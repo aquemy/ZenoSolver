@@ -1,13 +1,39 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+# ignore html files
+*.html
+main.pdf
+./feedback/*.pdf
+*.lof
+*.aux
+*.log
+*.lot
+*.out
+*.bbl
+*.blg
+*.toc
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
+# ignore all textual files
+*.txt
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+# ignore object and archive files
+*.[oa]
+
+# ignore auto-saved files
+*~
+\#*\#
+
+# excepted these manually configured files
+!CMakeLists.txt
+!README.txt
+!application/
+!doc/
+!lib/
+!src/
+!test/
+
+# ignore built files
+*/build/
+*/release/*
+*/debug/*
+*/build/*
+
+
