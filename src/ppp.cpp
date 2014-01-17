@@ -3,7 +3,7 @@
 #include <vector>
 #include <ppp.hpp>
 
-PPP::PPP(std::vector<int>& _e, std::vector<int>& _w, double _C, double _Ms, double _Mc) :
+PPP::PPP(unsigned _e, unsigned _w, double _C, double _Ms, double _Mc) :
     e(_e),
     w(_w),
     C(_C),
@@ -11,8 +11,11 @@ PPP::PPP(std::vector<int>& _e, std::vector<int>& _w, double _C, double _Ms, doub
     Mc(_Mc)
     {}
    
-void PPP::computeBetaMax()
+void PPP::computeBetaMax(const std::vector<std::vector<int>>& E, const std::vector<std::vector<int>>& W)
 {
+    auto e = E[this->e];
+    auto w = W[this->w];
+
     betaSet.clear();
 
     decltype(w) diff;
@@ -22,27 +25,17 @@ void PPP::computeBetaMax()
     betaMax = betaSet.size();
 }
    
-bool PPP::operator==(const PPP& o)
+bool PPP::operator==(const PPP& o) const
 {
     return (this->C == o.C) and (this->Mc == o.Mc);
 }    
 
-std::ostream& operator <<(std::ostream& _os, const PPP& _ppp)
+bool PPP::operator!=(const PPP& o) const
 {
-    _os << "PPP = (";
-    for(auto i : _ppp.e)
-        _os << i << ",";
-    _os << ")(";
-    for(auto i : _ppp.w)
-        _os << i << ",";
-    _os << ")" << std::endl;
-    _os << " - Cost          : " << _ppp.C << std::endl;
-    _os << " - Min. Makespan : " << _ppp.Ms << std::endl;
-    _os << " - Cur. Makespan : " << _ppp.Mc << std::endl;
-    _os << " - Beta Max      : " << _ppp.betaMax << std::endl;
-    
-    return _os;
-}
+    return !(*this == o);
+}    
+
 
 bool SortByCost(PPP i, PPP j) { return i.C < j.C; }
 bool SortByMakespan(PPP i, PPP j) { return i.Mc < j.Mc; }
+

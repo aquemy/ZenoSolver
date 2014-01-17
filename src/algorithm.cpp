@@ -3,38 +3,52 @@
 #include <algorithm.hpp>
 #include <ppp.hpp>
 
-double SimpleUpperBound(const PPP& ppp, const std::vector<double>& d, unsigned p, unsigned t)
+double SimpleUpperBound(const PPP& ppp, 
+    const std::vector<std::vector<int>>& E,
+    const std::vector<double>& d, 
+    unsigned p, 
+    unsigned t)
 {
     std::vector<double> M(p);
 
     for(unsigned i = 0; i < p; i++)
     {
-        M[i] += 2*d[ppp.e[i]];
+        M[i] += 2*d[E[ppp.e][i]];
     }
     
     for(unsigned i = 0; i < t-p; i++)
     {
         unsigned minPlane = distance(begin(M), min_element(begin(M), end(M)));
-        M[minPlane] += 2*d[ppp.e[p+i]] + 2*d[ppp.w[i]];
+        M[minPlane] += 2*d[E[ppp.e][p+i]] + 2*d[E[ppp.w][i]];
     }
       
     return *max_element(begin(M),end(M));
 }
 
-double UpperBound(const PPP& ppp, const std::vector<double>& d, unsigned p, unsigned beta)
+double UpperBound(const PPP& ppp, 
+    const std::vector<std::vector<int>>& E, 
+    const std::vector<std::vector<int>>& W,
+    const std::vector<double>& d, 
+    unsigned p, 
+    unsigned beta)
 {
-    std::vector<double> M(p);   
+    using std::begin;
+    using std::end;
+
+    std::vector<double> M(p);
+    auto e = E[ppp.e];
+    auto w = W[ppp.w]; 
             
     auto betaSet = ppp.betaSet;
     betaSet.resize(beta);
             
-    decltype(ppp.e) alphaWSet;
-    set_difference (begin(ppp.w), end(ppp.w), begin(betaSet), end(betaSet), back_inserter(alphaWSet));
+    decltype(e) alphaWSet;
+    std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
             
-    decltype(ppp.e) alphaESet;
-    decltype(ppp.e) diff;
-    set_intersection (begin(ppp.e), end(ppp.e), begin(betaSet), end(betaSet), back_inserter(diff));
-    set_difference (begin(ppp.e), end(ppp.e), begin(diff), end(diff), back_inserter(alphaESet));
+    decltype(e) alphaESet;
+    decltype(e) diff;
+    std::set_intersection (begin(e), end(e), begin(betaSet), end(betaSet), std::back_inserter(diff));
+    std::set_difference (begin(e), end(e), begin(diff), end(diff), std::back_inserter(alphaESet));
                 
     // Pattern 1
     unsigned card = p;
@@ -53,11 +67,21 @@ double UpperBound(const PPP& ppp, const std::vector<double>& d, unsigned p, unsi
     for(unsigned i = 0; i < beta; i++)
     {
         unsigned minPlane = distance(begin(M), min_element(begin(M), end(M)));
-        nth_element(begin(M), begin(M)+1, end(M)); // Place only the element we need in order to avoid complete sorting
+        std::nth_element(begin(M), begin(M)+1, end(M)); // Place only the element we need in order to avoid complete sorting
 
         M[minPlane] += 2*d[betaSet[i]];
         M[1] += 2*d[betaSet[i]];
     }
             
-    return *max_element(begin(M),end(M)); 
+    return *std::max_element(begin(M),end(M)); 
 }
+
+bool isGreedyDominated(const PPP& ppp, const std::vector<PPP>& PPPSet)
+{
+    for(const auto& j : PPPSet)
+        if((j != ppp) && ((j.C <= ppp.C) && (j.Mc < ppp.Ms))) 
+            return true;
+
+    return false;
+}
+

@@ -81,8 +81,11 @@ int main(int argc, char** argv)
         
         //// 2.2. Cartesian product E x W + Admissible PPP initialization
         vector<PPP> PPPSet;
+        unsigned ie = 0;
+        unsigned iw = 0;
         for(auto& e : E)
         {
+            iw = 0;
             double CostEast = 0;
             for_each(begin(e),end(e),[&](unsigned i) { CostEast += c[i];});
             double MlEast = 0;
@@ -93,43 +96,37 @@ int main(int argc, char** argv)
                 for_each(begin(w),end(w),[&](unsigned i) { Cost += c[i];});
                 double Ml = MlEast;
                 for_each(begin(w),end(w),[&](unsigned i) { Ml += 2*d[i];});
-                // Note : We compute BetaMax only after the computation of the GreedyUpperBound with Beta=0
+                // Note : We compute BetaMax only after the computation of the GreedyUpperBound with Beta = 0
                 //        In this case it is possible to avoid such a computation for already pruned PPP.
-                PPPSet.push_back(PPP(e, w, Cost, Ml / p, Ml));
+                PPPSet.push_back(PPP(ie, iw, Cost, Ml / p, Ml));
+                iw++;
             }
+            ie++;
         }
         
-        auto PPPSetDump = bind(dump, PPPSet);
+        auto PPPSetDump = bind(dump, PPPSet, E, W);
         
         #ifdef DEBUG
         debugPrint("ADMISSIBLE PPP-SET", PPPSetDump);
         #endif // DEBUG
         
         // 3. COMPUTE THE SIMPLE GREEDY UPPER-BOUND
-        #ifdef _OPENMP
-        #pragma omp parallel for
-        #endif // _OPENMP
-        for_each(begin(PPPSet), end(PPPSet), bind(SimpleUpperBound, placeholders::_1, d, p, t));
+        auto upperBound = bind(SimpleUpperBound, placeholders::_1, E, d, p, t);
+        for_each(begin(PPPSet), end(PPPSet), [&upperBound](PPP& ppp){ ppp.Mc = upperBound(ppp); });
                                 
         // 5. COMPUTE BETA MAX AND THE SET OF POSSIBLE VALUE
-        // Note : We compute BetaMax only now because the Greedy Upper-Bound corresponds to Beta=0
+        // Note : We compute BetaMax only now because the Greedy Upper-Bound corresponds to Beta = 0
         // REQUIEREMENT : Both tupple of the PPP must be in ascending order !
         //                This avoids sorting PPP in O((t+p)*log(t+p) + t*log(t))
-        #ifdef _OPENMP
-        #pragma omp parallel for
-        #endif // _OPENMP
-        for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
-            it->computeBetaMax();
+        for_each(begin(PPPSet), end(PPPSet), bind(&PPP::computeBetaMax, placeholders::_1, E, W));
         
-    #ifdef DEBUG
+        #ifdef DEBUG
         debugPrint("AFTER THE GREEDY ALGORITHM", PPPSetDump);
-    #endif // DEBUG
+        #endif // DEBUG
 
         // 5. APPLY MAIN ALGORITHM
         // TODO : Using BetaSet and Pruning
-        unsigned k = 1;
-        
-        for(unsigned beta = 1; beta <= t-p; beta++)
+        for(unsigned beta = 1; beta <= t - p; ++beta)
         {
             //bool improved = false; // If the PPP is not improved, no need to check Greedy Domination
             #ifdef _OPENMP
@@ -138,35 +135,19 @@ int main(int argc, char** argv)
             for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
             {
                 if(it->betaMax >= beta) {
-    #ifdef STATS
+                    #ifdef STATS
                     it->nbEval++;
-    #endif // STATS
-                    double MaxMi = UpperBound(*it, d, p, beta);
+                    #endif // STATS
+                    double MaxMi = UpperBound(*it, E, W, d, p, beta);
                     if(MaxMi < it->Mc) 
-                    {
-    #ifdef DEBUG    
-                    cerr << "IMPROVEMENT : " << endl;
-                    cerr << "PPP = (";
-                    for(auto& i : it->e)
-                        cerr << i << ",";
-                    cerr << ")(";
-                    for(auto& i : it->w)
-                        cerr << i << ",";
-                    cerr << ")" << endl;
-                    cerr << "Previous Makespan : " << it->Mc << endl;
-                    cerr << "New Makespan : " << MaxMi << endl;
-    #endif // DEBUG
-                    it->Mc = MaxMi;
-                    //improved = true;
-                    }
+                        it->Mc = MaxMi;
                 }
             }
-            k++;
         }
         
-    #ifdef DEBUG
+        #ifdef DEBUG
         debugPrint("FINAL PPP SET WITH OPTIMAL MAKESPAN", PPPSetDump);
-    #endif // DEBUG
+        #endif // DEBUG
 
         // 6. COMPUTE PARETO POINTS
         //// 6.1 Clean PPP Set
@@ -174,23 +155,20 @@ int main(int argc, char** argv)
         stable_sort(begin(PPPSet), end(PPPSet), SortByCost);
         PPPSet.erase(unique(begin(PPPSet), end(PPPSet)), end(PPPSet));
 
-        for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
+        for(auto& i : PPPSet)
         {
-            it->dominated = true;
+            i.dominated = false;
             if(PArg.getValue())
             {
                 for(const auto& j : PPPSet)
                 {
-                    if(((j.C <= it->C) && (j.Mc < it->Mc)) 
-                    || ((j.C < it->C) && (j.Mc <= it->Mc)))
-                        it->dominated = false;
+                    if(((j.C <= i.C) && (j.Mc < i.Mc)) 
+                    || ((j.C < i.C) && (j.Mc <= i.Mc)))
+                        i.dominated = true;
                 }
             }
-            if(it->dominated) 
-            {    
-                //#pragma omp critical
-                cout << it->C << " " << it->Mc << " " << it->Ms << endl;
-            }     
+            if(!i.dominated) 
+                cout << i.C << " " << i.Mc << " " << i.Ms << endl;  
         }
         
     } 
@@ -198,5 +176,6 @@ int main(int argc, char** argv)
 	{ 
         std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
 	}
+	
     return 0;
 }
