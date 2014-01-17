@@ -40,10 +40,16 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake)
 ######################################################################################
 
 ## Paths
-set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/include" CACHE INTERNAL "Sources directory" FORCE)
-set(BINARY_DIR "${CMAKE_BINARY_DIR}" CACHE INTERNAL "Binaries directory" FORCE)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_subdirectory(src)
+set(FILES 
+    src/solver.cpp
+    src/algorithm.cpp
+    src/ppp.cpp
+    src/genFunctions.cpp
+    src/combiGenerator.cpp
+    src/utils.cpp
+    )
+
+add_executable(zenoSolver ${FILES})

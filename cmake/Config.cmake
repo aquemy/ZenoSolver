@@ -2,7 +2,7 @@
 ### 1) Build type
 ######################################################################################
 
-set(ZS_BUILD_TYPE "Standard" CACHE STRING "Build type.")
+set(CMAKE_BUILD_TYPE "Standard" CACHE STRING "Build type.")
 
 set(ZS_GENERATE_TESTS TRUE CACHE STRING "Generate tests (activated in debug and profiling).")
 set(ZS_GENERATE_DOC TRUE CACHE STRING "Generate documention.")

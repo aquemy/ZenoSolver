@@ -16,6 +16,6 @@ double UpperBound(const PPP& ppp,
     unsigned p, 
     unsigned beta);
     
-bool isGreedyDominated(const PPP& ppp, const std::vector<PPP>&);
+bool isGreedilyDominated(const PPP& ppp, const std::vector<PPP>&);
 
 #endif // _ZS_ALGORITHM_

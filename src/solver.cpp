@@ -46,9 +46,10 @@ int main(int argc, char** argv)
 	    TCLAP::SwitchArg sArg("s","saveTuple","Save tuples in file.", cmd, false);
 	    TCLAP::SwitchArg gArg("g","generateTuple","Generate tuple even if a data file exists.", cmd, false);
         TCLAP::SwitchArg PArg("P","onlyPareto","Return only Pareto optimal points.", cmd, true);
+        TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         
 	    // Parse the argv array.
-	    cmd.parse( argc, argv );
+	    cmd.parse(argc, argv);
 	
         // 1. DATA
         unsigned n = nArg.getValue();
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
         // Generate data
         apply(c, f3);
         apply(d, f3);
-        
+
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         
@@ -106,13 +107,19 @@ int main(int argc, char** argv)
         
         auto PPPSetDump = bind(dump, PPPSet, E, W);
         
-        #ifdef DEBUG
+        #ifndef NDEBUG
         debugPrint("ADMISSIBLE PPP-SET", PPPSetDump);
         #endif // DEBUG
         
         // 3. COMPUTE THE SIMPLE GREEDY UPPER-BOUND
         auto upperBound = bind(SimpleUpperBound, placeholders::_1, E, d, p, t);
         for_each(begin(PPPSet), end(PPPSet), [&upperBound](PPP& ppp){ ppp.Mc = upperBound(ppp); });
+        /*bool pruningIsActivated = aArg.getValue();
+        if(pruningIsActivated)
+        {
+            auto pruningCriterion = bind(isGreedilyDominated, placeholders::_1, PPPSet);
+            PPPSet.erase(remove_if(begin(PPPSet), end(PPPSet), pruningCriterion), end(PPPSet));
+        }*/
                                 
         // 5. COMPUTE BETA MAX AND THE SET OF POSSIBLE VALUE
         // Note : We compute BetaMax only now because the Greedy Upper-Bound corresponds to Beta = 0
@@ -120,21 +127,21 @@ int main(int argc, char** argv)
         //                This avoids sorting PPP in O((t+p)*log(t+p) + t*log(t))
         for_each(begin(PPPSet), end(PPPSet), bind(&PPP::computeBetaMax, placeholders::_1, E, W));
         
-        #ifdef DEBUG
+        #ifndef NDEBUG
         debugPrint("AFTER THE GREEDY ALGORITHM", PPPSetDump);
         #endif // DEBUG
 
         // 5. APPLY MAIN ALGORITHM
         // TODO : Using BetaSet and Pruning
+        #ifdef _OPENMP
+        #pragma omp parallel for
+        #endif // _OPENMP
         for(unsigned beta = 1; beta <= t - p; ++beta)
         {
             //bool improved = false; // If the PPP is not improved, no need to check Greedy Domination
-            #ifdef _OPENMP
-            #pragma omp parallel for
-            #endif // _OPENMP
             for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
             {
-                if(it->betaMax >= beta) {
+                if(it->betaMax >= beta && it->Mc > it->Ms) {
                     #ifdef STATS
                     it->nbEval++;
                     #endif // STATS
@@ -143,9 +150,17 @@ int main(int argc, char** argv)
                         it->Mc = MaxMi;
                 }
             }
+            
+            // Prunning
+            // TODO Smartest pruning system
+            /*if(pruningIsActivated)
+            {
+                auto pruningCriterion = bind(isGreedilyDominated, placeholders::_1, PPPSet);
+                PPPSet.erase(remove_if(begin(PPPSet), end(PPPSet), pruningCriterion), end(PPPSet));
+            }*/
         }
         
-        #ifdef DEBUG
+        #ifndef NDEBUG
         debugPrint("FINAL PPP SET WITH OPTIMAL MAKESPAN", PPPSetDump);
         #endif // DEBUG
 
@@ -176,6 +191,6 @@ int main(int argc, char** argv)
 	{ 
         std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
 	}
-	
+
     return 0;
 }

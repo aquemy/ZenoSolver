@@ -76,7 +76,7 @@ double UpperBound(const PPP& ppp,
     return *std::max_element(begin(M),end(M)); 
 }
 
-bool isGreedyDominated(const PPP& ppp, const std::vector<PPP>& PPPSet)
+bool isGreedilyDominated(const PPP& ppp, const std::vector<PPP>& PPPSet)
 {
     for(const auto& j : PPPSet)
         if((j != ppp) && ((j.C <= ppp.C) && (j.Mc < ppp.Ms))) 
