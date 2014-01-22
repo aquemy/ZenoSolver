@@ -1,5 +1,7 @@
 #ifndef _ZS_UTILS_
 #define _ZS_UTILS_
+ 
+#include <functional>
 
 class PPP;
 

@@ -32,8 +32,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Dependencies.cmake)
 ## Custom Targets file
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Target.cmake)
 
-## Tests
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake)
 
 ######################################################################################
 ### 3) Define and add module paths
@@ -44,12 +42,18 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(FILES 
-    src/solver.cpp
     src/algorithm.cpp
     src/ppp.cpp
     src/genFunctions.cpp
     src/combiGenerator.cpp
     src/utils.cpp
+    src/powerSetGenerator.cpp
     )
 
-add_executable(zenoSolver ${FILES})
+add_executable(zenoSolver src/solver.cpp ${FILES})
+
+######################################################################################
+### 3) Include Tests
+######################################################################################
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake)

@@ -59,7 +59,6 @@ std::vector<std::vector<int>> generateTuples(const int n, const int k, bool seri
             file << std::endl;
         }
     }
-    
     return std::move(set);
 }
 

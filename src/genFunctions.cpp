@@ -13,4 +13,4 @@ double f1(unsigned i) { return std::log(i); }
 double f2(unsigned i) { return std::sqrt(i); }
 double f3(unsigned i) { return i; }
 double f4(unsigned i) { return pow(2,i); }
-
+double f5(unsigned i) { return 2*i; }
