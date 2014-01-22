@@ -46,8 +46,6 @@ int main(int argc, char** argv)
 	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
         TCLAP::ValueArg<int> tArg("t","travelers","Number of travelers",true,3,"int", cmd);
         TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
-        TCLAP::SwitchArg sArg("s","saveTuple","Save tuples in file.", cmd, false);
-        TCLAP::SwitchArg gArg("g","generateTuple","Generate tuple even if a data file exists.", cmd, false);
         TCLAP::SwitchArg PArg("P","onlyPareto","Return only Pareto optimal points.", cmd, false);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false,100, "unsigned", cmd);
@@ -88,16 +86,9 @@ int main(int argc, char** argv)
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
-        vector<vector<int>> E, W;
-        if(gArg.getValue() or !isReadable("tuple_"+to_string(n)+"_"+to_string(t)+".dat"))
-            E = generateTuples(n, t, sArg.getValue());
-        else
-            E = readTuples(n,t);
+        vector<vector<int>> E = generateTuples(n, t);
+        vector<vector<int>> W = generateTuples(n, t-p);
         
-        if(gArg.getValue() or !isReadable("tuple_"+to_string(n)+"_"+to_string(t-p)+".dat"))
-            W = generateTuples(n, t-p, sArg.getValue());
-        else
-            W = readTuples(n,t-p);
         auto t1 = high_resolution_clock::now();
         milliseconds time = std::chrono::duration_cast<milliseconds>(t1 - t0);
         cerr << "Generation Tuple : " << time.count() << "ms." << endl;

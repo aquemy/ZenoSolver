@@ -36,7 +36,7 @@ int nextTuple(std::vector<int>& vec, const int n, const int k)
     return(GEN_NEXT);
 }
 
-std::vector<std::vector<int>> generateTuples(const int n, const int k, bool serialize)
+std::vector<std::vector<int>> generateTuples(const int n, const int k)
 {
     int genResult = GEN_NEXT;
 
@@ -49,25 +49,5 @@ std::vector<std::vector<int>> generateTuples(const int n, const int k, bool seri
         genResult = nextTuple(tuple, n, k);
     }
     
-    if(serialize)
-    {
-        std::ofstream file("tuple_"+std::to_string(n)+"_"+std::to_string(k)+".dat");
-        for(auto s : set)
-        {
-            for(auto i : s)
-                file << i << " ";
-            file << std::endl;
-        }
-    }
     return std::move(set);
-}
-
-std::vector<std::vector<int>> readTuples(const int n, const int k)
-{
-    std::vector<std::vector<int>> set;
-    std::vector<int> tuple(k,0);
-    std::ofstream file("tuple_"+std::to_string(n)+"_"+std::to_string(k)+".dat");
-    std::string line;
-
-    return set;
 }

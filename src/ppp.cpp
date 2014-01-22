@@ -52,7 +52,7 @@ std::vector<PPP> cartesianProduct(
     PPPSet.reserve(E.size()*W.size());
     unsigned ie = 0;
     unsigned iw = 0;
-    long unsigned count = 0;
+    
     for(auto& e : E)
     {
         iw = 0;
@@ -69,10 +69,7 @@ std::vector<PPP> cartesianProduct(
             // Note : We compute BetaMax only after the computation of the GreedyUpperBound with Beta = 0
             //        In this case it is possible to avoid such a computation for already pruned PPP.
             PPPSet.push_back(PPP(ie, iw, Cost, Ml / p, Ml));
-            iw++;
-            std::cerr << count << " " << std::endl;
-            count++;
-            
+            iw++;      
         }
         ie++;
     }

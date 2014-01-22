@@ -8,8 +8,6 @@
 
 int nextTuple(std::vector<int>& vec, const int n, const int k);
 
-std::vector<std::vector<int>> generateTuples(const int n, const int k, bool serialize = false);
-
-std::vector<std::vector<int>> readTuples(const int n, const int k);
+std::vector<std::vector<int>> generateTuples(const int n, const int k);
 
 #endif // _ZS_COMBI_GENERATOR_
