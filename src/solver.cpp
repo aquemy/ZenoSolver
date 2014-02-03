@@ -4,6 +4,8 @@
 #include <functional>
 #include <fstream>
 #include <chrono>
+#include <random>
+#include <ctime>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -46,10 +48,22 @@ int main(int argc, char** argv)
 	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
         TCLAP::ValueArg<int> tArg("t","travelers","Number of travelers",true,3,"int", cmd);
         TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
+        //TCLAP::ValueArg<string> DArg("D","data","File where data (cost and durations) are located",true,"data","string", cmd);
         TCLAP::SwitchArg PArg("P","onlyPareto","Return only Pareto optimal points.", cmd, false);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
+        TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false,100, "unsigned", cmd);
+        TCLAP::ValueArg<unsigned> CArg("C","C","Function to generate C", false, 3, "unsigned", cmd);
+        TCLAP::ValueArg<unsigned> DArg("D","D","Function to generate D", false, 3, "unsigned", cmd);
+        TCLAP::ValueArg<double> ScArg("j","scaleC","Scale factor for C", false, 1, "unsigned", cmd);
+        TCLAP::ValueArg<double> TcArg("k","transC","Translation factor for C", false, 0, "unsigned", cmd);
+        TCLAP::ValueArg<double> SdArg("l","scaleD","Scale factor for D", false, 1, "unsigned", cmd);
+        TCLAP::ValueArg<double> TdArg("m","transD","Translation factor for D", false, 0, "unsigned", cmd);
         
+        TCLAP::ValueArg<double> xArg("x","x","Scale factor for D", false, 1, "unsigned", cmd);
+        TCLAP::ValueArg<double> yArg("y","y","Translation factor for D", false, 0, "unsigned", cmd);
+        
+        TCLAP::ValueArg<string> OArg("O","ouput","Output file for PDDL File", false,"", "string", cmd);
 	    cmd.parse(argc, argv);
 	
         // 1. DATA
@@ -63,26 +77,76 @@ int main(int argc, char** argv)
             exit(0); // Cases not handled at the moment. 
         }
         
+       
+        
         unsigned n = nArg.getValue();
         unsigned t = tArg.getValue();
         unsigned p = pArg.getValue();
         
-        unsigned initValue = 1;
-        vector<double> c(n);
-        generate(begin(c), end(c), [&]{ return initValue++; }); 
-        vector<double> d(n);
-        generate(begin(d), end(d), [&]{ return initValue--; }); 
+        string pathPDDL;
+        if(OArg.getValue().empty())
+            pathPDDL = "zeno"+std::to_string(n)+"n"+std::to_string(t)+"t"+std::to_string(p)+"pMulti.pddl";
+        else
+            pathPDDL = OArg.getValue();
+        
+        vector<double> c(n,1);
+        vector<double> d(n,1);
+        /*ifstream dataFile(DArg.getValue());
+        if (dataFile)
+        {
+            
+            
+        }
+        else
+            exit(0); // TODO : real warnings*/
+            
+        function<double(unsigned)> fc, fd;
+        if(DArg.getValue() == 1)
+            fd = f1;
+        else if(DArg.getValue() == 2)
+            fd = f2;
+        else if(DArg.getValue() == 3)
+            fd = f3;
+        else if(DArg.getValue() == 4)
+            fd = f4;
+        else if(DArg.getValue() == 5)
+            fd = f5;
+            
+        if(CArg.getValue() == 1)
+            fc = f1;
+        else if(CArg.getValue() == 2)
+            fc = f2;
+        else if(CArg.getValue() == 3)
+            fc = f3;
+        else if(CArg.getValue() == 4)
+            fc = f4;
+        else if(CArg.getValue() == 5)
+            fc = f5;
         
         // Generate data
-        apply(c, f3);
-        apply(d, f5);
+        apply(c, fc, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        rapply(d, fd, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        /*std::default_random_engine generator;
+        generator.seed(std::time(0));
+        std::uniform_real_distribution<double> distribution(0.0,10);
+        c[0] = distribution(generator);
+        d[d.size() - 1] = distribution(generator);
+        for(unsigned i = 1; i < c.size(); i++)
+        {
+            c[i] += distribution(generator) + c[i-1];
+            d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
+        }*/
         
+        
+        cerr << "C : ";
         for(auto i : c)
             cerr << i << " ";
         cerr << endl;
+        cerr << "D : ";
         for(auto i : d)
             cerr << i << " ";
-
+        cerr << endl;
+        
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
@@ -180,50 +244,63 @@ int main(int argc, char** argv)
         if(PArg.getValue())
         {
             t0 = high_resolution_clock::now();
-            
             sort(begin(PPPSet), end(PPPSet), SortByCost);
-            auto it = begin(PPPSet);
-            decltype(PPPSet) pareto;
+            auto current = begin(PPPSet);
+            auto bestCurrent = begin(PPPSet);
+            decltype(PPPSet) temp;
             for(auto i = begin(PPPSet); i <= end(PPPSet); i++)
             {
-                if(it->C == i->C)
+                if(current->C == i->C)
                 {
-                    if(it->Mc > i->Mc)
-                        it = i;
+                    if(bestCurrent->Mc > i->Mc)
+                        bestCurrent = i;
                 }
                 else
                 {
-                    cout << it->C << " " << it->Mc << " " << it->Ms << endl;
-                    pareto.push_back(*it);
-                    it = i;
+                    //cout << it->C << " " << it->Mc << " " << it->Ms << endl;
+                    temp.push_back(*bestCurrent);
+                    current = i;
+                    bestCurrent = i;
                 }
             }
-            /*sort(begin(pareto), end(pareto), SortByMakespan);
-            it = begin(pareto);
-            unsigned cardPareto = 0;
-            for(auto i = begin(pareto); i <= end(pareto); i++)
+            
+            sort(begin(temp), end(temp), SortByMakespan);
+            decltype(PPPSet) pareto;
+            current = begin(temp);
+            bestCurrent = begin(temp);
+            for(auto i = begin(temp); i <= end(temp); i++)
             {
-                if(it->Mc == i->Mc)
+                if(current->Mc == i->Mc)
                 {
-                    if(it->C > i->C)
-                        it = i;
+                    if(bestCurrent->C > i->C)
+                        bestCurrent = i;
                 }
                 else
                 {
-                    cout << it->C << " " << it->Mc << " " << it->Ms << endl;
-                    it = i;
-                    cardPareto++;
+                    //cout << it->C << " " << it->Mc << " " << it->Ms << endl;
+                    pareto.push_back(*bestCurrent);
+                    current = i;
+                    bestCurrent = i;
                 }
             }
-            cerr << "Pareto-optimal points : " << cardPareto << endl;*/
+            
+            cerr << "Pareto-optimal points : " << pareto.size() << endl;
             t1 = high_resolution_clock::now();
             time = std::chrono::duration_cast<milliseconds>(t1 - t0);
             cerr << "Pareto extraction : " << time.count() << "ms." << endl;
+            for(auto& i : pareto)
+                cout << i.Mc << " " << i.C << " " << i.Ms << endl;
+            // Generate PDDL instance
+            if(GArg.getValue())
+                generatePDDL(pathPDDL, n,t,p,c,d,pareto);
         }
         else
         {
             for(auto& i : PPPSet)
-                cout << i.C << " " << i.Mc << " " << i.Ms << endl;
+                cout << i.Mc << " " << i.C << " " << i.Ms << endl;
+                    // Generate PDDL instance
+            if(GArg.getValue())
+                generatePDDL(pathPDDL, n,t,p,c,d);
         }
     } 
 	catch (TCLAP::ArgException &e)  // catch any exceptions

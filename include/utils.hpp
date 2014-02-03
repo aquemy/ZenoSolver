@@ -17,6 +17,11 @@ void dumpPPP(const PPP& ppp,
 
 bool isReadable(const std::string& path);
 
+void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, 
+    const std::vector<double>& c, 
+    const std::vector<double>& d, 
+    const std::vector<PPP>& pareto = std::vector<PPP>());
+
 #endif // _ZS_UTILS_
 
 
