@@ -126,6 +126,7 @@ int main(int argc, char** argv)
         // Generate data
         apply(c, fc, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
         rapply(d, fd, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        
         /*std::default_random_engine generator;
         generator.seed(std::time(0));
         std::uniform_real_distribution<double> distribution(0.0,10);
@@ -136,17 +137,7 @@ int main(int argc, char** argv)
             c[i] += distribution(generator) + c[i-1];
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
-        
-        
-        cerr << "C : ";
-        for(auto i : c)
-            cerr << i << " ";
-        cerr << endl;
-        cerr << "D : ";
-        for(auto i : d)
-            cerr << i << " ";
-        cerr << endl;
-        
+
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
@@ -205,18 +196,15 @@ int main(int argc, char** argv)
         #ifdef _OPENMP
         #pragma omp parallel for
         #endif // _OPENMP
-        for(unsigned beta = 1; beta <= globalBetaMax; ++beta)
+        for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
         {
             //debugPrint("BETA = "+to_string(beta), []{});
-            for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
+            unsigned betaMax = min(globalBetaMax, it->betaMax);
+            for(unsigned beta = 1; beta <= betaMax; ++beta)
             {
-                if(it->betaMax >= beta && it->Mc > it->Ms) {
-                    //cerr << "________________________" << endl;
-                    //dumpPPP(*it, E, W);
-                    double MaxM = UpperBound(*it, E, W, d, p, beta);
-                    if(MaxM < it->Mc) 
-                        it->Mc = MaxM;
-                }
+                double MaxM = UpperBound(*it, E, W, d, p, beta);
+                if(MaxM < it->Mc) 
+                    it->Mc = MaxM;
             }
             
             // Prunning
