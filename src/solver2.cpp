@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 #include <set>
 #include <algorithm>
 #include <functional>
@@ -39,13 +40,12 @@ using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-double UpperBound(double Mc, 
-    double Ml, 
+int UpperBound(int Mc, 
+    int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::vector<std::vector<unsigned>>& betaPowerSet,
+    const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
-    
     unsigned p)
 {
     using std::begin;
@@ -54,8 +54,6 @@ double UpperBound(double Mc,
     // Little trick waiting for C++14
     auto rbegin = [](decltype(e) v) { return v.rbegin(); };
     auto rend = [](decltype(e) v) { return v.rend(); };
-    
-    
 
     auto bestM = Mc;
     
@@ -113,80 +111,34 @@ double UpperBound(double Mc,
         
         if(bestM > std::max_element(begin(S),end(S), compM)->m)
             bestM = std::max_element(begin(S),end(S), compM)->m;
-        if(bestM <= Ml)
+        if(bestM == Ml)
             return Ml;
     }
             
     return bestM; 
 }
 
-vector<pair<double,double>> paretoExtraction2(vector<pair<double,double>>& front)
-{
-            auto current = begin(front);
-            auto bestCurrent = begin(front);
-            vector<pair<double,double>> temp;
-            sort(begin(front), end(front), [](pair<double,double> i, pair<double,double> j){ return i.first < j.first; }); // TODO retirer l'étape de tri et insérer au bon endroit...
-            for(auto i = begin(front); i <= end(front); i++)
-            {
-                if(current->first == i->first)
-                {
-                    if(bestCurrent->second > i->second)
-                        bestCurrent = i;
-                }
-                else
-                {
-                    //cout << it->C << " " << it->Mc << " " << it->Ms << endl;
-                    temp.push_back(*bestCurrent);
-                    current = i;
-                    bestCurrent = i;
-                }
-            }
-            
-            sort(begin(temp), end(temp), [](pair<double,double> i, pair<double,double> j){ return i.second < j.second; });
-            vector<pair<double,double>> pareto;
-            current = begin(temp);
-            bestCurrent = begin(temp);
-            for(auto i = begin(temp); i <= end(temp); i++)
-            {
-                if(current->second == i->second)
-                {
-                    if(bestCurrent->first > i->first)
-                        bestCurrent = i;
-                }
-                else
-                {
-                    //cout << it->C << " " << it->Mc << " " << it->Ms << endl;
-                    pareto.push_back(*bestCurrent);
-                    current = i;
-                    bestCurrent = i;
-                }
-            }
-            
-            return pareto;
-}
-
-void paretoExtraction(vector<pair<double,double>>& front)
+std::map<int, int> paretoExtraction(std::map<int, int>& front)
 {
 
-    vector<pair<double,double>> temp;
-    sort(begin(front), end(front), [](pair<double,double> i, pair<double,double> j){ return i.second < j.second; });
-    stable_sort(begin(front), end(front), [](pair<double,double> i, pair<double,double> j){ return i.first < j.first; });
-    front.erase(unique(begin(front), end(front)), end(front));
-
-    //#pragma omp parallel for
-    for(auto it = begin(front); it < end(front); ++it)
+    std::map<int, int> pareto;
+   
+    auto current = begin(front);
+    
+    // Add the first
+    pareto[current->first] = current->second;
+    current++;
+    
+    for(auto it = begin(front); it != end(front); ++it)
     {
-        bool dominated = true;
-        for(const auto& j : front)
+        if(it->second < current->second)
         {
-            if(j.first <= it->first && j.second < it->second 
-            || j.first < it->first && j.second <= it->second)
-                dominated = false;
-        }
-        if(dominated) {    
-            cout << it->second << " " << it->first << endl;
-        }     
+            pareto[it->first] = it->second;
+            current = it;
+        }   
     }
+    
+    return pareto;
 }
 
 int main(int argc, char** argv)
@@ -253,8 +205,8 @@ int main(int argc, char** argv)
             exit(0); // TODO : real warnings*/
 
         // Generate data
-        apply(c, f2, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-        rapply(d, f1, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        apply(c, f3, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        rapply(d, f3, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         
         // Convert to INT for DAE
         // TODO : Un truc plus propre
@@ -279,19 +231,26 @@ int main(int argc, char** argv)
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
         
-        if(d[0] > d[1])
-            swap(d,c);
-
+        cerr << "c : ";
+        for(auto i : c)
+            cerr << i << " ";
+        cerr << endl;
+        cerr << "d : ";
+        for(auto i : d)
+            cerr << i << " ";
+        cerr << endl;    
+        
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
-        vector<pair<double, double>> front; // Key using a double ?
-        vector<pair<double, double>> pareto;
+        map<int, int> front; // Key using a double ?
+        map<int, int> pareto;
         int EStatut = GEN_NEXT;
         
         std::vector<int> e(t,0);
         
         long long int count = 0;
+        long long int countIterations = 0;
         while(EStatut == GEN_NEXT)
         {
             int WStatut = GEN_NEXT;
@@ -301,14 +260,17 @@ int main(int argc, char** argv)
                 // TODO : Checker si le PPP est greedily dominé
                 
                 // 1. Construction du PPP courant
-                double C = 0;
+                int C = 0;
                 for_each(begin(e), end(e),[&](unsigned i) { C += c[i];});
                 for_each(begin(w), end(w),[&](unsigned i) { C += c[i];});
-                double Mc = 0;
+                int Mc = 0;
                 for_each(begin(e), end(e),[&](unsigned i) { Mc += 2*d[i];});
                 for_each(begin(w), end(w),[&](unsigned i) { Mc += 2*d[i];});
-                double Ml = Mc / p;
+                int Ml = Mc / p;
                 
+                if (!front.count(C))
+                    front[C] = Mc;
+                  
                 vector<int> betaSetValue;
                 decltype(w) diff;
                 set_difference (begin(w), end(w), begin(e), end(e), back_inserter(diff));
@@ -331,7 +293,7 @@ int main(int argc, char** argv)
                 
                 // 1.2. Calcul du BetaPowerSet
                 unsigned betaMax = betaSetValue.size();
-                vector<vector<unsigned>> betaPowerSet;
+                set<vector<unsigned>> betaPowerSet;
                 for(unsigned i = 0; i <= betaMax; i++)
                     generatePowerSet(betaMax, i, betaSetValue, betaPowerSet);
                 /*cerr << "BetaPowerSet : ";
@@ -342,33 +304,39 @@ int main(int argc, char** argv)
                         cerr << j << ",";
                     cerr << "}" << endl;
                 }
-                cerr << endl;  */  
+                cerr << endl;*/
                 // 2. Calcul de la borne max    
 
                 auto bestM = Mc;
-                double MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
+                int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
                 if(MaxM < Mc) 
+                {
                     Mc = MaxM;    
-
-                // 3. Compare
-                pair<double, double> point(C,Mc);
-                front.push_back(point);  
-                
+                    // 3. Compare
+                    if(Mc < front[C])
+                        front[C] = Mc;
+                }
+                    
                 count++;
+                countIterations += betaPowerSet.size();
                 //_
                 WStatut = nextTuple(w, n, t-p);
             }
-            // Copy partial Pareto front
-            //front = paretoExtraction(front);
             EStatut = nextTuple(e, n, t);
         }
         
         
-        pareto = paretoExtraction2(front);
+        pareto = paretoExtraction(front);
         for(auto& i : pareto)
            cout << i.second << " " << i.first << endl;
            
-        cerr << "PPP traités : " << count << endl;
+        if(GArg.getValue())
+            generatePDDL(pathPDDL, n,t,p,c,d,pareto);
+             
+        cerr << "PPP: " << count << endl;
+        cerr << "Iterations: " << countIterations << endl;
+        cerr << "PPP in memory: " << front.size() << endl;
+        cerr << "Pareto points: " << pareto.size() << endl;
     } 
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{ 

@@ -6,7 +6,7 @@ set(ZS_CXX_FLAGS " -std=c++11" CACHE STRING "General flags." FORCE)
 set(ZS_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "Flags for debug build." FORCE)
 set(ZS_CXX_FLAGS_RELEASE "-O3" CACHE STRING "Flags for release build." FORCE)
 set(ZS_CXX_FLAGS_PROFILING "-pg --coverage" CACHE STRING "Flags for profiling build." FORCE)
-set(ZS_CXX_FLAGS_PARALLEL "-fopenmp -lpthread -D_GLIBCXX_PARALLEL" CACHE STRING "Flags for parallel build." FORCE)
+set(ZS_CXX_FLAGS_PARALLEL "-fopenmp -lpthread" CACHE STRING "Flags for parallel build." FORCE)
 
 ######################################################################################
 ### 2) Set flags to CMake

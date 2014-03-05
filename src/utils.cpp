@@ -5,6 +5,7 @@
 #include <functional>
 #include <utils.hpp>
 #include <ppp.hpp>
+#include <map>
 
 void debugPrint(std::string title, std::function<void(void)> f)
 {
@@ -47,7 +48,7 @@ bool isReadable(const std::string& path)
     return !file.fail(); 
 }
 
-void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const std::vector<double>& c, const std::vector<double>& d, const std::vector<PPP>& pareto)
+void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const std::vector<double>& c, const std::vector<double>& d, const std::map<int,int>& pareto)
 {
     std::ofstream dataFile(path);
             if (dataFile)
@@ -111,7 +112,7 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const st
             {
                 dataFile << std::endl << "; Pareto points : Makespan - Cost" << std::endl;
                 for(auto& i : pareto)
-                    dataFile << "; " << i.Mc << " " << i.C << std::endl;
+                    dataFile << "; " << i.second << " " << i.first << std::endl;
             }    
 }
 

@@ -2,6 +2,7 @@
 #define _ZS_UTILS_
  
 #include <functional>
+#include <map>
 
 class PPP;
 
@@ -20,7 +21,7 @@ bool isReadable(const std::string& path);
 void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, 
     const std::vector<double>& c, 
     const std::vector<double>& d, 
-    const std::vector<PPP>& pareto = std::vector<PPP>());
+    const std::map<int,int>& pareto = std::map<int,int>());
 
 #endif // _ZS_UTILS_
 

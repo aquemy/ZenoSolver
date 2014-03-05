@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <vector>
+#include <set>
 #include <algorithm.hpp>
 #include <ppp.hpp>
 #include <powerSetGenerator.hpp>
@@ -78,7 +79,7 @@ double UpperBound(const PPP& ppp,
     auto rbegin = [](decltype(E[ppp.e]) v) { return v.rbegin(); };
     auto rend = [](decltype(E[ppp.e]) v) { return v.rend(); };
 
-    std::vector<std::vector<unsigned>> betaPowerSet;
+    std::set<std::vector<unsigned>> betaPowerSet;
     generatePowerSet(ppp.betaMax, beta, ppp.betaSet, betaPowerSet);
     
     auto bestM = ppp.Mc;
