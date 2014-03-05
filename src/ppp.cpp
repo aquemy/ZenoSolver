@@ -23,8 +23,8 @@ void PPP::computeBetaMax(const std::vector<std::vector<int>>& E, const std::vect
     decltype(w) diff;
     set_difference (begin(w), end(w), begin(e), end(e), back_inserter(diff));
     set_difference (begin(w), end(w), begin(diff), end(diff), back_inserter(betaSet));
-
-    betaMax = betaSet.size();
+    
+    this->betaMax = betaSet.size();
 }
    
 bool PPP::operator==(const PPP& o) const

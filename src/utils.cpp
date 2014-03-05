@@ -29,10 +29,10 @@ void dumpPPP(const PPP& ppp,
     const std::vector<std::vector<int>>& W)
 {
     std::cerr << "PPP = (";
-    for(auto i : E[ppp.e])
+    for(auto& i : E[ppp.e])
         std::cerr << i << ",";
     std::cerr << ")(";
-    for(auto i : W[ppp.w])
+    for(auto& i : W[ppp.w])
         std::cerr << i << ",";
     std::cerr << ")" << std::endl;
     std::cerr << " - Cost          : " << ppp.C << std::endl;
@@ -71,6 +71,7 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const st
                     dataFile << "(= (citythreat city" << i << ") " << c[i-1] << ")" << std::endl << "         ";
                 dataFile << "(= (citythreat city" << n+1 << ") 0)" << std::endl << "         ";
                 
+                // Edges from C_I to C_G
                 for(unsigned i = 1; i < n+1; i++)
                 {
                     dataFile << std::endl << "; city" << i << std::endl << "         ";
@@ -78,6 +79,13 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const st
                     dataFile << "(= (timeTerre city" << i << " city0) " << d[i-1] << ")" << std::endl << "         ";
                     dataFile << "(= (timeTerre city" << n+1 << " city" << i << ") " << d[i-1] << ")" << std::endl << "         ";
                     dataFile << "(= (timeTerre city" << i << " city" << n+1 << ") " << d[i-1] << ")" << std::endl << "         ";
+                    for(unsigned j = 1; j < n+1; j++)
+                    {
+                        if(i != j)
+                        {
+                            dataFile << "(= (timeTerre city" << i << " city" << j << ") " << d[i-1]+d[j-1]+100 << ")" << std::endl << "         ";
+                        }
+                    }
                 }
                 
                 dataFile << std::endl << "; plane init" << std::endl << "         ";

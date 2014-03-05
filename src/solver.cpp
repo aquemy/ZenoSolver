@@ -124,9 +124,29 @@ int main(int argc, char** argv)
             fc = f5;
         
         // Generate data
-        apply(c, fc, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-        rapply(d, fd, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        apply(c, f3, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        rapply(d, f3, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         
+        // Convert to INT for DAE
+        // TODO : Un truc plus propre
+        for(auto& i : c)
+            i = (int)(100*i);
+        
+        for(auto& i : d)
+            i = (int)(100*i);
+        
+        // Assuming d and c are strictly monoteneous
+        if(d[0] > d[1])
+            swap(d,c);
+            
+        cerr << "c : ";
+        for(auto i : c)
+            cerr << i << " ";
+        cerr << endl;
+        cerr << "d : ";
+        for(auto i : d)
+            cerr << i << " ";
+        cerr << endl;    
         /*std::default_random_engine generator;
         generator.seed(std::time(0));
         std::uniform_real_distribution<double> distribution(0.0,10);
@@ -155,12 +175,6 @@ int main(int argc, char** argv)
         time = std::chrono::duration_cast<milliseconds>(t1 - t0);
         cerr << "Generation PPP from tuples : " << time.count() << "ms." << endl;
         
-        auto PPPSetDump = bind(dump, PPPSet, E, W);
-        
-        /*#ifndef NDEBUG
-        debugPrint("ADMISSIBLE PPP-SET", PPPSetDump);
-        #endif // DEBUG*/
-        
         // 3. COMPUTE THE SIMPLE GREEDY UPPER-BOUND
         t0 = high_resolution_clock::now();
         auto upperBound = bind(SimpleUpperBound, placeholders::_1, E, W, d, p);
@@ -179,12 +193,10 @@ int main(int argc, char** argv)
         // Note : We compute BetaMax only now because the Greedy Upper-Bound corresponds to Beta = 0
         // REQUIEREMENT : Both tupple of the PPP must be in ascending order !
         //                This avoids sorting PPP in O((t+p)*log(t+p) + t*log(t))
+        
         for_each(begin(PPPSet), end(PPPSet), bind(&PPP::computeBetaMax, placeholders::_1, E, W));
         
-        /*#ifndef NDEBUG
-        debugPrint("AFTER THE GREEDY ALGORITHM", PPPSetDump);
-        #endif // DEBUG*/
-        
+
         /*std::cerr << "Avant : " << std::endl;
         for(auto ppp : PPPSet)
             std::cerr << ppp.Mc << std::endl;*/
@@ -198,6 +210,7 @@ int main(int argc, char** argv)
         #endif // _OPENMP
         for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
         {
+            
             //debugPrint("BETA = "+to_string(beta), []{});
             unsigned betaMax = min(globalBetaMax, it->betaMax);
             for(unsigned beta = 1; beta <= betaMax; ++beta)
@@ -222,9 +235,7 @@ int main(int argc, char** argv)
         /*std::cerr << "Après : " << std::endl;
         for(auto ppp : PPPSet)
             std::cerr << ppp.Mc << std::endl;*/
-        /*#ifndef NDEBUG
-        debugPrint("FINAL PPP SET WITH OPTIMAL MAKESPAN", PPPSetDump);
-        #endif // DEBUG*/
+        
 
         // 6. COMPUTE PARETO POINTS
         //// 6.1 Clean PPP Set
@@ -232,7 +243,7 @@ int main(int argc, char** argv)
         if(PArg.getValue())
         {
             t0 = high_resolution_clock::now();
-            sort(begin(PPPSet), end(PPPSet), SortByCost);
+            /*sort(begin(PPPSet), end(PPPSet), SortByCost);
             auto current = begin(PPPSet);
             auto bestCurrent = begin(PPPSet);
             decltype(PPPSet) temp;
@@ -270,14 +281,34 @@ int main(int argc, char** argv)
                     current = i;
                     bestCurrent = i;
                 }
-            }
+            }*/
+            
+                sort(begin(PPPSet), end(PPPSet), SortByMakespan);
+                stable_sort(begin(PPPSet), end(PPPSet), SortByCost);
+                PPPSet.erase(unique(begin(PPPSet), end(PPPSet)), end(PPPSet));
+                decltype(PPPSet) pareto;
+                for(auto it = begin(PPPSet); it < end(PPPSet); ++it)
+                {
+                    bool dominated = true;
+                    for(const auto& j : PPPSet)
+                    {
+                        if(j.C <= it->C && j.Mc < it->Mc 
+                        || j.C < it->C && j.Mc <= it->Mc)
+                            dominated = false;
+                    }
+           
+                    if(dominated) {   
+                        pareto.push_back(*it); 
+                        //cout << it->C << " " << it->Mc << " " << it->Ms << endl;
+                    }     
+                }
             
             cerr << "Pareto-optimal points : " << pareto.size() << endl;
             t1 = high_resolution_clock::now();
             time = std::chrono::duration_cast<milliseconds>(t1 - t0);
             cerr << "Pareto extraction : " << time.count() << "ms." << endl;
             for(auto& i : pareto)
-                cout << i.Mc << " " << i.C << " " << i.Ms << endl;
+                cout << i.Mc << " " << i.C << endl;
             // Generate PDDL instance
             if(GArg.getValue())
                 generatePDDL(pathPDDL, n,t,p,c,d,pareto);
@@ -285,7 +316,7 @@ int main(int argc, char** argv)
         else
         {
             for(auto& i : PPPSet)
-                cout << i.Mc << " " << i.C << " " << i.Ms << endl;
+                cout << i.Mc << " " << i.C  << endl;
                     // Generate PDDL instance
             if(GArg.getValue())
                 generatePDDL(pathPDDL, n,t,p,c,d);
