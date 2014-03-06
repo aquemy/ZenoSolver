@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <iterator>
 #include <functional>
 #include <fstream>
 #include <chrono>
@@ -187,6 +188,8 @@ int main(int argc, char** argv)
         unsigned t = tArg.getValue();
         unsigned p = pArg.getValue();
         
+        bool pruning = aArg.getValue();
+        
         string pathPDDL;
         if(OArg.getValue().empty())
             pathPDDL = "zeno"+std::to_string(n)+"n"+std::to_string(t)+"t"+std::to_string(p)+"pMulti.pddl";
@@ -205,8 +208,8 @@ int main(int argc, char** argv)
             exit(0); // TODO : real warnings*/
 
         // Generate data
-        apply(c, f3, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-        rapply(d, f3, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        apply(c, f1, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        rapply(d, f2, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         
         // Convert to INT for DAE
         // TODO : Un truc plus propre
@@ -270,7 +273,24 @@ int main(int argc, char** argv)
                 
                 if (!front.count(C))
                     front[C] = Mc;
+                
+                bool dominated = false;
+                // Pruning
+                if(pruning)
+                {
+                    for(auto i = front.find(C); i != --begin(front); --i)
+                    {
+                        if(i->second <= Ml)
+                        {
+                            dominated = true;
+                            break;
+                        }
+                    }
+                }
+                //*/
                   
+                if(!dominated)
+                {  
                 vector<int> betaSetValue;
                 decltype(w) diff;
                 set_difference (begin(w), end(w), begin(e), end(e), back_inserter(diff));
@@ -317,8 +337,10 @@ int main(int argc, char** argv)
                         front[C] = Mc;
                 }
                     
-                count++;
+                
                 countIterations += betaPowerSet.size();
+                }
+                count++;
                 //_
                 WStatut = nextTuple(w, n, t-p);
             }
@@ -327,16 +349,15 @@ int main(int argc, char** argv)
         
         
         pareto = paretoExtraction(front);
+        auto t1 = high_resolution_clock::now();
+        auto time = std::chrono::duration_cast<milliseconds>(t1 - t0);
         for(auto& i : pareto)
            cout << i.second << " " << i.first << endl;
            
         if(GArg.getValue())
             generatePDDL(pathPDDL, n,t,p,c,d,pareto);
              
-        cerr << "PPP: " << count << endl;
-        cerr << "Iterations: " << countIterations << endl;
-        cerr << "PPP in memory: " << front.size() << endl;
-        cerr << "Pareto points: " << pareto.size() << endl;
+        cerr <<  count << " " << countIterations << " " << front.size() << " " << pareto.size() << " " << time.count() << endl;
     } 
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{ 

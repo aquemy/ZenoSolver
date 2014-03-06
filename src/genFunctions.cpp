@@ -22,13 +22,14 @@ double f4(unsigned i) { return pow(2,i); }
 double f5(unsigned i) { return 5*(i / 2) + 0.1*(i % 2); }
 
 /*
-[aquemy@rlm build]$ ./zenoSolver -n 3 -t 6 -p 2 -j 2.9 -aP > t
+[aquemy@rlm build]$ ./zenoSolver2 -n 3 -t 6 -p 2 -j 2.9 -l 2.9 -G > pareto.txt
 c : 2000 1010 500 
 d : 500 1010 2000 
 
-[aquemy@rlm build]$ ./zenoSolver -n 3 -t 3 -p 2 -j 3.9 -aP > t
+[aquemy@rlm build]$ ./zenoSolver -n 3 -t 3 -p 2 -j 3.9 -l 2.9 -G > pareto.txt
 c : 2510 1510 509 
 d : 509 1510 2510
+
 
 c : 2000 1510 1500 1010 
 d : 1010 1500 1510 2000
