@@ -1,8 +1,6 @@
 #ifndef _ZS_ALGORITHM_
 #define _ZS_ALGORITHM_
 
-struct PPP;
-
 struct Si
 {
     double m = 0;
@@ -13,12 +11,6 @@ struct Si
 bool compM(const Si i, const Si j);
 bool compMS(Si& i, Si& j);
 
-double SimpleUpperBound(const PPP& ppp, 
-    const std::vector<std::vector<int>>& E,
-    const std::vector<std::vector<int>>& W,
-    const std::vector<double>& d, 
-    unsigned p);
-
 int UpperBound(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
@@ -26,7 +18,5 @@ int UpperBound(int Mc,
     const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
     unsigned p);
-    
-bool isGreedilyDominated(const PPP& ppp, const std::vector<PPP>&);
 
 #endif // _ZS_ALGORITHM_

@@ -43,7 +43,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(FILES 
     src/algorithm.cpp
-    src/ppp.cpp
     src/genFunctions.cpp
     src/combiGenerator.cpp
     src/utils.cpp
@@ -51,7 +50,6 @@ set(FILES
     src/paretoExtraction.cpp
     )
 
-#add_executable(zenoSolver src/solver.cpp ${FILES})
 add_executable(zenoSolver2 src/solver2.cpp ${FILES})
 #add_executable(random src/random.cpp)
 

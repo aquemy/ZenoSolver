@@ -2,7 +2,6 @@
 #include <vector>
 #include <set>
 #include <algorithm.hpp>
-#include <ppp.hpp>
 #include <powerSetGenerator.hpp>
 
 #include <iostream> // Only debug
@@ -17,52 +16,6 @@ bool compMS(Si& i, Si& j)
         return false;
     else
         return i.m < j.m;
-}
-
-double SimpleUpperBound(const PPP& ppp, 
-    const std::vector<std::vector<int>>& E,
-    const std::vector<std::vector<int>>& W,
-    const std::vector<double>& d, 
-    unsigned p)
-{     
-    using std::begin;
-    using std::end;
-
-    std::vector<Si> S(p);
-    
-    auto rbegin = [](decltype(E[ppp.e]) v) { return v.rbegin(); };
-    auto rend = [](decltype(E[ppp.e]) v) { return v.rend(); };
-    
-    auto itE = rbegin(E[ppp.e]);
-    auto itW = rbegin(W[ppp.w]);
-    auto itP = begin(S);
-    
-    while(itW < rend(W[ppp.w]))
-    {
-        itP = min_element(begin(S), end(S), compM);
-        if(itP->s)
-        {
-            itP->m += 2*d[*itE];
-            itP->s = false;
-            itE++;
-        }
-        else
-        {
-            itP->m += 2*d[*itW];
-            itP->s = true;
-            itW++;
-        }
-    }
-    
-    while(itE < rend(E[ppp.e]))
-    {
-        itP = min_element(begin(S),end(S),compMS);
-        itP->m += 2*d[*itE];
-        itP->s = false;
-        itE++;
-    }
-      
-    return max_element(begin(S), end(S), compM)->m;
 }
 
 int UpperBound(int Mc, 
@@ -141,14 +94,5 @@ int UpperBound(int Mc,
     }
             
     return bestM; 
-}
-
-bool isGreedilyDominated(const PPP& ppp, const std::vector<PPP>& PPPSet)
-{
-    for(const auto& j : PPPSet)
-        if((j != ppp) && ((j.C <= ppp.C) && (j.Mc < ppp.Ms))) 
-            return true;
-
-    return false;
 }
 
