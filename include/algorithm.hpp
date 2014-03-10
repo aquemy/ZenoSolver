@@ -19,12 +19,13 @@ double SimpleUpperBound(const PPP& ppp,
     const std::vector<double>& d, 
     unsigned p);
 
-double UpperBound(const PPP& ppp,
-    const std::vector<std::vector<int>>& E, 
-    const std::vector<std::vector<int>>& W,
-    const std::vector<double>& d, 
-    unsigned p, 
-    unsigned beta);
+int UpperBound(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<double>& d,
+    unsigned p);
     
 bool isGreedilyDominated(const PPP& ppp, const std::vector<PPP>&);
 

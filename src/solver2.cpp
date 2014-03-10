@@ -19,6 +19,7 @@
 #include <powerSetGenerator.hpp>
 #include <algorithm.hpp>
 #include <ppp.hpp>
+#include <paretoExtraction.hpp>
 #include <genFunctions.hpp>
 #include <utils.hpp>
 
@@ -41,106 +42,7 @@ using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-int UpperBound(int Mc, 
-    int Ml, 
-    const std::vector<int>& e, 
-    const std::vector<int>& w,
-    const std::set<std::vector<unsigned>>& betaPowerSet,
-    const std::vector<double>& d,
-    unsigned p)
-{
-    using std::begin;
-    using std::end;
-    
-    // Little trick waiting for C++14
-    auto rbegin = [](decltype(e) v) { return v.rbegin(); };
-    auto rend = [](decltype(e) v) { return v.rend(); };
-
-    auto bestM = Mc;
-    
-    for(auto betaSet : betaPowerSet)
-    {
-        // Delete elements of the betaSet from w        
-        std::vector<int> alphaWSet;
-        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
-        
-        // Delete elements of the betaSet from e        
-        std::vector<int> alphaESet;
-        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), std::back_inserter(alphaESet));
-    
-        std::vector<Si> S(p);
-        
-        auto itE = rbegin(alphaESet);
-        auto itW = rbegin(alphaWSet);
-        auto itP = begin(S);
-    
-        // Perform the greedy algorithm
-        while(itW < rend(alphaWSet))
-        {
-            itP = min_element(begin(S), end(S), compM);
-            if(itP->s)
-            {
-                itP->m += 2*d[*itE];
-                itP->s = false;
-                itE++;
-            }
-            else
-            {
-                itP->m += 2*d[*itW];
-                itP->s = true;
-                itW++;
-            }
-        }
-        
-        while(itE < rend(alphaESet))
-        {
-            itP = min_element(begin(S),end(S),compMS);
-            itP->m += 2*d[*itE];
-            itP->s = false;
-            itE++;
-        }
-        
-        // Pattern 3
-        for(auto i : betaSet)
-        {
-            // Place only the element we need in order to avoid complete sorting
-            std::nth_element(begin(S), begin(S)+1, end(S), compM);
-            itP = min_element(begin(S), end(S), compM);
-            itP->m += 2*d[i];
-            (itP + 1)->m += 2*d[i];
-        }
-        
-        if(bestM > std::max_element(begin(S),end(S), compM)->m)
-            bestM = std::max_element(begin(S),end(S), compM)->m;
-        if(bestM == Ml)
-            return Ml;
-    }
-            
-    return bestM; 
-}
-
-std::map<int, int> paretoExtraction(std::map<int, int>& front)
-{
-
-    std::map<int, int> pareto;
-   
-    auto current = begin(front);
-    
-    // Add the first
-    pareto[current->first] = current->second;
-    current++;
-    
-    for(auto it = begin(front); it != end(front); ++it)
-    {
-        if(it->second < current->second)
-        {
-            pareto[it->first] = it->second;
-            current = it;
-        }   
-    }
-    
-    return pareto;
-}
+long long int countIterations = 0;
 
 int main(int argc, char** argv)
 {
@@ -208,7 +110,7 @@ int main(int argc, char** argv)
             exit(0); // TODO : real warnings*/
 
         // Generate data
-        apply(c, f1, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        apply(c, f2, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
         rapply(d, f2, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         
         // Convert to INT for DAE
@@ -234,14 +136,14 @@ int main(int argc, char** argv)
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
         
-        cerr << "c : ";
+        /*cerr << "c : ";
         for(auto i : c)
             cerr << i << " ";
         cerr << endl;
         cerr << "d : ";
         for(auto i : d)
             cerr << i << " ";
-        cerr << endl;    
+        cerr << endl;    */
         
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
@@ -253,7 +155,6 @@ int main(int argc, char** argv)
         std::vector<int> e(t,0);
         
         long long int count = 0;
-        long long int countIterations = 0;
         while(EStatut == GEN_NEXT)
         {
             int WStatut = GEN_NEXT;
@@ -338,7 +239,7 @@ int main(int argc, char** argv)
                 }
                     
                 
-                countIterations += betaPowerSet.size();
+                
                 }
                 count++;
                 //_
@@ -357,7 +258,7 @@ int main(int argc, char** argv)
         if(GArg.getValue())
             generatePDDL(pathPDDL, n,t,p,c,d,pareto);
              
-        cerr <<  count << " " << countIterations << " " << front.size() << " " << pareto.size() << " " << time.count() << endl;
+        cerr << n << " " << t << " " << p << " " << count << " " << countIterations << " " << front.size() << " " << pareto.size() << " " << time.count() << endl;
     } 
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{ 

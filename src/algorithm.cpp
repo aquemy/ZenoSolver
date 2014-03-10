@@ -65,34 +65,32 @@ double SimpleUpperBound(const PPP& ppp,
     return max_element(begin(S), end(S), compM)->m;
 }
 
-double UpperBound(const PPP& ppp, 
-    const std::vector<std::vector<int>>& E, 
-    const std::vector<std::vector<int>>& W,
-    const std::vector<double>& d, 
-    unsigned p, 
-    unsigned beta)
+int UpperBound(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<double>& d,
+    unsigned p)
 {
     using std::begin;
     using std::end;
     
     // Little trick waiting for C++14
-    auto rbegin = [](decltype(E[ppp.e]) v) { return v.rbegin(); };
-    auto rend = [](decltype(E[ppp.e]) v) { return v.rend(); };
+    auto rbegin = [](decltype(e) v) { return v.rbegin(); };
+    auto rend = [](decltype(e) v) { return v.rend(); };
 
-    std::set<std::vector<unsigned>> betaPowerSet;
-    generatePowerSet(ppp.betaMax, beta, ppp.betaSet, betaPowerSet);
-    
-    auto bestM = ppp.Mc;
+    auto bestM = Mc;
     
     for(auto betaSet : betaPowerSet)
     {
         // Delete elements of the betaSet from w        
         std::vector<int> alphaWSet;
-        std::set_difference (begin(W[ppp.w]), end(W[ppp.w]), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
+        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
         
         // Delete elements of the betaSet from e        
         std::vector<int> alphaESet;
-        std::set_difference(begin(E[ppp.e]), end(E[ppp.e]), begin(betaSet), end(betaSet), std::back_inserter(alphaESet));
+        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), std::back_inserter(alphaESet));
     
         std::vector<Si> S(p);
         
@@ -138,7 +136,8 @@ double UpperBound(const PPP& ppp,
         
         if(bestM > std::max_element(begin(S),end(S), compM)->m)
             bestM = std::max_element(begin(S),end(S), compM)->m;
-
+        if(bestM == Ml)
+            return Ml;
     }
             
     return bestM; 
