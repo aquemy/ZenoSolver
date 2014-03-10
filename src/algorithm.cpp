@@ -4,18 +4,19 @@
 #include <algorithm.hpp>
 #include <powerSetGenerator.hpp>
 
-#include <iostream> // Only debug
+bool compM(const Si i, const Si j) 
+{ 
+    return i.m < j.m; 
+}
 
-//bool compM(Si& i, Si& j) { return i.m < j.m; }
-bool compM(const Si i, const Si j) { return i.m < j.m; }
 bool compMS(Si& i, Si& j) 
 { 
-    if(i.s == true and j.s == false)
+    if(i.s == EAST and j.s == WEST)
         return true;
-    else if(i.s == false and j.s == true)
+    else if(i.s == WEST and j.s == EAST)
         return false;
     else
-        return i.m < j.m;
+        compM(i,j);
 }
 
 int UpperBound(int Mc, 
@@ -58,13 +59,13 @@ int UpperBound(int Mc,
             if(itP->s)
             {
                 itP->m += 2*d[*itE];
-                itP->s = false;
+                itP->s = WEST;
                 itE++;
             }
             else
             {
                 itP->m += 2*d[*itW];
-                itP->s = true;
+                itP->s = EAST;
                 itW++;
             }
         }
@@ -73,7 +74,7 @@ int UpperBound(int Mc,
         {
             itP = min_element(begin(S),end(S),compMS);
             itP->m += 2*d[*itE];
-            itP->s = false;
+            itP->s = WEST;
             itE++;
         }
         

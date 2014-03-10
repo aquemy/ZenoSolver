@@ -18,8 +18,9 @@ uint64_t nextSubSet (uint64_t sub, uint64_t set) {
    return rip;
 }
 
-void generatePowerSet(unsigned n, unsigned i, const std::vector<int>& values, std::set<std::vector<unsigned>>& s)
+void generatePowerSet(unsigned i, const std::vector<int>& values, std::set<std::vector<unsigned>>& s)
 {
+    const unsigned n = values.size();
     auto set = (1ULL << n) - 1;
     auto sub = (1ULL << i) - 1;
     uint64_t x = sub; 

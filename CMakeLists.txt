@@ -50,7 +50,7 @@ set(FILES
     src/paretoExtraction.cpp
     )
 
-add_executable(zenoSolver2 src/solver2.cpp ${FILES})
+add_executable(zenoSolver src/solver.cpp ${FILES})
 #add_executable(random src/random.cpp)
 
 ######################################################################################
