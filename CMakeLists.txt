@@ -32,6 +32,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Dependencies.cmake)
 ## Custom Targets file
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Target.cmake)
 
+add_subdirectory(doc)
 
 ######################################################################################
 ### 3) Define and add module paths

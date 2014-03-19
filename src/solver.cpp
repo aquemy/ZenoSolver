@@ -107,8 +107,8 @@ int main(int argc, char** argv)
             exit(0); // TODO : real warnings*/
 
         // Generate data
-        apply(c, f2, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-        rapply(d, f2, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        apply(c, f1, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+        rapply(d, f1, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         
         // Convert to INT for DAE
         // TODO : Un truc plus propre
@@ -133,14 +133,14 @@ int main(int argc, char** argv)
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
         
-        /*cerr << "c : ";
+        cerr << "c : ";
         for(auto i : c)
             cerr << i << " ";
         cerr << endl;
         cerr << "d : ";
         for(auto i : d)
             cerr << i << " ";
-        cerr << endl;    */
+        cerr << endl;    
         
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
@@ -158,8 +158,6 @@ int main(int argc, char** argv)
             std::vector<int> w(t-p,0);
             while(WStatut == NEXT)
             {
-                // TODO : Checker si le PPP est greedily dominé
-                
                 // 1. Construction du PPP courant
                 int C = 0;
                 for_each(begin(e), end(e),[&](unsigned i) { C += c[i];});
