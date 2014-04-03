@@ -82,6 +82,13 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const st
                 dataFile << "  (:metric (and (minimize (total-time)) (minimize (total-cost)))))" << std::endl;
             }
             
+            dataFile << std::endl << "; Durations : " << std::endl << "; ";
+            for(auto i : c)
+                dataFile << i << " ";
+            dataFile << std::endl << "; Costs : " << std::endl << "; ";
+            for(auto i : d)
+                dataFile << i << " ";
+            
             if(pareto.size() > 0)
             {
                 dataFile << std::endl << "; Pareto points : Makespan - Cost" << std::endl;

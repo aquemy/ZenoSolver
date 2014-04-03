@@ -54,11 +54,13 @@ int main(int argc, char** argv)
 	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
         TCLAP::ValueArg<int> tArg("t","travelers","Number of travelers",true,3,"int", cmd);
         TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
-        //TCLAP::ValueArg<string> DArg("D","data","File where data (cost and durations) are located",true,"data","string", cmd);
+        TCLAP::ValueArg<int> rArg("r","adjustCoef",
+            "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
+        TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
         TCLAP::SwitchArg PArg("P","onlyPareto","Return only Pareto optimal points.", cmd, false);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
-        TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false,100, "unsigned", cmd);
+        TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> CArg("C","C","Function to generate C", false, 3, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> DArg("D","D","Function to generate D", false, 3, "unsigned", cmd);
         TCLAP::ValueArg<double> ScArg("j","scaleC","Scale factor for C", false, 1, "unsigned", cmd);
@@ -73,15 +75,15 @@ int main(int argc, char** argv)
 	    cmd.parse(argc, argv);
 	
         // 1. DATA
-        // 1.1 Data verification
-        if(nArg.getValue() < 0 
-        or tArg.getValue() < 1 
-        or pArg.getValue() < 1 
-        or (tArg.getValue() - pArg.getValue()) < 1)
-        {
-            // TODO : Real warning :)
-            exit(0); // Cases not handled at the moment. 
-        }
+        // 1.1 CMD verification
+        if(nArg.getValue() < 0)
+            throw std::domain_error("Number of cities (n) must be positive.");
+        if(tArg.getValue() < 1)
+            throw std::domain_error("Number of passengers (t) must be > 0.");
+        if(pArg.getValue() < 1)
+            throw std::domain_error("Number of planes (p) must be > 0.");
+        if(tArg.getValue() - pArg.getValue() < 1)
+            throw std::domain_error("Number of passengers must be strictly higher than the number of planes.");
         
         unsigned n = nArg.getValue();
         unsigned t = tArg.getValue();
@@ -95,30 +97,76 @@ int main(int argc, char** argv)
         else
             pathPDDL = OArg.getValue();
         
+        // 1.2 Costs and durations
         vector<double> c(n,1);
         vector<double> d(n,1);
-        /*ifstream dataFile(DArg.getValue());
-        if (dataFile)
+
+        if(!dArg.getValue().empty())
         {
-            
-            
+            ifstream dataFile(dArg.getValue());
+            if (dataFile)
+            {
+                for(unsigned i = 0; i < n; ++i)
+                    dataFile >> d[i];
+                for(unsigned i = 0; i < n; ++i)
+                    dataFile >> c[i];
+            }
+            else
+                throw std::runtime_error("Can't open the data file: "+dArg.getValue());
         }
         else
-            exit(0); // TODO : real warnings*/
-
-        // Generate data
-        apply(c, f1, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-        rapply(d, f1, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        {
+            auto f = f3;
+            auto g = f3;
+            switch (CArg.getValue())
+            {
+                case 1:
+                    f = f1;
+                    break;
+                case 2:
+                    f = f2;
+                    break;
+                case 3:
+                    f = f3;
+                    break;
+                case 4:
+                    f = f4;
+                    break;
+                case 5:
+                    f = f5;
+                    break;
+            }
+            switch (DArg.getValue())
+            {
+                case 1:
+                    g = f1;
+                    break;
+                case 2:
+                    g = f2;
+                    break;
+                case 3:
+                    g = f3;
+                    break;
+                case 4:
+                    f = f4;
+                    break;
+                case 5:
+                    g = f5;
+                    break;
+            }
+            // Generate data
+            apply(c, f, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
+            rapply(d, g, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+        }
         
-        // Convert to INT for DAE
-        // TODO : Un truc plus propre
+        // Convert to int
         for(auto& i : c)
-            i = (int)(100*i);
+            i = (int)(rArg.getValue()*i);
         
         for(auto& i : d)
-            i = (int)(100*i);
+            i = (int)(rArg.getValue()*i);
         
-        // Assuming d and c are strictly monoteneous
+        // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
         if(d[0] > d[1])
             swap(d,c);
         
@@ -132,15 +180,6 @@ int main(int argc, char** argv)
             c[i] += distribution(generator) + c[i-1];
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
-        
-        cerr << "c : ";
-        for(auto i : c)
-            cerr << i << " ";
-        cerr << endl;
-        cerr << "d : ";
-        for(auto i : d)
-            cerr << i << " ";
-        cerr << endl;    
         
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
@@ -160,11 +199,11 @@ int main(int argc, char** argv)
             {
                 // 1. Construction du PPP courant
                 int C = 0;
-                for_each(begin(e), end(e),[&](unsigned i) { C += c[i];});
-                for_each(begin(w), end(w),[&](unsigned i) { C += c[i];});
+                for_each(begin(e), end(e),[&](unsigned i) { C += c[i]; });
+                for_each(begin(w), end(w),[&](unsigned i) { C += c[i]; });
                 int Mc = 0;
-                for_each(begin(e), end(e),[&](unsigned i) { Mc += 2*d[i];});
-                for_each(begin(w), end(w),[&](unsigned i) { Mc += 2*d[i];});
+                for_each(begin(e), end(e),[&](unsigned i) { Mc += 2*d[i]; });
+                for_each(begin(w), end(w),[&](unsigned i) { Mc += 2*d[i]; });
                 int Ml = Mc / p;
                 
                 if (!front.count(C))
@@ -192,7 +231,7 @@ int main(int argc, char** argv)
                     set_difference (begin(w), end(w), begin(diff), end(diff), back_inserter(betaSetValue));
                     
                     // 1.2. Calcul du BetaPowerSet
-                    unsigned betaMax = betaSetValue.size();
+                    unsigned betaMax = min(BArg.getValue(), (unsigned)betaSetValue.size());
                     set<vector<unsigned>> betaPowerSet;
                     for(unsigned i = 0; i <= betaMax; i++)
                         generatePowerSet(i, betaSetValue, betaPowerSet);
@@ -235,9 +274,10 @@ int main(int argc, char** argv)
              << pareto.size() << " " 
              << time.count() << endl;
     } 
-	catch (TCLAP::ArgException &e)  // catch any exceptions
+	catch (std::exception &e)  // catch any exceptions
 	{ 
-        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
 	}
 
     return 0;
