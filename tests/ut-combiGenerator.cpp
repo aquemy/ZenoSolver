@@ -8,6 +8,9 @@ using namespace std;
 
 int main()
 {
+    // Old version
+    // TODO : new one ! :-)
+    /*
     vector<vector<int>> E;
     decltype(E) expected;
     
@@ -86,7 +89,7 @@ int main()
 	{ 
         cerr << "Error : " << e.what() << endl;
         return 1;
-	}
+	}*/
 
     return 0;
 }

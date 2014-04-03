@@ -1,6 +1,8 @@
 #ifndef _ZS_ALGORITHM_
 #define _ZS_ALGORITHM_
 
+#include <set>
+
 constexpr const bool EAST = true;
 constexpr const bool WEST = false;
 

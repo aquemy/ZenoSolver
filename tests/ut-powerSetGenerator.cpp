@@ -8,6 +8,9 @@ using namespace std;
 
 int main()
 {
+    // Old version
+    // TODO : new one ! :-)
+    /*
     vector<vector<unsigned>> powerSet;
     decltype(powerSet) expected;
     vector<int> v = {3,4,2,9};
@@ -117,6 +120,7 @@ int main()
         cerr << "Error : " << e.what() << endl;
         return 1;
 	}
+	*/
 
     return 0;
 }

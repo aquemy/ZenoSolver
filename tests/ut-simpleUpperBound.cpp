@@ -3,13 +3,14 @@
 #include <vector>
 
 #include <algorithm.hpp>
-#include <ppp.hpp>
 
 using namespace std;
 
 int main()
 {
-    
+    // Old version
+    // TODO : new one ! :-)
+    /*
     double upperBound;
     double expected;
     unsigned p;
@@ -81,7 +82,7 @@ int main()
 	{ 
         cerr << "Error : " << e.what() << endl;
         return 1;
-	}
+	}*/
 
     return 0;
 }

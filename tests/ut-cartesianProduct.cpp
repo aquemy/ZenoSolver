@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <combiGenerator.hpp>
-#include <ppp.hpp>
 #include <utils.hpp>
 
 
@@ -11,7 +10,10 @@ using namespace std;
 
 int main()
 { 
-    vector<PPP> expected;
+
+    // Old version
+    // TODO : new one ! :-)
+    /*vector<PPP> expected;
     
 	try 
 	{
@@ -45,7 +47,7 @@ int main()
 	{ 
         cerr << "Error : " << e.what() << endl;
         return 1;
-	}
+	}*/
 
     return 0;
 }

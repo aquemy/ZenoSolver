@@ -57,7 +57,6 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<int> rArg("r","adjustCoef",
             "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
         TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
-        TCLAP::SwitchArg PArg("P","onlyPareto","Return only Pareto optimal points.", cmd, false);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);

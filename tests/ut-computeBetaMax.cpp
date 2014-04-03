@@ -3,12 +3,14 @@
 #include <vector>
 
 #include <algorithm.hpp>
-#include <ppp.hpp>
 
 using namespace std;
 
 int main()
 {
+    // Old version
+    // TODO : new one ! :-)
+    /*
     vector<int> expected;
     unsigned p;
     vector<double> c = {3,2,1};
@@ -105,6 +107,7 @@ int main()
         cerr << "Error : " << e.what() << endl;
         return 1;
 	}
+	*/
 
     return 0;
 }

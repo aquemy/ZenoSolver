@@ -12,11 +12,11 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/tests)
 
 set(TEST_LIST 
-    #ut-combiGenerator
-    #ut-cartesianProduct
-    #ut-simpleUpperBound
-    #ut-computeBetaMax
-    #ut-powerSetGenerator
+    ut-combiGenerator
+    ut-cartesianProduct
+    ut-simpleUpperBound
+    ut-computeBetaMax
+    ut-powerSetGenerator
 )
 
 foreach(test ${TEST_LIST})
