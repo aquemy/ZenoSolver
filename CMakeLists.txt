@@ -42,7 +42,7 @@ add_subdirectory(doc)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(FILES 
+set(FILES
     src/algorithm.cpp
     src/genFunctions.cpp
     src/combiGenerator.cpp

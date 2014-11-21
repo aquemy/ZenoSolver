@@ -45,17 +45,14 @@ long long int countIterations = 0;
 
 int main(int argc, char** argv)
 {
-    
-	try 
-	{  
-	
-	    TCLAP::CmdLine cmd("ZenoSolver", ' ', "0.9");
+    try
+  	{
+        TCLAP::CmdLine cmd("ZenoSolver", ' ', "0.9");
 
-	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
+  	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
         TCLAP::ValueArg<int> tArg("t","travelers","Number of travelers",true,3,"int", cmd);
         TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
-        TCLAP::ValueArg<int> rArg("r","adjustCoef",
-            "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
+        TCLAP::ValueArg<int> rArg("r","adjustCoef", "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
         TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
@@ -66,13 +63,13 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<double> TcArg("k","transC","Translation factor for C", false, 0, "unsigned", cmd);
         TCLAP::ValueArg<double> SdArg("l","scaleD","Scale factor for D", false, 1, "unsigned", cmd);
         TCLAP::ValueArg<double> TdArg("m","transD","Translation factor for D", false, 0, "unsigned", cmd);
-        
+
         TCLAP::ValueArg<double> xArg("x","x","Scale factor for D", false, 1, "unsigned", cmd);
         TCLAP::ValueArg<double> yArg("y","y","Translation factor for D", false, 0, "unsigned", cmd);
-        
+
         TCLAP::ValueArg<string> OArg("O","ouput","Output file for PDDL File", false,"", "string", cmd);
-	    cmd.parse(argc, argv);
-	
+  	    cmd.parse(argc, argv);
+
         // 1. DATA
         // 1.1 CMD verification
         if(nArg.getValue() < 0)
@@ -83,19 +80,19 @@ int main(int argc, char** argv)
             throw std::domain_error("Number of planes (p) must be > 0.");
         if(tArg.getValue() - pArg.getValue() < 1)
             throw std::domain_error("Number of passengers must be strictly higher than the number of planes.");
-        
+
         unsigned n = nArg.getValue();
         unsigned t = tArg.getValue();
         unsigned p = pArg.getValue();
-        
+
         bool pruning = aArg.getValue();
-        
+
         string pathPDDL;
         if(OArg.getValue().empty())
             pathPDDL = "zeno"+std::to_string(n)+"n"+std::to_string(t)+"t"+std::to_string(p)+"pMulti.pddl";
         else
             pathPDDL = OArg.getValue();
-        
+
         // 1.2 Costs and durations
         vector<double> c(n,1);
         vector<double> d(n,1);
@@ -157,18 +154,18 @@ int main(int argc, char** argv)
             apply(c, f, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
             rapply(d, g, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         }
-        
+
         // Convert to int
         for(auto& i : c)
             i = (int)(rArg.getValue()*i);
-        
+
         for(auto& i : d)
             i = (int)(rArg.getValue()*i);
-        
+
         // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
         if(d[0] > d[1])
             swap(d,c);
-        
+
         /*std::default_random_engine generator;
         generator.seed(std::time(0));
         std::uniform_real_distribution<double> distribution(0.0,10);
@@ -179,16 +176,16 @@ int main(int argc, char** argv)
             c[i] += distribution(generator) + c[i-1];
             d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
         }*/
-        
+
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
         map<int, int> front; // Key using a double ?
         map<int, int> pareto;
         int EStatut = NEXT;
-        
+
         std::vector<int> e(t,0);
-        
+
         long long int count = 0;
         while(EStatut == NEXT)
         {
@@ -204,10 +201,10 @@ int main(int argc, char** argv)
                 for_each(begin(e), end(e),[&](unsigned i) { Mc += 2*d[i]; });
                 for_each(begin(w), end(w),[&](unsigned i) { Mc += 2*d[i]; });
                 int Ml = Mc / p;
-                
+
                 if (!front.count(C))
                     front[C] = Mc;
-                
+
                 // Pruning
                 bool dominated = false;
                 if(pruning)
@@ -221,26 +218,26 @@ int main(int argc, char** argv)
                         }
                     }
                 }
-                  
+
                 if(!dominated)
-                {  
+                {
                     vector<int> betaSetValue;
                     decltype(w) diff;
                     set_difference (begin(w), end(w), begin(e), end(e), back_inserter(diff));
                     set_difference (begin(w), end(w), begin(diff), end(diff), back_inserter(betaSetValue));
-                    
+
                     // 1.2. Calcul du BetaPowerSet
                     unsigned betaMax = min(BArg.getValue(), (unsigned)betaSetValue.size());
                     set<vector<unsigned>> betaPowerSet;
                     for(unsigned i = 0; i <= betaMax; i++)
                         generatePowerSet(i, betaSetValue, betaPowerSet);
 
-                    // 2. Calcul de la borne max    
+                    // 2. Calcul de la borne max
                     auto bestM = Mc;
                     int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
-                    if(MaxM < Mc) 
+                    if(MaxM < Mc)
                     {
-                        Mc = MaxM;    
+                        Mc = MaxM;
                         // 3. Compare
                         if(Mc < front[C])
                             front[C] = Mc;
@@ -253,28 +250,28 @@ int main(int argc, char** argv)
             }
             EStatut = nextTuple(e, n, t);
         }
-        
-        
+
+
         pareto = paretoExtraction(front);
         auto t1 = high_resolution_clock::now();
         auto time = std::chrono::duration_cast<milliseconds>(t1 - t0);
         for(auto& i : pareto)
            cout << i.second << " " << i.first << endl;
-           
+
         if(GArg.getValue())
             generatePDDL(pathPDDL, n,t,p,c,d,pareto);
-             
-        cerr << n << " " 
-             << t << " " 
-             << p << " " 
-             << count << " " 
-             << countIterations << " " 
-             << front.size() << " " 
-             << pareto.size() << " " 
+
+        cerr << n << " "
+             << t << " "
+             << p << " "
+             << count << " "
+             << countIterations << " "
+             << front.size() << " "
+             << pareto.size() << " "
              << time.count() << endl;
-    } 
+    }
 	catch (std::exception &e)  // catch any exceptions
-	{ 
+	{
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
 	}
