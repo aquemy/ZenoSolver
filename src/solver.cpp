@@ -134,7 +134,6 @@ int main(int argc, char** argv)
                 while(!dataFile.eof())
                 {
                     getline(dataFile, s);
-                    std::cout << "c:" << s << std::endl;
                     if(s.empty())
                         c = de;
                     else
@@ -151,9 +150,11 @@ int main(int argc, char** argv)
             else
                 throw std::runtime_error("Can't open the data file: "+dArg.getValue());
             if(c[0] == c[1] && c[0] == 1) // Symetric problem
+            {
                 c = de;
                 de = d;
                 symetric = true;
+            }
         }
         else
         {
@@ -250,6 +251,9 @@ int main(int argc, char** argv)
         for(auto& i : d)
             i = (int)(rArg.getValue()*i);
 
+        for(auto& i : de)
+            i = (int)(rArg.getValue()*i);
+
         // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
         if(d[0] > d[1])
             swap(d,c);
@@ -288,7 +292,12 @@ int main(int argc, char** argv)
                 int Mc = 0;
                 for_each(begin(e), end(e),[&](unsigned i) { Mc += d[i] + de[i]; });
                 for_each(begin(w), end(w),[&](unsigned i) { Mc += d[i] + de[i]; });
+                // TODO: Check if the PPP are generated sorted. In this case the max element can be found in O(1)
+                auto me = *std::max_element(begin(e), end(e),[&](unsigned i, unsigned j) { return d[i] + de[i] < d[j] + de[j]; });
+                auto mw = *std::max_element(begin(w), end(w),[&](unsigned i, unsigned j) { return d[i] + de[i] < d[j] + de[j]; });
                 int Ml = Mc / p;
+                Ml = std::max(double(Ml), d[me] + de[me]);
+                Ml = std::max(double(Ml), d[mw] + de[mw]);
 
                 if (!front.count(C))
                     front[C] = Mc;
