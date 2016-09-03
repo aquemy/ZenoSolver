@@ -122,13 +122,18 @@ int main(int argc, char** argv)
                 {
                     getline(dataFile, s);
                     if(s.empty())
+                        continue;
+                    else 
+                    {
+                        iss = istringstream(s);
+                        tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                        if(tokens.size() != n)
+                            throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
+                        for(unsigned i = 0; i < n; ++i)
+                            de[i] = stoi(tokens[i]);
                         break;
-                    iss = istringstream(s);
-                    tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                    if(tokens.size() != n)
-                        throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                    for(unsigned i = 0; i < n; ++i)
-                        de[i] = stoi(tokens[i]);
+                    }
+
                 }
 
                 while(!dataFile.eof())
@@ -331,7 +336,7 @@ int main(int argc, char** argv)
 
                     // 2. Calcul de la borne max
                     auto bestM = Mc;
-                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p, symetric);
+                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric);
                     if(MaxM < Mc)
                     {
                         Mc = MaxM;

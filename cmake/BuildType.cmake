@@ -2,7 +2,7 @@
 ### 1) Define flags depending on the build type
 ######################################################################################
 #-Wall -Wextra -ansi -pedantic -Werror
-set(ZS_CXX_FLAGS " -std=c++11" CACHE STRING "General flags." FORCE)
+set(ZS_CXX_FLAGS " -std=c++14" CACHE STRING "General flags." FORCE)
 set(ZS_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "Flags for debug build." FORCE)
 set(ZS_CXX_FLAGS_RELEASE "-O3" CACHE STRING "Flags for release build." FORCE)
 set(ZS_CXX_FLAGS_PROFILING "-pg --coverage" CACHE STRING "Flags for profiling build." FORCE)

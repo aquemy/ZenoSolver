@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <vector>
+#include <iterator>
 #include <set>
 #include <algorithm.hpp>
 #include <powerSetGenerator.hpp>
+
+#include <iostream>
 
 bool compM(const Si i, const Si j) 
 { 
@@ -25,10 +28,11 @@ int UpperBound(int Mc,
     const std::vector<int>& w,
     const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
+    const std::vector<double>& de,
     unsigned p,
     bool symetric)
 {
-    return symetric ? UpperBound_Symetric(Mc, Ml, e, w, betaPowerSet, d, p) : UpperBound_NonSymetric(Mc, Ml, e, w, betaPowerSet, d, p);
+    return symetric ? UpperBound_Symetric(Mc, Ml, e, w, betaPowerSet, d, p) : UpperBound_NonSymetric(Mc, Ml, e, w, betaPowerSet, d, de, p);
 }
 
 
@@ -64,7 +68,8 @@ int UpperBound_Symetric(int Mc,
         auto itE = rbegin(alphaESet);
         auto itW = rbegin(alphaWSet);
         auto itP = begin(S);
-    
+
+
         // Perform the greedy algorithm
         while(itW < rend(alphaWSet))
         {
@@ -116,6 +121,7 @@ int UpperBound_NonSymetric(int Mc,
     const std::vector<int>& w,
     const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
+    const std::vector<double>& de,
     unsigned p)
 {
     using std::begin;
@@ -143,6 +149,38 @@ int UpperBound_NonSymetric(int Mc,
         auto itW = rbegin(alphaWSet);
         auto itP = begin(S);
     
+        // We give one P1 to every plane by plan constraint
+        for(auto& plane: S) 
+        {
+            plane.m += d[*itE] + de[*itE];
+            itE++;
+        }
+
+        // Open the P3
+        for(auto i : betaSet)
+        {
+            itP = min_element(begin(S), end(S), compM);
+            itP->m += 2*d[i];
+        }
+
+        while(itW < rend(alphaWSet))
+        {
+            itP = min_element(begin(S), end(S), compM);
+            itP->m += d[*itE] + de[*itE];
+            itE++;
+            itP->m += d[*itW] + de[*itW];
+            itW++;
+        }
+
+        // We close the P3
+        for(auto it = betaSet.rbegin(); it != betaSet.rend(); ++it) // TODO: Check why free function rbegin and rend are not found
+        {
+            itP = min_element(begin(S), end(S), [&](auto a, auto b) { return a.m + de[*it]; });
+            //itP->m += 2*d[i];
+            //(itP + 1)->m += 2*d[i];
+        }
+
+        /*
         // Perform the greedy algorithm
         while(itW < rend(alphaWSet))
         {
@@ -178,6 +216,7 @@ int UpperBound_NonSymetric(int Mc,
             itP->m += 2*d[i];
             (itP + 1)->m += 2*d[i];
         }
+        */
         
         if(bestM > std::max_element(begin(S),end(S), compM)->m)
             bestM = std::max_element(begin(S),end(S), compM)->m;
