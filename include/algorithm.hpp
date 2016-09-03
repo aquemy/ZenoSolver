@@ -45,9 +45,32 @@ bool compMS(Si& i, Si& j);
 ////////////////////////////////////////////////////////////
 /// \brief Compute the optimal makespan for a given PPP.
 ///
-/// The algorithm consists in greedily distribute durations
-/// between planes. More details and proofs of optimality
-/// can be found in doc/zenobench.pdf.
+/// This function call either the algorithm for a symetric
+/// problem or non-symetric problems. More details and 
+/// proofs of optimality can be found in doc/zenobench.pdf.
+///
+/// \param Mc Current makespan or upper bound).
+/// \param Ml Lower bound.
+/// \param e Eastbound cities.
+/// \param w Westbound cities.
+/// \param betaPowerSet Powerset according to patterns 3.
+/// \param d Vector of durations.
+/// \param p Number of planes.
+/// \param symetric True if the problem is symetric
+///
+/// \return Optimal makespan.
+////////////////////////////////////////////////////////////
+int UpperBound(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<double>& d,
+    unsigned p,
+    bool symetric);
+
+////////////////////////////////////////////////////////////
+/// \brief Symetric version of the algorithm.
 ///
 /// \param Mc Current makespan or upper bound).
 /// \param Ml Lower bound.
@@ -59,7 +82,28 @@ bool compMS(Si& i, Si& j);
 ///
 /// \return Optimal makespan.
 ////////////////////////////////////////////////////////////
-int UpperBound(int Mc, 
+int UpperBound_Symetric(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<double>& d,
+    unsigned p);
+
+////////////////////////////////////////////////////////////
+/// \brief Non-symetric version of the algorithm.
+///
+/// \param Mc Current makespan or upper bound).
+/// \param Ml Lower bound.
+/// \param e Eastbound cities.
+/// \param w Westbound cities.
+/// \param betaPowerSet Powerset according to patterns 3.
+/// \param d Vector of durations.
+/// \param p Number of planes.
+///
+/// \return Optimal makespan.
+////////////////////////////////////////////////////////////
+int UpperBound_NonSymetric(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
