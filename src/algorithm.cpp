@@ -175,48 +175,9 @@ int UpperBound_NonSymetric(int Mc,
         // We close the P3
         for(auto it = betaSet.rbegin(); it != betaSet.rend(); ++it) // TODO: Check why free function rbegin and rend are not found
         {
-            itP = min_element(begin(S), end(S), [&](auto a, auto b) { return a.m + de[*it]; });
-            //itP->m += 2*d[i];
-            //(itP + 1)->m += 2*d[i];
+            itP = min_element(begin(S), end(S), [&](auto a, auto b) { return std::max(a.m + de[*it],  d[*it]) < std::max(b.m + de[*it],  d[*it]); });
+            itP->m = std::max(itP->m + de[*it], d[*it]) + de[*it];
         }
-
-        /*
-        // Perform the greedy algorithm
-        while(itW < rend(alphaWSet))
-        {
-            itP = min_element(begin(S), end(S), compM);
-            if(itP->s)
-            {
-                itP->m += 2*d[*itE];
-                itP->s = WEST;
-                itE++;
-            }
-            else
-            {
-                itP->m += 2*d[*itW];
-                itP->s = EAST;
-                itW++;
-            }
-        }
-        
-        while(itE < rend(alphaESet))
-        {
-            itP = min_element(begin(S),end(S),compMS);
-            itP->m += 2*d[*itE];
-            itP->s = WEST;
-            itE++;
-        }
-        
-        // Pattern 3
-        for(auto i : betaSet)
-        {
-            // Place only the element we need in order to avoid complete sorting
-            std::nth_element(begin(S), begin(S)+1, end(S), compM);
-            itP = min_element(begin(S), end(S), compM);
-            itP->m += 2*d[i];
-            (itP + 1)->m += 2*d[i];
-        }
-        */
         
         if(bestM > std::max_element(begin(S),end(S), compM)->m)
             bestM = std::max_element(begin(S),end(S), compM)->m;
