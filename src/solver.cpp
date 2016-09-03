@@ -286,8 +286,8 @@ int main(int argc, char** argv)
                 for_each(begin(e), end(e),[&](unsigned i) { C += c[i]; });
                 for_each(begin(w), end(w),[&](unsigned i) { C += c[i]; });
                 int Mc = 0;
-                for_each(begin(e), end(e),[&](unsigned i) { Mc += 2*d[i]; });
-                for_each(begin(w), end(w),[&](unsigned i) { Mc += 2*d[i]; });
+                for_each(begin(e), end(e),[&](unsigned i) { Mc += d[i] + de[i]; });
+                for_each(begin(w), end(w),[&](unsigned i) { Mc += d[i] + de[i]; });
                 int Ml = Mc / p;
 
                 if (!front.count(C))
