@@ -152,6 +152,7 @@ int main(int argc, char** argv)
                 throw std::runtime_error("Can't open the data file: "+dArg.getValue());
             if(c[0] == c[1] && c[0] == 1) // Symetric problem
                 c = de;
+                de = d;
                 symetric = true;
         }
         else
