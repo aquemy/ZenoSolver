@@ -331,7 +331,11 @@ int main(int argc, char** argv)
 
                     // 2. Calcul de la borne max
                     auto bestM = Mc;
-                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
+                    int MaxM = 0;
+                    if(symetric)
+                        MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
+                    else
+                        MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, p);
                     if(MaxM < Mc)
                     {
                         Mc = MaxM;
