@@ -102,6 +102,7 @@ int main(int argc, char** argv)
         vector<double> c(n,1);
         vector<double> d(n,1);
         vector<double> de(n,1); // East durations in case the problem is not symetric
+        auto symetric = false;
 
         if(!dArg.getValue().empty())
         {
@@ -151,11 +152,13 @@ int main(int argc, char** argv)
                 throw std::runtime_error("Can't open the data file: "+dArg.getValue());
             if(c[0] == c[1] && c[0] == 1) // Symetric problem
                 c = de;
+                symetric = true;
         }
         else
         {
             auto f = f3;
             auto g = f3;
+            auto h = f3;
             switch (CArg.getValue())
             {
                 case 1:
@@ -174,6 +177,46 @@ int main(int argc, char** argv)
                     f = f5;
                     break;
             }
+            if(DEArg.isSet() and DWArg.isSet())
+            {
+                symetric = false;
+                switch (DEArg.getValue())
+                {
+                    case 1:
+                        g = f1;
+                        break;
+                    case 2:
+                        g = f2;
+                        break;
+                    case 3:
+                        g = f3;
+                        break;
+                    case 4:
+                        g = f4;
+                        break;
+                    case 5:
+                        g = f5;
+                        break;
+                }
+                switch (DEArg.getValue())
+                {
+                    case 1:
+                        h = f1;
+                        break;
+                    case 2:
+                        h = f2;
+                        break;
+                    case 3:
+                        h = f3;
+                        break;
+                    case 4:
+                        h = f4;
+                        break;
+                    case 5:
+                        h = f5;
+                        break;
+                }
+            }
             switch (DArg.getValue())
             {
                 case 1:
@@ -186,7 +229,7 @@ int main(int argc, char** argv)
                     g = f3;
                     break;
                 case 4:
-                    f = f4;
+                    g = f4;
                     break;
                 case 5:
                     g = f5;
@@ -195,6 +238,8 @@ int main(int argc, char** argv)
             // Generate data
             apply(c, f, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
             rapply(d, g, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
+            if(!symetric)
+                rapply(de, h, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
         }
 
         // Convert to int
