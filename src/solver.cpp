@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 #include <map>
 #include <set>
@@ -59,6 +61,9 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> CArg("C","C","Function to generate C", false, 3, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> DArg("D","D","Function to generate D", false, 3, "unsigned", cmd);
+        // Taking into account the none symetric case
+        TCLAP::ValueArg<unsigned> DEArg("E","DE","Function to generate DE", false, 3, "unsigned", cmd);
+        TCLAP::ValueArg<unsigned> DWArg("W","DW","Function to generate DW", false, 3, "unsigned", cmd);
         TCLAP::ValueArg<double> ScArg("j","scaleC","Scale factor for C", false, 1, "unsigned", cmd);
         TCLAP::ValueArg<double> TcArg("k","transC","Translation factor for C", false, 0, "unsigned", cmd);
         TCLAP::ValueArg<double> SdArg("l","scaleD","Scale factor for D", false, 1, "unsigned", cmd);
@@ -96,19 +101,56 @@ int main(int argc, char** argv)
         // 1.2 Costs and durations
         vector<double> c(n,1);
         vector<double> d(n,1);
+        vector<double> de(n,1); // East durations in case the problem is not symetric
 
         if(!dArg.getValue().empty())
         {
             ifstream dataFile(dArg.getValue());
             if (dataFile)
             {
+                string s;
+                getline(dataFile, s);
+                istringstream iss(s);
+                vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                if(tokens.size() != n)
+                    throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
                 for(unsigned i = 0; i < n; ++i)
-                    dataFile >> d[i];
-                for(unsigned i = 0; i < n; ++i)
-                    dataFile >> c[i];
+                    d[i] = stoi(tokens[i]);
+
+                while(!dataFile.eof())
+                {
+                    getline(dataFile, s);
+                    if(s.empty())
+                        break;
+                    iss = istringstream(s);
+                    tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                    if(tokens.size() != n)
+                        throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
+                    for(unsigned i = 0; i < n; ++i)
+                        de[i] = stoi(tokens[i]);
+                }
+
+                while(!dataFile.eof())
+                {
+                    getline(dataFile, s);
+                    std::cout << "c:" << s << std::endl;
+                    if(s.empty())
+                        c = de;
+                    else
+                    {
+                        iss = istringstream(s);
+                        tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                        if(tokens.size() != n)
+                            throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
+                        for(unsigned i = 0; i < n; ++i)
+                            c[i] = stoi(tokens[i]);
+                    }
+                }
             }
             else
                 throw std::runtime_error("Can't open the data file: "+dArg.getValue());
+            if(c[0] == c[1] && c[0] == 1) // Symetric problem
+                c = de;
         }
         else
         {
