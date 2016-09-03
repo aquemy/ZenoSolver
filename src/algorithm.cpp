@@ -32,7 +32,7 @@ int UpperBound(int Mc,
     unsigned p,
     bool symetric)
 {
-    return symetric ? UpperBound_Symetric(Mc, Ml, e, w, betaPowerSet, d, p) : UpperBound_NonSymetric(Mc, Ml, e, w, betaPowerSet, d, de, p);
+    return symetric ? UpperBound_Symetric(Mc, Ml, e, w, betaPowerSet, d, de, p) : UpperBound_NonSymetric(Mc, Ml, e, w, betaPowerSet, d, de, p);
 }
 
 
@@ -42,6 +42,7 @@ int UpperBound_Symetric(int Mc,
     const std::vector<int>& w,
     const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
+    const std::vector<double>& de,
     unsigned p)
 {
     using std::begin;
@@ -76,13 +77,13 @@ int UpperBound_Symetric(int Mc,
             itP = min_element(begin(S), end(S), compM);
             if(itP->s)
             {
-                itP->m += 2*d[*itE];
+                itP->m += d[*itE] + de[*itE];
                 itP->s = WEST;
                 itE++;
             }
             else
             {
-                itP->m += 2*d[*itW];
+                itP->m += d[*itW] + de[*itW];
                 itP->s = EAST;
                 itW++;
             }
@@ -91,7 +92,7 @@ int UpperBound_Symetric(int Mc,
         while(itE < rend(alphaESet))
         {
             itP = min_element(begin(S),end(S),compMS);
-            itP->m += 2*d[*itE];
+            itP->m += d[*itE] + de[*itE];
             itP->s = WEST;
             itE++;
         }
@@ -102,8 +103,10 @@ int UpperBound_Symetric(int Mc,
             // Place only the element we need in order to avoid complete sorting
             std::nth_element(begin(S), begin(S)+1, end(S), compM);
             itP = min_element(begin(S), end(S), compM);
-            itP->m += 2*d[i];
-            (itP + 1)->m += 2*d[i];
+            auto maxSide = std::max(d[i], de[i]);
+            auto minSide = std::min(d[i], de[i]);
+            itP->m += 2*maxSide;
+            (itP + 1)->m += 2*minSide;
         }
         
         if(bestM > std::max_element(begin(S),end(S), compM)->m)

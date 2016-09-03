@@ -58,6 +58,7 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
         TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
         TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
+        TCLAP::SwitchArg SArg("S","forceSymetric","Force to use the symetric algorithm.", cmd, false);
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> CArg("C","C","Function to generate C", false, 3, "unsigned", cmd);
         TCLAP::ValueArg<unsigned> DArg("D","D","Function to generate D", false, 3, "unsigned", cmd);
@@ -91,6 +92,7 @@ int main(int argc, char** argv)
         unsigned p = pArg.getValue();
 
         bool pruning = aArg.getValue();
+        bool forceSym = SArg.getValue();
 
         string pathPDDL;
         if(OArg.getValue().empty())
@@ -336,7 +338,7 @@ int main(int argc, char** argv)
 
                     // 2. Calcul de la borne max
                     auto bestM = Mc;
-                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric);
+                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym);
                     if(MaxM < Mc)
                     {
                         Mc = MaxM;

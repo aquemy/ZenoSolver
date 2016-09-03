@@ -79,7 +79,8 @@ int UpperBound(int Mc,
 /// \param e Eastbound cities.
 /// \param w Westbound cities.
 /// \param betaPowerSet Powerset according to patterns 3.
-/// \param d Vector of durations.
+/// \param d Vector of west durations
+/// \param de Vector of east durations.
 /// \param p Number of planes.
 ///
 /// \return Optimal makespan.
@@ -90,6 +91,7 @@ int UpperBound_Symetric(int Mc,
     const std::vector<int>& w,
     const std::set<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
+    const std::vector<double>& de,
     unsigned p);
 
 ////////////////////////////////////////////////////////////
