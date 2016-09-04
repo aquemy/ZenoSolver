@@ -188,7 +188,6 @@ int main(int argc, char** argv)
             }
             if(DEArg.isSet() and DWArg.isSet())
             {
-                symetric = false;
                 switch (DEArg.getValue())
                 {
                     case 1:
@@ -207,7 +206,7 @@ int main(int argc, char** argv)
                         g = f5;
                         break;
                 }
-                switch (DEArg.getValue())
+                switch (DWArg.getValue())
                 {
                     case 1:
                         h = f1;
@@ -226,23 +225,26 @@ int main(int argc, char** argv)
                         break;
                 }
             }
-            switch (DArg.getValue())
-            {
-                case 1:
-                    g = f1;
-                    break;
-                case 2:
-                    g = f2;
-                    break;
-                case 3:
-                    g = f3;
-                    break;
-                case 4:
-                    g = f4;
-                    break;
-                case 5:
-                    g = f5;
-                    break;
+            else {
+                symetric = true;
+                switch (DArg.getValue())
+                {
+                    case 1:
+                        g = f1;
+                        break;
+                    case 2:
+                        g = f2;
+                        break;
+                    case 3:
+                        g = f3;
+                        break;
+                    case 4:
+                        g = f4;
+                        break;
+                    case 5:
+                        g = f5;
+                        break;
+                }
             }
             // Generate data
             apply(c, f, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
@@ -262,19 +264,32 @@ int main(int argc, char** argv)
             i = (int)(rArg.getValue()*i);
 
         // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
-        if(d[0] > d[1])
+        // TODO: Take into account non-symetric cases
+        if(d[0] > d[1]) {
             swap(d,c);
+            std::reverse(std::begin(de), std::end(de));
+        }
 
-        /*std::default_random_engine generator;
-        generator.seed(std::time(0));
-        std::uniform_real_distribution<double> distribution(0.0,10);
-        c[0] = distribution(generator);
-        d[d.size() - 1] = distribution(generator);
-        for(unsigned i = 1; i < c.size(); i++)
-        {
-            c[i] += distribution(generator) + c[i-1];
-            d[d.size()-i-1] += distribution(generator) + d[d.size()-i];
-        }*/
+
+        if(symetric)
+            de = d;
+
+        #ifdef DEBUG
+        std::cerr << "C: ";
+        for(auto& i : c)
+            std::cerr << i << " ";
+        std::cerr << std::endl;
+
+        std::cerr << "DW: ";
+        for(auto& i : d)
+            std::cerr << i << " ";
+        std::cerr << std::endl;
+
+        std::cerr << "DE: ";
+        for(auto& i : de)
+            std::cerr << i << " ";
+        std::cerr << std::endl;
+        #endif
 
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
@@ -332,21 +347,30 @@ int main(int argc, char** argv)
 
                     // 1.2. Calcul du BetaPowerSet
                     unsigned betaMax = min(BArg.getValue(), (unsigned)betaSetValue.size());
-                    set<vector<unsigned>> betaPowerSet;
-                    for(unsigned i = 0; i <= betaMax; i++)
+
+                    auto bestM = Mc;
+                    decltype(bestM) MaxM;
+                    for(unsigned i = 0; i <= betaMax; i++) {
+                        set<vector<unsigned>> betaPowerSet;
                         generatePowerSet(i, betaSetValue, betaPowerSet);
+                        MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym);
+                        countIterations += betaPowerSet.size();
+                        if(MaxM == Ml) {
+                            break;
+                        }
+                    }
+                    #ifdef DEBUG
+                    std::cerr << "        Cost: " << C <<std::endl;
+                    #endif
 
                     // 2. Calcul de la borne max
-                    auto bestM = Mc;
-                    int MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym);
                     if(MaxM < Mc)
                     {
                         Mc = MaxM;
                         // 3. Compare
                         if(Mc < front[C])
                             front[C] = Mc;
-                    }
-                    countIterations += betaPowerSet.size();
+                    } 
                 }
                 count++;
                 //_

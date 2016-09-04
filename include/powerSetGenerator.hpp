@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <set>
 
-void addSubSet(uint64_t x, const std::vector<int>& values, std::set<std::vector<unsigned>>& s);
+void addSubSet(uint64_t x, const std::vector<int>& values, std::set<std::vector<unsigned>>& s, unsigned i);
 
 uint64_t nextSubSet (uint64_t sub, uint64_t set);
 
@@ -16,5 +16,5 @@ uint64_t nextSubSet (uint64_t sub, uint64_t set);
 /// \param s Set to be filled with generated sets.
 ////////////////////////////////////////////////////////////
 void generatePowerSet(unsigned i, const std::vector<int>& values, std::set<std::vector<unsigned>>& s);
-
+std::vector<std::vector<unsigned>> new_powerSet(std::vector<int> sub);
 #endif // _ZS_POWER_SET_GENERATOR_
