@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+//#define DEBUG
+
 bool compM(const Si i, const Si j) 
 { 
     return i.m < j.m; 
@@ -26,7 +28,7 @@ int UpperBound(int Mc,
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
     unsigned p,
@@ -40,7 +42,7 @@ int UpperBound_Symetric(int Mc,
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
     unsigned p)
@@ -74,12 +76,12 @@ int UpperBound_Symetric(int Mc,
         #endif
         
         // Delete elements of the betaSet from w        
-        std::vector<int> alphaWSet;
-        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
-        
+        std::vector<int> alphaWSet(w.size() - betaSet.size());
+        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), begin(alphaWSet));
+
         // Delete elements of the betaSet from e        
-        std::vector<int> alphaESet;
-        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), std::back_inserter(alphaESet));
+        std::vector<int> alphaESet(e.size() - betaSet.size());
+        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), begin(alphaESet));
     
         std::vector<Si> S(p);
         
@@ -113,7 +115,7 @@ int UpperBound_Symetric(int Mc,
             itP->s = WEST;
             itE++;
         }
-        
+
         // Pattern 3
         for(auto i : betaSet)
         {
@@ -152,7 +154,7 @@ int UpperBound_NonSymetric(int Mc,
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::set<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<std::vector<unsigned>>& betaPowerSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
     unsigned p)
@@ -188,33 +190,39 @@ int UpperBound_NonSymetric(int Mc,
         std::cerr << "}" << std::endl;
         #endif
 
+        auto betaSetSize = betaSet.size();
         // Delete elements of the betaSet from w        
-        std::vector<int> alphaWSet;
-        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), std::back_inserter(alphaWSet));
+        std::vector<int> alphaWSet(w.size() - betaSetSize);
+        std::set_difference (begin(w), end(w), begin(betaSet), end(betaSet), begin(alphaWSet));
         
         // Delete elements of the betaSet from e        
-        std::vector<int> alphaESet;
-        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), std::back_inserter(alphaESet));
+        std::vector<int> alphaESet(e.size() - betaSetSize);
+        std::set_difference(begin(e), end(e), begin(betaSet), end(betaSet), begin(alphaESet));
     
         std::vector<Si> S(p);
         
         auto itE = rbegin(alphaESet);
         auto itW = rbegin(alphaWSet);
         auto itP = begin(S);
-    
-        
 
         // Open the P3
-        for(auto i : betaSet)
-        {
-            itP = min_element(begin(S), end(S), compM);
-            itP->m += 2*std::max(d[i], de[i]);
+        if(p >= betaSetSize) { // Avoid finding the min element that is costly
+           for(unsigned i = 0; i < betaSetSize; ++i)
+                S[i].m = 2*std::max(d[betaSet[i]], de[betaSet[i]]);
+        }
+        else {
+            for(auto i : betaSet)
+            {
+                itP = min_element(begin(S), end(S), compM);
+                itP->m += 2*std::max(d[i], de[i]);
+            }
         }
 
         // We give one P1 to every plane by plan constraint
-        for(auto& plane: S) 
+        for(unsigned i = 0; i < p; ++i) 
         {
-            plane.m += d[*itE] + de[*itE];
+            itP = min_element(begin(S), end(S), compM);
+            itP->m += d[*itE] + de[*itE];
             itE++;
         }
 
@@ -244,8 +252,8 @@ int UpperBound_NonSymetric(int Mc,
         if(bestM == Ml) {
             #ifdef DEBUG
             bestBetaSet = betaSet;
+            std::cerr << "[!]     BEST: " << Ml << " (" << i << "/" << betaSize << ")" << std::endl;
             #endif
-            //std::cout << "BEST: " << Ml << " (" << i << "/" << betaSize << ")" << std::endl;
             break;
         }
     }
