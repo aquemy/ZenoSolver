@@ -16,6 +16,8 @@
 #include <omp.h>
 #endif // _OPENMP
 
+//#define DEBUG
+
 #include <tclap/CmdLine.h>
 #include <combiGenerator.hpp>
 #include <powerSetGenerator.hpp>
@@ -56,7 +58,7 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
         TCLAP::ValueArg<int> rArg("r","adjustCoef", "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
         TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
-        TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, true);
+        TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, false);
         TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
         TCLAP::SwitchArg SArg("S","forceSymetric","Force to use the symetric algorithm.", cmd, false);
         TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);
@@ -304,7 +306,7 @@ int main(int argc, char** argv)
         while(EStatut == NEXT)
         {
             int WStatut = NEXT;
-            std::vector<int> w(t-p,0);
+            auto w = std::vector<int>(t-p,0);
             while(WStatut == NEXT)
             {
                 // 1. Construction du PPP courant
@@ -350,6 +352,10 @@ int main(int argc, char** argv)
 
                     auto bestM = Mc;
                     decltype(bestM) MaxM;
+                    auto betaPowerSet = new_powerSet(betaSetValue);
+                    MaxM = UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym);
+                    countIterations += betaPowerSet.size();
+                    /*
                     for(unsigned i = 0; i <= betaMax; i++) {
                         set<vector<unsigned>> betaPowerSet;
                         generatePowerSet(i, betaSetValue, betaPowerSet);
@@ -359,6 +365,7 @@ int main(int argc, char** argv)
                             break;
                         }
                     }
+                    */
                     #ifdef DEBUG
                     std::cerr << "        Cost: " << C <<std::endl;
                     #endif
