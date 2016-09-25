@@ -26,21 +26,6 @@
 #include <genFunctions.hpp>
 #include <utils.hpp>
 
-/* TODO
-- Système de build
-- Tests
-- Optimisation mémoire
-- Pruning + Domination
-- Calcul de stats
-- Calcul itératif en limitant les beta
-- Etude boucle intérieur / extérieur
-- Système de fonctions génératrices
-- Option de génération de plans
-- Option de génération de benchmark PDDL
-- Gérer les cas triviaux ou paramètres mauvais
-- Gérer les options
-*/
-
 using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -299,110 +284,230 @@ int main(int argc, char** argv)
         map<int, int> pareto;
         int EStatut = NEXT;
 
-        std::vector<int> e(t,0);
+        int s = 2*t - p;
+        auto w = std::vector<int>(p,0);
 
         long long int count = 0;
 
         int countIterations = 0;
-        ///*
-        while(EStatut == NEXT)
+        
+
+        int EStatus = NEXT;
+        auto e = std::vector<int>(s,0);
+        while(EStatus == NEXT)
         {
-            int WStatut = NEXT;
-            auto w = std::vector<int>(t-p,0);
-            while(WStatut == NEXT)
+            int C = 0;
+            for_each(begin(e), end(e),[&](unsigned i) { C += c[i]; });
+
+            int Mc = 0;
+            for_each(begin(e), end(e),[&](unsigned i) { Mc += d[i] + de[i]; });
+
+            // TODO: Check if the PPP are generated sorted. In this case the max element can be found in O(1)
+            auto me = *std::max_element(begin(e), end(e),[&](unsigned i, unsigned j) { return d[i] + de[i] < d[j] + de[j]; });
+            int Ml = Mc / p;
+            //Ml = std::max(double(Ml), d[me] + de[me]);
+
+            auto MaxM = Mc;
+
+            if (!front.count(C))
+                front[C] = Mc;
+
+            // Pruning
+            bool dominated = false;
+            if(pruning)
             {
-                // 1. Construction du PPP courant
-                int C = 0;
-                for_each(begin(e), end(e),[&](unsigned i) { C += c[i]; });
-                for_each(begin(w), end(w),[&](unsigned i) { C += c[i]; });
-                int Mc = 0;
-                for_each(begin(e), end(e),[&](unsigned i) { Mc += d[i] + de[i]; });
-                for_each(begin(w), end(w),[&](unsigned i) { Mc += d[i] + de[i]; });
-                // TODO: Check if the PPP are generated sorted. In this case the max element can be found in O(1)
-                auto me = *std::max_element(begin(e), end(e),[&](unsigned i, unsigned j) { return d[i] + de[i] < d[j] + de[j]; });
-                auto mw = *std::max_element(begin(w), end(w),[&](unsigned i, unsigned j) { return d[i] + de[i] < d[j] + de[j]; });
-                int Ml = Mc / p;
-                Ml = std::max(double(Ml), d[me] + de[me]);
-                Ml = std::max(double(Ml), d[mw] + de[mw]);
-
-                if (!front.count(C))
-                    front[C] = Mc;
-
-                // Pruning
-                bool dominated = false;
-                if(pruning)
+                for(auto i = front.find(C); i != --begin(front); --i)
                 {
-                    for(auto i = front.find(C); i != --begin(front); --i)
+                    if(i->second <= Ml)
                     {
-                        if(i->second <= Ml)
-                        {
-                            dominated = true;
-                            break;
-                        }
+                        //std::cout << "Dominated!" << std::endl;
+                        dominated = true;
+                        break;
                     }
                 }
+                
+            }
 
-                if(!dominated)
+            if(!dominated)
+            {
+                auto mapping = std::map<int, std::pair<int, int>>{};
+                auto mapping_inPPP = std::map<int, std::pair<int, int>>{};
+                auto sum = int{0};
+                for(auto it: e)
                 {
-                    vector<int> betaSetValue;
-                    decltype(w) diff;
-                    set_difference (begin(w), end(w), begin(e), end(e), back_inserter(diff));
-                    set_difference (begin(w), end(w), begin(diff), end(diff), back_inserter(betaSetValue));
+                    if(mapping.count(it)) {
+                        mapping[it].first++;
+                        mapping_inPPP[it].first++;
 
-                    // 1.2. Calcul du BetaPowerSet
-                    unsigned betaMax = min(BArg.getValue(), (unsigned)betaSetValue.size());
+                    }
+                    else {
+                        mapping[it] = {1, 0};
+                        mapping_inPPP[it] = {1, sum};
+                    }
+                    sum++;
+                }
 
-                    auto bestM = Mc;
-                    decltype(bestM) MaxM;
+                auto mapping_v = std::vector<int>(mapping.size());
+                auto i = int{0};
+                for(auto& j: mapping)
+                {
+                    j.second.second = i;
+                    mapping_v[i] = j.first;
+                    ++i;
+                }
+
+
+
+                // Select p cities for the pattern 1
+                auto p1 = std::vector<std::vector<int>>{};
+                for(int i = 0; i <= p; i++) {
+                    p1 = generatePowerSet(p1, e, mapping_v, mapping, i, mapping_v.size());
+                } 
+                
+                for(auto p1_dist: p1) 
+                {
+                    auto ppp_c = std::vector<int>(s - 1*p1_dist.size());
+                    auto mapping_new = mapping_inPPP;
+                    auto mapping_betaSet = std::map<int, std::pair<int, int>>{};
+
+                    auto k = int{0};
+                    for(auto& i: p1_dist) {
+                        mapping_new[i].first -= 1;
+                    }
+
+                    for(auto i: mapping_new) 
+                    {
+                        for(auto l = 0; l < i.second.first; ++l) {
+                            ppp_c[k + l] = i.first;
+                        }
+                        k += i.second.first;
+                    }
+
+                    auto mapping = std::map<int, std::pair<int, int>>{};
+                    auto mapping_inPPP = std::map<int, std::pair<int, int>>{};
+                    auto sum = int{0};
+                    for(auto it: ppp_c)
+                    {
+                        if(mapping.count(it)) {
+                            mapping[it].first++;
+                            mapping_inPPP[it].first++;
+
+                        }
+                        else {
+                            mapping[it] = {1, 0};
+                            mapping_inPPP[it] = {1, sum};
+                        }
+                        sum++;
+                    }
+
+                    // Calculate the size of the set of beta values
+                    auto betaSetSize = 0;
+                    for(auto& i: mapping) 
+                    {
+                        i.second.first /= 2;
+                        betaSetSize += i.second.first;
+                    }
+
+                    // Create the vector of beta values
+                    auto betaSetValues = std::vector<int>(betaSetSize);
+                    k = int{0};
+
+                    auto it = std::begin(mapping);
+                    while(it != std::end(mapping)) 
+                    {
+                        if(it->second.first == 0) {
+                            mapping.erase(it++);
+                        }
+                        else 
+                        {
+                            for(auto j = 0; j < it->second.first; ++j) {
+                                betaSetValues[k + j] = it->first;
+                            }
+                            k += it->second.first;
+                            ++it;
+                        }
+                    }
+
+                    auto mapping_v = std::vector<int>(mapping.size());
+                    auto i = int{0};
+                    for(auto& j: mapping)
+                    {
+                        j.second.second = i;
+                        mapping_v[i] = j.first;
+                        ++i;
+                    }
+
+                    MaxM = noDuplicate::UpperBound(Mc, Ml, ppp_c, p1_dist, {}, d, de, p);
+                    countIterations++;
+
+                    if(MaxM == Ml)
+                    {
+                        front[C] = std::min(front[C], Ml);
+                        break;
+                    }
+
                     auto betaPowerSet = std::vector<std::vector<int>>{};
-                                
-                    // Computation of the betaPowerSet
-                    
-                    auto mapping = std::map<int, std::pair<int, int>, std::greater<int>>{};
-                    auto mapping_v = std::vector<int>{};
-                    unsigned i = calculateMapping(betaSetValue, mapping, mapping_v);
-                    if(i > 1) 
+                    if(i > 0) 
                     {    
                         auto r = std::vector<std::vector<int>>{};
-                        for(int i = 0; i <= betaMax; i++) {
-                            r = generatePowerSet(r, betaSetValue, mapping_v, mapping, i, mapping_v.size());
+                        for(int i = 0; i <= betaSetSize; i++) {
+                        r = generatePowerSet(r, betaSetValues, mapping_v, mapping, i, mapping_v.size());
                             for(unsigned i = 0; i < r.size(); ++i) {
                                 betaPowerSet.push_back(r[i]);
                             }
                         } 
                     } 
-                    else if(i == 1)
-                        betaPowerSet = std::vector<std::vector<int>>{std::vector<int>{betaSetValue[0]}};
-                                   
-                    MaxM = ComputeUpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym, countIterations);
-                    
-                    #ifdef DEBUG
-                    std::cerr << "        Cost: " << C <<std::endl;
-                    #endif
 
-                    // 2. Calcul de la borne max
-                    if(MaxM < Mc)
+                    for(auto j: betaPowerSet) 
                     {
-                        Mc = MaxM;
-                        // 3. Compare
-                            if(Mc < front[C])
-                                front[C] = Mc;
-                    } 
+                        auto ppp_beta = std::vector<int>(s - p1_dist.size() - 2*j.size());
+                        auto mapping_new2 = mapping_new;
+
+                        k = int{0};
+                        for(auto& i: j) 
+                        {
+                            mapping_new2[i].first -= 2;
+                        }
+
+                        for(auto i: mapping_new2) 
+                        {
+                            for(auto l = 0; l < i.second.first; ++l) {
+                                ppp_beta[k + l] = i.first;
+                            }
+                            k += i.second.first;
+
+                        }
+
+                        auto mkspam = noDuplicate::UpperBound(Mc, Ml, ppp_beta, p1_dist, j, d, de, p);
+                        MaxM = std::min(mkspam, MaxM);
+                        countIterations++;
+                        if(MaxM == Ml)
+                        {
+                            //std::cout << "optimal! -> Exit from BetaSet" << std::endl;
+                            break;
+                        }
+                    }
+                    if(MaxM == Ml)
+                    {
+                        //std::cout << "optimal! -> Exit from P1 Distrib" << std::endl;
+                        break;
+                    }
                 }
-                count++;
-                //_
-                WStatut = nextTuple(w, n, t-p);
             }
-            EStatut = nextTuple(e, n, t);
+            front[C] = std::min(front[C], MaxM);
+            count++;
+            EStatus = nextTuple(e, n, s);
         }
+        
 
         pareto = paretoExtraction(front);
         auto t1 = high_resolution_clock::now();
         auto time = std::chrono::duration_cast<milliseconds>(t1 - t0);
-        /*
+        ///*
         for(auto& i : pareto)
            cout << i.second << " " << i.first << endl;
         //*/
+
         if(GArg.getValue())
             generatePDDL(pathPDDL, n,t,p,c,d,pareto);
 

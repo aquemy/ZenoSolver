@@ -61,16 +61,50 @@ bool compMS(Si& i, Si& j);
 ///
 /// \return Optimal makespan.
 ////////////////////////////////////////////////////////////
+int ComputeUpperBound(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::vector<std::vector<int>>& betaPowerSet,
+    const std::vector<double>& d,
+    const std::vector<double>& de,
+    unsigned p,
+    bool symetric,
+    int& countIterations);
+
+namespace naive {
+	namespace symetric {
+////////////////////////////////////////////////////////////
+/// \brief Compute the optimal makespan for a given PPP.
+///
+///	It uses the naive generation of the beta power set.
+///
+/// \param Mc Current makespan or upper bound).
+/// \param Ml Lower bound.
+/// \param e Eastbound cities.
+/// \param w Westbound cities.
+/// \param betaPowerSet Powerset according to patterns 3.
+/// \param d Vector of west durations
+/// \param de Vector of east durations.
+/// \param p Number of planes.
+/// \param symetric True if the problem is symetric
+///
+/// \return Optimal makespan.
+////////////////////////////////////////////////////////////
 int UpperBound(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::vector<std::vector<unsigned>>& betaPowerSet,
+    const std::set<std::vector<int>>& betaPowerSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
     unsigned p,
-    bool symetric);
+    int& countIterations);
 
+	}; // end namespace symetric
+}; // end namespace naive
+
+namespace symetric {
 ////////////////////////////////////////////////////////////
 /// \brief Symetric version of the algorithm.
 ///
@@ -85,14 +119,17 @@ int UpperBound(int Mc,
 ///
 /// \return Optimal makespan.
 ////////////////////////////////////////////////////////////
-int UpperBound_Symetric(int Mc, 
+int UpperBound(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::vector<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<std::vector<int>>& betaPowerSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
-    unsigned p);
+    unsigned p,
+    int& countIterations);
+
+}; // end namespace symetric
 
 ////////////////////////////////////////////////////////////
 /// \brief Non-symetric version of the algorithm.
@@ -108,13 +145,42 @@ int UpperBound_Symetric(int Mc,
 ///
 /// \return Optimal makespan.
 ////////////////////////////////////////////////////////////
-int UpperBound_NonSymetric(int Mc, 
+int UpperBound(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,
-    const std::vector<std::vector<unsigned>>& betaPowerSet,
+    const std::vector<std::vector<int>>& betaPowerSet,
+    const std::vector<double>& d,
+    const std::vector<double>& de,
+    unsigned p,
+    int& countIterations);
+
+namespace noDuplicate 
+{
+////////////////////////////////////////////////////////////
+/// \brief Non-symetric version of the algorithm.
+///
+/// \param Mc Current makespan or upper bound).
+/// \param Ml Lower bound.
+/// \param e All the cities for the patterns 2 and 1 except
+///          those contained in w.
+/// \param w Cities for the patterns 1 executed by each plane.
+/// \param betaSet Cities for the patterns 3.
+/// \param d Vector of west durations
+/// \param de Vector of east durations.
+/// \param p Number of planes.
+///
+/// \return Optimal makespan.
+////////////////////////////////////////////////////////////
+int UpperBound(int Mc, 
+    int Ml, 
+    const std::vector<int>& e, 
+    const std::vector<int>& w,
+    const std::vector<int>& betaSet,
     const std::vector<double>& d,
     const std::vector<double>& de,
     unsigned p);
+
+}; // end namespace noDuplicate
 
 #endif // _ZS_ALGORITHM_

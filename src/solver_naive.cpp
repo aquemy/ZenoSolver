@@ -351,43 +351,21 @@ int main(int argc, char** argv)
 
                     // 1.2. Calcul du BetaPowerSet
                     unsigned betaMax = min(BArg.getValue(), (unsigned)betaSetValue.size());
-
-                    auto bestM = Mc;
-                    decltype(bestM) MaxM;
-                    auto betaPowerSet = std::vector<std::vector<int>>{};
-                                
-                    // Computation of the betaPowerSet
-                    
-                    auto mapping = std::map<int, std::pair<int, int>, std::greater<int>>{};
-                    auto mapping_v = std::vector<int>{};
-                    unsigned i = calculateMapping(betaSetValue, mapping, mapping_v);
-                    if(i > 1) 
-                    {    
-                        auto r = std::vector<std::vector<int>>{};
-                        for(int i = 0; i <= betaMax; i++) {
-                            r = generatePowerSet(r, betaSetValue, mapping_v, mapping, i, mapping_v.size());
-                            for(unsigned i = 0; i < r.size(); ++i) {
-                                betaPowerSet.push_back(r[i]);
-                            }
-                        } 
-                    } 
-                    else if(i == 1)
-                        betaPowerSet = std::vector<std::vector<int>>{std::vector<int>{betaSetValue[0]}};
-                                   
-                    MaxM = ComputeUpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym, countIterations);
-                    
-                    #ifdef DEBUG
-                    std::cerr << "        Cost: " << C <<std::endl;
-                    #endif
+                    set<vector<int>> betaPowerSet;
+                    for(unsigned i = 0; i <= betaMax; i++)
+                        naive::generatePowerSet(i, betaSetValue, betaPowerSet);
 
                     // 2. Calcul de la borne max
+                    auto bestM = Mc;
+                    int MaxM = naive::symetric::UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, countIterations);
                     if(MaxM < Mc)
                     {
                         Mc = MaxM;
                         // 3. Compare
-                            if(Mc < front[C])
-                                front[C] = Mc;
-                    } 
+                        if(Mc < front[C])
+                            front[C] = Mc;
+                    }
+                    //countIterations += betaPowerSet.size();
                 }
                 count++;
                 //_
@@ -403,6 +381,7 @@ int main(int argc, char** argv)
         for(auto& i : pareto)
            cout << i.second << " " << i.first << endl;
         //*/
+
         if(GArg.getValue())
             generatePDDL(pathPDDL, n,t,p,c,d,pareto);
 

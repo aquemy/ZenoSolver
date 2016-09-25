@@ -52,6 +52,8 @@ set(FILES
     )
 
 add_executable(zenoSolver src/solver.cpp ${FILES})
+add_executable(zenoSolver_noDuplicate src/solver_noDuplicate.cpp ${FILES})
+add_executable(zenoSolver_naive src/solver_naive.cpp ${FILES})
 #add_executable(random src/random.cpp)
 
 ######################################################################################
