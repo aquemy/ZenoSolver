@@ -26,21 +26,6 @@
 #include <genFunctions.hpp>
 #include <utils.hpp>
 
-/* TODO
-- Système de build
-- Tests
-- Optimisation mémoire
-- Pruning + Domination
-- Calcul de stats
-- Calcul itératif en limitant les beta
-- Etude boucle intérieur / extérieur
-- Système de fonctions génératrices
-- Option de génération de plans
-- Option de génération de benchmark PDDL
-- Gérer les cas triviaux ou paramètres mauvais
-- Gérer les options
-*/
-
 using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -73,6 +58,8 @@ int main(int argc, char** argv)
 
         TCLAP::ValueArg<double> xArg("x","x","Scale factor for D", false, 1, "unsigned", cmd);
         TCLAP::ValueArg<double> yArg("y","y","Translation factor for D", false, 0, "unsigned", cmd);
+
+        TCLAP::SwitchArg genPlan("P","generatePlan","Output the pareto-optimal plans.", cmd, false);
 
         TCLAP::ValueArg<string> OArg("O","ouput","Output file for PDDL File", false,"", "string", cmd);
   	    cmd.parse(argc, argv);

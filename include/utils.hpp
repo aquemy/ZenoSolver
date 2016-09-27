@@ -1,6 +1,8 @@
 #ifndef _ZS_UTILS_
-#define _ZS_UTILS_
- 
+#define _ZS_UTILS_ 
+
+#include <algorithm.hpp>
+
 #include <functional>
 #include <map>
 
@@ -38,6 +40,11 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p,
     const std::vector<double>& c, 
     const std::vector<double>& d, 
     const std::map<int,int>& pareto = std::map<int,int>());
+
+void generatePDDLPlan(std::string path, unsigned n, unsigned t, unsigned p, 
+    const std::vector<double>& c, 
+    const std::vector<double>& d, 
+    const std::map<int, Plan>& pareto = std::map<int, Plan>());
 
 #endif // _ZS_UTILS_
 

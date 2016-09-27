@@ -2,9 +2,28 @@
 #define _ZS_ALGORITHM_
 
 #include <set>
+#include <vector>
+#include <ostream>
 
 constexpr const bool EAST = true;
 constexpr const bool WEST = false;
+
+struct Plan {
+	Plan() = default;
+
+	Plan(int p) {
+		cities = std::vector<std::vector<int>>(p, std::vector<int>{});
+		planes_m = std::vector<int>(p);
+	}
+
+	std::vector<std::vector<int>> cities;
+	std::vector<int> planes_m;
+	int c = 0;
+	int m = 0;
+
+	friend std::ostream& operator<< (std::ostream& stream, const Plan& plan);
+};
+
 
 ////////////////////////////////////////////////////////////
 /// \brief Handle duration and direction of a plane.
@@ -172,7 +191,7 @@ namespace noDuplicate
 ///
 /// \return Optimal makespan.
 ////////////////////////////////////////////////////////////
-int UpperBound(int Mc, 
+Plan UpperBound(int Mc, 
     int Ml, 
     const std::vector<int>& e, 
     const std::vector<int>& w,

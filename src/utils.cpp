@@ -97,3 +97,12 @@ void generatePDDL(std::string path, unsigned n, unsigned t, unsigned p, const st
             }    
 }
 
+void generatePDDLPlan(std::string path, unsigned n, unsigned t, unsigned p, const std::vector<double>& c, const std::vector<double>& d, const std::map<int, Plan>& pareto)
+{
+    auto converted = std::map<int,int>{};
+    for(auto i: pareto) {
+        converted[i.first] = converted[i.second.m];
+    }
+    generatePDDL(path, n, t, p, c, d, converted);
+}
+

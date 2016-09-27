@@ -59,6 +59,8 @@ int main(int argc, char** argv)
         TCLAP::ValueArg<double> xArg("x","x","Scale factor for D", false, 1, "unsigned", cmd);
         TCLAP::ValueArg<double> yArg("y","y","Translation factor for D", false, 0, "unsigned", cmd);
 
+        TCLAP::SwitchArg genPlan("P","generatePlan","Output the pareto-optimal plans.", cmd, false);
+
         TCLAP::ValueArg<string> OArg("O","ouput","Output file for PDDL File", false,"", "string", cmd);
   	    cmd.parse(argc, argv);
 
@@ -280,8 +282,8 @@ int main(int argc, char** argv)
         // 2. GENERATE ADMISSIBLE PPP
         //// 2.1. East and West subtuples
         auto t0 = high_resolution_clock::now();
-        map<int, int> front; // Key using a double ?
-        map<int, int> pareto;
+        map<int, Plan> front; // Key using a double ?
+        map<int, Plan> pareto;
         int EStatut = NEXT;
 
         int s = 2*t - p;
@@ -308,9 +310,12 @@ int main(int argc, char** argv)
             //Ml = std::max(double(Ml), d[me] + de[me]);
 
             auto MaxM = Mc;
-
+            auto linear = Plan(1);
+            linear.m = Mc;
+            linear.c = C;
+            auto plan = linear;
             if (!front.count(C))
-                front[C] = Mc;
+                front[C] = linear;
 
             // Pruning
             bool dominated = false;
@@ -318,7 +323,7 @@ int main(int argc, char** argv)
             {
                 for(auto i = front.find(C); i != --begin(front); --i)
                 {
-                    if(i->second <= Ml)
+                    if(i->second.m <= Ml)
                     {
                         //std::cout << "Dominated!" << std::endl;
                         dominated = true;
@@ -437,12 +442,14 @@ int main(int argc, char** argv)
                         ++i;
                     }
 
-                    MaxM = noDuplicate::UpperBound(Mc, Ml, ppp_c, p1_dist, {}, d, de, p);
+                    plan = noDuplicate::UpperBound(Mc, Ml, ppp_c, p1_dist, {}, d, de, p);
+                    plan.c = C;
                     countIterations++;
 
-                    if(MaxM == Ml)
+                    if(plan.m <= Ml)
                     {
-                        front[C] = std::min(front[C], Ml);
+                        if(plan.m < front[C].m)
+                            front[C] = plan;
                         break;
                     }
 
@@ -478,38 +485,40 @@ int main(int argc, char** argv)
 
                         }
 
-                        auto mkspam = noDuplicate::UpperBound(Mc, Ml, ppp_beta, p1_dist, j, d, de, p);
-                        MaxM = std::min(mkspam, MaxM);
+                        plan = noDuplicate::UpperBound(Mc, Ml, ppp_beta, p1_dist, j, d, de, p);
+                        plan.c = C;
+                        MaxM = std::min(plan.m, MaxM);
                         countIterations++;
-                        if(MaxM == Ml)
+                        if(MaxM <= Ml)
                         {
                             //std::cout << "optimal! -> Exit from BetaSet" << std::endl;
                             break;
                         }
                     }
-                    if(MaxM == Ml)
+                    if(MaxM <= Ml)
                     {
                         //std::cout << "optimal! -> Exit from P1 Distrib" << std::endl;
                         break;
                     }
                 }
             }
-            front[C] = std::min(front[C], MaxM);
+            if(plan.m < front[C].m)
+                front[C] = plan;
             count++;
             EStatus = nextTuple(e, n, s);
         }
         
 
-        pareto = paretoExtraction(front);
+        pareto = paretoExtractionPlan(front);
         auto t1 = high_resolution_clock::now();
         auto time = std::chrono::duration_cast<milliseconds>(t1 - t0);
         ///*
         for(auto& i : pareto)
-           cout << i.second << " " << i.first << endl;
+           cout << i.second << " " << i.second.c << " " << i.second.m << endl;
         //*/
 
         if(GArg.getValue())
-            generatePDDL(pathPDDL, n,t,p,c,d,pareto);
+            generatePDDLPlan(pathPDDL, n,t,p,c,d,pareto);
 
         cerr << n << " "
              << t << " "
