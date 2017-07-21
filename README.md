@@ -31,3 +31,7 @@ By default it is set to 1 but a better value for most of functions could be 100.
 
 More information using ./zenoSolver -h.
 
+# References
+
+- **True Pareto Fronts for Multi-Objective AI Planning Instances**. *Alexandre Quemy, Marc Schoenauer.* Francesco Chicano and Gabriela Ochoa. European Conference on Combinatorial Optimization - EvoCOP, Apr 2015, Copenhague, Denmark. LNCS 9026, Springer Verlag, pp.197-208, 2015. <hal-01109777>
+- **Solving Large MultiZenoTravel Benchmarks with Divide-and-Evolve.** *Alexandre Quemy, Marc Schoenauer, Vincent Vidal, Johann Dréo, Pierre Savéant.* Learning and Intelligent OptimizatioN - LION 9, Jan 2015, Lille, France. LNCS 8994, Springer Verlag, pp.262-267, 2015. <hal-01109776>
