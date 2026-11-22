@@ -1,4 +1,4 @@
-# <target> <instance> pairs whose golden test currently fails. See cmake/Golden.cmake.
+# <target> <instance> pairs whose golden test currently fails. See tests/CMakeLists.txt.
 # Each fix must remove the entries it repairs: a listed test that passes fails the suite.
 
 # The greedy scheduling of a PPP (Algorithm 1 of the EvoCOP 2015 paper) is not
