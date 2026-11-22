@@ -34,3 +34,6 @@ n3t5p2-C1D4r10|-n 3 -t 5 -p 2 -C 1 -D 4 -r 10
 # Pareto-optimal but the greedy of Algorithm 1 (EvoCOP 2015) returns 68 for its
 # PPP e = (10,10,6,6,6), w = (10,6,6): A flies 20+20+20, B flies 12*5.
 lpt-counterexample|-n 2 -t 5 -p 2 -d @DATA@/lpt-counterexample.dat
+# Two cities, d = (1, 9), c = (4, 1), t = 5, p = 3, from a data file that ends
+# with a newline and a blank line (it used to be read as a different instance).
+trailing-newline|-n 2 -t 5 -p 3 -d @DATA@/trailing-newline.dat
