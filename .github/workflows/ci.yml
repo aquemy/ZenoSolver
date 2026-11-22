@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux, GCC 14
+            os: ubuntu-24.04
+            cxx: g++-14
+          - name: Linux, Clang 18
+            os: ubuntu-24.04
+            cxx: clang++-18
+          - name: macOS, Apple Clang
+            os: macos-15
+            cxx: clang++
+    env:
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release --parallel
+      - name: Test
+        run: ctest --preset release
+
+  sanitizers:
+    name: Linux, Clang 18, ASan + UBSan
+    runs-on: ubuntu-24.04
+    env:
+      CXX: clang++-18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake --preset asan
+      - name: Build
+        run: cmake --build --preset asan --parallel
+      - name: Test
+        run: ctest --preset asan
