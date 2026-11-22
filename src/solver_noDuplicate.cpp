@@ -19,6 +19,7 @@
 //#define DEBUG
 
 #include <tclap/CmdLine.h>
+#include <cli.hpp>
 #include <combiGenerator.hpp>
 #include <powerSetGenerator.hpp>
 #include <algorithm.hpp>
@@ -36,231 +37,29 @@ int main(int argc, char** argv)
     try
   	{
         TCLAP::CmdLine cmd("ZenoSolver", ' ', "0.9");
-
-  	    TCLAP::ValueArg<int> nArg("n","cities","Number of cities",true,3,"int", cmd);
-        TCLAP::ValueArg<int> tArg("t","travelers","Number of travelers",true,3,"int", cmd);
-        TCLAP::ValueArg<int> pArg("p","planes","Number of planes",true,2,"int", cmd);
-        TCLAP::ValueArg<int> rArg("r","adjustCoef", "Multiplicative coefficient before converting to integers.",false,1,"int", cmd);
-        TCLAP::ValueArg<string> dArg("d","data","File where data (cost and durations) are located",false,"","string", cmd);
-        TCLAP::SwitchArg aArg("a","pruning","Activate / deactivate the pruning by greedily domination.", cmd, false);
-        TCLAP::SwitchArg GArg("G","generatePDDL","Generate PDDL instance file according to data.", cmd, false);
-        TCLAP::SwitchArg SArg("S","forceSymetric","Force to use the symetric algorithm.", cmd, false);
-        TCLAP::ValueArg<unsigned> BArg("B","betaMax","Ignore higher beta values.", false, 100, "unsigned", cmd);
-        TCLAP::ValueArg<unsigned> CArg("C","C","Function to generate C", false, 3, "unsigned", cmd);
-        TCLAP::ValueArg<unsigned> DArg("D","D","Function to generate D", false, 3, "unsigned", cmd);
-        // Taking into account the none symetric case
-        TCLAP::ValueArg<unsigned> DEArg("E","DE","Function to generate DE", false, 3, "unsigned", cmd);
-        TCLAP::ValueArg<unsigned> DWArg("W","DW","Function to generate DW", false, 3, "unsigned", cmd);
-        TCLAP::ValueArg<double> ScArg("j","scaleC","Scale factor for C", false, 1, "unsigned", cmd);
-        TCLAP::ValueArg<double> TcArg("k","transC","Translation factor for C", false, 0, "unsigned", cmd);
-        TCLAP::ValueArg<double> SdArg("l","scaleD","Scale factor for D", false, 1, "unsigned", cmd);
-        TCLAP::ValueArg<double> TdArg("m","transD","Translation factor for D", false, 0, "unsigned", cmd);
-
-        TCLAP::ValueArg<double> xArg("x","x","Scale factor for D", false, 1, "unsigned", cmd);
-        TCLAP::ValueArg<double> yArg("y","y","Translation factor for D", false, 0, "unsigned", cmd);
-
-        TCLAP::SwitchArg genPlan("P","generatePlan","Output the pareto-optimal plans.", cmd, false);
-
-        TCLAP::ValueArg<string> OArg("O","ouput","Output file for PDDL File", false,"", "string", cmd);
-  	    cmd.parse(argc, argv);
+        CliArgs args(cmd);
+        cmd.parse(argc, argv);
 
         // 1. DATA
-        // 1.1 CMD verification
-        if(nArg.getValue() < 0)
-            throw std::domain_error("Number of cities (n) must be positive.");
-        if(tArg.getValue() < 1)
-            throw std::domain_error("Number of passengers (t) must be > 0.");
-        if(pArg.getValue() < 1)
-            throw std::domain_error("Number of planes (p) must be > 0.");
-        if(tArg.getValue() - pArg.getValue() < 1)
-            throw std::domain_error("Number of passengers must be strictly higher than the number of planes.");
+        auto instance = buildInstance(args);
+        unsigned n = instance.n;
+        unsigned t = instance.t;
+        unsigned p = instance.p;
+        vector<double> c = instance.c;
+        vector<double> d = instance.d;
+        vector<double> de = instance.de;
+        auto symetric = instance.symetric;
 
-        unsigned n = nArg.getValue();
-        unsigned t = tArg.getValue();
-        unsigned p = pArg.getValue();
-
-        bool pruning = aArg.getValue();
-        bool forceSym = SArg.getValue();
+        bool pruning = args.aArg.getValue();
+        bool forceSym = args.SArg.getValue();
+        auto& BArg = args.BArg;
+        auto& GArg = args.GArg;
 
         string pathPDDL;
-        if(OArg.getValue().empty())
+        if(args.OArg.getValue().empty())
             pathPDDL = "zeno"+std::to_string(n)+"n"+std::to_string(t)+"t"+std::to_string(p)+"pMulti.pddl";
         else
-            pathPDDL = OArg.getValue();
-
-        // 1.2 Costs and durations
-        vector<double> c(n,1);
-        vector<double> d(n,1);
-        vector<double> de(n,1); // East durations in case the problem is not symetric
-        auto symetric = false;
-
-        if(!dArg.getValue().empty())
-        {
-            ifstream dataFile(dArg.getValue());
-            if (dataFile)
-            {
-                string s;
-                getline(dataFile, s);
-                istringstream iss(s);
-                vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                if(tokens.size() != n)
-                    throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                for(unsigned i = 0; i < n; ++i)
-                    d[i] = stoi(tokens[i]);
-
-                while(!dataFile.eof())
-                {
-                    getline(dataFile, s);
-                    if(s.empty())
-                        continue;
-                    else 
-                    {
-                        iss = istringstream(s);
-                        tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                        if(tokens.size() != n)
-                            throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                        for(unsigned i = 0; i < n; ++i)
-                            de[i] = stoi(tokens[i]);
-                        break;
-                    }
-
-                }
-
-                while(!dataFile.eof())
-                {
-                    getline(dataFile, s);
-                    if(s.empty())
-                        c = de;
-                    else
-                    {
-                        iss = istringstream(s);
-                        tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                        if(tokens.size() != n)
-                            throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                        for(unsigned i = 0; i < n; ++i)
-                            c[i] = stoi(tokens[i]);
-                    }
-                }
-            }
-            else
-                throw std::runtime_error("Can't open the data file: "+dArg.getValue());
-            if(c[0] == c[1] && c[0] == 1) // Symetric problem
-            {
-                c = de;
-                de = d;
-                symetric = true;
-            }
-        }
-        else
-        {
-            auto f = f3;
-            auto g = f3;
-            auto h = f3;
-            switch (CArg.getValue())
-            {
-                case 1:
-                    f = f1;
-                    break;
-                case 2:
-                    f = f2;
-                    break;
-                case 3:
-                    f = f3;
-                    break;
-                case 4:
-                    f = f4;
-                    break;
-                case 5:
-                    f = f5;
-                    break;
-            }
-            if(DEArg.isSet() and DWArg.isSet())
-            {
-                switch (DEArg.getValue())
-                {
-                    case 1:
-                        g = f1;
-                        break;
-                    case 2:
-                        g = f2;
-                        break;
-                    case 3:
-                        g = f3;
-                        break;
-                    case 4:
-                        g = f4;
-                        break;
-                    case 5:
-                        g = f5;
-                        break;
-                }
-                switch (DWArg.getValue())
-                {
-                    case 1:
-                        h = f1;
-                        break;
-                    case 2:
-                        h = f2;
-                        break;
-                    case 3:
-                        h = f3;
-                        break;
-                    case 4:
-                        h = f4;
-                        break;
-                    case 5:
-                        h = f5;
-                        break;
-                }
-            }
-            else {
-                symetric = true;
-                switch (DArg.getValue())
-                {
-                    case 1:
-                        g = f1;
-                        break;
-                    case 2:
-                        g = f2;
-                        break;
-                    case 3:
-                        g = f3;
-                        break;
-                    case 4:
-                        g = f4;
-                        break;
-                    case 5:
-                        g = f5;
-                        break;
-                }
-            }
-            // Generate data
-            apply(c, f, xArg.getValue(), yArg.getValue(), ScArg.getValue(), TcArg.getValue());
-            rapply(d, g, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
-            if(!symetric)
-                rapply(de, h, xArg.getValue(), yArg.getValue(), SdArg.getValue(), TdArg.getValue());
-        }
-
-        // Convert to int
-        for(auto& i : c)
-            i = (int)(rArg.getValue()*i);
-
-        for(auto& i : d)
-            i = (int)(rArg.getValue()*i);
-
-        for(auto& i : de)
-            i = (int)(rArg.getValue()*i);
-
-        // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
-        // TODO: Take into account non-symetric cases
-        if(d[0] > d[1]) {
-            swap(d,c);
-            std::reverse(std::begin(de), std::end(de));
-        }
-
-
-        if(symetric)
-            de = d;
+            pathPDDL = args.OArg.getValue();
 
         #ifdef DEBUG
         std::cerr << "C: ";
@@ -512,10 +311,12 @@ int main(int argc, char** argv)
         pareto = paretoExtractionPlan(front);
         auto t1 = high_resolution_clock::now();
         auto time = std::chrono::duration_cast<milliseconds>(t1 - t0);
-        ///*
-        for(auto& i : pareto)
-           cout << i.second << " " << i.second.c << " " << i.second.m << endl;
-        //*/
+        if(args.FArg.getValue())
+            for(auto& i : pareto)
+                cout << i.first << " " << i.second.m << "\n";
+        else
+            for(auto& i : pareto)
+               cout << i.second << " " << i.second.c << " " << i.second.m << endl;
 
         if(GArg.getValue())
             generatePDDLPlan(pathPDDL, n,t,p,c,d,pareto);

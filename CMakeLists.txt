@@ -49,6 +49,7 @@ set(FILES
     src/utils.cpp
     src/powerSetGenerator.cpp
     src/paretoExtraction.cpp
+    src/cli.cpp
     )
 
 add_executable(zenoSolver src/solver.cpp ${FILES})
