@@ -34,7 +34,7 @@ bool compMS(Si& i, Si& j)
     else if(i.s == WEST and j.s == EAST)
         return false;
     else
-        compM(i,j);
+        return compM(i,j); // The return was missing: undefined behaviour.
 }
 
 int ComputeUpperBound(int Mc, 

@@ -133,7 +133,9 @@ int main(int argc, char** argv)
                 bool dominated = false;
                 if(pruning)
                 {
-                    for(auto i = front.find(C); i != --begin(front); --i)
+                    // Any stored front entry with cost <= C (all keys up to and including C).
+                    // The former reverse loop decremented begin(), which is undefined behaviour.
+                    for(auto i = begin(front), last = std::next(front.find(C)); i != last; ++i)
                     {
                         if(i->second <= Ml)
                         {
@@ -183,12 +185,12 @@ int main(int argc, char** argv)
            cout << i.second << " " << i.first << endl;
         //*/
 
-        if(GArg.getValue())
-            generatePDDL(pathPDDL, n,t,p,c,d,pareto);
         if(args.FArg.getValue())
             for(auto& i : pareto)
                 cout << i.first << " " << i.second << "\n";
 
+        if(GArg.getValue())
+            generatePDDL(pathPDDL, n,t,p,c,d,pareto);
 
         cerr << n << " "
              << t << " "
