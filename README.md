@@ -23,6 +23,16 @@ To activate the DEBUG build, in build folder, use:
 cmake .. -DCMAKE_BUILD_TYPE=DEBUG
 make
 
+# Testing
+
+    ctest --output-on-failure        # in the build folder
+
+The golden tests compare the Pareto front of every solver variant (printed with `-F`) to fronts computed by a brute-force oracle (`tests/oracle`). The oracle enumerates every PPP, every beta set, and every assignment and order of flights to planes, and simulates the waiting in pattern P3 exactly. It is exponential, so the golden instances (`tests/golden/instances.txt`) are tiny. Regenerate the fronts with `tests/golden/regenerate.sh build/zenoOracle`.
+
+Pairs that currently fail are listed in `tests/golden/known-bugs.txt`. They are expected to fail, and they must be removed from that list when fixed.
+
+`bench/run.sh build` times the three variants on a few larger instances.
+
 # RunTime Options
 
 As ZenoSolver handles only integers for cost and durations, it will cast generated vectors (or provided data) to integers. The adjustement factor (option -r) is a multiplicative constant in order to avoid some errors (for instance, obtaining more than once the value 0 because log(i) and log(i+1) have same floor value.
