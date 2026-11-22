@@ -17,6 +17,7 @@ set(TEST_LIST
     ut-simpleUpperBound
     ut-computeBetaMax
     ut-powerSetGenerator
+    ut-paretoExtraction
 )
 
 foreach(test ${TEST_LIST})
