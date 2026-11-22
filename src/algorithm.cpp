@@ -464,7 +464,7 @@ Plan noDuplicate::UpperBound(int Mc,
         }
 
         auto east = int{0};
-        auto west = int{p};
+        auto west = static_cast<int>(p);
         auto flights = int{0};
         auto ppp_s = e.size();
 
@@ -587,7 +587,7 @@ int noDuplicate::UpperBound(int Mc,
         }
 
         auto east = int{0};
-        auto west = int{p};
+        auto west = static_cast<int>(p);
         auto flights = int{0};
         auto ppp_s = e.size();
 
