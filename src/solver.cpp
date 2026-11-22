@@ -172,7 +172,7 @@ int main(int argc, char** argv)
                     // Keep the best makespan found for this cost. The former test
                     // (MaxM < Mc) skipped PPPs whose optimum is the sequential plan.
                     if(MaxM < front[C])
-                        front[C] = MaxM; 
+                        front[C] = MaxM;
                 }
                 count++;
                 //_
