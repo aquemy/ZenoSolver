@@ -161,13 +161,10 @@ int main(int argc, char** argv)
                     // 2. Calcul de la borne max
                     auto bestM = Mc;
                     int MaxM = naive::symetric::UpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, countIterations);
-                    if(MaxM < Mc)
-                    {
-                        Mc = MaxM;
-                        // 3. Compare
-                        if(Mc < front[C])
-                            front[C] = Mc;
-                    }
+                    // Keep the best makespan found for this cost. The former test
+                    // (MaxM < Mc) skipped PPPs whose optimum is the sequential plan.
+                    if(MaxM < front[C])
+                        front[C] = MaxM;
                     //countIterations += betaPowerSet.size();
                 }
                 count++;

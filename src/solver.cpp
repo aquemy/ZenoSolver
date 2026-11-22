@@ -169,13 +169,10 @@ int main(int argc, char** argv)
                     #endif
 
                     // 2. Calcul de la borne max
-                    if(MaxM < Mc)
-                    {
-                        Mc = MaxM;
-                        // 3. Compare
-                            if(Mc < front[C])
-                                front[C] = Mc;
-                    } 
+                    // Keep the best makespan found for this cost. The former test
+                    // (MaxM < Mc) skipped PPPs whose optimum is the sequential plan.
+                    if(MaxM < front[C])
+                        front[C] = MaxM; 
                 }
                 count++;
                 //_

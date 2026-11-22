@@ -7,7 +7,6 @@ zenoSolver n2t3p1
 zenoSolver n3t2p1
 zenoSolver n3t3p1
 zenoSolver n3t3p1-C4D3
-zenoSolver_naive n3t3p1-C4D3
 
 # Algorithm 1 (LPT greedy) is not optimal for a PPP, see the lpt-counterexample instance.
 zenoSolver lpt-counterexample
