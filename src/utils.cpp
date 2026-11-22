@@ -101,7 +101,7 @@ void generatePDDLPlan(std::string path, unsigned n, unsigned t, unsigned p, cons
 {
     auto converted = std::map<int,int>{};
     for(auto i: pareto) {
-        converted[i.first] = converted[i.second.m];
+        converted[i.first] = i.second.m;
     }
     generatePDDL(path, n, t, p, c, d, converted);
 }
