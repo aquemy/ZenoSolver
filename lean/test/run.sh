@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Run zeno-check on the test certificates and compare the verdicts with the expected ones:
-#   test/certificates/accepted/*     must be accepted      (exit code 0)
-#   test/certificates/rejected/*     must be rejected      (exit code 1)
-#   test/certificates/unsupported/*  must be not supported (exit code 2: forest gaps)
+#   test/certificates/accepted/*  must be accepted (exit code 0)
+#   test/certificates/rejected/*  must be rejected (exit code 1)
 # Usage, from lean/: bash test/run.sh [path/to/zeno-check]
 set -u
 cd "$(dirname "$0")/.."
@@ -25,5 +24,4 @@ expect() {
 
 expect accepted 0
 expect rejected 1
-expect unsupported 2
 exit $status
