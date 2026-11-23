@@ -15,6 +15,20 @@ target_link_libraries(ut-pddl PRIVATE zeno::core zeno_build_settings)
 target_compile_definitions(ut-pddl PRIVATE ZS_PDDL_DIR="${PROJECT_SOURCE_DIR}/pddl")
 add_test(NAME ut-pddl COMMAND ut-pddl)
 
+# The certificate fuzz target, replayed on the seed corpus (tests/fuzz/corpus
+# and the Lean test certificates). ZS_BUILD_FUZZERS builds the libFuzzer target.
+add_executable(fuzz-certificate-replay fuzz/fuzz_certificate.cpp)
+target_link_libraries(fuzz-certificate-replay PRIVATE zeno::core zeno_build_settings)
+target_compile_definitions(fuzz-certificate-replay PRIVATE ZS_FUZZ_REPLAY)
+add_test(NAME fuzz-certificate-replay
+    COMMAND fuzz-certificate-replay ${CMAKE_CURRENT_SOURCE_DIR}/fuzz/corpus ${PROJECT_SOURCE_DIR}/lean/test/certificates)
+if(ZS_BUILD_FUZZERS)
+    add_executable(fuzz-certificate fuzz/fuzz_certificate.cpp)
+    target_link_libraries(fuzz-certificate PRIVATE zeno::core zeno_build_settings)
+    target_compile_options(fuzz-certificate PRIVATE -fsanitize=fuzzer)
+    target_link_options(fuzz-certificate PRIVATE -fsanitize=fuzzer)
+endif()
+
 ######################################################################################
 ### Brute-force oracle
 ######################################################################################
