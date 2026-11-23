@@ -18,6 +18,10 @@ enum class GapProof : std::uint8_t
     Roles,     ///< role relaxation (each plane an odd number >= 1 of crossings, and the
                ///< loads add up to fill(X)): needs Theorem 6.1 of the theory note
                ///< (assumption A1-NS)
+    Lagrangian, ///< Lagrangian relaxation of the per-city balance (lagrangianRoles): needs
+                ///< Theorem 6.1 (assumption A1-NS)
+    Balanced,  ///< the cheapest balanced role configuration (BalancedRoles): needs
+               ///< Theorem 6.1 (assumption A1-NS)
 };
 
 /// A certified bracket of the Pareto front of a (non-symmetric) instance.
@@ -37,8 +41,14 @@ struct BracketResult
     GapProof fastestProof = GapProof::Relaxed; ///< which bound gives fastestLower
     std::vector<Cost> gapLower;         ///< per gap
     std::vector<GapProof> gapProof;     ///< per gap
+    /// Why an open gap is open: the exact balanced program gave up (state or
+    /// work limit, or out of time), or it finished below the achieved cost
+    /// but no schedule found for its configuration fits in the gap (waiting,
+    /// or the heuristic scheduler missed one). Empty for closed gaps.
+    enum class OpenReason : std::uint8_t { None, Incomplete, Unscheduled };
+    std::vector<OpenReason> openReason;
     [[nodiscard]] bool exact() const;
-    /// Assumptions the closed gaps rely on ("A1-NS" when a Roles gap is used).
+    /// Assumptions the closed gaps rely on ("A1-NS" when a Roles or Balanced bound is used).
     [[nodiscard]] std::vector<std::string> assumptions() const;
     SolveStats stats;
 };

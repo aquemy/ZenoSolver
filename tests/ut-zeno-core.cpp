@@ -6,6 +6,7 @@
 #include <zeno/certificate.hpp>
 #include <zeno/forest.hpp>
 #include <zeno/ns.hpp>
+#include <zeno/roles.hpp>
 #include <zeno/one_plane.hpp>
 #include <zeno/reduce.hpp>
 #include <zeno/solve.hpp>
@@ -386,6 +387,61 @@ void testBracketNonSymmetric(std::mt19937& rng, int trials)
     std::cout << "ut-zeno-core: " << exactCount << " of " << trials << " non-symmetric brackets are exact\n";
 }
 
+// The balanced role program and its bounds on random non-symmetric
+// instances: the Lagrangian bound never exceeds the balanced optimum, the
+// target-pruned search agrees with the full one, and the optimum's
+// configuration is balanced, has s landings and fits the level.
+void testBalancedRoles(std::mt19937& rng, int trials)
+{
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        zeno::Instance in = randomInstance(rng, 4, 6, 3, 9);
+        std::uniform_int_distribution<int> value(0, 12);
+        for(auto& v : in.dbar)
+            v = value(rng);
+        const auto r = zeno::reduce(in);
+        const zeno::Time hi = r.highestLevel();
+        const zeno::OnePlaneTable G(r.fill, r.c, r.maxGroup(), hi);
+        for(zeno::Time T = r.lowestLevel(); T <= hi; T += std::max<zeno::Time>(1, (hi - r.lowestLevel()) / 6))
+        {
+            const zeno::BalancedRoles full(r, G, T);
+            if(!full.complete())
+                continue;
+            const std::string where = describe(in) + " T=" + std::to_string(T);
+            const zeno::Cost lagrange = zeno::lagrangianRoles(r, T, full.value());
+            check(lagrange <= full.value(), "Lagrangian bound <= balanced optimum: " + where);
+            if(zeno::isInf(full.value()))
+                continue;
+            for(zeno::Cost target : {full.value(), full.value() + 1, full.value() + 50})
+            {
+                const zeno::BalancedRoles pruned(r, G, T, 2'000'000, 50'000'000, target);
+                check(pruned.complete() && pruned.value() == std::min(full.value(), target), "pruned search agrees: " + where);
+            }
+            const zeno::RoleConfig config = full.reconstruct();
+            std::vector<int> balance(static_cast<std::size_t>(r.n()), 0);
+            int landings = 0;
+            zeno::Cost cost = 0;
+            bool fits = true;
+            for(std::size_t k = 0; k < config.drops.size(); ++k)
+            {
+                zeno::Time load = 0;
+                for(int x : config.drops[k]) { ++balance[static_cast<std::size_t>(x)]; load += r.drop[static_cast<std::size_t>(x)]; cost += r.c[static_cast<std::size_t>(x)]; }
+                for(int x : config.picks[k]) { --balance[static_cast<std::size_t>(x)]; load += r.pick[static_cast<std::size_t>(x)]; cost += r.c[static_cast<std::size_t>(x)]; }
+                for(int x : config.crossings[k]) { load += r.fill[static_cast<std::size_t>(x)]; cost += r.c[static_cast<std::size_t>(x)]; }
+                landings += static_cast<int>(config.drops[k].size() + config.picks[k].size() + config.crossings[k].size());
+                fits = fits && load <= T && config.crossings[k].size() % 2 == 1;
+            }
+            check(std::ranges::all_of(balance, [](int b) { return b == 0; }) && landings == r.landings() && fits && cost == full.value(),
+                  "balanced configuration is consistent: " + where);
+            if(auto plan = zeno::scheduleRoles(in, r, config))
+            {
+                const auto ok = zeno::checkPlan(in, *plan);
+                check(ok.ok && ok.cost == full.value(), "scheduled configuration simulates at its cost: " + where);
+            }
+        }
+    }
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -437,6 +493,7 @@ int main(int argc, char** argv)
     testCertificates(rng, trials, sizes);
     testBracketSymmetric(rng, trials, sizes);
     testBracketNonSymmetric(rng, trials / 4);
+    testBalancedRoles(rng, trials / 4);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";
