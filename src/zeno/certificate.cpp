@@ -289,7 +289,11 @@ CertificateCheck checkCertificate(const Certificate& cert)
     }
     for(std::size_t i = 0; i + 1 < f.size(); ++i)
         if(!(f[i].makespan < f[i + 1].makespan && f[i].cost > f[i + 1].cost))
+        {
+            // The gap obligations below assume a monotone list.
             fail("the points are not strictly increasing in makespan and decreasing in cost at point " + std::to_string(i + 1));
+            return report;
+        }
     if(cert.plans.size() != f.size() || cert.gaps.size() + 1 != f.size())
     {
         fail("one plan per point and one lower bound per gap are required");

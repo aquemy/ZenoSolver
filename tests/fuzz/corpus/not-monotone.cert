@@ -1,0 +1,16 @@
+zeno-certificate 1
+instance 1 2 1
+d 1
+dbar 1
+c 1
+assume S
+front 2
+5 9
+3 2
+plan 1 1
+plane 1 0
+plan 2 1
+plane 1 0
+lower-bounds 1
+1 relaxed
+end
