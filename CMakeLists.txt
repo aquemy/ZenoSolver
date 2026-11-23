@@ -86,6 +86,7 @@ target_link_libraries(zeno_legacy PUBLIC zeno_tclap PRIVATE zeno_build_settings)
 # The exact solver: library zeno_core (namespace zeno, include/zeno) and the
 # zeno command-line tool.
 add_library(zeno_core STATIC
+    src/zeno/certificate.cpp
     src/zeno/forest.cpp
     src/zeno/instance.cpp
     src/zeno/legacy_input.cpp

@@ -3,6 +3,7 @@
 // The reference is the enumeration oracle (tests/oracle/partitionEnum.hpp),
 // which shares no code with the library: every landing multiset, every
 // admissible partition.
+#include <zeno/certificate.hpp>
 #include <zeno/forest.hpp>
 #include <zeno/one_plane.hpp>
 #include <zeno/reduce.hpp>
@@ -235,6 +236,57 @@ void testPlans(std::mt19937& rng, int trials, const Sizes& z)
     }
 }
 
+// Certificates round-trip, are accepted, and are rejected once corrupted.
+void testCertificates(std::mt19937& rng, int trials, const Sizes& z)
+{
+    zeno::SolveOptions options;
+    options.plans = true;
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        const zeno::Instance in = randomInstance(rng, z.n, z.t, z.p, z.s);
+        const auto result = zeno::solveFront(in, options);
+        const zeno::Certificate cert = zeno::makeCertificate(in, result);
+        std::stringstream text;
+        zeno::writeCertificate(text, cert);
+        const zeno::Certificate back = zeno::readCertificate(text);
+        const auto report = zeno::checkCertificate(back);
+        check(report.ok, "certificate accepted: " + describe(in) + (report.errors.empty() ? "" : ": " + report.errors.front()));
+        check(back.front == cert.front && back.gaps == cert.gaps && back.instance.d == in.d, "certificate round trip: " + describe(in));
+
+        const auto rejected = [&](zeno::Certificate bad, const std::string& what) {
+            check(!zeno::checkCertificate(bad).ok, "corrupted certificate rejected (" + what + "): " + describe(in));
+        };
+        zeno::Certificate bad = cert;
+        bad.front.front().cost -= 1;
+        rejected(bad, "fastest point made cheaper");
+        if(cert.front.size() >= 2)
+        {
+            bad = cert;
+            bad.front.erase(bad.front.begin() + 1);
+            bad.plans.erase(bad.plans.begin() + 1);
+            bad.gaps.pop_back();
+            rejected(bad, "a point removed");
+            bad = cert;
+            bad.front[1].makespan -= 1;
+            rejected(bad, "a point made faster");
+            for(std::size_t g = 0; g < cert.gaps.size(); ++g)
+                if(cert.gaps[g] == zeno::GapBound::Forest)
+                {
+                    bad = cert;
+                    bad.gaps[g] = zeno::GapBound::Relaxed;
+                    rejected(bad, "a forest gap claimed by the relaxation");
+                    bad = cert;
+                    bad.assumptions = {"S"};
+                    rejected(bad, "assumption A1 dropped");
+                    break;
+                }
+        }
+        bad = cert;
+        bad.assumptions.clear();
+        rejected(bad, "no assumptions");
+    }
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -283,6 +335,7 @@ int main(int argc, char** argv)
     testLevels(rng, trials, sizes);
     testFront(rng, trials, sizes);
     testPlans(rng, trials, sizes);
+    testCertificates(rng, trials, sizes);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";

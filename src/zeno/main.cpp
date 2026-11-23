@@ -5,8 +5,11 @@
 // The instance options are those of the 2016 solvers (see `zeno --help`), and
 // build the same instance. The front is printed as "cost makespan" lines by
 // increasing cost.
+#include <zeno/certificate.hpp>
 #include <zeno/legacy_input.hpp>
 #include <zeno/solve.hpp>
+
+#include <fstream>
 
 #include <cstdlib>
 #include <iostream>
@@ -21,6 +24,7 @@
 namespace
 {
 constexpr std::string_view kUsage = R"(usage: zeno [front] [options]
+       zeno check CERTIFICATE
 
 Exact Pareto front (cost, makespan) of a symmetric MultiZenoTravel instance,
 printed as "cost makespan" lines by increasing cost.
@@ -45,8 +49,14 @@ Solver:
   --plans      after the front, print a plan for every point (checked by
                simulation): one line per plane, legs as
                from->to[depart,arrive] with the passenger carried (pK)
+  --certificate FILE
+               write a certificate of the front to FILE
+               (doc/certificate-format.md)
   --stats      print solver statistics on stderr
   -h, --help   this help
+
+zeno check CERTIFICATE verifies a certificate with the reference checker
+and prints the assumptions it relied on.
 )";
 
 struct CliOptions
@@ -54,6 +64,8 @@ struct CliOptions
     zeno::legacy::Options instance;
     zeno::SolveOptions solve;
     bool stats = false;
+    bool printPlans = false;
+    std::optional<std::string> certificate;
 };
 
 double number(std::string_view flag, const std::string& value)
@@ -106,6 +118,7 @@ std::optional<CliOptions> parse(int argc, char** argv)
         if(flag == "--plans")
         {
             o.solve.plans = true;
+            o.printPlans = true;
             continue;
         }
         if(i + 1 >= args.size())
@@ -128,6 +141,11 @@ std::optional<CliOptions> parse(int argc, char** argv)
         else if(flag == "-x") in.x = number(flag, value);
         else if(flag == "-y") in.y = number(flag, value);
         else if(flag == "--threads") o.solve.threads = static_cast<unsigned>(integer(flag, value));
+        else if(flag == "--certificate")
+        {
+            o.certificate = value;
+            o.solve.plans = true;
+        }
         else
             throw std::invalid_argument("unknown option " + flag + " (see zeno --help)");
     }
@@ -175,10 +193,36 @@ void printStats(const zeno::SolveStats& s)
 }
 } // namespace
 
+int check(const std::string& path)
+{
+    std::ifstream file(path);
+    if(!file)
+        throw std::runtime_error("cannot open " + path);
+    const zeno::CertificateCheck report = zeno::checkCertificate(zeno::readCertificate(file));
+    for(const auto& error : report.errors)
+        std::cout << "error: " << error << "\n";
+    if(!report.ok)
+    {
+        std::cout << "certificate rejected\n";
+        return 2;
+    }
+    std::cout << "certificate accepted, assuming";
+    for(const auto& a : report.relied)
+        std::cout << " " << a;
+    std::cout << "\n";
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     try
     {
+        if(argc >= 2 && std::string_view(argv[1]) == "check")
+        {
+            if(argc != 3)
+                throw std::invalid_argument("usage: zeno check CERTIFICATE");
+            return check(argv[2]);
+        }
         const auto options = parse(argc, argv);
         if(!options)
             return 0;
@@ -186,8 +230,15 @@ int main(int argc, char** argv)
         const zeno::SolveResult result = zeno::solveFront(instance, options->solve);
         for(const auto& point : std::views::reverse(result.front))
             std::cout << point.cost << " " << point.makespan << "\n";
-        if(options->solve.plans)
+        if(options->printPlans)
             printPlans(result, instance.n());
+        if(options->certificate)
+        {
+            std::ofstream out(*options->certificate);
+            if(!out)
+                throw std::runtime_error("cannot write " + *options->certificate);
+            zeno::writeCertificate(out, zeno::makeCertificate(instance, result));
+        }
         if(options->stats)
             printStats(result.stats);
     }
