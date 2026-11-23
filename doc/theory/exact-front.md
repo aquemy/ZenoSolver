@@ -56,7 +56,7 @@ every emitted benchmark.
 | 4.6 | Adding a plane [AP] (corrects former Lemma 4.4) | — | P | 2.5 |
 | 4.7 | Converse: every plan is dominated by an admissible partition | (S), (A1) | P | 3.1, 4.3–4.5 |
 | 4.8 | Front characterisation | (S), (A1) | P | 1.1, 4.1, 4.7 |
-| 4.9 | Planes ending anywhere give the same front [B3] | (S), (A1) | P | 1.1, 3.1, 4.1, 4.3–4.6 |
+| 4.9 | Planes ending anywhere give the same front [B3] | (S), (A1) | P | 1.1, 3.1, 4.1, 4.3–4.8 |
 | 4.10 | Converse without (A1) | (S), (AΔ) | O | — |
 | 6.1 | Converse to role configurations [N1] | (A1-NS) | P | 3.1, 4.3, 4.4 |
 | 6.2 | Relaxed role-load lower bound | (AΔ) | P | 2.1, 3.3, 4.4 |
@@ -95,22 +95,26 @@ every emitted benchmark.
   $\mathrm{dur}(a,b)$ denotes the duration of the flight $a$–$b$.
 * Landing in central city $i$ costs $c_i \ge 0$; landing in a hub is free.
 * $p \ge 1$ planes and $t \ge p$ passengers start in $C_I$ at time 0. A plane carries at most one passenger.
-* Durations and times lie in an ordered field $\mathbb K$ (for instance $\mathbb Q$). From §7 on, durations
-  are integers.
+* Durations and times lie in an archimedean ordered field $\mathbb K$ ($\mathbb Q$ or $\mathbb R$), so that
+  $\lfloor\cdot\rfloor$ is defined. From §7 on, durations are integers.
 
 ### 1.2 Plans
 
-**Definition (plan).** A plan consists of
+**Definition (plan).** A plan on a finite set $Q$ of planes (all $p$ planes unless stated otherwise)
+consists of
 
-1. for every plane $k$, a *route*: a finite sequence of flights $f_{k,1},\dots,f_{k,\nu_k}$, where
-   $f_{k,j}$ goes from $v_{k,j-1}$ to $v_{k,j}$ and departs at time $e_{k,j}$, with $v_{k,0} = C_I$,
-   $e_{k,1} \ge 0$ and $e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})$;
-2. for every passenger $\pi$, a *journey*: a non-empty sequence of flights of the routes whose first flight
-   departs from $C_I$, whose last flight arrives in $C_G$, and in which each flight departs from the city
-   where the previous one arrives, no earlier than that arrival;
-3. *capacity*: every flight belongs to at most one journey, and occurs in it at most once.
+1. for every plane $k \in Q$, a *route*: a finite sequence of *legs* $(k,1),\dots,(k,\nu_k)$, where leg
+   $(k,j)$ uses an existing flight joining $v_{k,j-1}$ and $v_{k,j}$, flown from $v_{k,j-1}$ to $v_{k,j}$,
+   and departs at time $e_{k,j}$, with $v_{k,0} = C_I$, $e_{k,1} \ge 0$ and
+   $e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})$;
+2. for every passenger $\pi$, a *journey*: a non-empty sequence of legs whose first leg departs from $C_I$,
+   whose last leg arrives in $C_G$, and in which each leg departs from the city where the previous one
+   arrives, no earlier than that arrival, and, if both are legs of the same plane, at a later position of
+   its route;
+3. *capacity*: the journeys are pairwise disjoint, and none repeats a leg.
 
-The plan is *feasible* if every route ends in $C_G$ ($\nu_k \ge 1$ and $v_{k,\nu_k} = C_G$). Its *cost*
+Below, "flight" also means a leg when no confusion is possible. The plan is *feasible* if every route ends in
+$C_G$ ($\nu_k \ge 1$ and $v_{k,\nu_k} = C_G$). Its *cost*
 $C = \sum_{k,j} c(v_{k,j})$ sums the landing costs of all flights (hubs are free). Its *makespan*
 $M = \max_k a_{k,\nu_k}$ is the time at which the last plane reaches $C_G$ for the last time. $\mathcal A$
 is the set of pairs $(C, M)$ of feasible plans.
@@ -127,8 +131,9 @@ way.
 The *flight time* of plane $k$ is $F_k = \sum_j \mathrm{dur}(f_{k,j})$. Its flights are sequential, so
 $F_k \le a_{k,\nu_k} \le M$.
 
-*Planes ending anywhere.* In the variant of Theorem 4.9, routes need not end in $C_G$ and may be empty, and
-the makespan $M'$ is the largest arrival time over all flights.
+*Planes ending anywhere.* In the variant of Theorem 4.9, every plan counts (routes need not end in $C_G$ and
+may be empty), journeys still end in $C_G$, and the makespan $M'$ is the largest arrival time over all legs;
+there is at least one leg since $t \ge 1$. $\mathcal A'$ is the set of pairs $(C, M')$ of all plans.
 
 ### 1.3 PDDL semantics
 
@@ -190,8 +195,10 @@ of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{M
 $d_{\max} = \max_i d_i$. For multisets of central cities: $Y(i)$ is the multiplicity of $i$, $|Y|$ the size,
 $\mathrm{supp}\,Y$ the support, $Y + Z$ the sum, $Z \le Y$ inclusion and $Y - Z$ the difference for
 $Z \le Y$; $c(Y) = \sum_{w\in Y} c_w$, $\delta(Y) = \sum_{w\in Y} d_w$, $\bar\delta(Y) = \sum_{w\in Y} \bar d_w$,
-and under (S) the *load* $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ into $p$ groups is a family
-$X_1,\dots,X_p$ (one group per plane, possibly empty) with $X_1 + \dots + X_p = X$.
+and under (S) the *load* $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over a finite set $Q$ of planes is a
+family $(X_k)_{k \in Q}$ (one group per plane, possibly empty) with $\sum_{k\in Q} X_k = X$. Unless stated
+otherwise $Q$ is the set of all $p$ planes, written $X_1,\dots,X_p$; definitions and results of §2 hold for
+any $Q$, with $p$ replaced by $|Q|$.
 
 ## 2. Segments, admissible partitions, link forests
 
@@ -270,7 +277,8 @@ admissible partition has a link forest with at most one edge of each label at ea
 
 *Proof.* (If.) Let $\tilde h_{u,i}$ be the number of edges at $u$ labelled $i$. Then $\tilde h_{u,i} \le X_u(i)$
 by (F1), $\sum_i \tilde h_{u,i} = \deg_\Lambda(u) \equiv |X_u| + 1$ by (F2), and $\sum_u \tilde h_{u,i}$ is
-twice the number of edges labelled $i$. Lemma 2.3 applies. This direction holds for any multigraph.
+twice the number of edges labelled $i$. Lemma 2.3 applies. This direction holds for any loopless multigraph
+(a loop would add 2 to the degree but 1 to $\tilde h_{u,i}$).
 
 (Only if.) Take a spanning forest $\Theta$ of $H$ and a parity matrix with support $J \subseteq E(\Theta)$
 (Lemma 2.4(b)). At each city $i$, $\deg_J(i)$ is even. Split the planes $J$-adjacent to $i$ into
@@ -279,8 +287,10 @@ since $J$ has at most one edge per plane and city. At most one edge at $u$ is la
 $(u,i) \in J$, hence $X_u(i) \ge 1$: (F1) holds. $\deg_\Lambda(u) = \deg_J(u) = h_u \equiv |X_u| + 1$: (F2)
 holds.
 
-$\Lambda$ has no cycle. Take a cycle $u_0, u_1, \dots, u_{m-1}, u_0$ with $m \ge 2$ and edges
-$u_{j-1}u_j$ labelled $i_j$ (indices mod $m$). It gives the closed walk $u_0, i_1, u_1, i_2, \dots, i_m, u_0$
+$\Lambda$, built so far as a multigraph, has no cycle, and in particular no parallel edges. Take a cycle: a
+closed trail $u_0, u_1, \dots, u_{m-1}, u_0$ with $m \ge 2$ distinct edges $u_{j-1}u_j$ labelled $i_j$
+(indices mod $m$), with distinct vertices if $m \ge 3$; $m = 2$ is the case of parallel edges. It gives the
+closed walk $u_0, i_1, u_1, i_2, \dots, i_m, u_0$
 in $J$, which never uses the same edge twice in a row, even cyclically. At a city $i_j$ it arrives from
 $u_{j-1}$ and leaves to $u_j \ne u_{j-1}$. At a plane $u_j$ it arrives from $i_j$ and leaves to $i_{j+1}$;
 if $i_j = i_{j+1}$, then $u_j$ would belong to two different pairs at that city (the two distinct edges of
@@ -306,10 +316,12 @@ $h_k \le \min(|X_k| - 1,\ w)$ for every $k$.
 *Proof.* (a) By Lemma 2.5, $\sum_k h_k \le \sum_k (|X_k| - 1) = 2(t-p)$, and by (h3) each touched city
 carries at least two of these entries.
 
-(b) Let $J$ be the support. If $J$ contained a cycle of $H$, setting $h$ to 0 on it would lower the degree
-of each of its vertices by 2 and keep (h1)–(h3), with fewer entries. So $J$ is a forest. Let $P'$ and $Z$ be
-the planes and the cities incident to $J$, and assume $Z \ne \emptyset$. Every city of $Z$ has $J$-degree at
-least 2, so $2|Z| \le |J| \le |P'| + |Z| - 1$, and $|Z| \le |P'| - 1 \le p - 1$.
+(b) Parity matrices form a finite non-empty set, so one with the fewest entries exists; let $J$ be its
+support. $H$ is a simple bipartite graph, so each vertex of a cycle of $H$ meets exactly two of its edges. If
+$J$ contained a cycle, setting $h$ to 0 on it would lower the degree of each of its vertices by 2 and keep
+(h1)–(h3), with fewer entries. So $J$ is a forest. Let $P'$ and $Z$ be the planes and the cities incident to
+$J$. If $Z = \emptyset$ the bound is $0 \le p - 1$. Otherwise every city of $Z$ has $J$-degree at least 2,
+so $2|Z| \le |J| \le |P'| + |Z| - 1$, and $|Z| \le |P'| - 1 \le p - 1$.
 
 (c) Apply (a) to the matrix of (b). Then $h_k \le |X_k| - 1$ by Lemma 2.5, and $\eta_k \subseteq Z(h)$. $\square$
 
@@ -374,9 +386,9 @@ No assumption on central flights is needed.
 
 *Proof.* For a segment $\gamma$, let $x^\star(\gamma)$ be whichever of its first and last central cities has
 the smaller $d$. By Lemma 3.3(a), $F(\gamma) \ge 2d_{x^\star(\gamma)}$. Every route goes from $C_I$ to $C_G$,
-so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose $s$ of them,
-at least one per plane, and let $Y_k$ collect $x^\star(\gamma)$ over the chosen segments $\gamma$ of plane
-$k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
+so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose one segment
+per plane and any $s - p$ others, and let $Y_k$ collect $x^\star(\gamma)$ over the chosen segments $\gamma$
+of plane $k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
 $c(Y) \le C$. Also $\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M$.
 With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
 
@@ -435,18 +447,24 @@ $\sum_k |X_k| = 2t(\mathrm{cfg}) - |Q|$, and under (S), $\lambda_k = \ell(X_k)$.
 
 A plan is *simple* if each of its flights joins a hub and a central city; all its segments are then simple.
 
-**Lemma 4.3 (direct selection) [DS].** Let $P$ be a simple plan on a set $Q$ of planes, every route ending in
-$C_G$, with clean journeys and cost $C$. Then there is a role configuration on $Q$ with $t(\mathrm{cfg}) \ge t$,
-cost at most $C$, $\lambda_k \le F_k$ for every $k$, and $\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ a
-sub-multiset of the central landings of plane $k$. No assumption on durations is needed.
+**Lemma 4.3 (direct selection) [DS].** (a) In a simple plan with clean journeys, whether or not its routes end
+in $C_G$, every journey consists of exactly two flights, $C_I \to x$ and then $x \to C_G$, for a central
+city $x$.
 
-*Proof.* *Journeys.* The first flight of a journey goes from $C_I$ to a central city $x$; it is the first
-flight of a segment of type $A$ or $B$, written $o(\pi)$. As $x \ne C_G$, the journey continues with a flight
-from $x$ to a hub. That hub is not $C_I$ (Lemma 3.1), so the flight arrives in $C_G$ and ends the journey. It
-is the second flight of a segment at $x$ of type $A$ or $\bar B$, written $n(\pi)$. So every journey has
-exactly two flights, $o(\pi)$ and $n(\pi)$ are at the same city, and $o$ and $n$ are injective by capacity.
-Passenger $\pi$ is a *hand-off* if $o(\pi) \ne n(\pi)$. A $B$ is never an $n(\cdot)$, and a $\bar B$ never an
-$o(\cdot)$.
+(b) Let $P$ be a simple plan on a set $Q$ of planes, every route ending in $C_G$, with clean journeys and
+cost $C$. Then there is a role configuration on $Q$ with $t(\mathrm{cfg}) \ge t$, cost at most $C$,
+$\lambda_k \le F_k$ for every $k$, and $\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ a sub-multiset of the
+central landings of plane $k$. No assumption on durations is needed.
+
+*Proof.* (a) The first flight of a journey departs from $C_I$, so it goes to a central city $x$. As
+$x \ne C_G$, the journey continues with a flight from $x$, which goes to a hub. That hub is not $C_I$
+(Lemma 3.1), so the flight arrives in $C_G$, and it is the last flight of the journey (Lemma 3.1).
+
+(b) *Journeys.* By (a), the first flight of a journey is the first flight of a segment of type $A$ or $B$,
+written $o(\pi)$, and its second flight is the second flight of a segment at the same city $x$ of type $A$ or
+$\bar B$, written $n(\pi)$. A segment has one first flight and one second flight, and by capacity a flight
+carries at most one passenger, so $o$ and $n$ are injective. Passenger $\pi$ is a *hand-off* if
+$o(\pi) \ne n(\pi)$. A $B$ is never an $n(\cdot)$, and a $\bar B$ never an $o(\cdot)$.
 
 *Counts at a city $x$.* Let $\beta_x$ be the number of $B$ segments at $x$ that are an $o(\cdot)$, and
 $\bar\beta_x$ the number of $\bar B$ segments at $x$ that are an $n(\cdot)$. Among the $A$ segments at $x$:
@@ -498,25 +516,28 @@ $X_k(i) \ge 1$. (h2): $h_k \equiv |\mathrm{Dr}_k| + |\mathrm{Pk}_k| = |X_k| - |\
 (h3): $\sum_k h_{k,i} \equiv \sum_k (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) = 2\sum_k \mathrm{Dr}_k(i) \equiv 0$
 by the balance. The size is that of Definition 4.2. $\square$
 
-**Lemma 4.6 (adding a plane) [AP].** Let $X_1,\dots,X_q$ be admissible with $\sum_k |X_k| = 2t - q$ and
-$t \ge q + 1$. Then some admissible $Y_1,\dots,Y_{q+1}$ has $\sum_k |Y_k| = 2t - q - 1$, $c(Y) \le c(X)$ and
+**Lemma 4.6 (adding a plane) [AP].** Let $(X_k)_{k \in Q}$ be admissible with $q = |Q|$,
+$\sum_k |X_k| = 2t - q$ and $t \ge q + 1$, and let $\star \notin Q$ be a further plane. Then some admissible
+partition $(Y_k)_{k \in Q \cup \{\star\}}$ has $\sum_k |Y_k| = 2t - q - 1$, $c(Y) \le c(X)$ and
 $\max_k \delta(Y_k) \le \max_k \delta(X_k)$. This corrects case (b) of the first version's Lemma 4.4, where
 the support has $2(t-q)$ entries, not $t - q$.
 
 *Proof.* Fix a parity matrix $h$. By Lemma 2.5, $f_k := |X_k| - h_k$ is odd and at least 1. In $X_k$, call
-one copy of each $i \in \eta_k$ *reserved* and the other $f_k$ landings *free*.
+*free* the $X_k(i) - h_{k,i}$ copies of each city $i$ beyond one copy for each $i \in \eta_k$; there are
+$f_k$ of them.
 
 *Case (a): some $f_k \ge 3$.* Let $y, y'$ be two free landings of $X_k$. Set $Y_k = X_k - \{y, y'\}$,
-$Y_{q+1} = \{y\}$, keep the other groups, and give plane $q+1$ a zero row. (h1) holds as the reserved copies
-remain. (h2) holds for $k$, since $|Y_k| = |X_k| - 2$, and for $q+1$, since $|Y_{q+1}| = 1$ and
-$h_{q+1} = 0$. (h3) is unchanged. Also $\delta(Y_{q+1}) = d_y \le \delta(X_k)$ and $c(Y) = c(X) - c_{y'}$.
+$Y_\star = \{y\}$, keep the other groups, and give plane $\star$ a zero row. (h1) holds as
+$Y_k(i) \ge h_{k,i}$ for every $i$. (h2) holds for $k$, since $|Y_k| = |X_k| - 2$, and for $\star$, since
+$|Y_\star| = 1$ and $h_\star = 0$. (h3) is unchanged. Also $\delta(Y_\star) = d_y \le \delta(X_k)$ and
+$c(Y) = c(X) - c_{y'}$.
 
 *Case (b): every $f_k = 1$.* Then $2t - q = \sum_k (h_k + 1)$, so $\sum_k h_k = 2(t-q) \ge 2$. Some city $i$
 has a non-zero column, which is even, so $h_{u,i} = h_{v,i} = 1$ for two planes $u \ne v$. Set
-$Y_u = X_u - \{i\}$, $Y_v = X_v - \{i\}$ and $Y_{q+1} = \{i\}$, set $h_{u,i} = h_{v,i} := 0$, and give
-plane $q+1$ a zero row. (h1) holds for $j \ne i$, as $Y_u(j) = X_u(j)$. (h2) holds for $u$ and $v$, whose
-group size and row sum both drop by one, and for $q+1$. Column $i$ drops by 2. $|Y_u| = h_u \ge 1$ (old
-$h_u$), $\delta(Y_{q+1}) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
+$Y_u = X_u - \{i\}$, $Y_v = X_v - \{i\}$ and $Y_\star = \{i\}$, set $h_{u,i} = h_{v,i} := 0$, and give plane
+$\star$ a zero row. (h1) holds for $j \ne i$, as $Y_u(j) = X_u(j)$. (h2) holds for $u$ and $v$, whose group
+size and row sum both drop by one, and for $\star$. Column $i$ drops by 2. $|Y_u| = h_u \ge 1$ (old $h_u$),
+$\delta(Y_\star) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
 
 ### 4.3 Converse under (A1)
 
@@ -524,16 +545,17 @@ $h_u$), $\delta(Y_{q+1}) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\squa
 times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ with $|X| = s$, $c(X) \le C$
 and $\ell(X_k) \le F_k \le M$ for every $k$.
 
-*Proof.* *Step 1: remove central flights.* Replace a flight $a \to b$ between central cities, departing at
-$e$, by $a \to C_G$ departing at $e$ followed by $C_G \to b$ departing on arrival. The plane reaches $b$ at
-$e + d_a + d_b \le e + d_{ab}$ by (S) and (A1), and waits there until its next departure, which is
-unchanged. A passenger on board is delivered at $C_G$: its journey is cut after $a \to C_G$. Central
-landings are unchanged ($C_G$ is free), no arrival time and no $F_k$ increases, and the last flight of a
-route, which ends in $C_G$, is never such a flight. After finitely many replacements the plan is simple.
+*Proof.* *Step 1: remove central flights.* This step applies to any plan, whether or not its routes end in
+$C_G$. Replace a flight $a \to b$ between central cities, departing at $e$, by $a \to C_G$ departing at $e$
+followed by $C_G \to b$ departing on arrival. The plane reaches $b$ at $e + d_a + d_b \le e + d_{ab}$ by (S)
+and (A1), and waits there until its next departure, which is unchanged. A passenger on board is delivered at
+$C_G$: its journey is cut after $a \to C_G$. Central landings are unchanged ($C_G$ is free), and no arrival
+time and no $F_k$ increases; in a feasible plan the last flight of a route ends in $C_G$ and is never
+replaced, so the makespan is unchanged. After finitely many replacements the plan is simple.
 
 *Step 2.* Clean it (Lemma 3.1).
 
-*Step 3.* Lemma 4.3 on all $p$ planes gives a role configuration with passenger count at least $t$, cost at
+*Step 3.* Lemma 4.3(b) on all $p$ planes gives a role configuration with passenger count at least $t$, cost at
 most $C$ and $\lambda_k \le F_k$. Lemma 4.4 ($t \ge p$) brings the count to $t$. Lemma 4.5 gives an
 admissible partition of a multiset of size $2t - p = s$ with $\ell(X_k) = \lambda_k \le F_k \le M$. $\square$
 
@@ -557,33 +579,35 @@ still attains $(0, 6)$.
 
 ### 4.5 Planes ending anywhere (PDDL without plane goals)
 
-**Theorem 4.9 (bridge) [B3].** Assume (S) and (A1). The front of the variant in which planes may end anywhere
-and the makespan is the last arrival time (§1.2) equals $\mathcal F$.
+**Theorem 4.9 (bridge) [B3].** Assume (S) and (A1). The front $\mathrm{Min}\,\mathcal A'$ of the variant in
+which planes may end anywhere and the makespan is the last arrival time (§1.2) equals $\mathcal F$.
 
 *Proof.* A feasible plan is a plan of the variant with the same cost and makespan, since the last arrival of
-each route is its latest. Conversely, take a plan of the variant with cost $C$ and makespan $M'$. We build an
-admissible partition of a multiset of size $s$ with cost at most $C$ and loads at most $M'$, which Theorem 4.1
-achieves. Then both sets of points are weakly dominated by $\mathcal X \subseteq \mathcal A$ (Corollary 4.8),
-and Lemma 1.1 gives equal fronts.
+each route is its latest; so $\mathcal A \subseteq \mathcal A'$. Conversely, take a plan of the variant with
+cost $C$ and makespan $M'$. We build an admissible partition of a multiset of size $s$ with cost at most $C$
+and loads at most $M'$; its point in $\mathcal X$ (Corollary 4.8) weakly dominates $(C, M')$. So
+$\mathcal X \subseteq \mathcal A \subseteq \mathcal A'$ is finite and dominates both sets, and Lemma 1.1 gives
+$\mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal X = \mathcal F$.
 
-1. Apply Step 1 of Theorem 4.7; it applies to a last flight as well, since arrival times only decrease.
-   Clean the plan (Lemma 3.1). From every route, delete the flights after its last flight that carries a
-   passenger. Cost and arrival times do not increase.
+1. Apply Step 1 of Theorem 4.7, which applies to any plan. Clean the plan (Lemma 3.1). From every route,
+   delete the flights after its last flight that carries a passenger. Cost and arrival times do not
+   increase.
 2. A route that is not empty now ends with a flight carrying a passenger $\pi$. That flight joins a hub and a
    central city, and it cannot arrive in $C_I$ or depart from $C_G$ (Lemma 3.1). So either it arrives in
    $C_G$, or it is $C_I \to x$, the first flight of $\pi$'s journey, arriving at some time $a$. In the
-   second case the journey's second flight is $x \to C_G$ (proof of Lemma 4.3), departing at some
+   second case the journey's second flight is $x \to C_G$ (Lemma 4.3(a)), departing at some
    $e' \ge a$ and arriving at $e' + \bar d_x \le M'$. Append to the route a flight $x \to C_G$ departing at
    $a$ and carrying $\pi$; it arrives at $a + \bar d_x \le M'$, and $\pi$'s old second flight becomes empty.
    Do this for all such routes at once: it only adds flights and empties others, so each inequality
    $e' \ge a$ refers to a flight that is still there.
 3. Every route is now empty (an *idle* plane) or ends in $C_G$. Let $Q$ be the set of the $q$ planes that are
    not idle; $q \ge 1$ since $t \ge 1$, and $q \le p \le t$. On $Q$ this is a simple plan with clean
-   journeys, every route ending in $C_G$, of cost at most $C$, with $F_k \le M'$. Lemmas 4.3, 4.4 and 4.5
-   on $Q$ give an admissible partition of a multiset of size $2t - q$ into $q$ groups, with cost at most $C$
-   and loads at most $M'$.
-4. Lemma 4.6, applied $p - q$ times (each time $t \ge q + 1$, since $q < p \le t$), gives $p$ groups and size
-   $s$, without increasing the cost or the largest load. $\square$
+   journeys, every route ending in $C_G$, of cost at most $C$, with $F_k \le M'$. Lemmas 4.3(b), 4.4 and 4.5
+   on $Q$ give an admissible partition over $Q$ of a multiset of size $2t - q$, with cost at most $C$ and
+   loads at most $M'$.
+4. Lemma 4.6, applied once per idle plane (each time with $t \ge q' + 1$ for the current number $q' < p \le t$
+   of planes), gives a partition over all $p$ planes of size $s$, without increasing the cost or the largest
+   load. $\square$
 
 ### 4.6 What remains under (AΔ) only
 
@@ -644,7 +668,7 @@ and $\lambda_k \le F_k \le M$ for every $k$. (AΔ) is not needed.
 $\mathrm{dur}(a,h) + \mathrm{dur}(h,b) \le d_{ab}$, which exists by (A1-NS). The plane waits in $b$ until its
 next departure, and a passenger on board stays on board through $h$. Then clean (Lemma 3.1): a journey that
 passes through $C_I$ now starts there, one that passes through $C_G$ ends there. The plan is simple, costs no
-more, and no $F_k$ increases. Lemmas 4.3 and 4.4 conclude. $\square$
+more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
 
 **Lemma 6.2 (relaxed role loads).** Assume (AΔ). For every feasible plan with cost $C$ and makespan $M$ there
 are multisets $\mathrm{Dr}_k$, $\mathrm{Pk}_k$, $\mathrm{Cr}_k$ ($k = 1,\dots,p$) with $|\mathrm{Cr}_k|$ odd,
@@ -665,19 +689,27 @@ Shrink as in Lemma 4.4, removing in the second case a drop-off and a pick-up any
 
 ### 6.2 Scheduling role configurations
 
-Fix a role configuration with passenger count $t$, an order of the drop-offs and of the pick-ups of every
-plane, written $\mathrm{Dr}_u = (\mathrm{Dr}_u[1], \mathrm{Dr}_u[2], \dots)$ and
+Fix a role configuration on all $p$ planes with passenger count $t$, an order of the drop-offs and of the
+pick-ups of every plane, written $\mathrm{Dr}_u = (\mathrm{Dr}_u[1], \mathrm{Dr}_u[2], \dots)$ and
 $\mathrm{Pk}_v = (\mathrm{Pk}_v[1], \dots)$, and a *link matching* $\mathcal L$: at each city, a bijection
 between its copies in $\sum_k \mathrm{Dr}_k$ and in $\sum_k \mathrm{Pk}_k$. A link $(u, j; v, l)$ at city
 $i$ means that the passenger dropped by the $j$-th drop-off of $u$ is picked up by the $l$-th pick-up of $v$.
 
-A *schedule* of these data is a feasible plan in which plane $k$ flies exactly one simple $B$ per drop-off,
-one simple $\bar B$ per pick-up, and simple $A$ and $\bar A$ segments at the cities of $\mathrm{Cr}_k$, in an
-order consistent with its route and with the fixed orders of its $B$ and $\bar B$ segments; in which each link
-carries one passenger from $C_I$ (on the drop-off) to $C_G$ (on the pick-up); and in which each $A$ carries
-one passenger from $C_I$ to $C_G$. The *template* is the schedule in which every plane flies its drop-offs in
-order from time 0, then its crossings $A, \bar A, \dots, A$, then its pick-ups in order, every flight
-departing as early as possible.
+A *schedule* of these data is a feasible plan such that:
+
+* the route of plane $k$ is a concatenation of simple segments: exactly one $B$ at each element of
+  $\mathrm{Dr}_k$, in the order of $\mathrm{Dr}_k$; exactly one $\bar B$ at each element of $\mathrm{Pk}_k$,
+  in the order of $\mathrm{Pk}_k$; exactly one $A$ or $\bar A$ at each element of $\mathrm{Cr}_k$; and no
+  other segment;
+* for each link $(u, j; v, l)$ at $i$, one passenger's journey is the flight $C_I \to i$ of the $j$-th $B$ of
+  $u$ followed by the flight $i \to C_G$ of the $l$-th $\bar B$ of $v$; for each $A$, one passenger's journey
+  is its two flights; there are no other journeys.
+
+The *template* is the schedule in which every plane flies its drop-offs in order from time 0, then its
+crossings $A, \bar A, \dots, A$, then its pick-ups in order; every flight departs as soon as the plane
+arrives, except the flight $i \to C_G$ of a pick-up, which departs at the later of the plane's arrival in $i$
+and the arrival of the linked drop-off. The *least makespan* of a role configuration is the minimum makespan
+of a schedule over all orders and matchings (finitely many).
 
 Let $\mathrm{Pre}_u(j) = 2\sum_{j' < j} d_{\mathrm{Dr}_u[j']}$ and
 $\mathrm{Suf}_v(l) = 2\sum_{l' > l} \bar d_{\mathrm{Pk}_v[l']}$.
@@ -709,14 +741,10 @@ at most one drop-off.
 *Proof.* For a link $(u,j;v,1)$ at $i$, $\mathrm{Suf}_v(1) = 0$ and
 $\mathrm{Pre}_u(j) \le 2\delta(\mathrm{Dr}_u) - 2d_i$. Plane $u$ has a crossing $z$, since $|\mathrm{Cr}_u| \ge 1$,
 and $\bar d_i \le d_i + d_z + \bar d_z$. So the term is at most $2\delta(\mathrm{Dr}_u) + d_z + \bar d_z \le \lambda_u$.
-For the second claim, reverse time on $[0, \lambda^\star]$, $\lambda^\star = \max_k\lambda_k$, and exchange
-$C_I$ with $C_G$. A schedule of the instance $(d, \bar d)$ with makespan at most $\lambda^\star$ becomes a
-schedule of the instance $(\bar d, d)$ with makespan at most $\lambda^\star$, the same cost and role loads,
-drop-offs and pick-ups exchanged and their orders reversed; and conversely. The second half of (AΔ-path) is
-the first half for $(\bar d, d)$, where every plane has at most one pick-up. By the first claim, the template
-of the reversed configuration, with the reversed orders and the same matching, has makespan $\lambda^\star$.
-Reversing it back gives a schedule of the original data with makespan at most $\lambda^\star$, so
-$M_{\rm tmpl} \le \lambda^\star$ by Lemma 6.3, and $M_{\rm tmpl} \ge \lambda^\star$ always. $\square$
+For the second claim, take a link $(u,1;v,l)$ at $i$. Then $\mathrm{Pre}_u(1) = 0$ and
+$\mathrm{Suf}_v(l) \le 2\bar\delta(\mathrm{Pk}_v) - 2\bar d_i$. Plane $v$ has a crossing $z$, and
+$d_i \le \bar d_i + \bar d_z + d_z$, so the term is at most
+$2\bar\delta(\mathrm{Pk}_v) + d_z + \bar d_z \le \lambda_v$. $\square$
 
 This corrects §6.2 of the first version, which claimed that a pick-up after long drop-offs can push the
 makespan above the largest load. Under (AΔ-path) a single pick-up never does.
