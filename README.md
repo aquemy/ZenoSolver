@@ -15,7 +15,7 @@ How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints 
 
 **Correctness.**
 
-- `zeno` reproduces all 27 golden fronts of the brute-force oracle, including the six the 2016 solvers got wrong (their greedy schedule is not optimal: `doc/theory/exact-front.md` §5).
+- `zeno` reproduces all 27 golden fronts of the brute-force oracle, including the five on which the 2016 solvers were still wrong after their bookkeeping fixes (their greedy schedule is not optimal: `doc/theory/exact-front.md` §5).
 - Every level of thousands of random instances matches an independent enumeration oracle.
 - On 1,800 tiny non-symmetric instances, every bracket closes and equals the oracle's front.
 
