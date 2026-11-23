@@ -552,6 +552,34 @@ void testBracketCertificates(std::mt19937& rng, int trials)
     std::cout << "ut-zeno-core: " << written << " non-symmetric certificates checked\n";
 }
 
+// Proposition 6.5 of the theory note: harmful waiting. The role-load bound
+// stays below the true front in two gaps; the bracket must equal the oracle's
+// front and must not claim those gaps closed.
+void testHarmfulWaiting()
+{
+    zeno::Instance in;
+    in.d = {3, 19};
+    in.dbar = {3, 11};
+    in.c = {5, 1};
+    in.t = 7;
+    in.p = 4;
+    oracle::Instance o;
+    o.travelers = 7;
+    o.planes = 4;
+    o.cost = {5, 1};
+    o.west = {3, 19};
+    o.east = {3, 11};
+    std::vector<zeno::FrontPoint> truth;
+    for(const auto& [cost, makespan] : oracle::paretoFront(o))
+        truth.push_back({cost, makespan});
+    const auto bracket = zeno::solveBracket(in);
+    check(bracket.upper == zeno::paretoFilter(truth), "harmful waiting: the bracket's points are the true front");
+    check(!bracket.exact(), "harmful waiting: the bracket does not claim exactness");
+    for(std::size_t i = 0; i < bracket.gapProof.size(); ++i)
+        if(bracket.upper[i].makespan == 68)
+            check(bracket.gapProof[i] == zeno::GapProof::Open && bracket.gapLower[i] == 14, "harmful waiting: the gap 68-74 is open with bound 14");
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -606,6 +634,7 @@ int main(int argc, char** argv)
     testBalancedRoles(rng, trials / 4);
     testMetamorphic(rng, trials, sizes);
     testBracketCertificates(rng, trials / 4);
+    testHarmfulWaiting();
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";
