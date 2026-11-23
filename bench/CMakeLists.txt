@@ -17,8 +17,11 @@ function(zs_add_benchmark name)
     set_property(GLOBAL APPEND PROPERTY ZS_BENCHMARK_TARGETS ${name})
 endfunction()
 
+# The exact solver.
+zs_add_benchmark(bm-core components/core.cpp LIBS zeno::core)
+
 # Components of the 2016 solver, kept as the reference until it is removed.
-zs_add_benchmark(bm-legacy components/legacy.cpp LIBS zeno)
+zs_add_benchmark(bm-legacy components/legacy.cpp LIBS zeno_legacy)
 
 # 'cmake --build <dir> --target benchmarks' builds every benchmark.
 get_property(zs_benchmarks GLOBAL PROPERTY ZS_BENCHMARK_TARGETS)

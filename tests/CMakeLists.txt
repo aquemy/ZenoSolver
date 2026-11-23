@@ -15,26 +15,37 @@ set(ZS_UNIT_TESTS
 
 foreach(test ${ZS_UNIT_TESTS})
     add_executable(${test} ${test}.cpp)
-    target_link_libraries(${test} PRIVATE zeno zeno_build_settings)
+    target_link_libraries(${test} PRIVATE zeno_legacy zeno_build_settings)
     add_test(NAME ${test} COMMAND ${test})
 endforeach()
 
 add_executable(ut-pddl ut-pddl.cpp)
-target_link_libraries(ut-pddl PRIVATE zeno zeno_build_settings)
+target_link_libraries(ut-pddl PRIVATE zeno_legacy zeno_build_settings)
 target_compile_definitions(ut-pddl PRIVATE ZS_PDDL_DIR="${PROJECT_SOURCE_DIR}/pddl")
 add_test(NAME ut-pddl COMMAND ut-pddl)
 
 # Performance test: unbounded runtime and always returns 1, so it is built but
 # not registered with CTest.
 add_executable(pt-powerSetGenerator pt-powerSetGenerator.cpp)
-target_link_libraries(pt-powerSetGenerator PRIVATE zeno zeno_build_settings)
+target_link_libraries(pt-powerSetGenerator PRIVATE zeno_legacy zeno_build_settings)
+
+######################################################################################
+### Exact solver (zeno_core)
+######################################################################################
+
+# Differential tests against the enumeration oracle (tests/oracle/partitionEnum.hpp).
+add_executable(ut-zeno-core ut-zeno-core.cpp)
+target_link_libraries(ut-zeno-core PRIVATE zeno::core zeno_build_settings)
+target_include_directories(ut-zeno-core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME ut-zeno-core COMMAND ut-zeno-core)
+set_tests_properties(ut-zeno-core PROPERTIES TIMEOUT 600)
 
 ######################################################################################
 ### Brute-force oracle
 ######################################################################################
 
 add_executable(zenoOracle oracle/main.cpp)
-target_link_libraries(zenoOracle PRIVATE zeno zeno_build_settings)
+target_link_libraries(zenoOracle PRIVATE zeno_legacy zeno_build_settings)
 
 # The oracle header shares no code with the library, and neither does its test.
 add_executable(ut-oracle ut-oracle.cpp)
@@ -52,7 +63,7 @@ add_test(NAME ut-oracle COMMAND ut-oracle)
 # has to be removed with the fix.
 
 set(ZS_GOLDEN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/golden)
-set(ZS_GOLDEN_TARGETS zenoSolver zenoSolver_naive zenoSolver_noDuplicate)
+set(ZS_GOLDEN_TARGETS zeno zenoSolver zenoSolver_naive zenoSolver_noDuplicate)
 
 # Reconfigure when the lists change.
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
