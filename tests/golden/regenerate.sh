@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Regenerate the golden Pareto fronts with the brute-force oracle.
-# Usage: tests/golden/regenerate.sh <path/to/zenoOracle>
+# Usage: tests/golden/regenerate.sh <path/to/zenoOracle>   (e.g. build/release/zenoOracle)
 set -euo pipefail
 oracle="${1:?usage: $0 <path/to/zenoOracle>}"
 here="$(cd "$(dirname "$0")" && pwd)"

@@ -38,3 +38,7 @@ main.pdf
 */build/*
 
 
+
+# build trees and local presets
+/build/
+CMakeUserPresets.json

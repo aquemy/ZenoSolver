@@ -1,0 +1,54 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Optimised build with link-time optimisation.",
+            "inherits": "base",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+        },
+        {
+            "name": "dev",
+            "displayName": "Development",
+            "description": "Debug build that exports compile_commands.json.",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "asan",
+            "displayName": "Sanitizers",
+            "description": "AddressSanitizer and UndefinedBehaviorSanitizer; any report fails the test.",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ZS_SANITIZERS": "address;undefined"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "release", "configurePreset": "release" },
+        { "name": "dev", "configurePreset": "dev" },
+        { "name": "asan", "configurePreset": "asan" }
+    ],
+    "testPresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "output": { "outputOnFailure": true },
+            "execution": { "jobs": 4 }
+        },
+        { "name": "release", "inherits": "base", "configurePreset": "release" },
+        { "name": "dev", "inherits": "base", "configurePreset": "dev" },
+        { "name": "asan", "inherits": "base", "configurePreset": "asan" }
+    ]
+}
