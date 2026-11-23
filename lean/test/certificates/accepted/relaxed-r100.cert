@@ -1,0 +1,23 @@
+zeno-certificate 1
+instance 3 4 4
+d 44 74 76
+dbar 44 74 76
+c 62 82 63
+assume S
+front 1
+248 88
+plan 1 4
+plane 1 2
+0 1 0 44 1
+1 4 44 88 1
+plane 2 2
+0 1 0 44 2
+1 4 44 88 2
+plane 3 2
+0 1 0 44 3
+1 4 44 88 3
+plane 4 2
+0 1 0 44 4
+1 4 44 88 4
+lower-bounds 0
+end
