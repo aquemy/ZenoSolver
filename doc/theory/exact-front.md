@@ -21,7 +21,7 @@ P: complete written proof in this note. S: argument given, not complete. O: open
 | | (S) and (A1) | (S) only | Non-symmetric |
 |---|---|---|---|
 | Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4) | role loads under (A1-NS) (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
-| Front characterised by admissible partitions | P (Cor 4.8) | O (Conj 4.10) | O (Conj 6.5, 6.7) |
+| Front characterised by admissible partitions | P (Cor 4.8) | O (Conj 4.10) | false by role loads (Prop 6.5); O (Conj 6.7) |
 | Front computed exactly | P, pseudo-polynomial (§7) | wherever $L$ meets $E$ (§9) | wherever a plan meets the bound (§6.5) |
 | Ends of the front in closed form | P (Prop 7.10) | P (Prop 7.10) | — |
 | Linear family (default generator) | P, closed form (Thm 10.1) | P, same front | — |
@@ -62,7 +62,7 @@ every emitted benchmark.
 | 6.2 | Relaxed role-load lower bound | (AΔ) | P | 2.1, 3.3, 4.4 |
 | 6.3 | Template schedule and closed-form makespan [N3] | — | P | 3.3 |
 | 6.4 | One pick-up (or one drop-off) per plane never waits harmfully [W1] | (AΔ-path) | P | 6.3 |
-| 6.5 | No harmful waiting in general | (AΔ-path) | O | — |
+| 6.5 | No harmful waiting in general — **false**: counterexample, front checked by the exhaustive oracle (Prop 6.5) | (AΔ-path) | refuted | 6.1, 6.3 |
 | 6.6 | Imbalance-vector DP for the role-load bound [N5] | — | P | 7.2 |
 | 6.7 | Shuttle triples complete the front | (AΔ) | O | — |
 | 7.1 | Front = breakpoints of $E$ | (S), (A1) | P | 4.8 |
@@ -749,16 +749,55 @@ $2\bar\delta(\mathrm{Pk}_v) + d_z + \bar d_z \le \lambda_v$. $\square$
 This corrects §6.2 of the first version, which claimed that a pick-up after long drop-offs can push the
 makespan above the largest load. Under (AΔ-path) a single pick-up never does.
 
-**Conjecture 6.5 (no harmful waiting).** Assume (AΔ-path). Every role configuration has orders and a matching
-with $M_{\rm tmpl} = \max_k \lambda_k$.
+**Conjecture 6.5 (no harmful waiting) — false.** The conjecture stated: assume (AΔ-path); every role
+configuration has orders and a matching with $M_{\rm tmpl} = \max_k \lambda_k$. A weaker, front-level form,
+which would have sufficed for exact fronts, stated that the front equals the Pareto set of
+(cost, $\max_k \lambda_k$) over role configurations. Both forms are false.
 
-It holds when every plane has at most one pick-up, or at most one drop-off (Corollary 6.4). It is open when
-some plane has several pick-ups and some plane has several drop-offs. A weaker, front-level form suffices for
-exact fronts: the front equals the Pareto set of (cost, $\max_k \lambda_k$) over role configurations. A
-counterexample is plausible: for general durations, choosing the orders resembles non-preemptive open-shop
-scheduling. Without the conjecture, the role-load front is a lower bound (Theorem 6.1), and the exact makespan
-of a configuration is the minimum of $M_{\rm tmpl}$ (Lemma 6.3), computable by search over orders and
-matchings. Evidence: §11.
+**Proposition 6.5 (harmful waiting).** Take $n = 2$ central cities with $d = (3, 19)$, $\bar d = (3, 11)$,
+$c = (5, 1)$, $t = 7$ passengers and $p = 4$ planes, and no central flights (so (A1-NS) holds). (AΔ-path)
+holds: $\bar d_i \le d_i + d_z + \bar d_z$ for all $i, z$. The cheapest role configuration with every
+$\lambda_k \le 73$ costs 14, but no plan of makespan $\le 73$ costs less than 18: the role-load front and the
+true front differ.
+
+*Status.* The second half is computer-checked: the brute-force oracle (`tests/oracle/bruteForce.hpp`), which
+enumerates every pattern plan with its exact waiting, gives the front $(10, 90), (14, 74), (18, 68),
+(22, 66), (26, 52), (34, 42), (38, 36), (42, 30), (50, 18)$ as (cost, makespan), and `zeno`'s upper front
+equals it. The first half, and why every configuration of cost 14 and loads $\le 73$ waits, is the
+following argument.
+
+*Cost-14 configurations at level 73.* Write $1$ and $2$ for the cities. Loads: a crossing weighs 6 in city 1
+and 30 in city 2; a drop-off 6 and 38; a pick-up 6 and 22. A role configuration has $s = 10$ landings, so
+cost 14 means one landing in city 1 and nine in city 2. Each plane flies an odd number of crossings, and only
+one plane, $v$, can cross in city 1; a plane crossing three times in city 2 weighs 90. So the three other
+planes cross once, in city 2 (load 30), and with $\ell$ links (drop-off/pick-up pairs) $v$ crosses
+$10 - 2\ell - 3$ times. For $\ell \le 2$, $v$ crosses at least 3 times, two of them in city 2, so it weighs
+at least 66 and takes no link landing (a pick-up in city 2 adds 22); the other three planes can take one
+link landing each (30 + 38 or 30 + 22; two would exceed 73), which leaves at least one of the $2\ell$ link
+landings unplaced when $\ell = 2$, and fails the crossing count when $\ell \le 1$ ($v$ would weigh
+$6 + 4 \cdot 30$ or more). So $\ell = 3$: every plane crosses once, the three planes crossing in city 2 take
+one link landing each, and $v$ takes the other three; three drop-offs on $v$, or two, or one with two
+pick-ups, would weigh $6 + 38 + 38$ or more, so $v$ has three pick-ups (load $6 + 3 \cdot 22 = 72$) and the
+three others one drop-off each (load 68). Such a configuration exists, so the role-load bound at level 73 is
+14.
+
+*Why it waits.* Every drop-off reaches city 2 at time $\ge 19$. Plane $v$ starts in $C_I$ with no drop-off,
+so it crosses first and reaches city 2 for its first pick-up at time $6 + 11 = 17$; it waits until 19, and
+its two further pick-ups take 44 more: it finishes at $19 + 11 + 44 = 74 > 72 = \lambda_v$. The
+configuration-level form of the conjecture fails on it, and since every cost-14 configuration at level 73 is
+of this shape, so does the front-level form, as the oracle confirms. $\square$
+
+The same mechanism also opens the gap between makespans 42 and 52: a configuration of cost 30 has all loads
+$\le 50$, but its pick-up plane waits 2 at its first pick-up and finishes at 52.
+
+What survives: the role-load front is a lower bound (Theorem 6.1), the template is optimal for fixed orders
+and matching (Lemma 6.3), and Corollary 6.4 (one pick-up or one drop-off per plane) holds. The exact front of
+a non-symmetric instance is therefore the Pareto set of (cost, exact schedule makespan) over role
+configurations, where the exact makespan of a configuration is the minimum of $M_{\rm tmpl}$ over orders and
+matchings. Mechanism: harmful waiting needs a plane with several pick-ups in a city $y$ whose first pick-up
+arrives before the earliest drop-off there, i.e. $\min(\text{crossing}) + \bar d_y < d_y$; (AΔ-path) bounds
+$\bar d$ by $d$ but not $d$ by $\bar d$. A configuration-level search (`checks/waiting_search.cpp`) finds such
+configurations among random ones once every plane's crossing phase is short (§11).
 
 ### 6.3 Exact role-load bound
 
@@ -815,8 +854,9 @@ repairs as well:
    (Lemma 6.3), whose makespan equals the largest role load when every plane picks up at most once or drops
    off at most once (Corollary 6.4).
 2. A point is exact only when a simulated plan meets the lower bound. Elsewhere, search over orders and
-   matchings with the closed form of Lemma 6.3 until Conjecture 6.5 is settled, and, if Conjecture 6.7
-   holds, over shuttle triples.
+   matchings with the closed form of Lemma 6.3; Proposition 6.5 shows that the role-load bound can stay
+   strictly below the front, so closing such a gap needs a search over the role configurations cheaper than
+   the achieved point, each with its exact makespan. If Conjecture 6.7 holds, add shuttle triples.
 
 The bounds were loose in the measurements (certified on 18–28% of instances), so the search dominates.
 
@@ -1277,6 +1317,7 @@ All checks compare against exhaustive searches written independently of the solv
 | Linear family closed form (Thm 10.1) vs link-forest DP | 336 instances, 5,844 levels; $L = U = E$ on 245 more instances (3,157 levels); offset progressions: $L < E$ on 4 of 5,904 levels |
 | Papers' greedy on the linear family | 115 / 115 fronts equal |
 | C++ solver (branch `feat/exact-front-solver`) | 27 / 27 golden fronts; every level of 300 random instances ($n \le 5$, $t \le 9$, $p \le 6$, $s \le 12$) equal to an independent enumeration oracle, the unrestricted-tree DP equal to the $q_{\max}$-restricted one |
+| Harmful waiting (Prop 6.5), `checks/waiting_search.cpp`: exhaustive orders and matchings on random balanced configurations with a plane picking up twice and one dropping off twice, (AΔ-path) | Random crossing phases: 0 of 112,500 (p ≤ 4, ≤ 4 links, durations ≤ 12) and 0 of 192,270 (≤ 5 links, ≤ 15). One shortest crossing per plane: 6 of 189,964 (p ≤ 4, ≤ 5 links, ≤ 20), 5 of 190,040 (p ≤ 5, ≤ 6 links, ≤ 30), 1 of 71,538 (p ≤ 3, ≤ 6 links, ≤ 40) wait harmfully. On the instance of Prop 6.5 the bracket of `zeno` equals the oracle's front and leaves the two waiting gaps open |
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
 
 The exhaustive search over plans (`truth.cpp`) enforces that planes end in $C_G$ (`ANYWHERE=1` lifts this),
@@ -1294,7 +1335,15 @@ how to build and run them.
    Theorem 4.7. Then Theorem 4.7.
 2. Conjecture 4.10: search only where $L < E$; a proof needs simultaneous chain contraction for shared
    segments (§4.6).
-3. Conjecture 6.5: configuration-level search with the closed form of Lemma 6.3, $p \le 6$, several pick-ups
+3. Non-symmetric gaps left open by harmful waiting (Proposition 6.5): enumerate the balanced role
+   configurations cheaper than the achieved point at the gap's level, each with its exact makespan by search
+   over orders and matchings; the gap closes when none fits. This is only sound with a lemma that Theorem 6.1
+   does not give: *schedulable domination*, every plan of cost $C$ and makespan $M$ is weakly dominated by a
+   role configuration of cost $\le C$ whose template makespan (Lemma 6.3, best orders and matching) is at most
+   $M$. Direct selection (Lemma 4.3) matches drop-offs to pick-ups by counts per city, not by the plan's own
+   hand-offs, so its configuration need not inherit the plan's timing. Until the lemma is proved, such gaps
+   stay open, as `zeno` reports them. (Former item: configuration-level search for
+   Conjecture 6.5, $p \le 6$, several pick-ups
    per plane.
 4. Conjecture 6.7: extend the exhaustive oracle with shuttle triples and compare on the 11 instances.
 5. Conjecture 10.2, and the offset progressions.
