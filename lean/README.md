@@ -107,6 +107,7 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
 | `ZenoFront/PlanBounds.lean` | Counting, segments, trimming, Lemma R | `hubArrivals`, `ciDepartures`, `cgArrivals` |
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
+| `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
@@ -216,6 +217,16 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
   landings.
 * `IsParityWitness.size_mod_two`: an admissible grouping has `Σ_k |X_k| ≡ p (mod 2)`.
 * `Admissible.map`: relabelling the cities by any map keeps a grouping admissible.
+
+**Adding a plane (`AddPlane.lean`)**
+
+* `Admissible.addPlane`, `Admissible.addPlane_of_size` (**Lemma 4.6, AP**): an admissible
+  grouping of `q` planes with `2t − q` landings, `t ≥ q + 1`, gives an admissible grouping of
+  `q + 1` planes with `2t − q − 1` landings, no larger cost, and loads within every bound on the
+  old ones. One shrinking step removes two landings, and one of them becomes the new plane's
+  group.
+* `Admissible.addPlanes`: AP applied `m` times, from `q` to `q + m ≤ t` planes (step 4 of
+  bridge B3).
 
 **Converse (`Converse.lean`)**
 
@@ -423,10 +434,8 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] SH in partition form (`Admissible.exists_shrink`); the role-configuration form is not
       needed.
-- [ ] AP (add a plane, Lemma 4.6): an admissible `q`-grouping with `Σ|X_k| = 2t − q`, `t ≥ q + 1`
-      gives an admissible `(q + 1)`-grouping with one landing less, no larger cost or load.
-      Needed only for bridge B3.
-- [x] The σ-DP as a lower bound on `E(T)` (`forestBoundAt_le_totalCost`).
+- [x] AP (add a plane, Lemma 4.6; `Admissible.addPlane`, `Admissible.addPlanes`).
+- [x] The σ-DP as a lower bound on `E(T)` (`sigmaBoundAt_le_totalCost`).
 - [x] The σ-DP's state bound `|σ| ≤ min(p − 1, t − p)` from Claim B′ (`smallSubsetList`).
 - [ ] The σ-DP's other direction (`DP ≥ E`, so the DP is exact). Not needed for soundness.
 - [ ] `E(T)` as a definition and its monotonicity; pairs upper bound `U(T)` with `L ≤ E ≤ U`.
@@ -458,7 +467,14 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] Checker performance at suite scale: the 66 suite certificates in 5.7 s (478 s before).
 - [ ] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
-      front under (S) + (A1). Needs AP.
+      front under (S) + (A1). AP (step 4) is done. Missing are steps 1–3 of Theorem 4.9 on the
+      routes, then `Feasible.exists_admissible` on the planes that are not idle:
+      * remove central flights and clean;
+      * cut every route after its last loaded leg;
+      * append `x → C_G` where a route ends after a passenger's first leg `C_I → x`.
+
+      The checker's soundness for that semantics would then follow as for
+      `Cert.check_sound_A1`.
 - [ ] Theorem 4.1: forest `T`-join, links, schedule with drop-offs first and at most one
       pick-up per plane, makespan = largest load. Not needed by the checker.
 - [x] Link-forest lemma (2.6, only if; `Admissible.exists_linkForest`) and the tree DP
