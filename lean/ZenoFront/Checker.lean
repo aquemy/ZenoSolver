@@ -8,7 +8,7 @@ public import ZenoFront.PlanBounds
 public import ZenoFront.Relaxation
 public import ZenoFront.Simulate
 public import ZenoFront.Converse
-public import ZenoFront.AdmissibleBound
+public import ZenoFront.TreeBound
 
 /-!
 # A verified checker for front certificates (format v1)

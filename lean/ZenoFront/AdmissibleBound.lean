@@ -325,27 +325,27 @@ theorem sigmaValue_eq (p : ℕ) (h : ∅ ∈ subs) :
 
 /-! ### The forest bound of the checker -/
 
-/-- The bound the checker uses for a `forest` gap at level `T`: the σ-DP over the subsets of at
+/-- The σ-DP bound for a `forest` gap at level `T`: the σ-DP over the subsets of at
 most `w = min(p − 1, t − p)` non-dominated cities (Claim B′), with plane options read from the
 one-plane table `table` (columns `0, …, Tmax`); `0` (no bound) if `T > Tmax`. -/
-def forestBoundAt (d c : Fin n → ℕ) (p t s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
+def sigmaBoundAt (d c : Fin n → ℕ) (p t s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
     (T : ℕ) : WithTop ℕ :=
   if T ≤ Tmax then
     sigmaValue (smallSubsetList (domReps d c) (min (p - 1) (t - p)))
       (groupOption d c (fun m τ => (table.getD m #[]).getD τ ⊤) T) s p
   else 0
 
-/-- **The forest bound is a lower bound**: at most the cost of every admissible grouping into
+/-- **The σ-DP bound is a lower bound**: at most the cost of every admissible grouping into
 `p ≤ t` groups of total size `s = 2t − p` with loads at most `T`, for the table
 `oneplaneTable d c Tmax s`. The proof merges dominated cities, then takes a witness touching at
 most `min(p − 1, t − p)` cities (Claim B′), so that every state of the DP is a small subset. -/
-theorem forestBoundAt_le_totalCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t)
+theorem sigmaBoundAt_le_totalCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t)
     {X : Groups n p} (hX : Admissible X) (hsize : size X = 2 * t - p)
     (hT : ∀ k, load d (X k) ≤ T) :
-    forestBoundAt d c p t (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T ≤
+    sigmaBoundAt d c p t (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T ≤
       (totalCost c X : WithTop ℕ) := by
   classical
-  unfold forestBoundAt
+  unfold sigmaBoundAt
   split_ifs with hTmax
   · set w := min (p - 1) (t - p)
     set R := domReps d c
