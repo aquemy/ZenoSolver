@@ -23,6 +23,12 @@ struct SolveOptions
     bool plans = false;   ///< also build and check a plan for every front point
     LevelStrategy levels = LevelStrategy::Automatic;
     OnePlaneTable::Layout table = OnePlaneTable::Layout::Automatic;
+    /// Non-symmetric bracket: limits of the balanced role program per level
+    /// (states, transitions), and the time after which the refinement of open
+    /// gaps stops (they stay open, with their lower bounds).
+    std::size_t roleStates = 2'000'000;
+    std::size_t roleWork = 50'000'000;
+    double refineSeconds = 30;
 };
 
 /// How the value E(T) of a level was established.

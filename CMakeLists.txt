@@ -80,6 +80,7 @@ add_library(zeno_core STATIC
     src/zeno/one_plane.cpp
     src/zeno/plan.cpp
     src/zeno/reduce.cpp
+    src/zeno/roles.cpp
     src/zeno/solve.cpp)
 add_library(zeno::core ALIAS zeno_core)
 target_include_directories(zeno_core PUBLIC ${PROJECT_SOURCE_DIR}/include)

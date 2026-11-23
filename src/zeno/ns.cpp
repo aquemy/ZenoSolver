@@ -5,11 +5,15 @@
 #include <zeno/one_plane.hpp>
 #include <zeno/parallel.hpp>
 #include <zeno/reduce.hpp>
+#include <zeno/roles.hpp>
 
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <iterator>
+#include <limits>
+#include <map>
+#include <optional>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -122,7 +126,8 @@ bool BracketResult::exact() const
 
 std::vector<std::string> BracketResult::assumptions() const
 {
-    if(fastestProof == GapProof::Roles || std::ranges::any_of(gapProof, [](GapProof g) { return g == GapProof::Roles; }))
+    const auto needsA1 = [](GapProof g) { return g == GapProof::Roles || g == GapProof::Lagrangian || g == GapProof::Balanced; };
+    if(needsA1(fastestProof) || std::ranges::any_of(gapProof, needsA1))
         return {"A1-NS"};
     return {};
 }
@@ -187,16 +192,18 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
         achieved[i] = {check.cost, check.makespan};
         plans[i] = std::move(plan);
     });
-    // Waiting can delay a plan past its level, so filter the simulated points.
-    result.upper = paretoFilter(achieved);
-    if(options.plans)
-        for(const FrontPoint& point : result.upper)
-            for(std::size_t i = 0; i < achieved.size(); ++i)
-                if(achieved[i] == point)
-                {
-                    result.plans.push_back(plans[i]);
-                    break;
-                }
+    // Achieved points and their plans; the upper front is their Pareto set
+    // (waiting can delay a plan past its level, so filter the simulated points).
+    std::vector<std::pair<FrontPoint, Plan>> candidates;
+    for(std::size_t i = 0; i < achieved.size(); ++i)
+        candidates.emplace_back(achieved[i], std::move(plans[i]));
+    const auto rebuildUpper = [&] {
+        std::vector<FrontPoint> pts;
+        for(const auto& c : candidates)
+            pts.push_back(c.first);
+        result.upper = paretoFilter(pts);
+    };
+    rebuildUpper();
 
     // 2. Lower bounds, on tables covering every gap level.
     //  - lemma R: per-plane groups with weights min(drop, pick); no assumption.
@@ -206,8 +213,11 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
     //    min(drop, pick); and, as drop-offs and pick-ups pair up city by
     //    city, the loads of all planes add up to fill(X), so the largest is
     //    at least fill(X) / p.
+    //  - balanced (Theorem 6.1, A1-NS): the cheapest balanced role
+    //    configuration itself (BalancedRoles), on the gaps the others leave open.
     const Time maxLevel = std::max(hi, (result.upper.back().makespan - 1) / r.makespanPerLevel);
     const OnePlaneTable Glow(r.low, r.c, r.maxGroup(), maxLevel, options.table);
+    const OnePlaneTable Gfill(r.fill, r.c, r.maxGroup(), maxLevel, options.table);
     const OddCrossingTable roles(r, r.maxGroup(), maxLevel);
     const OnePlaneTable Gtotal(r.fill, r.c, r.landings(), static_cast<Time>(r.p) * maxLevel, OnePlaneTable::Layout::Staircase);
     const auto relaxedAt = [&](Time T) { return T < 0 ? kInfCost : relaxedCost(r, Glow, T); };
@@ -225,19 +235,160 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
         result.fastestLower = r.makespanPerLevel * fastestRoles;
         result.fastestProof = GapProof::Roles;
     }
-    const std::size_t gaps = result.upper.size() - 1;
-    result.gapLower.assign(gaps, 0);
-    result.gapProof.assign(gaps, GapProof::Open);
-    parallelFor(gaps, threads, [&](std::size_t i) {
-        const Time level = (result.upper[i + 1].makespan - 1) / r.makespanPerLevel;
-        const Cost relaxed = relaxedAt(level);
-        const Cost byRoles = rolesAt(level);
-        result.gapLower[i] = std::max(relaxed, byRoles);
-        if(relaxed >= result.upper[i].cost)
-            result.gapProof[i] = GapProof::Relaxed;
-        else if(byRoles >= result.upper[i].cost)
-            result.gapProof[i] = GapProof::Roles;
-    });
+    const auto gapLevel = [&](std::size_t i) { return (result.upper[i + 1].makespan - 1) / r.makespanPerLevel; };
+    const auto boundGaps = [&] {
+        const std::size_t gaps = result.upper.size() - 1;
+        result.gapLower.assign(gaps, 0);
+        result.gapProof.assign(gaps, GapProof::Open);
+        parallelFor(gaps, threads, [&](std::size_t i) {
+            const Cost relaxed = relaxedAt(gapLevel(i));
+            const Cost byRoles = rolesAt(gapLevel(i));
+            result.gapLower[i] = std::max(relaxed, byRoles);
+            if(relaxed >= result.upper[i].cost)
+                result.gapProof[i] = GapProof::Relaxed;
+            else if(byRoles >= result.upper[i].cost)
+                result.gapProof[i] = GapProof::Roles;
+        });
+    };
+    boundGaps();
+
+    // 3. Open gaps (and an uncertified fastest point): the cheapest balanced
+    // role configuration at the gap's level either reaches the achieved cost
+    // (the gap closes) or, scheduled (scheduleRoles), may be a new achieved
+    // point inside the gap. Repeat while points are found.
+    struct Balanced
+    {
+        bool complete = false;
+        Cost value = kInfCost;
+        Cost lagrange = std::numeric_limits<Cost>::min(); ///< Lagrangian bound, when computed
+        std::optional<std::pair<FrontPoint, Plan>> scheduled;
+    };
+    std::map<Time, Balanced> cache;
+    const auto balancedAt = [&](Time T) -> const Balanced& {
+        return cache.at(T);
+    };
+    const auto refineUntil = std::chrono::steady_clock::now() + std::chrono::duration<double>(options.refineSeconds);
+    for(int round = 0; round < 64 && std::chrono::steady_clock::now() < refineUntil; ++round)
+    {
+        std::vector<Time> wanted;
+        if(result.fastestLower < result.upper.front().makespan)
+            wanted.push_back((result.upper.front().makespan - 1) / r.makespanPerLevel);
+        for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+            if(result.gapProof[i] == GapProof::Open)
+                wanted.push_back(gapLevel(i));
+        std::ranges::sort(wanted);
+        wanted.erase(std::unique(wanted.begin(), wanted.end()), wanted.end());
+        std::erase_if(wanted, [&](Time T) { return cache.contains(T); });
+        // The Lagrangian bound first: polynomial, and enough for most gaps.
+        std::map<Time, Cost> target;
+        for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+            if(result.gapProof[i] == GapProof::Open)
+                target[gapLevel(i)] = std::max(target[gapLevel(i)], result.upper[i].cost);
+        std::vector<Balanced> computed(wanted.size());
+        parallelFor(wanted.size(), threads, [&](std::size_t k) {
+            if(std::chrono::steady_clock::now() >= refineUntil)
+                return; // out of time: the level stays incomplete
+            if(const auto it = target.find(wanted[k]); it != target.end())
+            {
+                const Cost lagrange = lagrangianRoles(r, wanted[k], it->second);
+                if(lagrange >= it->second)
+                {
+                    computed[k].complete = false; // not the optimum, only a bound
+                    computed[k].lagrange = lagrange;
+                    return;
+                }
+                computed[k].lagrange = lagrange;
+            }
+            // Bound on the planes still to come: the role relaxation per plane.
+            const Time T = wanted[k];
+            std::vector<std::vector<Cost>> remaining(at(r.p + 1), std::vector<Cost>(at(r.landings() + 1), kInfCost));
+            remaining[0][0] = 0;
+            for(int q = 1; q <= r.p; ++q)
+                for(int j = 0; j <= r.landings(); ++j)
+                    for(int m = 1; m <= std::min(j, r.maxGroup()); ++m)
+                        remaining[at(q)][at(j)] = std::min(remaining[at(q)][at(j)], addCost(remaining[at(q - 1)][at(j - m)], roles.odd(m, T)));
+            const auto it = target.find(T);
+            const BalancedRoles program(r, Gfill, T, options.roleStates, options.roleWork, it == target.end() ? kInfCost : it->second, &remaining);
+            Balanced& b = computed[k];
+            b.complete = program.complete();
+            b.value = program.value();
+            if(!program.optimal() || isInf(b.value))
+                return;
+            if(auto plan = scheduleRoles(instance, r, program.reconstruct()))
+            {
+                const PlanCheck check = checkPlan(instance, *plan);
+                b.scheduled.emplace(FrontPoint{check.cost, check.makespan}, std::move(*plan));
+            }
+        });
+        for(std::size_t k = 0; k < wanted.size(); ++k)
+            cache.emplace(wanted[k], std::move(computed[k]));
+        stats.exactCalls += wanted.size();
+
+        // New achieved points inside gaps, or faster than the fastest.
+        bool added = false;
+        const auto offer = [&](const Balanced& b, Time below) {
+            if(b.scheduled && b.scheduled->first.makespan < below &&
+               std::ranges::none_of(candidates, [&](const auto& c) { return c.first == b.scheduled->first; }))
+            {
+                candidates.push_back(*b.scheduled);
+                added = true;
+            }
+        };
+        if(result.fastestLower < result.upper.front().makespan)
+        {
+            const Balanced& b = balancedAt((result.upper.front().makespan - 1) / r.makespanPerLevel);
+            if(b.complete && isInf(b.value))
+            {
+                result.fastestLower = result.upper.front().makespan;
+                result.fastestProof = GapProof::Balanced;
+            }
+            else
+                offer(b, result.upper.front().makespan);
+        }
+        for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+        {
+            if(result.gapProof[i] != GapProof::Open)
+                continue;
+            const Balanced& b = balancedAt(gapLevel(i));
+            if(b.lagrange > std::numeric_limits<Cost>::min())
+                result.gapLower[i] = std::max(result.gapLower[i], b.lagrange);
+            if(b.lagrange >= result.upper[i].cost)
+            {
+                result.gapProof[i] = GapProof::Lagrangian;
+                continue;
+            }
+            if(!b.complete)
+                continue;
+            result.gapLower[i] = std::max(result.gapLower[i], b.value);
+            if(b.value >= result.upper[i].cost)
+                result.gapProof[i] = GapProof::Balanced;
+            else
+                offer(b, result.upper[i + 1].makespan);
+        }
+        if(!added)
+            break;
+        rebuildUpper();
+        boundGaps();
+        // Gaps closed by the balanced bound in an earlier round stay closed
+        // when they are unchanged: the cache answers them at once next round.
+    }
+
+    result.openReason.assign(result.gapProof.size(), BracketResult::OpenReason::None);
+    for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+        if(result.gapProof[i] == GapProof::Open)
+        {
+            const auto it = cache.find(gapLevel(i));
+            const bool complete = it != cache.end() && it->second.complete;
+            result.openReason[i] = complete ? BracketResult::OpenReason::Unscheduled : BracketResult::OpenReason::Incomplete;
+        }
+    if(options.plans)
+        for(const FrontPoint& point : result.upper)
+            for(const auto& c : candidates)
+                if(c.first == point)
+                {
+                    result.plans.push_back(c.second);
+                    break;
+                }
     stats.secondsExact = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
     return result;
 }

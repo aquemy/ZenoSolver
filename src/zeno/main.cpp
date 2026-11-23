@@ -168,7 +168,11 @@ int runBracket(const zeno::Instance& instance, const zeno::SolveOptions& options
         if(result.gapProof[i] == zeno::GapProof::Open)
             std::cerr << "  open gap between makespans " << result.upper[i].makespan << " and " << result.upper[i + 1].makespan
                       << ": a plan with makespan < " << result.upper[i + 1].makespan << " costs at least " << result.gapLower[i]
-                      << " (achieved: " << result.upper[i].cost << ")\n";
+                      << " (achieved: " << result.upper[i].cost << "; "
+                      << (result.openReason[i] == zeno::BracketResult::OpenReason::Unscheduled
+                              ? "a cheaper balanced configuration exists, no schedule found within the gap"
+                              : "the exact balanced program gave up")
+                      << ")\n";
     if(stats)
         printStats(result.stats);
     return 0;
