@@ -14,7 +14,7 @@ the only cities whose parity must be tracked by the σ-DP of the exact algorithm
 bound on their number bounds the DP state.
 
 **Claim B′, `t − p` part.** If `h` is any parity witness of a grouping with `Σ_k |X_k| = s`, then
-`h` touches at most `t − p` cities. Proof: by Lemma 2.3 the number of edges is
+`h` touches at most `t − p` cities. Proof: by Lemma 2.5 the number of edges is
 `Σ_k |h k| ≤ Σ_k (|X_k| − 1) = s − p = 2(t − p)`; every touched city has even, hence at least
 `2`, incident edges; so `2 · #touched ≤ 2(t − p)`.
 
@@ -80,7 +80,7 @@ theorem two_mul_card_touched_le_edgeCount (hw : IsParityWitness X h) :
         omega
     _ ≤ ∑ i, #{k | i ∈ h k} := Finset.sum_le_sum_of_subset (Finset.subset_univ _)
 
-/-- Summing Lemma 2.3 over the planes: `Σ_k |h k| + p ≤ Σ_k |X_k|`. -/
+/-- Summing Lemma 2.5 over the planes: `Σ_k |h k| + p ≤ Σ_k |X_k|`. -/
 theorem edgeCount_add_le_size (hw : IsParityWitness X h) : edgeCount h + p ≤ size X :=
   hw.sum_card_add_le
 
