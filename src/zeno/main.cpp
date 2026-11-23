@@ -43,6 +43,8 @@ generate  write the instance as a data file for -d (default: standard output)
 constexpr std::string_view kSolverHelp = R"(
 Solver (front):
   --threads N          worker threads (default: all cores)
+  --levels MODE        auto (default), sweep (bracket every level) or search
+                       (bisect for the breakpoints; for wide level ranges)
   --plans              after the front, print a plan for every point (checked
                        by simulation): one line per plane, legs as
                        from->to[depart,arrive] with the passenger carried (pK)
@@ -136,6 +138,15 @@ int runFront(const std::vector<std::string>& args)
     zeno::SolveOptions options;
     if(auto v = takeValue(rest, "--threads"))
         options.threads = static_cast<unsigned>(zeno::cli::integerValue("--threads", *v));
+    if(auto v = takeValue(rest, "--levels"))
+    {
+        if(*v == "sweep")
+            options.levels = zeno::LevelStrategy::Sweep;
+        else if(*v == "search")
+            options.levels = zeno::LevelStrategy::Search;
+        else if(*v != "auto")
+            throw std::invalid_argument("--levels takes auto, sweep or search");
+    }
     const auto certificate = takeValue(rest, "--certificate");
     const bool plans = takeFlag(rest, "--plans");
     const bool stats = takeFlag(rest, "--stats");

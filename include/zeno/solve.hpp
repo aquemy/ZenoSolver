@@ -9,10 +9,20 @@
 
 namespace zeno
 {
+/// How the levels T are visited.
+enum class LevelStrategy : std::uint8_t
+{
+    Automatic, ///< sweep up to 2^12 levels, search beyond
+    Sweep,     ///< bracket every level, then the exact DP on the open ones
+    Search,    ///< bisect for the breakpoints of E
+};
+
 struct SolveOptions
 {
     unsigned threads = 0; ///< 0: hardware concurrency
     bool plans = false;   ///< also build and check a plan for every front point
+    LevelStrategy levels = LevelStrategy::Automatic;
+    OnePlaneTable::Layout table = OnePlaneTable::Layout::Automatic;
 };
 
 /// How the value E(T) of a level was established.

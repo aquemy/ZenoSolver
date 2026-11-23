@@ -8,7 +8,8 @@
 // Instances come from the 2016 generator (zeno::legacy), so they match the
 // suites in bench/instances. The complexity fits are against the bounds of
 // doc/theory/exact-front.md: G in O(n * m * T), L in O(p * s^2) per level,
-// the forest DP in O(T * n * q^2 * s^2) per level (q = trees' planes).
+// the forest DP in O(K * n * q^2 * s^2) per level, K the size of the
+// children staircases (q = trees' planes).
 #include <zeno/forest.hpp>
 #include <zeno/legacy_input.hpp>
 #include <zeno/one_plane.hpp>
@@ -50,25 +51,29 @@ zeno::Instance randomInstance(int n, int t, int p, int maxDuration, unsigned see
     return in;
 }
 
-// G over (n, T): n cities with durations up to D = range(1).
+// G over (n, D): n cities with durations up to D = range(1); dense (range(2)
+// = 0) or staircase (1).
 void BM_OnePlaneTable(benchmark::State& state)
 {
     const auto n = static_cast<int>(state.range(0));
     const auto D = static_cast<int>(state.range(1));
+    const auto layout = state.range(2) == 0 ? zeno::OnePlaneTable::Layout::Dense : zeno::OnePlaneTable::Layout::Staircase;
     const auto in = randomInstance(n, 20, 4, D, 1);
     const auto r = zeno::reduce(in);
     const zeno::Time maxT = r.highestLevel();
+    std::size_t entries = 0;
     for(auto _ : state)
     {
-        zeno::OnePlaneTable G(r.d, r.c, r.maxGroup(), maxT);
+        zeno::OnePlaneTable G(r.d, r.c, r.maxGroup(), maxT, layout);
         benchmark::DoNotOptimize(G(r.maxGroup(), maxT));
+        entries = G.size();
     }
     state.counters["cities"] = r.n();
+    state.counters["entries"] = static_cast<double>(entries);
     state.counters["cells"] = static_cast<double>(r.maxGroup() + 1) * static_cast<double>(maxT + 1);
-    state.SetComplexityN(static_cast<benchmark::IterationCount>(r.n()) * (r.maxGroup() + 1) * (maxT + 1));
     zs::bench::reportPeakRss(state);
 }
-BENCHMARK(BM_OnePlaneTable)->ArgsProduct({{10, 40, 160}, {10, 100, 1000}})->Complexity(benchmark::oN);
+BENCHMARK(BM_OnePlaneTable)->ArgsProduct({{10, 40, 160}, {10, 100, 1000}, {0, 1}});
 
 // L at the middle level of the default generator, sweeping t (s = 2t - p).
 void BM_RelaxedLevel(benchmark::State& state)
@@ -131,6 +136,22 @@ BENCHMARK(BM_SolveGenerated)
     ->Args({10, 8, 3, 1})
     ->Args({10, 8, 3, 2})
     ->Unit(benchmark::kMillisecond);
+
+// End to end with large durations (sqrt family scaled by range(0)): the
+// level range grows linearly, the breakpoint search and the staircases keep
+// time and memory flat.
+void BM_SolveLargeDurations(benchmark::State& state)
+{
+    const auto in = generated(10, 8, 3, 2, 2, static_cast<int>(state.range(0)));
+    zeno::SolveResult result;
+    for(auto _ : state)
+        result = zeno::solveFront(in);
+    state.counters["levels"] = static_cast<double>(result.stats.levels);
+    state.counters["front_size"] = static_cast<double>(result.front.size());
+    state.counters["evaluations"] = static_cast<double>(result.stats.closedByBracket + result.stats.closedByPairs + result.stats.closedByChains + result.stats.exactCalls);
+    zs::bench::reportPeakRss(state);
+}
+BENCHMARK(BM_SolveLargeDurations)->RangeMultiplier(10)->Range(100, 10000000)->Unit(benchmark::kMillisecond);
 
 // End to end on random instances, where the exact DP runs on open levels.
 void BM_SolveRandom(benchmark::State& state)

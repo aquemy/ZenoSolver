@@ -106,7 +106,8 @@ void testOnePlaneTable(std::mt19937& rng)
         }
         const int M = 4;
         const zeno::Time maxT = 18;
-        const zeno::OnePlaneTable G(d, c, M, maxT);
+        const zeno::OnePlaneTable G(d, c, M, maxT, zeno::OnePlaneTable::Layout::Dense);
+        const zeno::OnePlaneTable stairs(d, c, M, maxT, zeno::OnePlaneTable::Layout::Staircase);
         // Brute force over all multisets of size m.
         for(int m = 0; m <= M; ++m)
             for(zeno::Time T = 0; T <= maxT; ++T)
@@ -123,6 +124,20 @@ void testOnePlaneTable(std::mt19937& rng)
                 };
                 rec(0, m, 0, 0);
                 check(G(m, T) == best, "OnePlaneTable G[" + std::to_string(m) + "][" + std::to_string(T) + "]");
+                check(stairs(m, T) == best, "staircase G[" + std::to_string(m) + "][" + std::to_string(T) + "]");
+                if(!zeno::isInf(best))
+                    for(const auto* table : {&G, &stairs})
+                    {
+                        const auto w = table->witness(m, T);
+                        zeno::Time load = 0;
+                        zeno::Cost cost = 0;
+                        for(int city : w)
+                        {
+                            load += d[static_cast<std::size_t>(city)];
+                            cost += c[static_cast<std::size_t>(city)];
+                        }
+                        check(static_cast<int>(w.size()) == m && load <= T && cost == best, "witness realises G");
+                    }
             }
     }
 }
@@ -170,6 +185,18 @@ void testFront(std::mt19937& rng, int trials, const Sizes& z)
         one.threads = 1;
         const auto single = zeno::solveFront(in, one).front;
         const auto multi = zeno::solveFront(in).front;
+        // Every combination of level strategy and table layout gives the same front.
+        for(auto strategy : {zeno::LevelStrategy::Sweep, zeno::LevelStrategy::Search})
+            for(auto layout : {zeno::OnePlaneTable::Layout::Dense, zeno::OnePlaneTable::Layout::Staircase})
+            {
+                zeno::SolveOptions o;
+                o.levels = strategy;
+                o.table = layout;
+                o.plans = strategy == zeno::LevelStrategy::Search;
+                const auto other = zeno::solveFront(in, o);
+                check(other.front == single, "strategy and layout do not change the front: " + describe(in));
+                check(!o.plans || other.plans.size() == other.front.size(), "plans with the staircase table: " + describe(in));
+            }
         std::vector<std::pair<zeno::Cost, zeno::Time>> got;
         for(auto it = single.rbegin(); it != single.rend(); ++it)
             got.emplace_back(it->cost, it->makespan);
