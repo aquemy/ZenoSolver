@@ -1,12 +1,22 @@
 # ZenoFront: Lean formalisation of the exact MultiZenoTravel front
 
-`ZenoFront` is a Lean 4 / Mathlib library that formalises the combinatorial core of the exact
-Pareto-front solver for symmetric MultiZenoTravel. The informal proofs are in
+`ZenoFront` is a Lean 4 / Mathlib library about the exact Pareto front of symmetric
+MultiZenoTravel. The informal proofs are in
 [`doc/theory/exact-front.md`](../doc/theory/exact-front.md); the statements follow the IDs of
-the proof review (Claim A, PAR, Claim B′, G).
+the proof review (Claim A, PAR, Claim B′, G, R).
 
-This first part covers the combinatorial core, with no time and no plans: admissibility, role
-configurations, the support bound and the one-plane table. Section [TODO](#todo) lists the rest.
+It has two parts:
+
+* **the combinatorial core** (no time, no plans): admissibility, role configurations, the
+  support bound and the one-plane table;
+* **a verified checker for front certificates** (format v1 of
+  [`doc/certificate-format.md`](../doc/certificate-format.md)). It covers certificates whose
+  gaps are all `relaxed`. The
+  soundness theorem `Cert.check_sound` says that if `check` accepts, the listed points are
+  exactly the Pareto front of the instance. The front is that of *every* feasible plan, with any
+  central flights (format v1 plans fly none of them).
+
+Section [TODO](#todo) lists the rest.
 
 ## Build
 
@@ -17,12 +27,34 @@ cd lean
 lake exe cache get        # download the Mathlib build cache (never build Mathlib from source)
 lake build --wfail        # build ZenoFront; warnings, including `sorry`, are errors
 lake env lean scripts/CheckAxioms.lean   # axiom audit
+lake build zeno-check     # the compiled checker (first build compiles Mathlib's C code, ~1.5 min)
+lake exe zeno-check FILE  # check a certificate
+bash test/run.sh          # check the test certificates against their expected verdicts
 ```
 
 The axiom audit fails if any declaration of a `ZenoFront` module uses an axiom other than
 `propext`, `Classical.choice` and `Quot.sound`. It rejects `sorryAx` and `native_decide`.
-CI (`.github/workflows/lean.yml`) runs these three steps, plus a `grep` for `sorry` and `admit`,
-on every push and pull request that touches `lean/**`.
+CI (`.github/workflows/lean.yml`) runs all of this on every push and pull request that touches
+`lean/**`, plus a `grep` for `sorry` and `admit`.
+
+`zeno-check FILE` prints one of three verdicts:
+
+* `accepted` (exit code 0): `Cert.check` returned `true`;
+* `rejected: <reason>` (exit code 1): the file is malformed, or an obligation fails;
+* `not supported: <reason>` (exit code 2): every supported obligation holds, but a gap names the
+  `forest` bound.
+
+Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
+verified function. On the largest sample, `relaxed-r101.cert`, the check takes about 0.13 s on
+an Apple-silicon laptop: 62 KB, `n = 10`, `t = 14`, `p = 5`, 89 points and 88 gaps.
+
+`test/certificates/` holds three groups:
+
+* `accepted/`: certificates written by the C++ solver whose gaps are all `relaxed`;
+* `rejected/`: corrupted copies, each with a comment saying what was broken (wrong cost, wrong
+  duration, broken passenger route, asymmetric durations, missing `S`, non-monotone points, a
+  missing point, a `forest` gap relabelled `relaxed`, a truncated file);
+* `unsupported/`: certificates with a `forest` gap.
 
 ## Contents
 
@@ -34,6 +66,14 @@ on every push and pull request that touches `lean/**`.
 | `ZenoFront/SupportBound.lean` | Claim B′, `t − p` part | `touched`, `edgeCount` |
 | `ZenoFront/MinimalWitness.lean` | Claim B′, `p − 1` part, and the combined `min(p − 1, t − p)` bound | `edgeVec`, `coordSum` |
 | `ZenoFront/OnePlane.lean` | One-plane table `G[m][T]`: specification and memoised table | `oneplane`, `oneplaneTable` |
+| `ZenoFront/Plan.lean` | Locations, legs, plans, flight network (with arbitrary central flights `dc`), feasibility, cost, makespan | `Loc`, `Leg`, `Plan`, `Network`, `Flies`, `IsRoute`, `Feasible`, `planCost`, `planMakespan` |
+| `ZenoFront/PlanBounds.lean` | Counting, segments, trimming, Lemma R | `hubArrivals`, `ciDepartures`, `cgArrivals` |
+| `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
+| `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
+| `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
+| `ZenoFront/Parse.lean` | Parser for the text format (untrusted) | `parseCert` |
+| `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
+| `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
 
 ### Theorems
 
@@ -100,13 +140,61 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 * `oneplaneRow_getD`, `oneplaneTable_getD`: the memoised table (`O(mMax · Tmax · n)`) agrees
   with `G` for `m ≤ mMax`, `T ≤ Tmax`.
 
-## Conventions the C++ side must match
+**Plans and lower bounds (`PlanBounds.lean`)**
 
-The future certificate format and checker will build on these definitions.
+Every statement holds for every feasible plan, for any table `dc` of central flight durations.
 
-* **Indices.** Cities are `Fin n` and planes are `Fin p`, both numbered from `0`.
-* **Durations and costs.** Durations and costs are natural numbers: `d i` is the *one-way*
-  duration between a hub and city `i`, after any gcd scaling.
+* `ciDepartures_add_cgArrivals`: along a route,
+  `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`.
+* `Feasible.le_ciDepartures`, `Feasible.le_cgArrivals`: every passenger leaves `C_I` and
+  reaches `C_G` on its own leg (capacity one), so each count is at least `t`.
+* `Feasible.le_sum_hubArrivals` (**counting**, Lemma 3.2): `2t ≤ Σ_k #segments_k + p`.
+* `PlaneFeasible.exists_segments`: under (S), one landing per segment gives a multiset `Z` with
+  `|Z| = #segments`, `2 δ(Z) ≤` the plane's end time, and `c(Z) ≤` its landing cost.
+* `exists_trim`: groups that are all non-empty, with total size at least `s ≥ p`, can be trimmed
+  to total size exactly `s` and stay non-empty.
+* `Feasible.exists_relaxation` (**Lemma R**): under (S), with `p ≤ t`, a feasible plan yields
+  `p` non-empty groups of total size `s = 2t − p`. Each satisfies `2 δ(Y_k) ≤ makespan`, and
+  `Σ c(Y_k) ≤ cost`.
+
+**Relaxation (`Relaxation.lean`)**
+
+* `relaxCost_oneplane_le_totalCost`: `L(T) = relaxCost (G[·][T]) p s` is at most `Σ_k c(Y_k)`
+  for every grouping into `p` non-empty groups of total size `s` with loads `≤ T`.
+* `relaxRow_getD`: the memoised rows agree with `relaxCost`.
+* `relaxedBoundAt_le_totalCost`: the bound the checker reads from its tables is a lower bound.
+* `load_eq_scale_mul`, `load_scaled_le_of_load_le`: loads in original units are `g ×` loads in
+  scaled units, and `δ ≤ h` implies `δ/g ≤ ⌊h/g⌋`.
+
+**Checker (`Simulate.lean`, `Checker.lean`, `Examples.lean`)**
+
+* `planOK_feasible`: a plan accepted by the simulation is feasible, for every `dc`.
+* `follow_sound`: the greedy passenger walk, when it uses all the passenger's legs, orders them
+  into a route.
+* `Feasible.minOf_le_makespan` (**obligation 2**): under (S), every feasible plan has makespan
+  `≥ 2 · d_min · ⌈s/p⌉`.
+* `Feasible.minOf_le_cost` (**obligation 4**): under (S), every feasible plan costs
+  `≥ s · c_min`.
+* `Cert.gapBound_le` (**obligation 3**, `relaxed`): a feasible plan with makespan below `M`
+  costs at least the relaxed bound at the gap level of `M`.
+* `exists_le_of_gapsOK`: the domination argument along the front.
+* `Cert.check_sound` (**soundness**): `C.check = true` implies, for every `dc`,
+  `IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front`. That is, every point is
+  achieved by a feasible plan, every feasible plan is weakly dominated by a point, and the points
+  are pairwise incomparable.
+* `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`: equivalently, a pair is listed
+  iff it is a minimal achievable (cost, makespan) pair.
+* `Examples.lptCounterexample_front`: checked by the kernel alone (`decide +kernel`, about
+  1.5 s). For every `dc`, the Pareto front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` is
+  `(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)`. This includes the point
+  the papers' greedy misses.
+
+## Conventions shared with the C++ side
+
+* **Indices.** Cities are `Fin n`, planes `Fin p`, passengers `Fin t`, all numbered from `0`.
+  The certificate format numbers them from `1`.
+* **Durations and costs.** Durations and costs are natural numbers. `d i` is the *one-way*
+  duration between a hub and city `i`.
 * **Load and makespan.** The load of a group is `δ(Y) = Σ_{w ∈ Y} d w`. The makespan of the
   plan built from it is `2 δ`. Every `T` in the DP and the table is a **half-makespan** (a bound
   on `δ`), as in §7 of the note.
@@ -127,52 +215,71 @@ The future certificate format and checker will build on these definitions.
   crossings `Cr_k`, with `|Cr_k|` odd and `Σ_k D_k = Σ_k P_k` as multisets (per-city balance).
   The converse of PAR produces `D_k + P_k = h k`, so every city appears at most once in
   `D_k + P_k`.
-* **Infinity.** The one-plane table uses `WithTop ℕ`, with `⊤ = ∞`. `ℕ∞` is not used because
-  its lattice instance is not computable. The C++ table must agree on
-  `G[0][T] = 0` and `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`, the minimum over
-  no city being `∞`.
+* **Infinity.** The tables use `WithTop ℕ`, with `⊤ = ∞`. `ℕ∞` is not used because its lattice
+  instance is not computable. The C++ table must agree on `G[0][T] = 0` and
+  `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`, the minimum over no city being `∞`.
 
 ### Certificate format v1
 
-The solver writes certificates in the format of `doc/certificate-format.md`, on branch
-`feat/exact-front-solver` (not yet on `master`). A Lean checker of that format would reuse the
-following:
+`Cert.check` mirrors `checkCertificate` in `src/zeno/certificate.cpp` and `checkPlan` in
+`src/zeno/plan.cpp`:
 
-* **Header.** `Instance` holds the header (`instance n t p`, `d`, `c`; under `assume S`,
-  `dbar = d`), and `Instance.s` is the `s = 2t − p` of obligations 2 to 4. The format numbers
-  cities `1..n` (locations `0` = `C_I`, `n + 1` = `C_G`) and planes and passengers from `1`.
-  `Fin n` and `Fin p` count from `0`, so the parser subtracts one.
-* **Gap levels.** The table and the DPs work on the scaled instance: durations divided by their
-  gcd `g`, at the format's level `T = ⌊⌊(M_{i+1} − 1)/2⌋ / g⌋`. Its `d` is that scaled `d`.
-* **`relaxed` gaps.** `L(T)` is a DP over planes whose entries are the one-plane table, so it
-  reuses `oneplane` / `oneplaneTable` and their specification `isLeast_oneplane`. Its soundness,
-  Lemma R, needs plan semantics (P2), but not admissibility.
-* **`forest` gaps.** `E(T)` is a minimum over admissible groupings: `Groups`, `size`, `load`,
-  `cost` and `Admissible`. Its soundness goes through the converse theorem. That is DS, then PAR
-  (`RoleConfig.isParityWitness_witness`), then the link-forest lemma (P3, P4), and the forest DP
-  also reuses `oneplane`.
-* **Claim B′.** Claim B′ (`Admissible.exists_card_touched_le`) bounds the σ-DP, which v1 does not
-  emit. It becomes relevant if a `sigma` bound kind is added.
-* **Plans (obligation 1).** Plans are full leg lists with integer times, so P2 can use `ℕ` times
-  for v1.
+* **Header.** It requires `1 ≤ n`, `1 ≤ p ≤ t`, `d = dbar` (checked, not trusted) and `S` among
+  the assumptions.
+* **Indices.** The format numbers cities `1..n` (location `0` is `C_I`, `n + 1` is `C_G`) and
+  planes and passengers from `1`; passenger `0` means none. `Fin` counts from `0`, so the parser
+  subtracts one.
+* **Front.** There must be at least one point. Points are strictly increasing in makespan and
+  strictly decreasing in cost, with one plan per point and one gap kind per gap.
+* **Plans (obligation 1).** The checker simulates each plan:
+  * legs must be hub–central flights of exact duration;
+  * planes must chain from `C_I` at time `0` and end in `C_G`;
+  * passengers are followed greedily, by earliest (departure, arrival) and the first leg on a
+    tie, and every leg of a passenger must be used.
+
+  The cost is the sum of `c` over central landings. The makespan is the maximum over planes of
+  the last arrival.
+* **Closed forms (obligations 2 and 4).** `M_1 = 2 · d_min · ⌈s/p⌉`, with
+  `⌈s/p⌉ = (s + p − 1)/p`, and `C_r = s · c_min`.
+* **Gaps (obligation 3).** The level below `M_{i+1}` is `⌊⌊(M_{i+1} − 1)/2⌋ / g⌋`, with `g`
+  the gcd of `d` (or `1` if `g = 0`), and the durations are divided by `g`. The C++ checker also
+  removes dominated cities before computing `L`, which does not change `L`; the Lean checker
+  keeps every city. A gap passes iff `C_i ≤ L(level)`, with `L = ∞` when no grouping fits.
+* **`forest` gaps.** `check` returns `false` on them for now.
 
 ## Trust assumptions
 
 * **Theorems.** Every theorem is checked by the Lean kernel and depends only on `propext`,
   `Classical.choice` and `Quot.sound`. The axiom audit enforces this. The examples use `decide`,
   which the kernel evaluates; `native_decide` is not used anywhere.
-* **Statements.** The definitions above are the trusted interface: a theorem is only as good as
-  the match between `Admissible`, `RoleConfig` and `oneplane` and the intended mathematics. The
-  docstrings tie each definition to the note.
-* **Future compiled checker (not written yet).** The checker will run on benchmark certificates
-  as a compiled Lean executable, or through `native_decide`. It will then also trust the Lean
-  compiler and runtime (`Lean.ofReduceBool`), not only the kernel. Its soundness theorem will be
-  kernel-checked; only its execution on large inputs will rely on the compiler.
+* **Statements.** The definitions are the trusted interface: a theorem is only as good as the
+  match between them and the intended mathematics. For the checker these are `Feasible`,
+  `planCost`, `planMakespan`, `achievable` and `IsParetoFront`. The docstrings tie each
+  definition to the note and the format.
+* **Plan semantics.** Times are natural numbers, as in format v1. The theorem therefore
+  quantifies over every plan with integer times. Rational times are **not covered**, although
+  the proof uses no integrality of waiting times: every bound comes from sums of integer
+  durations. Plans may fly central–central legs of any duration `dc`, may wait anywhere and may
+  hand passengers over anywhere. Planes must end in `C_G` (the format's semantics, not PDDL's;
+  see bridge B3 below).
+* **Parser.** `parseCert` and `ZenoCheck.lean` are **outside the verified statement**.
+  `Cert.check_sound` is about the `Cert` value, so a parser bug could make the checker verify a
+  different front than the file's. The parser only translates numbers and `1`-based indices; it
+  mirrors `readCertificate` in `src/zeno/certificate.cpp`.
+* **Compiled checker.** `lake exe zeno-check` runs `Cert.check` as compiled code. Its verdict
+  therefore also trusts the Lean compiler and runtime, not only the kernel. Only the soundness
+  theorem is kernel-checked. To avoid that trust, a certificate can be checked by the kernel
+  with `decide +kernel`, as `Examples.lean` does. That is practical for small certificates only.
 
 ## TODO
 
-Remaining items of the formalisation plan (proof review, §4). The P1 items have no time and no
-plans; P2 and later need plan semantics.
+Remaining items of the formalisation plan (proof review, §4).
+
+**Next: `forest` gaps.** A `forest` gap bound is `E(T)`, computed by the link-forest DP. Its
+soundness needs two things: every feasible plan (under (A1)) is weakly dominated by an
+admissible grouping (Theorem 4.3, P3), and the link-forest DP computes a lower bound on `E(T)`
+(link-forest lemma, P4). The checker then needs the forest DP as a computable function with that
+lower-bound theorem.
 
 **P1, combinatorial core (rest).**
 
@@ -186,24 +293,24 @@ plans; P2 and later need plan semantics.
       `isLeast_oneplane`).
 - [ ] `E(T)` as a definition (least cost over admissible groupings with `Σ|X_k| = s` and
       `δ(X_k) ≤ T`) and its monotonicity.
-- [ ] Lower bound `L(T)` (drops admissibility) and pairs upper bound `U(T)`, with `L ≤ E ≤ U`.
+- [ ] Pairs upper bound `U(T)`, with `L ≤ E ≤ U`.
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
       every arc bound `E(T)` from below.
-- [ ] Executable dual checker over a certificate format, with a soundness proof.
 - [ ] Executable admissibility check (union–find on the plane–city graph) proved equal to
       `Admissible`. This needs Lemma 2.2 (component form ⇔ parity witness).
 
 **P2, plan semantics and the relaxation.**
 
-- [ ] Route-based plans: per plane a list of legs (source, destination, departure and arrival
-      times; integers suffice for certificate format v1, `ℚ` in general); per passenger an
-      explicit list of legs; feasibility (chaining, capacity one, planes end in `C_G`), cost and
-      makespan, matching the plan semantics of `doc/certificate-format.md`.
-- [ ] Lemma 2.1 and counting (Lemma 3.2): at least `2t − p` landings, by leg counting.
-- [ ] Segments and the endpoint bound (Lemma 3.3 under (S)).
-- [ ] Lemma R: under (S) alone every plan `(C, M)` has `C ≥ L(⌊M/2⌋)`.
-- [ ] Decidable primal checker (a plan is feasible with the claimed cost and makespan).
-- [ ] First end-to-end verified fronts, wherever `L`-certificates close.
+- [x] Route-based plans with `ℕ` times (`Plan.lean`), matching format v1, with arbitrary
+      central flights.
+- [x] Counting (Lemma 3.2) by leg counting (`Feasible.le_sum_hubArrivals`).
+- [x] Segments and the endpoint bound under (S) (`PlaneFeasible.exists_segments`).
+- [x] Lemma R (`Feasible.exists_relaxation`), and `L` as a DP proved a lower bound.
+- [x] Primal checker (`planOK_feasible`) and the end-to-end checker for all-`relaxed`
+      certificates (`Cert.check_sound`), with a parser and `zeno-check`.
+- [ ] Rational (or any ordered-semiring) times.
+- [ ] Completeness of the simulation: the greedy passenger walk finds a route whenever the
+      C++ one does. Only soundness is proved.
 
 **P3, Theorem 4.3 (converse under (S) + (A1)).**
 
@@ -211,8 +318,7 @@ plans; P2 and later need plan semantics.
 - [ ] Cleaning (Lemma 3.1) as a suffix/prefix operation on passenger routes.
 - [ ] Hand-off abstraction (M6): `o` and `n` injective, hand-offs at a common city.
 - [ ] DS (direct selection) from a simple plan to a role configuration, then M7 via DS, SH, PAR.
-- [ ] Front theorem X3: the checker accepts ⇒ the listed points are achieved, weakly dominate
-      every plan and are strictly monotone.
+- [ ] Front theorem X3 for `forest` gaps (the `relaxed` case is `Cert.check_sound`).
 
 **P4.**
 

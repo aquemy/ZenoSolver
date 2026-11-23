@@ -14,3 +14,7 @@ rev = "v4.36.0"
 
 [[lean_lib]]
 name = "ZenoFront"
+
+[[lean_exe]]
+name = "zeno-check"
+root = "ZenoCheck"

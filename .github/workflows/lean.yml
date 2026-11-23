@@ -27,7 +27,7 @@ jobs:
 
       - name: Reject sorry and admit in the sources
         run: |
-          if grep -rnwE 'sorry|admit' lean/ZenoFront lean/ZenoFront.lean; then
+          if grep -rnwE 'sorry|admit' lean/ZenoFront lean/ZenoFront.lean lean/ZenoCheck.lean; then
             echo "::error::sorry or admit found in ZenoFront"
             exit 1
           fi
@@ -47,3 +47,17 @@ jobs:
       - name: Axiom audit
         working-directory: lean
         run: lake env lean scripts/CheckAxioms.lean
+
+      # The compiled checker: the all-relaxed certificates must be accepted, the corrupted
+      # ones rejected, and the ones with a forest gap reported as not supported.
+      - name: Build zeno-check
+        working-directory: lean
+        run: lake build zeno-check
+
+      - name: Check the test certificates
+        working-directory: lean
+        run: bash test/run.sh
+
+      - name: Time the largest certificate
+        working-directory: lean
+        run: time .lake/build/bin/zeno-check test/certificates/accepted/relaxed-r101.cert
