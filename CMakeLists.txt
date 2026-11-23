@@ -4,7 +4,7 @@
 ### 0) Check the CMake version
 ######################################################################################
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20)
 
 ######################################################################################
 ### 1) Define the project
@@ -49,6 +49,7 @@ set(FILES
     src/utils.cpp
     src/powerSetGenerator.cpp
     src/paretoExtraction.cpp
+    src/cli.cpp
     )
 
 add_executable(zenoSolver src/solver.cpp ${FILES})

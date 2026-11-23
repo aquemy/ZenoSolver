@@ -1,0 +1,41 @@
+# <target> <instance> pairs whose golden test currently fails. See cmake/Golden.cmake.
+# Each fix must remove the entries it repairs: a listed test that passes fails the suite.
+
+# p = 1: the front update only fires when MaxM < Mc, so each cost keeps the first PPP seen (zenoSolver also writes past S when p = 1).
+zenoSolver n2t2p1
+zenoSolver n2t3p1
+zenoSolver n3t2p1
+zenoSolver n3t3p1
+zenoSolver n3t3p1-C4D3
+zenoSolver_naive n2t2p1
+zenoSolver_naive n2t3p1
+zenoSolver_naive n3t2p1
+zenoSolver_naive n3t3p1
+zenoSolver_naive n3t3p1-C4D3
+zenoSolver_noDuplicate n2t2p1
+zenoSolver_noDuplicate n2t3p1
+zenoSolver_noDuplicate n3t2p1
+zenoSolver_noDuplicate n3t3p1
+zenoSolver_noDuplicate n3t3p1-C4D3
+
+# Algorithm 1 (LPT greedy) is not optimal for a PPP, see the lpt-counterexample instance.
+zenoSolver lpt-counterexample
+zenoSolver n3t5p2-C1D4r10
+zenoSolver_naive lpt-counterexample
+zenoSolver_naive n3t5p2-C1D4r10
+zenoSolver_noDuplicate lpt-counterexample
+zenoSolver_noDuplicate n3t5p2-C1D4r10
+
+# Other: Pareto extraction drops the 2nd point, zenoSolver never tries empty or repeated beta sets, noDuplicate keeps the last plan instead of the best one and misses some P3 schedules.
+zenoSolver n3t4p2
+zenoSolver n3t4p2-C2D3r10
+zenoSolver n3t5p3
+zenoSolver n4t4p2
+zenoSolver n4t4p2-C4D3
+zenoSolver n4t5p3-C5D2r10
+zenoSolver n5t4p2
+zenoSolver_naive n3t5p3
+zenoSolver_naive n4t5p3-C5D2r10
+zenoSolver_noDuplicate n3t5p3
+zenoSolver_noDuplicate n4t5p3-C5D2r10
+zenoSolver_noDuplicate n5t4p3-C4D5

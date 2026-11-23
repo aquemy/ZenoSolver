@@ -34,7 +34,7 @@ bool compMS(Si& i, Si& j)
     else if(i.s == WEST and j.s == EAST)
         return false;
     else
-        compM(i,j);
+        return compM(i,j); // The return was missing: undefined behaviour.
 }
 
 int ComputeUpperBound(int Mc, 
@@ -464,7 +464,7 @@ Plan noDuplicate::UpperBound(int Mc,
         }
 
         auto east = int{0};
-        auto west = int{p};
+        auto west = static_cast<int>(p);
         auto flights = int{0};
         auto ppp_s = e.size();
 
@@ -587,7 +587,7 @@ int noDuplicate::UpperBound(int Mc,
         }
 
         auto east = int{0};
-        auto west = int{p};
+        auto west = static_cast<int>(p);
         auto flights = int{0};
         auto ppp_s = e.size();
 

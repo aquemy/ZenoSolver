@@ -9,9 +9,9 @@
 #include <algorithm.hpp>
 #include <algorithm>
 
-//#ifdef _OPENMP
+#ifdef _OPENMP
 #include <omp.h>
-//#endif // _OPENMP
+#endif // _OPENMP
 
 bool test_combi(int k, int n, const std::vector<std::vector<int>>& expected, bool print = true) 
 {
@@ -257,6 +257,7 @@ bool test_ppp(int t, int p, int n, const std::vector<std::vector<int>>& expected
     std::cout << "FRONT SIZE: " << pareto.size() << std::endl;
     for(auto& i : pareto)
     	std::cerr << i.second << " " << i.first << std::endl;
+    return true; // Exploration only: nothing is checked.
 }
 
 bool test_ppp_(int t, int p, int n, const std::vector<std::vector<int>>& expected, bool print = true) 
@@ -392,6 +393,7 @@ bool test_ppp_(int t, int p, int n, const std::vector<std::vector<int>>& expecte
     std::cout << "FRONT SIZE: " << pareto.size() << std::endl;
     for(auto& i : pareto)
     	std::cerr << i.second << " " << i.first << std::endl;
+    return true; // Exploration only: nothing is checked.
 }
 
 
