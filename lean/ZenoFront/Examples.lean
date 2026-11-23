@@ -10,7 +10,8 @@ public import ZenoFront.Checker
 # Kernel-checked fronts
 
 Two certificates checked by the Lean **kernel** alone (`decide +kernel`, no compiled code), so
-with `Cert.check_sound` they give fully kernel-checked statements about concrete instances.
+with `Cert.check_sound_relaxed` they give fully kernel-checked statements about concrete
+instances.
 
 * `lptCounterexample`: the instance `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` of §5 of
   the theory note, on which the papers' greedy misses the point `(260, 60)`. Its exact front has
@@ -99,7 +100,7 @@ is `(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)`. In partic
 theorem lptCounterexample_front (dc : Fin 2 → Fin 2 → ℕ) :
     IsParetoFront (achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2)
       [(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)] :=
-  lptCounterexample.check_sound lptCounterexample_check dc
+  lptCounterexample.check_sound_relaxed lptCounterexample_check (by decide) dc
 
 /-- A one-point certificate (`relaxed-r100.cert`). -/
 def fourPlanes : Cert where

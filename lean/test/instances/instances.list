@@ -1,0 +1,10 @@
+# Random instances for the end-to-end check (lean/test/e2e.sh): <name>|<zeno arguments>.
+# @DATA@ expands to lean/test/instances. The r* instances with a forest gap in their
+# certificate exercise the converse (Theorem 4.7) and the sigma-DP bound.
+r155|-n 8 -t 11 -p 2 -d @DATA@/r155.dat
+r169|-n 7 -t 7 -p 4 -d @DATA@/r169.dat
+r225|-n 10 -t 15 -p 7 -d @DATA@/r225.dat
+r240|-n 7 -t 11 -p 6 -d @DATA@/r240.dat
+r25|-n 10 -t 18 -p 8 -d @DATA@/r25.dat
+r10|-n 7 -t 12 -p 5 -d @DATA@/r10.dat
+r101|-n 10 -t 14 -p 5 -d @DATA@/r101.dat

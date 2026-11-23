@@ -3,18 +3,21 @@
 `ZenoFront` is a Lean 4 / Mathlib library about the exact Pareto front of symmetric
 MultiZenoTravel. The informal proofs are in
 [`doc/theory/exact-front.md`](../doc/theory/exact-front.md); the statements follow the IDs of
-the proof review (Claim A, PAR, Claim B′, G, R).
+the proof review and of the note (Claim A, PAR, Claim B′, G, R, Theorem 4.7).
 
-It has two parts:
+It has three parts:
 
 * **the combinatorial core** (no time, no plans): admissibility, role configurations, the
-  support bound and the one-plane table;
+  support bound, the one-plane table, shrinking and merging partitions;
+* **the plan theory**: plan semantics with arbitrary central flights, counting, Lemma R, and the
+  converse under (S) and (A1) (Theorem 4.7): every feasible plan is weakly dominated by an
+  admissible partition;
 * **a verified checker for front certificates** (format v1 of
-  [`doc/certificate-format.md`](../doc/certificate-format.md)). It covers certificates whose
-  gaps are all `relaxed`. The
-  soundness theorem `Cert.check_sound` says that if `check` accepts, the listed points are
-  exactly the Pareto front of the instance. The front is that of *every* feasible plan, with any
-  central flights (format v1 plans fly none of them).
+  [`doc/certificate-format.md`](../doc/certificate-format.md)), for `relaxed` and `forest` gaps.
+  The soundness theorem `Cert.check_sound` says that if `check` accepts, the listed points are
+  exactly the Pareto front of the instance. The front is over *every* feasible plan: with any
+  central flights when all gaps are `relaxed`, and with any central flights satisfying (A1)
+  otherwise (format v1 plans fly none of them).
 
 Section [TODO](#todo) lists the rest.
 
@@ -32,36 +35,55 @@ lake exe zeno-check FILE  # check a certificate
 bash test/run.sh          # check the test certificates against their expected verdicts
 ```
 
+End to end, from the repository root, with the C++ solver built (`cmake --preset release`):
+
+```sh
+bash lean/test/e2e.sh build/release/zeno lean/.lake/build/bin/zeno-check
+```
+
+It solves every golden instance (`tests/golden/instances.txt`) and the random instances of
+`lean/test/instances/` with the C++ solver, writes their certificates, and requires both
+`zeno check` and `zeno-check` to accept every one. Five of the random instances have a `forest`
+gap.
+
 The axiom audit fails if any declaration of a `ZenoFront` module uses an axiom other than
 `propext`, `Classical.choice` and `Quot.sound`. It rejects `sorryAx` and `native_decide`.
-CI (`.github/workflows/lean.yml`) runs all of this on every push and pull request that touches
-`lean/**`, plus a `grep` for `sorry` and `admit`.
+CI (`.github/workflows/lean.yml`) runs all of this, end to end included, on every push and pull
+request that touches `lean/**` or the C++ solver, plus a `grep` for `sorry` and `admit`.
 
-`zeno-check FILE` prints one of three verdicts:
+`zeno-check FILE` prints one of two verdicts:
 
 * `accepted` (exit code 0): `Cert.check` returned `true`;
-* `rejected: <reason>` (exit code 1): the file is malformed, or an obligation fails;
-* `not supported: <reason>` (exit code 2): every supported obligation holds, but a gap names the
-  `forest` bound.
+* `rejected: <reason>` (exit code 1): the file is malformed, or an obligation fails.
 
 Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
-verified function. On the largest sample, `relaxed-r101.cert`, the check takes about 0.13 s on
-an Apple-silicon laptop: 62 KB, `n = 10`, `t = 14`, `p = 5`, 89 points and 88 gaps.
+verified function.
 
-`test/certificates/` holds three groups:
+Timings on an Apple-silicon laptop, for the compiled checker:
+* `relaxed-r101.cert`: about 0.1 s (62 KB, `n = 10`, `t = 14`, `p = 5`, 89 points, 88
+  `relaxed` gaps).
+* `forest-r25.cert`: about 0.16 s (38 KB, `n = 10`, `t = 18`, `p = 8`, 45 points, one `forest`
+  gap).
+* `forest-r155.cert`: about 1 s, the slowest sample. Its forest gap has a high level, and the
+  σ-DP runs over `s = 20` landings.
+* The end-to-end run, 34 certificates: about 1.7 s, solver included.
 
-* `accepted/`: certificates written by the C++ solver whose gaps are all `relaxed`;
-* `rejected/`: corrupted copies, each with a comment saying what was broken (wrong cost, wrong
-  duration, broken passenger route, asymmetric durations, missing `S`, non-monotone points, a
-  missing point, a `forest` gap relabelled `relaxed`, a truncated file);
-* `unsupported/`: certificates with a `forest` gap.
+`test/certificates/` holds two groups:
+
+* `accepted/`: certificates written by the C++ solver, with `relaxed` and `forest` gaps;
+* `rejected/`: corrupted copies, each with a comment saying what was broken:
+  * a wrong cost, a wrong duration, a broken passenger route;
+  * asymmetric durations, a missing `S`, non-monotone points;
+  * a missing point closed by neither bound;
+  * a `forest` gap relabelled `relaxed`, a `forest` gap without `A1`;
+  * a truncated file.
 
 ## Contents
 
 | File | Content | Main declarations |
 |---|---|---|
 | `ZenoFront/Model.lean` | Instance (`n` cities, `d c : Fin n → ℕ`, `t` passengers, `p` planes, `1 ≤ p ≤ t`), `s = 2t − p`, groupings `X : Fin p → Multiset (Fin n)`, load `δ`, cost | `Instance`, `Instance.s`, `Groups`, `load`, `cost`, `size`, `totalCost`, `maxLoad` |
-| `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.3, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
+| `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.5, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
 | `ZenoFront/Roles.lean` | Role configurations, PAR and its converse | `RoleConfig`, `RoleConfig.groups`, `RoleConfig.witness` |
 | `ZenoFront/SupportBound.lean` | Claim B′, `t − p` part | `touched`, `edgeCount` |
 | `ZenoFront/MinimalWitness.lean` | Claim B′, `p − 1` part, and the combined `min(p − 1, t − p)` bound | `edgeVec`, `coordSum` |
@@ -69,6 +91,9 @@ an Apple-silicon laptop: 62 KB, `n = 10`, `t = 14`, `p = 5`, 89 points and 88 ga
 | `ZenoFront/Plan.lean` | Locations, legs, plans, flight network (with arbitrary central flights `dc`), feasibility, cost, makespan | `Loc`, `Leg`, `Plan`, `Network`, `Flies`, `IsRoute`, `Feasible`, `planCost`, `planMakespan` |
 | `ZenoFront/PlanBounds.lean` | Counting, segments, trimming, Lemma R | `hubArrivals`, `ciDepartures`, `cgArrivals` |
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
+| `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
+| `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
+| `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions (the `forest` gap bound), memoised, with dominance merging | `groupOption`, `sigmaDP`, `domRep`, `sigmaLayer`, `forestBoundAt` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
 | `ZenoFront/Parse.lean` | Parser for the text format (untrusted) | `parseCert` |
@@ -81,7 +106,7 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 
 **Admissibility (`Admissible.lean`)**
 
-* `IsParityWitness.card_add_one_le`: Lemma 2.3, `|h k| + 1 ≤ |X_k|` for every witness (forest
+* `IsParityWitness.card_add_one_le`: Lemma 2.5, `|h k| + 1 ≤ |X_k|` for every witness (forest
   or not).
 * `IsParityWitness.sum_card_add_le`: `Σ_k |h k| + p ≤ Σ_k |X_k|`.
 * `Admissible.card_pos`: every group of an admissible grouping is non-empty.
@@ -166,6 +191,51 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `load_eq_scale_mul`, `load_scaled_le_of_load_le`: loads in original units are `g ×` loads in
   scaled units, and `δ ≤ h` implies `δ/g ≤ ⌊h/g⌋`.
 
+**Shrinking and merging (`Shrink.lean`)**
+
+* `Admissible.exists_shrink` (SH, partition form): an admissible grouping with at least
+  `s ≥ p` landings and `s ≡ p (mod 2)` contains an admissible grouping with exactly `s`
+  landings.
+* `IsParityWitness.size_mod_two`: an admissible grouping has `Σ_k |X_k| ≡ p (mod 2)`.
+* `Admissible.map`: relabelling the cities by any map keeps a grouping admissible.
+
+**Converse (`Converse.lean`)**
+
+* `PlaneFeasible.two_mul_load_landings_le` (**Step 1**): under (S) and (A1), a plane's flight
+  time is at least `2 δ` of all its central landings.
+* `countP_landingRecs_entry`, `countP_landingRecs_exit`, `PlaneFeasible.cntA_eq`: the segment
+  types of the plan after Step 1, read off the routes. Landings entered from `C_I` are the legs
+  `C_I → x`, landings exited towards `C_G` are the legs leaving `x` not towards `C_I`, and
+  `#A = #Ā + 1` per plane (Lemma 2.1).
+* `exists_transfer` (**cleaning**): every passenger route has a leg `C_I → x` followed by a leg
+  leaving `x` not towards `C_I`.
+* `Feasible.exists_admissible` (**Theorem 4.7**): under (S) and (A1), with `p ≤ t`, every
+  feasible plan with cost `C` and makespan `M` yields an admissible partition with
+  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M` for every plane, and `Σ_k c(X_k) ≤ C`.
+
+The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the plan.
+* **Step 1:** a central leg counts as passing through `C_G`, and under (A1) it lasts at least
+  the weights of its two endpoints.
+* **Cleaning:** each passenger uses its last departure from `C_I` and the next leg.
+* **DS:** all `A` and `Ā` landings are kept as crossings, and each city gets
+  `min(#B, #B̄)` drop-off/pick-up pairs. This is at least as many passengers as DS selects. The
+  count `passengers at x ≤ #A_x + min(#B_x, #B̄_x)` comes from two injections: passengers into
+  landings entered from `C_I`, and passengers into landings exited towards `C_G`.
+* **PAR**, then **SH** in partition form (`Admissible.exists_shrink`).
+
+**Forest bound (`AdmissibleBound.lean`)**
+
+* `groupOption_le_cost`: a group with witness set `H` costs at least
+  `c(H) + G[m − |H|][T − δ(H)]`.
+* `sigmaDP_le_totalCost`: the σ-DP over planes, with state the odd-degree city set `σ`, is at
+  most the cost of every admissible grouping whose witness lies in `R`.
+* `domRep_le`, `sigmaDP_domReps_le_totalCost`: cities are merged into non-dominated
+  representatives (no slower, no more expensive). This keeps the bound valid and makes `R`
+  small: at most 4 cities on the samples.
+* `sigmaLayer_getD`, `sigmaValue_eq`: the memoised σ-DP agrees with `sigmaDP`.
+* `forestBoundAt_le_totalCost`: the forest bound the checker computes is at most the cost of
+  every admissible partition into `p` groups of total size `s` with loads `≤ T`.
+
 **Checker (`Simulate.lean`, `Checker.lean`, `Examples.lean`)**
 
 * `planOK_feasible`: a plan accepted by the simulation is feasible, for every `dc`.
@@ -176,12 +246,17 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `Feasible.minOf_le_cost` (**obligation 4**): under (S), every feasible plan costs
   `≥ s · c_min`.
 * `Cert.gapBound_le` (**obligation 3**, `relaxed`): a feasible plan with makespan below `M`
-  costs at least the relaxed bound at the gap level of `M`.
+  costs at least the relaxed bound at the gap level of `M`, for every `dc`.
+* `Cert.forestGapBound_le` (**obligation 3**, `forest`): under (A1), a feasible plan with
+  makespan below `M` costs at least the forest bound at the gap level of `M`. The proof chains
+  Theorem 4.7 and `forestBoundAt_le_totalCost`.
 * `exists_le_of_gapsOK`: the domination argument along the front.
-* `Cert.check_sound` (**soundness**): `C.check = true` implies, for every `dc`,
+* `Cert.check_sound` (**soundness**): `C.check = true` implies
   `IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front`. That is, every point is
   achieved by a feasible plan, every feasible plan is weakly dominated by a point, and the points
-  are pairwise incomparable.
+  are pairwise incomparable. It holds for every `dc` satisfying (A1), or for every `dc` if all
+  gaps are `relaxed`.
+* `Cert.check_sound_A1`, `Cert.check_sound_relaxed`: the two cases of `check_sound`.
 * `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`: equivalently, a pair is listed
   iff it is a minimal achievable (cost, makespan) pair.
 * `Examples.lptCounterexample_front`: checked by the kernel alone (`decide +kernel`, about
@@ -207,7 +282,7 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
   * `|h k| ≡ |X_k| + 1 (mod 2)`;
   * every city in an even number of the `h k`.
 
-  It is the `T`-join of Lemma 2.2, as a 0/1 matrix. It need not be a forest. A witness found by
+  It is the `T`-join of Lemma 2.4, as a 0/1 matrix. It need not be a forest. A witness found by
   the σ-DP is fine as a certificate of admissibility, but Theorem 4.1's plan construction needs
   a forest. A certificate that wants the `min(p − 1, t − p)` bound on touched cities should send
   an inclusion-minimal witness (`card_touched_le_of_minimal_subset`).
@@ -244,8 +319,13 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * **Gaps (obligation 3).** The level below `M_{i+1}` is `⌊⌊(M_{i+1} − 1)/2⌋ / g⌋`, with `g`
   the gcd of `d` (or `1` if `g = 0`), and the durations are divided by `g`. The C++ checker also
   removes dominated cities before computing `L`, which does not change `L`; the Lean checker
-  keeps every city. A gap passes iff `C_i ≤ L(level)`, with `L = ∞` when no grouping fits.
-* **`forest` gaps.** `check` returns `false` on them for now.
+  keeps every city. A `relaxed` gap passes iff `C_i ≤ L(level)`, with `L = ∞` when no grouping
+  fits.
+* **`forest` gaps.** These need `A1` among the assumptions. A gap passes iff `C_i ≤ E(level)`,
+  where `E` is the least cost of an admissible partition. The C++ solver computes `E` with the
+  link-forest DP. The Lean checker computes it with the σ-DP over the non-dominated cities.
+  Both are exact, and they agree on every sample. The Lean side proves only the lower-bound
+  direction, which is all soundness needs.
 
 ## Trust assumptions
 
@@ -259,9 +339,12 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * **Plan semantics.** Times are natural numbers, as in format v1. The theorem therefore
   quantifies over every plan with integer times. Rational times are **not covered**, although
   the proof uses no integrality of waiting times: every bound comes from sums of integer
-  durations. Plans may fly central–central legs of any duration `dc`, may wait anywhere and may
-  hand passengers over anywhere. Planes must end in `C_G` (the format's semantics, not PDDL's;
-  see bridge B3 below).
+  durations.
+  * Plans may fly central–central legs of any duration `dc`, may wait anywhere and may hand
+    passengers over anywhere.
+  * Planes must end in `C_G`. This is the format's semantics, not PDDL's; see bridge B3 below.
+  * With `forest` gaps, the theorem assumes (A1) on `dc` (`dc i j ≥ d i + d j`, including
+    `i = j`). Every PDDL file the generator emits satisfies it.
 * **Parser.** `parseCert` and `ZenoCheck.lean` are **outside the verified statement**.
   `Cert.check_sound` is about the `Cert` value, so a parser bug could make the checker verify a
   different front than the file's. The parser only translates numbers and `1`-based indices; it
@@ -273,31 +356,26 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 
 ## TODO
 
-Remaining items of the formalisation plan (proof review, §4).
-
-**Next: `forest` gaps.** A `forest` gap bound is `E(T)`, computed by the link-forest DP. Its
-soundness needs two things: every feasible plan (under (A1)) is weakly dominated by an
-admissible grouping (Theorem 4.3, P3), and the link-forest DP computes a lower bound on `E(T)`
-(link-forest lemma, P4). The checker then needs the forest DP as a computable function with that
-lower-bound theorem.
+Remaining items of the formalisation plan (proof review, §4). Theorem 4.1 (achievability) is not
+needed for soundness: the plan of every listed point is checked by simulation.
 
 **P1, combinatorial core (rest).**
 
-- [ ] SH (shrink): a role configuration with `Σ_k (|D_k| + a_k) > t` can drop one unit, keeping
-      loads and cost from increasing.
-- [ ] AP (add a plane, Lemma 4.4): an admissible `q`-grouping with `Σ|X_k| = 2t − q`, `t ≥ q + 1`
+- [x] SH in partition form (`Admissible.exists_shrink`); the role-configuration form is not
+      needed.
+- [ ] AP (add a plane, Lemma 4.6): an admissible `q`-grouping with `Σ|X_k| = 2t − q`, `t ≥ q + 1`
       gives an admissible `(q + 1)`-grouping with one landing less, no larger cost or load.
-- [ ] σ-DP of Claim C: definition over states `(j, σ)` with `|σ| ≤ min(p − 1, t − p)`, plane
-      options `(m, H)` with `|H| ≡ m + 1`, `|H| ≤ m − 1`, cost `c(H) + G[m − |H|][T − δ(H)]`.
-      Soundness (`DP ≥ E`, from `Admissible`) and completeness (`DP ≤ E`, from Claim B′ and
-      `isLeast_oneplane`).
-- [ ] `E(T)` as a definition (least cost over admissible groupings with `Σ|X_k| = s` and
-      `δ(X_k) ≤ T`) and its monotonicity.
-- [ ] Pairs upper bound `U(T)`, with `L ≤ E ≤ U`.
+      Needed only for bridge B3.
+- [x] The σ-DP as a lower bound on `E(T)` (`forestBoundAt_le_totalCost`).
+- [ ] The σ-DP's other direction (`DP ≥ E`, so the DP is exact), and its state bound
+      `|σ| ≤ min(p − 1, t − p)` from Claim B′. Neither is needed for soundness. The bound would
+      only speed up instances with many non-dominated cities, which the checker does not prune
+      by.
+- [ ] `E(T)` as a definition and its monotonicity; pairs upper bound `U(T)` with `L ≤ E ≤ U`.
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
-      every arc bound `E(T)` from below.
+      every arc bound `E(T)` from below (sparse certificates).
 - [ ] Executable admissibility check (union–find on the plane–city graph) proved equal to
-      `Admissible`. This needs Lemma 2.2 (component form ⇔ parity witness).
+      `Admissible`. This needs Lemma 2.4 (component form ⇔ parity witness).
 
 **P2, plan semantics and the relaxation.**
 
@@ -306,28 +384,27 @@ lower-bound theorem.
 - [x] Counting (Lemma 3.2) by leg counting (`Feasible.le_sum_hubArrivals`).
 - [x] Segments and the endpoint bound under (S) (`PlaneFeasible.exists_segments`).
 - [x] Lemma R (`Feasible.exists_relaxation`), and `L` as a DP proved a lower bound.
-- [x] Primal checker (`planOK_feasible`) and the end-to-end checker for all-`relaxed`
-      certificates (`Cert.check_sound`), with a parser and `zeno-check`.
+- [x] Primal checker (`planOK_feasible`) and the end-to-end checker, with a parser and
+      `zeno-check`.
 - [ ] Rational (or any ordered-semiring) times.
 - [ ] Completeness of the simulation: the greedy passenger walk finds a route whenever the
       C++ one does. Only soundness is proved.
 
-**P3, Theorem 4.3 (converse under (S) + (A1)).**
+**P3, Theorem 4.7 (converse under (S) + (A1)).**
 
-- [ ] Step 1: removing central flights under (A1).
-- [ ] Cleaning (Lemma 3.1) as a suffix/prefix operation on passenger routes.
-- [ ] Hand-off abstraction (M6): `o` and `n` injective, hand-offs at a common city.
-- [ ] DS (direct selection) from a simple plan to a role configuration, then M7 via DS, SH, PAR.
-- [ ] Front theorem X3 for `forest` gaps (the `relaxed` case is `Cert.check_sound`).
+- [x] Step 1, cleaning, DS, SH and PAR, done directly on the routes
+      (`Feasible.exists_admissible`).
+- [x] Front theorem X3 for `forest` gaps (`Cert.check_sound`, `Cert.check_sound_A1`).
 
 **P4.**
 
 - [ ] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
-      front under (S) + (A1).
+      front under (S) + (A1). Needs AP.
 - [ ] Theorem 4.1: forest `T`-join, links, schedule with drop-offs first and at most one
-      pick-up per plane, makespan = largest load.
-- [ ] Link-forest lemma and tree-DP potentials; Pareto-semiring DP (PS); dominance and
-      closed-form ends of the front.
+      pick-up per plane, makespan = largest load. Not needed by the checker.
+- [ ] Link-forest lemma (2.6, 2.7) and the tree DP (Theorem 7.5). This would replace the σ-DP
+      by the C++ forest DP for instances with many non-dominated cities.
+- [ ] Pareto-semiring DP (PS); closed-form ends of the front.
 
 **P5, non-symmetric.**
 

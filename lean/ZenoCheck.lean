@@ -6,11 +6,10 @@ import ZenoFront.Parse
 `lake exe zeno-check FILE` parses a certificate (format v1), runs the verified checker
 `ZenoFront.Cert.check`, and prints
 
-* `accepted: …` (exit code 0) when `check` returns `true`: by `ZenoFront.Cert.check_sound`, the
-  listed points are then the exact Pareto front of the instance;
-* `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails;
-* `not supported: <reason>` (exit code 2) when every obligation the checker supports holds but a
-  gap names the `forest` bound, which needs the converse theorem (not formalised yet).
+* `accepted: …` (exit code 0) when `check` returns `true`. By `ZenoFront.Cert.check_sound`, the
+  listed points are then the exact Pareto front of the instance: for every table of central
+  flight durations if all gaps are `relaxed`, and for every table satisfying (A1) otherwise;
+* `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails.
 
 Only the `accepted` verdict is backed by the theorem; the reasons are diagnostics recomputed
 here, outside the verified function.
@@ -38,10 +37,9 @@ def planReason (C : Cert) (i : ℕ) (P : Plan C.n C.t C.p) (x : ℕ × ℕ) : Op
           not {x.1} and {x.2}"
       else none
 
-/-- The failed obligations, and the unsupported ones (`forest` gaps). -/
-def reasons (C : Cert) : Array String × Array String := Id.run do
+/-- The failed obligations. -/
+def reasons (C : Cert) : Array String := Id.run do
   let mut errs : Array String := #[]
-  let mut unsupported : Array String := #[]
   if !C.headerOK then
     errs := errs.push "the header needs 1 ≤ n, 1 ≤ p ≤ t, symmetric durations (d = dbar) and \
       assumption S"
@@ -64,13 +62,18 @@ def reasons (C : Cert) : Array String × Array String := Id.run do
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
       | .forest =>
-        unsupported := unsupported.push s!"gap {i + 1} uses the forest bound, which the Lean \
-          checker does not support yet"
+        if !C.assumptions.contains "A1" then
+          errs := errs.push s!"gap {i + 1} uses the forest bound, which needs assumption A1"
+        else
+          let b := C.forestGapBound table y.2
+          if !decide ((x.1 : WithTop ℕ) ≤ b) then
+            errs := errs.push s!"gap {i + 1}: the forest bound {showBound b} is below the cost \
+              {x.1}"
       | .relaxed =>
         let b := C.gapBound table y.2
         if !decide ((x.1 : WithTop ℕ) ≤ b) then
           errs := errs.push s!"gap {i + 1}: the relaxed bound {showBound b} is below the cost {x.1}"
-  return (errs, unsupported)
+  return errs
 
 def main (args : List String) : IO UInt32 := do
   let [file] := args | do
@@ -83,12 +86,11 @@ def main (args : List String) : IO UInt32 := do
     return 1
   | .ok C =>
     if C.check then
-      IO.println s!"accepted: the {C.front.length} points are the Pareto front \
-        (all gaps relaxed; ZenoFront.Cert.check_sound)"
+      let forest := (C.gaps.filter (· = .forest)).length
+      let scope := if forest = 0 then "all gaps relaxed: for every central flight table"
+        else s!"{forest} forest gap(s): for every central flight table satisfying A1"
+      IO.println s!"accepted: the {C.front.length} points are the Pareto front ({scope}; \
+        ZenoFront.Cert.check_sound)"
       return 0
-    let (errs, unsupported) := reasons C
-    if errs.isEmpty && !unsupported.isEmpty then
-      IO.println s!"not supported: {unsupported[0]!} ({unsupported.size} forest gap(s))"
-      return 2
-    IO.println s!"rejected: {errs.getD 0 "an obligation fails"}"
+    IO.println s!"rejected: {(reasons C).getD 0 "an obligation fails"}"
     return 1

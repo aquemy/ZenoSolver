@@ -13,3 +13,6 @@ public import ZenoFront.Simulate
 public import ZenoFront.Checker
 public import ZenoFront.Parse
 public import ZenoFront.Examples
+public import ZenoFront.Shrink
+public import ZenoFront.Converse
+public import ZenoFront.AdmissibleBound

@@ -16,7 +16,7 @@ public import Mathlib.Data.Fintype.Powerset
 
 A grouping `X_1, …, X_p` is *admissible* (`doc/theory/exact-front.md`, §2) when, in the bipartite
 graph `H` joining plane `k` to city `i` whenever `i ∈ X_k`, every connected component contains an
-even number of *even planes* (planes with `|X_k|` even). By Lemma 2.2 of the note this is the
+even number of *even planes* (planes with `|X_k|` even). By Lemma 2.4 of the note this is the
 same as the existence of a `T`-join of `H`, `T` being the set of even planes.
 
 We take the `T`-join form as the definition (Claim A of the note, §7): a *parity witness* is a
@@ -26,7 +26,7 @@ family `h : Fin p → Finset (Fin n)` (the set of `T`-join edges at each plane) 
 * `|h k| ≡ |X_k| + 1 (mod 2)` (even planes have odd degree, odd planes even degree);
 * every city `i` lies in an even number of the `h k` (cities have even degree).
 
-The component form of Lemma 2.2 is not formalised yet (see `lean/README.md`).
+The component form of Lemma 2.4 is not formalised yet (see `lean/README.md`).
 
 ## Main definitions
 
@@ -36,7 +36,7 @@ The component form of Lemma 2.2 is not formalised yet (see `lean/README.md`).
 
 ## Main results
 
-* `ZenoFront.IsParityWitness.card_add_one_le`: Lemma 2.3, `|h k| + 1 ≤ |X_k|`.
+* `ZenoFront.IsParityWitness.card_add_one_le`: Lemma 2.5, `|h k| + 1 ≤ |X_k|`.
 * `ZenoFront.Admissible.card_pos`: every group of an admissible grouping is non-empty.
 * `ZenoFront.IsParityWitness.sum_card_add_le`: `Σ_k |h k| + p ≤ Σ_k |X_k|`.
 -/
@@ -62,7 +62,7 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   col : ∀ i, Even #{k | i ∈ h k}
 
 /-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
-the component condition by Lemma 2.2). -/
+the component condition by Lemma 2.4). -/
 def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
 
 theorem isParityWitness_iff (X : Groups n p) (h : Fin p → Finset (Fin n)) :
@@ -97,7 +97,7 @@ theorem card_le_card_toFinset (hw : IsParityWitness X h) (k : Fin p) :
     (h k).card ≤ (X k).toFinset.card :=
   card_le_card (hw.subset k)
 
-/-- Lemma 2.3 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
+/-- Lemma 2.5 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
 `T`-join, not only for forests: `|h k| ≤ |supp X_k| ≤ |X_k|`, and equality is excluded by
 parity. -/
 theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
@@ -107,7 +107,7 @@ theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
   have h₃ := hw.row k
   omega
 
-/-- Summing Lemma 2.3: `Σ_k |h k| + p ≤ Σ_k |X_k|`. -/
+/-- Summing Lemma 2.5: `Σ_k |h k| + p ≤ Σ_k |X_k|`. -/
 theorem sum_card_add_le (hw : IsParityWitness X h) :
     ∑ k, (h k).card + p ≤ size X := by
   have := Finset.sum_le_sum fun k (_ : k ∈ (univ : Finset (Fin p))) => hw.card_add_one_le k
