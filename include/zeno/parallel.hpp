@@ -32,27 +32,29 @@ void parallelFor(std::size_t count, unsigned threads, Body&& body)
     std::atomic<std::size_t> next{0};
     std::exception_ptr error;
     std::mutex errorMutex;
-    {
-        std::vector<std::jthread> pool;
-        pool.reserve(workers);
-        for(std::size_t w = 0; w < workers; ++w)
-            pool.emplace_back([&] {
-                for(std::size_t i = next++; i < count; i = next++)
+    // std::thread rather than std::jthread: Apple's libc++ does not provide
+    // jthread on every supported Xcode.
+    std::vector<std::thread> pool;
+    pool.reserve(workers);
+    for(std::size_t w = 0; w < workers; ++w)
+        pool.emplace_back([&] {
+            for(std::size_t i = next++; i < count; i = next++)
+            {
+                try
                 {
-                    try
-                    {
-                        body(i);
-                    }
-                    catch(...)
-                    {
-                        const std::scoped_lock lock(errorMutex);
-                        if(!error)
-                            error = std::current_exception();
-                        next = count;
-                    }
+                    body(i);
                 }
-            });
-    }
+                catch(...)
+                {
+                    const std::scoped_lock lock(errorMutex);
+                    if(!error)
+                        error = std::current_exception();
+                    next = count;
+                }
+            }
+        });
+    for(auto& thread : pool)
+        thread.join();
     if(error)
         std::rethrow_exception(error);
 }
