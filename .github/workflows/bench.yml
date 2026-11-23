@@ -66,6 +66,8 @@ jobs:
     env:
       CXX: clang++-18
       MACHINE: ${{ vars.ZS_BENCH_MACHINE || 'ci-ubuntu-24.04' }}
+      ZS_BENCH_THRESHOLD: ${{ vars.ZS_BENCH_THRESHOLD }}
+      ZS_BENCH_MIN_DELTA_MS: ${{ vars.ZS_BENCH_MIN_DELTA_MS }}
     steps:
       - uses: actions/checkout@v4
       - name: Build
@@ -89,7 +91,9 @@ jobs:
           for f in out/*.json; do
             for base in bench/baselines/*/"$MACHINE/$(basename "$f")"; do
               [ -f "$base" ] || continue
-              bench/tools/check_regression.py "$base" "$f" || status=1
+              # Shared runners are noisy: 25% and 5 ms unless the repository
+              # variables say otherwise (a dedicated runner can use 10%).
+              bench/tools/check_regression.py "$base" "$f" --threshold "${ZS_BENCH_THRESHOLD:-0.25}" --min-delta-ms "${ZS_BENCH_MIN_DELTA_MS:-5}" || status=1
             done
           done
           exit $status
