@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # End to end: solve every golden instance (tests/golden/instances.txt) and every random instance
-# (lean/test/instances/instances.txt) with the C++ solver, write its certificate, and check it
+# (lean/test/instances/instances.list) with the C++ solver, write its certificate, and check it
 # with the Lean checker. Every certificate must be accepted. This guards against format drift
 # between the C++ writer and the Lean parser and checker.
 # Usage, from the repository root: bash lean/test/e2e.sh ZENO ZENO_CHECK [OUT_DIR]
@@ -43,7 +43,7 @@ run_list() {
 }
 
 run_list tests/golden/instances.txt tests/golden/data
-run_list lean/test/instances/instances.txt lean/test/instances
+run_list lean/test/instances/instances.list lean/test/instances
 echo "$total certificates checked, $forest with a forest gap"
 if [ "$forest" -eq 0 ]; then
     echo "FAIL  no certificate has a forest gap: the forest path is not exercised"
