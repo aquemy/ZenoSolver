@@ -76,6 +76,7 @@ add_library(zeno_core STATIC
     src/zeno/instance.cpp
     src/zeno/io.cpp
     src/zeno/legacy_input.cpp
+    src/zeno/ns.cpp
     src/zeno/one_plane.cpp
     src/zeno/plan.cpp
     src/zeno/reduce.cpp

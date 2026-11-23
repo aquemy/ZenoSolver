@@ -7,7 +7,7 @@ Exact Pareto fronts (total cost, makespan) of MultiZenoTravel planning instances
     zeno -n 10 -t 8 -p 3 -C 2 -D 2 -r 100 --stats
     zeno -n 2 -t 5 -p 2 -d durations-and-costs.dat
 
-`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. It currently handles instances with symmetric durations, which includes every instance the generator emits; non-symmetric instances are rejected.
+`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. For instances with symmetric durations, which includes every instance the generator emits, the front is exact. For non-symmetric instances (`-E`/`-W`, or 3-line data files) `zeno` prints points achieved by simulated plans and reports on stderr which gaps between them a lower bound certifies, and whether the whole front is therefore exact.
 
 How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints of E(T), the cheapest admissible partition of the 2t − p landings into p groups whose durations each sum to at most T. `zeno` brackets E between a relaxation L and the pairs and chains bounds U and U3 on every level, and runs the exact link-forest dynamic program only on the levels that the bracket and the monotonicity of E leave open. The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) scheduled each PPP greedily, which is not optimal; they were removed (last in commit 84ca92a), and their timings are kept in `bench/baselines/legacy` for comparison.
 
@@ -71,7 +71,8 @@ Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once
     zeno pddl [instance options] [-O FILE] [--no-front]
     zeno generate [instance options] [-O FILE]
 
-- `front` (the default) prints the front; `--plans` adds a plan for every point, checked by simulation; `--certificate` writes a certificate (`doc/certificate-format.md`).
+- `front` (the default) prints the front; `--plans` adds a plan for every point, checked by simulation; `--certificate` writes a certificate (`doc/certificate-format.md`, symmetric instances).
+- Non-symmetric instances get a certified bracket (`zeno/ns.hpp`): the upper points come from link forests in which every plane picks up at most once, or drops off at most once, scheduled and simulated with their waiting; the lower bounds are lemma R (no assumption) and a role relaxation (Theorem 6.1, assumption A1-NS). On random tiny instances checked against the brute-force oracle, 95% of the upper fronts are the true front and 73% of the brackets close completely.
 - `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
 - `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 

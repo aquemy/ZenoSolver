@@ -121,11 +121,13 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
                     root(q, jk + rr) = std::min(root(q, jk + rr), step.cost + asRoot);
                     if(!childAllowed || jk + rr + 1 > s)
                         continue;
-                    for(int a = 0; a < n; ++a)
+                    // A child plane picks its passenger up in its parent
+                    // edge's city a: that landing weighs pick[a].
+                    for(int a : r.byPick)
                     {
-                        const Cost filler = G(rr, rootBudget - r.d[at(a)]);
+                        const Cost filler = G(rr, rootBudget - r.pick[at(a)]);
                         if(isInf(filler))
-                            break; // d increases with a: less budget
+                            break; // by increasing pick weight: less budget
                         Cost& cell = sub(a, q, jk + rr + 1);
                         cell = std::min(cell, r.c[at(a)] + step.cost + filler);
                     }
@@ -140,9 +142,11 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
         for(int j = 1; j <= s; ++j)
         {
             candidates.clear();
-            for(int b = 0; b < n; ++b)
+            // The parent drops the passenger in the child edge's city b: that
+            // landing weighs drop[b] in the parent's load (tau).
+            for(int b : r.byDrop)
             {
-                const Time db = r.d[at(b)];
+                const Time db = r.drop[at(b)];
                 if(db > T)
                     break;
                 const Cost cb = r.c[at(b)];
@@ -211,7 +215,7 @@ void ForestProgram::buildKids(int q, int j, int step, int parentIndex, LinkFores
     const KidStep& k = kids(q, j)[at(step)];
     if(k.b < 0)
         return; // the empty multiset
-    buildNode(k.qc, k.jc, k.b, T_ - r_.d[at(k.b)], parentIndex, out);
+    buildNode(k.qc, k.jc, k.b, T_ - r_.pick[at(k.b)], parentIndex, out);
     buildKids(q - k.qc, j - 1 - k.jc, k.previous, parentIndex, out);
 }
 
