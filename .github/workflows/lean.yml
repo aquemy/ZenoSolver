@@ -1,0 +1,49 @@
+name: Lean
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "lean/**"
+      - ".github/workflows/lean.yml"
+  pull_request:
+    paths:
+      - "lean/**"
+      - ".github/workflows/lean.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and audit ZenoFront
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject sorry and admit in the sources
+        run: |
+          if grep -rnwE 'sorry|admit' lean/ZenoFront lean/ZenoFront.lean; then
+            echo "::error::sorry or admit found in ZenoFront"
+            exit 1
+          fi
+
+      # Installs elan and the pinned toolchain, downloads the Mathlib cache
+      # (`lake exe cache get`, never a source build of Mathlib) and runs `lake build`.
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          use-mathlib-cache: true
+          build-args: --wfail
+          test: false
+          lint: false
+
+      # Fails if any ZenoFront declaration depends on an axiom other than propext,
+      # Classical.choice and Quot.sound (this rejects sorryAx and native_decide).
+      - name: Axiom audit
+        working-directory: lean
+        run: lake env lean scripts/CheckAxioms.lean
