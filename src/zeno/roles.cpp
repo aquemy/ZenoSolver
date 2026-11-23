@@ -169,6 +169,7 @@ Cost lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iteratio
     if(2 * at(M + 1) * W > cellLimit)
         return std::numeric_limits<Cost>::min();
     std::vector<Cost> mu(at(n), 0);
+    const Cost bound = static_cast<Cost>(s) * *std::ranges::max_element(r.c) + 1;
     // H[par][m][w]: cheapest m landings of exact load w with crossing parity par.
     std::vector<Cost> H(2 * at(M + 1) * W);
     const auto cell = [&](int par, int m, std::size_t w) -> Cost& { return H[(at(par) * at(M + 1) + at(m)) * W + w]; };
@@ -263,10 +264,13 @@ Cost lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iteratio
             norm += v * v;
         if(norm == 0)
             break; // the minimiser is balanced: the bound is the balanced optimum
-        // Polyak step towards the target, at least one unit.
-        const Cost step = std::max<Cost>(1, (target - value) / norm);
+        // Polyak step towards the target, at least one unit. Multipliers stay
+        // within [-bound, bound], bound = s * max c + 1: beyond it no landing
+        // pays off, and every cost of the tables stays far from overflow.
+        const Cost gap = isInf(target) ? 1 : target - value;
+        const Cost step = std::clamp<Cost>(gap / norm, 1, bound);
         for(int x = 0; x < n; ++x)
-            mu[at(x)] += step * g[at(x)];
+            mu[at(x)] = std::clamp<Cost>(mu[at(x)] + step * g[at(x)], -bound, bound);
     }
     return best;
 }
