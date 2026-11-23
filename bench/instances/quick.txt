@@ -1,0 +1,8 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Short suite for pull-request CI (each instance well under a second for the
+# legacy solvers).
+n5t5p2|-n 5 -t 5 -p 2
+n6t5p3|-n 6 -t 5 -p 3
+n10t4p2|-n 10 -t 4 -p 2
+lpt-counterexample|-n 2 -t 5 -p 2 -d @DATA@/lpt-counterexample.dat
+multiples|-n 6 -t 6 -p 3 -d @DATA@/multiples.dat

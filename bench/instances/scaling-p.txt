@@ -1,0 +1,14 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Number of planes, n = 8, t = 13.
+p1|-n 8 -t 13 -p 1
+p2|-n 8 -t 13 -p 2
+p3|-n 8 -t 13 -p 3
+p4|-n 8 -t 13 -p 4
+p5|-n 8 -t 13 -p 5
+p6|-n 8 -t 13 -p 6
+p7|-n 8 -t 13 -p 7
+p8|-n 8 -t 13 -p 8
+p9|-n 8 -t 13 -p 9
+p10|-n 8 -t 13 -p 10
+p11|-n 8 -t 13 -p 11
+p12|-n 8 -t 13 -p 12

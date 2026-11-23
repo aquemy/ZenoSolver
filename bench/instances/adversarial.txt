@@ -1,0 +1,9 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Instances where greedy rules fail or search is hard: the LPT counterexample,
+# clustered and near-equal durations, multiples, and a 3-Partition gadget
+# (12 cities forming four triples of sum 100, t = 8, p = 4, s = 12).
+lpt-counterexample|-n 2 -t 5 -p 2 -d @DATA@/lpt-counterexample.dat
+clustered|-n 8 -t 9 -p 3 -d @DATA@/clustered.dat
+multiples|-n 6 -t 8 -p 3 -d @DATA@/multiples.dat
+near-equal|-n 10 -t 9 -p 4 -d @DATA@/near-equal.dat
+three-partition-m4|-n 12 -t 8 -p 4 -d @DATA@/three-partition-m4.dat

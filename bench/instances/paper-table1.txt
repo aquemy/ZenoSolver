@@ -1,0 +1,10 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Table 1 of Quemy & Schoenauer, EvoCOP 2015: n = t, p = 2, default generator.
+n3t3p2|-n 3 -t 3 -p 2
+n4t4p2|-n 4 -t 4 -p 2
+n5t5p2|-n 5 -t 5 -p 2
+n6t6p2|-n 6 -t 6 -p 2
+n7t7p2|-n 7 -t 7 -p 2
+n8t8p2|-n 8 -t 8 -p 2
+n9t9p2|-n 9 -t 9 -p 2
+n10t10p2|-n 10 -t 10 -p 2
