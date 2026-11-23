@@ -28,6 +28,7 @@ struct Options
 };
 
 /// Builds the instance; throws std::invalid_argument or std::runtime_error.
-/// Unlike the 2016 solvers it accepts t = p.
-[[nodiscard]] Instance buildInstance(const Options& options);
+/// Unlike the 2016 solvers it accepts t = p. When `swapped` is given, it tells
+/// whether the 2016 swap of durations and costs (d[0] > d[1]) was applied.
+[[nodiscard]] Instance buildInstance(const Options& options, bool* swapped = nullptr);
 } // namespace zeno::legacy

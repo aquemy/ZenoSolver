@@ -112,7 +112,7 @@ Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once
 - `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
 - `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 
-Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log.
+Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Also as in 2016, when the first duration exceeds the second the duration and cost vectors are swapped (the 2016 code assumed increasing durations); `zeno` prints a note when this happens to a data file. Order the cities by duration to avoid it.
 
 # PDDL
 
