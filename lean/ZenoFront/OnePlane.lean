@@ -138,6 +138,42 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
   rintro _ ⟨Y', ⟨hY', hT'⟩, rfl⟩
   exact oneplane_le_cost hY' hT'
 
+/-! ### Allocation-free minima
+
+The memoised tables take minima with these loops instead of `Finset.inf`, which builds the
+finset it ranges over at every entry. -/
+
+/-- `min (acc, f (u − 1), …, f 0)`, as a tail-recursive loop. -/
+def minUpToAux (f : ℕ → WithTop ℕ) : ℕ → WithTop ℕ → WithTop ℕ
+  | 0, acc => acc
+  | u + 1, acc => minUpToAux f u (min acc (f u))
+
+/-- `min_{i < u} f i` (`⊤` if `u = 0`), without building `Finset.range u`. -/
+def minUpTo (f : ℕ → WithTop ℕ) (u : ℕ) : WithTop ℕ := minUpToAux f u ⊤
+
+theorem minUpToAux_eq (f : ℕ → WithTop ℕ) : ∀ (u : ℕ) (acc : WithTop ℕ),
+    minUpToAux f u acc = min acc ((range u).inf f)
+  | 0, acc => by simp [minUpToAux]
+  | u + 1, acc => by
+    rw [minUpToAux, minUpToAux_eq f u, Finset.range_add_one, Finset.inf_insert, min_assoc]
+
+theorem minUpTo_eq (f : ℕ → WithTop ℕ) (u : ℕ) : minUpTo f u = (range u).inf f := by
+  rw [minUpTo, minUpToAux_eq]
+  exact top_inf_eq _
+
+/-- `min_{i : Fin n} f i`, as a loop. -/
+def minFin (f : Fin n → WithTop ℕ) : WithTop ℕ :=
+  minUpTo (fun i => if h : i < n then f ⟨i, h⟩ else ⊤) n
+
+theorem minFin_eq (f : Fin n → WithTop ℕ) : minFin f = univ.inf f := by
+  rw [minFin, minUpTo_eq]
+  refine le_antisymm (Finset.le_inf fun i _ => ?_) (Finset.le_inf fun i hi => ?_)
+  · refine (Finset.inf_le (Finset.mem_range.mpr i.isLt)).trans ?_
+    simp
+  · rw [Finset.mem_range] at hi
+    simp only [hi, dite_true]
+    exact Finset.inf_le (Finset.mem_univ _)
+
 /-! ### The memoised table -/
 
 variable (d c)
@@ -145,7 +181,8 @@ variable (d c)
 /-- Row `m + 1` of the table from row `m`, for budgets `T = 0, …, Tmax`. Entries of `row` out of
 range read as `∞`. -/
 def oneplaneNextRow (Tmax : ℕ) (row : Array (WithTop ℕ)) : Array (WithTop ℕ) :=
-  Array.ofFn (n := Tmax + 1) fun T => oneplaneStep d c (fun T' => row.getD T' ⊤) T
+  Array.ofFn (n := Tmax + 1) fun T =>
+    minFin fun i => if d i ≤ (T : ℕ) then (c i : WithTop ℕ) + row.getD (T - d i) ⊤ else ⊤
 
 /-- Row `m` of the table, for budgets `T = 0, …, Tmax`. -/
 def oneplaneRow (Tmax : ℕ) : ℕ → Array (WithTop ℕ)
@@ -189,6 +226,7 @@ theorem oneplaneRow_getD {Tmax : ℕ} : ∀ (m : ℕ) {T : ℕ}, T ≤ Tmax →
   | m + 1, T, hT => by
     simp only [oneplaneRow, oneplaneNextRow, Array.getD_eq_getD_getElem?, Array.getElem?_ofFn,
       show T < Tmax + 1 by omega, oneplane_succ, oneplaneStep]
+    simp only [dite_true, Option.getD_some, minFin_eq]
     refine Finset.inf_congr rfl fun i _ => ?_
     split_ifs with hdi
     · rw [← Array.getD_eq_getD_getElem?, oneplaneRow_getD m (by omega)]

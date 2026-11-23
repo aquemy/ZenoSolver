@@ -49,7 +49,9 @@ Both tools read and write the JSON schema of Google Benchmark, so `tools/compare
 | `bm-plan` | dominance reduction, plan simulation per front point, solve with and without plans, certificates (make, write, read, check), PDDL writer, instance builder | plan checking is linear in legs, the PDDL writer quadratic in n |
 | `bm-ns` | non-symmetric bracket end to end, Lagrangian balance bound, exact balanced role program, role scheduling | sweeps over n and t − p (the number of links) |
 
-The Lean checker is timed with `tools/time_checker.py` over `lean/test/certificates` (`baselines/lean/apple-m4-max/zeno-check.json`; the C++ reference checker on the same files is in `baselines/zeno/apple-m4-max/zeno-check-cpp.json`). On 57 sample certificates the compiled Lean checker takes 24 ms at the median and 102 ms on the largest (62 KB, 89 points).
+The Lean checker is timed with `tools/time_checker.py` over `lean/test/certificates` (`baselines/lean/apple-m4-max/zeno-check.json`; the C++ reference checker on the same files is in `baselines/zeno/apple-m4-max/zeno-check-cpp.json`). On those 23 certificates the compiled Lean checker takes 31 ms at the median and 55 ms at most.
+
+`baselines/lean/apple-m4-max/zeno-check-suite.json` times it on the certificates the C++ solver writes for every suite instance (`zeno <args> --certificate FILE` over `instances/*.txt`; 66 certificates, up to 3.9 MB and 240,000 legs for `regimes/r5-n100t60p10`). Every certificate is accepted, at 33 ms at the median and 2.3 s at most (`r5`, 135 MiB peak RSS). Before the checker hoisted the gcd scaling, the one-plane table and the plan's leg list out of its inner loops, and before it restricted the forest bound's state space with Claim B′, the same certificates took 478 s in total: 295 s for `r5` and 48 s for `families/sqrt`. They now take 5.8 s in total.
 
 ## Counters
 

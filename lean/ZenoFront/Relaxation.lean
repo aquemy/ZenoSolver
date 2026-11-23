@@ -92,7 +92,7 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
 
 /-- Row `j + 1` of the relaxation table from row `j`, for `u = 0, …, s`. -/
 def relaxNextRow (G : ℕ → WithTop ℕ) (s : ℕ) (prev : Array (WithTop ℕ)) : Array (WithTop ℕ) :=
-  Array.ofFn (n := s + 1) fun u => (range u).inf fun m => G (m + 1) + prev.getD (u - (m + 1)) ⊤
+  Array.ofFn (n := s + 1) fun u => minUpTo (fun m => G (m + 1) + prev.getD (u - (m + 1)) ⊤) u
 
 /-- Row `j` of the relaxation table, for `u = 0, …, s`. -/
 def relaxRow (G : ℕ → WithTop ℕ) (s : ℕ) : ℕ → Array (WithTop ℕ)
@@ -106,7 +106,7 @@ theorem relaxRow_getD (G : ℕ → WithTop ℕ) {s : ℕ} : ∀ (j : ℕ) {u : �
   | j + 1, u, hu => by
     simp only [relaxRow, relaxNextRow, Array.getD_eq_getD_getElem?, Array.getElem?_ofFn,
       show u < s + 1 by omega, relaxCost]
-    simp only [dite_true, Option.getD_some]
+    simp only [dite_true, Option.getD_some, minUpTo_eq]
     refine Finset.inf_congr rfl fun m hm => ?_
     rw [← Array.getD_eq_getD_getElem?, relaxRow_getD G j (by omega)]
 
