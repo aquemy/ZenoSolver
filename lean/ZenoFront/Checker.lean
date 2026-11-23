@@ -51,14 +51,14 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
 
 /-- `F` is the Pareto front of `S` (for the product order on (cost, makespan)): its points are in
 `S`, weakly dominate every point of `S`, and are pairwise incomparable. -/
-structure IsParetoFront (S : Set (ℕ × ℕ)) (F : List (ℕ × ℕ)) : Prop where
+structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α) : Prop where
   achieved : ∀ x ∈ F, x ∈ S
   dominates : ∀ y ∈ S, ∃ x ∈ F, x ≤ y
   antichain : F.Pairwise fun a b => ¬ a ≤ b ∧ ¬ b ≤ a
 
 /-- A Pareto front lists exactly the minimal elements. -/
-theorem IsParetoFront.mem_iff_minimal {S : Set (ℕ × ℕ)} {F : List (ℕ × ℕ)}
-    (h : IsParetoFront S F) (x : ℕ × ℕ) : x ∈ F ↔ Minimal (· ∈ S) x := by
+theorem IsParetoFront.mem_iff_minimal {α : Type*} [PartialOrder α] {S : Set α} {F : List α}
+    (h : IsParetoFront S F) (x : α) : x ∈ F ↔ Minimal (· ∈ S) x := by
   constructor
   · intro hx
     refine ⟨h.achieved x hx, fun y hy hyx => ?_⟩
@@ -68,7 +68,7 @@ theorem IsParetoFront.mem_iff_minimal {S : Set (ℕ × ℕ)} {F : List (ℕ × �
     · subst heq
       exact hx'y
     · exfalso
-      have : Std.Symm fun a b : ℕ × ℕ => ¬ a ≤ b ∧ ¬ b ≤ a := ⟨fun _ _ h => ⟨h.2, h.1⟩⟩
+      have : Std.Symm fun a b : α => ¬ a ≤ b ∧ ¬ b ≤ a := ⟨fun _ _ h => ⟨h.2, h.1⟩⟩
       exact (h.antichain.forall hx' hx heq).1 hx'x
   · intro ⟨hx, hmin⟩
     obtain ⟨x', hx', hx'x⟩ := h.dominates x hx

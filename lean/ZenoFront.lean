@@ -16,3 +16,4 @@ public import ZenoFront.Examples
 public import ZenoFront.Shrink
 public import ZenoFront.Converse
 public import ZenoFront.AdmissibleBound
+public import ZenoFront.RationalPlans
