@@ -65,6 +65,8 @@ The suite runner reports `peak_rss_mib` and `front_size` per instance.
 
 `baselines/legacy/apple-m4-max/` holds the three 2016 solver variants (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) on every suite: Apple M4 Max, 16 cores, macOS, Release build, 30 s timeout per run, median of 3 runs. These are the reference for the speed-up claims of the new solver, and they stay after the legacy solvers are removed. Their fronts are those of the legacy solvers, which are wrong on some instances (`tests/golden/known-bugs.txt`), so `front_size` there is not a correctness reference.
 
+`baselines/zeno/apple-m4-max/zeno.json` holds the exact solver (`zeno`, all cores) under the same conditions. It solves 65 of the 66 instances; on the 21 that the 2016 solvers also finish it is 2 to 5,600 times faster, its slowest run is 2.5 s (`regimes/r5-n100t60p10`), and it times out only on `scaling-D/r10000` (durations near 10^4 with gcd 1: the dense one-plane table spans ~10^5 levels). Its front sizes match the 2016 ones except on the LPT counterexample, where the 2016 solvers miss a point. Process start-up is about 3 ms, the floor of every timing.
+
 ## CI
 
 `.github/workflows/bench.yml`:
