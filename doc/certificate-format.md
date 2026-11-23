@@ -1,4 +1,4 @@
-# Front certificates, format version 1
+# Front certificates, format versions 1 and 2
 
 `zeno --certificate FILE` writes, next to the front, a certificate that a checker can verify without trusting the solver. The reference checker is `zeno check FILE`; the Lean checker in `lean/` (in progress) reads the same format. This page defines the format and what a checker must verify. The proofs behind each obligation are in `doc/theory/exact-front.md`.
 
@@ -63,3 +63,17 @@ Boarding and debarking take no time. The cost is the sum of `c` over the legs th
 ## Example
 
 `zeno -n 2 -t 5 -p 2 -d tests/golden/data/lpt-counterexample.dat --certificate lpt.cert` writes a certificate for the instance $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$, whose front has six points; `zeno check lpt.cert` verifies it.
+
+## Version 2: non-symmetric instances
+
+`zeno --certificate FILE` on a non-symmetric instance writes a version 2 certificate when its bracket is exact (every gap closed). Version 2 differs from version 1 in four places.
+
+- The header is `zeno-certificate 2`, and `dbar` may differ from `d`. `assume` lists `S` only for symmetric durations, and `A1-NS` when a bound below needs it (Theorem 6.1 of the theory note: every plan is weakly dominated by a role configuration with the same cost and loads at most its makespan, if central flights are useless).
+- Levels are in units of the gcd g of all durations, and are full loads: a crossing $C_I \to i \to C_G$ or back weighs $d_i + \bar d_i$, a drop-off $2 d_i$, a pick-up $2 \bar d_i$. A plan of makespan $< M_{i+1}$ fits in level $T = \lfloor (M_{i+1} - 1)/g \rfloor$. (For symmetric durations, version 1's half-loads and level $\lfloor (M_{i+1}-1)/(2g) \rfloor$ are kept.)
+- A line `fastest <kind>` after the front names the bound that rules out plans faster than $M_1$: the bound at level $\lfloor (M_1 - 1)/g \rfloor$ must be infinite. Kinds: `closed` (symmetric only, as in version 1), `relaxed`, `roles`, `balanced`.
+- Gap kinds, in addition to `relaxed` (lemma R with weight $\min(2d_i, 2\bar d_i)$ per landing, no assumption) and `forest` (symmetric, A1):
+  - `roles` (A1-NS): each plane flies an odd number $\ge 1$ of crossings and its other landings weigh at least $\min(2d, 2\bar d)$; all loads add up to the crossing weight of the landings, so the largest is at least that over $p$.
+  - `lagrangian mu_1 ... mu_n` (A1-NS): with one signed integer multiplier per city, a drop-off in $i$ costs $c_i + \mu_i$ and a pick-up $c_i - \mu_i$; the balance of drop-offs and pick-ups city by city drops out and the planes decouple. Every $\mu$ gives a lower bound, so the checker only evaluates the bound at the listed $\mu$.
+  - `balanced` (A1-NS): the checker reruns the exact program over balanced role configurations (a branch and bound against the cost $C_i$) and requires that it finishes.
+
+Obligations 1 and 4 are unchanged. The reference checker (`zeno check`) reads both versions. The Lean checker (`lean/`) verifies version 1; it reports version 2 as unsupported until the non-symmetric theory is formalised.

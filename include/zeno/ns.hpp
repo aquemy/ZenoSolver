@@ -41,6 +41,7 @@ struct BracketResult
     GapProof fastestProof = GapProof::Relaxed; ///< which bound gives fastestLower
     std::vector<Cost> gapLower;         ///< per gap
     std::vector<GapProof> gapProof;     ///< per gap
+    std::vector<std::vector<Cost>> gapMultipliers; ///< per gap: the multipliers of a Lagrangian proof
     /// Why an open gap is open: the exact balanced program gave up (state or
     /// work limit, or out of time), or it finished below the achieved cost
     /// but no schedule found for its configuration fits in the gap (waiting,
