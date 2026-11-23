@@ -11,6 +11,35 @@ Exact Pareto fronts (total cost, makespan) of MultiZenoTravel planning instances
 
 How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints of E(T), the cheapest admissible partition of the 2t − p landings into p groups whose durations each sum to at most T. `zeno` brackets E between a relaxation L and the pairs and chains bounds U and U3 on every level, and runs the exact link-forest dynamic program only on the levels that the bracket and the monotonicity of E leave open. The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) scheduled each PPP greedily, which is not optimal; they were removed (last in commit 84ca92a), and their timings are kept in `bench/baselines/legacy` for comparison.
 
+# Results
+
+**Correctness.**
+
+- `zeno` reproduces all 27 golden fronts of the brute-force oracle, including the six the 2016 solvers got wrong (their greedy schedule is not optimal: `doc/theory/exact-front.md` §5).
+- Every level of thousands of random instances matches an independent enumeration oracle.
+- On 1,800 tiny non-symmetric instances, every bracket closes and equals the oracle's front.
+
+**Speed** (`bench/README.md`; Apple M4 Max):
+
+| Suite instance | 2016 `zenoSolver` | `zeno` |
+|---|---|---|
+| EvoCOP Table 1, n = t = 8, p = 2 | 17.8 s | 3 ms |
+| n = 50, t = 30, p = 5 | > 30 s | 8 ms |
+| n = 100, t = 60, p = 10 | > 30 s | 61 ms |
+| sqrt family with durations × 10⁴ (10⁵ levels) | > 30 s | 9 ms |
+
+The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishes all 66. Time grows with the logarithm of the level range: 10⁸ levels take about 4 ms.
+
+**Proofs and certificates.**
+
+- The theory note gives a complete written proof of every statement the symmetric solver relies on.
+- Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and, for version 1, by the Lean-verified checker in `lean/`. Its soundness theorem holds for any central-flight durations whenever every gap is closed by the relaxation L (386 of 400 random fronts, and every front of the default generator). Fronts with `forest` gaps need the converse theorem, which is being formalised.
+
+**Non-symmetric instances.**
+
+- Fronts are exact wherever the certified bracket closes. The lower bounds rest on Theorem 6.1, which needs central flights to be useless (A1-NS).
+- Waiting can be genuinely harmful (Proposition 6.5 refutes the papers' no-waiting assumption). On such instances `zeno` reports the open gaps and their lower bounds instead of a front it cannot prove.
+
 # Requirements
 
 - CMake >= 3.21
