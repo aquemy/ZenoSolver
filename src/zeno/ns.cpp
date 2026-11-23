@@ -22,86 +22,6 @@ namespace zeno
 {
 namespace
 {
-std::size_t at(int v) { return static_cast<std::size_t>(v); }
-
-/// Per-plane table of the role relaxation: the cheapest m landings with load
-/// <= T of which an odd number are crossings (weight fill) and the others
-/// drop-offs or pick-ups (weight low = min(drop, pick)). Staircases per (m,
-/// parity of the crossings).
-class OddCrossingTable
-{
-public:
-    OddCrossingTable(const ReducedInstance& r, int maxLandings, Time maxLevel)
-        : stairs_(at(maxLandings + 1))
-    {
-        stairs_[0][0].push_back({0, 0});
-        std::vector<Stair> candidates;
-        for(int m = 1; m <= maxLandings; ++m)
-            for(int parity = 0; parity < 2; ++parity)
-            {
-                candidates.clear();
-                const auto extend = [&](const std::vector<Stair>& from, const std::vector<Time>& weight) {
-                    for(int i = 0; i < r.n(); ++i)
-                        for(const Stair& s : from)
-                        {
-                            const Time load = s.load + weight[at(i)];
-                            if(load > maxLevel)
-                                break;
-                            candidates.push_back({load, s.cost + r.c[at(i)]});
-                        }
-                };
-                extend(stairs_[at(m - 1)][at(1 - parity)], r.fill); // one more crossing
-                extend(stairs_[at(m - 1)][at(parity)], r.low);      // one more drop-off or pick-up
-                std::ranges::sort(candidates, [](const Stair& a, const Stair& b) { return a.load != b.load ? a.load < b.load : a.cost < b.cost; });
-                auto& out = stairs_[at(m)][at(parity)];
-                for(const Stair& s : candidates)
-                    if((out.empty() || s.cost < out.back().cost) && (out.empty() || out.back().load != s.load))
-                        out.push_back(s);
-            }
-    }
-
-    Cost odd(int m, Time level) const
-    {
-        const auto& steps = stairs_[at(m)][1];
-        const auto it = std::upper_bound(steps.begin(), steps.end(), level, [](Time v, const Stair& s) { return v < s.load; });
-        return it == steps.begin() ? kInfCost : std::prev(it)->cost;
-    }
-
-private:
-    struct Stair
-    {
-        Time load = 0;
-        Cost cost = 0;
-    };
-    std::vector<std::array<std::vector<Stair>, 2>> stairs_;
-};
-
-/// Cheapest way to give p planes s landings, plane k taking m_k >= 1 at
-/// cost group(m_k).
-template<class Group>
-Cost overPlanes(int p, int s, Group group)
-{
-    std::vector<Cost> best(at(s + 1), kInfCost), next;
-    best[0] = 0;
-    for(int k = 0; k < p; ++k)
-    {
-        next.assign(at(s + 1), kInfCost);
-        for(int j = 0; j < s; ++j)
-        {
-            if(isInf(best[at(j)]))
-                continue;
-            for(int m = 1; j + m <= s; ++m)
-            {
-                const Cost g = group(m);
-                if(!isInf(g))
-                    next[at(j + m)] = std::min(next[at(j + m)], best[at(j)] + g);
-            }
-        }
-        best.swap(next);
-    }
-    return best[at(s)];
-}
-
 /// Smallest level in [lo, hi] at which the non-increasing f is finite (f(hi) finite).
 template<class F>
 Time firstFinite(Time lo, Time hi, F f)
@@ -218,15 +138,9 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
     const Time maxLevel = std::max(hi, (result.upper.back().makespan - 1) / r.makespanPerLevel);
     const OnePlaneTable Glow(r.low, r.c, r.maxGroup(), maxLevel, options.table);
     const OnePlaneTable Gfill(r.fill, r.c, r.maxGroup(), maxLevel, options.table);
-    const OddCrossingTable roles(r, r.maxGroup(), maxLevel);
-    const OnePlaneTable Gtotal(r.fill, r.c, r.landings(), static_cast<Time>(r.p) * maxLevel, OnePlaneTable::Layout::Staircase);
+    const RoleRelaxation roles(r, maxLevel);
     const auto relaxedAt = [&](Time T) { return T < 0 ? kInfCost : relaxedCost(r, Glow, T); };
-    const auto rolesAt = [&](Time T) {
-        if(T < 0)
-            return kInfCost;
-        const Cost perPlane = overPlanes(r.p, r.landings(), [&](int m) { return m <= r.maxGroup() ? roles.odd(m, T) : kInfCost; });
-        return std::max(perPlane, Gtotal(r.landings(), static_cast<Time>(r.p) * T));
-    };
+    const auto rolesAt = [&](Time T) { return roles.bound(T); };
     const Time fastestRelaxed = firstFinite(0, maxLevel, relaxedAt);
     const Time fastestRoles = firstFinite(fastestRelaxed, maxLevel, rolesAt);
     result.fastestLower = r.makespanPerLevel * fastestRelaxed;
@@ -240,6 +154,7 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
         const std::size_t gaps = result.upper.size() - 1;
         result.gapLower.assign(gaps, 0);
         result.gapProof.assign(gaps, GapProof::Open);
+        result.gapMultipliers.assign(gaps, {});
         parallelFor(gaps, threads, [&](std::size_t i) {
             const Cost relaxed = relaxedAt(gapLevel(i));
             const Cost byRoles = rolesAt(gapLevel(i));
@@ -261,6 +176,7 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
         bool complete = false;
         Cost value = kInfCost;
         Cost lagrange = std::numeric_limits<Cost>::min(); ///< Lagrangian bound, when computed
+        std::vector<Cost> multipliers;                     ///< and the multipliers that give it
         std::optional<std::pair<FrontPoint, Plan>> scheduled;
     };
     std::map<Time, Balanced> cache;
@@ -290,23 +206,18 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
                 return; // out of time: the level stays incomplete
             if(const auto it = target.find(wanted[k]); it != target.end())
             {
-                const Cost lagrange = lagrangianRoles(r, wanted[k], it->second);
-                if(lagrange >= it->second)
+                LagrangianBound lagrange = lagrangianRoles(r, wanted[k], it->second);
+                computed[k].lagrange = lagrange.value;
+                computed[k].multipliers = std::move(lagrange.multipliers);
+                if(computed[k].lagrange >= it->second)
                 {
                     computed[k].complete = false; // not the optimum, only a bound
-                    computed[k].lagrange = lagrange;
                     return;
                 }
-                computed[k].lagrange = lagrange;
             }
             // Bound on the planes still to come: the role relaxation per plane.
             const Time T = wanted[k];
-            std::vector<std::vector<Cost>> remaining(at(r.p + 1), std::vector<Cost>(at(r.landings() + 1), kInfCost));
-            remaining[0][0] = 0;
-            for(int q = 1; q <= r.p; ++q)
-                for(int j = 0; j <= r.landings(); ++j)
-                    for(int m = 1; m <= std::min(j, r.maxGroup()); ++m)
-                        remaining[at(q)][at(j)] = std::min(remaining[at(q)][at(j)], addCost(remaining[at(q - 1)][at(j - m)], roles.odd(m, T)));
+            const auto remaining = remainingPlanesBound(r, roles, T);
             const auto it = target.find(T);
             const BalancedRoles program(r, Gfill, T, options.roleStates, options.roleWork, it == target.end() ? kInfCost : it->second, &remaining);
             Balanced& b = computed[k];
@@ -345,6 +256,7 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
             else
                 offer(b, result.upper.front().makespan);
         }
+        result.gapMultipliers.resize(result.gapProof.size());
         for(std::size_t i = 0; i < result.gapProof.size(); ++i)
         {
             if(result.gapProof[i] != GapProof::Open)
@@ -355,6 +267,7 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
             if(b.lagrange >= result.upper[i].cost)
             {
                 result.gapProof[i] = GapProof::Lagrangian;
+                result.gapMultipliers[i] = b.multipliers;
                 continue;
             }
             if(!b.complete)

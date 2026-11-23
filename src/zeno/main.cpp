@@ -135,10 +135,9 @@ std::ofstream openOutput(const std::string& path)
 }
 
 // Non-symmetric instances: the certified bracket of zeno::solveBracket.
-int runBracket(const zeno::Instance& instance, const zeno::SolveOptions& options, bool plans, bool certificate, bool stats)
+int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool plans, const std::optional<std::string>& certificate, bool stats)
 {
-    if(certificate)
-        throw std::invalid_argument("certificates (format v1) cover symmetric instances only");
+    options.plans = plans || certificate.has_value();
     const zeno::BracketResult result = zeno::solveBracket(instance, options);
     for(const auto& point : std::views::reverse(result.upper))
         std::cout << point.cost << " " << point.makespan << "\n";
@@ -173,6 +172,13 @@ int runBracket(const zeno::Instance& instance, const zeno::SolveOptions& options
                               ? "a cheaper balanced configuration exists, no schedule found within the gap"
                               : "the exact balanced program gave up")
                       << ")\n";
+    if(certificate)
+    {
+        if(!result.exact())
+            throw std::runtime_error("no certificate: the front is a bracket with open gaps");
+        auto out = openOutput(*certificate);
+        zeno::writeCertificate(out, zeno::makeBracketCertificate(instance, result));
+    }
     if(stats)
         printStats(result.stats);
     return 0;
@@ -202,7 +208,7 @@ int runFront(const std::vector<std::string>& args)
 
     const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
     if(!instance.symmetric())
-        return runBracket(instance, options, plans, certificate.has_value(), stats);
+        return runBracket(instance, options, plans, certificate, stats);
     const zeno::SolveResult result = zeno::solveFront(instance, options);
     for(const auto& point : std::views::reverse(result.front))
         std::cout << point.cost << " " << point.makespan << "\n";

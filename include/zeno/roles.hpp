@@ -5,6 +5,7 @@
 #include <zeno/plan.hpp>
 #include <zeno/reduce.hpp>
 
+#include <array>
 #include <cstddef>
 #include <optional>
 #include <vector>
@@ -81,17 +82,57 @@ private:
     std::size_t final_ = 0;
 };
 
-/// Lagrangian lower bound on the cheapest balanced role configuration at
-/// level T: with an integer multiplier mu_i per city, a drop-off in i costs
-/// c_i + mu_i and a pick-up c_i - mu_i, so the balance constraint drops out
-/// (the mu terms cancel on balanced configurations) and the planes decouple
-/// into knapsacks with an odd number of crossings. Every mu gives a lower
-/// bound (under A1-NS, like BalancedRoles); mu follows subgradient steps
-/// towards `target` for up to `iterations` rounds, stopping as soon as the
-/// bound reaches it. Returns the best bound found, or -infinity (as 0 or
-/// below) when the dense knapsack would exceed `cellLimit` cells.
-[[nodiscard]] Cost lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iterations = 60,
+/// Role relaxation at level T (under A1-NS, Theorem 6.1): every plane flies
+/// an odd number >= 1 of crossings (weight fill) and its other landings weigh
+/// at least min(drop, pick); and as drop-offs and pick-ups pair up city by
+/// city, all planes' loads add up to fill(X), so the largest is at least
+/// fill(X) / p. bound(T) is the larger of the two bounds; oddGroup(m, T) is the
+/// per-plane bound of a plane with m landings.
+class RoleRelaxation
+{
+public:
+    RoleRelaxation(const ReducedInstance& r, Time maxLevel);
+    [[nodiscard]] Cost bound(Time T) const;
+    [[nodiscard]] Cost oddGroup(int m, Time T) const;
+    [[nodiscard]] Time maxLevel() const noexcept { return maxLevel_; }
+
+private:
+    struct Stair
+    {
+        Time load = 0;
+        Cost cost = 0;
+    };
+    const ReducedInstance& r_;
+    Time maxLevel_;
+    std::vector<std::array<std::vector<Stair>, 2>> stairs_; ///< per m and crossing parity
+    OnePlaneTable total_;                                    ///< s landings, fill weights, level p * T
+};
+
+/// remaining[q][j]: a lower bound (the role relaxation per plane) on q more
+/// planes carrying j more landings at level T, for BalancedRoles' pruning.
+[[nodiscard]] std::vector<std::vector<Cost>> remainingPlanesBound(const ReducedInstance& r, const RoleRelaxation& roles, Time T);
+
+/// The Lagrangian bound for given multipliers: a drop-off in city i costs
+/// c_i + mu_i, a pick-up c_i - mu_i; the balance constraint drops out (the
+/// mu terms cancel on balanced configurations), and the planes decouple into
+/// knapsacks with an odd number of crossings. A lower bound on the cheapest
+/// balanced role configuration at level T for every mu (under A1-NS).
+/// kInfCost when no configuration fits; std::numeric_limits<Cost>::min()
+/// when the dense knapsack would exceed `cellLimit` cells.
+[[nodiscard]] Cost lagrangianValue(const ReducedInstance& r, Time T, const std::vector<Cost>& mu,
                                    std::size_t cellLimit = std::size_t{1} << 24);
+
+struct LagrangianBound
+{
+    Cost value = 0;
+    std::vector<Cost> multipliers; ///< mu with lagrangianValue(r, T, mu) == value
+};
+
+/// Subgradient search for multipliers that raise the Lagrangian bound to
+/// `target`, for up to `iterations` rounds, stopping as soon as it reaches it.
+/// Multipliers stay within [-(s max c + 1), s max c + 1].
+[[nodiscard]] LagrangianBound lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iterations = 60,
+                                              std::size_t cellLimit = std::size_t{1} << 24);
 
 /// A schedule of a role configuration: drop-offs first, crossings, pick-ups
 /// last (the template lemma N3), so drop-offs never wait and a pick-up waits

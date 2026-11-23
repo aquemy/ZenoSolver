@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <numeric>
@@ -160,113 +161,210 @@ RoleConfig BalancedRoles::reconstruct() const
     return config;
 }
 
-Cost lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iterations, std::size_t cellLimit)
+RoleRelaxation::RoleRelaxation(const ReducedInstance& r, Time maxLevel)
+    : r_(r)
+    , maxLevel_(maxLevel)
+    , stairs_(at(r.maxGroup() + 1))
+    , total_(r.fill, r.c, r.landings(), static_cast<Time>(r.p) * maxLevel, OnePlaneTable::Layout::Staircase)
 {
-    const int n = r.n(), M = r.maxGroup(), s = r.landings();
-    const auto W = static_cast<std::size_t>(T + 1);
+    stairs_[0][0].push_back({0, 0});
+    std::vector<Stair> candidates;
+    for(int m = 1; m <= r.maxGroup(); ++m)
+        for(int parity = 0; parity < 2; ++parity)
+        {
+            candidates.clear();
+            const auto extend = [&](const std::vector<Stair>& from, const std::vector<Time>& weight) {
+                for(int i = 0; i < r.n(); ++i)
+                    for(const Stair& st : from)
+                    {
+                        const Time load = st.load + weight[at(i)];
+                        if(load > maxLevel)
+                            break;
+                        candidates.push_back({load, st.cost + r.c[at(i)]});
+                    }
+            };
+            extend(stairs_[at(m - 1)][at(1 - parity)], r.fill); // one more crossing
+            extend(stairs_[at(m - 1)][at(parity)], r.low);      // one more drop-off or pick-up
+            std::ranges::sort(candidates, [](const Stair& x, const Stair& y) { return x.load != y.load ? x.load < y.load : x.cost < y.cost; });
+            auto& out = stairs_[at(m)][at(parity)];
+            for(const Stair& st : candidates)
+                if((out.empty() || st.cost < out.back().cost) && (out.empty() || out.back().load != st.load))
+                    out.push_back(st);
+        }
+}
+
+Cost RoleRelaxation::oddGroup(int m, Time T) const
+{
+    if(T < 0 || m < 1 || m > r_.maxGroup())
+        return kInfCost;
+    if(T > maxLevel_)
+        throw std::invalid_argument("RoleRelaxation: level above the table");
+    const auto& steps = stairs_[at(m)][1];
+    const auto it = std::upper_bound(steps.begin(), steps.end(), T, [](Time v, const Stair& st) { return v < st.load; });
+    return it == steps.begin() ? kInfCost : std::prev(it)->cost;
+}
+
+Cost RoleRelaxation::bound(Time T) const
+{
     if(T < 0)
         return kInfCost;
-    if(2 * at(M + 1) * W > cellLimit)
-        return std::numeric_limits<Cost>::min();
-    std::vector<Cost> mu(at(n), 0);
-    const Cost bound = static_cast<Cost>(s) * *std::ranges::max_element(r.c) + 1;
-    // H[par][m][w]: cheapest m landings of exact load w with crossing parity par.
-    std::vector<Cost> H(2 * at(M + 1) * W);
-    const auto cell = [&](int par, int m, std::size_t w) -> Cost& { return H[(at(par) * at(M + 1) + at(m)) * W + w]; };
-    Cost best = std::numeric_limits<Cost>::min();
-    for(int it = 0; it < iterations; ++it)
+    const int p = r_.p, s = r_.landings();
+    std::vector<Cost> best(at(s + 1), kInfCost), next;
+    best[0] = 0;
+    for(int k = 0; k < p; ++k)
     {
-        std::ranges::fill(H, kInfCost);
-        cell(0, 0, 0) = 0;
-        // Item types: crossing (flips parity), drop-off, pick-up, per city.
-        const auto relax = [&](int par, int m, std::size_t w, int from, Time weight, Cost cost) {
-            if(static_cast<std::size_t>(weight) > w)
-                return;
-            const Cost before = cell(from, m - 1, w - static_cast<std::size_t>(weight));
-            if(!isInf(before))
-                cell(par, m, w) = std::min(cell(par, m, w), before + cost);
-        };
-        for(int m = 1; m <= M; ++m)
-            for(int par = 0; par < 2; ++par)
-                for(std::size_t w = 0; w < W; ++w)
-                    for(int x = 0; x < n; ++x)
-                    {
-                        relax(par, m, w, 1 - par, r.fill[at(x)], r.c[at(x)]);
-                        relax(par, m, w, par, r.drop[at(x)], r.c[at(x)] + mu[at(x)]);
-                        relax(par, m, w, par, r.pick[at(x)], r.c[at(x)] - mu[at(x)]);
-                    }
-        // Per plane: the best odd-parity group of m landings within T.
-        std::vector<Cost> group(at(M + 1), kInfCost);
-        std::vector<std::size_t> groupLoad(at(M + 1), 0);
-        for(int m = 1; m <= M; ++m)
-            for(std::size_t w = 0; w < W; ++w)
-                if(cell(1, m, w) < group[at(m)])
-                {
-                    group[at(m)] = cell(1, m, w);
-                    groupLoad[at(m)] = w;
-                }
-        // Planes: p groups summing to s landings, with the sizes chosen.
-        std::vector<std::vector<Cost>> plan(at(r.p + 1), std::vector<Cost>(at(s + 1), kInfCost));
-        std::vector<std::vector<int>> size(at(r.p + 1), std::vector<int>(at(s + 1), 0));
-        plan[0][0] = 0;
-        for(int k = 1; k <= r.p; ++k)
-            for(int j = 0; j < s; ++j)
-                if(!isInf(plan[at(k - 1)][at(j)]))
-                    for(int m = 1; m <= M && j + m <= s; ++m)
-                        if(!isInf(group[at(m)]) && plan[at(k - 1)][at(j)] + group[at(m)] < plan[at(k)][at(j + m)])
-                        {
-                            plan[at(k)][at(j + m)] = plan[at(k - 1)][at(j)] + group[at(m)];
-                            size[at(k)][at(j + m)] = m;
-                        }
-        const Cost value = plan[at(r.p)][at(s)];
-        if(isInf(value))
-            return kInfCost; // no configuration at all within T
-        best = std::max(best, value);
-        if(best >= target)
-            break;
-        // Subgradient: drop-offs minus pick-ups per city in the minimiser.
-        std::vector<Cost> g(at(n), 0);
-        int j = s;
-        for(int k = r.p; k >= 1; --k)
+        next.assign(at(s + 1), kInfCost);
+        for(int j = 0; j < s; ++j)
         {
-            int m = size[at(k)][at(j)];
-            j -= m;
-            int par = 1;
-            std::size_t w = groupLoad[at(m)];
-            for(; m > 0; --m)
+            if(isInf(best[at(j)]))
+                continue;
+            for(int m = 1; j + m <= s; ++m)
             {
-                bool found = false;
-                for(int x = 0; x < n && !found; ++x)
-                {
-                    const Cost here = cell(par, m, w);
-                    const auto try_ = [&](int from, Time weight, Cost cost, int dg) {
-                        if(found || static_cast<std::size_t>(weight) > w)
-                            return;
-                        const Cost before = cell(from, m - 1, w - static_cast<std::size_t>(weight));
-                        if(!isInf(before) && before + cost == here)
-                        {
-                            g[at(x)] += dg;
-                            par = from;
-                            w -= static_cast<std::size_t>(weight);
-                            found = true;
-                        }
-                    };
-                    try_(1 - par, r.fill[at(x)], r.c[at(x)], 0);
-                    try_(par, r.drop[at(x)], r.c[at(x)] + mu[at(x)], 1);
-                    try_(par, r.pick[at(x)], r.c[at(x)] - mu[at(x)], -1);
-                }
-                if(!found)
-                    throw std::logic_error("lagrangianRoles: inconsistent table");
+                const Cost g = oddGroup(m, T);
+                if(!isInf(g))
+                    next[at(j + m)] = std::min(next[at(j + m)], best[at(j)] + g);
             }
         }
+        best.swap(next);
+    }
+    return std::max(best[at(s)], total_(s, static_cast<Time>(p) * T));
+}
+
+std::vector<std::vector<Cost>> remainingPlanesBound(const ReducedInstance& r, const RoleRelaxation& roles, Time T)
+{
+    std::vector<std::vector<Cost>> remaining(at(r.p + 1), std::vector<Cost>(at(r.landings() + 1), kInfCost));
+    remaining[0][0] = 0;
+    for(int q = 1; q <= r.p; ++q)
+        for(int j = 0; j <= r.landings(); ++j)
+            for(int m = 1; m <= std::min(j, r.maxGroup()); ++m)
+                remaining[at(q)][at(j)] = std::min(remaining[at(q)][at(j)], addCost(remaining[at(q - 1)][at(j - m)], roles.oddGroup(m, T)));
+    return remaining;
+}
+
+namespace
+{
+/// The Lagrangian value at mu, and (optionally) a subgradient: drop-offs
+/// minus pick-ups per city in a minimiser.
+Cost lagrangianEvaluate(const ReducedInstance& r, Time T, const std::vector<Cost>& mu, std::size_t cellLimit, std::vector<Cost>* subgradient)
+{
+    const int n = r.n(), M = r.maxGroup(), s = r.landings();
+    if(T < 0)
+        return kInfCost;
+    const auto W = static_cast<std::size_t>(T + 1);
+    if(2 * at(M + 1) * W > cellLimit)
+        return std::numeric_limits<Cost>::min();
+    // H[par][m][w]: cheapest m landings of exact load w with crossing parity par.
+    std::vector<Cost> H(2 * at(M + 1) * W, kInfCost);
+    const auto cell = [&](int par, int m, std::size_t w) -> Cost& { return H[(at(par) * at(M + 1) + at(m)) * W + w]; };
+    cell(0, 0, 0) = 0;
+    const auto relax = [&](int par, int m, std::size_t w, int from, Time weight, Cost cost) {
+        if(static_cast<std::size_t>(weight) > w)
+            return;
+        const Cost before = cell(from, m - 1, w - static_cast<std::size_t>(weight));
+        if(!isInf(before))
+            cell(par, m, w) = std::min(cell(par, m, w), before + cost);
+    };
+    for(int m = 1; m <= M; ++m)
+        for(int par = 0; par < 2; ++par)
+            for(std::size_t w = 0; w < W; ++w)
+                for(int x = 0; x < n; ++x)
+                {
+                    relax(par, m, w, 1 - par, r.fill[at(x)], r.c[at(x)]);
+                    relax(par, m, w, par, r.drop[at(x)], r.c[at(x)] + mu[at(x)]);
+                    relax(par, m, w, par, r.pick[at(x)], r.c[at(x)] - mu[at(x)]);
+                }
+    std::vector<Cost> group(at(M + 1), kInfCost);
+    std::vector<std::size_t> groupLoad(at(M + 1), 0);
+    for(int m = 1; m <= M; ++m)
+        for(std::size_t w = 0; w < W; ++w)
+            if(cell(1, m, w) < group[at(m)])
+            {
+                group[at(m)] = cell(1, m, w);
+                groupLoad[at(m)] = w;
+            }
+    std::vector<std::vector<Cost>> plan(at(r.p + 1), std::vector<Cost>(at(s + 1), kInfCost));
+    std::vector<std::vector<int>> size(at(r.p + 1), std::vector<int>(at(s + 1), 0));
+    plan[0][0] = 0;
+    for(int k = 1; k <= r.p; ++k)
+        for(int j = 0; j < s; ++j)
+            if(!isInf(plan[at(k - 1)][at(j)]))
+                for(int m = 1; m <= M && j + m <= s; ++m)
+                    if(!isInf(group[at(m)]) && plan[at(k - 1)][at(j)] + group[at(m)] < plan[at(k)][at(j + m)])
+                    {
+                        plan[at(k)][at(j + m)] = plan[at(k - 1)][at(j)] + group[at(m)];
+                        size[at(k)][at(j + m)] = m;
+                    }
+    const Cost value = plan[at(r.p)][at(s)];
+    if(isInf(value) || !subgradient)
+        return value;
+    subgradient->assign(at(n), 0);
+    int j = s;
+    for(int k = r.p; k >= 1; --k)
+    {
+        int m = size[at(k)][at(j)];
+        j -= m;
+        int par = 1;
+        std::size_t w = groupLoad[at(m)];
+        for(; m > 0; --m)
+        {
+            bool found = false;
+            const Cost here = cell(par, m, w);
+            for(int x = 0; x < n && !found; ++x)
+            {
+                const auto attempt = [&](int from, Time weight, Cost cost, int dg) {
+                    if(found || static_cast<std::size_t>(weight) > w)
+                        return;
+                    const Cost before = cell(from, m - 1, w - static_cast<std::size_t>(weight));
+                    if(!isInf(before) && before + cost == here)
+                    {
+                        (*subgradient)[at(x)] += dg;
+                        par = from;
+                        w -= static_cast<std::size_t>(weight);
+                        found = true;
+                    }
+                };
+                attempt(1 - par, r.fill[at(x)], r.c[at(x)], 0);
+                attempt(par, r.drop[at(x)], r.c[at(x)] + mu[at(x)], 1);
+                attempt(par, r.pick[at(x)], r.c[at(x)] - mu[at(x)], -1);
+            }
+            if(!found)
+                throw std::logic_error("lagrangianRoles: inconsistent table");
+        }
+    }
+    return value;
+}
+} // namespace
+
+Cost lagrangianValue(const ReducedInstance& r, Time T, const std::vector<Cost>& mu, std::size_t cellLimit)
+{
+    if(mu.size() != at(r.n()))
+        throw std::invalid_argument("lagrangianValue: one multiplier per city is required");
+    return lagrangianEvaluate(r, T, mu, cellLimit, nullptr);
+}
+
+LagrangianBound lagrangianRoles(const ReducedInstance& r, Time T, Cost target, int iterations, std::size_t cellLimit)
+{
+    const int n = r.n();
+    std::vector<Cost> mu(at(n), 0), g;
+    const Cost bound = static_cast<Cost>(r.landings()) * *std::ranges::max_element(r.c) + 1;
+    LagrangianBound best{std::numeric_limits<Cost>::min(), mu};
+    for(int it = 0; it < iterations; ++it)
+    {
+        const Cost value = lagrangianEvaluate(r, T, mu, cellLimit, &g);
+        if(value == std::numeric_limits<Cost>::min())
+            return best; // too large for the dense knapsack
+        if(value > best.value)
+            best = {value, mu};
+        if(isInf(value) || best.value >= target)
+            break;
         Cost norm = 0;
         for(Cost v : g)
             norm += v * v;
         if(norm == 0)
             break; // the minimiser is balanced: the bound is the balanced optimum
-        // Polyak step towards the target, at least one unit. Multipliers stay
-        // within [-bound, bound], bound = s * max c + 1: beyond it no landing
-        // pays off, and every cost of the tables stays far from overflow.
+        // Polyak step towards the target, at least one unit; multipliers stay
+        // within [-bound, bound] (beyond it no landing pays off, and every cost
+        // of the tables stays far from overflow).
         const Cost gap = isInf(target) ? 1 : target - value;
         const Cost step = std::clamp<Cost>(gap / norm, 1, bound);
         for(int x = 0; x < n; ++x)

@@ -409,8 +409,9 @@ void testBalancedRoles(std::mt19937& rng, int trials)
             if(!full.complete())
                 continue;
             const std::string where = describe(in) + " T=" + std::to_string(T);
-            const zeno::Cost lagrange = zeno::lagrangianRoles(r, T, full.value());
-            check(lagrange <= full.value(), "Lagrangian bound <= balanced optimum: " + where);
+            const auto lagrange = zeno::lagrangianRoles(r, T, full.value());
+            check(lagrange.value <= full.value(), "Lagrangian bound <= balanced optimum: " + where);
+            check(zeno::lagrangianValue(r, T, lagrange.multipliers) == lagrange.value, "Lagrangian multipliers reproduce the bound: " + where);
             if(zeno::isInf(full.value()))
                 continue;
             for(zeno::Cost target : {full.value(), full.value() + 1, full.value() + 50})
@@ -500,6 +501,57 @@ void testMetamorphic(std::mt19937& rng, int trials, const Sizes& z)
     }
 }
 
+// Version 2 certificates of exact non-symmetric brackets: they round-trip,
+// are accepted, and are rejected once corrupted.
+void testBracketCertificates(std::mt19937& rng, int trials)
+{
+    zeno::SolveOptions options;
+    options.plans = true;
+    int written = 0;
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        zeno::Instance in = randomInstance(rng, 4, 6, 3, 9);
+        std::uniform_int_distribution<int> value(0, 12);
+        for(auto& v : in.dbar)
+            v = value(rng);
+        const auto bracket = zeno::solveBracket(in, options);
+        if(!bracket.exact())
+            continue;
+        ++written;
+        const auto cert = zeno::makeBracketCertificate(in, bracket);
+        std::stringstream text;
+        zeno::writeCertificate(text, cert);
+        const auto back = zeno::readCertificate(text);
+        const auto report = zeno::checkCertificate(back);
+        const std::string where = describe(in);
+        check(report.ok, "v2 certificate accepted: " + where + (report.errors.empty() ? "" : ": " + report.errors.front()));
+        check(back.version == 2 && back.front == cert.front && back.gaps == cert.gaps && back.multipliers == cert.multipliers,
+              "v2 certificate round trip: " + where);
+        const auto rejected = [&](const zeno::Certificate& bad, const std::string& what) {
+            check(!zeno::checkCertificate(bad).ok, "corrupted v2 certificate rejected (" + what + "): " + where);
+        };
+        zeno::Certificate bad = cert;
+        bad.front.front().makespan -= 1;
+        rejected(bad, "fastest point made faster");
+        if(cert.front.size() >= 3)
+        {
+            bad = cert;
+            bad.front.erase(bad.front.begin() + 1);
+            bad.plans.erase(bad.plans.begin() + 1);
+            bad.gaps.erase(bad.gaps.begin() + 1);
+            bad.multipliers.erase(bad.multipliers.begin() + 1);
+            rejected(bad, "a point removed");
+        }
+        if(std::ranges::find(cert.assumptions, std::string("A1-NS")) != cert.assumptions.end())
+        {
+            bad = cert;
+            std::erase(bad.assumptions, std::string("A1-NS"));
+            rejected(bad, "assumption A1-NS dropped");
+        }
+    }
+    std::cout << "ut-zeno-core: " << written << " non-symmetric certificates checked\n";
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -553,6 +605,7 @@ int main(int argc, char** argv)
     testBracketNonSymmetric(rng, trials / 4);
     testBalancedRoles(rng, trials / 4);
     testMetamorphic(rng, trials, sizes);
+    testBracketCertificates(rng, trials / 4);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";
