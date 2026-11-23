@@ -1,14 +1,26 @@
 name: Lean
 
+# Also runs on changes to the C++ solver, so that the end-to-end step catches any drift between
+# the certificates the solver writes and what the Lean checker accepts.
 on:
   push:
     branches: [master]
     paths:
       - "lean/**"
+      - "src/**"
+      - "include/**"
+      - "tests/golden/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
       - ".github/workflows/lean.yml"
   pull_request:
     paths:
       - "lean/**"
+      - "src/**"
+      - "include/**"
+      - "tests/golden/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
       - ".github/workflows/lean.yml"
 
 concurrency:
@@ -48,8 +60,8 @@ jobs:
         working-directory: lean
         run: lake env lean scripts/CheckAxioms.lean
 
-      # The compiled checker: the all-relaxed certificates must be accepted, the corrupted
-      # ones rejected, and the ones with a forest gap reported as not supported.
+      # The compiled checker: the solver's certificates (relaxed and forest gaps) must be
+      # accepted, and the corrupted ones rejected.
       - name: Build zeno-check
         working-directory: lean
         run: lake build zeno-check
@@ -61,3 +73,16 @@ jobs:
       - name: Time the largest certificate
         working-directory: lean
         run: time .lake/build/bin/zeno-check test/certificates/accepted/relaxed-r101.cert
+
+      # End to end: the C++ solver writes a certificate for every golden instance and for the
+      # random instances of lean/test/instances (some with forest gaps); the Lean checker must
+      # accept all of them.
+      - name: Build the C++ solver
+        env:
+          CXX: g++-14
+        run: |
+          cmake --preset release
+          cmake --build --preset release --parallel --target zeno
+
+      - name: End to end, C++ certificates checked by Lean
+        run: bash lean/test/e2e.sh build/release/zeno lean/.lake/build/bin/zeno-check
