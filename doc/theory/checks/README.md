@@ -19,6 +19,7 @@ Every script that runs a program takes this directory as its first argument (it 
 | `achievability_check.py` | the construction of Theorem 4.1, simulated | Thm 4.1 |
 | `linear_sweep.py`, `linear_closed_form.py` | the linear family: L = E, and the closed form of the front; offset progressions | Thm 10.1 |
 | `waiting_search.cpp` | harmful waiting: random balanced role configurations with a plane picking up twice and one dropping off twice, every order and matching, makespan against the largest load (`bin/waiting_search <trials> <seed> [maxPlanes maxLinks maxDuration tight]`) | Prop 6.5 (refutes Conj 6.5) |
+| `cpsat_check.py` | `zeno`'s fronts against an independent CP-SAT model of E(T) (admissibility by a parity matrix), at sizes enumeration cannot reach (`python3 cpsat_check.py <zeno> <trials> <seed> [maxN maxT maxP maxD]`, needs `ortools`) | Cor 4.8 via §7 |
 | `scale_g.cpp`, `linear_greedy.py` | the papers' greedy on the linear family | Conj 10.2 |
 
 The exhaustive search (`truth.cpp`) needs durations of at least 1 and caps costs as described in the note.
