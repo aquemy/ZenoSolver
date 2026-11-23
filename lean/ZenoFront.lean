@@ -6,3 +6,6 @@ public import ZenoFront.Roles
 public import ZenoFront.SupportBound
 public import ZenoFront.OnePlane
 public import ZenoFront.MinimalWitness
+public import ZenoFront.Plan
+public import ZenoFront.PlanBounds
+public import ZenoFront.Relaxation
