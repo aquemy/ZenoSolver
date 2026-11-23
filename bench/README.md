@@ -8,16 +8,16 @@ Every algorithm component has its own benchmark, and every solver is timed end t
 cmake --preset bench                     # Release + Google Benchmark (fetched, v1.9.1)
 cmake --build --preset bench --parallel  # all benchmarks and the solvers
 
-build/bench/bm-legacy                                        # one component benchmark
-build/bench/bm-legacy --benchmark_out=out.json --benchmark_out_format=json
+build/bench/bm-core                                          # one component benchmark
+build/bench/bm-core --benchmark_filter=Forest --benchmark_out=out.json --benchmark_out_format=json
 ```
 
 End to end, over suites:
 
 ```sh
-bench/tools/run_suite.py --exe build/bench/zenoSolver --args=-F \
+bench/tools/run_suite.py --exe build/bench/zeno \
     --suite bench/instances/regimes.txt --suite bench/instances/families.txt \
-    --timeout 30 --repetitions 3 --machine apple-m4-max --out zenoSolver.json
+    --timeout 30 --repetitions 3 --machine apple-m4-max --out zeno.json
 ```
 
 Compare two result files, failing on a regression above 10% in time or memory, or on a changed front size:
@@ -34,7 +34,7 @@ Both tools read and write the JSON schema of Google Benchmark, so `tools/compare
 |---|---|
 | `components/` | One Google Benchmark executable per component (`bm-<component>`). |
 | `support/zs_bench.hpp` | Shared helpers: peak RSS counter, per-iteration counters. |
-| `instances/*.txt` | Suites, one `name\|arguments` line per instance (legacy solver syntax; `@DATA@` is `instances/data`). |
+| `instances/*.txt` | Suites, one `name\|arguments` line per instance (`zeno` instance options; `@DATA@` is `instances/data`). |
 | `instances/data/` | Data files: line 1 durations, line 2 costs. |
 | `tools/run_suite.py` | Times an executable over suites: median wall and CPU time, peak RSS of the child, front size, status (`ok`, `timeout`, `error`). |
 | `tools/check_regression.py` | Regression gate between two result files. |
@@ -63,7 +63,7 @@ The suite runner reports `peak_rss_mib` and `front_size` per instance.
 
 ## Baselines
 
-`baselines/legacy/apple-m4-max/` holds the three 2016 solver variants (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) on every suite: Apple M4 Max, 16 cores, macOS, Release build, 30 s timeout per run, median of 3 runs. These are the reference for the speed-up claims of the new solver, and they stay after the legacy solvers are removed. Their fronts are those of the legacy solvers, which are wrong on some instances (`tests/golden/known-bugs.txt`), so `front_size` there is not a correctness reference.
+`baselines/legacy/apple-m4-max/` holds the three 2016 solver variants (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) on every suite: Apple M4 Max, 16 cores, macOS, Release build, 30 s timeout per run, median of 3 runs. These are the reference for the speed-up claims of the new solver. The 2016 solvers have since been removed from the code; to rerun them, build commit 84ca92a. Their fronts are those of the legacy solvers, which are wrong on some instances (`tests/golden/known-bugs.txt`), so `front_size` there is not a correctness reference.
 
 `baselines/zeno/apple-m4-max/zeno.json` holds the exact solver (`zeno`, all cores) under the same conditions. It solves 65 of the 66 instances; on the 21 that the 2016 solvers also finish it is 2 to 5,600 times faster, its slowest run is 2.5 s (`regimes/r5-n100t60p10`), and it times out only on `scaling-D/r10000` (durations near 10^4 with gcd 1: the dense one-plane table spans ~10^5 levels). Its front sizes match the 2016 ones except on the LPT counterexample, where the 2016 solvers miss a point. Process start-up is about 3 ms, the floor of every timing.
 

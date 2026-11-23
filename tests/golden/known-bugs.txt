@@ -1,19 +1,6 @@
 # <target> <instance> pairs whose golden test currently fails. See tests/CMakeLists.txt.
 # Each fix must remove the entries it repairs: a listed test that passes fails the suite.
-
-# The greedy scheduling of a PPP (Algorithm 1 of the EvoCOP 2015 paper) is not
-# optimal: every plane starts on one of the longest flights. See the
-# lpt-counterexample instance. Needs an exact scheduler for a fixed PPP.
-zenoSolver lpt-counterexample
-zenoSolver n3t5p2-C1D4r10
-zenoSolver_naive lpt-counterexample
-zenoSolver_naive n3t5p2-C1D4r10
-zenoSolver_noDuplicate lpt-counterexample
-zenoSolver_noDuplicate n3t5p2-C1D4r10
-
-# zenoSolver_noDuplicate uses another greedy (P3 drop-offs first, then one
-# crossing per plane, longest first to the least loaded plane). It misses
-# schedules that Algorithm 1 finds. See the p3-first-counterexample instance.
-zenoSolver_noDuplicate n4t5p3-C5D2r10
-zenoSolver_noDuplicate n5t4p3-C4D5
-zenoSolver_noDuplicate p3-first-counterexample
+#
+# The 2016 solvers (zenoSolver, zenoSolver_naive, zenoSolver_noDuplicate) failed
+# 9 pairs: their greedy PPP schedules are not optimal. They were removed; their
+# timings and fronts are kept in bench/baselines/legacy.

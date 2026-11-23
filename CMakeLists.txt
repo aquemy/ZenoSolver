@@ -28,7 +28,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# All binaries at the root of the build tree: build/<preset>/zenoSolver, ...
+# All binaries at the root of the build tree: build/<preset>/zeno, ...
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 ######################################################################################
@@ -68,27 +68,13 @@ endif()
 ### Library and solvers
 ######################################################################################
 
-# Vendored command-line parser. SYSTEM keeps its warnings out of our build.
-add_library(zeno_tclap INTERFACE)
-target_include_directories(zeno_tclap SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/tclap)
-
-add_library(zeno_legacy STATIC
-    src/algorithm.cpp
-    src/cli.cpp
-    src/combiGenerator.cpp
-    src/genFunctions.cpp
-    src/paretoExtraction.cpp
-    src/powerSetGenerator.cpp
-    src/utils.cpp)
-target_include_directories(zeno_legacy PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(zeno_legacy PUBLIC zeno_tclap PRIVATE zeno_build_settings)
-
 # The exact solver: library zeno_core (namespace zeno, include/zeno) and the
 # zeno command-line tool.
 add_library(zeno_core STATIC
     src/zeno/certificate.cpp
     src/zeno/forest.cpp
     src/zeno/instance.cpp
+    src/zeno/io.cpp
     src/zeno/legacy_input.cpp
     src/zeno/one_plane.cpp
     src/zeno/plan.cpp
@@ -101,12 +87,6 @@ target_link_libraries(zeno_core PUBLIC Threads::Threads PRIVATE zeno_build_setti
 
 add_executable(zeno src/zeno/main.cpp)
 target_link_libraries(zeno PRIVATE zeno::core zeno_build_settings)
-
-# The 2016 solvers, kept until the exact solver replaces them.
-foreach(variant "" _noDuplicate _naive)
-    add_executable(zenoSolver${variant} src/solver${variant}.cpp)
-    target_link_libraries(zenoSolver${variant} PRIVATE zeno_legacy zeno_build_settings)
-endforeach()
 
 ######################################################################################
 ### Tests and documentation
