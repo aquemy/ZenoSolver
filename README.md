@@ -60,6 +60,17 @@ By default it is set to 1 but a better value for most of functions could be 100.
 
 More information using ./zenoSolver -h.
 
+# PDDL
+
+`-G` writes the instance as a PDDL problem (`-O` sets the path) for the domain in `pddl/multi-zeno-travel.pddl`.
+
+- `city0` is the initial city C_I, `city1`…`cityN` are the central cities, `city(N+1)` is the goal city C_G.
+- Every person and every plane starts in C_I, and must end in C_G.
+- `fly` takes `timeTerre` time units; landing in a city adds its `citythreat` to the total cost (0 for C_I and C_G).
+- A flight between two central cities i and j lasts d_i + d_j + 100, so it is never faster than going through C_I or C_G.
+- A plane carries one person at a time. `board` and `debark` are instantaneous: with the ε-separation of PDDL 2.1 a planner's makespan exceeds ZenoSolver's by at most ε per action on the critical path.
+- The trailing comments list the durations, the costs and the Pareto front (makespan, cost).
+
 # References
 
 - **True Pareto Fronts for Multi-Objective AI Planning Instances**. *Alexandre Quemy, Marc Schoenauer.* Francesco Chicano and Gabriela Ochoa. European Conference on Combinatorial Optimization - EvoCOP, Apr 2015, Copenhague, Denmark. LNCS 9026, Springer Verlag, pp.197-208, 2015. <hal-01109777>

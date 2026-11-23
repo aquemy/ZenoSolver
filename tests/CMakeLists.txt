@@ -19,6 +19,11 @@ foreach(test ${ZS_UNIT_TESTS})
     add_test(NAME ${test} COMMAND ${test})
 endforeach()
 
+add_executable(ut-pddl ut-pddl.cpp)
+target_link_libraries(ut-pddl PRIVATE zeno zeno_build_settings)
+target_compile_definitions(ut-pddl PRIVATE ZS_PDDL_DIR="${PROJECT_SOURCE_DIR}/pddl")
+add_test(NAME ut-pddl COMMAND ut-pddl)
+
 # Performance test: unbounded runtime and always returns 1, so it is built but
 # not registered with CTest.
 add_executable(pt-powerSetGenerator pt-powerSetGenerator.cpp)
