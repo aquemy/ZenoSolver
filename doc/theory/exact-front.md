@@ -1280,11 +1280,11 @@ All checks compare against exhaustive searches written independently of the solv
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
 
 The exhaustive search over plans (`truth.cpp`) enforces that planes end in $C_G$ (`ANYWHERE=1` lifts this),
-allows any flight, including central ones, and needs durations of at least 1. The scripts live in the
-development scratchpad for now (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_sweep.py` and
+allows any flight, including central ones, and needs durations of at least 1. The programs and scripts are
+in `doc/theory/checks` (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_sweep.py` and
 `theorychecks_anti.py`, `ds_check.py`, `ns_sched_check.py`, `truth.cpp` with `truth_checks.py`,
-`linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`); they move into
-`tests/` with the implementation.
+`linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`); its README says
+how to build and run them.
 
 ## 12. Next steps
 
