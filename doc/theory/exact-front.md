@@ -20,9 +20,9 @@ P: complete written proof in this note. S: argument given, not complete. O: open
 
 | | (S) and (A1) | (S) only | Non-symmetric |
 |---|---|---|---|
-| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4) | role loads under (A1-NS) (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
-| Front characterised by admissible partitions | P (Cor 4.8) | O (Conj 4.10) | false by role loads (Prop 6.5); O (Conj 6.7) |
-| Front computed exactly | P, pseudo-polynomial (§7) | wherever $L$ meets $E$ (§9) | wherever a plan meets the bound (§6.5) |
+| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4) | least makespans of role configurations under (A1-NS), for event-ordered plans or when no city has $d_x = \bar d_x = 0$ (Thm 6.9); role loads (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
+| Front characterised by admissible partitions | P (Cor 4.8) | O (Conj 4.10) | by role configurations with least makespans under (A1-NS), unless some city has $d_x = \bar d_x = 0$ (Cor 6.10), not by role loads (Prop 6.5); with shuttle triples O (Conj 6.7) |
+| Front computed exactly | P, pseudo-polynomial (§7) | wherever $L$ meets $E$ (§9) | under (A1-NS): bracket, then enumeration of configurations at gap levels (§6.5) |
 | Ends of the front in closed form | P (Prop 7.10) | P (Prop 7.10) | — |
 | Linear family (default generator) | P, closed form (Thm 10.1) | P, same front | — |
 | Per-PPP greedy of both papers is optimal | false (§5) | false | false |
@@ -65,6 +65,10 @@ every emitted benchmark.
 | 6.5 | No harmful waiting in general — **false**: counterexample, front checked by the exhaustive oracle (Prop 6.5) | (AΔ-path) | refuted | 6.1, 6.3 |
 | 6.6 | Imbalance-vector DP for the role-load bound [N5] | — | P | 7.2 |
 | 6.7 | Shuttle triples complete the front | (AΔ) | O | — |
+| 6.8 | Event order: acyclic next-leg relation; cycles need a city with $d_x = \bar d_x = 0$; templates are event-ordered | — | P | 4.3(a) |
+| 6.9 | Schedulable domination: every plan is dominated by a role configuration whose template is no later [SD] | (A1-NS); plan event-ordered, or no city with $d_x = \bar d_x = 0$ | P | 2.1, 3.1, 3.3, 4.3(a), 4.4, 6.1, 6.3, 6.8 |
+| 6.10 | Non-symmetric front = Pareto set of (cost, least makespan) over role configurations, for event-ordered plans (PDDL), and for all plans if no city has $d_x = \bar d_x = 0$ | (A1-NS) | P | 1.1, 6.3, 6.8, 6.9 |
+| §6.2 end | Plans that are not event-ordered never beat Cor 6.10, on instances with a city with $d_x = \bar d_x = 0$ | (A1-NS) | O | — |
 | 7.1 | Front = breakpoints of $E$ | (S), (A1) | P | 4.8 |
 | 7.2 | One-plane table $G$ | — | P | — |
 | 7.3 | $L \le E \le U_3 \le U$ | — | P | 2.6, 7.2 |
@@ -128,6 +132,15 @@ may be in a city at once.
 several events can share a time; the sequences fix their order, and every argument below reads them this
 way.
 
+A plan is *event-ordered* if its legs have a total order $\prec$ that extends every route and every journey
+and along which departure times do not decrease. Lemma 6.8, Theorem 6.9 and Corollary 6.10 use this notion,
+and Statement 1.2 relates it to PDDL. If every flight has a positive
+duration, every plan is event-ordered: in a route or a journey the next leg departs after the previous one
+arrives, hence strictly after it departs, so sorting legs by departure time extends both. Plans of the PDDL
+domain are event-ordered too (Statement 1.2). With zero durations a plan can fail to be: a passenger may ride
+a later leg of one plane and then an earlier leg of another at the same instant, in a cycle of dependencies
+that no execution in time realises.
+
 The *flight time* of plane $k$ is $F_k = \sum_j \mathrm{dur}(f_{k,j})$. Its flights are sequential, so
 $F_k \le a_{k,\nu_k} \le M$.
 
@@ -154,10 +167,15 @@ ending anywhere; Theorem 4.9 shows that their front is the same.
 **Statement 1.2 (PDDL correspondence, S).** A plan of the domain under ε-separation yields a plan of §1.2
 with the same cost and a makespan at most its `total-time`: each plane's `fly` actions in time order form
 its route, each person's flights between `board` and `debark` form its journey, and `libre` gives capacity
-one. Conversely, a plan of §1.2 with makespan $M$ yields PDDL plans with `total-time` at most $M + K\varepsilon$,
-where $K$ bounds the length of a chain of dependent actions: delay each action by ε per predecessor. So the
-model's makespan is the PDDL makespan in the limit ε → 0, which is what ZenoSolver reports. This is argued
-here, not formalised.
+one; ordering the `fly` actions by start time (ties by the plan's order of actions) shows that this plan is
+event-ordered. Conversely, an event-ordered plan of §1.2 with makespan $M$ yields PDDL plans with
+`total-time` at most $M + K\varepsilon$, where $K$ is its number of `fly`, `board` and `debark` actions:
+list the actions in the event order (each `board` just before its leg, each `debark` just after) and delay
+the $r$-th one by $r\varepsilon$. So the PDDL front tends to the front of event-ordered plans, which is
+$\mathcal F$ under (S) and (A1) (the plans of Theorem 4.1 are event-ordered, Lemma 6.8(c)) and is given by
+Corollary 6.10 under (A1-NS). The model's makespan is thus the PDDL makespan in the limit ε → 0, which is
+what ZenoSolver reports. Whether PDDL planners and VAL accept zero-duration actions is not checked here. This
+is argued, not formalised.
 
 ### 1.4 Assumptions
 
@@ -763,8 +781,10 @@ true front differ.
 *Status.* The second half is computer-checked: the brute-force oracle (`tests/oracle/bruteForce.hpp`), which
 enumerates every pattern plan with its exact waiting, gives the front $(10, 90), (14, 74), (18, 68),
 (22, 66), (26, 52), (34, 42), (38, 36), (42, 30), (50, 18)$ as (cost, makespan), and `zeno`'s upper front
-equals it. The first half, and why every configuration of cost 14 and loads $\le 73$ waits, is the
-following argument.
+equals it. That oracle enumerates role-configuration schedules; Corollary 6.10 shows that they suffice, and
+the exhaustive search over all plans (`checks/truth.cpp`, 937 million states, costs up to 60, so plans with
+extra landings included) gives the same front. The first half, and why every configuration of cost 14 and
+loads $\le 73$ waits, is the following argument.
 
 *Cost-14 configurations at level 73.* Write $1$ and $2$ for the cities. Loads: a crossing weighs 6 in city 1
 and 30 in city 2; a drop-off 6 and 38; a pick-up 6 and 22. A role configuration has $s = 10$ landings, so
@@ -791,13 +811,137 @@ The same mechanism also opens the gap between makespans 42 and 52: a configurati
 $\le 50$, but its pick-up plane waits 2 at its first pick-up and finishes at 52.
 
 What survives: the role-load front is a lower bound (Theorem 6.1), the template is optimal for fixed orders
-and matching (Lemma 6.3), and Corollary 6.4 (one pick-up or one drop-off per plane) holds. The exact front of
-a non-symmetric instance is therefore the Pareto set of (cost, exact schedule makespan) over role
-configurations, where the exact makespan of a configuration is the minimum of $M_{\rm tmpl}$ over orders and
-matchings. Mechanism: harmful waiting needs a plane with several pick-ups in a city $y$ whose first pick-up
-arrives before the earliest drop-off there, i.e. $\min(\text{crossing}) + \bar d_y < d_y$; (AΔ-path) bounds
-$\bar d$ by $d$ but not $d$ by $\bar d$. A configuration-level search (`checks/waiting_search.cpp`) finds such
-configurations among random ones once every plane's crossing phase is short (§11).
+and matching (Lemma 6.3), and Corollary 6.4 (one pick-up or one drop-off per plane) holds. Theorem 6.9 below
+shows that, under (A1-NS) and unless some central city has both hub legs of zero duration, the exact front
+of a non-symmetric instance is the Pareto set of (cost, least makespan) over role configurations
+(Corollary 6.10). Mechanism: harmful waiting needs a plane with several pick-ups in a city $y$ whose first
+pick-up arrives before the earliest drop-off there, i.e. $\min(\text{crossing}) + \bar d_y < d_y$; (AΔ-path)
+bounds $\bar d$ by $d$ but not $d$ by $\bar d$. A configuration-level search (`checks/waiting_search.cpp`)
+finds such configurations among random ones once every plane's crossing phase is short (§11).
+
+Theorem 6.1 bounds the role loads of the configuration it selects, but not its waiting: direct selection
+(Lemma 4.3) links drop-offs to pick-ups by counts per city, not by the plan's own hand-offs, so its links
+need not respect the plan's timing. Theorem 6.9 below selects links along the plan's hand-offs instead, after
+removing the hand-offs that the planes could have avoided. Lemma 6.8 settles when plans have an event order.
+
+**Lemma 6.8 (event order).** The *next-leg relation* of a plan relates a leg to the next leg on its route and
+to the next leg of the journey it belongs to, if any.
+
+(a) A plan is event-ordered iff its next-leg relation has no cycle.
+
+(b) In a simple plan with clean journeys, a cycle of the next-leg relation passes through a central city $x$
+with $d_x = \bar d_x = 0$.
+
+(c) The template of a role configuration (§6.2), and the plan of Theorem 4.1, are event-ordered.
+
+*Proof.* (a) An event order extends the relation, so the relation has no cycle. Conversely, along the
+relation departure times do not decrease, since the next leg departs no earlier than the previous one
+arrives; sorting the legs by departure time, ties broken by a topological order of the acyclic relation,
+gives an event order.
+
+(b) Along each step the next leg departs no earlier than the previous one departs plus its duration, so every
+leg on a cycle has zero duration. Steps within one plane go forward on its route (§1.2, item 2), so a cycle
+contains a journey step between two planes. By Lemma 4.3(a) that step goes from a leg $C_I \to x$ to a leg
+$x \to C_G$, both on the cycle, so $d_x = \bar d_x = 0$.
+
+(c) Give the legs of a plane's drop-offs phase 1, of its crossings phase 2 and of its pick-ups phase 3. A step
+of the relation either stays on one plane and goes forward on its route, or follows a link from the first leg
+of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never decrease along the relation,
+and they increase at every step between two planes. A cycle therefore has no such step and stays on one
+route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
+
+**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS). Let a feasible plan have cost $C$ and makespan
+$M$, and assume that it is event-ordered or that no central city has $d_x = \bar d_x = 0$. Then there are a
+role configuration on all $p$ planes with passenger count $t$ and cost at most $C$, orders of its drop-offs
+and pick-ups, and a link matching whose template has makespan at most $M$. Neither (AΔ) nor (AΔ-path) is
+needed.
+
+*Proof.* *Step 1: a simple, event-ordered plan with clean journeys.* Replace central flights and clean, as in
+the proof of Theorem 6.1; cost, arrival times, flight times and makespan do not increase. By Lemma 4.3(a),
+every journey is now a leg $C_I \to x$ followed by a leg $x \to C_G$. If no central city has
+$d_x = \bar d_x = 0$, the new plan is event-ordered by Lemma 6.8(a) and (b). If the original plan has an
+event order $\prec$, so does the new one: sort the legs by departure time, then by their position in $\prec$,
+the two legs replacing a central flight taking its position, the first before the second. In a route or a
+journey the next leg departs no earlier than the previous one, and when both depart at the same time the old
+order decides; cleaning keeps a contiguous part of each journey. So the new order extends routes and
+journeys. Let $\prec$ now be an event order of the new plan.
+
+*Step 2: exchanges.* A *hand-off* is a passenger $\pi$ whose two legs lie in different segments. Let its
+first leg $\alpha$, to a city $x$, belong to plane $u$, and its second leg $\beta$, from $x$, to plane $v$. Let
+$\beta'$ be the leg of $u$ after $\alpha$ and $\alpha'$ the leg of $v$ before $\beta$; both exist because
+routes end in $C_G$ and $x$ is central. The hand-off *overlaps* if $u \ne v$, $\alpha' \prec \beta'$ and
+$\beta'$ departs no earlier than $\alpha'$ arrives: both planes are in $x$ at a common moment. Then
+*exchange futures*: give $u$ the legs of $v$ from $\beta$ on, and $v$ the legs of $u$ from $\beta'$ on. The
+new routes are valid, since $\beta$ departs after $\alpha$ arrives (a journey) and $\beta'$ after $\alpha'$
+arrives (overlap). $\prec$ still extends them, since $\alpha \prec \beta$ and $\alpha' \prec \beta'$, and it
+extends the unchanged journeys. If two consecutive legs of a journey now lie on one plane, $\prec$ orders them
+as the journey does and extends that plane's route, and they are distinct (capacity), so the second comes
+later on the route. So item 2 of §1.2 holds, and the plan stays feasible and event-ordered. Every leg keeps
+its time and city, so cost and makespan are unchanged (the last legs of $u$ and $v$ are exchanged). The
+journey of $\pi$ now lies in one segment of $u$. Segments change only at these four legs, and $\beta$ carries
+$\pi$, so no journey lying in one segment is split. So the number of hand-offs drops by at least one.
+Exchange while some hand-off overlaps.
+
+*Step 3: paths.* For a segment $\gamma$ at a city $x$, let $a(\gamma)$ be the time its first leg arrives in
+$x$ and $e(\gamma)$ the time its second leg departs, so $a(\gamma) \le e(\gamma)$. Take a hand-off from
+segment $\gamma$ (its first leg) to segment $\gamma'$ (its second leg) at $x$. If both are on one plane,
+$\gamma'$ comes later on the route; otherwise the hand-off does not overlap. In both cases the second leg of
+$\gamma$ precedes the first leg of $\gamma'$ in $\prec$, or departs strictly before it arrives; since
+departure times do not decrease along $\prec$, $e(\gamma) \le a(\gamma')$.
+
+At each city $x$, draw an arrow from $\gamma$ to $\gamma'$ for each hand-off at $x$. Each leg carries at
+most one passenger, so every segment has at most one outgoing and one incoming arrow. A $B$ has no incoming
+arrow, since its second leg returns to $C_I$, which clean journeys never reach, and a $\bar B$ has no
+outgoing arrow. So the arrows form disjoint paths $\gamma_0 \to \gamma_1 \to \dots \to \gamma_m$ with
+$m \ge 1$, and cycles. The inner segments of a path, and all segments of a cycle, have an incoming and an
+outgoing arrow, so they are $A$ segments, each dropping one passenger and picking up another. Along a path,
+$a(\gamma_0) \le e(\gamma_0) \le a(\gamma_1) \le \dots \le e(\gamma_m)$.
+
+*Step 4: selection.* Take every $A$ and $\bar A$ segment of each plane as a crossing; each plane gets
+$2\#A_k - 1$ of them (Lemma 2.1), an odd number. For each path from a $B$ to a $\bar B$, take its $B$ as a
+drop-off and its $\bar B$ as a pick-up, linked to each other. Take no other segment. The balance holds link
+by link. A passenger whose journey lies in one segment rides an $A$, which carries no arrow; every other
+passenger is an arrow of exactly one path or cycle. A cycle of $k$ arrows consists of $k$ $A$ segments. A
+path with $m$ arrows contributes its $m - 1$ inner $A$ segments, one more for each end that is an $A$, and
+one link if it runs from a $B$ to a $\bar B$: at least $m$ in every case. So the passenger count, the number
+of links plus the number of $A$ segments, is at least $t$. The selected segments are distinct segments of the
+plan, so the cost is at most $C$. Each is simple and lasts its role duration (Lemma 3.3(c)), so
+$\lambda_k \le F_k \le M$.
+
+*Step 5: the closed form.* The closed form $M_{\rm tmpl}$ of Lemma 6.3 makes sense for any configuration,
+orders and matching. Order each plane's drop-offs and pick-ups as on its route, and use the links of step 4.
+For a link from the $j$-th drop-off $\gamma$ of $u$ to the $l$-th pick-up $\gamma'$ of $v$, at $x$: $u$ flies
+its earlier drop-offs before $\gamma$, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$. After the second leg of
+$\gamma'$ departs at $e(\gamma')$, $v$ flies $\bar d_x$ to $C_G$ and then its later pick-ups, all by time
+$M$, so $e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term
+of the link is at most $M$. Together with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
+
+*Step 6: shrink.* Lemma 4.4 brings the passenger count to $t$, deleting two crossings of a plane or a
+drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
+still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
+and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
+$M_{\rm tmpl}$ stays at most $M$. The configuration now has passenger count $t$, and by Lemma 6.3 its
+template has makespan $M_{\rm tmpl} \le M$. $\square$
+
+**Corollary 6.10 (non-symmetric front).** Assume (A1-NS). Let $m(\mathrm{cfg})$ be the least makespan of a
+role configuration (§6.2), let
+$$\mathcal K = \{(c(\mathrm{cfg}),\ m(\mathrm{cfg})) : \mathrm{cfg} \text{ a role configuration on the } p \text{ planes with passenger count } t\},$$
+and let $\mathcal A_{\rm eo} \subseteq \mathcal A$ be the set of points of feasible event-ordered plans. Then
+$\mathrm{Min}\,\mathcal A_{\rm eo} = \mathrm{Min}\,\mathcal K$: a feasible event-ordered plan with cost at
+most $C$ and makespan at most $M$ exists iff some configuration has cost at most $C$ and least makespan at
+most $M$. If no central city has $d_x = \bar d_x = 0$ (for instance, if all durations are positive), then
+also $\mathcal F = \mathrm{Min}\,\mathcal K$.
+
+*Proof.* $\mathcal K$ is finite, and each of its points is attained by a template, which is a feasible
+event-ordered plan (Lemma 6.8(c)); so $\mathcal K \subseteq \mathcal A_{\rm eo} \subseteq \mathcal A$. By
+Theorem 6.9, every point of $\mathcal A_{\rm eo}$, and of $\mathcal A$ when no central city has
+$d_x = \bar d_x = 0$, is weakly dominated by a point of $\mathcal K$. Lemma 1.1 applies. $\square$
+
+By Statement 1.2, the PDDL front tends to $\mathrm{Min}\,\mathcal A_{\rm eo}$ as ε → 0, so under (A1-NS) it is
+$\mathrm{Min}\,\mathcal K$ whatever the durations. Only one case is left open: an instance with a central city
+$x$ with $d_x = \bar d_x = 0$, and a plan that is not event-ordered (§1.2). Such a plan has no PDDL
+counterpart, and whether it can beat $\mathrm{Min}\,\mathcal K$ is open; in the exchange of step 2 it could
+get a journey whose two legs lie on one plane in the wrong order.
 
 ### 6.3 Exact role-load bound
 
@@ -847,16 +991,24 @@ repairs as well:
 * "the central pattern cannot be $A$" is unproved;
 * the multiplicity "exactly 1" is unproved.
 
-### 6.5 Non-symmetric algorithm (conditional)
+### 6.5 Non-symmetric algorithm
 
 1. Bracket on every level. Below: $L_{\rm NS}$ (Lemma 6.2, valid under (AΔ), shuttle triples included) and
    $E_{\rm NS}$ (Proposition 6.6, valid under (A1-NS) by Theorem 6.1). Above: plans built by the template
    (Lemma 6.3), whose makespan equals the largest role load when every plane picks up at most once or drops
    off at most once (Corollary 6.4).
-2. A point is exact only when a simulated plan meets the lower bound. Elsewhere, search over orders and
-   matchings with the closed form of Lemma 6.3; Proposition 6.5 shows that the role-load bound can stay
-   strictly below the front, so closing such a gap needs a search over the role configurations cheaper than
-   the achieved point, each with its exact makespan. If Conjecture 6.7 holds, add shuttle triples.
+2. Gaps, under (A1-NS) when no central city has $d_x = \bar d_x = 0$, or for the PDDL front (Corollary 6.10).
+   Let $(C_i, M_i)$ and
+   $(C_{i+1}, M_{i+1})$ be consecutive achieved points. Every plan of makespan below $M_{i+1}$ costs at
+   least $C_i$ iff no role configuration of cost below $C_i$ has least makespan below $M_{i+1}$. With integer
+   durations, least makespans are integers at least $\max_k \lambda_k$. So it suffices to enumerate the
+   configurations of cost below $C_i$ with every $\lambda_k \le M_{i+1} - 1$, the ones the role-load DP
+   (Proposition 6.6) sees at that level, and to compute the least makespan of each by search over orders and
+   matchings with the closed form of Lemma 6.3. The gap is closed iff none has least makespan at most
+   $M_{i+1} - 1$; otherwise the template of the cheapest one that has is a better plan. Proposition 6.5 shows that this search can be
+   needed: the role-load bound alone can stay strictly below the front.
+3. Without (A1-NS), $L_{\rm NS}$ stays a valid lower bound; if Conjecture 6.7 holds, add shuttle triples to
+   the enumeration.
 
 The bounds were loose in the measurements (certified on 18–28% of instances), so the search dominates.
 
@@ -1320,14 +1472,19 @@ All checks compare against exhaustive searches written independently of the solv
 | Conjecture 4.10, targeted (`checks/conj410_search.py`): random instances with $n \le 3$, $p \le 3$, $t \le 6$ whose certificate has a gap with $L < E$, all plans with the shortest central flights the triangle inequality allows | 34,000 instances, 72 with such a gap, 0 plans inside a gap cheaper than $E$ |
 | `zeno` against an independent CP-SAT model of $E(T)$ (`checks/cpsat_check.py`): every front point $(C, M)$ has $E(M/2) = C$ and the level below the next point still costs $C$ | 554 points ($n \le 8$, $t \le 16$, $p \le 6$, durations $\le 40$) and 3,008 points ($n \le 10$, $t \le 24$, $p \le 8$, durations $\le 60$), 0 mismatches |
 | Harmful waiting (Prop 6.5), `checks/waiting_search.cpp`: exhaustive orders and matchings on random balanced configurations with a plane picking up twice and one dropping off twice, (AΔ-path) | Random crossing phases: 0 of 112,500 (p ≤ 4, ≤ 4 links, durations ≤ 12) and 0 of 192,270 (≤ 5 links, ≤ 15). One shortest crossing per plane: 6 of 189,964 (p ≤ 4, ≤ 5 links, ≤ 20), 5 of 190,040 (p ≤ 5, ≤ 6 links, ≤ 30), 1 of 71,538 (p ≤ 3, ≤ 6 links, ≤ 40) wait harmfully. On the instance of Prop 6.5 the bracket of `zeno` equals the oracle's front and leaves the two waiting gaps open |
+| Construction of Theorem 6.9 (`checks/sd_construct_check.py`) on random simple plans with clean journeys: any hand-offs (swaps, within one plane), random waits, positive durations | 104,452 / 104,452. Exchanges keep routes, event order, cost and makespan and lower the hand-offs; afterwards no hand-off overlaps, no chain cycles, chains are monotone in time; the configuration has count $\ge t$, cost $\le C$, loads $\le$ flight times, template $\le M$. In one run of 86,943 plans, 53,022 needed exchanges and 20,872 had chains through swaps. Without the exchanges, 3,091 of 26,168 plans break the chain monotonicity and 2,882 have cycles |
+| Full pipeline of Lemma 6.8 and Theorem 6.9 (`checks/sd_full_check.py`): plans with central flights under (A1-NS), journeys of several legs, random event orders with ties, zero durations with probability 0 to 0.9; the plan re-validated after every step, the template simulated as a plan | 21,331 / 21,331 event-ordered plans (3,047 with exchanges, 2,572 with links). 220 plans that are not event-ordered: all event-ordered after Step 1, and passing. On instances without a city with $d_x = \bar d_x = 0$: 36 / 36 event-ordered after Step 1 (Lemma 6.8(b)) |
+| Schedulable domination, fronts (`checks/sd_checks.py`): configuration schedules (`config_front`, exact waiting) vs all simple plans (`simple_plans`: any hand-offs, exact waiting), no central flights | Exactly $s$ landings: 400 / 400 equal ($n \le 3$, $p \le 4$, $t \le 7$, durations $\le 20$; 200 shaped like Prop 6.5, of which waiting changes the front on 11). Up to $s + 2$ landings: 118 / 118 ($s \le 8$; 2 timeouts; waiting changes 7 fronts) |
+| Same vs all plans (`truth`), central flights none or (A1-NS) | 513 / 513 tiny instances ($n \le 2$, $t \le 5$, $p \le 3$, durations $\le 6$; waiting changes none of these fronts). Instance of Prop 6.5 (937 million states, costs up to 60): equal. Four instances on which waiting changes the front, for example $d = (2, 17)$, $\bar d = (3, 10)$, $c = (3, 1)$, $t = 5$, $p = 3$, where (13, 45) without waiting becomes (13, 47), or $d = (1, 16)$, $\bar d = (1, 8)$, $c = (5, 0)$, $t = 6$, $p = 4$, where waiting removes (15, 34): equal |
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
 
 The exhaustive search over plans (`truth.cpp`) enforces that planes end in $C_G$ (`ANYWHERE=1` lifts this),
 allows any flight, including central ones, and needs durations of at least 1. The programs and scripts are
 in `doc/theory/checks` (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_sweep.py` and
 `theorychecks_anti.py`, `ds_check.py`, `ns_sched_check.py`, `truth.cpp` with `truth_checks.py`,
-`linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`); its README says
-how to build and run them.
+`linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`, `waiting_search.cpp`,
+`config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`); its
+README says how to build and run them.
 
 ## 12. Next steps
 
@@ -1337,16 +1494,11 @@ how to build and run them.
    Theorem 4.7. Then Theorem 4.7.
 2. Conjecture 4.10: search only where $L < E$; a proof needs simultaneous chain contraction for shared
    segments (§4.6).
-3. Non-symmetric gaps left open by harmful waiting (Proposition 6.5): enumerate the balanced role
-   configurations cheaper than the achieved point at the gap's level, each with its exact makespan by search
-   over orders and matchings; the gap closes when none fits. This is only sound with a lemma that Theorem 6.1
-   does not give: *schedulable domination*, every plan of cost $C$ and makespan $M$ is weakly dominated by a
-   role configuration of cost $\le C$ whose template makespan (Lemma 6.3, best orders and matching) is at most
-   $M$. Direct selection (Lemma 4.3) matches drop-offs to pick-ups by counts per city, not by the plan's own
-   hand-offs, so its configuration need not inherit the plan's timing. Until the lemma is proved, such gaps
-   stay open, as `zeno` reports them. (Former item: configuration-level search for
-   Conjecture 6.5, $p \le 6$, several pick-ups
-   per plane.
+3. Non-symmetric gaps: Theorem 6.9 (schedulable domination) makes the enumeration of §6.5, item 2, sound,
+   so `zeno` can close the gaps that harmful waiting leaves open. What remains is its cost: the number of
+   configurations below the achieved cost at a gap's level, and the search over orders and matchings, which
+   resembles non-preemptive open-shop scheduling. Also open: plans that are not event-ordered, on instances
+   with a central city whose two hub legs take no time (end of §6.2).
 4. Conjecture 6.7: extend the exhaustive oracle with shuttle triples and compare on the 11 instances.
 5. Conjecture 10.2, and the offset progressions.
 6. Statement 1.2: differential tests against VAL on emitted PDDL plans.
