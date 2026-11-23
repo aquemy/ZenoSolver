@@ -136,6 +136,12 @@ int naive::symetric::UpperBound(int Mc,
             itP = min_element(begin(S), end(S), compM);
             auto maxSide = std::max(d[i], de[i]);
             auto minSide = std::min(d[i], de[i]);
+            if(S.size() == 1)
+            {
+                // A single plane flies both halves of the P3.
+                itP->m += 2*maxSide + 2*minSide;
+                continue;
+            }
             itP->m += 2*maxSide;
             (itP + 1)->m += 2*minSide;
         }
@@ -248,6 +254,12 @@ int symetric::UpperBound(int Mc,
             itP = min_element(begin(S), end(S), compM);
             auto maxSide = std::max(d[i], de[i]);
             auto minSide = std::min(d[i], de[i]);
+            if(S.size() == 1)
+            {
+                // A single plane flies both halves of the P3.
+                itP->m += 2*maxSide + 2*minSide;
+                continue;
+            }
             itP->m += 2*maxSide;
             (itP + 1)->m += 2*minSide;
         }

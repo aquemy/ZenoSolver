@@ -113,6 +113,7 @@ int main(int argc, char** argv)
             linear.m = Mc;
             linear.c = C;
             auto plan = linear;
+            auto bestPlan = linear;
             if (!front.count(C))
                 front[C] = linear;
 
@@ -245,6 +246,8 @@ int main(int argc, char** argv)
 
                     plan = noDuplicate::UpperBound(Mc, Ml, ppp_c, p1_dist, {}, d, de, p);
                     plan.c = C;
+                    if(plan.m < bestPlan.m)
+                        bestPlan = plan;
                     countIterations++;
 
                     if(plan.m <= Ml)
@@ -288,6 +291,8 @@ int main(int argc, char** argv)
 
                         plan = noDuplicate::UpperBound(Mc, Ml, ppp_beta, p1_dist, j, d, de, p);
                         plan.c = C;
+                        if(plan.m < bestPlan.m)
+                            bestPlan = plan;
                         MaxM = std::min(plan.m, MaxM);
                         countIterations++;
                         if(MaxM <= Ml)
@@ -303,8 +308,8 @@ int main(int argc, char** argv)
                     }
                 }
             }
-            if(plan.m < front[C].m)
-                front[C] = plan;
+            if(bestPlan.m < front[C].m)
+                front[C] = bestPlan;
             count++;
             EStatus = nextTuple(e, n, s);
         }

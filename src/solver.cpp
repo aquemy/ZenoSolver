@@ -149,7 +149,9 @@ int main(int argc, char** argv)
                     auto mapping = std::map<int, std::pair<int, int>, std::greater<int>>{};
                     auto mapping_v = std::vector<int>{};
                     unsigned i = calculateMapping(betaSetValue, mapping, mapping_v);
-                    if(i > 1) 
+                    // No P3 at all is always a candidate.
+                    betaPowerSet.push_back(std::vector<int>{});
+                    if(i >= 1) 
                     {    
                         auto r = std::vector<std::vector<int>>{};
                         for(int i = 0; i <= betaMax; i++) {
@@ -159,8 +161,6 @@ int main(int argc, char** argv)
                             }
                         } 
                     } 
-                    else if(i == 1)
-                        betaPowerSet = std::vector<std::vector<int>>{std::vector<int>{betaSetValue[0]}};
                                    
                     MaxM = ComputeUpperBound(Mc, Ml, e, w, betaPowerSet, d, de, p, symetric || forceSym, countIterations);
                     
@@ -169,13 +169,10 @@ int main(int argc, char** argv)
                     #endif
 
                     // 2. Calcul de la borne max
-                    if(MaxM < Mc)
-                    {
-                        Mc = MaxM;
-                        // 3. Compare
-                            if(Mc < front[C])
-                                front[C] = Mc;
-                    } 
+                    // Keep the best makespan found for this cost. The former test
+                    // (MaxM < Mc) skipped PPPs whose optimum is the sequential plan.
+                    if(MaxM < front[C])
+                        front[C] = MaxM;
                 }
                 count++;
                 //_

@@ -65,59 +65,44 @@ InstanceData buildInstance(CliArgs& args)
     if(!args.dArg.getValue().empty())
     {
         ifstream dataFile(args.dArg.getValue());
-        if (dataFile)
+        if(!dataFile)
+            throw std::runtime_error("Can't open the data file: "+args.dArg.getValue());
+
+        // One vector of n integers per non-empty line:
+        //   2 lines: durations, costs (symetric problem);
+        //   3 lines: west durations, east durations, costs.
+        vector<vector<double>> rows;
+        string s;
+        while(getline(dataFile, s))
         {
-            string s;
-            getline(dataFile, s);
             istringstream iss(s);
             vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
+            if(tokens.empty())
+                continue;
             if(tokens.size() != n)
                 throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
+            vector<double> row(n);
             for(unsigned i = 0; i < n; ++i)
-                d[i] = stoi(tokens[i]);
-
-            while(!dataFile.eof())
-            {
-                getline(dataFile, s);
-                if(s.empty())
-                    continue;
-                else 
-                {
-                    iss = istringstream(s);
-                    tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                    if(tokens.size() != n)
-                        throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                    for(unsigned i = 0; i < n; ++i)
-                        de[i] = stoi(tokens[i]);
-                    break;
-                }
-
-            }
-
-            while(!dataFile.eof())
-            {
-                getline(dataFile, s);
-                if(s.empty())
-                    c = de;
-                else
-                {
-                    iss = istringstream(s);
-                    tokens = vector<string>{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                    if(tokens.size() != n)
-                        throw std::runtime_error("The data file is not valid. Check the length of the vectors.");
-                    for(unsigned i = 0; i < n; ++i)
-                        c[i] = stoi(tokens[i]);
-                }
-            }
+                row[i] = stoi(tokens[i]);
+            rows.push_back(row);
         }
-        else
-            throw std::runtime_error("Can't open the data file: "+args.dArg.getValue());
-        if(c[0] == c[1] && c[0] == 1) // Symetric problem
+
+        if(rows.size() == 2)
         {
-            c = de;
-            de = d;
+            d = rows[0];
+            de = rows[0];
+            c = rows[1];
             symetric = true;
         }
+        else if(rows.size() == 3)
+        {
+            d = rows[0];
+            de = rows[1];
+            c = rows[2];
+        }
+        else
+            throw std::runtime_error("The data file is not valid. Expected 2 lines (durations, costs) "
+                                     "or 3 lines (west durations, east durations, costs).");
     }
     else
     {
@@ -221,7 +206,7 @@ InstanceData buildInstance(CliArgs& args)
 
     // Assuming d and c are strictly monoteneous, d must be decreasing for the algorithm
     // TODO: Take into account non-symetric cases
-    if(d[0] > d[1]) {
+    if(n > 1 && d[0] > d[1]) {
         swap(d,c);
         std::reverse(std::begin(de), std::end(de));
     }

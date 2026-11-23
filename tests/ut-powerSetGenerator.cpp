@@ -54,40 +54,41 @@ bool test_powerSet(const std::vector<int>& setValue, const std::vector<std::vect
 
 int main()
 {
+	bool ok = true;
 	auto setValue = std::vector<int>{};
 	auto expected = std::vector<std::vector<int>>{};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{0};
 	expected = std::vector<std::vector<int>>{{0}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{1};
 	expected = std::vector<std::vector<int>>{{1}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{9999};
 	expected = std::vector<std::vector<int>>{{9999}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{5,6};
 	expected = std::vector<std::vector<int>>{{5}, {6}, {5,6}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{5,5};
 	expected = std::vector<std::vector<int>>{{5}, {5,5}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	setValue = std::vector<int>{5,9};
 	expected = std::vector<std::vector<int>>{{5}, {9}, {5,9}};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	int n = {10};
 	setValue = std::vector<int>(n, 5);
 	expected = std::vector<std::vector<int>>(n);
 	for(int i = 0; i < n; ++i)
 		expected[i] = std::vector<int>(i+1, 5);
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
 	n = {2};
 	setValue = std::vector<int>{3,2,2,1,1};
@@ -98,7 +99,7 @@ int main()
 		{3,2,2,1}, {3,2,1,1},{2,2,1,1},
 		{3,2,2,1,1}
 	};
-	test_powerSet(setValue, expected);
+	ok = test_powerSet(setValue, expected) && ok;
 
-    return 0;
+    return ok ? 0 : 1;
 }
