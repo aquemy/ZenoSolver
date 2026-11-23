@@ -1,5 +1,7 @@
-// Checks the PDDL problem writer against the domain file in pddl/.
-#include <utils.hpp>
+// Checks the PDDL problem writer against the domain file in pddl/, and the
+// data-file writer against the instance reader.
+#include <zeno/io.hpp>
+#include <zeno/legacy_input.hpp>
 
 #include <cstdio>
 #include <filesystem>
@@ -74,15 +76,17 @@ std::set<std::string> matches(const std::string& text, const std::regex& re)
 
 int main()
 {
-    const unsigned n = 3, t = 4, p = 2;
-    const std::vector<double> c{30, 20, 10};
-    const std::vector<double> d{2, 4, 6};
-    const std::map<int, int> pareto{{120, 24}, {90, 36}};
+    zeno::Instance in;
+    in.d = {2, 4, 6};
+    in.dbar = in.d;
+    in.c = {30, 20, 10};
+    in.t = 4;
+    in.p = 2;
+    const zeno::Front front{{120, 24}, {90, 36}};
 
-    const auto path = std::filesystem::temp_directory_path() / "zeno-ut-pddl.pddl";
-    generatePDDL(path.string(), n, t, p, c, d, pareto);
-    const std::string problem = slurp(path);
-    std::filesystem::remove(path);
+    std::ostringstream written;
+    zeno::writePddlProblem(written, in, &front);
+    const std::string problem = written.str();
     const std::string body = stripComments(problem);
 
     check(!problem.empty(), "the problem file is written");
@@ -90,9 +94,9 @@ int main()
 
     // Goals: every person and every plane in C_G = city(n+1).
     const std::string goals = body.substr(body.find("(:goal"));
-    for(unsigned i = 1; i <= t; ++i)
+    for(int i = 1; i <= in.t; ++i)
         check(goals.find("(at person" + std::to_string(i) + " city4)") != std::string::npos, "goal for person" + std::to_string(i));
-    for(unsigned i = 1; i <= p; ++i)
+    for(int i = 1; i <= in.p; ++i)
         check(goals.find("(at plane" + std::to_string(i) + " city4)") != std::string::npos, "goal for plane" + std::to_string(i));
 
     // Landing costs and flight durations.
@@ -117,6 +121,36 @@ int main()
     const std::set<std::string> declared = matches(domain, used);
     for(const auto& symbol : matches(body, used))
         check(declared.contains(symbol), "domain declares " + symbol);
+
+    // Non-symmetric durations: C_I legs use d, C_G legs use dbar, central
+    // flights max(d_i, dbar_i) + max(d_j, dbar_j) + 100.
+    zeno::Instance ns = in;
+    ns.dbar = {5, 1, 7};
+    std::ostringstream nsText;
+    zeno::writePddlProblem(nsText, ns);
+    const std::string nsBody = stripComments(nsText.str());
+    check(nsBody.find("(= (timeTerre city0 city1) 2)") != std::string::npos, "non-symmetric C_I leg");
+    check(nsBody.find("(= (timeTerre city1 city4) 5)") != std::string::npos, "non-symmetric C_G leg");
+    check(nsBody.find("(= (timeTerre city2 city3) 111)") != std::string::npos, "non-symmetric central flight");
+    check(commentAfter(nsText.str(), "Durations (C_G side)") == "; 5 1 7 ", "non-symmetric durations comment");
+
+    // Data files round-trip through the reader of -d.
+    for(const zeno::Instance& instance : {in, ns})
+    {
+        const auto path = std::filesystem::temp_directory_path() / "zeno-ut-pddl.dat";
+        {
+            std::ofstream out(path);
+            zeno::writeDataFile(out, instance);
+        }
+        zeno::legacy::Options options;
+        options.n = instance.n();
+        options.t = instance.t;
+        options.p = instance.p;
+        options.dataFile = path.string();
+        const zeno::Instance back = zeno::legacy::buildInstance(options);
+        std::filesystem::remove(path);
+        check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, "data file round trip");
+    }
 
     if(failures == 0)
         std::cout << "ut-pddl: all checks passed\n";

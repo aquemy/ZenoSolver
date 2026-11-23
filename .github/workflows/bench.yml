@@ -41,7 +41,7 @@ jobs:
             "$exe" --benchmark_min_time=0.05s --benchmark_out="out/$(basename "$exe").json" --benchmark_out_format=json
           done
       - name: Quick suite
-        run: bench/tools/run_suite.py --exe build/bench/zenoSolver --args=-F --suite bench/instances/quick.txt --timeout 60 --machine "$MACHINE" --out out/quick-zenoSolver.json
+        run: bench/tools/run_suite.py --exe build/bench/zeno --suite bench/instances/quick.txt --timeout 60 --machine "$MACHINE" --out out/quick-zeno.json
       - name: Compare with the committed baseline
         run: |
           {
@@ -82,7 +82,7 @@ jobs:
         run: |
           suites=""
           for s in bench/instances/*.txt; do suites="$suites --suite $s"; done
-          bench/tools/run_suite.py --exe build/bench/zenoSolver --args=-F $suites --timeout 30 --machine "$MACHINE" --out out/zenoSolver.json
+          bench/tools/run_suite.py --exe build/bench/zeno $suites --timeout 30 --machine "$MACHINE" --out out/zeno.json
       - name: Gate on regressions
         run: |
           status=0

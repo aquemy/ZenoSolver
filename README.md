@@ -7,9 +7,9 @@ Exact Pareto fronts (total cost, makespan) of MultiZenoTravel planning instances
     zeno -n 10 -t 8 -p 3 -C 2 -D 2 -r 100 --stats
     zeno -n 2 -t 5 -p 2 -d durations-and-costs.dat
 
-`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. It currently handles instances with symmetric durations, which includes every instance the generator emits.
+`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. It currently handles instances with symmetric durations, which includes every instance the generator emits; non-symmetric instances are rejected.
 
-How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints of E(T), the cheapest admissible partition of the 2t − p landings into p groups whose durations each sum to at most T. `zeno` brackets E between a relaxation L and the pairs and chains bounds U and U3 on every level, and runs the exact link-forest dynamic program only on the levels that the bracket and the monotonicity of E leave open. The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) use a greedy schedule that is not optimal (`tests/golden/known-bugs.txt`); they are kept until the new solver covers the non-symmetric case.
+How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints of E(T), the cheapest admissible partition of the 2t − p landings into p groups whose durations each sum to at most T. `zeno` brackets E between a relaxation L and the pairs and chains bounds U and U3 on every level, and runs the exact link-forest dynamic program only on the levels that the bracket and the monotonicity of E leave open. The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) scheduled each PPP greedily, which is not optimal; they were removed (last in commit 84ca92a), and their timings are kept in `bench/baselines/legacy` for comparison.
 
 # Requirements
 
@@ -54,34 +54,39 @@ Options (`-D<option>=<value>`):
 
     ctest --preset release
 
-The golden tests compare the Pareto front of every solver variant (printed with `-F`) to fronts computed by a brute-force oracle (`tests/oracle`). The oracle enumerates every PPP, every beta set, and every assignment and order of flights to planes, and simulates the waiting in pattern P3 exactly. It is exponential, so the golden instances (`tests/golden/instances.txt`) are tiny. Regenerate the fronts with `tests/golden/regenerate.sh build/release/zenoOracle`.
+The golden tests compare the front of `zeno` to fronts computed by a brute-force oracle (`tests/oracle/bruteForce.hpp`), and check that `zeno check` accepts the certificate of each. The oracle enumerates every PPP, every beta set, and every assignment and order of flights to planes, and simulates the waiting in pattern P3 exactly. It is exponential, so the golden instances (`tests/golden/instances.txt`) are tiny. Regenerate the fronts with `tests/golden/regenerate.sh build/release/zenoOracle`.
 
-Pairs that currently fail are listed in `tests/golden/known-bugs.txt`. They are expected to fail, and they must be removed from that list when fixed.
+Pairs that are known to fail go in `tests/golden/known-bugs.txt` (currently none). They are expected to fail, and they must be removed from that list when fixed.
 
 `ut-zeno-core` checks the exact solver against a second, independent oracle (`tests/oracle/partitionEnum.hpp`), which enumerates every landing multiset and every admissible partition: the value of every level, the bracket order L ≤ E ≤ U3 ≤ U, and the front, on random instances. `ut-zeno-core <trials> <maxN> <maxT> <maxP> <maxS>` runs a larger sweep.
 
-Benchmarks: `cmake --preset bench && cmake --build --preset bench` builds the component benchmarks (Google Benchmark) and the solvers; `bench/tools/run_suite.py` times a solver over the instance suites in `bench/instances`. See `bench/README.md`.
+Benchmarks: `cmake --preset bench && cmake --build --preset bench` builds the component benchmarks (Google Benchmark) and `zeno`; `bench/tools/run_suite.py` times a solver over the instance suites in `bench/instances`. See `bench/README.md`.
 
 Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once more under the sanitizers.
 
-# RunTime Options
+# Commands
 
-As ZenoSolver handles only integers for cost and durations, it will cast generated vectors (or provided data) to integers. The adjustement factor (option -r) is a multiplicative constant in order to avoid some errors (for instance, obtaining more than once the value 0 because log(i) and log(i+1) have same floor value.
+    zeno [front] [instance options] [--threads N] [--plans] [--certificate FILE] [--stats]
+    zeno check CERTIFICATE
+    zeno pddl [instance options] [-O FILE] [--no-front]
+    zeno generate [instance options] [-O FILE]
 
-By default it is set to 1 but a better value for most of functions could be 100.
+- `front` (the default) prints the front; `--plans` adds a plan for every point, checked by simulation; `--certificate` writes a certificate (`doc/certificate-format.md`).
+- `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
+- `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 
-More information using ./zenoSolver -h.
+Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log.
 
 # PDDL
 
-`-G` writes the instance as a PDDL problem (`-O` sets the path) for the domain in `pddl/multi-zeno-travel.pddl`.
+`zeno pddl` writes the instance as a PDDL problem (`-O` sets the path) for the domain in `pddl/multi-zeno-travel.pddl`.
 
 - `city0` is the initial city C_I, `city1`…`cityN` are the central cities, `city(N+1)` is the goal city C_G.
 - Every person and every plane starts in C_I, and must end in C_G.
 - `fly` takes `timeTerre` time units; landing in a city adds its `citythreat` to the total cost (0 for C_I and C_G).
-- A flight between two central cities i and j lasts d_i + d_j + 100, so it is never faster than going through C_I or C_G.
+- C_I–i flights last d_i, i–C_G flights last dbar_i (equal to d_i for symmetric instances). A flight between two central cities i and j lasts max(d_i, dbar_i) + max(d_j, dbar_j) + 100, so it is never faster than going through C_I or C_G.
 - A plane carries one person at a time. `board` and `debark` are instantaneous: with the ε-separation of PDDL 2.1 a planner's makespan exceeds ZenoSolver's by at most ε per action on the critical path.
-- The trailing comments list the durations, the costs and the Pareto front (makespan, cost).
+- The trailing comments list the durations, the costs and, for symmetric instances, the Pareto front (makespan, cost).
 
 # References
 

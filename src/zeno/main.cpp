@@ -1,19 +1,20 @@
 // zeno: exact Pareto fronts of MultiZenoTravel instances.
 //
-//   zeno [front] [instance options] [--threads N] [--stats]
+//   zeno [front] [instance options] [solver options]
+//   zeno check CERTIFICATE
+//   zeno pddl [instance options] [-O FILE] [--no-front]
+//   zeno generate [instance options] [-O FILE]
 //
-// The instance options are those of the 2016 solvers (see `zeno --help`), and
-// build the same instance. The front is printed as "cost makespan" lines by
-// increasing cost.
+// The instance options are those of the 2016 solvers and build the same
+// instances (zeno --help).
 #include <zeno/certificate.hpp>
+#include <zeno/io.hpp>
 #include <zeno/legacy_input.hpp>
 #include <zeno/solve.hpp>
 
+#include <algorithm>
 #include <fstream>
-
-#include <cstdlib>
 #include <iostream>
-#include <map>
 #include <optional>
 #include <ranges>
 #include <stdexcept>
@@ -23,134 +24,32 @@
 
 namespace
 {
-constexpr std::string_view kUsage = R"(usage: zeno [front] [options]
+constexpr std::string_view kUsage = R"(usage: zeno [front] [instance options] [solver options]
        zeno check CERTIFICATE
+       zeno pddl [instance options] [-O FILE] [--no-front]
+       zeno generate [instance options] [-O FILE]
 
-Exact Pareto front (cost, makespan) of a symmetric MultiZenoTravel instance,
-printed as "cost makespan" lines by increasing cost.
+front     exact Pareto front (cost, makespan) of a symmetric instance, as
+          "cost makespan" lines by increasing cost (the default command)
+check     verify a front certificate (doc/certificate-format.md) and print
+          the assumptions it relied on
+pddl      write the instance as a PDDL problem for pddl/multi-zeno-travel.pddl,
+          with its front as comments unless --no-front (default file
+          zeno<n>n<t>t<p>pMulti.pddl)
+generate  write the instance as a data file for -d (default: standard output)
 
-Instance (same meaning as for the 2016 zenoSolver):
-  -n N        central cities (default 3)
-  -t N        passengers (default 3)
-  -p N        planes (default 2), 1 <= p <= t
-  -d FILE     data file: durations then costs (2 lines), or west durations,
-              east durations, costs (3 lines)
-  -C K -D K   generator of costs / durations: 1 log, 2 sqrt, 3 identity (default),
-              4 power of two, 5 staircase
-  -E K -W K   east / west duration generators (non-symmetric)
-  -r R        multiply before truncating to integers (default 1)
-  -j -k       cost generator scale / translation
-  -l -m       duration generator scale / translation
-  -x -y       output scale / translation of both generators
-  -F          accepted for compatibility (the front is always printed)
-
-Solver:
-  --threads N  worker threads (default: all cores)
-  --plans      after the front, print a plan for every point (checked by
-               simulation): one line per plane, legs as
-               from->to[depart,arrive] with the passenger carried (pK)
-  --certificate FILE
-               write a certificate of the front to FILE
-               (doc/certificate-format.md)
-  --stats      print solver statistics on stderr
-  -h, --help   this help
-
-zeno check CERTIFICATE verifies a certificate with the reference checker
-and prints the assumptions it relied on.
 )";
 
-struct CliOptions
-{
-    zeno::legacy::Options instance;
-    zeno::SolveOptions solve;
-    bool stats = false;
-    bool printPlans = false;
-    std::optional<std::string> certificate;
-};
-
-double number(std::string_view flag, const std::string& value)
-{
-    std::size_t used = 0;
-    double v = 0;
-    try
-    {
-        v = std::stod(value, &used);
-    }
-    catch(const std::exception&)
-    {
-        used = 0;
-    }
-    if(used != value.size())
-        throw std::invalid_argument("invalid value '" + value + "' for " + std::string(flag));
-    return v;
-}
-
-int integer(std::string_view flag, const std::string& value)
-{
-    const double v = number(flag, value);
-    if(v != static_cast<double>(static_cast<int>(v)))
-        throw std::invalid_argument("expected an integer for " + std::string(flag) + ", got '" + value + "'");
-    return static_cast<int>(v);
-}
-
-std::optional<CliOptions> parse(int argc, char** argv)
-{
-    CliOptions o;
-    std::vector<std::string> args(argv + 1, argv + argc);
-    std::size_t i = 0;
-    if(i < args.size() && args[i] == "front")
-        ++i;
-    for(; i < args.size(); ++i)
-    {
-        const std::string& flag = args[i];
-        if(flag == "-h" || flag == "--help")
-        {
-            std::cout << kUsage;
-            return std::nullopt;
-        }
-        if(flag == "-F")
-            continue;
-        if(flag == "--stats")
-        {
-            o.stats = true;
-            continue;
-        }
-        if(flag == "--plans")
-        {
-            o.solve.plans = true;
-            o.printPlans = true;
-            continue;
-        }
-        if(i + 1 >= args.size())
-            throw std::invalid_argument("missing value for " + flag);
-        const std::string& value = args[++i];
-        auto& in = o.instance;
-        if(flag == "-n") in.n = integer(flag, value);
-        else if(flag == "-t") in.t = integer(flag, value);
-        else if(flag == "-p") in.p = integer(flag, value);
-        else if(flag == "-d") in.dataFile = value;
-        else if(flag == "-C") in.costFunction = integer(flag, value);
-        else if(flag == "-D") in.durationFunction = integer(flag, value);
-        else if(flag == "-E") in.eastFunction = integer(flag, value);
-        else if(flag == "-W") in.westFunction = integer(flag, value);
-        else if(flag == "-r") in.adjust = integer(flag, value);
-        else if(flag == "-j") in.scaleC = number(flag, value);
-        else if(flag == "-k") in.transC = number(flag, value);
-        else if(flag == "-l") in.scaleD = number(flag, value);
-        else if(flag == "-m") in.transD = number(flag, value);
-        else if(flag == "-x") in.x = number(flag, value);
-        else if(flag == "-y") in.y = number(flag, value);
-        else if(flag == "--threads") o.solve.threads = static_cast<unsigned>(integer(flag, value));
-        else if(flag == "--certificate")
-        {
-            o.certificate = value;
-            o.solve.plans = true;
-        }
-        else
-            throw std::invalid_argument("unknown option " + flag + " (see zeno --help)");
-    }
-    return o;
-}
+constexpr std::string_view kSolverHelp = R"(
+Solver (front):
+  --threads N          worker threads (default: all cores)
+  --plans              after the front, print a plan for every point (checked
+                       by simulation): one line per plane, legs as
+                       from->to[depart,arrive] with the passenger carried (pK)
+  --certificate FILE   write a certificate of the front to FILE
+  --stats              print solver statistics on stderr
+  -h, --help           this help
+)";
 
 std::string location(int loc, int n)
 {
@@ -191,13 +90,81 @@ void printStats(const zeno::SolveStats& s)
               << "seconds: table " << s.secondsTable << ", bracket " << s.secondsBracket << ", chains " << s.secondsChains
               << ", exact " << s.secondsExact << ", plans " << s.secondsPlans << "\n";
 }
-} // namespace
 
-int check(const std::string& path)
+/// Value of an option taking one argument; removes both tokens from `rest`.
+std::optional<std::string> takeValue(std::vector<std::string>& rest, std::string_view flag)
 {
-    std::ifstream file(path);
+    for(std::size_t i = 0; i < rest.size(); ++i)
+        if(rest[i] == flag)
+        {
+            if(i + 1 >= rest.size())
+                throw std::invalid_argument("missing value for " + std::string(flag));
+            std::string value = rest[i + 1];
+            rest.erase(rest.begin() + static_cast<std::ptrdiff_t>(i), rest.begin() + static_cast<std::ptrdiff_t>(i) + 2);
+            return value;
+        }
+    return std::nullopt;
+}
+
+bool takeFlag(std::vector<std::string>& rest, std::string_view flag)
+{
+    const auto it = std::ranges::find(rest, flag);
+    if(it == rest.end())
+        return false;
+    rest.erase(it);
+    return true;
+}
+
+void rejectLeftovers(const std::vector<std::string>& rest)
+{
+    if(!rest.empty())
+        throw std::invalid_argument("unknown option " + rest.front() + " (see zeno --help)");
+}
+
+std::ofstream openOutput(const std::string& path)
+{
+    std::ofstream out(path);
+    if(!out)
+        throw std::runtime_error("cannot write " + path);
+    return out;
+}
+
+int runFront(const std::vector<std::string>& args)
+{
+    auto parsed = zeno::cli::parseInstanceArguments(args);
+    auto& rest = parsed.rest;
+    zeno::SolveOptions options;
+    if(auto v = takeValue(rest, "--threads"))
+        options.threads = static_cast<unsigned>(zeno::cli::integerValue("--threads", *v));
+    const auto certificate = takeValue(rest, "--certificate");
+    const bool plans = takeFlag(rest, "--plans");
+    const bool stats = takeFlag(rest, "--stats");
+    rejectLeftovers(rest);
+    options.plans = plans || certificate.has_value();
+
+    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    const zeno::SolveResult result = zeno::solveFront(instance, options);
+    for(const auto& point : std::views::reverse(result.front))
+        std::cout << point.cost << " " << point.makespan << "\n";
+    if(plans)
+        printPlans(result, instance.n());
+    if(certificate)
+    {
+        auto out = openOutput(*certificate);
+        zeno::writeCertificate(out, zeno::makeCertificate(instance, result));
+    }
+    if(stats)
+        printStats(result.stats);
+    return 0;
+}
+
+int runCheck(const std::vector<std::string>& args)
+{
+    if(args.size() != 1)
+        throw std::invalid_argument("usage: zeno check CERTIFICATE");
+    std::ifstream file(args.front());
     if(!file)
-        throw std::runtime_error("cannot open " + path);
+        throw std::runtime_error("cannot open " + args.front());
     const zeno::CertificateCheck report = zeno::checkCertificate(zeno::readCertificate(file));
     for(const auto& error : report.errors)
         std::cout << "error: " << error << "\n";
@@ -213,39 +180,68 @@ int check(const std::string& path)
     return 0;
 }
 
+int runPddl(const std::vector<std::string>& args)
+{
+    auto parsed = zeno::cli::parseInstanceArguments(args);
+    const auto file = takeValue(parsed.rest, "-O");
+    const bool noFront = takeFlag(parsed.rest, "--no-front");
+    rejectLeftovers(parsed.rest);
+    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    auto out = openOutput(file.value_or(zeno::defaultPddlName(instance)));
+    if(!noFront && instance.symmetric())
+    {
+        const zeno::Front front = zeno::solveFront(instance).front;
+        zeno::writePddlProblem(out, instance, &front);
+    }
+    else
+        zeno::writePddlProblem(out, instance);
+    return 0;
+}
+
+int runGenerate(const std::vector<std::string>& args)
+{
+    auto parsed = zeno::cli::parseInstanceArguments(args);
+    const auto file = takeValue(parsed.rest, "-O");
+    rejectLeftovers(parsed.rest);
+    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    if(!file)
+    {
+        zeno::writeDataFile(std::cout, instance);
+        return 0;
+    }
+    auto out = openOutput(*file);
+    zeno::writeDataFile(out, instance);
+    return 0;
+}
+} // namespace
+
 int main(int argc, char** argv)
 {
     try
     {
-        if(argc >= 2 && std::string_view(argv[1]) == "check")
+        std::vector<std::string> args(argv + 1, argv + argc);
+        if(std::ranges::any_of(args, [](const std::string& a) { return a == "-h" || a == "--help"; }))
         {
-            if(argc != 3)
-                throw std::invalid_argument("usage: zeno check CERTIFICATE");
-            return check(argv[2]);
-        }
-        const auto options = parse(argc, argv);
-        if(!options)
+            std::cout << kUsage << zeno::cli::instanceOptionsHelp() << kSolverHelp;
             return 0;
-        const zeno::Instance instance = zeno::legacy::buildInstance(options->instance);
-        const zeno::SolveResult result = zeno::solveFront(instance, options->solve);
-        for(const auto& point : std::views::reverse(result.front))
-            std::cout << point.cost << " " << point.makespan << "\n";
-        if(options->printPlans)
-            printPlans(result, instance.n());
-        if(options->certificate)
-        {
-            std::ofstream out(*options->certificate);
-            if(!out)
-                throw std::runtime_error("cannot write " + *options->certificate);
-            zeno::writeCertificate(out, zeno::makeCertificate(instance, result));
         }
-        if(options->stats)
-            printStats(result.stats);
+        std::string command = "front";
+        if(!args.empty() && (args.front() == "front" || args.front() == "check" || args.front() == "pddl" || args.front() == "generate"))
+        {
+            command = args.front();
+            args.erase(args.begin());
+        }
+        if(command == "check")
+            return runCheck(args);
+        if(command == "pddl")
+            return runPddl(args);
+        if(command == "generate")
+            return runGenerate(args);
+        return runFront(args);
     }
     catch(const std::exception& e)
     {
         std::cerr << "zeno: " << e.what() << "\n";
         return 1;
     }
-    return 0;
 }

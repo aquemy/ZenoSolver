@@ -17,7 +17,7 @@
         {
             "name": "bench",
             "displayName": "Benchmarks",
-            "description": "Release build with the component benchmarks (fetches Google Benchmark).",
+            "description": "Release build with the component benchmarks (fetches Google Benchmark) and zeno.",
             "inherits": "release",
             "cacheVariables": { "ZS_BUILD_BENCHMARKS": "ON", "ZS_BUILD_TESTS": "OFF" }
         },
@@ -44,7 +44,7 @@
     ],
     "buildPresets": [
         { "name": "release", "configurePreset": "release" },
-        { "name": "bench", "configurePreset": "bench", "targets": ["benchmarks", "zenoSolver", "zenoSolver_naive", "zenoSolver_noDuplicate"] },
+        { "name": "bench", "configurePreset": "bench", "targets": ["benchmarks", "zeno"] },
         { "name": "dev", "configurePreset": "dev" },
         { "name": "asan", "configurePreset": "asan" }
     ],

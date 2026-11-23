@@ -12,9 +12,9 @@ The output follows the schema of Google Benchmark's --benchmark_out=json, so
 benchmark's tools/compare.py and bench/tools/check_regression.py read it.
 
 Examples:
-  bench/tools/run_suite.py --exe build/release/zenoSolver --args=-F \\
+  bench/tools/run_suite.py --exe build/bench/zeno \\
       --suite bench/instances/regimes.txt --timeout 120 \\
-      --out bench/baselines/legacy/apple-m4-max/zenoSolver.json --machine apple-m4-max
+      --out bench/baselines/zeno/apple-m4-max/zeno.json --machine apple-m4-max
 """
 
 import argparse
