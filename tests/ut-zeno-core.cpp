@@ -553,8 +553,9 @@ void testBracketCertificates(std::mt19937& rng, int trials)
 }
 
 // Proposition 6.5 of the theory note: harmful waiting. The role-load bound
-// stays below the true front in two gaps; the bracket must equal the oracle's
-// front and must not claim those gaps closed.
+// stays below the true front in two gaps; only the exhaustive search over role
+// configurations (Corollary 6.10) closes them. The bracket must equal the
+// oracle's front, and close those gaps by search.
 void testHarmfulWaiting()
 {
     zeno::Instance in;
@@ -574,10 +575,15 @@ void testHarmfulWaiting()
         truth.push_back({cost, makespan});
     const auto bracket = zeno::solveBracket(in);
     check(bracket.upper == zeno::paretoFilter(truth), "harmful waiting: the bracket's points are the true front");
-    check(!bracket.exact(), "harmful waiting: the bracket does not claim exactness");
+    check(bracket.exact(), "harmful waiting: the search closes every gap");
+    int bySearch = 0;
     for(std::size_t i = 0; i < bracket.gapProof.size(); ++i)
+    {
+        bySearch += bracket.gapProof[i] == zeno::GapProof::Search;
         if(bracket.upper[i].makespan == 68)
-            check(bracket.gapProof[i] == zeno::GapProof::Open && bracket.gapLower[i] == 14, "harmful waiting: the gap 68-74 is open with bound 14");
+            check(bracket.gapProof[i] == zeno::GapProof::Search, "harmful waiting: the gap 68-74 is closed by search, not by a bound");
+    }
+    check(bySearch == 2, "harmful waiting: exactly the two waiting gaps need the search");
 }
 
 void testRejects()
