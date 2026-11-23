@@ -36,6 +36,8 @@ its linear-algebra form over `ZMod 2`, which Mathlib supports directly:
   be replaced by a witness with fewer edges (contained in it).
 * `ZenoFront.IsParityWitness.card_touched_le_of_minimal`: a witness with the fewest edges touches
   at most `p − 1` cities.
+* `ZenoFront.IsParityWitness.card_touched_le_of_minimal_subset`: the same for a witness that
+  contains no other witness.
 * `ZenoFront.Admissible.exists_minimal`: an admissible grouping has a witness with the fewest
   edges.
 * `ZenoFront.Admissible.exists_card_touched_le`: **Claim B′.** With `Σ_k |X_k| = s`, an admissible
@@ -206,6 +208,23 @@ theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
       omega
   · obtain ⟨h', hw', -, hlt⟩ := hw.exists_edgeCount_lt hli
     exact absurd (hmin h' hw') (not_le.mpr hlt)
+
+/-- **Claim B′, `p − 1` part, inclusion form.** A parity witness that contains no other parity
+witness (for instance, one from which no even subgraph can be removed) touches at most `p − 1`
+cities. -/
+theorem card_touched_le_of_minimal_subset (hw : IsParityWitness X h)
+    (hmin : ∀ h', IsParityWitness X h' → (∀ k, h' k ⊆ h k) → h' = h) :
+    (touched h).card ≤ p - 1 := by
+  by_cases hli : LinearIndependent (ZMod 2) (edgeVec h)
+  · rcases (touched h).eq_empty_or_nonempty with hC | ⟨i, hi⟩
+    · simp [hC]
+    · obtain ⟨k₀, -⟩ := mem_touched.mp hi
+      have h₁ := edgeCount_add_one_le_of_linearIndependent hli k₀
+      have h₂ := hw.two_mul_card_touched_le_edgeCount
+      omega
+  · obtain ⟨h', hw', hsub, hlt⟩ := hw.exists_edgeCount_lt hli
+    rw [hmin h' hw' hsub] at hlt
+    exact absurd hlt (lt_irrefl _)
 
 end IsParityWitness
 
