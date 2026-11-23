@@ -53,12 +53,17 @@ struct Levels
 class FrontSolver
 {
 public:
+    /// Above this many levels, search for the breakpoints instead of sweeping.
+    static constexpr Time kSweepLevels = Time{1} << 12;
+
     FrontSolver(const ReducedInstance& r, const SolveOptions& options, SolveStats& stats)
         : r_(r)
         , threads_(workerCount(options.threads))
         , stats_(stats)
-        , levels_(r.lowestLevel(), r.highestLevel())
-        , G_(build(r, stats))
+        , sweep_(options.levels == LevelStrategy::Sweep ||
+                 (options.levels == LevelStrategy::Automatic && r.highestLevel() - r.lowestLevel() + 1 <= kSweepLevels))
+        , levels_(r.lowestLevel(), sweep_ ? r.highestLevel() : r.lowestLevel())
+        , G_(build(r, options.table, stats))
     {}
 
     /// Plans for the front points, from the smallest tree bound that reaches E.
@@ -94,7 +99,14 @@ public:
 
     Front run()
     {
-        stats_.levels = levels_.size();
+        stats_.levels = static_cast<std::uint64_t>(r_.highestLevel() - r_.lowestLevel() + 1);
+        return sweep_ ? runSweep() : runSearch();
+    }
+
+private:
+    // Every level: the bracket on all of them, then the exact DP where needed.
+    Front runSweep()
+    {
         bracket();
         if(r_.maxTree() >= 3)
             chains();
@@ -109,11 +121,123 @@ public:
         return extract();
     }
 
-private:
-    static OnePlaneTable build(const ReducedInstance& r, SolveStats& stats)
+    // E at one level, from the cheapest bound that settles it.
+    Cost valueAt(Time T, LevelSource& how)
+    {
+        LevelStats work;
+        const Cost L = relaxedCost(r_, G_, T, &work);
+        Cost U = forestCost(r_, G_, T, 2, &work);
+        Cost value = U;
+        how = L == U ? LevelSource::Bracket : LevelSource::Pairs;
+        if(L != U && r_.maxTree() >= 3)
+        {
+            U = std::min(U, forestCost(r_, G_, T, 3, &work));
+            value = U;
+            how = LevelSource::Chains;
+            if(L != U && r_.maxTree() > 3)
+            {
+                value = forestCost(r_, G_, T, r_.maxTree(), &work);
+                how = LevelSource::Exact;
+            }
+        }
+        if(value < L || value > U)
+            throw std::logic_error("solveFront: E(" + std::to_string(T) + ") outside its bracket");
+        addWork(work);
+        return value;
+    }
+
+    // Few breakpoints over many levels: bisect for them. Every open interval
+    // (a, b) with E(a) > E(b) is split at up to `threads` evenly spaced
+    // levels, evaluated in parallel; pieces with equal ends are constant, and
+    // a piece (a, a + 1) has its breakpoint at a + 1.
+    Front runSearch()
+    {
+        struct Interval
+        {
+            Time a, b;
+            Cost Ea, Eb;
+        };
+        const Time lo = r_.lowestLevel(), hi = r_.highestLevel();
+        std::vector<std::pair<Time, Cost>> points;
+        LevelSource how{};
+        const Cost Elo = valueAt(lo, how);
+        count(how);
+        points.emplace_back(lo, Elo);
+        const Cost Ehi = static_cast<Cost>(r_.landings()) * r_.c.back();
+        std::vector<Interval> open;
+        if(Elo > Ehi)
+            open.push_back({lo, hi, Elo, Ehi});
+        const auto start = Clock::now();
+        while(!open.empty())
+        {
+            std::vector<Interval> next;
+            std::vector<Time> probes;
+            std::vector<std::size_t> first; // first probe of each interval
+            for(const Interval& iv : open)
+            {
+                first.push_back(probes.size());
+                if(iv.b == iv.a + 1)
+                    continue;
+                const Time gaps = iv.b - iv.a - 1;
+                const Time k = std::clamp<Time>(static_cast<Time>(threads_) / static_cast<Time>(open.size()), 1, gaps);
+                for(Time j = 1; j <= k; ++j)
+                    probes.push_back(iv.a + j * (iv.b - iv.a) / (k + 1));
+            }
+            first.push_back(probes.size());
+            std::vector<Cost> values(probes.size());
+            std::vector<LevelSource> sources(probes.size());
+            parallelFor(probes.size(), threads_, [&](std::size_t i) { values[i] = valueAt(probes[i], sources[i]); });
+            for(LevelSource src : sources)
+                count(src);
+            for(std::size_t k = 0; k < open.size(); ++k)
+            {
+                const Interval& iv = open[k];
+                if(iv.b == iv.a + 1)
+                {
+                    points.emplace_back(iv.b, iv.Eb);
+                    continue;
+                }
+                Time a = iv.a;
+                Cost Ea = iv.Ea;
+                for(std::size_t i = first[k]; i <= first[k + 1]; ++i)
+                {
+                    const bool end = i == first[k + 1];
+                    const Time b = end ? iv.b : probes[i];
+                    const Cost Eb = end ? iv.Eb : values[i];
+                    if(Eb > Ea)
+                        throw std::logic_error("solveFront: E increases at level " + std::to_string(b));
+                    if(Eb < Ea)
+                        next.push_back({a, b, Ea, Eb});
+                    a = b;
+                    Ea = Eb;
+                }
+            }
+            open = std::move(next);
+        }
+        stats_.secondsExact += secondsSince(start);
+        std::ranges::sort(points);
+        Front front;
+        for(const auto& [T, E] : points)
+            front.push_back({E, 2 * r_.scale * T});
+        return front;
+    }
+
+    void count(LevelSource how)
+    {
+        switch(how)
+        {
+            case LevelSource::Bracket: ++stats_.closedByBracket; break;
+            case LevelSource::Pairs: ++stats_.closedByPairs; break;
+            case LevelSource::Chains: ++stats_.closedByChains; break;
+            case LevelSource::Exact: ++stats_.exactCalls; break;
+            default: break;
+        }
+    }
+
+    static OnePlaneTable build(const ReducedInstance& r, OnePlaneTable::Layout layout, SolveStats& stats)
     {
         const auto start = Clock::now();
-        OnePlaneTable G(r.d, r.c, r.maxGroup(), r.highestLevel());
+        OnePlaneTable G(r.d, r.c, r.maxGroup(), r.highestLevel(), layout);
         stats.secondsTable = secondsSince(start);
         return G;
     }
@@ -249,6 +373,7 @@ private:
     unsigned threads_;
     SolveStats& stats_;
     std::mutex statsMutex_;
+    bool sweep_;
     Levels levels_;
     OnePlaneTable G_;
 };

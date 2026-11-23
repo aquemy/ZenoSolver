@@ -73,8 +73,8 @@ Cost relaxedCost(const ReducedInstance& r, const OnePlaneTable& G, Time T, Level
     return forest.back();
 }
 
-Cost& ForestProgram::kids(int q, int j, Time tau) noexcept { return kids_[(at(q) * S_ + at(j)) * W_ + static_cast<std::size_t>(tau)]; }
-Cost ForestProgram::kids(int q, int j, Time tau) const noexcept { return kids_[(at(q) * S_ + at(j)) * W_ + static_cast<std::size_t>(tau)]; }
+std::vector<ForestProgram::KidStep>& ForestProgram::kids(int q, int j) noexcept { return kids_[at(q) * S_ + at(j)]; }
+const std::vector<ForestProgram::KidStep>& ForestProgram::kids(int q, int j) const noexcept { return kids_[at(q) * S_ + at(j)]; }
 Cost& ForestProgram::sub(int a, int q, int j) noexcept { return sub_[(at(a) * at(Q_) + at(q - 1)) * S_ + at(j)]; }
 Cost ForestProgram::sub(int a, int q, int j) const noexcept { return sub_[(at(a) * at(Q_) + at(q - 1)) * S_ + at(j)]; }
 Cost& ForestProgram::root(int q, int j) noexcept { return root_[at(q) * S_ + at(j)]; }
@@ -88,38 +88,37 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
     , Q_(std::max(1, std::min(maxTreePlanes, r.p)))
     , s_(r.landings())
     , S_(at(r.landings() + 1))
-    , W_(static_cast<std::size_t>(T + 1))
 {
     checkLevel(r, G, T);
     const int n = r.n(), s = s_, Q = Q_;
-    kids_.assign(at(Q) * S_ * W_, kInfCost);
+    kids_.assign(at(Q) * S_, {});
     sub_.assign(at(n) * at(Q) * S_, kInfCost);
     root_.assign(at(Q + 1) * S_, kInfCost);
-    kids(0, 0, 0) = 0;
+    kids(0, 0).push_back({0, 0, -1, 0, 0, -1});
 
-    // kids(q, j, tau): the children of one plane: q planes and j landings in
-    // total, counting the subtrees and the plane's own copy of each child edge
-    // label; tau is the sum of the child labels' durations, the part of the
-    // plane's load taken by its child edges.
+    // kids(q, j): the children of one plane, q planes and j landings in total
+    // (the subtrees plus the plane's own copy of each child edge label), as a
+    // staircase over tau = the sum of the child labels' durations (strictly
+    // increasing) and cost (strictly decreasing): a larger tau leaves less
+    // load for the filler, so only these points matter.
     // sub(a, q, j): a subtree of q planes and j landings hanging from its
     // parent by an edge labelled a (its root's copy of a included).
     // root(q, j): a whole tree.
+    std::vector<KidStep> candidates;
     for(int q = 1; q <= Q; ++q)
     {
         // A plane with q - 1 descendants: its children plus an odd filler.
         const bool childAllowed = q <= Q - 1;
-        for(Time tau = 0; tau <= T; ++tau)
-            for(int jk = 0; jk < s; ++jk)
+        for(int jk = 0; jk < s; ++jk)
+            for(const KidStep& step : kids(q - 1, jk))
             {
-                const Cost k = kids(q - 1, jk, tau);
-                if(isInf(k))
-                    continue;
-                const Time rootBudget = T - tau;
+                const Time rootBudget = T - step.tau;
                 for(int rr = 1; jk + rr <= s && rr <= G.maxLandings(); rr += 2)
                 {
                     const Cost asRoot = G(rr, rootBudget);
-                    if(!isInf(asRoot))
-                        root(q, jk + rr) = std::min(root(q, jk + rr), k + asRoot);
+                    if(isInf(asRoot))
+                        break; // G grows with rr at a fixed budget
+                    root(q, jk + rr) = std::min(root(q, jk + rr), step.cost + asRoot);
                     if(!childAllowed || jk + rr + 1 > s)
                         continue;
                     for(int a = 0; a < n; ++a)
@@ -128,7 +127,7 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
                         if(isInf(filler))
                             break; // d increases with a: less budget
                         Cost& cell = sub(a, q, jk + rr + 1);
-                        cell = std::min(cell, r.c[at(a)] + k + filler);
+                        cell = std::min(cell, r.c[at(a)] + step.cost + filler);
                     }
                     if(stats)
                         stats->relaxations += at(n) + 1;
@@ -137,41 +136,46 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
         if(!childAllowed)
             break;
 
-        // kids(q, ., .) = kids(q - qc, ., .) plus one child subtree of qc planes.
-        for(int b = 0; b < n; ++b)
+        // kids(q, j) = kids(q - qc, j - 1 - jc) plus one child subtree (b, qc, jc).
+        for(int j = 1; j <= s; ++j)
         {
-            const Time db = r.d[at(b)];
-            if(db > T)
-                break;
-            const Cost cb = r.c[at(b)];
-            for(int qc = 1; qc <= q; ++qc)
-                for(int jc = 2; jc + 1 <= s; ++jc)
-                {
-                    const Cost child = sub(b, qc, jc);
-                    if(isInf(child))
-                        continue;
-                    const Cost item = cb + child;
-                    for(int j = jc + 1; j <= s; ++j)
+            candidates.clear();
+            for(int b = 0; b < n; ++b)
+            {
+                const Time db = r.d[at(b)];
+                if(db > T)
+                    break;
+                const Cost cb = r.c[at(b)];
+                for(int qc = 1; qc <= q; ++qc)
+                    for(int jc = 2; jc + 1 <= j; ++jc)
                     {
-                        const Cost* before = &kids(q - qc, j - 1 - jc, 0);
-                        Cost* after = &kids(q, j, 0);
-                        for(Time tau = db; tau <= T; ++tau)
-                            after[tau] = std::min(after[tau], before[tau - db] + item);
+                        const Cost child = sub(b, qc, jc);
+                        if(isInf(child))
+                            continue;
+                        const auto& before = kids(q - qc, j - 1 - jc);
+                        for(std::size_t i = 0; i < before.size(); ++i)
+                        {
+                            const Time tau = before[i].tau + db;
+                            if(tau > T)
+                                break; // staircase: tau increases
+                            candidates.push_back({tau, before[i].cost + cb + child, b, qc, jc, static_cast<int>(i)});
+                        }
                     }
-                    if(stats)
-                        stats->relaxations += at(s - jc) * static_cast<std::size_t>(T - db + 1);
+            }
+            if(stats)
+                stats->relaxations += candidates.size();
+            std::ranges::sort(candidates, [](const KidStep& x, const KidStep& y) { return x.tau != y.tau ? x.tau < y.tau : x.cost < y.cost; });
+            auto& out = kids(q, j);
+            for(const KidStep& c : candidates)
+                if(out.empty() || c.cost < out.back().cost)
+                {
+                    if(!out.empty() && out.back().tau == c.tau)
+                        continue; // same tau, higher cost (sorted)
+                    out.push_back(c);
                 }
+            if(stats)
+                stats->states += out.size();
         }
-        // before[] may hold kInfCost; kInfCost + item stays below overflow and
-        // above kInfCost, so clamp the new layer.
-        for(int j = 0; j <= s; ++j)
-        {
-            Cost* row = &kids(q, j, 0);
-            for(std::size_t tau = 0; tau < W_; ++tau)
-                row[tau] = std::min(row[tau], kInfCost);
-        }
-        if(stats)
-            stats->states += S_ * W_;
     }
 
     forest_ = combineTrees(r.p, s, Q, [&](int q, int j) { return root(q, j); }, stats);
@@ -180,53 +184,35 @@ ForestProgram::ForestProgram(const ReducedInstance& r, const OnePlaneTable& G, T
 
 void ForestProgram::buildNode(int q, int j, int label, Time budget, int parentIndex, LinkForest& out) const
 {
-    // budget: the node's load limit for its children and filler.
+    // budget: the node's load limit for its children and its filler.
     const Cost target = label >= 0 ? sub(label, q, j) : root(q, j);
     const int own = label >= 0 ? 1 : 0;
     const Cost labelCost = label >= 0 ? r_.c[at(label)] : 0;
-    for(Time tau = 0; tau <= budget; ++tau)
-        for(int rr = 1; rr + own <= j && rr <= G_.maxLandings(); rr += 2)
+    for(int rr = 1; rr + own <= j && rr <= G_.maxLandings(); rr += 2)
+    {
+        const int jk = j - own - rr;
+        const auto& steps = kids(q - 1, jk);
+        for(std::size_t i = 0; i < steps.size(); ++i)
         {
-            const int jk = j - own - rr;
-            const Cost k = kids(q - 1, jk, tau);
-            const Cost filler = G_(rr, budget - tau);
-            if(isInf(k) || isInf(filler) || labelCost + k + filler != target)
+            const Cost filler = G_(rr, budget - steps[i].tau);
+            if(isInf(filler) || labelCost + steps[i].cost + filler != target)
                 continue;
             const int index = static_cast<int>(out.planes.size());
-            out.planes.push_back({G_.witness(rr, budget - tau), parentIndex, label});
-            buildKids(q - 1, jk, tau, index, out);
+            out.planes.push_back({G_.witness(rr, budget - steps[i].tau), parentIndex, label});
+            buildKids(q - 1, jk, static_cast<int>(i), index, out);
             return;
         }
+    }
     throw std::logic_error("ForestProgram::reconstruct: no decomposition of a tree node");
 }
 
-void ForestProgram::buildKids(int q, int j, Time tau, int parentIndex, LinkForest& out) const
+void ForestProgram::buildKids(int q, int j, int step, int parentIndex, LinkForest& out) const
 {
-    if(q == 0)
-    {
-        if(j != 0 || tau != 0)
-            throw std::logic_error("ForestProgram::reconstruct: leftover children");
-        return;
-    }
-    const Cost target = kids(q, j, tau);
-    for(int b = 0; b < r_.n(); ++b)
-    {
-        const Time db = r_.d[at(b)];
-        if(db > tau)
-            break;
-        for(int qc = 1; qc <= q; ++qc)
-            for(int jc = 2; jc + 1 <= j; ++jc)
-            {
-                const Cost child = sub(b, qc, jc);
-                const Cost before = kids(q - qc, j - 1 - jc, tau - db);
-                if(isInf(child) || isInf(before) || before + r_.c[at(b)] + child != target)
-                    continue;
-                buildNode(qc, jc, b, T_ - db, parentIndex, out);
-                buildKids(q - qc, j - 1 - jc, tau - db, parentIndex, out);
-                return;
-            }
-    }
-    throw std::logic_error("ForestProgram::reconstruct: no decomposition of a children multiset");
+    const KidStep& k = kids(q, j)[at(step)];
+    if(k.b < 0)
+        return; // the empty multiset
+    buildNode(k.qc, k.jc, k.b, T_ - r_.d[at(k.b)], parentIndex, out);
+    buildKids(q - k.qc, j - 1 - k.jc, k.previous, parentIndex, out);
 }
 
 LinkForest ForestProgram::reconstruct() const

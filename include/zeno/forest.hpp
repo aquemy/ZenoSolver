@@ -54,8 +54,9 @@ struct LinkForest
 /// ReducedInstance::maxTree() (link-forest lemma). maxTreePlanes = 2 gives
 /// the pairs bound U, 3 the bound U3.
 ///
-/// Per level: O(T * n * q^2 * s^2) time and O(q * s * T + n * q * s) memory,
-/// with q = min(maxTreePlanes, p).
+/// The children of a plane are kept as Pareto staircases over (tau, cost),
+/// tau being the part of the plane's load taken by its child edges, so the
+/// work depends on the staircase sizes and not on the magnitude of T.
 class ForestProgram
 {
 public:
@@ -66,24 +67,35 @@ public:
     [[nodiscard]] LinkForest reconstruct() const;
 
 private:
-    [[nodiscard]] Cost& kids(int q, int j, Time tau) noexcept;
-    [[nodiscard]] Cost kids(int q, int j, Time tau) const noexcept;
+    /// One point of a children staircase, with how it was obtained: child
+    /// subtree (label b, qc planes, jc landings) added to entry `previous` of
+    /// kids(q - qc, j - 1 - jc). b = -1 for the empty multiset.
+    struct KidStep
+    {
+        Time tau = 0;
+        Cost cost = 0;
+        int b = -1, qc = 0, jc = 0, previous = -1;
+    };
+
+    [[nodiscard]] std::vector<KidStep>& kids(int q, int j) noexcept;
+    [[nodiscard]] const std::vector<KidStep>& kids(int q, int j) const noexcept;
     [[nodiscard]] Cost& sub(int a, int q, int j) noexcept;
     [[nodiscard]] Cost sub(int a, int q, int j) const noexcept;
     [[nodiscard]] Cost& root(int q, int j) noexcept;
     [[nodiscard]] Cost root(int q, int j) const noexcept;
     [[nodiscard]] Cost forest(int planes, int j) const noexcept;
 
-    // Reconstruction helpers: fill `out` with the planes of a subtree.
-    void buildKids(int q, int j, Time tau, int parentIndex, LinkForest& out) const;
+    // Reconstruction helpers: append the planes of a subtree to `out`.
+    void buildKids(int q, int j, int step, int parentIndex, LinkForest& out) const;
     void buildNode(int q, int j, int label, Time budget, int parentIndex, LinkForest& out) const;
 
     const ReducedInstance& r_;
     const OnePlaneTable& G_;
     Time T_;
     int Q_, s_;
-    std::size_t S_, W_;
-    std::vector<Cost> kids_, sub_, root_, forest_;
+    std::size_t S_;
+    std::vector<std::vector<KidStep>> kids_;
+    std::vector<Cost> sub_, root_, forest_;
     Cost value_ = kInfCost;
 };
 
