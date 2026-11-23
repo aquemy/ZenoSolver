@@ -28,12 +28,14 @@ Presets (`CMakePresets.json`):
 | `release` | Optimised build with link-time optimisation (the default build type). |
 | `dev` | Debug build, exports `compile_commands.json`. |
 | `asan` | AddressSanitizer and UndefinedBehaviorSanitizer. Any report fails the test. |
+| `bench` | Release build of the benchmarks and the solvers, without the tests. |
 
 Options (`-D<option>=<value>`):
 
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `ZS_BUILD_TESTS` | `ON` | Build the tests, the brute-force oracle and the golden suite. |
+| `ZS_BUILD_BENCHMARKS` | `OFF` | Build the component benchmarks; fetches Google Benchmark v1.9.1 (`bench` preset). |
 | `ZS_BUILD_DOC` | `OFF` | Add the `doc` target (requires Doxygen). |
 | `ZS_ENABLE_IPO` | `ON` | Link-time optimisation in Release builds, when supported. |
 | `ZS_NATIVE` | `OFF` | Tune for the build machine (`-march=native`). Binaries are not portable. |
@@ -48,7 +50,7 @@ The golden tests compare the Pareto front of every solver variant (printed with 
 
 Pairs that currently fail are listed in `tests/golden/known-bugs.txt`. They are expected to fail, and they must be removed from that list when fixed.
 
-`bench/run.sh build/release` times the three variants on a few larger instances.
+Benchmarks: `cmake --preset bench && cmake --build --preset bench` builds the component benchmarks (Google Benchmark) and the solvers; `bench/tools/run_suite.py` times a solver over the instance suites in `bench/instances`. See `bench/README.md`.
 
 Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once more under the sanitizers.
 

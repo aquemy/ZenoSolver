@@ -17,6 +17,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 option(ZS_BUILD_TESTS "Build the tests, the brute-force oracle and the golden suite." ON)
+option(ZS_BUILD_BENCHMARKS "Build the component benchmarks (fetches Google Benchmark)." OFF)
 option(ZS_BUILD_DOC "Add the 'doc' target (requires Doxygen)." OFF)
 option(ZS_WARNINGS_AS_ERRORS "Treat compiler warnings as errors." OFF)
 option(ZS_ENABLE_IPO "Link-time optimisation in Release builds, when supported." ON)
@@ -94,6 +95,21 @@ endforeach()
 if(ZS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(ZS_BUILD_BENCHMARKS)
+    include(FetchContent)
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(benchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.9.1
+        GIT_SHALLOW TRUE
+        SYSTEM)
+    FetchContent_MakeAvailable(benchmark)
+    add_subdirectory(bench)
 endif()
 
 if(ZS_BUILD_DOC)

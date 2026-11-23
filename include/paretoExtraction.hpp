@@ -3,6 +3,8 @@
 
 #include <algorithm.hpp>
 
+#include <map>
+
 ////////////////////////////////////////////////////////////
 /// \brief Extract the Pareto Front from a std::map.
 ///
