@@ -1,0 +1,8 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Five regimes of the plan: many cities, few passengers; balanced; p close to t;
+# medium; large. Default generator (c_i = i, d_i = n+1-i).
+r1-n200t3p2|-n 200 -t 3 -p 2
+r2-n20t6p2|-n 20 -t 6 -p 2
+r3-n8t26p25|-n 8 -t 26 -p 25
+r4-n50t30p5|-n 50 -t 30 -p 5
+r5-n100t60p10|-n 100 -t 60 -p 10

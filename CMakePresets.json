@@ -15,6 +15,13 @@
             "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
+            "name": "bench",
+            "displayName": "Benchmarks",
+            "description": "Release build with the component benchmarks (fetches Google Benchmark).",
+            "inherits": "release",
+            "cacheVariables": { "ZS_BUILD_BENCHMARKS": "ON", "ZS_BUILD_TESTS": "OFF" }
+        },
+        {
             "name": "dev",
             "displayName": "Development",
             "description": "Debug build that exports compile_commands.json.",
@@ -37,6 +44,7 @@
     ],
     "buildPresets": [
         { "name": "release", "configurePreset": "release" },
+        { "name": "bench", "configurePreset": "bench", "targets": ["benchmarks", "zenoSolver", "zenoSolver_naive", "zenoSolver_noDuplicate"] },
         { "name": "dev", "configurePreset": "dev" },
         { "name": "asan", "configurePreset": "asan" }
     ],

@@ -24,6 +24,7 @@ main.pdf
 # excepted these manually configured files
 !CMakeLists.txt
 !tests/golden/*.txt
+!bench/instances/*.txt
 !README.txt
 !application/
 !doc/

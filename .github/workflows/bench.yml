@@ -1,0 +1,100 @@
+name: Benchmarks
+
+# Pull requests: run the component benchmarks and the quick suite, and compare
+# them with the baseline committed for the runner. Shared runners are noisy, so
+# this job reports and never blocks.
+# Nightly: the full suites on the benchmark runner (repository variable
+# ZS_BENCH_RUNNER, default ubuntu-24.04), failing on a regression above 10%.
+
+on:
+  pull_request:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pull-request:
+    if: github.event_name == 'pull_request'
+    name: Benchmarks (report only)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    env:
+      CXX: clang++-18
+      MACHINE: ci-ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          cmake --preset bench
+          cmake --build --preset bench --parallel
+      - name: Component benchmarks
+        run: |
+          mkdir -p out
+          for exe in build/bench/bm-*; do
+            "$exe" --benchmark_min_time=0.05s --benchmark_out="out/$(basename "$exe").json" --benchmark_out_format=json
+          done
+      - name: Quick suite
+        run: bench/tools/run_suite.py --exe build/bench/zenoSolver --args=-F --suite bench/instances/quick.txt --timeout 60 --machine "$MACHINE" --out out/quick-zenoSolver.json
+      - name: Compare with the committed baseline
+        run: |
+          {
+            echo "### Benchmarks against bench/baselines/*/$MACHINE"
+            echo '```'
+            for f in out/*.json; do
+              for base in bench/baselines/*/"$MACHINE/$(basename "$f")"; do
+                [ -f "$base" ] && bench/tools/check_regression.py "$base" "$f" || true
+              done
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: out/
+
+  nightly:
+    if: github.event_name != 'pull_request'
+    name: Benchmarks (nightly, gated)
+    runs-on: ${{ vars.ZS_BENCH_RUNNER || 'ubuntu-24.04' }}
+    env:
+      CXX: clang++-18
+      MACHINE: ${{ vars.ZS_BENCH_MACHINE || 'ci-ubuntu-24.04' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          cmake --preset bench
+          cmake --build --preset bench --parallel
+      - name: Component benchmarks
+        run: |
+          mkdir -p out
+          for exe in build/bench/bm-*; do
+            "$exe" --benchmark_repetitions=5 --benchmark_report_aggregates_only=true --benchmark_out="out/$(basename "$exe").json" --benchmark_out_format=json
+          done
+      - name: Suites
+        run: |
+          suites=""
+          for s in bench/instances/*.txt; do suites="$suites --suite $s"; done
+          bench/tools/run_suite.py --exe build/bench/zenoSolver --args=-F $suites --timeout 30 --machine "$MACHINE" --out out/zenoSolver.json
+      - name: Gate on regressions
+        run: |
+          status=0
+          for f in out/*.json; do
+            for base in bench/baselines/*/"$MACHINE/$(basename "$f")"; do
+              [ -f "$base" ] || continue
+              bench/tools/check_regression.py "$base" "$f" || status=1
+            done
+          done
+          exit $status
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmarks-nightly
+          path: out/

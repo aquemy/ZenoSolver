@@ -1,0 +1,11 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Number of passengers, n = 8, p = 3.
+t4|-n 8 -t 4 -p 3
+t6|-n 8 -t 6 -p 3
+t8|-n 8 -t 8 -p 3
+t10|-n 8 -t 10 -p 3
+t12|-n 8 -t 12 -p 3
+t16|-n 8 -t 16 -p 3
+t20|-n 8 -t 20 -p 3
+t30|-n 8 -t 30 -p 3
+t40|-n 8 -t 40 -p 3

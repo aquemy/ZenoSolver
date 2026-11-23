@@ -1,0 +1,7 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Duration magnitude: sqrt family scaled by -r, n = 10, t = 8, p = 3.
+r1|-n 10 -t 8 -p 3 -C 2 -D 2 -r 1
+r10|-n 10 -t 8 -p 3 -C 2 -D 2 -r 10
+r100|-n 10 -t 8 -p 3 -C 2 -D 2 -r 100
+r1000|-n 10 -t 8 -p 3 -C 2 -D 2 -r 1000
+r10000|-n 10 -t 8 -p 3 -C 2 -D 2 -r 10000

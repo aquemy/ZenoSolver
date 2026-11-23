@@ -1,0 +1,6 @@
+# name|arguments (legacy solver syntax; @DATA@ = bench/instances/data).
+# Number of distinct durations among n = 24 cities, t = 8, p = 3.
+k2|-n 24 -t 8 -p 3 -d @DATA@/distinct-2.dat
+k4|-n 24 -t 8 -p 3 -d @DATA@/distinct-4.dat
+k8|-n 24 -t 8 -p 3 -d @DATA@/distinct-8.dat
+k24|-n 24 -t 8 -p 3 -d @DATA@/distinct-24.dat
