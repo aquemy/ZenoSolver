@@ -70,6 +70,7 @@ struct SolveResult
 
 /// Exact Pareto front of a symmetric instance (assumption A1 on central
 /// flights, which every generated instance satisfies). Throws
-/// std::invalid_argument for invalid or non-symmetric instances.
+/// std::invalid_argument for invalid or non-symmetric instances; the latter go
+/// to solveBracket (zeno/ns.hpp).
 [[nodiscard]] SolveResult solveFront(const Instance& instance, const SolveOptions& options = {});
 } // namespace zeno

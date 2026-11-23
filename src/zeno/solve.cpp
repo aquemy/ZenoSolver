@@ -329,7 +329,7 @@ private:
 SolveResult solveFront(const Instance& instance, const SolveOptions& options)
 {
     if(!instance.symmetric())
-        throw std::invalid_argument("solveFront: non-symmetric instances are not supported yet");
+        throw std::invalid_argument("solveFront: the instance is not symmetric; use solveBracket (zeno/ns.hpp)");
     const ReducedInstance r = reduce(instance);
     SolveResult result;
     result.stats.lowestLevel = r.lowestLevel();
