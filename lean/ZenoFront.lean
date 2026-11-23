@@ -9,3 +9,5 @@ public import ZenoFront.MinimalWitness
 public import ZenoFront.Plan
 public import ZenoFront.PlanBounds
 public import ZenoFront.Relaxation
+public import ZenoFront.Simulate
+public import ZenoFront.Checker
