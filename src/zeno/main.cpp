@@ -1,0 +1,161 @@
+// zeno: exact Pareto fronts of MultiZenoTravel instances.
+//
+//   zeno [front] [instance options] [--threads N] [--stats]
+//
+// The instance options are those of the 2016 solvers (see `zeno --help`), and
+// build the same instance. The front is printed as "cost makespan" lines by
+// increasing cost.
+#include <zeno/legacy_input.hpp>
+#include <zeno/solve.hpp>
+
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <optional>
+#include <ranges>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
+
+namespace
+{
+constexpr std::string_view kUsage = R"(usage: zeno [front] [options]
+
+Exact Pareto front (cost, makespan) of a symmetric MultiZenoTravel instance,
+printed as "cost makespan" lines by increasing cost.
+
+Instance (same meaning as for the 2016 zenoSolver):
+  -n N        central cities (default 3)
+  -t N        passengers (default 3)
+  -p N        planes (default 2), 1 <= p <= t
+  -d FILE     data file: durations then costs (2 lines), or west durations,
+              east durations, costs (3 lines)
+  -C K -D K   generator of costs / durations: 1 log, 2 sqrt, 3 identity (default),
+              4 power of two, 5 staircase
+  -E K -W K   east / west duration generators (non-symmetric)
+  -r R        multiply before truncating to integers (default 1)
+  -j -k       cost generator scale / translation
+  -l -m       duration generator scale / translation
+  -x -y       output scale / translation of both generators
+  -F          accepted for compatibility (the front is always printed)
+
+Solver:
+  --threads N  worker threads (default: all cores)
+  --stats      print solver statistics on stderr
+  -h, --help   this help
+)";
+
+struct CliOptions
+{
+    zeno::legacy::Options instance;
+    zeno::SolveOptions solve;
+    bool stats = false;
+};
+
+double number(std::string_view flag, const std::string& value)
+{
+    std::size_t used = 0;
+    double v = 0;
+    try
+    {
+        v = std::stod(value, &used);
+    }
+    catch(const std::exception&)
+    {
+        used = 0;
+    }
+    if(used != value.size())
+        throw std::invalid_argument("invalid value '" + value + "' for " + std::string(flag));
+    return v;
+}
+
+int integer(std::string_view flag, const std::string& value)
+{
+    const double v = number(flag, value);
+    if(v != static_cast<double>(static_cast<int>(v)))
+        throw std::invalid_argument("expected an integer for " + std::string(flag) + ", got '" + value + "'");
+    return static_cast<int>(v);
+}
+
+std::optional<CliOptions> parse(int argc, char** argv)
+{
+    CliOptions o;
+    std::vector<std::string> args(argv + 1, argv + argc);
+    std::size_t i = 0;
+    if(i < args.size() && args[i] == "front")
+        ++i;
+    for(; i < args.size(); ++i)
+    {
+        const std::string& flag = args[i];
+        if(flag == "-h" || flag == "--help")
+        {
+            std::cout << kUsage;
+            return std::nullopt;
+        }
+        if(flag == "-F")
+            continue;
+        if(flag == "--stats")
+        {
+            o.stats = true;
+            continue;
+        }
+        if(i + 1 >= args.size())
+            throw std::invalid_argument("missing value for " + flag);
+        const std::string& value = args[++i];
+        auto& in = o.instance;
+        if(flag == "-n") in.n = integer(flag, value);
+        else if(flag == "-t") in.t = integer(flag, value);
+        else if(flag == "-p") in.p = integer(flag, value);
+        else if(flag == "-d") in.dataFile = value;
+        else if(flag == "-C") in.costFunction = integer(flag, value);
+        else if(flag == "-D") in.durationFunction = integer(flag, value);
+        else if(flag == "-E") in.eastFunction = integer(flag, value);
+        else if(flag == "-W") in.westFunction = integer(flag, value);
+        else if(flag == "-r") in.adjust = integer(flag, value);
+        else if(flag == "-j") in.scaleC = number(flag, value);
+        else if(flag == "-k") in.transC = number(flag, value);
+        else if(flag == "-l") in.scaleD = number(flag, value);
+        else if(flag == "-m") in.transD = number(flag, value);
+        else if(flag == "-x") in.x = number(flag, value);
+        else if(flag == "-y") in.y = number(flag, value);
+        else if(flag == "--threads") o.solve.threads = static_cast<unsigned>(integer(flag, value));
+        else
+            throw std::invalid_argument("unknown option " + flag + " (see zeno --help)");
+    }
+    return o;
+}
+
+void printStats(const zeno::SolveStats& s)
+{
+    std::cerr << "levels " << s.lowestLevel << ".." << s.highestLevel << " (x" << s.scale << ", " << s.levels << " levels)"
+              << ", cities " << s.reducedCities << ", max tree " << s.maxTree << "\n"
+              << "settled: bracket " << s.closedByBracket << ", pairs " << s.closedByPairs << ", chains " << s.closedByChains
+              << ", monotone " << s.closedByMonotonicity << ", exact " << s.exactCalls << "\n"
+              << "work: " << s.work.states << " states, " << s.work.relaxations << " relaxations\n"
+              << "seconds: table " << s.secondsTable << ", bracket " << s.secondsBracket << ", chains " << s.secondsChains
+              << ", exact " << s.secondsExact << "\n";
+}
+} // namespace
+
+int main(int argc, char** argv)
+{
+    try
+    {
+        const auto options = parse(argc, argv);
+        if(!options)
+            return 0;
+        const zeno::Instance instance = zeno::legacy::buildInstance(options->instance);
+        const zeno::SolveResult result = zeno::solveFront(instance, options->solve);
+        for(const auto& point : std::views::reverse(result.front))
+            std::cout << point.cost << " " << point.makespan << "\n";
+        if(options->stats)
+            printStats(result.stats);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "zeno: " << e.what() << "\n";
+        return 1;
+    }
+    return 0;
+}

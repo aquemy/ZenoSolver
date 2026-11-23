@@ -18,7 +18,7 @@ function(zs_add_benchmark name)
 endfunction()
 
 # Components of the 2016 solver, kept as the reference until it is removed.
-zs_add_benchmark(bm-legacy components/legacy.cpp LIBS zeno)
+zs_add_benchmark(bm-legacy components/legacy.cpp LIBS zeno_legacy)
 
 # 'cmake --build <dir> --target benchmarks' builds every benchmark.
 get_property(zs_benchmarks GLOBAL PROPERTY ZS_BENCHMARK_TARGETS)
