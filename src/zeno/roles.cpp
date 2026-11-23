@@ -1,6 +1,7 @@
 #include <zeno/roles.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <iterator>
 #include <limits>
@@ -15,16 +16,6 @@ namespace
 {
 std::size_t at(int v) { return static_cast<std::size_t>(v); }
 
-struct KeyHash
-{
-    std::size_t operator()(const std::pair<std::vector<int>, int>& key) const noexcept
-    {
-        std::size_t h = std::hash<int>{}(key.second);
-        for(int v : key.first)
-            h = h * 1000003u ^ std::hash<int>{}(v + 1024);
-        return h;
-    }
-};
 } // namespace
 
 BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill, Time T, std::size_t stateLimit, std::size_t workLimit,
@@ -62,15 +53,63 @@ BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill
     if(!complete_)
         return;
 
-    // Layers over planes: state (imbalance, landings so far).
+    // Layers over planes: state (imbalance, landings so far), packed into one
+    // 128-bit key = landings + (s + 1) * sum_i (v_i + links) * B^i with
+    // B = 2 links + 1, so a plane's option shifts the key by a constant.
+    using Key = RoleKey;
+    const auto B = static_cast<Key>(2 * links + 1);
+    {
+        // Give up when the key does not fit (about 30 cities for t - p = 6).
+        Key span = static_cast<Key>(s + 1);
+        for(int i = 0; i < n; ++i)
+        {
+            if(span > (~Key{0}) / (4 * B))
+            {
+                complete_ = false;
+                return;
+            }
+            span *= B;
+        }
+    }
+    std::vector<Key> power(at(n));
+    {
+        Key pw = static_cast<Key>(s + 1);
+        for(int i = 0; i < n; ++i)
+        {
+            power[at(i)] = pw;
+            pw *= B;
+        }
+    }
+    Key zero = 0;
+    for(int i = 0; i < n; ++i)
+        zero += static_cast<Key>(links) * power[at(i)];
+    // Per option: the key shift, as the sum of the positive and of the
+    // negative parts (unsigned arithmetic).
+    std::vector<Key> up(options_.size(), 0), down(options_.size(), 0);
+    for(std::size_t o = 0; o < options_.size(); ++o)
+        for(int i = 0; i < n; ++i)
+        {
+            const int delta = options_[o].delta[at(i)];
+            (delta > 0 ? up[o] : down[o]) += static_cast<Key>(delta > 0 ? delta : -delta) * power[at(i)];
+        }
+    struct KeyHash
+    {
+        std::size_t operator()(Key k) const noexcept
+        {
+            const auto lo = static_cast<std::uint64_t>(k), hi = static_cast<std::uint64_t>(k >> 64);
+            return std::hash<std::uint64_t>{}(lo ^ (hi * 0x9e3779b97f4a7c15ull));
+        }
+    };
+
     keys_.assign(at(r.p + 1), {});
     layers_.assign(at(r.p + 1), {});
-    keys_[0].push_back({std::vector<int>(at(n), 0), 0});
+    keys_[0].push_back(zero);
     layers_[0].push_back({0, -1, 0, 0});
     std::size_t states = 1, work = 0;
+    std::vector<int> v(at(n));
     for(int k = 1; k <= r.p; ++k)
     {
-        std::unordered_map<std::pair<std::vector<int>, int>, std::size_t, KeyHash> index;
+        std::unordered_map<Key, std::size_t, KeyHash> index;
         auto& keys = keys_[at(k)];
         auto& layer = layers_[at(k)];
         const auto& prevKeys = keys_[at(k - 1)];
@@ -78,7 +117,15 @@ BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill
         const int planesLeft = r.p - k; // planes after this one, at least one landing each
         for(std::size_t st = 0; st < prev.size(); ++st)
         {
-            const auto& [v, j] = prevKeys[st];
+            // Decode the imbalance and the landings of the state.
+            const Key key = prevKeys[st];
+            const int j = static_cast<int>(key % static_cast<Key>(s + 1));
+            Key rest = key / static_cast<Key>(s + 1);
+            for(int i = 0; i < n; ++i)
+            {
+                v[at(i)] = static_cast<int>(rest % B) - links;
+                rest /= B;
+            }
             work += options_.size();
             if(work > workLimit)
             {
@@ -88,16 +135,16 @@ BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill
             for(std::size_t o = 0; o < options_.size(); ++o)
             {
                 const Option& opt = options_[o];
-                std::vector<int> next = v;
                 int norm = 0;
                 for(int i = 0; i < n; ++i)
                 {
-                    next[at(i)] += opt.delta[at(i)];
-                    norm += next[at(i)] < 0 ? -next[at(i)] : next[at(i)];
+                    const int x = v[at(i)] + opt.delta[at(i)];
+                    norm += x < 0 ? -x : x;
                 }
                 // At most t - p links in all, and the last state must be 0.
                 if(norm > links || (planesLeft == 0 && norm != 0))
                     continue;
+                const Key moved = key + up[o] - down[o];
                 for(int cr = 1; j + opt.landings + cr + planesLeft <= s && cr <= fill.maxLandings(); cr += 2)
                 {
                     const Cost crossings = fill(cr, T - opt.load);
@@ -110,12 +157,11 @@ BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill
                     if(!isInf(target) &&
                        (cost >= target || (remaining && addCost(cost, (*remaining)[at(planesLeft)][at(s - landings)]) >= target)))
                         continue;
-                    auto key = std::pair(next, landings);
-                    auto it = index.find(key);
-                    if(it == index.end())
+                    const Key next = moved + static_cast<Key>(landings - j);
+                    const auto [it, fresh] = index.try_emplace(next, layer.size());
+                    if(fresh)
                     {
-                        index.emplace(key, layer.size());
-                        keys.push_back(std::move(key));
+                        keys.push_back(next);
                         layer.push_back({cost, static_cast<int>(o), cr, st});
                         if(++states > stateLimit)
                         {
@@ -130,9 +176,10 @@ BalancedRoles::BalancedRoles(const ReducedInstance& r, const OnePlaneTable& fill
         }
     }
     value_ = isInf(target) ? kInfCost : target;
+    const Key done = zero + static_cast<Key>(s);
     const auto& keys = keys_[at(r.p)];
     for(std::size_t st = 0; st < keys.size(); ++st)
-        if(keys[st].second == s && std::ranges::all_of(keys[st].first, [](int x) { return x == 0; }) && layers_[at(r.p)][st].cost < value_)
+        if(keys[st] == done && layers_[at(r.p)][st].cost < value_)
         {
             value_ = layers_[at(r.p)][st].cost;
             final_ = st;
