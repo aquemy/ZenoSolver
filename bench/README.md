@@ -83,7 +83,7 @@ The suite runner reports `peak_rss_mib` and `front_size` per instance.
 `.github/workflows/bench.yml`:
 
 - **Pull requests**: builds the `bench` preset, runs every component benchmark and the `quick` suite, and writes the comparison with `baselines/*/ci-ubuntu-24.04/` to the job summary. It never blocks: shared runners are noisy.
-- **Nightly**: runs everything on the runner named by the repository variable `ZS_BENCH_RUNNER` (default `ubuntu-24.04`; set it to a self-hosted machine for stable numbers) and fails on a regression above 10%. `ZS_BENCH_MACHINE` names the baseline directory to compare with.
+- **Nightly**: runs everything on the runner named by the repository variable `ZS_BENCH_RUNNER` (default `ubuntu-24.04`; set it to a self-hosted machine for stable numbers) and fails on a regression above `ZS_BENCH_THRESHOLD` (default 25%, with a 5 ms noise floor `ZS_BENCH_MIN_DELTA_MS`; use 10% on a dedicated runner). `ZS_BENCH_MACHINE` names the baseline directory to compare with; `baselines/zeno/ci-ubuntu-24.04` holds the baselines of GitHub's runner.
 
 To create or refresh the CI baselines, download the `benchmarks` artifact of a run on `master` and commit its files under `baselines/<solver>/<machine>/`.
 
