@@ -31,8 +31,21 @@ struct Plan
 /// (C_I -> b -> C_I), then flies its filler as alternating crossings
 /// (C_I -> x -> C_G carrying a passenger, C_G -> x -> C_I empty, ...), then
 /// picks up the passenger its parent dropped (C_G -> a -> C_G), waiting if
-/// needed. Cost c(X), makespan 2 * scale * max_k delta(X_k).
+/// needed. Legs to and from C_I take d, legs to and from C_G take dbar.
+/// Symmetric instances: cost c(X), makespan 2 * scale * max_k delta(X_k);
+/// non-symmetric ones: a pick-up may wait for its drop-off, and the
+/// simulated makespan (checkPlan) is the truth.
 [[nodiscard]] Plan buildPlan(const Instance& instance, const ReducedInstance& r, const LinkForest& forest);
+
+/// The instance with C_I and C_G exchanged (d and dbar swapped).
+[[nodiscard]] Instance mirrored(const Instance& instance);
+
+/// Time reversal: a plan of mirrored(instance) becomes a plan of `instance`
+/// with the same cost and makespan (each leg reversed and C_I, C_G
+/// exchanged; n is the number of central cities). It turns plans where
+/// every plane picks up at most once into plans where every plane drops off
+/// at most once.
+[[nodiscard]] Plan mirrorPlan(const Plan& plan, int n);
 
 struct PlanCheck
 {

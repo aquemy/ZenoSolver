@@ -32,7 +32,7 @@ struct LevelBounds
 
     LevelBounds(const Instance& instance, Time maxMakespan)
         : r(reduce(instance))
-        , G(r.d, r.c, r.maxGroup(), std::max<Time>(gapLevel(maxMakespan, r.scale), 0)) {}
+        , G(r.fill, r.c, r.maxGroup(), std::max<Time>(gapLevel(maxMakespan, r.scale), 0)) {}
 
     Cost relaxed(Time T) const { return T < 0 ? kInfCost : relaxedCost(r, G, checked(T)); }
     Cost forest(Time T) const { return T < 0 ? kInfCost : forestCost(r, G, checked(T), r.maxTree()); }

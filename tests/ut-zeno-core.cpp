@@ -5,10 +5,12 @@
 // admissible partition.
 #include <zeno/certificate.hpp>
 #include <zeno/forest.hpp>
+#include <zeno/ns.hpp>
 #include <zeno/one_plane.hpp>
 #include <zeno/reduce.hpp>
 #include <zeno/solve.hpp>
 
+#include "oracle/bruteForce.hpp"
 #include "oracle/partitionEnum.hpp"
 
 #include <algorithm>
@@ -314,6 +316,76 @@ void testCertificates(std::mt19937& rng, int trials, const Sizes& z)
     }
 }
 
+// The bracket of a symmetric instance: its upper front is the exact front
+// (forests suffice and nothing waits), and its lower bounds lie below it.
+void testBracketSymmetric(std::mt19937& rng, int trials, const Sizes& z)
+{
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        const zeno::Instance in = randomInstance(rng, z.n, z.t, z.p, z.s);
+        const auto exact = zeno::solveFront(in).front;
+        const auto bracket = zeno::solveBracket(in);
+        check(bracket.upper == exact, "symmetric bracket: upper front = exact front: " + describe(in));
+        check(bracket.fastestLower <= exact.front().makespan, "symmetric bracket: fastest bound: " + describe(in));
+        for(std::size_t i = 0; i < bracket.gapLower.size() && i + 1 < exact.size(); ++i)
+            check(bracket.gapLower[i] <= exact[i].cost, "symmetric bracket: gap bound below the front: " + describe(in));
+    }
+}
+
+// Non-symmetric instances against the brute-force oracle, which simulates
+// every schedule with its waiting: every upper point is achieved, so the true
+// front weakly dominates it; the lower bounds never exceed the true front;
+// and an exact bracket is the true front.
+void testBracketNonSymmetric(std::mt19937& rng, int trials)
+{
+    int exactCount = 0;
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        zeno::Instance in = randomInstance(rng, 3, 4, 2, 6);
+        if(in.t == in.p)
+            ++in.t; // the brute-force oracle needs t > p
+        std::uniform_int_distribution<int> value(0, 12);
+        for(auto& v : in.dbar)
+            v = value(rng);
+        oracle::Instance o;
+        o.travelers = static_cast<unsigned>(in.t);
+        o.planes = static_cast<unsigned>(in.p);
+        for(int i = 0; i < in.n(); ++i)
+        {
+            o.cost.push_back(in.c[static_cast<std::size_t>(i)]);
+            o.west.push_back(in.d[static_cast<std::size_t>(i)]);
+            o.east.push_back(in.dbar[static_cast<std::size_t>(i)]);
+        }
+        std::vector<zeno::FrontPoint> truth;
+        for(const auto& [cost, makespan] : oracle::paretoFront(o))
+            truth.push_back({cost, makespan});
+        const zeno::Front front = zeno::paretoFilter(truth);
+        zeno::SolveOptions options;
+        options.plans = true;
+        const auto bracket = zeno::solveBracket(in, options);
+        const std::string where = describe(in) + " dbar=" + [&] { std::string s; for(auto v : in.dbar) s += std::to_string(v) + ","; return s; }();
+        for(const auto& point : bracket.upper)
+            check(std::ranges::any_of(front, [&](const zeno::FrontPoint& f) { return f.cost <= point.cost && f.makespan <= point.makespan; }),
+                  "non-symmetric upper point is dominated by the true front: " + where);
+        for(std::size_t i = 0; i < bracket.plans.size(); ++i)
+        {
+            const auto ok = zeno::checkPlan(in, bracket.plans[i]);
+            check(ok.ok && ok.cost == bracket.upper[i].cost && ok.makespan == bracket.upper[i].makespan, "non-symmetric plan realises its point: " + where);
+        }
+        check(bracket.fastestLower <= front.front().makespan, "non-symmetric fastest bound: " + where);
+        for(std::size_t i = 0; i < bracket.gapLower.size(); ++i)
+            for(const auto& f : front)
+                if(f.makespan < bracket.upper[i + 1].makespan)
+                    check(bracket.gapLower[i] <= f.cost, "non-symmetric gap bound below the true front: " + where);
+        if(bracket.exact())
+        {
+            ++exactCount;
+            check(bracket.upper == front, "exact non-symmetric bracket = true front: " + where);
+        }
+    }
+    std::cout << "ut-zeno-core: " << exactCount << " of " << trials << " non-symmetric brackets are exact\n";
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -363,6 +435,8 @@ int main(int argc, char** argv)
     testFront(rng, trials, sizes);
     testPlans(rng, trials, sizes);
     testCertificates(rng, trials, sizes);
+    testBracketSymmetric(rng, trials, sizes);
+    testBracketNonSymmetric(rng, trials / 4);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";

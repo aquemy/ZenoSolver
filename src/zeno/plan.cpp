@@ -17,9 +17,10 @@ Plan buildPlan(const Instance& instance, const ReducedInstance& r, const LinkFor
     if(static_cast<int>(forest.planes.size()) != r.p)
         throw std::invalid_argument("buildPlan: the forest needs one node per plane");
     const int goal = instance.n() + 1;
-    // Location and duration of a reduced city.
+    // Location of a reduced city, and its flight durations to C_I and to C_G.
     const auto location = [&](int reduced) { return r.original[at(reduced)] + 1; };
-    const auto duration = [&](int reduced) { return instance.d[at(r.original[at(reduced)])]; };
+    const auto west = [&](int reduced) { return instance.d[at(r.original[at(reduced)])]; };
+    const auto east = [&](int reduced) { return instance.dbar[at(r.original[at(reduced)])]; };
 
     Plan plan;
     plan.planes.resize(forest.planes.size());
@@ -59,10 +60,10 @@ Plan buildPlan(const Instance& instance, const ReducedInstance& r, const LinkFor
         {
             const int b = forest.planes[child].parentCity;
             const int passenger = nextPassenger++;
-            fly(0, location(b), now, duration(b), passenger);
+            fly(0, location(b), now, west(b), passenger);
             dropTime[child] = now;
             dropped[child] = passenger;
-            fly(location(b), 0, now, duration(b), -1);
+            fly(location(b), 0, now, west(b), -1);
         }
         // 2. The filler as alternating crossings, starting and ending with A.
         const auto& filler = forest.planes[k].filler;
@@ -74,26 +75,51 @@ Plan buildPlan(const Instance& instance, const ReducedInstance& r, const LinkFor
             if(i % 2 == 0)
             {
                 const int passenger = nextPassenger++;
-                fly(0, location(x), now, duration(x), passenger);
-                fly(location(x), goal, now, duration(x), passenger);
+                fly(0, location(x), now, west(x), passenger);
+                fly(location(x), goal, now, east(x), passenger);
             }
             else
             {
-                fly(goal, location(x), now, duration(x), -1);
-                fly(location(x), 0, now, duration(x), -1);
+                fly(goal, location(x), now, east(x), -1);
+                fly(location(x), 0, now, west(x), -1);
             }
         }
         // 3. The pick-up of the passenger the parent dropped.
         if(forest.planes[k].parent >= 0)
         {
             const int a = forest.planes[k].parentCity;
-            fly(goal, location(a), now, duration(a), -1);
-            fly(location(a), goal, std::max(now, dropTime[k]), duration(a), dropped[k]);
+            fly(goal, location(a), now, east(a), -1);
+            fly(location(a), goal, std::max(now, dropTime[k]), east(a), dropped[k]);
         }
     }
     if(nextPassenger != instance.t)
         throw std::logic_error("buildPlan: the forest carries " + std::to_string(nextPassenger) + " passengers, not t = " + std::to_string(instance.t));
     return plan;
+}
+
+Instance mirrored(const Instance& instance)
+{
+    Instance m = instance;
+    std::swap(m.d, m.dbar);
+    return m;
+}
+
+Plan mirrorPlan(const Plan& plan, int n)
+{
+    const auto flip = [n](int loc) { return loc == 0 ? n + 1 : loc == n + 1 ? 0 : loc; };
+    Time end = 0;
+    for(const auto& legs : plan.planes)
+        for(const Leg& leg : legs)
+            end = std::max(end, leg.arrive);
+    Plan out;
+    for(const auto& legs : plan.planes)
+    {
+        std::vector<Leg> reversed;
+        for(auto it = legs.rbegin(); it != legs.rend(); ++it)
+            reversed.push_back({flip(it->to), flip(it->from), end - it->arrive, end - it->depart, it->passenger});
+        out.planes.push_back(std::move(reversed));
+    }
+    return out;
 }
 
 PlanCheck checkPlan(const Instance& instance, const Plan& plan)

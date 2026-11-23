@@ -10,6 +10,7 @@
 #include <zeno/certificate.hpp>
 #include <zeno/io.hpp>
 #include <zeno/legacy_input.hpp>
+#include <zeno/ns.hpp>
 #include <zeno/solve.hpp>
 
 #include <algorithm>
@@ -29,8 +30,10 @@ constexpr std::string_view kUsage = R"(usage: zeno [front] [instance options] [s
        zeno pddl [instance options] [-O FILE] [--no-front]
        zeno generate [instance options] [-O FILE]
 
-front     exact Pareto front (cost, makespan) of a symmetric instance, as
-          "cost makespan" lines by increasing cost (the default command)
+front     Pareto front (cost, makespan) as "cost makespan" lines by
+          increasing cost (the default command). Exact for symmetric
+          instances. For non-symmetric ones: achieved points (simulated
+          plans) and, on stderr, which gaps a lower bound certifies
 check     verify a front certificate (doc/certificate-format.md) and print
           the assumptions it relied on
 pddl      write the instance as a PDDL problem for pddl/multi-zeno-travel.pddl,
@@ -131,6 +134,46 @@ std::ofstream openOutput(const std::string& path)
     return out;
 }
 
+// Non-symmetric instances: the certified bracket of zeno::solveBracket.
+int runBracket(const zeno::Instance& instance, const zeno::SolveOptions& options, bool plans, bool certificate, bool stats)
+{
+    if(certificate)
+        throw std::invalid_argument("certificates (format v1) cover symmetric instances only");
+    const zeno::BracketResult result = zeno::solveBracket(instance, options);
+    for(const auto& point : std::views::reverse(result.upper))
+        std::cout << point.cost << " " << point.makespan << "\n";
+    if(plans)
+    {
+        zeno::SolveResult shown;
+        shown.front = result.upper;
+        shown.plans = result.plans;
+        printPlans(shown, instance.n());
+    }
+    std::size_t closed = 0;
+    for(auto proof : result.gapProof)
+        closed += proof != zeno::GapProof::Open;
+    std::cerr << "non-symmetric instance: " << result.upper.size() << " achieved points; fastest makespan "
+              << (result.fastestLower == result.upper.front().makespan ? "certified" : "not certified (bound " + std::to_string(result.fastestLower) + ")")
+              << "; " << closed << " of " << result.gapProof.size() << " gaps certified; "
+              << (result.exact() ? "the front is exact" : "the front is a bracket");
+    const auto assumptions = result.assumptions();
+    if(!assumptions.empty())
+    {
+        std::cerr << ", assuming";
+        for(const auto& a : assumptions)
+            std::cerr << " " << a;
+    }
+    std::cerr << "\n";
+    for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+        if(result.gapProof[i] == zeno::GapProof::Open)
+            std::cerr << "  open gap between makespans " << result.upper[i].makespan << " and " << result.upper[i + 1].makespan
+                      << ": a plan with makespan < " << result.upper[i + 1].makespan << " costs at least " << result.gapLower[i]
+                      << " (achieved: " << result.upper[i].cost << ")\n";
+    if(stats)
+        printStats(result.stats);
+    return 0;
+}
+
 int runFront(const std::vector<std::string>& args)
 {
     auto parsed = zeno::cli::parseInstanceArguments(args);
@@ -154,6 +197,8 @@ int runFront(const std::vector<std::string>& args)
     options.plans = plans || certificate.has_value();
 
     const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    if(!instance.symmetric())
+        return runBracket(instance, options, plans, certificate.has_value(), stats);
     const zeno::SolveResult result = zeno::solveFront(instance, options);
     for(const auto& point : std::views::reverse(result.front))
         std::cout << point.cost << " " << point.makespan << "\n";
