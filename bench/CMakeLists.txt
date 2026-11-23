@@ -19,6 +19,8 @@ endfunction()
 
 # The exact solver.
 zs_add_benchmark(bm-core components/core.cpp LIBS zeno::core)
+zs_add_benchmark(bm-plan components/plan_cert.cpp LIBS zeno::core)
+zs_add_benchmark(bm-ns components/ns.cpp LIBS zeno::core)
 
 # 'cmake --build <dir> --target benchmarks' builds every benchmark.
 get_property(zs_benchmarks GLOBAL PROPERTY ZS_BENCHMARK_TARGETS)

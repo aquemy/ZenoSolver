@@ -38,7 +38,18 @@ Both tools read and write the JSON schema of Google Benchmark, so `tools/compare
 | `instances/data/` | Data files: line 1 durations, line 2 costs. |
 | `tools/run_suite.py` | Times an executable over suites: median wall and CPU time, peak RSS of the child, front size, status (`ok`, `timeout`, `error`). |
 | `tools/check_regression.py` | Regression gate between two result files. |
+| `tools/time_checker.py` | Times a certificate checker (`zeno check`, or the Lean `zeno-check`) over `*.cert` files: time, peak RSS, size, verdict. |
 | `baselines/<solver>/<machine>/*.json` | Committed reference results. |
+
+## Component benchmarks
+
+| Executable | Components | Notes |
+|---|---|---|
+| `bm-core` | one-plane table (dense and staircase), relaxation L, forest programs U, U3 and exact at one level, end-to-end solve (regimes, families, random, large durations) | complexity fits; states and relaxations per iteration |
+| `bm-plan` | dominance reduction, plan simulation per front point, solve with and without plans, certificates (make, write, read, check), PDDL writer, instance builder | plan checking is linear in legs, the PDDL writer quadratic in n |
+| `bm-ns` | non-symmetric bracket end to end, Lagrangian balance bound, exact balanced role program, role scheduling | sweeps over n and t − p (the number of links) |
+
+The Lean checker is timed with `tools/time_checker.py` over `lean/test/certificates` (`baselines/lean/apple-m4-max/zeno-check.json`; the C++ reference checker on the same files is in `baselines/zeno/apple-m4-max/zeno-check-cpp.json`). On 57 sample certificates the compiled Lean checker takes 24 ms at the median and 102 ms on the largest (62 KB, 89 points).
 
 ## Counters
 
@@ -65,7 +76,7 @@ The suite runner reports `peak_rss_mib` and `front_size` per instance.
 
 `baselines/legacy/apple-m4-max/` holds the three 2016 solver variants (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) on every suite: Apple M4 Max, 16 cores, macOS, Release build, 30 s timeout per run, median of 3 runs. These are the reference for the speed-up claims of the new solver. The 2016 solvers have since been removed from the code; to rerun them, build commit 84ca92a. Their fronts are those of the legacy solvers, which are wrong on some instances (`tests/golden/known-bugs.txt`), so `front_size` there is not a correctness reference.
 
-`baselines/zeno/apple-m4-max/zeno.json` holds the exact solver (`zeno`, all cores) under the same conditions. It solves all 66 instances, the slowest in 61 ms (`regimes/r5-n100t60p10`); on the 21 that the 2016 solvers also finish it is up to 5,600 times faster. Its front sizes match the 2016 ones except on the LPT counterexample, where the 2016 solvers miss a point. Process start-up is about 3 ms, the floor of every timing. `BM_SolveLargeDurations` in `bm-core` shows the time growing with the logarithm of the level range (3.9 ms for 10^8 levels).
+`baselines/zeno/apple-m4-max/bm-*.json` are the component benchmarks (median of 3 repetitions; recorded while other builds ran, so treat differences below 20% as noise). `baselines/zeno/apple-m4-max/zeno.json` holds the exact solver (`zeno`, all cores) under the same conditions. It solves all 66 instances, the slowest in 61 ms (`regimes/r5-n100t60p10`); on the 21 that the 2016 solvers also finish it is up to 5,600 times faster. Its front sizes match the 2016 ones except on the LPT counterexample, where the 2016 solvers miss a point. Process start-up is about 3 ms, the floor of every timing. `BM_SolveLargeDurations` in `bm-core` shows the time growing with the logarithm of the level range (3.9 ms for 10^8 levels).
 
 ## CI
 
