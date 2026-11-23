@@ -43,3 +43,6 @@ main.pdf
 # build trees and local presets
 /build/
 CMakeUserPresets.json
+
+# Python bytecode
+__pycache__/
