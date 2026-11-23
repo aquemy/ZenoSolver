@@ -20,7 +20,7 @@ foreach(test ${ZS_UNIT_TESTS})
 endforeach()
 
 add_executable(ut-pddl ut-pddl.cpp)
-target_link_libraries(ut-pddl PRIVATE zeno zeno_build_settings)
+target_link_libraries(ut-pddl PRIVATE zeno_legacy zeno_build_settings)
 target_compile_definitions(ut-pddl PRIVATE ZS_PDDL_DIR="${PROJECT_SOURCE_DIR}/pddl")
 add_test(NAME ut-pddl COMMAND ut-pddl)
 
