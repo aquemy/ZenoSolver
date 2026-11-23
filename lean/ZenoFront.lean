@@ -12,3 +12,4 @@ public import ZenoFront.Relaxation
 public import ZenoFront.Simulate
 public import ZenoFront.Checker
 public import ZenoFront.Parse
+public import ZenoFront.Examples
