@@ -7,11 +7,16 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <vector>
 
 namespace zeno
 {
+/// Packed state key of BalancedRoles (a GCC/Clang extension; __extension__
+/// keeps -Wpedantic quiet).
+__extension__ typedef unsigned __int128 RoleKey;
+
 /// A role configuration (theory note, section 6): per plane, the cities of
 /// its drop-offs (C_I -> x -> C_I, weight 2 d_x), pick-ups (C_G -> x -> C_G,
 /// weight 2 dbar_x) and crossings (an odd number, weight d_x + dbar_x), in
@@ -75,7 +80,7 @@ private:
     Time T_;
     Cost target_;
     std::vector<Option> options_;
-    std::vector<std::vector<std::pair<std::vector<int>, int>>> keys_; ///< per layer: (imbalance, landings)
+    std::vector<std::vector<RoleKey>> keys_; ///< per layer: packed (imbalance, landings)
     std::vector<std::vector<Entry>> layers_;
     bool complete_ = true;
     Cost value_ = kInfCost;
