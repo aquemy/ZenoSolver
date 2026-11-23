@@ -33,7 +33,11 @@ The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishe
 **Proofs and certificates.**
 
 - The theory note gives a complete written proof of every statement the symmetric solver relies on.
-- Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and, for version 1, by the Lean-verified checker in `lean/`. Its soundness theorem holds for any central-flight durations whenever every gap is closed by the relaxation L (386 of 400 random fronts, and every front of the default generator). Fronts with `forest` gaps need the converse theorem, which is being formalised.
+- Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and, for version 1, by the Lean-verified checker in `lean/` (`lake exe zeno-check FILE`).
+- The Lean soundness theorem (`Cert.check_sound`) states: if the checker accepts, the listed points are exactly the Pareto front among plans with integer times.
+  - When every gap is closed by the relaxation L, this holds for any central-flight durations. That covers 386 of 400 random fronts and every front of the default generator.
+  - When some gap uses the forest bound, it holds whenever central flights are no faster than through a hub (A1), via the converse theorem (Theorem 4.7), which is proved in Lean.
+- CI writes certificates for the golden and random instances with `zeno` and checks them with both checkers.
 
 **Non-symmetric instances.**
 
