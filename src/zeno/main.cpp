@@ -206,7 +206,11 @@ int runFront(const std::vector<std::string>& args)
     rejectLeftovers(rest);
     options.plans = plans || certificate.has_value();
 
-    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    bool swapped = false;
+    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options, &swapped);
+    if(swapped && parsed.options.dataFile)
+        std::cerr << "zeno: note: the first duration exceeds the second, so the duration and cost lines of "
+                  << *parsed.options.dataFile << " were swapped, as the 2016 solvers did (order the cities to avoid it)\n";
     if(!instance.symmetric())
         return runBracket(instance, options, plans, certificate, stats);
     const zeno::SolveResult result = zeno::solveFront(instance, options);
