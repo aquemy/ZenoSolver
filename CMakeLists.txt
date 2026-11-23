@@ -90,6 +90,7 @@ add_library(zeno_core STATIC
     src/zeno/instance.cpp
     src/zeno/legacy_input.cpp
     src/zeno/one_plane.cpp
+    src/zeno/plan.cpp
     src/zeno/reduce.cpp
     src/zeno/solve.cpp)
 add_library(zeno::core ALIAS zeno_core)

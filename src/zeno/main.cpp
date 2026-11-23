@@ -42,6 +42,9 @@ Instance (same meaning as for the 2016 zenoSolver):
 
 Solver:
   --threads N  worker threads (default: all cores)
+  --plans      after the front, print a plan for every point (checked by
+               simulation): one line per plane, legs as
+               from->to[depart,arrive] with the passenger carried (pK)
   --stats      print solver statistics on stderr
   -h, --help   this help
 )";
@@ -100,6 +103,11 @@ std::optional<CliOptions> parse(int argc, char** argv)
             o.stats = true;
             continue;
         }
+        if(flag == "--plans")
+        {
+            o.solve.plans = true;
+            continue;
+        }
         if(i + 1 >= args.size())
             throw std::invalid_argument("missing value for " + flag);
         const std::string& value = args[++i];
@@ -126,6 +134,35 @@ std::optional<CliOptions> parse(int argc, char** argv)
     return o;
 }
 
+std::string location(int loc, int n)
+{
+    if(loc == 0)
+        return "CI";
+    if(loc == n + 1)
+        return "CG";
+    return "c" + std::to_string(loc);
+}
+
+void printPlans(const zeno::SolveResult& result, int n)
+{
+    for(std::size_t i = result.front.size(); i-- > 0;)
+    {
+        std::cout << "\n# cost " << result.front[i].cost << ", makespan " << result.front[i].makespan << "\n";
+        const auto& plan = result.plans[i];
+        for(std::size_t k = 0; k < plan.planes.size(); ++k)
+        {
+            std::cout << "plane " << k + 1 << ":";
+            for(const auto& leg : plan.planes[k])
+            {
+                std::cout << " " << location(leg.from, n) << "->" << location(leg.to, n) << "[" << leg.depart << "," << leg.arrive << "]";
+                if(leg.passenger >= 0)
+                    std::cout << "p" << leg.passenger + 1;
+            }
+            std::cout << "\n";
+        }
+    }
+}
+
 void printStats(const zeno::SolveStats& s)
 {
     std::cerr << "levels " << s.lowestLevel << ".." << s.highestLevel << " (x" << s.scale << ", " << s.levels << " levels)"
@@ -134,7 +171,7 @@ void printStats(const zeno::SolveStats& s)
               << ", monotone " << s.closedByMonotonicity << ", exact " << s.exactCalls << "\n"
               << "work: " << s.work.states << " states, " << s.work.relaxations << " relaxations\n"
               << "seconds: table " << s.secondsTable << ", bracket " << s.secondsBracket << ", chains " << s.secondsChains
-              << ", exact " << s.secondsExact << "\n";
+              << ", exact " << s.secondsExact << ", plans " << s.secondsPlans << "\n";
 }
 } // namespace
 
@@ -149,6 +186,8 @@ int main(int argc, char** argv)
         const zeno::SolveResult result = zeno::solveFront(instance, options->solve);
         for(const auto& point : std::views::reverse(result.front))
             std::cout << point.cost << " " << point.makespan << "\n";
+        if(options->solve.plans)
+            printPlans(result, instance.n());
         if(options->stats)
             printStats(result.stats);
     }

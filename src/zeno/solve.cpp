@@ -61,6 +61,37 @@ public:
         , G_(build(r, stats))
     {}
 
+    /// Plans for the front points, from the smallest tree bound that reaches E.
+    std::vector<Plan> plans(const Instance& instance, const Front& front)
+    {
+        const auto start = Clock::now();
+        std::vector<Plan> out(front.size());
+        parallelFor(front.size(), threads_, [&](std::size_t i) {
+            const Time T = front[i].makespan / (2 * r_.scale);
+            std::vector<int> bounds;
+            for(int q : {2, 3})
+                if(q < r_.maxTree())
+                    bounds.push_back(q);
+            bounds.push_back(r_.maxTree());
+            for(int q : bounds)
+            {
+                const ForestProgram program(r_, G_, T, q);
+                if(program.value() != front[i].cost)
+                    continue;
+                out[i] = buildPlan(instance, r_, program.reconstruct());
+                const PlanCheck check = checkPlan(instance, out[i]);
+                if(!check.ok || check.cost != front[i].cost || check.makespan != front[i].makespan)
+                    throw std::logic_error("solveFront: the plan of the point (" + std::to_string(front[i].cost) + ", " +
+                                           std::to_string(front[i].makespan) + ") fails its check: " +
+                                           (check.ok ? "cost " + std::to_string(check.cost) + ", makespan " + std::to_string(check.makespan) : check.error));
+                return;
+            }
+            throw std::logic_error("solveFront: no forest realises a front point");
+        });
+        stats_.secondsPlans = secondsSince(start);
+        return out;
+    }
+
     Front run()
     {
         stats_.levels = levels_.size();
@@ -236,6 +267,8 @@ SolveResult solveFront(const Instance& instance, const SolveOptions& options)
     result.stats.maxTree = r.maxTree();
     FrontSolver solver(r, options, result.stats);
     result.front = solver.run();
+    if(options.plans)
+        result.plans = solver.plans(instance, result.front);
     return result;
 }
 } // namespace zeno

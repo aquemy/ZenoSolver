@@ -2,6 +2,7 @@
 
 #include <zeno/forest.hpp>
 #include <zeno/instance.hpp>
+#include <zeno/plan.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -11,6 +12,7 @@ namespace zeno
 struct SolveOptions
 {
     unsigned threads = 0; ///< 0: hardware concurrency
+    bool plans = false;   ///< also build and check a plan for every front point
 };
 
 /// How the value E(T) of a level was established.
@@ -38,12 +40,15 @@ struct SolveStats
     std::uint64_t exactCalls = 0;          ///< link-forest DP evaluations
     std::uint64_t closedByMonotonicity = 0;
     LevelStats work;                       ///< summed DP work
-    double secondsTable = 0, secondsBracket = 0, secondsChains = 0, secondsExact = 0;
+    double secondsTable = 0, secondsBracket = 0, secondsChains = 0, secondsExact = 0, secondsPlans = 0;
 };
 
 struct SolveResult
 {
     Front front;
+    /// With SolveOptions::plans: plans[i] realises front[i]; each was checked
+    /// by checkPlan.
+    std::vector<Plan> plans;
     SolveStats stats;
 };
 

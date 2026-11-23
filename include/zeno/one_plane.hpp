@@ -33,7 +33,12 @@ public:
     [[nodiscard]] int maxLandings() const noexcept { return maxLandings_; }
     [[nodiscard]] Time maxLevel() const noexcept { return static_cast<Time>(width_) - 1; }
 
+    /// A multiset realising G[m][T], as m city indices. Requires a finite value.
+    [[nodiscard]] std::vector<int> witness(int m, Time level) const;
+
 private:
+    std::vector<Time> d_;
+    std::vector<Cost> c_;
     int maxLandings_;
     std::size_t width_;
     std::vector<Cost> table_;

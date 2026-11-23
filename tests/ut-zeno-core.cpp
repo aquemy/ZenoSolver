@@ -177,6 +177,64 @@ void testFront(std::mt19937& rng, int trials, const Sizes& z)
     }
 }
 
+// Every front point comes with a plan that the independent checker accepts
+// (solveFront throws otherwise), and the checker rejects broken plans.
+void testPlans(std::mt19937& rng, int trials, const Sizes& z)
+{
+    zeno::SolveOptions options;
+    options.plans = true;
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        const zeno::Instance in = randomInstance(rng, z.n, z.t, z.p, z.s);
+        zeno::SolveResult result;
+        try
+        {
+            result = zeno::solveFront(in, options);
+        }
+        catch(const std::exception& e)
+        {
+            check(false, std::string("plans: ") + e.what() + ": " + describe(in));
+            continue;
+        }
+        check(result.plans.size() == result.front.size(), "one plan per front point: " + describe(in));
+        for(std::size_t i = 0; i < result.plans.size(); ++i)
+        {
+            const auto ok = zeno::checkPlan(in, result.plans[i]);
+            check(ok.ok && ok.cost == result.front[i].cost && ok.makespan == result.front[i].makespan, "plan realises its point: " + describe(in));
+        }
+        if(result.plans.empty())
+            continue;
+        // Mutations of the first plan must be rejected (or change the objectives).
+        const zeno::Plan& plan = result.plans.front();
+        const auto rejected = [&](const zeno::Plan& bad, const std::string& what) {
+            const auto r = zeno::checkPlan(in, bad);
+            check(!r.ok || r.cost != result.front.front().cost || r.makespan != result.front.front().makespan, "checker notices: " + what + ": " + describe(in));
+        };
+        for(std::size_t k = 0; k < plan.planes.size(); ++k)
+        {
+            if(plan.planes[k].empty())
+                continue;
+            zeno::Plan bad = plan;
+            bad.planes[k].pop_back();
+            rejected(bad, "a plane stops early");
+            bad = plan;
+            bad.planes[k].front().arrive += 1;
+            rejected(bad, "a flight of the wrong duration");
+            for(std::size_t l = 0; l < plan.planes[k].size(); ++l)
+                if(plan.planes[k][l].passenger >= 0)
+                {
+                    bad = plan;
+                    bad.planes[k][l].passenger = -1;
+                    rejected(bad, "a passenger left behind");
+                    break;
+                }
+        }
+        zeno::Plan bad = plan;
+        bad.planes.pop_back();
+        rejected(bad, "a missing plane");
+    }
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -224,6 +282,7 @@ int main(int argc, char** argv)
     testOnePlaneTable(rng);
     testLevels(rng, trials, sizes);
     testFront(rng, trials, sizes);
+    testPlans(rng, trials, sizes);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";

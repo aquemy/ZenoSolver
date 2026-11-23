@@ -6,7 +6,9 @@
 namespace zeno
 {
 OnePlaneTable::OnePlaneTable(std::span<const Time> d, std::span<const Cost> c, int maxLandings, Time maxLevel)
-    : maxLandings_(maxLandings)
+    : d_(d.begin(), d.end())
+    , c_(c.begin(), c.end())
+    , maxLandings_(maxLandings)
     , width_(static_cast<std::size_t>(maxLevel) + 1)
 {
     if(maxLandings < 0 || maxLevel < 0 || d.size() != c.size())
@@ -33,5 +35,23 @@ OnePlaneTable::OnePlaneTable(std::span<const Time> d, std::span<const Cost> c, i
         for(std::size_t level = 0; level < width_; ++level)
             cur[level] = std::min(cur[level], kInfCost);
     }
+}
+std::vector<int> OnePlaneTable::witness(int m, Time level) const
+{
+    if(m < 0 || m > maxLandings_ || level < 0 || level > maxLevel() || isInf((*this)(m, level)))
+        throw std::invalid_argument("OnePlaneTable::witness: no multiset realises this entry");
+    std::vector<int> cities;
+    for(; m > 0; --m)
+    {
+        const Cost target = (*this)(m, level);
+        std::size_t i = 0;
+        while(i < d_.size() && (d_[i] > level || (*this)(m - 1, level - d_[i]) + c_[i] != target))
+            ++i;
+        if(i == d_.size())
+            throw std::logic_error("OnePlaneTable::witness: inconsistent table");
+        cities.push_back(static_cast<int>(i));
+        level -= d_[i];
+    }
+    return cities;
 }
 } // namespace zeno
