@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <numeric>
 #include <random>
 #include <sstream>
 #include <string>
@@ -442,6 +443,63 @@ void testBalancedRoles(std::mt19937& rng, int trials)
     }
 }
 
+// Metamorphic properties of the exact front: transformations of the
+// instance with a known effect on the front.
+void testMetamorphic(std::mt19937& rng, int trials, const Sizes& z)
+{
+    for(int trial = 0; trial < trials; ++trial)
+    {
+        const zeno::Instance in = randomInstance(rng, z.n, z.t, z.p, z.s);
+        const zeno::Front front = zeno::solveFront(in).front;
+        const std::string where = describe(in);
+        const auto solve = [](const zeno::Instance& x) { return zeno::solveFront(x).front; };
+
+        // Permuting the cities.
+        zeno::Instance permuted = in;
+        std::vector<std::size_t> order(static_cast<std::size_t>(in.n()));
+        std::iota(order.begin(), order.end(), std::size_t{0});
+        std::ranges::shuffle(order, rng);
+        for(std::size_t i = 0; i < order.size(); ++i)
+        {
+            permuted.d[i] = in.d[order[i]];
+            permuted.c[i] = in.c[order[i]];
+        }
+        permuted.dbar = permuted.d;
+        check(solve(permuted) == front, "permuting cities keeps the front: " + where);
+
+        // Scaling durations by k scales makespans; scaling costs scales costs.
+        const zeno::Cost k = std::uniform_int_distribution<int>(2, 5)(rng);
+        zeno::Instance slower = in, dearer = in;
+        for(auto& v : slower.d) v *= k;
+        slower.dbar = slower.d;
+        for(auto& v : dearer.c) v *= k;
+        zeno::Front expectSlower = front, expectDearer = front;
+        for(auto& point : expectSlower) point.makespan *= k;
+        for(auto& point : expectDearer) point.cost *= k;
+        check(solve(slower) == expectSlower, "scaling durations scales makespans: " + where);
+        check(solve(dearer) == expectDearer, "scaling costs scales costs: " + where);
+
+        // A dominated city and a duplicate city change nothing.
+        zeno::Instance extra = in;
+        const auto i = std::uniform_int_distribution<std::size_t>(0, static_cast<std::size_t>(in.n() - 1))(rng);
+        extra.d.push_back(in.d[i] + std::uniform_int_distribution<int>(0, 3)(rng));
+        extra.c.push_back(in.c[i] + std::uniform_int_distribution<int>(0, 3)(rng));
+        extra.d.push_back(in.d[i]);
+        extra.c.push_back(in.c[i]);
+        extra.dbar = extra.d;
+        check(solve(extra) == front, "dominated and duplicate cities keep the front: " + where);
+
+        // Adding a to every cost adds s * a to every front cost: front plans
+        // land exactly s times.
+        const zeno::Cost a = std::uniform_int_distribution<int>(1, 7)(rng);
+        zeno::Instance shifted = in;
+        for(auto& v : shifted.c) v += a;
+        zeno::Front expectShifted = front;
+        for(auto& point : expectShifted) point.cost += a * in.landings();
+        check(solve(shifted) == expectShifted, "shifting costs shifts the front by s * a: " + where);
+    }
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -494,6 +552,7 @@ int main(int argc, char** argv)
     testBracketSymmetric(rng, trials, sizes);
     testBracketNonSymmetric(rng, trials / 4);
     testBalancedRoles(rng, trials / 4);
+    testMetamorphic(rng, trials, sizes);
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";

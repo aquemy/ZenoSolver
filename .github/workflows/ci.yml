@@ -53,3 +53,26 @@ jobs:
         run: cmake --build --preset asan --parallel
       - name: Test
         run: ctest --preset asan
+
+  fuzz:
+    name: Fuzz the certificate reader and checker (libFuzzer, 2 min)
+    runs-on: ubuntu-24.04
+    env:
+      CXX: clang++-18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build/fuzz -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZS_BUILD_FUZZERS=ON -DZS_SANITIZERS="address;undefined" -DZS_ENABLE_IPO=OFF
+      - name: Build
+        run: cmake --build build/fuzz --target fuzz-certificate --parallel
+      - name: Fuzz
+        run: |
+          mkdir -p corpus crashes
+          cp tests/fuzz/corpus/* corpus/
+          find lean/test/certificates -name '*.cert' -exec cp {} corpus/ \;
+          build/fuzz/fuzz-certificate corpus -max_total_time=120 -max_len=65536 -timeout=10 -rss_limit_mb=2048 -artifact_prefix=crashes/
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: fuzz-crashes
+          path: crashes/

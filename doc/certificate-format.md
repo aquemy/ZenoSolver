@@ -48,6 +48,7 @@ end
 - `plan <i> <p>`: the plan of point $i$ (1-based), for the $p$ planes, in order $i = 1..r$. Each `plane <k> <m>` (k = 1..p, in order) is followed by its $m$ legs, in flight order.
 - A leg: locations are `0` for $C_I$, `1`..`n` for the central cities, `n+1` for $C_G$; times are integers; `passenger` is `1`..`t`, or `0` when the plane flies empty.
 - `lower-bounds`: one line per gap $i = 1..r-1$, in order, with its kind, `relaxed` or `forest`.
+- Limits of the reference reader: every number at most $2^{36}$, $n, t, p \le 10^5$, at most $10^7$ legs in all.
 
 ## Plan semantics (obligation 1)
 

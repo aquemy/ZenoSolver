@@ -1,0 +1,14 @@
+zeno-certificate 1
+instance 1 1 1
+d 0
+dbar 0
+c 0
+assume S
+front 1
+0 0
+plan 1 1
+plane 1 2
+0 1 0 0 1
+1 2 0 0 1
+lower-bounds 0
+end

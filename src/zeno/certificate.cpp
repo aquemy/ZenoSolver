@@ -98,12 +98,19 @@ public:
         }
         if(used != token.size() || v < 0)
             fail("expected a non-negative integer, found '" + token + "'");
+        if(v > kMaxValue)
+            fail("value " + token + " exceeds the limit 2^36 of this reader");
         return v;
     }
 
     bool done() const { return pos_ >= lines_.size(); }
 
     static constexpr std::size_t kAny = static_cast<std::size_t>(-1);
+    /// Limits of this reader: they keep every sum of the checker far from
+    /// overflow (at most 10^7 legs of values below 2^36).
+    static constexpr std::int64_t kMaxValue = std::int64_t{1} << 36;
+    static constexpr std::int64_t kMaxCount = 100'000;
+    static constexpr std::int64_t kMaxLegs = 10'000'000;
 
 private:
     std::vector<std::pair<int, std::vector<std::string>>> lines_;
@@ -179,8 +186,12 @@ Certificate readCertificate(std::istream& input)
         lines.fail("unsupported version " + header[1]);
     const auto& head = lines.next("instance", 4);
     const auto n = lines.number(head[1]);
-    cert.instance.t = static_cast<int>(lines.number(head[2]));
-    cert.instance.p = static_cast<int>(lines.number(head[3]));
+    const auto t = lines.number(head[2]);
+    const auto p = lines.number(head[3]);
+    if(n > Lines::kMaxCount || t > Lines::kMaxCount || p > Lines::kMaxCount)
+        lines.fail("n, t and p are limited to 100000 by this reader");
+    cert.instance.t = static_cast<int>(t);
+    cert.instance.p = static_cast<int>(p);
     const auto vector = [&](const char* name) {
         const auto& tokens = lines.next(name, at(static_cast<int>(n)) + 1);
         std::vector<std::int64_t> v;
@@ -194,6 +205,9 @@ Certificate readCertificate(std::istream& input)
     const auto& assume = lines.next("assume", Lines::kAny);
     cert.assumptions.assign(assume.begin() + 1, assume.end());
     const auto r = lines.number(lines.next("front", 2)[1]);
+    if(r > Lines::kMaxLegs)
+        lines.fail("too many points");
+    std::int64_t totalLegs = 0;
     for(std::int64_t i = 0; i < r; ++i)
     {
         const auto& point = lines.next("", 2);
@@ -206,6 +220,8 @@ Certificate readCertificate(std::istream& input)
             lines.fail("plans must be listed in order");
         Plan plan;
         const auto planes = lines.number(planHead[2]);
+        if(planes > Lines::kMaxCount)
+            lines.fail("too many planes");
         for(std::int64_t k = 0; k < planes; ++k)
         {
             const auto& planeHead = lines.next("plane", 3);
@@ -213,6 +229,9 @@ Certificate readCertificate(std::istream& input)
                 lines.fail("planes must be listed in order");
             std::vector<Leg> legs;
             const auto count = lines.number(planeHead[2]);
+            totalLegs += count;
+            if(totalLegs > Lines::kMaxLegs)
+                lines.fail("more than 10^7 legs");
             for(std::int64_t l = 0; l < count; ++l)
             {
                 const auto& leg = lines.next("", 5);
@@ -270,7 +289,11 @@ CertificateCheck checkCertificate(const Certificate& cert)
     }
     for(std::size_t i = 0; i + 1 < f.size(); ++i)
         if(!(f[i].makespan < f[i + 1].makespan && f[i].cost > f[i + 1].cost))
+        {
+            // The gap obligations below assume a monotone list.
             fail("the points are not strictly increasing in makespan and decreasing in cost at point " + std::to_string(i + 1));
+            return report;
+        }
     if(cert.plans.size() != f.size() || cert.gaps.size() + 1 != f.size())
     {
         fail("one plan per point and one lower bound per gap are required");

@@ -43,6 +43,7 @@ Options (`-D<option>=<value>`):
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `ZS_BUILD_TESTS` | `ON` | Build the tests, the brute-force oracle and the golden suite. |
+| `ZS_BUILD_FUZZERS` | `OFF` | Build the libFuzzer targets (clang only; combine with `ZS_SANITIZERS`). |
 | `ZS_BUILD_BENCHMARKS` | `OFF` | Build the component benchmarks; fetches Google Benchmark v1.9.1 (`bench` preset). |
 | `ZS_BUILD_DOC` | `OFF` | Add the `doc` target (requires Doxygen). |
 | `ZS_ENABLE_IPO` | `ON` | Link-time optimisation in Release builds, when supported. |
@@ -58,7 +59,9 @@ The golden tests compare the front of `zeno` to fronts computed by a brute-force
 
 Pairs that are known to fail go in `tests/golden/known-bugs.txt` (currently none). They are expected to fail, and they must be removed from that list when fixed.
 
-`ut-zeno-core` checks the exact solver against a second, independent oracle (`tests/oracle/partitionEnum.hpp`), which enumerates every landing multiset and every admissible partition: the value of every level, the bracket order L ≤ E ≤ U3 ≤ U, and the front, on random instances. `ut-zeno-core <trials> <maxN> <maxT> <maxP> <maxS>` runs a larger sweep.
+`ut-zeno-core` checks the exact solver against a second, independent oracle (`tests/oracle/partitionEnum.hpp`), which enumerates every landing multiset and every admissible partition: the value of every level, the bracket order L ≤ E ≤ U3 ≤ U, and the front, on random instances. `ut-zeno-core <trials> <maxN> <maxT> <maxP> <maxS>` runs a larger sweep. It also checks metamorphic properties: permuting cities, adding dominated or duplicate cities change nothing; scaling durations or costs scales the front; adding a to every cost adds s·a to every front cost.
+
+The certificate reader and checker are fuzzed (`tests/fuzz/fuzz_certificate.cpp`): CTest replays the seed corpus on every platform, and CI runs libFuzzer with ASan and UBSan for two minutes on every pull request (`-DZS_BUILD_FUZZERS=ON`, clang). The reader refuses values above 2^36, n, t or p above 10^5 and more than 10^7 legs, so no sum in the checker can overflow.
 
 Benchmarks: `cmake --preset bench && cmake --build --preset bench` builds the component benchmarks (Google Benchmark) and `zeno`; `bench/tools/run_suite.py` times a solver over the instance suites in `bench/instances`. See `bench/README.md`.
 
