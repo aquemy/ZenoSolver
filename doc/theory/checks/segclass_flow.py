@@ -16,7 +16,8 @@ usage: python3 segclass_flow.py front <dW> <dE> <c> <t> <p> <table> <class> [Mma
        python3 segclass_flow.py xval <bin dir> <trials> <seed>
          compares fronts with bin/segclass_truth on tiny instances, for several classes
        python3 segclass_flow.py search <trials> <seed> <mode> <maxN> <maxT> <minP> <maxP> <maxD> [workers [classes]]
-         random instances with (AΔ) tables violating (A1-NS) (mode tight|random|mixed|sparse); for each, the
+         random instances with (AΔ) tables violating (A1-NS) (mode tight|random|mixed|sparse, or comono:
+         mixed tables on hub durations d and dbar that order the cities alike); for each, the
          least cost of all plans and of each class at every makespan up to a bound; prints the levels at
          which a class is dearer than all plans
 Needs highspy. One solver per process (see flowplan.py).
@@ -378,7 +379,9 @@ def search(trials, seed, mode, maxN, maxT, minP, maxP, maxD, workers, classes):
         dW = [rng.randint(1, maxD) for _ in range(n)]
         dE = [rng.randint(1, maxD) for _ in range(n)]
         c = [rng.randint(0, 9) for _ in range(n)]
-        m = mode if mode != "mixed" else rng.choice(["tight", "random"])
+        if mode == "comono":  # d and dbar order the cities alike
+            dW, dE = sorted(dW), sorted(dE)
+        m = mode if mode not in ("mixed", "comono") else rng.choice(["tight", "random"])
         D = random_table(dW, dE, m, rng)
         if D is None:
             continue

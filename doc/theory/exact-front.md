@@ -11,7 +11,8 @@ is sufficient.
 
 *Numbering.* This revision renumbers the results of the first version: Theorem 4.3 is now 4.7, Lemma 4.4 is
 4.6, Corollary 4.5 is 4.8, Conjecture 4.6 is 4.10, Conjecture 6.2 is 6.5 and Conjecture 6.4 is 6.7.
-Conjecture 4.10 is now proved, as Theorem 4.10, and keeps its number.
+Conjecture 4.10 is now proved, as Theorem 4.10, and keeps its number. Conjecture 6.7 is refuted, by
+Proposition 6.7, and keeps its number too.
 
 ## 0. Status
 
@@ -21,9 +22,9 @@ P: complete written proof in this note. S: argument given, not complete. O: open
 
 | | (S) and (A1) | (S) only | Non-symmetric |
 |---|---|---|---|
-| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4); $E$ under (AΔ) (Thm 4.10); $E$ with shortest hub distances $d'$ (§4.6, remarks) | least makespans of role configurations under (A1-NS) (Thm 6.9); role loads (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
-| Front characterised by admissible partitions | P (Cor 4.8) | P under (AΔ) (Cor 4.12); false in general without (AΔ) and (A1) (Ex 4.13) | by role configurations with least makespans under (A1-NS) (Cor 6.10), not by role loads (Prop 6.5); with shuttle triples O (Conj 6.7) |
-| Front computed exactly | P, pseudo-polynomial (§7) | under (AΔ) P, pseudo-polynomial (§7, Cor 4.12); otherwise wherever $L$ meets $E$ (§9) | under (A1-NS): bracket, then enumeration of configurations at gap levels (§6.5) |
+| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4); $E$ under (AΔ) (Thm 4.10); $E$ with shortest hub distances $d'$ (§4.6, remarks) | least makespans of role configurations under (A1-NS) (Thm 6.9); role loads (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2); makespans at least $(2t-p)\Phi/p$ (Lemma 6.19) |
+| Front characterised by admissible partitions | P (Cor 4.8) | P under (AΔ) (Cor 4.12); false in general without (AΔ) and (A1) (Ex 4.13) | by role configurations with least makespans under (A1-NS) (Cor 6.10), not by role loads (Prop 6.5); under (AΔ) alone, not by role configurations with shuttle triples (Prop 6.7) nor with any segments of one central flight (Prop 6.18); open |
+| Front computed exactly | P, pseudo-polynomial (§7) | under (AΔ) P, pseudo-polynomial (§7, Cor 4.12); otherwise wherever $L$ meets $E$ (§9) | under (A1-NS): bracket, then enumeration of configurations at gap levels (§6.5); otherwise only the flow model on small instances (§11) |
 | Ends of the front in closed form | P (Prop 7.10) | P (Prop 7.10) | — |
 | Linear family (default generator) | P, closed form (Thm 10.1) | P, same front | — |
 | Per-PPP greedy of both papers is optimal | false (§5) | false | false |
@@ -74,7 +75,7 @@ integer durations, the exact front is the Pareto set of the level-by-level optim
 | 6.4 | One pick-up (or one drop-off) per plane never waits harmfully [W1] | (AΔ-path) | P | 6.3 |
 | 6.5 | No harmful waiting in general — **false**: counterexample, front checked by the exhaustive oracle (Prop 6.5) | (AΔ-path) | refuted | 6.1, 6.3 |
 | 6.6 | Imbalance-vector DP for the role-load bound [N5] | — | P | 7.2 |
-| 6.7 | Shuttle triples complete the front | (AΔ) | O | — |
+| 6.7 | Shuttle triples complete the front — **false**: plans whose central flights all lie in shuttles miss the front (Prop 6.7, proof and computation) | (AΔ) | refuted | 2.1, 3.3, 6.1 |
 | 6.8 | Event order: acyclic next-leg relation; cycles need a city with $d_x = \bar d_x = 0$; templates are event-ordered | — | P | 4.3(a) |
 | 6.9 | Schedulable domination: every plan is dominated by a role configuration whose template is no later [SD] | (A1-NS) | P | 2.1, 3.1, 3.3, 4.3(a), 4.4, 6.1, 6.3 |
 | 6.10 | Non-symmetric front = Pareto set of (cost, least makespan) over role configurations, for all plans and for event-ordered plans (PDDL) | (A1-NS) | P | 1.1, 6.3, 6.8, 6.9 |
@@ -85,6 +86,9 @@ integer durations, the exact front is the Pareto set of the level-by-level optim
 | 6.14 | Dominated cities, hence non-Pareto paths, can be dropped from the reduced instance | no central flights | P | 1.1, 6.3, 6.10 |
 | 6.15 | The reduction is exact on clique instances under (A1-NS), for $p = 1$ and for $t = p$ | — | P | 1.1, 6.9, 6.10, 6.12, 6.13 |
 | 6.16 | Time-expanded integer flows give the least cost of a graph plan with makespan at most $M$, hence the graph's front | integer durations $\ge 1$ | P | 3.1, 6.13 |
+| 6.17 | Shuttle triples and split crossings | definition | — | — |
+| 6.18 | One central flight per segment is not enough: some fronts need segments with four or six central landings, or pick-up segments with central flights (computed) | (AΔ) | P (computed) | — |
+| 6.19 | Cut bound: $\sum_k F_k \ge (2t-p)\Phi$, $\Phi$ the least flight time from $C_I$ to $C_G$ | — | P | 3.3 |
 | 7.1 | Front = breakpoints of $E$ | (S), (A1) | P | 4.8 |
 | 7.2 | One-plane table $G$ | — | P | — |
 | 7.3 | $L \le E \le U_3 \le U$ | — | P | 2.6, 7.2 |
@@ -878,8 +882,8 @@ more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
 are multisets $\mathrm{Dr}_k$, $\mathrm{Pk}_k$, $\mathrm{Cr}_k$ ($k = 1,\dots,p$) with $|\mathrm{Cr}_k|$ odd,
 $\sum_k |\mathrm{Dr}_k| = \sum_k |\mathrm{Pk}_k|$ (only the totals balance), passenger count $t$, cost at most
 $C$ and $\lambda_k \le F_k \le M$. So the least cost $L_{\rm NS}(T)$ of such a family with every
-$\lambda_k \le T$ is a lower bound for every plan of makespan at most $T$, whatever its central flights and
-including shuttle triples (§6.4).
+$\lambda_k \le T$ is a lower bound for every plan of makespan at most $T$, whatever its central flights,
+including the shuttles and the multi-landing segments of §6.4.
 
 *Proof.* Give each segment $\gamma$ any of its landings. By Lemma 3.3(b), $F(\gamma)$ is at least the role
 duration of its type at that landing, reading $A$ and $\bar A$ as crossings, $B$ as drop-offs and $\bar B$ as
@@ -1181,30 +1185,159 @@ $|v_k(i)| \le D^{>}(i)$ otherwise. Summing over $i$, $\|v_k\|_1 \le N \le t - p$
 path of the restricted graph, of weight at most its cost. To count the vectors $v$, choose a support of $u$
 cities, signs, and positive values summing to at most $t - p$. $\square$
 
-### 6.4 Short central flights: the shuttle triple
+### 6.4 Short central flights
 
-Without (A1-NS), the $2t-p$ model is beaten (11 of 140 random instances). The smallest example found has
-$n = 2$, $t = 4$, $p = 3$, $d = (5,3)$, $\bar d = (2,3)$, $c = (1,5)$, and the central flight as short as (AΔ)
-allows. Its point (18, 12) needs 6 landings, one more than $s = 5$.
+Without (A1-NS), the $2t-p$ model is beaten (11 of 140 random instances in the first search, §11). The
+smallest example found then has $n = 2$, $t = 4$, $p = 3$, $d = (5,3)$, $\bar d = (2,3)$, $c = (1,5)$, and
+the central flight as short as (AΔ) allows ($d_{12} = 2$). Its point (18, 12) needs 6 landings, one more
+than $s = 5$. Earlier revisions read it as the arXiv paper's $B\bar A\bar B$ situation and conjectured that
+such shuttle triples complete the front. They do not, and neither does any extension by segments with one
+central flight.
 
-This is the arXiv paper's $B\bar A\bar B$ situation: a drop-off at $i$, a shuttle $C_G \to i \to j \to C_I$,
-and a pick-up at $j$.
+**Definition 6.17 (shuttle triple, split crossing).** Let $x \ne y$ be central cities joined by a flight.
 
-**Conjecture 6.7 (extended Proposition I).** Under (AΔ), the front equals the front of role configurations
-extended with *shuttle triples* (each adding exactly one landing), with exact makespans.
+* A *shuttle* from $x$ to $y$ is a segment $C_G \to x \to y \to C_I$ (type $\bar A$) that carries a
+  passenger from $x$ to $y$. A *shuttle triple* at $(x, y)$ is a drop-off at $x$ (a segment $B$), a shuttle
+  from $x$ to $y$, and a pick-up at $y$ (a segment $\bar B$), the three carrying one passenger. This is the
+  $B\bar A\bar B$ situation of the arXiv paper.
+* A *split crossing* at $(x, y)$ is a segment $C_I \to x \to y \to C_G$ (type $A$) whose central flight is
+  empty: its first flight leaves a passenger in $x$, and its last flight carries another passenger from $y$
+  to $C_G$. It acts as a drop-off at $x$ and a pick-up at $y$.
 
-The bound of Lemma 6.2 stays valid with shuttle triples. The arXiv construction of §3.3 (virtual cities)
-encodes the triples. It is sound only if a drop-off or pick-up at a virtual city is used together with its
-shuttle. Its equation (4) should read $d^{\bar B}_k = 2\bar d_j$. The non-symmetric proofs of §2.3 need
-repairs as well:
+A shuttle from $y$ to $x$ and a split crossing at $(x, y)$ fly the same three flights in opposite directions.
+Both last $d_x + d_{xy} + \bar d_y$, and both take one passenger out of $y$ and leave one in $x$. But a split
+crossing is a crossing, while a shuttle is a return segment, whose plane needs two more crossings (Lemma 2.1).
+By Lemma 3.3(b), both last at least $\max(d_x + \bar d_x,\ d_y + \bar d_y)$.
+
+**Conjecture 6.7 (shuttle triples complete the front) — false.** Made precise, it stated: under (AΔ), the
+front is the Pareto set of (cost, least makespan) over role configurations extended with shuttle triples.
+For each triple at $(x, y)$, such a configuration adds a drop-off at $x$ to one plane, a pick-up at $y$ to one
+plane and a shuttle to the crossings of one plane, one landing more than three simple roles. A schedule flies
+each triple as its three segments. Every schedule is then a plan whose central flights all lie in shuttles,
+and Proposition 6.7 shows that such plans can miss the front at every cost vector.
+
+**Proposition 6.7 (shuttles are not enough).** Take $n = 2$, $d = (1, 3)$, $\bar d = (3, 1)$, $d_{12} = 2$,
+$t = 3$, $p = 2$ and any costs. (AΔ) holds and (A1-NS) fails. Some plan has makespan 8, but every plan whose
+central flights all lie in segments of type $\bar A$ has makespan at least 10. With $c = (6, 1)$, the front
+is $\{(4, 10), (15, 8)\}$, and plans with shuttles only, like role configurations, give $\{(4, 10)\}$.
+
+*Proof.* The only triangles are $C_I, 1, 2$ and $C_G, 1, 2$. In both, $d_{12} = 2$ is at most 4, the sum of
+the other two durations, and at least 2, their difference. So (AΔ) holds, and (A1-NS) fails as
+$2 < \min(d_1 + d_2,\ \bar d_1 + \bar d_2) = 4$.
+
+*A plan of makespan 8.* Plane 1 flies $C_I \to 1 \to C_I$, leaving $\pi_1$ in 1 at time 1. It then carries
+$\pi_2$ along $C_I \to 2 \to C_G$, from time 2 to 6. Finally it flies $C_G \to 2 \to C_G$, picking up $\pi_3$
+in 2 at time 7 and arriving at 8. Plane 2 flies the split crossing $C_I \to 2 \to 1 \to C_G$. It leaves
+$\pi_3$ in 2 at time 3, flies empty to 1, arriving at 5, and carries $\pi_1$ to $C_G$, arriving at 8. The
+landings are 1, 2, 2 and 2, 1, so the cost is $2c_1 + 3c_2$.
+
+*Lower bound.* By Lemma 3.3(b), a segment of type $A$ or $\bar A$ lasts at least $\min_x (d_x + \bar d_x) = 4$.
+A plane with a segment $\bar A$ has at least two segments $A$ (Lemma 2.1), so it flies at least 12. A plan of
+makespan below 12 whose central flights lie in segments $\bar A$ therefore has no central flight. It is a plan
+of the instance without the central flight, which satisfies (A1-NS), and Theorem 6.1 gives a role
+configuration with passenger count 3 and every $\lambda_k \le M$. Crossings last 4 in both cities. A
+drop-off lasts 2 in city 1 and 6 in city 2, and a pick-up 6 in city 1 and 2 in city 2. The configuration has
+$s = 4$ landings and every $|\mathrm{Cr}_k|$ odd. So either a plane has three crossings, with load at least
+12, or each plane has one crossing and there is one link, a drop-off and a pick-up at one city $x$. A plane
+with both has load at least $4 + 2d_x + 2\bar d_x = 12$. Otherwise the two loads are $4 + 2d_x$ and
+$4 + 2\bar d_x$, and $\max(d_x, \bar d_x) = 3$ in both cities. So $M \ge 10$. The two fronts for
+$c = (6, 1)$ were computed by the exhaustive search and by the flow model (§11). $\square$
+
+The example of the first search behaves the same way. Plans whose central flights lie in shuttles give the
+front of role configurations, $(5, 17), (9, 16), (13, 13), (21, 12)$, and a split crossing gives (18, 12)
+(computed by both methods). The two cities of Proposition 6.7 are the virtual cities of Example 6.11 (§6.6),
+whose reduced instance has no central flights and misses the makespan 8 that the path graph reaches.
+
+The arXiv construction of §3.3 (virtual cities) encodes the triples. It is sound only if a drop-off or
+pick-up at a virtual city is used together with its shuttle, and its equation (4) should read
+$d^{\bar B}_k = 2\bar d_j$. Its conclusion fails by Proposition 6.7. The non-symmetric proofs of §2.3 have
+gaps as well:
 
 * the "finite number of patterns" argument is defeated by 2-cycles;
-* "the central pattern cannot be $A$" is unproved;
+* "the central pattern cannot be $A$" is unproved, and in Proposition 6.7 the central pattern is an $A$;
 * the multiplicity "exactly 1" is unproved.
+
+*Mechanism.* The split crossing of Proposition 6.7 flies against the grain. It enters at city 2, next to
+$C_G$ ($\bar d_2 = 1$), and leaves from city 1, next to $C_I$ ($d_1 = 1$). It lasts 8, two crossings, but it
+lets plane 1 drop a passenger off in 1 and pick another up in 2 for 2 each. These two roles form a link
+between two different cities, which the per-city balance of role configurations does not allow; a link
+within one city costs $2d_x + 2\bar d_x = 8$ in either city. Such a link can be faster than a link within one
+city only if $d$ and $\bar d$ order the two cities differently: if $d_x \le d_y$ and $\bar d_x \le \bar d_y$,
+the drop-off and the pick-up of a link within $x$ are no longer than those of a link between $x$ and $y$, in
+either direction. The segments that move the passengers between the two cities can land many times.
+
+**Proposition 6.18 (one central flight per segment is not enough).** In each instance below, (AΔ) holds and
+(A1-NS) fails.
+
+(a) $n = 2$, $d = (1, 7)$, $\bar d = (7, 1)$, $d_{12} = 6$, the least value (AΔ) allows, $t = 5$, $p = 2$,
+any costs. The least makespan of a plan is 32. Plans whose segments each make at most three central landings
+need 34, and role configurations need 36. A plan of makespan 32 flies the segment
+$C_I \to 2 \to 1 \to 2 \to 1 \to C_G$ on one plane: it leaves a passenger in 2, carries another from 1 to 2,
+and carries a third from 1 to $C_G$.
+
+(b) $n = 3$, $d = (1, 3, 2)$, $\bar d = (3, 1, 2)$, flights $1$–$3$ and $2$–$3$ of duration 1 and none
+between 1 and 2, $c = (0, 0, 1)$, $t = 3$, $p = 2$. The front is $\{(0, 10), (1, 8)\}$. Plans whose segments
+each make at most two central landings give $\{(0, 10), (2, 8)\}$. The point $(1, 8)$ needs the split
+crossing of Proposition 6.7 routed through city 3, $C_I \to 2 \to 3 \to 1 \to C_G$.
+
+(c) $n = 2$, $d = (3, 8)$, $\bar d = (8, 3)$, $d_{12} = 5$, $t = 7$, $p = 3$, any costs. The least makespan
+is 41, reached with a segment that lands six times, $C_I \to 2 \to 1 \to 2 \to 1 \to 2 \to 1 \to C_G$.
+Plans whose segments each make at most five central landings need more.
+
+(d) $n = 3$, $d = (7, 1, 3)$, $\bar d = (2, 6, 6)$, $c = (4, 7, 4)$, $d_{12} = 7$, $d_{13} = 5$, $d_{23} = 3$,
+$t = 7$, $p = 3$. A plan of cost 73 has makespan 29, and $(73, 29)$ is a point of the front. The plan flies
+the pick-up segment $C_G \to 3 \to 1 \to 3 \to C_G$, which carries one passenger from 3 to 1 and then another
+from 3 to $C_G$. No plan whose central flights all lie in segments of type $A$, however many central
+landings they make, has makespan 29.
+
+*Status.* Computed with `checks/segclass_truth.cpp` (exhaustive search over plans of a segment class) and
+`checks/segclass_flow.py` (the flow model of §11 restricted to a segment class). For (a) and (b) both methods
+give every number above. For (c) and (d) the exhaustive search confirms the least makespan 41 and the plan of
+cost 73 and makespan 29, and the claims about the restricted classes come from the flow model alone, which
+agrees with the exhaustive search on 200 class fronts of smaller instances (§11). The quoted plans were
+re-simulated.
+
+In (a), two split crossings at $(2, 1)$ would take two crossings and a return between them, $20 + 8 + 20$.
+The segment of (a) does the work of both in 32: after leaving a passenger in 2, it shuttles between the two
+cities instead of returning to a hub. So the front needs segments with several central landings, in
+crossings and in pick-up segments alike. The searches found no instance that needs more than six central
+landings in a segment. Whether some bound, depending on $t$ and $p$ or not, always suffices is open.
+
+**Lemma 6.19 (cut bound).** Let $\Phi$ be the least flight time of a sequence of flights from $C_I$ to $C_G$.
+For every feasible plan, $\sum_k F_k \ge (2t - p)\,\Phi$, so its makespan is at least $(2t - p)\Phi/p$. No
+assumption is needed. Under (AΔ), $\Phi = \min_x (d_x + \bar d_x)$.
+
+*Proof.* Let $\phi(v)$ be the least flight time of a sequence of flights from $C_I$ to the city $v$, so
+$\phi(C_I) = 0$, $\phi(C_G) = \Phi$, and $|\phi(a) - \phi(b)| \le \mathrm{dur}(a, b)$ for every flight. For a
+leg $\ell$ from $a$ to $b$ let $\Delta(\ell) = \phi(b) - \phi(a)$. Along the route of plane $k$ the $\Delta$
+sum to $\Phi$. So its upward part $U_k = \sum_\ell \Delta(\ell)^+$ and its downward part
+$D_k = \sum_\ell \Delta(\ell)^-$ satisfy $U_k - D_k = \Phi$, and $F_k \ge U_k + D_k = 2U_k - \Phi$. Along the
+journey of a passenger the $\Delta$ also sum to $\Phi$, so the upward parts of its legs add up to at least
+$\Phi$. Journeys are disjoint (capacity), so $\sum_k U_k \ge t\Phi$ and $\sum_k F_k \ge 2t\Phi - p\Phi$.
+Every $F_k$ is at most the makespan. Under (AΔ), take a sequence of flights from $C_I$ to $C_G$, its first
+arrival in $C_G$, and its last visit to $C_I$ before that. Between them it visits only central cities, and
+if $x$ is the last of them, that part lasts at least $d_x + \bar d_x$ by the induction of Lemma 3.3(b). The
+sequence $C_I \to x \to C_G$ attains it. $\square$
+
+In Proposition 6.7 and in 6.18(a) and (c), the least makespan of all plans is this bound rounded up,
+$\lceil (2t-p)\Phi/p \rceil$ (8, 32 and 41), and role configurations stay above it. The relaxed role loads of
+Lemma 6.2 miss it: in 6.18(a) they allow makespan 14, dropping every linked passenger off in city 1 and
+picking it up in city 2. Lemma 6.19 is a lower bound for every plan, next to $L_{\rm NS}$, but it bounds
+makespans only, not costs.
+
+What remains of §6 without (A1-NS): $L_{\rm NS}$ and Lemma 6.19 are lower bounds, and plans built from role
+configurations and from the segments above are upper bounds. The flow model of §11 computes the front
+exactly on small instances. A combinatorial description of the front is open. The searches of §11 show where
+the difficulty lies. Shuttles never improved a front: wherever the exhaustive search compared them, plans
+whose only multi-landing segments are shuttles gave the front of role configurations. Split crossings alone
+completed the front on all but two of 600 random instances, and on those two, segments with more central
+landings were needed. And on 150 random instances whose hub durations $d$ and $\bar d$ order the cities alike,
+central flights never changed the front, as the mechanism above suggests; whether this holds in general is
+open.
 
 ### 6.5 Non-symmetric algorithm
 
-1. Bracket on every level. Below: $L_{\rm NS}$ (Lemma 6.2, valid under (AΔ), shuttle triples included) and
+1. Bracket on every level. Below: $L_{\rm NS}$ (Lemma 6.2, valid under (AΔ) whatever the central flights) and
    $E_{\rm NS}$ (Proposition 6.6, valid under (A1-NS) by Theorem 6.1). Above: plans built by the template
    (Lemma 6.3), whose makespan equals the largest role load when every plane picks up at most once or drops
    off at most once (Corollary 6.4).
@@ -1218,8 +1351,9 @@ repairs as well:
    matchings with the closed form of Lemma 6.3. The gap is closed iff none has least makespan at most
    $M_{i+1} - 1$; otherwise the template of the cheapest one that has is a better plan. Proposition 6.5 shows that this search can be
    needed: the role-load bound alone can stay strictly below the front.
-3. Without (A1-NS), $L_{\rm NS}$ stays a valid lower bound; if Conjecture 6.7 holds, add shuttle triples to
-   the enumeration.
+3. Without (A1-NS), $L_{\rm NS}$ stays a valid lower bound, but no enumeration is known to be exact: shuttle
+   triples (Proposition 6.7) and segments with one central flight (Proposition 6.18) do not complete the
+   front. Exact fronts there come only from the flow model of §11 (`checks/flowplan.py`), on small instances.
 
 The bounds were loose in the measurements (certified on 18–28% of instances), so the search dominates.
 
@@ -1927,7 +2061,7 @@ All checks compare against exhaustive searches written independently of the solv
 | Exact prototype (§7) vs search over all plans, symmetric, three central-flight regimes | 504 / 504 |
 | $2t-p$ front vs all plans, symmetric (incl. 96 hub instances, shortest central flights) | 516 / 516 |
 | $2t-p$ front vs all plans, non-symmetric, no useful central flights | 280 / 280 |
-| same, shortest central flights | 129 / 140 (the 11 are shuttle triples) |
+| same, shortest central flights | 129 / 140 (the 11 were read as shuttle triples; the first of them, §6.4, needs a split crossing instead) |
 | Ignoring waiting, non-symmetric | 193 / 193 fronts unchanged |
 | Golden fronts | 27 / 27 |
 | Link-forest DP prototype vs enumeration | 600 instances, 25,919 levels, 0 mismatches |
@@ -1952,6 +2086,12 @@ All checks compare against exhaustive searches written independently of the solv
 | Theorem 6.9 without an event order (`checks/sd_zero_check.py`): random simple plans with clean journeys on instances with cities of $d_x = \bar d_x = 0$, journeys in the note's semantics (`strict`) or by time only (`loose`), $p \le 5$, up to 9 segments per plane. The generator favours zero-duration cities and zero-time hand-offs between planes, and injects a two-passenger cycle in half of the plans with two planes. Exchanges, cuts and splices, every step re-validated, the template simulated as an event-ordered plan | `strict`: 578,383 / 578,383 plans, 215,881 of them not event-ordered (220,689 with cuts, 8,433 with splices). `loose`: 578,583 / 578,583, 245,924 not event-ordered (249,487 with cuts, 10,740 with splices). Every move carries one more passenger through; afterwards every hand-off has $e \le a$, the count is $\ge t$, the cost $\le C$ and the template $\le M$ |
 | Schedulable domination, fronts (`checks/sd_checks.py`): configuration schedules (`config_front`, exact waiting) vs all simple plans (`simple_plans`: any hand-offs, exact waiting), no central flights | Exactly $s$ landings: 400 / 400 equal ($n \le 3$, $p \le 4$, $t \le 7$, durations $\le 20$; 200 shaped like Prop 6.5, of which waiting changes the front on 11). Up to $s + 2$ landings: 118 / 118 ($s \le 8$; 2 timeouts; waiting changes 7 fronts) |
 | Same vs all plans (`truth`), central flights none or (A1-NS) | 513 / 513 tiny instances ($n \le 2$, $t \le 5$, $p \le 3$, durations $\le 6$; waiting changes none of these fronts). Instance of Prop 6.5 (937 million states, costs up to 60): equal. Four instances on which waiting changes the front, for example $d = (2, 17)$, $\bar d = (3, 10)$, $c = (3, 1)$, $t = 5$, $p = 3$, where (13, 45) without waiting becomes (13, 47), or $d = (1, 16)$, $\bar d = (1, 8)$, $c = (5, 0)$, $t = 6$, $p = 4$, where waiting removes (15, 34): equal |
+| Shuttle triples and split crossings (Prop 6.7, Conj 6.7): exhaustive search over plans of a segment class (`checks/segclass_truth.cpp`, `segclass_search.py`), (AΔ) tables that violate (A1-NS), the tightest or random | $n = 2$, $t \le 3$, $p \le 2$, tightest tables: 400 instances, central flights change the front on 7. $n \le 3$, $t \le 4$, $p \le 3$, durations $\le 7$, tightest or random tables: 300 instances, 15. On all 22, plans whose central flights lie in shuttles give exactly the front of role configurations, and crossings with one central flight give the front of all plans |
+| Flow model of a segment class (`checks/segclass_flow.py xval`) vs that exhaustive search | 200 / 200 fronts equal, in three runs, the last of 80 with the final code ($n \le 3$, $t \le 4$, $p \le 3$; classes: simple plans, shuttles, crossings and split crossings with one central flight, both, segments with at most two or three central landings, crossings of any length, all plans) |
+| Segment classes on larger instances (`segclass_flow.py search`): $t \le 7$, $2 \le p \le 4$, durations $\le 8$, tightest or random tables | 400 instances with $n \le 4$: central flights lower the cost of a front point on 42, and segments with at most two central landings miss a front point on 1. Its cities 3 and 4 alone, $d = (2, 8)$, $\bar d = (7, 1)$, $d_{12} = 6$, $t = 7$, $p = 3$, already need four central landings in a segment: least makespan 33, but 35 with at most two (both methods) or three (flow model). 600 instances with $n \le 3$: split crossings miss a front point on 2; adding shuttles, or allowing every segment two central landings, recovers neither (Prop 6.18(d) is one of them) |
+| Two cities, least makespan only (zero costs), tightest table | 900 random instances ($t \le 7$, $p \le 3$, durations $\le 8$): segments with at most two central landings always reach the least makespan. Grid of the 1,170 instances with $d_1 \le 3$, $\bar d_1 \ge 4$, $d_2 \ge 4$, $\bar d_2 \le 3$ (durations $\le 8$), a tightest table that violates (A1-NS), $t \in \{5, 6, 7\}$ and $p \in \{2, 3\}$: on 20 they do not, and the least bound on central landings per segment that does is 3 (once), 4 (18 times) or 6 (once, Prop 6.18(c)). Mirror family $d = (1, 7)$, $\bar d = (7, 1)$, $p = 2$, $t = 3, \dots, 11$: four landings are needed only at $t = 5$ (Prop 6.18(a)); from $t = 4$ on, the least makespan is the cut bound $8(t - 1)$ of Lemma 6.19 |
+| Co-monotone hub durations ($d$ and $\bar d$ sorted alike), flow model (`segclass_flow.py search` in mode `comono`), tightest or random (AΔ) tables violating (A1-NS), $n \le 4$, $t \le 7$, $p \le 4$, durations $\le 9$ | 150 / 150 instances: the front of all plans equals that of role configurations at every front point |
+| Prop 6.18, instance by instance | (a) exhaustive search: all plans 32, at most two or three central landings per segment 34, crossings with up to four 32, role configurations 36; the flow model gives the same. (b) both methods: fronts as stated. (c) exhaustive search: least makespan 41; flow model: at most five central landings per segment cannot reach it, six can. (d) exhaustive search: the plan of cost 73 and makespan 29; flow model: no plan with central flights in crossings only reaches makespan 29, three landings per segment do |
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
 | General graphs: Example 6.11, the bucket brigade and the inner point of §6.6 (`checks/general_graph.py example`) | Fronts of $f(U)$ by `zeno` (reported exact) and, for the first, by `graph_truth` on the star graph of its cities: $\{(8, 10)\}$, $\{(10, 7)\}$, and four points without $(31, 11)$. Exact fronts by `graph_truth` and by the flow model of Prop 6.16: $\{(8, 8)\}$, $\{(10, 5)\}$, and five points with $(31, 11)$. With planes ending anywhere, `graph_truth` gives the same two fronts for Example 6.11, $\{(8, 10)\}$ on the star graph and $\{(8, 8)\}$ on $U$. The plans of §6.6, in which each passenger changes planes at most once, simulated, as are relay assignments on the same routes and every flow plan. $f(U)$ with central flights back (duration the graph distance between the cities' vertices), by `graph_truth`: $\{(8, 10), (10, 8)\}$ and $\{(10, 7), (12, 5)\}$ |
 | `graph_truth` against `truth` on clique instances (`general_graph.py validate`) | 1,000 / 1,000 fronts equal ($n \le 3$, $t \le 4$, $p \le 3$, durations $\le 4$, symmetric or not, central flights none, a1 or tight). Without useful central flights, the front of $f(U)$ by `zeno` equals them on 693 / 693 (Prop 6.15(a)) |
@@ -1965,8 +2105,8 @@ in `doc/theory/checks` (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_swee
 `theorychecks_anti.py`, `ds_check.py`, `ns_sched_check.py`, `truth.cpp` with `truth_checks.py`,
 `linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`, `waiting_search.cpp`,
 `config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`,
-`flowplan.py`, `thm410_search.py`, `thm410_construct.py`, `graph_truth.cpp` with `general_graph.py`); its
-README says how to build and run them. The flow model replaces the exhaustive search where `truth` is too
+`flowplan.py`, `thm410_search.py`, `thm410_construct.py`, `graph_truth.cpp` with `general_graph.py`, `segclass_truth.cpp` with
+`segclass_search.py`, `segclass_flow.py`); its README says how to build and run them. The flow model replaces the exhaustive search where `truth` is too
 slow (about a minute per front at $t = 5$). On the gaps of the searches above, up to $t = 12$, it typically
 finishes within seconds. `graph_truth.cpp` is the search of `truth.cpp` on an arbitrary graph, without a cost
 cap; it explores the plans with integer times, which dominate all plans (proof of Proposition 6.16), up to the
@@ -1990,13 +2130,18 @@ time cap of Proposition 6.13. `general_graph.py` has its own copy of the flow mo
    so `zeno` can close the gaps that harmful waiting leaves open. What remains is its cost: the number of
    configurations below the achieved cost at a gap's level, and the search over orders and matchings, which
    resembles non-preemptive open-shop scheduling.
-4. Conjecture 6.7: extend the exhaustive oracle with shuttle triples and compare on the 11 instances.
+4. Non-symmetric fronts under (AΔ) without (A1-NS). Conjecture 6.7 is refuted (Proposition 6.7), and no
+   extension of role configurations by segments with one central flight completes the front
+   (Proposition 6.18). Open: a combinatorial description of the front, and whether some bound on the central
+   landings of a segment always suffices. Lemma 6.19 and $L_{\rm NS}$ are the lower bounds; the flow model
+   (`checks/flowplan.py`) is the only exact method, on small instances.
 5. Conjecture 10.2, and the offset progressions.
 6. Statement 1.2: differential tests against VAL on emitted PDDL plans.
 7. Move the checkers of §11 into `tests/`.
 8. General graphs (§6.6): a characterisation of $\mathcal F_U$ like Corollary 6.10, with segments that fly
    central edges between a drop-off and a pick-up, as plane 1 does in Example 6.11 (a graph analogue of the
-   shuttle triples of Conjecture 6.7), and costs charged by the walks actually flown; an exact algorithm that
+   split crossings and multi-landing segments of §6.4; shuttle triples do not suffice, Proposition 6.7), and
+   costs charged by the walks actually flown; an exact algorithm that
    does better than the integer flows of Proposition 6.16; and the graph classes beyond Proposition 6.15 on
    which the reduction is exact (it fails on paths with two central vertices, so on trees).
 

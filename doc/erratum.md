@@ -48,6 +48,14 @@ Both papers present ZenoSolver as computing the *true* Pareto front (total cost,
   - the reduction is exact when every central vertex is joined to both hubs and central flights are no faster than through a hub, with one plane, or with as many planes as passengers;
   - with integer durations, the exact front of a graph can be computed with a time-expanded integer flow model, level by level.
 
+**Non-symmetric durations: shuttles do not complete the front.**
+
+- For central flights faster than any detour through a hub, arXiv:2304.14659 (§2.3 and §3.3) adds a virtual city for each "B Ā B̄" situation: a drop-off at one city, a shuttle C_G → i → j → C_I carrying the passenger to a second city, and a pick-up there. The note stated this as Conjecture 6.7; it is false, even under the triangle inequality.
+- Example: d = (1, 3), d̄ = (3, 1), central flight of duration 2, t = 3, p = 2 (note, Proposition 6.7).
+  - A plan of makespan 8 flies C_I → 2 → 1 → C_G: it leaves a passenger in city 2 and takes another from city 1.
+  - Every plan whose central flights lie in shuttles needs makespan 10: a plane with a shuttle also makes two crossings.
+- Segments with a single central flight do not suffice either: some fronts need a plane that shuttles between two cities four or six times within one segment (note, Proposition 6.18). No exact combinatorial method is known for this case; the note's flow model computes such fronts on small instances.
+
 **Bookkeeping errors in the 2016 code** (fixed in 2026, PRs #3 and #4 of the repository):
 
 - the extraction of the Pareto front;
