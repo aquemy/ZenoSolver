@@ -132,6 +132,15 @@ theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n �
   rw [← hsize, size, Finset.sum_mul]
   exact Finset.sum_le_sum fun k _ => card_mul_minOf_le_sum c (Y k)
 
+/-- **Obligation 4**, for any durations: every feasible plan costs at least `s · c_min`. -/
+theorem Feasible.minOf_le_cost_emin {N : Network n} (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    (2 * t - p) * minOf c ≤ planCost c P := by
+  obtain ⟨Y, -, hsize, -, hcost⟩ := hP.exists_relaxation_emin c hpt
+  refine le_trans ?_ hcost
+  rw [← hsize, size, Finset.sum_mul]
+  exact Finset.sum_le_sum fun k _ => card_mul_minOf_le_sum c (Y k)
+
 /-! ### Certificates -/
 
 /-- The lower bound named for a gap. -/
@@ -174,7 +183,7 @@ theorem pairwise_of_strictlyMonotone : ∀ {F : List (ℕ × ℕ)}, strictlyMono
       exact ⟨h.1.1.trans this.1, this.2.trans h.1.2⟩
 
 /-- The gaps: each consecutive pair `(x, y)` with named bound `g` has `C_x ≤ bound g M_y`. -/
-def gapsOK (bound : GapKind → ℕ → WithTop ℕ) : List (ℕ × ℕ) → List GapKind → Bool
+def gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) : List (ℕ × ℕ) → List κ → Bool
   | [_], [] => true
   | x :: y :: rest, g :: gs =>
     decide ((x.1 : WithTop ℕ) ≤ bound g y.2) && gapsOK bound (y :: rest) gs
@@ -183,8 +192,8 @@ def gapsOK (bound : GapKind → ℕ → WithTop ℕ) : List (ℕ × ℕ) → Lis
 /-- The domination argument: if, for every named bound `g`, `bound g M` is a lower bound on the
 cost of `y` whenever `y`'s makespan is below `M`, the first point is at least as fast as `y`, and
 the last at least as cheap, then some listed point weakly dominates `y`. -/
-theorem exists_le_of_gapsOK (bound : GapKind → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
-    ∀ (F : List (ℕ × ℕ)) (gs : List GapKind),
+theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
+    ∀ (F : List (ℕ × ℕ)) (gs : List κ),
       (∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) → gapsOK bound F gs = true →
       (∀ x ∈ F.head?, x.2 ≤ y.2) → (∀ x ∈ F.getLast?, x.1 ≤ y.1) → ∃ x ∈ F, x ≤ y
   | [], _, _, h, _, _ => by simp [gapsOK] at h

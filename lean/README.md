@@ -61,8 +61,10 @@ verified function.
 
 Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
 (`bench/baselines/lean/apple-m4-max/`):
-* The certificates of `test/certificates/`: about 30 ms at the median, 0.28 s at most
+* The certificates of `test/certificates/`: about 24 ms at the median, 0.22 s at most
   (`tree12.cert`, whose two forest gaps use the tree DP).
+* Version 2 certificates of small random non-symmetric instances (`n ≤ 4`, `t ≤ 6`): 22 ms at
+  the median and 43 ms at most, over 152 certificates.
 * The 66 certificates the C++ solver writes for the benchmark suite (`bench/instances/*.txt`):
   5.7 s in total, 33 ms at the median. The largest, `regimes/r5` (`n = 100`, `t = 60`, `p = 10`,
   3.9 MB, 240,000 legs), takes 2.3 s and 135 MiB. Before this phase's changes the same
@@ -91,7 +93,12 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   * a missing point closed by neither bound;
   * a `forest` gap relabelled `relaxed`, a `forest` gap without `A1`;
   * a missing point on `tree12`, rejected by the tree DP with the C++ checker's bound (5230);
-  * a truncated file.
+  * a truncated file;
+  * version 2: `roles` gaps without `A1-NS`, `S` listed for non-symmetric durations, a missing
+    point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak.
+
+The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
+`roles` and `lagrangian` bounds). The C++ checker agrees with every verdict.
 
 ## Contents
 
@@ -115,7 +122,11 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
 | `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat` |
-| `ZenoFront/Parse.lean` | Parser for the text format (untrusted) | `parseCert` |
+| `ZenoFront/CheckerV2.lean` | Format v2 (non-symmetric): certificates, `check`, soundness | `Kind2`, `Cert2`, `Cert2.check`, `Cert2.check_sound` |
+| `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role weights of landing records, role shrinking (Lemma 4.4), Theorem 6.1 | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad`, `RoleConfig.exists_shrink`, `Feasible.exists_roleConfig_ns` |
+| `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
+| `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
+| `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
 
@@ -319,6 +330,39 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
 * `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`: equivalently, a pair is listed
   iff it is a minimal achievable (cost, makespan) pair.
 
+**Non-symmetric instances (`PlanBounds.lean`, `NonSymmetric.lean`, `RoleBound.lean`,
+`LagrangianBound.lean`, `CheckerV2.lean`)**
+
+* `Feasible.exists_relaxation_emin` (**Lemma R, any durations**): a segment starts and ends with
+  hub flights, so its kept landing weighs `2 min(d, d̄)`. No assumption.
+* `Feasible.split`: under (A1-NS), splitting every central flight `a → b` into `a → h → b`
+  (`h` the hub of the shorter detour) keeps a plan feasible, with the same cost, no larger
+  makespan and no central flight.
+* `roleW_landingRecs_le`: on a route without central flights, each landing's two legs last
+  exactly its role weight (crossing `d + d̄`, drop-off `2d`, pick-up `2d̄`).
+* `Feasible.exists_roleConfig_records`: direct selection (Lemma 4.3(b)), shared by Theorems 4.7
+  and 6.1. `RoleConfig.exists_shrink`: Lemma 4.4 in role form.
+* `Feasible.exists_roleConfig_ns` (**Theorem 6.1**): under (A1-NS), every feasible plan gives a
+  role configuration on the `p` planes with passenger count `t`, cost at most the plan's and
+  every role load at most its makespan.
+* `rolesBoundAt_le_totalCost`: the role relaxation is a lower bound on such configurations. It
+  takes the larger of two bounds. Per plane: an odd number of crossings, other landings at
+  `2 min(d, d̄)`. All planes: the role loads add up to the crossing weight of all landings, by the
+  balance (`sum_roleLoad_eq_load_fill`).
+* `LagData.value_le_totalCost`: for every integer multiplier, the decoupled per-plane bound
+  (drop-off `c + μ`, pick-up `c − μ`) is a lower bound on every balanced configuration.
+* `domRep3`, `RoleConfig.map`: configurations are mapped to representatives no slower to either
+  hub and no more expensive. These are cities the C++ reduction keeps, and the level scale is
+  their gcd, as in the C++ checker.
+* `Cert2.check_sound` (**soundness, format v2**): if `Cert2.check` accepts, the listed points
+  are exactly the Pareto front. This holds for every table of central flights satisfying
+  (A1-NS) when the certificate lists it (`Cert2.check_sound_A1NS`), and for every table
+  otherwise (`Cert2.check_sound_of_not_A1NS`). The kinds it verifies:
+  * gaps: `relaxed`, `roles` and `lagrangian`;
+  * fastest point: `closed`, `relaxed` and `roles`.
+
+  It rejects `balanced`, `search` and `forest`.
+
 **Rational times (`RationalPlans.lean`)**
 
 * `QFeasible.floor`: a feasible plan with rational departure and arrival times, every time
@@ -416,8 +460,11 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   * Planes must end in `C_G`. This is the format's semantics, not PDDL's; see bridge B3 below.
   * With `forest` gaps, the theorem assumes (A1) on `dc` (`dc i j ≥ d i + d j`, including
     `i = j`). Every PDDL file the generator emits satisfies it.
-* **Parser.** `parseCert` and `ZenoCheck.lean` are **outside the verified statement**.
-  `Cert.check_sound` is about the `Cert` value, so a parser bug could make the checker verify a
+  * Version 2: with `roles` or `lagrangian` bounds, which need `A1-NS` listed,
+    `Cert2.check_sound` assumes (A1-NS) on `dc` (`dc i j ≥ min(d_i + d_j, d̄_i + d̄_j)`).
+    Otherwise it holds for every `dc`. Plans must end in `C_G` here too: bridge B3 is not done.
+* **Parser.** `parseAnyCert` and `ZenoCheck.lean` are **outside the verified statement**.
+  `Cert.check_sound` and `Cert2.check_sound` are about the parsed values, so a parser bug could make the checker verify a
   different front than the file's. The parser only translates numbers and `1`-based indices; it
   mirrors `readCertificate` in `src/zeno/certificate.cpp`.
 * **Compiled checker.** `lake exe zeno-check` runs `Cert.check` as compiled code. Its verdict
@@ -486,6 +533,15 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 **P5, non-symmetric.**
 
-- [ ] Role model with role loads (crossing `d + d̄`, drop `2d`, pick `2d̄`); N1 (converse under
-      (A1-NS)); N3 (drops-first template); W1 (a single pick-up never waits harmfully);
-      imbalance-vector DP; simulation with waiting; Conjecture 6.2 if it is proved.
+- [x] Format v2: parser, non-symmetric Lemma R (`relaxed`), and soundness for every table of
+      central flights (`Cert2.check_sound`).
+- [x] Role model with role loads; N1 (Theorem 6.1, `Feasible.exists_roleConfig_ns`); the
+      `roles` and `lagrangian` bounds.
+- [ ] `balanced`: a lower-bound DP over balanced role configurations, such as the
+      imbalance-vector DP of Proposition 6.6 (states with `‖v‖₁ ≤ t − p`). On 150 random small
+      non-symmetric instances, the Lean checker accepts 100 certificates and rejects the other
+      50 only because they use `balanced`.
+- [ ] `search`: Lemma 6.3 (the template schedule), Theorem 6.9 and Corollary 6.10, and an
+      exhaustive search over role configurations with exact schedules.
+- [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
+      is proved.

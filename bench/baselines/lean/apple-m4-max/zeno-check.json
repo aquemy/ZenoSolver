@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2026-11-24T00:50:35+01:00",
+    "date": "2026-11-24T01:39:38+01:00",
     "host_name": "apple-m4-max",
     "executable": "zeno-check",
     "num_cpus": 16,
@@ -21,12 +21,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 33.39645895175636,
-      "cpu_time": 33.39645895175636,
+      "real_time": 23.833208018913865,
+      "cpu_time": 23.833208018913865,
       "time_unit": "ms",
       "certificate_bytes": 6621,
       "verdict": "accepted",
-      "peak_rss_mib": 43.609375
+      "peak_rss_mib": 42.5625
     },
     {
       "name": "accepted/forest-r240",
@@ -38,12 +38,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 36.16658295504749,
-      "cpu_time": 36.16658295504749,
+      "real_time": 26.705166092142463,
+      "cpu_time": 26.705166092142463,
       "time_unit": "ms",
       "certificate_bytes": 13162,
       "verdict": "accepted",
-      "peak_rss_mib": 43.53125
+      "peak_rss_mib": 42.796875
     },
     {
       "name": "accepted/forest-r25",
@@ -55,12 +55,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 58.04758286103606,
-      "cpu_time": 58.04758286103606,
+      "real_time": 41.812000097706914,
+      "cpu_time": 41.812000097706914,
       "time_unit": "ms",
       "certificate_bytes": 38612,
       "verdict": "accepted",
-      "peak_rss_mib": 44.0
+      "peak_rss_mib": 43.515625
     },
     {
       "name": "accepted/golden-lpt-counterexample",
@@ -72,12 +72,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.81070808507502,
-      "cpu_time": 28.81070808507502,
+      "real_time": 22.35916582867503,
+      "cpu_time": 22.35916582867503,
       "time_unit": "ms",
       "certificate_bytes": 1486,
       "verdict": "accepted",
-      "peak_rss_mib": 42.59375
+      "peak_rss_mib": 42.359375
     },
     {
       "name": "accepted/golden-n2t2p1",
@@ -89,12 +89,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.647667029872537,
-      "cpu_time": 28.647667029872537,
+      "real_time": 24.0925420075655,
+      "cpu_time": 24.0925420075655,
       "time_unit": "ms",
       "certificate_bytes": 459,
       "verdict": "accepted",
-      "peak_rss_mib": 42.546875
+      "peak_rss_mib": 42.78125
     },
     {
       "name": "accepted/golden-n3t3p1",
@@ -106,12 +106,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.663167031481862,
-      "cpu_time": 28.663167031481862,
+      "real_time": 22.356499917805195,
+      "cpu_time": 22.356499917805195,
       "time_unit": "ms",
       "certificate_bytes": 1662,
       "verdict": "accepted",
-      "peak_rss_mib": 42.640625
+      "peak_rss_mib": 42.375
     },
     {
       "name": "accepted/golden-n4t5p3-C5D2r10",
@@ -123,12 +123,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 30.12716700322926,
-      "cpu_time": 30.12716700322926,
+      "real_time": 22.297666873782873,
+      "cpu_time": 22.297666873782873,
       "time_unit": "ms",
       "certificate_bytes": 4238,
       "verdict": "accepted",
-      "peak_rss_mib": 43.0625
+      "peak_rss_mib": 42.515625
     },
     {
       "name": "accepted/golden-n5t5p2",
@@ -140,12 +140,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 31.573083018884063,
-      "cpu_time": 31.573083018884063,
+      "real_time": 22.300750017166138,
+      "cpu_time": 22.300750017166138,
       "time_unit": "ms",
       "certificate_bytes": 3828,
       "verdict": "accepted",
-      "peak_rss_mib": 43.125
+      "peak_rss_mib": 42.46875
     },
     {
       "name": "accepted/golden-p3-first-counterexample",
@@ -157,12 +157,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 30.345499981194735,
-      "cpu_time": 30.345499981194735,
+      "real_time": 22.176166996359825,
+      "cpu_time": 22.176166996359825,
       "time_unit": "ms",
       "certificate_bytes": 1089,
       "verdict": "accepted",
-      "peak_rss_mib": 42.828125
+      "peak_rss_mib": 42.328125
     },
     {
       "name": "accepted/relaxed-r10",
@@ -174,12 +174,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 32.21204108558595,
-      "cpu_time": 32.21204108558595,
+      "real_time": 23.746250197291374,
+      "cpu_time": 23.746250197291374,
       "time_unit": "ms",
       "certificate_bytes": 5139,
       "verdict": "accepted",
-      "peak_rss_mib": 42.953125
+      "peak_rss_mib": 42.5625
     },
     {
       "name": "accepted/relaxed-r100",
@@ -191,12 +191,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 29.87412502989173,
-      "cpu_time": 29.87412502989173,
+      "real_time": 22.209832910448313,
+      "cpu_time": 22.209832910448313,
       "time_unit": "ms",
       "certificate_bytes": 254,
       "verdict": "accepted",
-      "peak_rss_mib": 42.578125
+      "peak_rss_mib": 42.296875
     },
     {
       "name": "accepted/relaxed-r101",
@@ -208,12 +208,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 37.540874909609556,
-      "cpu_time": 37.540874909609556,
+      "real_time": 29.776499839499593,
+      "cpu_time": 29.776499839499593,
       "time_unit": "ms",
       "certificate_bytes": 62151,
       "verdict": "accepted",
-      "peak_rss_mib": 44.328125
+      "peak_rss_mib": 44.046875
     },
     {
       "name": "accepted/tree12",
@@ -225,16 +225,67 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 277.61883311904967,
-      "cpu_time": 277.61883311904967,
+      "real_time": 210.92570899054408,
+      "cpu_time": 210.92570899054408,
       "time_unit": "ms",
       "certificate_bytes": 37468,
       "verdict": "accepted",
-      "peak_rss_mib": 45.125
+      "peak_rss_mib": 43.890625
+    },
+    {
+      "name": "accepted/v2-lagrangian-r58",
+      "family_index": 13,
+      "per_family_instance_index": 0,
+      "run_name": "accepted/v2-lagrangian-r58",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 23.77245808020234,
+      "cpu_time": 23.77245808020234,
+      "time_unit": "ms",
+      "certificate_bytes": 905,
+      "verdict": "accepted",
+      "peak_rss_mib": 42.46875
+    },
+    {
+      "name": "accepted/v2-relaxed-r26",
+      "family_index": 14,
+      "per_family_instance_index": 0,
+      "run_name": "accepted/v2-relaxed-r26",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 22.314625093713403,
+      "cpu_time": 22.314625093713403,
+      "time_unit": "ms",
+      "certificate_bytes": 243,
+      "verdict": "accepted",
+      "peak_rss_mib": 42.34375
+    },
+    {
+      "name": "accepted/v2-roles-r10",
+      "family_index": 15,
+      "per_family_instance_index": 0,
+      "run_name": "accepted/v2-roles-r10",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 35.81858309917152,
+      "cpu_time": 35.81858309917152,
+      "time_unit": "ms",
+      "certificate_bytes": 6169,
+      "verdict": "accepted",
+      "peak_rss_mib": 42.578125
     },
     {
       "name": "rejected/asymmetric",
-      "family_index": 13,
+      "family_index": 16,
       "per_family_instance_index": 0,
       "run_name": "rejected/asymmetric",
       "run_type": "iteration",
@@ -242,16 +293,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.62050011754036,
-      "cpu_time": 28.62050011754036,
+      "real_time": 22.278584074229002,
+      "cpu_time": 22.278584074229002,
       "time_unit": "ms",
       "certificate_bytes": 1527,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.828125
+      "peak_rss_mib": 42.34375
     },
     {
       "name": "rejected/bad-cost",
-      "family_index": 14,
+      "family_index": 17,
       "per_family_instance_index": 0,
       "run_name": "rejected/bad-cost",
       "run_type": "iteration",
@@ -259,16 +310,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 30.17162485048175,
-      "cpu_time": 30.17162485048175,
+      "real_time": 22.423041984438896,
+      "cpu_time": 22.423041984438896,
       "time_unit": "ms",
       "certificate_bytes": 1544,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.59375
+      "peak_rss_mib": 42.328125
     },
     {
       "name": "rejected/bad-duration",
-      "family_index": 15,
+      "family_index": 18,
       "per_family_instance_index": 0,
       "run_name": "rejected/bad-duration",
       "run_type": "iteration",
@@ -276,16 +327,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 29.994332930073142,
-      "cpu_time": 29.994332930073142,
+      "real_time": 24.08733288757503,
+      "cpu_time": 24.08733288757503,
       "time_unit": "ms",
       "certificate_bytes": 1530,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.5625
+      "peak_rss_mib": 42.34375
     },
     {
       "name": "rejected/bad-passenger",
-      "family_index": 16,
+      "family_index": 19,
       "per_family_instance_index": 0,
       "run_name": "rejected/bad-passenger",
       "run_type": "iteration",
@@ -293,16 +344,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.49562489427626,
-      "cpu_time": 28.49562489427626,
+      "real_time": 24.043207988142967,
+      "cpu_time": 24.043207988142967,
       "time_unit": "ms",
       "certificate_bytes": 1554,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.640625
+      "peak_rss_mib": 42.359375
     },
     {
       "name": "rejected/forest-as-relaxed",
-      "family_index": 17,
+      "family_index": 20,
       "per_family_instance_index": 0,
       "run_name": "rejected/forest-as-relaxed",
       "run_type": "iteration",
@@ -310,16 +361,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 31.581584131345153,
-      "cpu_time": 31.581584131345153,
+      "real_time": 23.79904198460281,
+      "cpu_time": 23.79904198460281,
       "time_unit": "ms",
       "certificate_bytes": 6692,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.796875
+      "peak_rss_mib": 42.578125
     },
     {
       "name": "rejected/forest-missing-point",
-      "family_index": 18,
+      "family_index": 21,
       "per_family_instance_index": 0,
       "run_name": "rejected/forest-missing-point",
       "run_type": "iteration",
@@ -327,16 +378,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 33.05875021032989,
-      "cpu_time": 33.05875021032989,
+      "real_time": 25.24049999192357,
+      "cpu_time": 25.24049999192357,
       "time_unit": "ms",
       "certificate_bytes": 6378,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.796875
+      "peak_rss_mib": 42.59375
     },
     {
       "name": "rejected/forest-no-a1",
-      "family_index": 19,
+      "family_index": 22,
       "per_family_instance_index": 0,
       "run_name": "rejected/forest-no-a1",
       "run_type": "iteration",
@@ -344,16 +395,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 29.966416070237756,
-      "cpu_time": 29.966416070237756,
+      "real_time": 23.715417133644223,
+      "cpu_time": 23.715417133644223,
       "time_unit": "ms",
       "certificate_bytes": 6666,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.84375
+      "peak_rss_mib": 42.59375
     },
     {
       "name": "rejected/missing-point",
-      "family_index": 20,
+      "family_index": 23,
       "per_family_instance_index": 0,
       "run_name": "rejected/missing-point",
       "run_type": "iteration",
@@ -361,16 +412,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.505624970421195,
-      "cpu_time": 28.505624970421195,
+      "real_time": 22.234665928408504,
+      "cpu_time": 22.234665928408504,
       "time_unit": "ms",
       "certificate_bytes": 1313,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.625
+      "peak_rss_mib": 42.40625
     },
     {
       "name": "rejected/no-assumption",
-      "family_index": 21,
+      "family_index": 24,
       "per_family_instance_index": 0,
       "run_name": "rejected/no-assumption",
       "run_type": "iteration",
@@ -378,16 +429,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 29.621999943628907,
-      "cpu_time": 29.621999943628907,
+      "real_time": 22.282083984464407,
+      "cpu_time": 22.282083984464407,
       "time_unit": "ms",
       "certificate_bytes": 1524,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.578125
+      "peak_rss_mib": 42.328125
     },
     {
       "name": "rejected/not-monotone",
-      "family_index": 22,
+      "family_index": 25,
       "per_family_instance_index": 0,
       "run_name": "rejected/not-monotone",
       "run_type": "iteration",
@@ -395,16 +446,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 28.654290828853846,
-      "cpu_time": 28.654290828853846,
+      "real_time": 25.314583908766508,
+      "cpu_time": 25.314583908766508,
       "time_unit": "ms",
       "certificate_bytes": 1521,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.59375
+      "peak_rss_mib": 42.9375
     },
     {
       "name": "rejected/tree-missing-point",
-      "family_index": 23,
+      "family_index": 26,
       "per_family_instance_index": 0,
       "run_name": "rejected/tree-missing-point",
       "run_type": "iteration",
@@ -412,16 +463,16 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 277.2151669487357,
-      "cpu_time": 277.2151669487357,
+      "real_time": 219.75174988619983,
+      "cpu_time": 219.75174988619983,
       "time_unit": "ms",
       "certificate_bytes": 37022,
       "verdict": "not accepted",
-      "peak_rss_mib": 43.796875
+      "peak_rss_mib": 43.84375
     },
     {
       "name": "rejected/truncated",
-      "family_index": 24,
+      "family_index": 27,
       "per_family_instance_index": 0,
       "run_name": "rejected/truncated",
       "run_type": "iteration",
@@ -429,12 +480,80 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 30.070249922573566,
-      "cpu_time": 30.070249922573566,
+      "real_time": 22.31254195794463,
+      "cpu_time": 22.31254195794463,
       "time_unit": "ms",
       "certificate_bytes": 1522,
       "verdict": "not accepted",
-      "peak_rss_mib": 42.5
+      "peak_rss_mib": 42.265625
+    },
+    {
+      "name": "rejected/v2-lagrangian-bad-mu",
+      "family_index": 28,
+      "per_family_instance_index": 0,
+      "run_name": "rejected/v2-lagrangian-bad-mu",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 23.756250040605664,
+      "cpu_time": 23.756250040605664,
+      "time_unit": "ms",
+      "certificate_bytes": 975,
+      "verdict": "not accepted",
+      "peak_rss_mib": 42.40625
+    },
+    {
+      "name": "rejected/v2-roles-missing-point",
+      "family_index": 29,
+      "per_family_instance_index": 0,
+      "run_name": "rejected/v2-roles-missing-point",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 35.900249844416976,
+      "cpu_time": 35.900249844416976,
+      "time_unit": "ms",
+      "certificate_bytes": 6045,
+      "verdict": "not accepted",
+      "peak_rss_mib": 42.59375
+    },
+    {
+      "name": "rejected/v2-roles-no-a1ns",
+      "family_index": 30,
+      "per_family_instance_index": 0,
+      "run_name": "rejected/v2-roles-no-a1ns",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 22.340665804222226,
+      "cpu_time": 22.340665804222226,
+      "time_unit": "ms",
+      "certificate_bytes": 6212,
+      "verdict": "not accepted",
+      "peak_rss_mib": 42.53125
+    },
+    {
+      "name": "rejected/v2-s-nonsymmetric",
+      "family_index": 31,
+      "per_family_instance_index": 0,
+      "run_name": "rejected/v2-s-nonsymmetric",
+      "run_type": "iteration",
+      "repetitions": 3,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3,
+      "real_time": 22.377792047336698,
+      "cpu_time": 22.377792047336698,
+      "time_unit": "ms",
+      "certificate_bytes": 6232,
+      "verdict": "not accepted",
+      "peak_rss_mib": 42.46875
     }
   ]
 }

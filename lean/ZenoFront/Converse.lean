@@ -497,13 +497,17 @@ theorem card_ofCounts (v : Fin n → ℕ) : (ofCounts v).card = ∑ x, v x := by
 theorem Loc.isCI_eq_false_of_ne {x : Loc n} (h : x ≠ .ci) : x.isCI = false := by
   cases x <;> simp_all
 
-/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
-dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
-`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
-theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
+/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
+gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
+records of type `B`, `B̄`, and `A` or `Ā` of their plane, and whose groups have at least
+`2t − p` landings. No assumption on durations is needed; under (S) and (A1), or on a plan
+without central flights, the records' types are those of the segments. -/
+theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    ∃ cfg : RoleConfig n p,
+      (∀ k, cfg.drop k ≤ recCities (fun r => r.2.1 && r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.pick k ≤ recCities (fun r => !r.2.1 && !r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.cross k = recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))) ∧
+      2 * t - p ≤ size cfg.groups := by
   classical
   set R : Fin p → List (Fin n × Bool × Bool) := fun k => landingRecs (P k) with hR
   -- Step 2: every passenger's transfer.
@@ -586,18 +590,6 @@ theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.
         ext y
         rw [Multiset.count_sum', Multiset.count_sum']
         simp only [hDr, hPk, count_ofCounts, hdr_sum, hpk_sum] }
-  -- The groups are sub-multisets of the planes' landings.
-  have hsub : ∀ k, cfg.groups k ≤ routeLandings (P k) := by
-    intro k
-    refine le_trans ?_ (landingRecs_map_fst_le (P k))
-    rw [← recCities_split]
-    refine add_le_add (add_le_add ?_ ?_) le_rfl
-    · refine Multiset.le_iff_count.mpr fun y => ?_
-      rw [count_ofCounts, count_recCities]
-      exact hdr_le y k
-    · refine Multiset.le_iff_count.mpr fun y => ?_
-      rw [count_ofCounts, count_recCities]
-      exact hpk_le y k
   -- Size: at least `2t − p`.
   have hsize : 2 * t - p ≤ size cfg.groups := by
     have hk : ∀ k, (cfg.groups k).card + 1 =
@@ -622,6 +614,28 @@ theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.
     have h₃ : t ≤ ∑ x, (A x + min (b x) (bb x)) := ht ▸ Finset.sum_le_sum fun x _ => hpass x
     rw [Finset.sum_add_distrib, hsumA] at h₃
     omega
+  refine ⟨cfg, fun k => ?_, fun k => ?_, fun k => rfl, hsize⟩
+  · refine Multiset.le_iff_count.mpr fun y => ?_
+    rw [count_ofCounts, count_recCities]
+    exact hdr_le y k
+  · refine Multiset.le_iff_count.mpr fun y => ?_
+    rw [count_ofCounts, count_recCities]
+    exact hpk_le y k
+
+/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
+dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
+`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
+theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
+  obtain ⟨cfg, hdr, hpk, hcr, hsize⟩ := hP.exists_roleConfig_records
+  -- The groups are sub-multisets of the planes' landings.
+  have hsub : ∀ k, cfg.groups k ≤ routeLandings (P k) := by
+    intro k
+    refine le_trans ?_ (landingRecs_map_fst_le (P k))
+    rw [← recCities_split]
+    exact add_le_add (add_le_add (hdr k) (hpk k)) (le_of_eq (hcr k))
   -- PAR, then shrinking to exactly `2t − p` landings.
   obtain ⟨X, hX, hle, hXsize⟩ := cfg.admissible_groups.exists_shrink (s := 2 * t - p)
     (by omega) (by omega) hsize
