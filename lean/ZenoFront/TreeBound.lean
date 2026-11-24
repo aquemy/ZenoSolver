@@ -512,8 +512,11 @@ end Trees
 
 /-! ### The bound of the checker -/
 
-/-- The link labels: the non-dominated representatives, listed. -/
-def repList (d c : Fin n → ℕ) : List (Fin n) := (List.finRange n).filter (· ∈ domReps d c)
+/-- The link labels: the non-dominated representatives, listed. The representatives are computed
+once, not once per city. -/
+def repList (d c : Fin n → ℕ) : List (Fin n) :=
+  let R := domReps d c
+  (List.finRange n).filter (· ∈ R)
 
 theorem mem_repList {d c : Fin n → ℕ} {b : Fin n} : b ∈ repList d c ↔ b ∈ domReps d c := by
   simp [repList]
