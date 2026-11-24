@@ -1,0 +1,14 @@
+[project]
+name = "zenosolver-experiments"
+version = "0.1.0"
+description = "Seeded empirical validation campaign E1-E10 for the exact MultiZenoTravel front (doc/theory/exact-front.md)."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "numpy>=2.1",
+    "matplotlib>=3.9",
+    "ortools>=9.12",
+]
+
+[tool.uv]
+package = false

@@ -548,3 +548,10 @@ created   = "2026-11-23"
 # ===========================================================================
 # Experiments
 # ===========================================================================
+#
+# The seeded validation campaign in experiments/ (experiments/README.md). Each experiment is
+# experiments/<EN_name>/run.py (seed 0) and writes its verdict, provenance and figures to
+# experiments/results/<EN_name>/. Extra fields: `tests` lists the claims an experiment bears on,
+# `refutes` those its evidence contradicts, `code` and `results` locate it. `status` uses the science
+# vocabulary: sci.supported (the evidence agrees with the claims tested; for a search, no
+# counterexample in the sample, which is not a proof) and sci.measured (a measurement).
