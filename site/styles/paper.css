@@ -1,0 +1,184 @@
+/* The Paper section: statements, proof sketches, figures and the small inline plan charts.
+   Colours come from tokens.css, so light and dark switch with the rest of the site. */
+
+/* A numbered statement (theorem, lemma, proposition, definition). */
+.statement {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid var(--zs-ink-3);
+  background: var(--zs-surface-2);
+  border-radius: 0 4px 4px 0;
+}
+.statement > p:last-child,
+.statement > ul:last-child,
+.statement > ol:last-child {
+  margin-bottom: 0;
+}
+.statement > p:first-child > a:first-child {
+  font-weight: 700;
+}
+.statement.refuted {
+  border-left-style: dashed;
+}
+
+/* A proof sketch: one to three sentences, with a link to the full proof. */
+.sketch {
+  margin: -0.4em 0 1.2em 0;
+  padding: 0 1em;
+  color: var(--zs-ink-2);
+  font-size: 0.95em;
+}
+
+/* The abstract on the opening page. */
+.abstract {
+  margin: 0.5em 0 1.8em 0;
+  padding: 0.8em 1.1em;
+  border-top: 1px solid var(--zs-rule);
+  border-bottom: 1px solid var(--zs-rule);
+  font-size: 0.97em;
+}
+
+/* Experiment figures are matplotlib SVGs on their own light background. */
+.paper-fig img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--zs-rule);
+  border-radius: 4px;
+}
+.paper-fig figcaption,
+.paper-fig .figure-caption {
+  color: var(--zs-ink-2);
+  font-size: 0.92em;
+}
+
+/* Verdict line of an experiment. */
+.verdict {
+  display: inline-block;
+  padding: 0.05em 0.6em;
+  border-radius: 10px;
+  font-size: 0.85em;
+  font-weight: 600;
+  background: var(--zs-surface-2);
+  border: 1px solid var(--zs-rule);
+  color: var(--zs-ink);
+}
+
+/* Inline SVG figures drawn on the page (segment types, plan charts). */
+.zs-gantt,
+.zs-segments {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  margin: 0.4em auto;
+  font-family: var(--bs-font-sans-serif, system-ui, sans-serif);
+}
+.zs-gantt .rowlbl,
+.zs-gantt .tick,
+.zs-segments text {
+  fill: var(--zs-ink-2);
+  font-size: 13px;
+}
+.zs-gantt .lbl {
+  fill: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.zs-gantt .lbl-empty {
+  fill: var(--zs-ink-2);
+  font-weight: 400;
+}
+.zs-gantt .leg.p1 { fill: var(--zs-pax-1); }
+.zs-gantt .leg.p2 { fill: var(--zs-pax-2); }
+.zs-gantt .leg.p3 { fill: var(--zs-pax-3); }
+.zs-gantt .leg.empty {
+  fill: var(--zs-surface-2);
+  stroke: var(--zs-ink-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+.zs-gantt .axis {
+  stroke: var(--zs-ink-3);
+  stroke-width: 1;
+}
+.zs-segments .node {
+  fill: var(--zs-surface);
+  stroke: var(--zs-ink-2);
+  stroke-width: 1.2;
+}
+.zs-segments .node.hub {
+  fill: var(--zs-surface-2);
+}
+.zs-segments .node-lbl {
+  fill: var(--zs-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.zs-segments .seg {
+  fill: none;
+  stroke: var(--zs-series-1);
+  stroke-width: 1.8;
+}
+.zs-segments .arrowhead {
+  fill: var(--zs-series-1);
+}
+.zs-segments .seg.dashed {
+  stroke-dasharray: 5 4;
+}
+.zs-instance {
+  max-width: 500px;
+}
+.zs-instance .seg {
+  stroke: var(--zs-ink-3);
+  stroke-width: 1.5;
+}
+.zs-segments text.math {
+  fill: var(--zs-ink);
+  font-style: italic;
+  font-size: 14px;
+}
+.zs-segments .type {
+  fill: var(--zs-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Small multiples of Pareto fronts (examples of instances). */
+.zs-fronts {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  margin: 0.4em auto;
+  font-family: var(--bs-font-sans-serif, system-ui, sans-serif);
+}
+.zs-fronts .ptitle { fill: var(--zs-ink); font-size: 12px; font-weight: 600; }
+.zs-fronts .tick, .zs-fronts .axlbl { fill: var(--zs-ink-2); font-size: 11px; }
+.zs-fronts .axis { stroke: var(--zs-ink-3); stroke-width: 1; }
+.zs-fronts .stair { fill: none; stroke: var(--zs-series-1); stroke-width: 1.4; }
+.zs-fronts .pt { fill: var(--zs-series-1); }
+
+/* The line under the title of the opening page, and the reference list. */
+.revision-note {
+  color: var(--zs-ink-2);
+  font-size: 0.92em;
+  margin-top: -0.4em;
+}
+.references-list p {
+  padding-left: 4.2em;
+  text-indent: -4.2em;
+  margin-bottom: 0.45em;
+  font-size: 0.93em;
+}
+.plan-display {
+  overflow-x: auto;
+}
+
+/* Contents list of the chapters. */
+.chapters dt {
+  margin-top: 0.6em;
+}
+.chapters dd {
+  margin-left: 1.2em;
+  color: var(--zs-ink-2);
+}

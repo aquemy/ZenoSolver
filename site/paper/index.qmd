@@ -1,14 +1,275 @@
 ---
-title: "Paper"
-subtitle: "A revised and extended version of the MultiZenoTravel paper"
-# Placeholder: the paper section comes in its own pull request, which replaces this page and adds
-# the other pages of site/paper/ (the render list and the sidebar pick them up by glob). The old
-# /experiments.html URL redirects here until then; move this alias to the experiments page.
-aliases: ["../experiments.html"]
 order: 1
+title: "MultiZenoTravel"
+subtitle: "a Tunable Benchmark for Multi-Objective Planning with Known Pareto Front"
+author:
+  - Alexandre Quemy
+  - Marc Schoenauer
+  - Johann Dreo
+css: ../styles/paper.css
+toc: true
+abstract: |
+  Multi-objective AI planning suffers from a lack of benchmarks exhibiting known Pareto Fronts.
+  In this work, we propose a tunable benchmark generator, together with a dedicated solver that
+  provably computes the true Pareto front of the resulting instances. First, we prove a
+  proposition allowing us to characterize the optimal plans for a constrained version of the
+  problem, symmetric durations whose flights obey the triangular inequality, and we show how far
+  this characterization extends to the non-symmetric and general problems. Second, we provide a
+  constructive way to find all the Pareto-optimal plans and discuss the complexity of the
+  algorithm: computing the makespan of a fixed list of cities is strongly NP-hard, yet the
+  Pareto front is computable in pseudo-polynomial time. We provide an implementation that allows
+  the solver to handle realistic instances in a reasonable time, and that returns with each front
+  a certificate that an independent checker verifies. Finally, we validate the solver and the
+  theory in a seeded experiment campaign against exhaustive searches written independently, and
+  the central results are formally verified in Lean 4.
 ---
 
-The paper is being prepared. In the meantime, the [problem page](../problem.qmd) introduces
-MultiZenoTravel with a worked example, the [algorithm page](../solver/algorithm.qmd) explains how
-`zeno` computes an exact front, and the [blueprint](../proofs.qmd) gives every statement of the
-theory with its proof and its Lean formalization.
+::: {.revision-note}
+Revised and extended version of
+[arXiv:2304.14659](https://arxiv.org/abs/2304.14659) (2023).
+:::
+
+## Introduction {#sec-intro}
+
+The progress of algorithmics, the availability of more & more data and the dramatic increase of
+computational power drive a fast-pace evolution of the artificial intelligence (AI) field. As
+part of this change, the need to assess the performances of computational methods and to compare
+their merits is crucial. Many of the core fields of AI have set up standard benchmarks and
+competitions, in order to complement expert knowledge and analysis. In that regard, the automated
+planning community is at the edge of the state of the art, with the well-known International
+Planning Competition (IPC), hosting a large benchmark and using a common definition language.
+
+A deterministic planning problem consists in selecting a sequence of actions (a plan) having an
+effect on a state, so that applying the plan on an initial state allows to reach a goal (partial)
+state, while optimizing a function of the plan's value. This function is generally the total
+duration to reach the goal (the *makespan*), each action having a duration. However, the value
+function may very well represent another aspect of the problem, such as the cost of the plan, the
+energy it requires or the uncertainty produced by the actions.
+
+In realistic problems, it is very often the case that several such *objective functions* exist
+and are contradictory. For example, a short plan may be costly, while a cheap plan may take a long
+time. In such a setting, using a linear combination of those objective functions falls back to
+introducing a bias about the preferences of the operational user. However, preferences cannot
+always be modelled easily in practice, e.g. the user may decide based on political information.
+In addition, the knowledge of the feasible compromises between the objectives may, in fact,
+influence the decision maker simply because it gives additional information about the problem
+itself. For instance, if the two objectives are a cost and a risk, the decision maker might revise
+its risk appetite knowing that the increase of the risk by 1% beyond its initial acceptable risk
+threshold can lead to a 50% cost decrease.
+
+This calls for the use of multi-objective optimization, where the problem is actually modelled
+with several objective functions, and the output of the solver is a set of solutions that are
+non-dominated by other solutions, regarding the objectives. The weak dominance of a
+$d$-dimensional point $\vec a$ over point $\vec b$ is defined as
+$\vec a \preceq \vec b \iff a_j \le b_j$ for $j = 1, \dots, d$. A set of points $P \subseteq X$ is
+then defined as Pareto-optimal if every point of $X$ is weakly dominated by a point of $P$, all
+its points being non-dominated by each other. The output of solving such a problem is thus a set
+of solutions ordered as a "Pareto front". That is, for a problem with two objective functions, a
+set of points ordered along a monotonic function. Operationally, the user is still in charge of
+taking the final decision, but the complexity of their decision has been drastically reduced to a
+$d-1$ dimensional problem.
+
+While real-world problems are often multi-objective in nature, few works actually consider their
+study in the automated planning area. The well known IPC does not propose benchmarks for such
+problems [[VCM18](#ref-VCM18), [CP19](#ref-CP19)] to this date. In fact, PDDL 3.0 explicitly
+offered hooks for several objectives [[GHL+09](#ref-GHL09)], but the only organized competition
+tracks concerned aggregated objectives, tracks which were canceled in 2011.
+
+Despite various work on benchmark generation [[LDG+18](#ref-LDG18), [ADE+20](#ref-ADE20),
+[BF22](#ref-BF22)] and extension to other planning problems [[PF21](#ref-PF21)], no truly
+multi-objective planning problem has been proposed apart from our line of work.
+
+### Previous Works {#sec-previous}
+
+We have previously proposed a problem instance generator for such multi-objective planning
+problems [[SSV06](#ref-SSV06), [KSV+13](#ref-KSV13), [QS15](#ref-QS15)], extending the ZenoTravel
+[[PW94](#ref-PW94)] problem with an additional objective. Such problem sets are crucial for
+benchmarking optimization algorithms, especially when the optimum is known, as it allows for a
+rigorous comparison of the performances of solvers.
+
+The original ZenoTravel problem [[PW94](#ref-PW94)] involves planes moving passengers between
+cities, while taking care of their fuel. Actions such as flying, boarding, deplaning or refueling
+take various time to complete, and a plane cannot fly without fuel. The objective is to minimize
+the makespan, while honoring passengers' destinations.
+
+The proof-of-concept of the MultiZenoTravel problem is based on a simplified ZenoTravel model
+[[SSV06](#ref-SSV06)]. In this model, there are five connected cities (see @fig-instance), planes
+may transport only one passenger at a time and there is only one flying speed. The main addition
+to the problem is that an additional objective is attached to all actions. This second objective
+is either a *cost*, which is additive (each plane has to pay the corresponding tax every time it
+lands in that city) or a *risk* (for which the maximal value encountered during the complete
+execution of a plan is to be minimized). In this first instance, three passengers can be moved
+across the cities.
+
+::: {#fig-instance}
+
+```{=html}
+<svg class="zs-segments zs-instance" viewBox="0 0 500 240" role="img" aria-label="A schematic view of a non-symmetric clique MultiZenoTravel instance" xmlns="http://www.w3.org/2000/svg">
+<path class="seg" d="M 60 120 L 250 34"/>
+<path class="seg" d="M 250 34 L 440 120"/>
+<path class="seg" d="M 60 120 L 250 120"/>
+<path class="seg" d="M 250 120 L 440 120"/>
+<path class="seg" d="M 60 120 L 250 206"/>
+<path class="seg" d="M 250 206 L 440 120"/>
+<path class="seg dashed" d="M 250 34 L 250 120"/>
+<path class="seg dashed" d="M 250 120 L 250 206"/>
+<path class="seg" d="M 250 34 Q 330 120 250 206"/>
+<rect class="node hub" x="42" y="107" width="36" height="26" rx="4"/>
+<text class="node-lbl" x="60" y="125" text-anchor="middle">C<tspan baseline-shift="sub" font-size="9">I</tspan></text>
+<rect class="node" x="232" y="21" width="36" height="26" rx="4"/>
+<text class="node-lbl" x="250" y="39" text-anchor="middle">c<tspan baseline-shift="sub" font-size="9">1</tspan></text>
+<rect class="node" x="232" y="107" width="36" height="26" rx="4"/>
+<text class="node-lbl" x="250" y="125" text-anchor="middle">c<tspan baseline-shift="sub" font-size="9">i</tspan></text>
+<rect class="node" x="232" y="193" width="36" height="26" rx="4"/>
+<text class="node-lbl" x="250" y="211" text-anchor="middle">c<tspan baseline-shift="sub" font-size="9">n</tspan></text>
+<rect class="node hub" x="422" y="107" width="36" height="26" rx="4"/>
+<text class="node-lbl" x="440" y="125" text-anchor="middle">C<tspan baseline-shift="sub" font-size="9">G</tspan></text>
+<text x="150" y="112" text-anchor="middle" class="math">d<tspan baseline-shift="sub" font-size="9">i</tspan></text>
+<text x="345" y="112" text-anchor="middle" class="math">d̄<tspan baseline-shift="sub" font-size="9">i</tspan></text>
+<text x="140" y="62" text-anchor="middle" class="math">d<tspan baseline-shift="sub" font-size="9">1</tspan></text>
+<text x="360" y="62" text-anchor="middle" class="math">d̄<tspan baseline-shift="sub" font-size="9">1</tspan></text>
+<text x="140" y="190" text-anchor="middle" class="math">d<tspan baseline-shift="sub" font-size="9">n</tspan></text>
+<text x="360" y="190" text-anchor="middle" class="math">d̄<tspan baseline-shift="sub" font-size="9">n</tspan></text>
+<text x="262" y="80" text-anchor="start" class="math">d<tspan baseline-shift="sub" font-size="9">1i</tspan></text>
+<text x="262" y="166" text-anchor="start" class="math">d<tspan baseline-shift="sub" font-size="9">in</tspan></text>
+<text x="306" y="128" text-anchor="start" class="math">d<tspan baseline-shift="sub" font-size="9">1n</tspan></text>
+</svg>
+```
+
+A schematic view of a non-symmetric clique MultiZenoTravel problem.
+:::
+
+The second version of the MultiZenoTravel problem [[KSV+13](#ref-KSV13)] builds up on the
+proof-of-concept, allows for 3, 6 and 9 passengers, and a 3-to-2 passengers-to-planes ratio,
+which makes up for very small instances, due to the combinatorial explosion of the solution space.
+
+In [[QS15](#ref-QS15)], we introduced an algorithm to compute the true Pareto fronts of very large
+instances in reasonable time, and the first version of the ZenoSolver software is described. The
+article also provides a few typical instances that exhibit very different shapes of Pareto Fronts,
+for different levels of complexity. Unfortunately, this work suffers from two unrealistic
+assumptions. First, the distances are assumed to be symmetric around the central cities, that is
+to say $\forall i, d_i = \bar d_i$. Second, the proof of the proposition which allows us to find
+Pareto-optimal plans relies on the following unrealistic assumption:
+$$\forall (i, j) \in [1, n]^2,\ d_i + d_j < d_{ij}.$$
+In other words, none of the instances generated under this assumption would respect a triangular
+inequality. Even if a benchmark does not necessarily have to be realistic by nature, this
+particular assumption drastically restrains the extrapolation of the performances of a solver
+observed on the benchmark to real life problems.
+
+### Our Contribution {#sec-contribution}
+
+In this work, we introduce a constructive way to find the Pareto-optimal solutions for the
+MultiZenoTravel problem. Our first contribution is to generalize from the original symmetric
+clique problem introduced in [[SSV06](#ref-SSV06)] to a non-symmetric clique version and to a
+version with no particular assumption on the graph.
+
+As a second contribution, we characterize the Pareto front of the symmetric clique problem when
+the flights between central cities obey the triangular inequality, as well as under the
+assumption of [[QS15](#ref-QS15)]: every point of the front is reached by a plan landing exactly
+$2t - p$ times in central cities, and the lists of cities that can be flown, and how fast, are
+described by a parity condition on the way they are shared among the planes. This leads to an
+exact algorithm, pseudo-polynomial in the durations. For the non-symmetric clique problem, the
+same holds when no flight between central cities is shorter than a detour through $C_I$ or
+$C_G$, provided the makespan of a configuration accounts for the waiting it may force. We also
+show where the characterization stops: with short flights between central cities, and for the
+reduction of the general problem to a clique problem, which preserves the front only in some
+cases, for which we give exact methods on small instances.
+
+In particular, we would like to insist on the fact that the triangular inequality assumption made
+in this paper contradicts the assumption of [[QS15](#ref-QS15)], so that the latter is not a
+special case of the former; both are covered here. In addition, even the technical
+implementation of the algorithm has been completely revised.
+
+In addition, we present the ZenoSolver, a C++ implementation of the algorithm to solve
+MultiZenoTravel. It can output the instance definition in PDDL such that the generated instance
+can easily be used by other solvers. We demonstrate how to generate instances with different
+behavior by tuning the input parameters. We provide a theoretical and empirical study of the
+performances of ZenoSolver. Each front is returned with a certificate that a checker verifies
+without trusting the solver, and the main theorems, the checker and a solver of their own are
+formally verified in Lean 4.
+
+Although we think that the primary utility of ZenoSolver is to generate benchmarks with known
+Pareto Front to study other solvers' properties and behaviors, real data come as arbitrary
+graphs. The extension of the solver capabilities from the symmetric clique problem to arbitrary
+graphs is therefore studied in detail, together with the part of it that is exact.
+
+### Outline {#sec-outline}
+
+The plan of this paper is as follows. In [MultiZenoTravel problems](model.qmd), we define three
+versions of the MultiZenoTravel problem, the plans and the assumptions. [Symmetric
+MultiZenoTravel](front.qmd) is dedicated to characterizing the Pareto front of the symmetric
+version of the problem, and [Pareto Optimal Plans](algorithm.qmd) to computing it exactly, with
+the ZenoSolver, its complexity and its certificates. [Non-symmetric and general
+MultiZenoTravel](nonsymmetric.qmd) focuses on the non-symmetric version of the problem, then on
+the reduction of the general problem to a clique one. [Experiments](experiments.qmd) reports the
+validation of the solver and of the theory, its performances and examples of instances, and
+[Conclusion and Perspectives](corrections.qmd) closes with the open problems.
+
+::: {.callout-note appearance="simple"}
+**Statements, proofs and formal status.** Results keep the numbering of the
+[theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md), which
+gives every proof in full. Each cited result links to its entry in the
+[blueprint](../proofs.qmd) and carries a badge derived from the Lean kernel: *machine-checked*
+when the whole statement is proved in Lean, *Lean definition* for a definition, and *informal*
+when the proof is written but not formalised. Here, proofs are sketched in a few sentences. A
+gentler introduction to the problem, on a small example, is on the [Problem](../problem.qmd)
+page.
+:::
+
+## References {#sec-references}
+
+::: {.references-list}
+[ADE+20]{#ref-ADE20} Özgür Akgün, Nguyen Dang, Joan Espasa, Ian Miguel, András Z. Salamon, and
+Christopher Stone. Exploring Instance Generation for Automated Planning. Technical report,
+arXiv:2009.10156, September 2020.
+
+[BF22]{#ref-BF22} Tomáš Balyo and Nils Froleyks. AI assisted design of Sokoban puzzles using
+automated planning. In *ArtsIT, Interactivity and Game Creation*, pages 424–441, Cham, 2022.
+Springer International Publishing.
+
+[CP19]{#ref-CP19} Isabel Cenamor and Alberto Pozanco. Insights from the 2018 IPC benchmarks. In
+*Workshop on the International Planning Competition (WIPC) of the 29th International Conference
+on Automated Planning and Scheduling (ICAPS)*, Berkeley, USA, July 2019.
+
+[FL03]{#ref-FL03} Maria Fox and Derek Long. PDDL2.1: An extension to PDDL for expressing temporal
+planning domains. *Journal of Artificial Intelligence Research*, 20:61–124, 2003.
+
+[GHL+09]{#ref-GHL09} Alfonso E. Gerevini, Patrik Haslum, Derek Long, Alessandro Saetti, and
+Yannis Dimopoulos. Deterministic planning in the fifth international planning competition: PDDL3
+and experimental evaluation of the planners. *Artificial Intelligence*, 173(5):619–668, 2009.
+
+[Han80]{#ref-Han80} Pierre Hansen. *Bicriterion Path Problems*, pages 109–127. Springer Berlin
+Heidelberg, 1980.
+
+[KSV+13]{#ref-KSV13} Mostepha Redouane Khouadjia, Marc Schoenauer, Vincent Vidal, Johann Dreo,
+and Pierre Savéant. Multi-objective AI planning: Evaluating DaE-YAHSP on a tunable benchmark. In
+*International Conference on Evolutionary Multi-Criterion Optimization*, pages 36–50. Springer,
+2013.
+
+[LDG+18]{#ref-LDG18} Fabien Lagriffoul, Neil T. Dantam, Caelan Garrett, Aliakbar Akbari,
+Siddharth Srivastava, and Lydia E. Kavraki. Platform-independent benchmarks for task and motion
+planning. *IEEE Robotics and Automation Letters*, 3(4):3765–3772, October 2018.
+
+[PF21]{#ref-PF21} Damien Pellier and Humbert Fiorino. From Classical to Hierarchical: benchmarks
+for the HTN Track of the International Planning Competition. Technical report, arXiv:2103.05481,
+March 2021.
+
+[PW94]{#ref-PW94} J. Scott Penberthy and Daniel S. Weld. Temporal planning with continuous
+change. In *American Association for Artificial Intelligence Conference (AAAI)*, volume 94, page
+1010, 1994.
+
+[QS15]{#ref-QS15} Alexandre Quemy and Marc Schoenauer. True Pareto Fronts for Multi-Objective AI
+Planning Instances. In *European Conference on Combinatorial Optimization (EvoCOP)*, pages
+197–208, Copenhagen, Denmark, April 2015. LNCS 9026, Springer Verlag.
+
+[SSV06]{#ref-SSV06} M. Schoenauer, P. Savéant, and V. Vidal. Divide-and-Evolve: a New Memetic
+Scheme for Domain-Independent Temporal Planning. In *6th EvoCOP*, pages 247–260. LNCS 3906,
+Springer Verlag, 2006.
+
+[Val79]{#ref-Val79} Leslie G. Valiant. The complexity of enumeration and reliability problems.
+*SIAM Journal on Computing*, 8(3):410–421, 1979.
+
+[VCM18]{#ref-VCM18} Mauro Vallati, Lukáš Chrpa, and Thomas L. McCluskey. What you always wanted
+to know about the deterministic part of the international planning competition (IPC) 2014 (but
+were too afraid to ask). *The Knowledge Engineering Review*, 33:e3, 2018.
+:::

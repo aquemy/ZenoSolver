@@ -1,0 +1,289 @@
+---
+order: 2
+title: "MultiZenoTravel problems"
+subtitle: "Instances, plans, Pareto fronts, assumptions and patterns"
+css: ../styles/paper.css
+---
+
+In this Section, we introduce three versions of the MultiZenoTravel problem: the symmetric clique
+MultiZenoTravel, the non-symmetric clique MultiZenoTravel and the general MultiZenoTravel. We then
+make precise what a plan is, together with its cost and its makespan, and the assumptions on
+durations used in the rest of the paper. Plans are defined flight by flight, with explicit
+departure times, so that waiting, passengers changing planes, empty flights and flights between
+central cities are part of the problem and not excluded by assumption. The characterization of the
+Pareto-optimal plans comes next: for the [symmetric clique problem](front.qmd) first, then for the
+[non-symmetric and general problems](nonsymmetric.qmd).
+
+## Instances {#sec-instances}
+
+Let us introduce some notations related to the planning problem briefly presented in the
+introduction: a non-symmetric clique MultiZenoTravel instance
+([schematic view](index.qmd#fig-instance)) is defined by the following elements
+({{< node "§1.1" >}}):
+
+* $n$ central cities, organized as a clique in which every node is connected to $C_I$ and $C_G$,
+  respectively the initial city and the goal city.
+* $c \in (\mathbb R^+)^n$, where $c_i$ is the cost for landing in $C_i$.
+* $D \in (\mathbb R^+)^{n \times n}$, where $d_{ij}$ is the flying time between $C_i$ and $C_j$.
+* $d \in (\mathbb R^+)^n$, where $d_i$ is the flying time between $C_I$ and $C_i$.
+* $\bar d \in (\mathbb R^+)^n$, where $\bar d_i$ is the flying time between $C_i$ and $C_G$.
+* $p$ planes, initially in $C_I$, that have a capacity of a unique person.
+* $t$ persons, initially in $C_I$.
+
+The goal of MultiZenoTravel is to carry all $t$ persons, initially in $C_I$, to $C_G$ using $p$
+planes, minimizing both the makespan and the cost of the plan.
+
+Flights are undirected: each one has a single duration, used in both directions, and there is no
+flight between $C_I$ and $C_G$. We write $\mathrm{dur}(a, b)$ for the duration of the flight
+between $a$ and $b$; a flight between central cities may also be missing. Landing in $C_I$ or
+$C_G$ is free. Without loss of generality, all triples $(d_i, \bar d_i, c_i)$ are assumed to be
+pairwise distinct. Otherwise, the 2 cities can be "merged" and the resulting $n-1$ cities problem
+is equivalent to the original $n$ cities problem, as there exist no city capacity constraints.
+Finally, we only consider cases where $t \ge p$, as the problem is otherwise trivial.
+
+An instance of the symmetric clique MultiZenoTravel problem is an instance such that
+$d = \bar d$. A general MultiZenoTravel instance is an instance such that the $n$ central cities
+are organized as an arbitrary graph; it is defined in the
+[general section](nonsymmetric.qmd#sec-graphs).
+
+Throughout the paper, we illustrate the definitions on the symmetric instance with $n = 3$
+cities, $t = 3$ passengers and $p = 2$ planes, durations $d = (2, 3, 5)$, costs
+$c = (9, 6, 1)$ and no flight between central cities (the file
+[`site/problem/example.dat`](https://github.com/aquemy/ZenoSolver/blob/master/site/problem/example.dat),
+also used on the [Problem](../problem.qmd) page). Its Pareto front, as (cost, makespan), is
+$$(4, 20),\ (14, 16),\ (20, 14),\ (24, 12),\ (30, 10),\ (36, 8).$$
+
+::: {#fig-plan .plan-display}
+
+$$
+\begin{array}{lllllll}
+p_1: & C_I & \overset{t_1}{\to} C_2 & \to C_I & \overset{t_2}{\to} C_3 & \overset{t_2}{\to} C_G & \\
+p_2: & C_I & \overset{t_3}{\to} C_3 & \overset{t_3}{\to} C_G & \to C_2 & \overset{t_1}{\to} C_G &
+\end{array}
+$$
+
+Example of an admissible plan to transport 3 travelers via 2 planes, on the instance above. This
+representation indicates the successive actions for each plane. We noted by
+$\overset{t_i}{\to}$ a flight with a traveler.
+:::
+
+@fig-plan illustrates an admissible solution, of cost 14 and makespan 16. Note that the makespan
+for a plan is not necessarily the largest sum of the flights' duration as some planes might have
+to wait for others. This would be the case for $p_2$ waiting for $t_1$ in $C_2$, had it reached
+$C_2$ before $p_1$ dropped $t_1$ there.
+
+## Plans {#sec-plans}
+
+To reason about all plans, including those that wait, hand passengers over or fly between
+central cities, we fix their semantics ({{< node "§1.2" >}}). A plan on a set $Q$ of planes (all
+$p$ planes unless stated otherwise) consists of
+
+1. for every plane $k \in Q$, a *route*: a sequence of *legs* $(k, 1), \dots, (k, \nu_k)$. Leg
+   $(k, j)$ flies an existing flight from $v_{k,j-1}$ to $v_{k,j}$ and departs at time
+   $e_{k,j}$, with $v_{k,0} = C_I$, $e_{k,1} \ge 0$, and
+   $e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})$;
+2. for every passenger, a *journey*: a non-empty sequence of legs whose first leg departs from
+   $C_I$ and whose last leg arrives in $C_G$. Each leg departs from the city where the previous
+   one arrives, no earlier than that arrival, and, if both legs belong to the same plane, at a
+   later position of its route;
+3. *capacity*: the journeys are pairwise disjoint, and none repeats a leg.
+
+The plan is *feasible* if every route ends in $C_G$. Its *cost* $C$ is the sum of the landing
+costs of all legs, with or without a passenger, and its *makespan* $M = \max_k a_{k,\nu_k}$ is
+the time at which the last plane reaches $C_G$ for the last time. $\mathcal A$ is the set of
+pairs $(C, M)$ of feasible plans. The *flight time* $F_k$ of plane $k$ is the sum of the
+durations of its legs; its flights are sequential, so $F_k \le M$.
+
+Waiting is implicit: a plane or a passenger may depart later than it arrived. Boarding and
+deplaning take no time, several planes may be in a city at once, and a passenger may change
+planes in any city, any number of times. In @fig-plan, $t_1$ changes planes once, in $C_2$.
+
+Journeys may contain detours that serve nothing, and they can be removed:
+
+::: {.statement}
+{{< node "Lemma 3.1" >}} **Cleaning.** Every plan can be changed, keeping all routes (hence its
+cost, makespan and flight times), so that every journey is *clean*: its first flight is its only
+flight departing from $C_I$, and its last flight is its only flight arriving in $C_G$.
+:::
+
+::: {.sketch}
+*Sketch.* Cut each journey down to the part from its last departure from $C_I$ to the first later
+arrival in $C_G$; this is still a journey, and capacity only gets looser
+({{< node "Lemma 3.1" text="full proof" badge=false >}}).
+:::
+
+A plan is *event-ordered* if its legs admit a total order that extends every route and every
+journey and along which departure times do not decrease. With positive durations every plan is
+event-ordered. With zero durations, a passenger can ride a later leg of one plane and then an
+earlier leg of another at the same instant, in a cycle that no execution in time realises; such
+plans never improve the front ({{< node "Corollary 6.10" >}}).
+
+Requiring planes to finish in $C_G$ does not change the front: if planes may end anywhere, with
+the makespan taken as the last arrival of any leg, the Pareto front is the same under the
+assumptions of the next section ({{< node "Theorem 4.9" >}}). All the planes may thus be assumed
+to finish their respective sequence in $C_G$.
+
+ZenoSolver outputs each instance as a PDDL file[^pddl] for the domain
+[`pddl/multi-zeno-travel.pddl`](https://github.com/aquemy/ZenoSolver/blob/master/pddl/multi-zeno-travel.pddl):
+a durative `fly` action that adds the landing cost to `total-cost`, instantaneous `board` and
+`debark` actions, and a predicate `libre` that enforces capacity one. Under
+$\varepsilon$-separation, PDDL plans and event-ordered plans correspond, with the same cost and
+makespans equal in the limit $\varepsilon \to 0$ ({{< node "Statement 1.2" >}}); this
+correspondence is argued but not formalised. The [Instances](../instances/index.qmd) section
+describes the generator and the files.
+
+[^pddl]: Planning Domain Definition Language [[FL03](index.qmd#ref-FL03)], almost universally used
+in AI Planning to describe domains and instances.
+
+## Pareto fronts {#sec-fronts}
+
+For points $y, z$ of the plane (cost, makespan), $y \preceq z$ if $y \le z$ in both coordinates.
+For a set $\mathcal S$ of points, $\mathrm{Min}\,\mathcal S$ is the set of $z \in \mathcal S$
+weakly dominated by no other point of $\mathcal S$, and the *Pareto front* of an instance is
+$\mathcal F = \mathrm{Min}\,\mathcal A$ ({{< node "§1.5" >}}). We look for the front and for one
+plan per front point.
+
+Every characterization of the front in this paper has two halves: a finite set of points that
+plans attain, and a proof that every plan is weakly dominated by one of them. The following lemma
+turns them into an equality of fronts.
+
+::: {.statement}
+{{< node "Lemma 1.1" >}} **Dominating subset.** Let $\mathcal S' \subseteq \mathcal S$ with
+$\mathcal S'$ finite and every point of $\mathcal S$ weakly dominated by a point of
+$\mathcal S'$. Then $\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$, and every point of
+$\mathcal S$ is weakly dominated by a point of $\mathrm{Min}\,\mathcal S$.
+:::
+
+## Assumptions {#sec-assumptions}
+
+The results of this paper use the following assumptions ({{< node "§1.4" >}}), each one only
+where stated. The first two are the triangular inequality and the symmetry assumption:
+
+**Assumption**: $\forall (a, b, x),\ \mathrm{dur}(a, x) + \mathrm{dur}(x, b) \ge \mathrm{dur}(a, b)$
+whenever the three flights exist $\hfill$ (AΔ)
+
+**Assumption** (Symmetry): $\forall i \in [1, n],\ d_i = \bar d_i$ $\hfill$ (S)
+
+The assumption of [[QS15](index.qmd#ref-QS15)], in a non-strict form, and its non-symmetric
+counterpart state that flights between central cities are useless, that is, never faster than a
+detour through $C_I$ or $C_G$:
+
+**Assumption**: under (S), $\forall (i, j),\ d_{ij} \ge d_i + d_j$ for every existing flight
+$\hfill$ (A1)
+
+**Assumption**: $\forall (i, j),\ d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)$ for every
+existing flight $\hfill$ (A1-NS)
+
+Finally, a weak form of the triangular inequality through the hubs is used for waiting:
+
+**Assumption**: $\forall (i, z),\ \bar d_i \le d_i + d_z + \bar d_z$ and
+$d_i \le \bar d_i + \bar d_z + d_z$ $\hfill$ (AΔ-path)
+
+(S) implies (AΔ-path), and so does (AΔ) whenever the flight between $i$ and $z$ exists. Under
+(S), (A1) and (AΔ) hold together only when $d_{ij} = d_i + d_j$: the first allows flights
+between central cities longer than the detour through a hub, and the second allows them as short
+as $|d_i - d_j|$. Every PDDL problem the generator writes is symmetric, and gives a flight between
+central cities the duration $d_i + d_j + 100$, so it satisfies (A1).
+
+**Notation.** We write $s = 2t - p$, so that $s \ge p$ and $s \equiv p \pmod 2$, and
+$\kappa = \lceil s/p \rceil$ ({{< node "Notation" >}}). For a multiset $Y$ of central cities,
+$Y(i)$ is the multiplicity of $i$, $|Y|$ its size, $c(Y) = \sum_{w \in Y} c_w$ its cost, and
+$\delta(Y) = \sum_{w \in Y} d_w$ and $\bar\delta(Y) = \sum_{w \in Y} \bar d_w$ its durations;
+under (S), its *load* is $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over the planes is a family
+of groups $X_1, \dots, X_p$ with $X_1 + \dots + X_p = X$, group $X_k$ being the cities in which
+plane $k$ lands.
+
+## Patterns {#sec-patterns}
+
+Cut the sequence of a plane at every visit to $C_I$ or $C_G$. Each piece, from one of them to the
+next, is a *pattern* (a *segment* in the [blueprint](../proofs.qmd)). As there is no flight
+between $C_I$ and $C_G$, every pattern lands in at least one central city. Depending on the
+cities it starts and ends in, a pattern is of one of four types, denoted by $A$, $\bar A$, $B$ and
+$\bar B$ (@fig-patterns). A pattern that lands in exactly one central city, of *multiplicity*
+0, consists of two flights; we call it *simple*. We denote by $|X|$ the number of the patterns
+$X \in \{A, \bar A, B, \bar B\}$ in a given plan, and by $F(\gamma)$ the flight time of a
+pattern $\gamma$.
+
+::: {#fig-patterns}
+
+```{=html}
+<svg class="zs-segments" viewBox="0 0 640 112" role="img" aria-label="The four patterns A, A-bar, B and B-bar" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="zs-seg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path class="arrowhead" d="M0,1 L10,5 L0,9 z"/></marker></defs>
+<path class="seg" d="M 39 36 L 66 36" marker-end="url(#zs-seg-arrow)"/>
+<path class="seg" d="M 93 36 L 120 36" marker-end="url(#zs-seg-arrow)"/>
+<circle class="node hub" cx="26" cy="36" r="12"/>
+<text class="node-lbl" x="26" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="80" cy="36" r="12"/>
+<text class="node-lbl" x="80" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="134" cy="36" r="12"/>
+<text class="node-lbl" x="134" y="40" text-anchor="middle">G</text>
+<text class="type" x="80" y="86" text-anchor="middle">A</text>
+<text x="80" y="104" text-anchor="middle">I → x → G</text>
+<path class="seg" d="M 281 36 L 254 36" marker-end="url(#zs-seg-arrow)"/>
+<path class="seg" d="M 227 36 L 200 36" marker-end="url(#zs-seg-arrow)"/>
+<circle class="node hub" cx="186" cy="36" r="12"/>
+<text class="node-lbl" x="186" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="240" cy="36" r="12"/>
+<text class="node-lbl" x="240" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="294" cy="36" r="12"/>
+<text class="node-lbl" x="294" y="40" text-anchor="middle">G</text>
+<text class="type" x="240" y="86" text-anchor="middle">Ā</text>
+<text x="240" y="104" text-anchor="middle">G → x → I</text>
+<path class="seg" d="M 355 27 Q 373.0 8 390 27" marker-end="url(#zs-seg-arrow)"/>
+<path class="seg" d="M 391 45 Q 373.0 64 356 45" marker-end="url(#zs-seg-arrow)"/>
+<circle class="node hub" cx="346" cy="36" r="12"/>
+<text class="node-lbl" x="346" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="400" cy="36" r="12"/>
+<text class="node-lbl" x="400" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="454" cy="36" r="12"/>
+<text class="node-lbl" x="454" y="40" text-anchor="middle">G</text>
+<text class="type" x="400" y="86" text-anchor="middle">B</text>
+<text x="400" y="104" text-anchor="middle">I → x → I</text>
+<path class="seg" d="M 605 27 Q 587.0 8 570 27" marker-end="url(#zs-seg-arrow)"/>
+<path class="seg" d="M 569 45 Q 587.0 64 604 45" marker-end="url(#zs-seg-arrow)"/>
+<circle class="node hub" cx="506" cy="36" r="12"/>
+<text class="node-lbl" x="506" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="560" cy="36" r="12"/>
+<text class="node-lbl" x="560" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="614" cy="36" r="12"/>
+<text class="node-lbl" x="614" y="40" text-anchor="middle">G</text>
+<text class="type" x="560" y="86" text-anchor="middle">B̄</text>
+<text x="560" y="104" text-anchor="middle">G → x → G</text>
+</svg>
+```
+
+The simple patterns $A$, $\bar A$, $B$ and $\bar B$, with $I = C_I$ and $G = C_G$. In the plans
+built in this paper, a pattern $A$ carries a passenger from $C_I$ to $C_G$, a pattern $\bar A$
+flies back empty, a pattern $B$ leaves a passenger in $x$ and a pattern $\bar B$ takes one from
+$x$ to $C_G$. Patterns of larger multiplicity have the same four types.
+:::
+
+In @fig-plan, $p_1$ performs a $B$ in $C_2$ and an $A$ in $C_3$, and $p_2$ an $A$ in $C_3$ and a
+$\bar B$ in $C_2$. Only the patterns $A$ and $\bar A$ change from $C_I$ to $C_G$ or back, and a
+plane goes from $C_I$ to $C_G$, so its patterns of these two types alternate $A, \bar A, \dots, A$
+({{< node "Lemma 2.1" >}}). We deduce the following property on the cardinal of each pattern in
+any feasible plan.
+
+**Property II**: In every feasible plan,
+
+1. $|A| + |B| \ge t$;
+2. $|A| + |\bar B| \ge t$;
+3. $|A| = |\bar A| + p$.
+
+**Proof**: The patterns $A$ and $B$ are the only ones that start with a flight from $C_I$, and
+the first flights of the journeys are distinct flights from $C_I$, so a feasible plan has at least
+$t$ of those patterns. Apply the same reasoning to $C_G$ with $A$ and $\bar B$, whose last flight
+arrives in $C_G$, to prove the second point. The third point is Lemma 2.1, summed over the $p$
+planes. $\square$
+
+**Corollary II**: A feasible plan performs at least $2t - p$ patterns, hence lands at least
+$2t - p$ times in central cities ({{< node "Lemma 3.2" >}}).
+
+**Proof**: By Property II, the number of patterns is
+$|A| + |\bar A| + |B| + |\bar B| = (|A| + |B|) + (|A| + |\bar B|) - p \ge 2t - p$, and each
+pattern lands in a central city. $\square$
+
+With fewer planes than passengers, some planes have to come back to $C_I$, and every return costs
+a landing. In @fig-plan the bound is reached: the plan lands $2t - p = 4$ times. The
+[next section](front.qmd) shows that, in the symmetric case, the Pareto front is always reached
+by such plans, and which lists of $2t - p$ cities can be flown, and how fast.
