@@ -36,6 +36,7 @@ Both tools read and write the JSON schema of Google Benchmark, so `tools/compare
 | `support/zs_bench.hpp` | Shared helpers: peak RSS counter, per-iteration counters. |
 | `instances/*.txt` | Suites, one `name\|arguments` line per instance (`zeno` instance options; `@DATA@` is `instances/data`). |
 | `instances/data/` | Data files: line 1 durations, line 2 costs. |
+| `instances/data/airports/` | A non-symmetric instance from real data, Atlanta to Beijing through 11 large airports (OpenFlights, ODbL); in no suite. Its README gives the source and the commands that regenerate it. |
 | `tools/run_suite.py` | Times an executable over suites: median wall and CPU time, peak RSS of the child, front size, status (`ok`, `timeout`, `error`). |
 | `tools/check_regression.py` | Regression gate between two result files. |
 | `tools/time_checker.py` | Times a certificate checker (`zeno check`, or the Lean `zeno-check`) over `*.cert` files: time, peak RSS, size, verdict. |

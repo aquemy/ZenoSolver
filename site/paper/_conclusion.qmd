@@ -28,16 +28,10 @@ without trusting the solver; the central theorems, a checker and a solver of the
 formally verified in Lean 4. We demonstrated the diversity of Pareto-fronts which can be obtained
 by changing the instance parameters, and gave the front of the default generator in closed form.
 We validated the solver and the theory in a seeded experiment campaign against exhaustive
-searches written independently of the solver. Finally, we provided a concrete application using
-real-life data. Using the OpenFlights database, we used the ZenoSolver to find the Pareto-optimal
-plans between the two largest airports in the world: exactly for three planes or more when the
-planes fly only between these two airports and the intermediate ones, and within a bracket
-otherwise.
+searches written independently of the solver.
 
-Beside the direct interest for the route and schedule multi-objective optimization for air
-transport, we believe that the work presented in this paper can be useful in many regards, and in
-particular for the benchmarking and comparison of algorithms, and for exploratory landscape
-analysis. Moreover, existing multi-objective planning instances are, as far as we know, not
+We believe that the work presented in this paper can be useful in many regards, and in particular
+for the benchmarking and comparison of algorithms, and for exploratory landscape analysis. Moreover, existing multi-objective planning instances are, as far as we know, not
 offering the exact Pareto-front, which only allows the comparison between solvers but not to
 characterize how hard is an instance and how far from an optimal solution the solvers are. On the
 contrary, ZenoSolver is capable to return the Pareto Front, with at least one plan for each point
@@ -103,3 +97,12 @@ claim.
    and the search over orders and matchings, which resembles non-preemptive open-shop scheduling.
 8. **Formalisation.** The blueprint lists the statements whose proofs are written but not yet
    formalised in Lean, among which several results of the non-symmetric and general sections.
+9. **Real-world instances.** Instances built from real data, such as the transport from Atlanta
+   (ATL) to Beijing (PEK) through large intermediate airports with great-circle distances as
+   durations, are non-symmetric, and they violate (A1-NS) as soon as direct flights between the
+   intermediate airports are allowed: such a flight is much shorter than a detour through ATL or
+   PEK. Their exact Pareto fronts are open. The plans found bound the front from above, but the
+   bounds that hold for every plan, such as the makespan bound of {{< node "Lemma 6.19" >}}, leave
+   the gaps between them open. The data of such a benchmark, built from the OpenFlights database,
+   is kept in the repository, in
+   [`bench/instances/data/airports/`](https://github.com/aquemy/ZenoSolver/tree/master/bench/instances/data/airports).

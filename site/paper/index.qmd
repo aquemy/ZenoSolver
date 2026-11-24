@@ -4,7 +4,8 @@ subtitle: "a Tunable Benchmark for Multi-Objective Planning with Known Pareto Fr
 css: ../styles/paper.css
 toc: true
 # The whole paper is this page: each section after the introduction is a partial _<name>.qmd,
-# included below. The former pages paper/<name>.html redirect to the anchor #sec-<name>.
+# included below. The former pages paper/<name>.html redirect to the anchor #sec-<name>, except
+# paper/application.html, whose section is removed, which redirects to the open problems.
 toc-depth: 4
 reference-location: section
 ---
@@ -39,10 +40,7 @@ front is computable in pseudo-polynomial time. We provide an implementation that
 solver to handle realistic instances in a reasonable time, and that returns each front with a
 certificate that an independent checker verifies; the central results, the checker and a solver
 are formally verified in Lean 4. We validate the solver and the theory in a seeded experiment
-campaign against exhaustive searches written independently. Finally, as a practical
-demonstration, we used this solver to find the Pareto-optimal plans between the two largest
-airports in the world, considering eleven large intermediate airports, spherical distances
-between airports and a made-up cost.
+campaign against exhaustive searches written independently.
 :::
 
 ::: {.chapters}
@@ -63,9 +61,6 @@ between airports and a made-up cost.
 
 [Experiments](#sec-experiments)
 :   Validation of the solver and of the theory, performances, and examples of instances.
-
-[Application: OpenFlights data](#sec-application)
-:   The Pareto front of the transport from Atlanta to Beijing.
 
 [Conclusion and Perspectives](#sec-conclusion)
 :   What is established, and the open problems.
@@ -233,13 +228,6 @@ performances of ZenoSolver. Each front is returned with a certificate that a che
 without trusting the solver, and the main theorems, the checker and a solver of their own are
 formally verified in Lean 4.
 
-Although we think that the primary utility of ZenoSolver is to generate benchmarks with known
-Pareto Front to study other solvers' properties and behaviors, we provide a demonstration of the
-ZenoSolver on a problem using real data. This has been made possible by the extension of the
-solver capabilities from the symmetric clique problem to non-symmetric instances. Real data also
-come as arbitrary graphs, and the extension to arbitrary graphs is studied in detail, together
-with the part of it that is exact.
-
 ### Outline {#sec-outline}
 
 The plan of this paper is as follows: in [MultiZenoTravel problems](#sec-model), we define three
@@ -256,10 +244,7 @@ algorithm, with its certificates and their verification in Lean. [Experiments](#
 reports the validation of the solver and of the theory, its performances and examples of
 instances.
 
-Finally, in [Application](#sec-application), we study an (almost) realistic application for
-MultiZenoTravel and ZenoSolver using the OpenFlights database to find the optimal routes between
-the two largest airports in the world, and [Conclusion and Perspectives](#sec-conclusion) closes
-with the open problems.
+Finally, [Conclusion and Perspectives](#sec-conclusion) closes with the open problems.
 
 ::: {.callout-note appearance="simple"}
 **Statements, proofs and formal status.** Results keep the numbering of the
@@ -281,8 +266,6 @@ page.
 {{< include _algorithm.qmd >}}
 
 {{< include _experiments.qmd >}}
-
-{{< include _application.qmd >}}
 
 {{< include _conclusion.qmd >}}
 
