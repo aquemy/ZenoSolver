@@ -19,7 +19,7 @@ enum class GapBound
     Lagrangian, ///< v2: evaluate the Lagrangian bound at the listed multipliers (needs A1-NS)
     Balanced,   ///< v2: rerun the exact balanced role program (needs A1-NS)
     Search,     ///< v2: rerun the exhaustive search over role configurations with exact
-                ///< schedules (needs A1-NS, and EO when a city has d = dbar = 0)
+                ///< schedules (needs A1-NS)
     Closed,     ///< fastest point only: the closed form 2 d_min ceil(s / p) (symmetric)
 };
 

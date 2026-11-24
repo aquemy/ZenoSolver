@@ -123,9 +123,9 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
 The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
 `roles`, `lagrangian`, `balanced` and `search` bounds; `v2-search-prop65.cert` is the
 Proposition 6.5 instance, whose two `search` gaps close harmful waiting, and
-`v2-search-eo.cert` an instance with a city of `d = d̄ = 0`, which lists `EO`). The C++ checker
-agrees with every verdict but one: it still asks for `EO` on `v2-search-no-eo.cert`, the same
-instance without `EO`, which the Lean checker accepts since Theorem 6.9 holds for every plan.
+`v2-search-eo.cert` an instance with a city of `d = d̄ = 0`, which lists `EO`;
+`v2-search-no-eo.cert` is the same instance without it, accepted since Theorem 6.9 holds for every
+plan). The C++ checker agrees with every verdict.
 
 ## Contents
 

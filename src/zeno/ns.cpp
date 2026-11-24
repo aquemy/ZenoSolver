@@ -52,11 +52,6 @@ std::vector<std::string> BracketResult::assumptions() const
     std::vector<std::string> out;
     if(needsA1(fastestProof) || std::ranges::any_of(gapProof, needsA1))
         out.push_back("A1-NS");
-    // A search proof covers event-ordered plans (all PDDL plans), and every
-    // plan unless some city has d = dbar = 0 (Theorem 6.9).
-    const auto search = [](GapProof g) { return g == GapProof::Search; };
-    if(zeroDurationCity && (search(fastestProof) || std::ranges::any_of(gapProof, search)))
-        out.push_back("EO");
     return out;
 }
 
@@ -77,8 +72,6 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
     const int Q = r.maxTree();
 
     BracketResult result;
-    for(int i = 0; i < instance.n(); ++i)
-        result.zeroDurationCity = result.zeroDurationCity || (instance.d[static_cast<std::size_t>(i)] == 0 && instance.dbar[static_cast<std::size_t>(i)] == 0);
     auto& stats = result.stats;
     stats.lowestLevel = lo;
     stats.highestLevel = hi;
