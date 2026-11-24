@@ -318,6 +318,14 @@ status    = "math.proved-informal"
 paper     = "Lemma 6.8, doc/theory/exact-front.md §6.2"
 created   = "2026-11-24"
 
+[claims.thm-6-9]
+kind      = "theorem"
+statement = "Theorem 6.9 (schedulable domination) [SD]: under (A1-NS), every feasible plan with cost C and makespan M is dominated by a role configuration on all p planes with passenger count t and cost at most C, with orders and a link matching whose template has makespan at most M; no event order, (AΔ) or (AΔ-path) is needed. Lean form: an explicit p ≤ t, the note's standing assumption (not_schedulableDomination: it fails for t < p); the configuration is a valid scheduled configuration with 2t − p landings, and the bound is on its closed form Sched.tmpl, the formula of Lemma 6.3, not on a template schedule."
+status    = "math.machine-checked"
+lean      = "ZenoFront.schedulableDomination_all"
+paper     = "Thm 6.9, doc/theory/exact-front.md §6.2"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
