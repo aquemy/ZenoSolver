@@ -447,6 +447,18 @@ paper     = "Cor 8.3, doc/theory/exact-front.md §8"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 9. Certificates
+# ===========================================================================
+
+[claims.thm-9-1]
+kind      = "theorem"
+statement = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F. Lean form: Cert.check = true implies IsParetoFront for every table of central flights satisfying (A1), or for every table if all gaps are relaxed; the obligations are the checker's tests."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Cert.check_sound"
+paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
 
