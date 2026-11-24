@@ -2,6 +2,8 @@
 # @DATA@ expands to lean/test/instances. The r* instances with a forest gap in their
 # certificate exercise the converse (Theorem 4.7) and the sigma-DP bound. tree12 (12
 # non-dominated cities, two forest gaps) exercises the link-forest tree DP.
+# The v2* instances are non-symmetric (3-line data files: d, dbar, c): their version 2
+# certificates exercise the relaxed, roles and lagrangian bounds under A1-NS.
 r155|-n 8 -t 11 -p 2 -d @DATA@/r155.dat
 r169|-n 7 -t 7 -p 4 -d @DATA@/r169.dat
 r225|-n 10 -t 15 -p 7 -d @DATA@/r225.dat
@@ -10,3 +12,7 @@ r25|-n 10 -t 18 -p 8 -d @DATA@/r25.dat
 r10|-n 7 -t 12 -p 5 -d @DATA@/r10.dat
 r101|-n 10 -t 14 -p 5 -d @DATA@/r101.dat
 tree12|-n 12 -t 10 -p 4 -d @DATA@/tree12.dat
+v2r10|-n 4 -t 4 -p 1 -d @DATA@/v2r10.dat
+v2r58|-n 4 -t 4 -p 2 -d @DATA@/v2r58.dat
+v2r26|-n 2 -t 3 -p 1 -d @DATA@/v2r26.dat
+v2r18|-n 3 -t 2 -p 1 -d @DATA@/v2r18.dat
