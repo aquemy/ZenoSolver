@@ -394,9 +394,9 @@ created   = "2026-11-24"
 
 [claims.prop-6-18]
 kind      = "proposition"
-statement = "Proposition 6.18 (computed): under (AΔ) without (A1-NS), segments with one central flight do not complete the front. For n = 2, d = (1, 7), d̄ = (7, 1), d_12 = 6, t = 5, p = 2 the least makespan is 32, but 34 with at most three central landings per segment; other instances need six central landings in a segment, a walk through a third city where no direct flight exists, or pick-up segments with central flights."
+statement = "Proposition 6.18 (a)–(c), computed by exhaustive search: under (AΔ) without (A1-NS), segments with one central flight do not complete the front. (a) For n = 2, d = (1, 7), d̄ = (7, 1), d_12 = 6, t = 5, p = 2 the least makespan is 32, but 34 with at most three central landings per segment and 36 without central flights (the role configurations, by Corollary 6.10). (b) On a table without the flight 1–2, a front point needs a walk through a third city. (c) For d = (3, 8), d̄ = (8, 3), d_12 = 5, t = 7, p = 3 the least makespan 41 needs six central landings in a segment (43 with at most five). Part (d) is the separate record claim-6-18-d."
 status    = "math.proved-informal"
-paper     = "Prop 6.18, doc/theory/exact-front.md §6.4"
+paper     = "Prop 6.18 (a)–(c), doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 
 [claims.lem-6-19]
