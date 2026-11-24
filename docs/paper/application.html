@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Application: OpenFlights Data – ZenoSolver</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../paper/conclusion.html" rel="next">
+<link href="../paper/experiments.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/provenance.css">
+<link rel="stylesheet" href="../styles/site.css">
+<link rel="stylesheet" href="../styles/paper.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ZenoSolver</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../problem.html"> 
+<span class="menu-text">Problem</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../paper/index.html"> 
+<span class="menu-text">Paper</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../instances/index.html"> 
+<span class="menu-text">Instances</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../solver/install.html"> 
+<span class="menu-text">Solver</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Theory</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-theory">    
+        <li>
+    <a class="dropdown-item" href="../proofs.html">
+ <span class="dropdown-text">Blueprint</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../claimgraph.html">
+ <span class="dropdown-text">Claim graph</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../history.html">
+ <span class="dropdown-text">History</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../blueprint.pdf">
+ <span class="dropdown-text">Blueprint (PDF)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/aquemy/ZenoSolver"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../paper/application.html">Application: OpenFlights Data</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MultiZenoTravel problems</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/front.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Symmetric MultiZenoTravel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/nonsymmetric.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Non-symmetric and general MultiZenoTravel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/algorithm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pareto Optimal Plans</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Experiments</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/application.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Application: OpenFlights Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conclusion and Perspectives</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-hub" id="toc-sec-hub" class="nav-link active" data-scroll-target="#sec-hub">The hub and spoke instance</a></li>
+  <li><a href="#sec-direct" id="toc-sec-direct" class="nav-link" data-scroll-target="#sec-direct">The instance with direct flights</a></li>
+  <li><a href="#sec-reproduce" id="toc-sec-reproduce" class="nav-link" data-scroll-target="#sec-reproduce">Reproducing the instance</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Application: OpenFlights Data</h1>
+<p class="subtitle lead">The Pareto front of the transport between the two largest airports in the world</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>To generate benchmarks with real data, we used the list of airports from the OpenFlights database<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We selected as initial airport and goal airport, the largest and second largest airport, namely Hartsfield Jackson Atlanta International Airport (ATL) and Beijing Capital International Airport (PEK). As central cities, we kept eleven large airports through which a passenger can travel from ATL to PEK: Dubai (DXB), Munich (MUC), Frankfurt (FRA), Amsterdam (AMS), San Francisco (SFO), Seattle (SEA), Chicago O’Hare (ORD), Las Vegas (LAS), Dallas-Fort Worth (DFW), Denver (DEN) and Houston (IAH).</p>
+<p>For each pair of airports, we calculated the spherical distance between the two airports, on a sphere of radius 6,371 km, in units of 100 km rounded to integers. This distance is used for the makespan. The cost of landing in an airport has been defined as follows: for a given airport <span class="math inline">\(C_i\)</span>, 1) compute the spherical distances <span class="math inline">\(d_{\text{ATL},i}\)</span> and <span class="math inline">\(d_{i,\text{PEK}}\)</span> between the airport and respectively, ATL and PEK; 2) assign the inverse of the average distance, i.e. <span class="math inline">\(c_i = \frac{2}{d_{\text{ATL},i} + d_{i,\text{PEK}}}\)</span>, with the distances in km, multiplied by <span class="math inline">\(10^7\)</span> and rounded to an integer (<a href="#tbl-airports" class="quarto-xref">Table&nbsp;1</a>).</p>
+<div id="tbl-airports" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-airports-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: The central cities: spherical distance <span class="math inline">\(d_i\)</span> from ATL and <span class="math inline">\(\bar d_i\)</span> to PEK, as used by the solver, and landing cost <span class="math inline">\(c_i\)</span>.
+</figcaption>
+<div aria-describedby="tbl-airports-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Airport</th>
+<th><span class="math inline">\(d_i\)</span> (km)</th>
+<th><span class="math inline">\(\bar d_i\)</span> (km)</th>
+<th><span class="math inline">\(c_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dubai (DXB)</td>
+<td>12,200</td>
+<td>5,800</td>
+<td>1,108</td>
+</tr>
+<tr class="even">
+<td>Munich (MUC)</td>
+<td>7,700</td>
+<td>7,700</td>
+<td>1,297</td>
+</tr>
+<tr class="odd">
+<td>Frankfurt (FRA)</td>
+<td>7,400</td>
+<td>7,800</td>
+<td>1,316</td>
+</tr>
+<tr class="even">
+<td>Amsterdam (AMS)</td>
+<td>7,100</td>
+<td>7,800</td>
+<td>1,343</td>
+</tr>
+<tr class="odd">
+<td>San Francisco (SFO)</td>
+<td>3,400</td>
+<td>9,500</td>
+<td>1,547</td>
+</tr>
+<tr class="even">
+<td>Seattle (SEA)</td>
+<td>3,500</td>
+<td>8,700</td>
+<td>1,641</td>
+</tr>
+<tr class="odd">
+<td>Chicago O’Hare (ORD)</td>
+<td>1,000</td>
+<td>10,600</td>
+<td>1,733</td>
+</tr>
+<tr class="even">
+<td>Las Vegas (LAS)</td>
+<td>2,800</td>
+<td>10,000</td>
+<td>1,558</td>
+</tr>
+<tr class="odd">
+<td>Dallas-Fort Worth (DFW)</td>
+<td>1,200</td>
+<td>11,200</td>
+<td>1,617</td>
+</tr>
+<tr class="even">
+<td>Denver (DEN)</td>
+<td>1,900</td>
+<td>10,200</td>
+<td>1,650</td>
+</tr>
+<tr class="odd">
+<td>Houston (IAH)</td>
+<td>1,100</td>
+<td>11,600</td>
+<td>1,579</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Of course, in this example, the cost was set up arbitrarily and does not reflect any real cost but one can imagine that the cost is defined to represent some tax, or a sort of risk, i.e. linked with a certain infectious disease or an on-going conflict. As it decreases with the length of the detour, the fastest airports are the most expensive ones: Chicago lies on the great circle from ATL to PEK, so that ATL → ORD → PEK is as short as a direct flight, while Dubai is the cheapest airport and the slowest.</p>
+<p>The instance is non-symmetric, since the initial and the goal cities are apart. Flights between two central airports raise the question of <a href="../paper/nonsymmetric.html#sec-short">the previous sections</a>: their spherical distances satisfy the triangular inequality (AΔ), but they are much shorter than a detour through ATL or PEK (SFO and SEA are 1,100 km apart, while the shortest detour between them, through ATL, is 6,900 km long), so (A1-NS) fails. We therefore study two versions of the instance:</p>
+<ul>
+<li><em>hub and spoke</em>: a plane flies only between ATL or PEK and a central airport. A flight between two central airports is then never faster than a detour through ATL or PEK, (A1-NS) holds, and by <a href="../proofs.html#node-corollary-6-10">Corollary 6.10</a> <span class="badge informal">informal, parts in Lean</span> the Pareto front is the Pareto set of (cost, least makespan) over role configurations;</li>
+<li><em>direct flights</em>: every pair of airports is joined by a flight of their spherical distance.</li>
+</ul>
+<section id="sec-hub" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hub">The hub and spoke instance</h2>
+<p>We solved the instance with <span class="math inline">\(t = 6\)</span> travelers and <span class="math inline">\(p\)</span> from 2 to 5 planes (<a href="#fig-airports" class="quarto-xref">Figure&nbsp;1</a>). For <span class="math inline">\(p = 3\)</span>, 4 and 5, ZenoSolver closes every gap of its bracket and the Pareto front is exact, under (A1-NS): it returns a certificate of format version 2, which <code>zeno check</code> accepts, assuming (A1-NS). Each run takes less than half a second. For <span class="math inline">\(p = 2\)</span>, the solver certifies 115 of the 217 gaps between its 218 achieved points, in 30 s; on the other 102, its exact program for balanced role configurations exceeds its built-in limits, and the front is only bracketed: every achieved point is reached by a plan, and in each open gap the cheapest plan costs at most the achieved cost and at least the lower bound the solver reports, which differ by 0.2% on average and by 1.1% at most.</p>
+<p>As expected, the front is composed of fewer points when the number of planes increases, as reported in <a href="#fig-airports" class="quarto-xref">Figure&nbsp;1</a>.</p>
+<div id="fig-airports" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-airports-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<svg class="zs-fronts" viewbox="0 0 640 470" role="img" aria-label="Pareto fronts of the ATL to PEK instance for 2 to 5 planes" xmlns="http://www.w3.org/2000/svg">
+<text class="ptitle" x="62" y="22">p = 2: 218 points, bracket, 102 open gaps</text>
+<line class="axis" x1="62" y1="194" x2="296" y2="194"></line>
+<line class="axis" x1="62" y1="36" x2="62" y2="194"></line>
+<text class="tick" x="62" y="208" text-anchor="middle">58000</text>
+<text class="tick" x="296" y="208" text-anchor="middle">90000</text>
+<text class="tick" x="57" y="198" text-anchor="end">11080</text>
+<text class="tick" x="57" y="40" text-anchor="end">17330</text>
+<text class="axlbl" x="179.0" y="220" text-anchor="middle">makespan (km)</text>
+<text class="axlbl" x="16" y="115.0" text-anchor="middle" transform="rotate(-90 16 115.0)">cost</text>
+<path class="stair" d="M 62.0 36.0 H 65.7 V 40.2 H 66.4 V 40.7 H 67.8 V 41.9 H 69.3 V 44.4 H 70.0 V 44.8 H 70.8 V 45.3 H 71.5 V 46.1 H 72.2 V 46.5 H 73.0 V 48.6 H 73.7 V 49.0 H 74.4 V 49.5 H 75.2 V 50.3 H 75.9 V 51.1 H 76.6 V 52.8 H 77.4 V 53.2 H 78.1 V 53.7 H 78.8 V 54.5 H 79.5 V 54.9 H 80.3 V 57.0 H 81.0 V 57.4 H 81.7 V 57.9 H 82.5 V 58.7 H 83.2 V 59.1 H 83.9 V 59.6 H 84.7 V 60.6 H 85.4 V 61.6 H 86.1 V 62.2 H 86.9 V 62.6 H 87.6 V 63.3 H 88.3 V 63.9 H 89.1 V 64.3 H 89.8 V 65.2 H 90.5 V 66.3 H 91.2 V 66.8 H 92.0 V 67.4 H 92.7 V 68.0 H 93.4 V 68.5 H 94.2 V 69.1 H 94.9 V 69.9 H 95.6 V 70.9 H 96.4 V 71.5 H 97.1 V 72.0 H 97.8 V 72.6 H 98.6 V 73.2 H 99.3 V 73.7 H 100.0 V 74.5 H 100.8 V 75.6 H 101.5 V 76.1 H 102.2 V 76.7 H 102.9 V 77.3 H 103.7 V 77.8 H 104.4 V 78.4 H 105.1 V 79.2 H 105.9 V 80.2 H 106.6 V 80.8 H 107.3 V 81.4 H 108.1 V 81.9 H 108.8 V 82.5 H 109.5 V 83.0 H 113.2 V 83.5 H 113.9 V 84.0 H 114.7 V 84.6 H 115.4 V 85.4 H 116.1 V 86.5 H 116.8 V 87.0 H 117.6 V 87.6 H 118.3 V 88.1 H 119.0 V 88.7 H 119.8 V 89.2 H 120.5 V 90.0 H 121.2 V 91.1 H 122.0 V 91.7 H 122.7 V 92.2 H 123.4 V 92.8 H 124.2 V 93.3 H 124.9 V 93.6 H 125.6 V 94.1 H 126.4 V 94.7 H 127.1 V 95.1 H 127.8 V 95.7 H 130.7 V 96.3 H 131.5 V 97.3 H 132.2 V 97.9 H 132.9 V 98.4 H 133.7 V 99.0 H 134.4 V 99.6 H 135.1 V 100.1 H 135.9 V 100.9 H 136.6 V 102.0 H 137.3 V 102.5 H 138.1 V 103.1 H 138.8 V 103.6 H 139.5 V 103.9 H 140.2 V 104.5 H 141.0 V 105.0 H 141.7 V 105.4 H 142.4 V 106.0 H 143.2 V 106.4 H 143.9 V 106.8 H 144.6 V 107.3 H 145.4 V 107.7 H 146.1 V 108.3 H 147.6 V 108.8 H 148.3 V 109.2 H 149.0 V 109.9 H 149.8 V 110.4 H 150.5 V 110.7 H 151.2 V 111.8 H 151.9 V 112.9 H 152.7 V 113.4 H 153.4 V 114.0 H 154.1 V 114.2 H 154.9 V 114.8 H 155.6 V 115.3 H 156.3 V 115.7 H 157.1 V 116.3 H 157.8 V 116.7 H 158.5 V 117.1 H 159.3 V 117.7 H 160.0 V 118.1 H 160.7 V 118.6 H 161.4 V 119.0 H 162.2 V 119.4 H 162.9 V 120.0 H 163.6 V 120.4 H 164.4 V 120.9 H 165.8 V 121.4 H 166.6 V 122.7 H 167.3 V 123.7 H 168.0 V 124.3 H 169.5 V 125.1 H 170.2 V 125.6 H 171.0 V 126.0 H 171.7 V 126.6 H 172.4 V 127.0 H 173.1 V 127.4 H 173.9 V 128.0 H 174.6 V 128.4 H 175.3 V 128.9 H 176.1 V 129.3 H 176.8 V 129.7 H 177.5 V 130.3 H 178.3 V 130.7 H 179.0 V 131.3 H 179.7 V 131.7 H 180.5 V 132.1 H 181.2 V 132.6 H 181.9 V 133.0 H 182.7 V 134.6 H 184.9 V 136.0 H 186.3 V 136.9 H 187.0 V 137.3 H 188.5 V 138.3 H 189.2 V 138.7 H 190.0 V 139.2 H 190.7 V 139.6 H 191.4 V 140.1 H 192.2 V 140.6 H 192.9 V 141.0 H 193.6 V 141.6 H 194.4 V 142.0 H 195.1 V 142.4 H 195.8 V 142.9 H 196.5 V 143.3 H 197.3 V 143.9 H 198.0 V 144.3 H 199.5 V 145.3 H 200.9 V 146.2 H 205.3 V 146.5 H 207.5 V 147.8 H 209.0 V 148.8 H 209.7 V 149.2 H 211.2 V 150.2 H 211.9 V 150.6 H 212.6 V 151.1 H 213.4 V 151.5 H 214.1 V 151.9 H 214.8 V 152.5 H 215.6 V 152.9 H 216.3 V 153.5 H 217.0 V 153.9 H 218.5 V 154.8 H 220.0 V 155.8 H 228.0 V 158.4 H 230.2 V 159.7 H 231.7 V 160.7 H 232.4 V 161.1 H 233.8 V 162.0 H 234.6 V 162.5 H 235.3 V 163.0 H 236.0 V 163.4 H 237.5 V 164.4 H 239.0 V 165.3 H 241.9 V 165.5 H 242.6 V 165.7 H 244.1 V 166.1 H 244.8 V 166.8 H 247.0 V 167.0 H 247.7 V 167.3 H 248.5 V 167.5 H 249.2 V 168.2 H 250.7 V 170.2 H 252.9 V 171.6 H 254.3 V 172.6 H 255.0 V 173.0 H 256.5 V 173.9 H 258.0 V 174.9 H 264.6 V 175.2 H 266.0 V 176.2 H 266.8 V 177.4 H 267.5 V 177.6 H 268.2 V 178.1 H 273.3 V 182.1 H 275.5 V 183.5 H 277.0 V 184.4 H 287.2 V 189.2 H 296.0 V 194.0"></path>
+<circle class="pt" cx="62.0" cy="36.0" r="2.2"></circle>
+<circle class="pt" cx="65.7" cy="40.2" r="2.2"></circle>
+<circle class="pt" cx="66.4" cy="40.7" r="2.2"></circle>
+<circle class="pt" cx="67.8" cy="41.9" r="2.2"></circle>
+<circle class="pt" cx="69.3" cy="44.4" r="2.2"></circle>
+<circle class="pt" cx="70.0" cy="44.8" r="2.2"></circle>
+<circle class="pt" cx="70.8" cy="45.3" r="2.2"></circle>
+<circle class="pt" cx="71.5" cy="46.1" r="2.2"></circle>
+<circle class="pt" cx="72.2" cy="46.5" r="2.2"></circle>
+<circle class="pt" cx="73.0" cy="48.6" r="2.2"></circle>
+<circle class="pt" cx="73.7" cy="49.0" r="2.2"></circle>
+<circle class="pt" cx="74.4" cy="49.5" r="2.2"></circle>
+<circle class="pt" cx="75.2" cy="50.3" r="2.2"></circle>
+<circle class="pt" cx="75.9" cy="51.1" r="2.2"></circle>
+<circle class="pt" cx="76.6" cy="52.8" r="2.2"></circle>
+<circle class="pt" cx="77.4" cy="53.2" r="2.2"></circle>
+<circle class="pt" cx="78.1" cy="53.7" r="2.2"></circle>
+<circle class="pt" cx="78.8" cy="54.5" r="2.2"></circle>
+<circle class="pt" cx="79.5" cy="54.9" r="2.2"></circle>
+<circle class="pt" cx="80.3" cy="57.0" r="2.2"></circle>
+<circle class="pt" cx="81.0" cy="57.4" r="2.2"></circle>
+<circle class="pt" cx="81.7" cy="57.9" r="2.2"></circle>
+<circle class="pt" cx="82.5" cy="58.7" r="2.2"></circle>
+<circle class="pt" cx="83.2" cy="59.1" r="2.2"></circle>
+<circle class="pt" cx="83.9" cy="59.6" r="2.2"></circle>
+<circle class="pt" cx="84.7" cy="60.6" r="2.2"></circle>
+<circle class="pt" cx="85.4" cy="61.6" r="2.2"></circle>
+<circle class="pt" cx="86.1" cy="62.2" r="2.2"></circle>
+<circle class="pt" cx="86.9" cy="62.6" r="2.2"></circle>
+<circle class="pt" cx="87.6" cy="63.3" r="2.2"></circle>
+<circle class="pt" cx="88.3" cy="63.9" r="2.2"></circle>
+<circle class="pt" cx="89.1" cy="64.3" r="2.2"></circle>
+<circle class="pt open" cx="89.8" cy="65.2" r="2.2"></circle>
+<circle class="pt" cx="90.5" cy="66.3" r="2.2"></circle>
+<circle class="pt" cx="91.2" cy="66.8" r="2.2"></circle>
+<circle class="pt" cx="92.0" cy="67.4" r="2.2"></circle>
+<circle class="pt open" cx="92.7" cy="68.0" r="2.2"></circle>
+<circle class="pt open" cx="93.4" cy="68.5" r="2.2"></circle>
+<circle class="pt open" cx="94.2" cy="69.1" r="2.2"></circle>
+<circle class="pt open" cx="94.9" cy="69.9" r="2.2"></circle>
+<circle class="pt" cx="95.6" cy="70.9" r="2.2"></circle>
+<circle class="pt" cx="96.4" cy="71.5" r="2.2"></circle>
+<circle class="pt" cx="97.1" cy="72.0" r="2.2"></circle>
+<circle class="pt open" cx="97.8" cy="72.6" r="2.2"></circle>
+<circle class="pt open" cx="98.6" cy="73.2" r="2.2"></circle>
+<circle class="pt open" cx="99.3" cy="73.7" r="2.2"></circle>
+<circle class="pt open" cx="100.0" cy="74.5" r="2.2"></circle>
+<circle class="pt" cx="100.8" cy="75.6" r="2.2"></circle>
+<circle class="pt" cx="101.5" cy="76.1" r="2.2"></circle>
+<circle class="pt" cx="102.2" cy="76.7" r="2.2"></circle>
+<circle class="pt open" cx="102.9" cy="77.3" r="2.2"></circle>
+<circle class="pt open" cx="103.7" cy="77.8" r="2.2"></circle>
+<circle class="pt open" cx="104.4" cy="78.4" r="2.2"></circle>
+<circle class="pt open" cx="105.1" cy="79.2" r="2.2"></circle>
+<circle class="pt" cx="105.9" cy="80.2" r="2.2"></circle>
+<circle class="pt" cx="106.6" cy="80.8" r="2.2"></circle>
+<circle class="pt" cx="107.3" cy="81.4" r="2.2"></circle>
+<circle class="pt" cx="108.1" cy="81.9" r="2.2"></circle>
+<circle class="pt" cx="108.8" cy="82.5" r="2.2"></circle>
+<circle class="pt open" cx="109.5" cy="83.0" r="2.2"></circle>
+<circle class="pt open" cx="113.2" cy="83.5" r="2.2"></circle>
+<circle class="pt open" cx="113.9" cy="84.0" r="2.2"></circle>
+<circle class="pt open" cx="114.7" cy="84.6" r="2.2"></circle>
+<circle class="pt open" cx="115.4" cy="85.4" r="2.2"></circle>
+<circle class="pt open" cx="116.1" cy="86.5" r="2.2"></circle>
+<circle class="pt open" cx="116.8" cy="87.0" r="2.2"></circle>
+<circle class="pt open" cx="117.6" cy="87.6" r="2.2"></circle>
+<circle class="pt open" cx="118.3" cy="88.1" r="2.2"></circle>
+<circle class="pt open" cx="119.0" cy="88.7" r="2.2"></circle>
+<circle class="pt open" cx="119.8" cy="89.2" r="2.2"></circle>
+<circle class="pt open" cx="120.5" cy="90.0" r="2.2"></circle>
+<circle class="pt" cx="121.2" cy="91.1" r="2.2"></circle>
+<circle class="pt" cx="122.0" cy="91.7" r="2.2"></circle>
+<circle class="pt" cx="122.7" cy="92.2" r="2.2"></circle>
+<circle class="pt" cx="123.4" cy="92.8" r="2.2"></circle>
+<circle class="pt" cx="124.2" cy="93.3" r="2.2"></circle>
+<circle class="pt open" cx="124.9" cy="93.6" r="2.2"></circle>
+<circle class="pt open" cx="125.6" cy="94.1" r="2.2"></circle>
+<circle class="pt" cx="126.4" cy="94.7" r="2.2"></circle>
+<circle class="pt open" cx="127.1" cy="95.1" r="2.2"></circle>
+<circle class="pt open" cx="127.8" cy="95.7" r="2.2"></circle>
+<circle class="pt open" cx="130.7" cy="96.3" r="2.2"></circle>
+<circle class="pt open" cx="131.5" cy="97.3" r="2.2"></circle>
+<circle class="pt open" cx="132.2" cy="97.9" r="2.2"></circle>
+<circle class="pt open" cx="132.9" cy="98.4" r="2.2"></circle>
+<circle class="pt open" cx="133.7" cy="99.0" r="2.2"></circle>
+<circle class="pt open" cx="134.4" cy="99.6" r="2.2"></circle>
+<circle class="pt open" cx="135.1" cy="100.1" r="2.2"></circle>
+<circle class="pt open" cx="135.9" cy="100.9" r="2.2"></circle>
+<circle class="pt" cx="136.6" cy="102.0" r="2.2"></circle>
+<circle class="pt" cx="137.3" cy="102.5" r="2.2"></circle>
+<circle class="pt" cx="138.1" cy="103.1" r="2.2"></circle>
+<circle class="pt" cx="138.8" cy="103.6" r="2.2"></circle>
+<circle class="pt open" cx="139.5" cy="103.9" r="2.2"></circle>
+<circle class="pt open" cx="140.2" cy="104.5" r="2.2"></circle>
+<circle class="pt" cx="141.0" cy="105.0" r="2.2"></circle>
+<circle class="pt open" cx="141.7" cy="105.4" r="2.2"></circle>
+<circle class="pt" cx="142.4" cy="106.0" r="2.2"></circle>
+<circle class="pt" cx="143.2" cy="106.4" r="2.2"></circle>
+<circle class="pt open" cx="143.9" cy="106.8" r="2.2"></circle>
+<circle class="pt open" cx="144.6" cy="107.3" r="2.2"></circle>
+<circle class="pt open" cx="145.4" cy="107.7" r="2.2"></circle>
+<circle class="pt open" cx="146.1" cy="108.3" r="2.2"></circle>
+<circle class="pt open" cx="147.6" cy="108.8" r="2.2"></circle>
+<circle class="pt open" cx="148.3" cy="109.2" r="2.2"></circle>
+<circle class="pt open" cx="149.0" cy="109.9" r="2.2"></circle>
+<circle class="pt open" cx="149.8" cy="110.4" r="2.2"></circle>
+<circle class="pt open" cx="150.5" cy="110.7" r="2.2"></circle>
+<circle class="pt open" cx="151.2" cy="111.8" r="2.2"></circle>
+<circle class="pt" cx="151.9" cy="112.9" r="2.2"></circle>
+<circle class="pt" cx="152.7" cy="113.4" r="2.2"></circle>
+<circle class="pt" cx="153.4" cy="114.0" r="2.2"></circle>
+<circle class="pt open" cx="154.1" cy="114.2" r="2.2"></circle>
+<circle class="pt open" cx="154.9" cy="114.8" r="2.2"></circle>
+<circle class="pt" cx="155.6" cy="115.3" r="2.2"></circle>
+<circle class="pt open" cx="156.3" cy="115.7" r="2.2"></circle>
+<circle class="pt" cx="157.1" cy="116.3" r="2.2"></circle>
+<circle class="pt" cx="157.8" cy="116.7" r="2.2"></circle>
+<circle class="pt open" cx="158.5" cy="117.1" r="2.2"></circle>
+<circle class="pt open" cx="159.3" cy="117.7" r="2.2"></circle>
+<circle class="pt open" cx="160.0" cy="118.1" r="2.2"></circle>
+<circle class="pt open" cx="160.7" cy="118.6" r="2.2"></circle>
+<circle class="pt open" cx="161.4" cy="119.0" r="2.2"></circle>
+<circle class="pt open" cx="162.2" cy="119.4" r="2.2"></circle>
+<circle class="pt open" cx="162.9" cy="120.0" r="2.2"></circle>
+<circle class="pt open" cx="163.6" cy="120.4" r="2.2"></circle>
+<circle class="pt open" cx="164.4" cy="120.9" r="2.2"></circle>
+<circle class="pt open" cx="165.8" cy="121.4" r="2.2"></circle>
+<circle class="pt open" cx="166.6" cy="122.7" r="2.2"></circle>
+<circle class="pt" cx="167.3" cy="123.7" r="2.2"></circle>
+<circle class="pt open" cx="168.0" cy="124.3" r="2.2"></circle>
+<circle class="pt open" cx="169.5" cy="125.1" r="2.2"></circle>
+<circle class="pt" cx="170.2" cy="125.6" r="2.2"></circle>
+<circle class="pt open" cx="171.0" cy="126.0" r="2.2"></circle>
+<circle class="pt" cx="171.7" cy="126.6" r="2.2"></circle>
+<circle class="pt" cx="172.4" cy="127.0" r="2.2"></circle>
+<circle class="pt open" cx="173.1" cy="127.4" r="2.2"></circle>
+<circle class="pt" cx="173.9" cy="128.0" r="2.2"></circle>
+<circle class="pt open" cx="174.6" cy="128.4" r="2.2"></circle>
+<circle class="pt open" cx="175.3" cy="128.9" r="2.2"></circle>
+<circle class="pt open" cx="176.1" cy="129.3" r="2.2"></circle>
+<circle class="pt open" cx="176.8" cy="129.7" r="2.2"></circle>
+<circle class="pt open" cx="177.5" cy="130.3" r="2.2"></circle>
+<circle class="pt open" cx="178.3" cy="130.7" r="2.2"></circle>
+<circle class="pt open" cx="179.0" cy="131.3" r="2.2"></circle>
+<circle class="pt open" cx="179.7" cy="131.7" r="2.2"></circle>
+<circle class="pt open" cx="180.5" cy="132.1" r="2.2"></circle>
+<circle class="pt open" cx="181.2" cy="132.6" r="2.2"></circle>
+<circle class="pt open" cx="181.9" cy="133.0" r="2.2"></circle>
+<circle class="pt open" cx="182.7" cy="134.6" r="2.2"></circle>
+<circle class="pt open" cx="184.9" cy="136.0" r="2.2"></circle>
+<circle class="pt" cx="186.3" cy="136.9" r="2.2"></circle>
+<circle class="pt open" cx="187.0" cy="137.3" r="2.2"></circle>
+<circle class="pt" cx="188.5" cy="138.3" r="2.2"></circle>
+<circle class="pt open" cx="189.2" cy="138.7" r="2.2"></circle>
+<circle class="pt" cx="190.0" cy="139.2" r="2.2"></circle>
+<circle class="pt" cx="190.7" cy="139.6" r="2.2"></circle>
+<circle class="pt open" cx="191.4" cy="140.1" r="2.2"></circle>
+<circle class="pt" cx="192.2" cy="140.6" r="2.2"></circle>
+<circle class="pt open" cx="192.9" cy="141.0" r="2.2"></circle>
+<circle class="pt" cx="193.6" cy="141.6" r="2.2"></circle>
+<circle class="pt" cx="194.4" cy="142.0" r="2.2"></circle>
+<circle class="pt open" cx="195.1" cy="142.4" r="2.2"></circle>
+<circle class="pt" cx="195.8" cy="142.9" r="2.2"></circle>
+<circle class="pt open" cx="196.5" cy="143.3" r="2.2"></circle>
+<circle class="pt" cx="197.3" cy="143.9" r="2.2"></circle>
+<circle class="pt open" cx="198.0" cy="144.3" r="2.2"></circle>
+<circle class="pt open" cx="199.5" cy="145.3" r="2.2"></circle>
+<circle class="pt open" cx="200.9" cy="146.2" r="2.2"></circle>
+<circle class="pt open" cx="205.3" cy="146.5" r="2.2"></circle>
+<circle class="pt open" cx="207.5" cy="147.8" r="2.2"></circle>
+<circle class="pt open" cx="209.0" cy="148.8" r="2.2"></circle>
+<circle class="pt open" cx="209.7" cy="149.2" r="2.2"></circle>
+<circle class="pt open" cx="211.2" cy="150.2" r="2.2"></circle>
+<circle class="pt open" cx="211.9" cy="150.6" r="2.2"></circle>
+<circle class="pt" cx="212.6" cy="151.1" r="2.2"></circle>
+<circle class="pt" cx="213.4" cy="151.5" r="2.2"></circle>
+<circle class="pt open" cx="214.1" cy="151.9" r="2.2"></circle>
+<circle class="pt" cx="214.8" cy="152.5" r="2.2"></circle>
+<circle class="pt open" cx="215.6" cy="152.9" r="2.2"></circle>
+<circle class="pt" cx="216.3" cy="153.5" r="2.2"></circle>
+<circle class="pt open" cx="217.0" cy="153.9" r="2.2"></circle>
+<circle class="pt open" cx="218.5" cy="154.8" r="2.2"></circle>
+<circle class="pt open" cx="220.0" cy="155.8" r="2.2"></circle>
+<circle class="pt open" cx="228.0" cy="158.4" r="2.2"></circle>
+<circle class="pt" cx="230.2" cy="159.7" r="2.2"></circle>
+<circle class="pt" cx="231.7" cy="160.7" r="2.2"></circle>
+<circle class="pt" cx="232.4" cy="161.1" r="2.2"></circle>
+<circle class="pt" cx="233.8" cy="162.0" r="2.2"></circle>
+<circle class="pt" cx="234.6" cy="162.5" r="2.2"></circle>
+<circle class="pt" cx="235.3" cy="163.0" r="2.2"></circle>
+<circle class="pt" cx="236.0" cy="163.4" r="2.2"></circle>
+<circle class="pt" cx="237.5" cy="164.4" r="2.2"></circle>
+<circle class="pt" cx="239.0" cy="165.3" r="2.2"></circle>
+<circle class="pt" cx="241.9" cy="165.5" r="2.2"></circle>
+<circle class="pt" cx="242.6" cy="165.7" r="2.2"></circle>
+<circle class="pt" cx="244.1" cy="166.1" r="2.2"></circle>
+<circle class="pt" cx="244.8" cy="166.8" r="2.2"></circle>
+<circle class="pt" cx="247.0" cy="167.0" r="2.2"></circle>
+<circle class="pt" cx="247.7" cy="167.3" r="2.2"></circle>
+<circle class="pt" cx="248.5" cy="167.5" r="2.2"></circle>
+<circle class="pt" cx="249.2" cy="168.2" r="2.2"></circle>
+<circle class="pt" cx="250.7" cy="170.2" r="2.2"></circle>
+<circle class="pt" cx="252.9" cy="171.6" r="2.2"></circle>
+<circle class="pt" cx="254.3" cy="172.6" r="2.2"></circle>
+<circle class="pt" cx="255.0" cy="173.0" r="2.2"></circle>
+<circle class="pt" cx="256.5" cy="173.9" r="2.2"></circle>
+<circle class="pt" cx="258.0" cy="174.9" r="2.2"></circle>
+<circle class="pt" cx="264.6" cy="175.2" r="2.2"></circle>
+<circle class="pt" cx="266.0" cy="176.2" r="2.2"></circle>
+<circle class="pt" cx="266.8" cy="177.4" r="2.2"></circle>
+<circle class="pt" cx="267.5" cy="177.6" r="2.2"></circle>
+<circle class="pt" cx="268.2" cy="178.1" r="2.2"></circle>
+<circle class="pt" cx="273.3" cy="182.1" r="2.2"></circle>
+<circle class="pt" cx="275.5" cy="183.5" r="2.2"></circle>
+<circle class="pt" cx="277.0" cy="184.4" r="2.2"></circle>
+<circle class="pt" cx="287.2" cy="189.2" r="2.2"></circle>
+<circle class="pt" cx="296.0" cy="194.0" r="2.2"></circle>
+<text class="ptitle" x="384" y="22">p = 3: 103 points, exact</text>
+<line class="axis" x1="384" y1="194" x2="618" y2="194"></line>
+<line class="axis" x1="384" y1="36" x2="384" y2="194"></line>
+<text class="tick" x="384" y="208" text-anchor="middle">34800</text>
+<text class="tick" x="618" y="208" text-anchor="middle">54000</text>
+<text class="tick" x="379" y="198" text-anchor="end">9972</text>
+<text class="tick" x="379" y="40" text-anchor="end">15597</text>
+<text class="axlbl" x="501.0" y="220" text-anchor="middle">makespan (km)</text>
+<text class="axlbl" x="338" y="115.0" text-anchor="middle" transform="rotate(-90 338 115.0)">cost</text>
+<path class="stair" d="M 384.0 36.0 H 390.1 V 43.0 H 391.3 V 43.8 H 393.8 V 45.8 H 396.2 V 50.0 H 397.4 V 50.7 H 398.6 V 51.5 H 399.8 V 52.8 H 401.1 V 53.5 H 402.3 V 57.0 H 403.5 V 57.7 H 404.7 V 58.5 H 405.9 V 59.8 H 407.2 V 60.5 H 408.4 V 61.3 H 409.6 V 63.0 H 410.8 V 64.7 H 412.0 V 65.7 H 413.2 V 66.4 H 414.5 V 67.5 H 415.7 V 68.4 H 416.9 V 69.2 H 418.1 V 70.7 H 419.3 V 72.5 H 420.6 V 73.4 H 421.8 V 74.3 H 423.0 V 75.3 H 424.2 V 76.2 H 425.4 V 77.1 H 426.7 V 78.5 H 427.9 V 80.2 H 429.1 V 81.2 H 430.3 V 82.1 H 431.5 V 83.0 H 435.2 V 83.1 H 436.4 V 83.5 H 437.6 V 83.8 H 438.8 V 84.4 H 440.1 V 85.6 H 441.3 V 88.4 H 442.5 V 89.1 H 443.7 V 90.1 H 444.9 V 91.4 H 446.2 V 91.7 H 447.4 V 92.5 H 448.6 V 93.4 H 449.8 V 94.3 H 451.0 V 94.8 H 452.2 V 96.6 H 453.5 V 98.4 H 454.7 V 99.3 H 455.9 V 100.2 H 457.1 V 100.6 H 458.3 V 101.6 H 459.6 V 102.5 H 460.8 V 103.2 H 462.0 V 104.1 H 468.1 V 104.4 H 470.5 V 108.7 H 471.8 V 109.5 H 474.2 V 111.5 H 475.4 V 111.8 H 476.6 V 112.6 H 477.8 V 114.7 H 479.1 V 116.5 H 480.3 V 117.4 H 482.7 V 118.7 H 483.9 V 119.7 H 485.2 V 120.4 H 486.4 V 121.3 H 487.6 V 122.0 H 488.8 V 122.6 H 490.0 V 123.6 H 491.2 V 124.2 H 492.5 V 125.2 H 493.7 V 126.4 H 494.9 V 127.2 H 498.6 V 128.0 H 501.0 V 128.5 H 502.2 V 131.4 H 504.7 V 134.6 H 508.3 V 136.9 H 510.8 V 138.5 H 512.0 V 139.1 H 514.4 V 140.7 H 515.6 V 141.4 H 516.8 V 142.3 H 518.1 V 143.0 H 520.5 V 144.6 H 522.9 V 146.2 H 525.4 V 146.4 H 532.7 V 147.9 H 540.0 V 151.7 H 542.4 V 154.4 H 546.1 V 156.7 H 548.5 V 158.3 H 549.8 V 158.9 H 552.2 V 160.5 H 554.6 V 162.1 H 580.2 V 174.2 H 583.9 V 176.5 H 586.3 V 178.1 H 618.0 V 194.0"></path>
+<circle class="pt" cx="384.0" cy="36.0" r="2.2"></circle>
+<circle class="pt" cx="390.1" cy="43.0" r="2.2"></circle>
+<circle class="pt" cx="391.3" cy="43.8" r="2.2"></circle>
+<circle class="pt" cx="393.8" cy="45.8" r="2.2"></circle>
+<circle class="pt" cx="396.2" cy="50.0" r="2.2"></circle>
+<circle class="pt" cx="397.4" cy="50.7" r="2.2"></circle>
+<circle class="pt" cx="398.6" cy="51.5" r="2.2"></circle>
+<circle class="pt" cx="399.8" cy="52.8" r="2.2"></circle>
+<circle class="pt" cx="401.1" cy="53.5" r="2.2"></circle>
+<circle class="pt" cx="402.3" cy="57.0" r="2.2"></circle>
+<circle class="pt" cx="403.5" cy="57.7" r="2.2"></circle>
+<circle class="pt" cx="404.7" cy="58.5" r="2.2"></circle>
+<circle class="pt" cx="405.9" cy="59.8" r="2.2"></circle>
+<circle class="pt" cx="407.2" cy="60.5" r="2.2"></circle>
+<circle class="pt" cx="408.4" cy="61.3" r="2.2"></circle>
+<circle class="pt" cx="409.6" cy="63.0" r="2.2"></circle>
+<circle class="pt" cx="410.8" cy="64.7" r="2.2"></circle>
+<circle class="pt" cx="412.0" cy="65.7" r="2.2"></circle>
+<circle class="pt" cx="413.2" cy="66.4" r="2.2"></circle>
+<circle class="pt" cx="414.5" cy="67.5" r="2.2"></circle>
+<circle class="pt" cx="415.7" cy="68.4" r="2.2"></circle>
+<circle class="pt" cx="416.9" cy="69.2" r="2.2"></circle>
+<circle class="pt" cx="418.1" cy="70.7" r="2.2"></circle>
+<circle class="pt" cx="419.3" cy="72.5" r="2.2"></circle>
+<circle class="pt" cx="420.6" cy="73.4" r="2.2"></circle>
+<circle class="pt" cx="421.8" cy="74.3" r="2.2"></circle>
+<circle class="pt" cx="423.0" cy="75.3" r="2.2"></circle>
+<circle class="pt" cx="424.2" cy="76.2" r="2.2"></circle>
+<circle class="pt" cx="425.4" cy="77.1" r="2.2"></circle>
+<circle class="pt" cx="426.7" cy="78.5" r="2.2"></circle>
+<circle class="pt" cx="427.9" cy="80.2" r="2.2"></circle>
+<circle class="pt" cx="429.1" cy="81.2" r="2.2"></circle>
+<circle class="pt" cx="430.3" cy="82.1" r="2.2"></circle>
+<circle class="pt" cx="431.5" cy="83.0" r="2.2"></circle>
+<circle class="pt" cx="435.2" cy="83.1" r="2.2"></circle>
+<circle class="pt" cx="436.4" cy="83.5" r="2.2"></circle>
+<circle class="pt" cx="437.6" cy="83.8" r="2.2"></circle>
+<circle class="pt" cx="438.8" cy="84.4" r="2.2"></circle>
+<circle class="pt" cx="440.1" cy="85.6" r="2.2"></circle>
+<circle class="pt" cx="441.3" cy="88.4" r="2.2"></circle>
+<circle class="pt" cx="442.5" cy="89.1" r="2.2"></circle>
+<circle class="pt" cx="443.7" cy="90.1" r="2.2"></circle>
+<circle class="pt" cx="444.9" cy="91.4" r="2.2"></circle>
+<circle class="pt" cx="446.2" cy="91.7" r="2.2"></circle>
+<circle class="pt" cx="447.4" cy="92.5" r="2.2"></circle>
+<circle class="pt" cx="448.6" cy="93.4" r="2.2"></circle>
+<circle class="pt" cx="449.8" cy="94.3" r="2.2"></circle>
+<circle class="pt" cx="451.0" cy="94.8" r="2.2"></circle>
+<circle class="pt" cx="452.2" cy="96.6" r="2.2"></circle>
+<circle class="pt" cx="453.5" cy="98.4" r="2.2"></circle>
+<circle class="pt" cx="454.7" cy="99.3" r="2.2"></circle>
+<circle class="pt" cx="455.9" cy="100.2" r="2.2"></circle>
+<circle class="pt" cx="457.1" cy="100.6" r="2.2"></circle>
+<circle class="pt" cx="458.3" cy="101.6" r="2.2"></circle>
+<circle class="pt" cx="459.6" cy="102.5" r="2.2"></circle>
+<circle class="pt" cx="460.8" cy="103.2" r="2.2"></circle>
+<circle class="pt" cx="462.0" cy="104.1" r="2.2"></circle>
+<circle class="pt" cx="468.1" cy="104.4" r="2.2"></circle>
+<circle class="pt" cx="470.5" cy="108.7" r="2.2"></circle>
+<circle class="pt" cx="471.8" cy="109.5" r="2.2"></circle>
+<circle class="pt" cx="474.2" cy="111.5" r="2.2"></circle>
+<circle class="pt" cx="475.4" cy="111.8" r="2.2"></circle>
+<circle class="pt" cx="476.6" cy="112.6" r="2.2"></circle>
+<circle class="pt" cx="477.8" cy="114.7" r="2.2"></circle>
+<circle class="pt" cx="479.1" cy="116.5" r="2.2"></circle>
+<circle class="pt" cx="480.3" cy="117.4" r="2.2"></circle>
+<circle class="pt" cx="482.7" cy="118.7" r="2.2"></circle>
+<circle class="pt" cx="483.9" cy="119.7" r="2.2"></circle>
+<circle class="pt" cx="485.2" cy="120.4" r="2.2"></circle>
+<circle class="pt" cx="486.4" cy="121.3" r="2.2"></circle>
+<circle class="pt" cx="487.6" cy="122.0" r="2.2"></circle>
+<circle class="pt" cx="488.8" cy="122.6" r="2.2"></circle>
+<circle class="pt" cx="490.0" cy="123.6" r="2.2"></circle>
+<circle class="pt" cx="491.2" cy="124.2" r="2.2"></circle>
+<circle class="pt" cx="492.5" cy="125.2" r="2.2"></circle>
+<circle class="pt" cx="493.7" cy="126.4" r="2.2"></circle>
+<circle class="pt" cx="494.9" cy="127.2" r="2.2"></circle>
+<circle class="pt" cx="498.6" cy="128.0" r="2.2"></circle>
+<circle class="pt" cx="501.0" cy="128.5" r="2.2"></circle>
+<circle class="pt" cx="502.2" cy="131.4" r="2.2"></circle>
+<circle class="pt" cx="504.7" cy="134.6" r="2.2"></circle>
+<circle class="pt" cx="508.3" cy="136.9" r="2.2"></circle>
+<circle class="pt" cx="510.8" cy="138.5" r="2.2"></circle>
+<circle class="pt" cx="512.0" cy="139.1" r="2.2"></circle>
+<circle class="pt" cx="514.4" cy="140.7" r="2.2"></circle>
+<circle class="pt" cx="515.6" cy="141.4" r="2.2"></circle>
+<circle class="pt" cx="516.8" cy="142.3" r="2.2"></circle>
+<circle class="pt" cx="518.1" cy="143.0" r="2.2"></circle>
+<circle class="pt" cx="520.5" cy="144.6" r="2.2"></circle>
+<circle class="pt" cx="522.9" cy="146.2" r="2.2"></circle>
+<circle class="pt" cx="525.4" cy="146.4" r="2.2"></circle>
+<circle class="pt" cx="532.7" cy="147.9" r="2.2"></circle>
+<circle class="pt" cx="540.0" cy="151.7" r="2.2"></circle>
+<circle class="pt" cx="542.4" cy="154.4" r="2.2"></circle>
+<circle class="pt" cx="546.1" cy="156.7" r="2.2"></circle>
+<circle class="pt" cx="548.5" cy="158.3" r="2.2"></circle>
+<circle class="pt" cx="549.8" cy="158.9" r="2.2"></circle>
+<circle class="pt" cx="552.2" cy="160.5" r="2.2"></circle>
+<circle class="pt" cx="554.6" cy="162.1" r="2.2"></circle>
+<circle class="pt" cx="580.2" cy="174.2" r="2.2"></circle>
+<circle class="pt" cx="583.9" cy="176.5" r="2.2"></circle>
+<circle class="pt" cx="586.3" cy="178.1" r="2.2"></circle>
+<circle class="pt" cx="618.0" cy="194.0" r="2.2"></circle>
+<text class="ptitle" x="62" y="254">p = 4: 27 points, exact</text>
+<line class="axis" x1="62" y1="426" x2="296" y2="426"></line>
+<line class="axis" x1="62" y1="268" x2="62" y2="426"></line>
+<text class="tick" x="62" y="440" text-anchor="middle">27000</text>
+<text class="tick" x="296" y="440" text-anchor="middle">42400</text>
+<text class="tick" x="57" y="430" text-anchor="end">8864</text>
+<text class="tick" x="57" y="272" text-anchor="end">12120</text>
+<text class="axlbl" x="179.0" y="452" text-anchor="middle">makespan (km)</text>
+<text class="axlbl" x="16" y="347.0" text-anchor="middle" transform="rotate(-90 16 347.0)">cost</text>
+<path class="stair" d="M 62.0 268.0 H 65.0 V 277.1 H 69.6 V 284.1 H 71.1 V 285.9 H 72.6 V 290.4 H 74.2 V 291.3 H 77.2 V 293.6 H 78.7 V 297.9 H 80.2 V 302.0 H 81.8 V 304.1 H 93.9 V 315.0 H 98.5 V 317.6 H 101.5 V 319.4 H 103.0 V 320.2 H 107.6 V 322.8 H 110.6 V 324.7 H 112.1 V 343.7 H 115.2 V 344.5 H 116.7 V 348.9 H 119.7 V 352.6 H 141.0 V 362.0 H 150.1 V 367.3 H 159.2 V 389.3 H 248.9 V 403.2 H 253.5 V 405.8 H 256.5 V 407.7 H 296.0 V 426.0"></path>
+<circle class="pt" cx="62.0" cy="268.0" r="2.2"></circle>
+<circle class="pt" cx="65.0" cy="277.1" r="2.2"></circle>
+<circle class="pt" cx="69.6" cy="284.1" r="2.2"></circle>
+<circle class="pt" cx="71.1" cy="285.9" r="2.2"></circle>
+<circle class="pt" cx="72.6" cy="290.4" r="2.2"></circle>
+<circle class="pt" cx="74.2" cy="291.3" r="2.2"></circle>
+<circle class="pt" cx="77.2" cy="293.6" r="2.2"></circle>
+<circle class="pt" cx="78.7" cy="297.9" r="2.2"></circle>
+<circle class="pt" cx="80.2" cy="302.0" r="2.2"></circle>
+<circle class="pt" cx="81.8" cy="304.1" r="2.2"></circle>
+<circle class="pt" cx="93.9" cy="315.0" r="2.2"></circle>
+<circle class="pt" cx="98.5" cy="317.6" r="2.2"></circle>
+<circle class="pt" cx="101.5" cy="319.4" r="2.2"></circle>
+<circle class="pt" cx="103.0" cy="320.2" r="2.2"></circle>
+<circle class="pt" cx="107.6" cy="322.8" r="2.2"></circle>
+<circle class="pt" cx="110.6" cy="324.7" r="2.2"></circle>
+<circle class="pt" cx="112.1" cy="343.7" r="2.2"></circle>
+<circle class="pt" cx="115.2" cy="344.5" r="2.2"></circle>
+<circle class="pt" cx="116.7" cy="348.9" r="2.2"></circle>
+<circle class="pt" cx="119.7" cy="352.6" r="2.2"></circle>
+<circle class="pt" cx="141.0" cy="362.0" r="2.2"></circle>
+<circle class="pt" cx="150.1" cy="367.3" r="2.2"></circle>
+<circle class="pt" cx="159.2" cy="389.3" r="2.2"></circle>
+<circle class="pt" cx="248.9" cy="403.2" r="2.2"></circle>
+<circle class="pt" cx="253.5" cy="405.8" r="2.2"></circle>
+<circle class="pt" cx="256.5" cy="407.7" r="2.2"></circle>
+<circle class="pt" cx="296.0" cy="426.0" r="2.2"></circle>
+<text class="ptitle" x="384" y="254">p = 5: 27 points, exact</text>
+<line class="axis" x1="384" y1="426" x2="618" y2="426"></line>
+<line class="axis" x1="384" y1="268" x2="384" y2="426"></line>
+<text class="tick" x="384" y="440" text-anchor="middle">27000</text>
+<text class="tick" x="618" y="440" text-anchor="middle">42400</text>
+<text class="tick" x="379" y="430" text-anchor="end">7756</text>
+<text class="tick" x="379" y="272" text-anchor="end">9384</text>
+<text class="axlbl" x="501.0" y="452" text-anchor="middle">makespan (km)</text>
+<text class="axlbl" x="338" y="347.0" text-anchor="middle" transform="rotate(-90 338 347.0)">cost</text>
+<path class="stair" d="M 384.0 268.0 H 387.0 V 277.1 H 391.6 V 284.1 H 393.1 V 285.9 H 394.6 V 290.4 H 396.2 V 291.3 H 399.2 V 293.6 H 400.7 V 297.9 H 402.2 V 302.0 H 403.8 V 304.1 H 415.9 V 315.0 H 420.5 V 317.6 H 423.5 V 319.4 H 425.0 V 320.2 H 429.6 V 322.8 H 432.6 V 324.7 H 434.1 V 343.7 H 437.2 V 344.5 H 438.7 V 348.9 H 441.7 V 352.6 H 463.0 V 362.0 H 472.1 V 367.3 H 481.2 V 389.3 H 570.9 V 403.2 H 575.5 V 405.8 H 578.5 V 407.7 H 618.0 V 426.0"></path>
+<circle class="pt" cx="384.0" cy="268.0" r="2.2"></circle>
+<circle class="pt" cx="387.0" cy="277.1" r="2.2"></circle>
+<circle class="pt" cx="391.6" cy="284.1" r="2.2"></circle>
+<circle class="pt" cx="393.1" cy="285.9" r="2.2"></circle>
+<circle class="pt" cx="394.6" cy="290.4" r="2.2"></circle>
+<circle class="pt" cx="396.2" cy="291.3" r="2.2"></circle>
+<circle class="pt" cx="399.2" cy="293.6" r="2.2"></circle>
+<circle class="pt" cx="400.7" cy="297.9" r="2.2"></circle>
+<circle class="pt" cx="402.2" cy="302.0" r="2.2"></circle>
+<circle class="pt" cx="403.8" cy="304.1" r="2.2"></circle>
+<circle class="pt" cx="415.9" cy="315.0" r="2.2"></circle>
+<circle class="pt" cx="420.5" cy="317.6" r="2.2"></circle>
+<circle class="pt" cx="423.5" cy="319.4" r="2.2"></circle>
+<circle class="pt" cx="425.0" cy="320.2" r="2.2"></circle>
+<circle class="pt" cx="429.6" cy="322.8" r="2.2"></circle>
+<circle class="pt" cx="432.6" cy="324.7" r="2.2"></circle>
+<circle class="pt" cx="434.1" cy="343.7" r="2.2"></circle>
+<circle class="pt" cx="437.2" cy="344.5" r="2.2"></circle>
+<circle class="pt" cx="438.7" cy="348.9" r="2.2"></circle>
+<circle class="pt" cx="441.7" cy="352.6" r="2.2"></circle>
+<circle class="pt" cx="463.0" cy="362.0" r="2.2"></circle>
+<circle class="pt" cx="472.1" cy="367.3" r="2.2"></circle>
+<circle class="pt" cx="481.2" cy="389.3" r="2.2"></circle>
+<circle class="pt" cx="570.9" cy="403.2" r="2.2"></circle>
+<circle class="pt" cx="575.5" cy="405.8" r="2.2"></circle>
+<circle class="pt" cx="578.5" cy="407.7" r="2.2"></circle>
+<circle class="pt" cx="618.0" cy="426.0" r="2.2"></circle>
+</svg>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-airports-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The Pareto fronts of the hub and spoke instance with <span class="math inline">\(t = 6\)</span> travelers and <span class="math inline">\(p\)</span> from 2 to 5 planes, as (makespan, cost). The fronts for <span class="math inline">\(p = 3\)</span>, 4 and 5 are exact. For <span class="math inline">\(p = 2\)</span> the points are the achieved ones, and an orange point opens a gap that no lower bound closes. Each panel spans its own ranges.
+</figcaption>
+</figure>
+</div>
+<p>The instance with 6 travelers and 3 planes has a Pareto front made of 103 distinct objective vectors. The two extreme points (Cost, Makespan) are <span class="math inline">\((15597, 34800)\)</span> and <span class="math inline">\((9972, 54000)\)</span>. These two points are obtained by using exclusively one airport, either Chicago (ORD) or Dubai (DXB), and do not perform any <span class="math inline">\((B\bar B)\)</span>-pairing:</p>
+<pre><code>C. 15597 Mk. 34800
+ATL -&gt; ORD -&gt; PEK -&gt; ORD -&gt; ATL -&gt; ORD -&gt; PEK
+ATL -&gt; ORD -&gt; PEK -&gt; ORD -&gt; ATL -&gt; ORD -&gt; PEK
+ATL -&gt; ORD -&gt; PEK -&gt; ORD -&gt; ATL -&gt; ORD -&gt; PEK</code></pre>
+<pre><code>C. 9972 Mk. 54000
+ATL -&gt; DXB -&gt; PEK -&gt; DXB -&gt; ATL -&gt; DXB -&gt; PEK
+ATL -&gt; DXB -&gt; PEK -&gt; DXB -&gt; ATL -&gt; DXB -&gt; PEK
+ATL -&gt; DXB -&gt; PEK -&gt; DXB -&gt; ATL -&gt; DXB -&gt; PEK</code></pre>
+<p>However, there are non-dominated plans using other airports, notably Amsterdam (AMS) and Munich (MUC), and performing <span class="math inline">\((B\bar B)\)</span>-pairings, 18 of the 103 points in all. In the following plan, the second plane leaves a passenger in AMS and another in MUC, and the third plane one in AMS; the first plane takes the two passengers left in AMS to PEK, and the third plane the one left in MUC:</p>
+<pre><code>C. 11479 Mk. 47600
+ATL -&gt; MUC -&gt; PEK -&gt; AMS -&gt; PEK -&gt; AMS -&gt; PEK
+ATL -&gt; AMS -&gt; ATL -&gt; MUC -&gt; ATL -&gt; DXB -&gt; PEK
+ATL -&gt; AMS -&gt; ATL -&gt; DXB -&gt; PEK -&gt; MUC -&gt; PEK</code></pre>
+<p>Finally, for some Pareto optimal plan, planes do not always perform the same number of flights:</p>
+<pre><code>C. 13162 Mk. 41700
+ATL -&gt; SFO -&gt; ATL -&gt; AMS -&gt; PEK -&gt; LAS -&gt; PEK
+ATL -&gt; IAH -&gt; ATL -&gt; LAS -&gt; ATL -&gt; AMS -&gt; PEK -&gt; SFO -&gt; PEK
+ATL -&gt; DXB -&gt; PEK -&gt; IAH -&gt; PEK</code></pre>
+<p>The plans were printed by <code>zeno --plans</code>, which checks each of them by simulation; makespans are in km.</p>
+</section>
+<section id="sec-direct" class="level2">
+<h2 class="anchored" data-anchor-id="sec-direct">The instance with direct flights</h2>
+<p>With direct flights between the central airports, the plans above remain feasible, and ZenoSolver finds the same achieved points. It certifies none of the gaps, however: (A1-NS) fails, and the only lower bound it uses that holds for every table of central flights, the relaxation of <a href="../proofs.html#node-lemma-3-4">Lemma 3.4</a> <span class="badge ok">machine-checked</span> with each landing in <span class="math inline">\(C_i\)</span> weighing <span class="math inline">\(2\min(d_i, \bar d_i)\)</span>, is too weak here. Another bound holds with no assumption at all: by <a href="../proofs.html#node-lemma-6-19">Lemma 6.19</a> <span class="badge informal">informal</span>, every plan has a makespan of at least <span class="math inline">\((2t - p)\Phi/p\)</span>, where <span class="math inline">\(\Phi = 11{,}600\)</span> km, in the rounded distances, is the shortest flight time from ATL to PEK, through Chicago. For <span class="math inline">\(p = 2\)</span> and <span class="math inline">\(p = 3\)</span> this is 58,000 km and 34,800 km, the makespans of the fastest achieved points, so these makespans are exact even with direct flights. Whether direct flights lower the cost of other points is open. They may: the airports close to ATL are far from PEK and conversely, so that <span class="math inline">\(d\)</span> and <span class="math inline">\(\bar d\)</span> order the cities in opposite ways, which is the situation in which a flight between central cities can beat every plan of simple patterns (<a href="../proofs.html#node-proposition-6-7">Proposition 6.7</a> <span class="badge informal">informal</span>).</p>
+</section>
+<section id="sec-reproduce" class="level2">
+<h2 class="anchored" data-anchor-id="sec-reproduce">Reproducing the instance</h2>
+<p>The data files are in <a href="https://github.com/aquemy/ZenoSolver/tree/master/site/paper/data"><code>site/paper/data/</code></a>: <code>atl-pek.coords</code> (the coordinates), <code>atl-pek-direct.dat</code> (durations, costs and the table of direct flights) and <code>atl-pek.dat</code> (the hub and spoke instance, without that table, so that ZenoSolver gives the flights between central cities a duration longer than any detour).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># durations from the coordinates, in units of 100 km (-r 0.01); the third line of the</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generated file (the costs) is then replaced by the costs of the table above</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> generate <span class="at">--metric</span> sphere <span class="at">--hubs</span> apart <span class="at">--coords</span> atl-pek.coords <span class="at">-n</span> 11 <span class="at">-r</span> 0.01 <span class="at">-O</span> atl-pek-direct.dat</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> <span class="at">-d</span> atl-pek.dat <span class="at">-n</span> 11 <span class="at">-t</span> 6 <span class="at">-p</span> 3 <span class="at">--plans</span> <span class="at">--certificate</span> atl-pek-p3.cert</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> check atl-pek-p3.cert</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> <span class="at">-d</span> atl-pek-direct.dat <span class="at">-n</span> 11 <span class="at">-t</span> 6 <span class="at">-p</span> 3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p><a href="https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"><code>airports.dat</code></a> of <a href="https://openflights.org/data.php">OpenFlights</a>, made available under the <a href="https://opendatacommons.org/licenses/odbl/1-0/">Open Database License</a>. The thirteen rows used here are kept in <a href="https://github.com/aquemy/ZenoSolver/blob/master/site/paper/data/atl-pek.coords"><code>site/paper/data/atl-pek.coords</code></a>, with this attribution.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/quemy\.info\/ZenoSolver\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../paper/experiments.html" class="pagination-link" aria-label="Experiments">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Experiments</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../paper/conclusion.html" class="pagination-link" aria-label="Conclusion and Perspectives">
+        <span class="nav-page-text">Conclusion and Perspectives</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ZenoSolver, its theory note and the Lean formalization: Alexandre Quemy.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

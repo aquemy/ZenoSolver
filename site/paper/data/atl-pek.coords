@@ -1,0 +1,37 @@
+# The airports instance of the paper section (site/paper/application.qmd).
+#
+# Source: OpenFlights, airports.dat,
+# https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat
+# (https://openflights.org/data.php), made available under the Open Database License (ODbL)
+# v1.0, https://opendatacommons.org/licenses/odbl/1-0/. Only the 13 rows below are kept, with
+# their IATA code, latitude and longitude (degrees) and, as comments, their name and place.
+#
+# Format of `zeno --metric sphere --hubs apart --coords FILE`: C_I (ATL) first, then C_G (PEK),
+# then the 11 central cities. atl-pek.dat and atl-pek-direct.dat are derived from this file
+# (see the application page for the commands).
+# Hartsfield Jackson Atlanta International Airport, Atlanta, United States
+ATL,33.6367,-84.428101
+# Beijing Capital International Airport, Beijing, China
+PEK,40.080101013183594,116.58499908447266
+# Dubai International Airport, Dubai, United Arab Emirates
+DXB,25.2527999878,55.3643989563
+# Munich Airport, Munich, Germany
+MUC,48.353802,11.7861
+# Frankfurt am Main Airport, Frankfurt, Germany
+FRA,50.033333,8.570556
+# Amsterdam Airport Schiphol, Amsterdam, Netherlands
+AMS,52.308601,4.76389
+# San Francisco International Airport, San Francisco, United States
+SFO,37.61899948120117,-122.375
+# Seattle Tacoma International Airport, Seattle, United States
+SEA,47.449001,-122.308998
+# Chicago O'Hare International Airport, Chicago, United States
+ORD,41.9786,-87.9048
+# McCarran International Airport, Las Vegas, United States
+LAS,36.08010101,-115.1520004
+# Dallas Fort Worth International Airport, Dallas-Fort Worth, United States
+DFW,32.896801,-97.038002
+# Denver International Airport, Denver, United States
+DEN,39.861698150635,-104.672996521
+# George Bush Intercontinental Houston Airport, Houston, United States
+IAH,29.984399795532227,-95.34140014648438
