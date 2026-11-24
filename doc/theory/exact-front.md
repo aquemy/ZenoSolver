@@ -654,8 +654,8 @@ has $\sigma_k \ge 1$ segments, and $\sigma = \sum_k \sigma_k \ge s$ (Lemma 3.2).
 A *selection* is a set of segments, at least one per plane, with for each chosen $\gamma$ a city $x(\gamma)$
 such that $d_{x(\gamma)} \le R(\gamma)$, and a central landing $\pi(\gamma)$ of the plan in $x(\gamma)$, with
 $\pi$ injective. Its groups $X_k = \{x(\gamma) : \gamma \text{ chosen, of plane } k\}$ satisfy
-$\ell(X_k) \le \sum_\gamma 2R(\gamma) \le \sum_\gamma F(\gamma) = F_k \le M$, the sum running over the
-segments of $k$, and $c(X) = \sum_\gamma c(\pi(\gamma)) \le C$. We build a selection whose groups are
+$\ell(X_k) \le \sum_{\gamma \text{ chosen}} 2R(\gamma) \le \sum_{\gamma} F(\gamma) = F_k \le M$, the last
+sum running over all segments of $k$, and $c(X) = \sum_\gamma c(\pi(\gamma)) \le C$. We build a selection whose groups are
 admissible with $|X| \ge s$ and $|X| \equiv s \pmod 2$. Lemma 4.11 then removes landings two at a time, down
 to $|X| = s$, keeping the groups admissible and making them smaller.
 
@@ -665,7 +665,8 @@ $\sigma_K$ its number of segments, and $t_K$ the number of passengers whose jour
 clean journey arrives in a hub only with its last flight. So two consecutive flights of a journey on
 different planes meet in a central city. The first plane lands there, and so does the second, whose route
 starts in $C_I$. Every journey therefore stays inside one component, $\sum_K t_K = t$, and $K$ with its
-passengers is a feasible plan. Lemma 3.2 gives $\sigma_K \ge 2t_K - q_K$; write
+passengers is a feasible plan. Lemma 3.2, whose proof does not use $t \ge p$, gives
+$\sigma_K \ge 2t_K - q_K$, even when $t_K < q_K$; write
 $\delta_K = \sigma_K - 2t_K + q_K \ge 0$, so that $\sum_K \delta_K = \sigma - s$. The number of planes of
 $K$ with $\sigma_k$ even has the parity of $q_K - \sigma_K$, hence of $\delta_K$. If $\delta_K$ is odd, some
 plane $\kappa_K$ of $K$ has $\sigma_{\kappa_K} \ge 2$; otherwise $\sigma_K = q_K$ and
@@ -685,8 +686,9 @@ $\{u, w\}$ of $J$, pick a city that $u$ and $w$ share, and segments of $u$ and o
 make a link there. While a segment $\gamma$ has two ends at one city $y$, in links $(\gamma, \gamma_1, y)$ and
 $(\gamma, \gamma_2, y)$, replace them by $(\gamma_1, \gamma_2, y)$, or delete both if $\gamma_1$ and
 $\gamma_2$ belong to the same plane. This keeps every plane's degree mod 2 and lowers the number of links.
-Every end is now at a city in which its segment lands, and no segment has two ends at one city. Pay each end
-with a landing of its own segment in its city.
+At this point every end is at a city in which its segment lands, and no segment has two ends at one city.
+Pay each end with a landing of its own segment in its city. Later steps move ends to cities their segment
+does not visit. Only the payments and the bound by $R$ are tracked from now on.
 
 *Re-pairing.* Let a segment $\gamma$ have ends in the links $\lambda_1 = (\gamma, \gamma_1, y_1)$ and
 $\lambda_2 = (\gamma, \gamma_2, y_2)$, with $d_{y_1} \le d_{y_2}$. *Re-pairing* them replaces both links by
@@ -710,10 +712,12 @@ $\gamma$ is within $R(\gamma)$. Then re-pair the first end with the second, the 
 on. Afterwards $\gamma$ has at most one end, and never gains another. The loop ends because the number of
 links decreases.
 
-*Claim: no landing $z(\gamma)$ ever pays for an end of another segment.* A landing of $\gamma$ is handed to
-another segment only when $\gamma$ is the middle segment of a re-pairing. This happens when $\gamma$ itself
-is processed, and only for the ends at odd positions. If $z(\gamma)$ pays an end of $\gamma$, that end is at
-position $r$: for $r$ even its payment is released, and for $r$ odd it is not re-paired.
+*Claim: no landing $z(\gamma)$ ever pays for an end of another segment.* Payments are only ever moved from
+one end to another, or released, and a released landing is never used again. So a landing of $\gamma$ can
+pay for another segment only if $\gamma$ hands it over, which happens only when $\gamma$ is the middle
+segment of a re-pairing. That happens only when $\gamma$ itself is processed, which is at most once, and only
+for its ends at odd positions. If $z(\gamma)$ pays an end of $\gamma$, that end is at position $r$: for $r$
+even its payment is released, and for $r$ odd it is not re-paired.
 
 *Step 4: the left-out segments.* For each $K$ with $\delta_K$ odd, consider $\kappa = \kappa_K$. If $\kappa$
 has a segment without an end, leave it out. Otherwise two segments $\gamma, \gamma'$ of $\kappa$ have one end
@@ -779,14 +783,14 @@ of Proposition 7.9 hold, and `forest` gaps (§9) are sound.
 For Proposition 7.9, the instance without city $i$ still satisfies (S) and (AΔ).
 
 For Theorem 4.9, change items 1–3 of its proof. Clean the plan, and delete from every route the flights after
-its last flight that carries a passenger. A route that is not empty now ends with a flight carrying a
-passenger $\pi$. This flight does not arrive in $C_I$ (Lemma 3.1). Suppose it arrives in a central city $b$,
-at time $a$. The rest of $\pi$'s journey goes from $b$ to $C_G$, leaving $b$ no earlier than $a$, and by
-(AΔ), as in Lemma 3.3(b), its flights last at least $\bar d_b$. So $\pi$ reaches $C_G$ at some time in
-$[a + \bar d_b, M']$. Append to the route a flight $b \to C_G$ departing at $a$ and carrying $\pi$; it
-arrives by $M'$, and the rest of $\pi$'s journey is emptied. Do this for all such routes at once. Every
-inequality refers to flights that are still there, since this only adds flights and empties others. The
-routes that are not empty now end in $C_G$, with $q \ge 1$ such planes. Theorem 4.10 on these $q$ planes
+its last flight that carries a passenger. Journeys are unchanged. A route that is not empty now ends with a
+flight carrying a passenger $\pi$. This flight does not arrive in $C_I$ (Lemma 3.1). Suppose it arrives in a
+central city $b$, at time $a$. The rest of $\pi$'s journey goes from $b$ to $C_G$, leaving $b$ no earlier
+than $a$, and by (AΔ), as in Lemma 3.3(b), its flights last at least $\bar d_b$. So $\pi$ reaches $C_G$ at
+some time in $[a + \bar d_b, M']$. Append to the route an empty flight $b \to C_G$ departing at $a$; it
+arrives by $M'$. Appending empty flights changes no journey, so this can be done for all such routes at once.
+The routes that are not empty now end in $C_G$, with $1 \le q \le p \le t$ such planes, and every flight time
+is at most $M'$. Theorem 4.10 applies to these $q$ planes, as its proof and Lemma 4.11 use only $t \ge q$. It
 gives an admissible partition over them of a multiset of size $2t - q$, with cost at most $C$ and loads at
 most $M'$. Item 4 is unchanged. $\square$
 
@@ -1655,7 +1659,11 @@ All checks compare against exhaustive searches written independently of the solv
 | Linear family closed form (Thm 10.1) vs link-forest DP | 336 instances, 5,844 levels; $L = U = E$ on 245 more instances (3,157 levels); offset progressions: $L < E$ on 4 of 5,904 levels |
 | Papers' greedy on the linear family | 115 / 115 fronts equal |
 | C++ solver (branch `feat/exact-front-solver`) | 27 / 27 golden fronts; every level of 300 random instances ($n \le 5$, $t \le 9$, $p \le 6$, $s \le 12$) equal to an independent enumeration oracle, the unrestricted-tree DP equal to the $q_{\max}$-restricted one |
-| Conjecture 4.10, targeted (`checks/conj410_search.py`): random instances with $n \le 3$, $p \le 3$, $t \le 6$ whose certificate has a gap with $L < E$, all plans with the shortest central flights the triangle inequality allows | 34,000 instances, 72 with such a gap, 0 plans inside a gap cheaper than $E$ |
+| Theorem 4.10, first targeted search, when it was Conjecture 4.10 (`checks/conj410_search.py`): random instances with $n \le 3$, $p \le 3$, $t \le 6$ whose certificate has a gap with $L < E$, all plans with the shortest central flights the triangle inequality allows | 34,000 instances, 72 with such a gap, 0 plans inside a gap cheaper than $E$ |
+| Flow model of all plans (`checks/flowplan.py`: integer plane and passenger flows over time, any central table, plans decoded and re-simulated) vs `truth` | 250 / 250 fronts equal ($n \le 3$, $t \le 4$, $p \le 3$; no, useless and shortest central flights) |
+| Theorem 4.10 at the front level (`checks/thm410_search.py`). Every `forest` gap of `zeno`'s certificate, i.e. every gap with $L < E$. At each, the flow model gives the least cost of all plans with the tightest table (AΔ) allows, $d_{ij} = \lvert d_i - d_j\rvert$, which lies below every (AΔ) table, so the check covers them all. Families: uniform, anti-correlated costs, one cheap slow city among fast dear ones, clusters of close durations, offset progressions; $3 \le p \le 6$, $n \le 6$, $t \le 12$, durations $\le 20$ | 24,000 instances, 1,120 with a `forest` gap, 1,492 gaps. 1,491 solved exactly (one hit the 300 s limit), 0 plans cheaper than $E$ |
+| Same, central tables drawn below the (AΔ) minimum (`below`; Example 4.13) | 6,000 instances, 370 `forest` gaps, 4 beaten by a plan. Example 4.13 itself: simulated, re-solved with CP-SAT, $E$ from `zeno` and `cpsat_check.py` (`flowplan.py ex413`) |
+| Construction of Theorem 4.10 (`checks/thm410_construct.py`), every step and invariant asserted, on plans drawn by the flow model: $p \le 6$, $t \le 9$, $n \le 5$, random (AΔ) or tightest tables, random makespan bounds, random arc weights that favour central flights, T-joins extended by random closed walks | 5,000 / 5,000 admissible, cost $\le C$, loads $\le F_k$. 2,379 plans with central flights; 968 needed re-pairing at a segment; 99 left out a segment for parity, 13 of them through Step 4's re-pairing |
 | `zeno` against an independent CP-SAT model of $E(T)$ (`checks/cpsat_check.py`): every front point $(C, M)$ has $E(M/2) = C$ and the level below the next point still costs $C$ | 554 points ($n \le 8$, $t \le 16$, $p \le 6$, durations $\le 40$) and 3,008 points ($n \le 10$, $t \le 24$, $p \le 8$, durations $\le 60$), 0 mismatches |
 | Harmful waiting (Prop 6.5), `checks/waiting_search.cpp`: exhaustive orders and matchings on random balanced configurations with a plane picking up twice and one dropping off twice, (AΔ-path) | Random crossing phases: 0 of 112,500 (p ≤ 4, ≤ 4 links, durations ≤ 12) and 0 of 192,270 (≤ 5 links, ≤ 15). One shortest crossing per plane: 6 of 189,964 (p ≤ 4, ≤ 5 links, ≤ 20), 5 of 190,040 (p ≤ 5, ≤ 6 links, ≤ 30), 1 of 71,538 (p ≤ 3, ≤ 6 links, ≤ 40) wait harmfully. On the instance of Prop 6.5 the bracket of `zeno` equals the oracle's front and leaves the two waiting gaps open |
 | Construction of Theorem 6.9 (`checks/sd_construct_check.py`) on random simple plans with clean journeys: any hand-offs (swaps, within one plane), random waits, positive durations | 104,452 / 104,452. Exchanges keep routes, event order, cost and makespan and lower the hand-offs; afterwards no hand-off overlaps, no chain cycles, chains are monotone in time; the configuration has count $\ge t$, cost $\le C$, loads $\le$ flight times, template $\le M$. In one run of 86,943 plans, 53,022 needed exchanges and 20,872 had chains through swaps. Without the exchanges, 3,091 of 26,168 plans break the chain monotonicity and 2,882 have cycles |
@@ -1670,8 +1678,10 @@ allows any flight, including central ones, and needs durations of at least 1. Th
 in `doc/theory/checks` (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_sweep.py` and
 `theorychecks_anti.py`, `ds_check.py`, `ns_sched_check.py`, `truth.cpp` with `truth_checks.py`,
 `linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`, `waiting_search.cpp`,
-`config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`); its
-README says how to build and run them.
+`config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`,
+`flowplan.py`, `thm410_search.py`, `thm410_construct.py`); its README says how to build and run them. The
+flow model replaces the exhaustive search where `truth` is too slow (about a minute per front at $t = 5$). On
+the gaps of the searches above, up to $t = 12$, it typically finishes within seconds.
 
 ## 12. Next steps
 

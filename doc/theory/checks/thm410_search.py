@@ -63,10 +63,10 @@ def gen(rng, family, nmax, tmax, pmin, pmax, dmax):
         c[rng.randrange(n // 2, n)] = rng.randint(0, 5)
     elif family == "cluster":
         centres = rng.sample(range(2, dmax - 1), rng.randint(1, 2))
-        d = set()
-        while len(d) < n:
-            d.add(max(1, min(dmax, rng.choice(centres) + rng.randint(-2, 2))))
-        d = sorted(d)
+        near = sorted({x for z in centres for x in range(z - 2, z + 3) if 1 <= x <= dmax})
+        far = [x for x in range(1, dmax + 1) if x not in near]
+        k = min(n, len(near))
+        d = sorted(rng.sample(near, k) + rng.sample(far, n - k))
         c = [rng.randint(0, 60) for _ in range(n)]
     elif family == "offset":
         a, b = rng.randint(1, 6), rng.randint(1, 3)
