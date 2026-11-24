@@ -61,10 +61,8 @@ int main()
     o.costFunction = 2;
     o.durationFunction = 2;
     o.adjust = 100;
-    bool swapped = false;
-    const zeno::Instance generated = zeno::legacy::buildInstance(o, &swapped);
-    std::cout << zeno::solveFront(generated).front.size() << " points"
-              << (swapped ? " (durations and costs swapped)" : "") << "\n";
+    const zeno::Instance generated = zeno::legacy::buildInstance(o);
+    std::cout << zeno::solveFront(generated).front.size() << " points\n";
 }
 ```
 
@@ -77,7 +75,7 @@ int main()
 160 80
 accepted
 9 points, exact, assuming A1-NS
-81 points (durations and costs swapped)
+81 points
 ```
 
 `zeno` prints fronts by increasing *cost*; the library's `Front` is sorted by increasing
@@ -208,11 +206,13 @@ for it, and `addCost(a, b)` is saturating addition.
 
 ### Instances and files: `zeno/legacy_input.hpp`, `zeno/io.hpp`
 
-`legacy::Options`, `legacy::buildInstance(options, &swapped)`
-: The instance options of the 2016 solvers and the 2016 construction, quirks included: values
-  multiplied by `adjust` (`-r`) and truncated toward zero, and the swap of durations and costs
-  when `d[0] > d[1]`; `swapped` reports whether it happened. Unlike the 2016 code it accepts
-  $t = p$. Formulas on the [generator page](../instances/generator.qmd).
+`legacy::Options`, `legacy::buildInstance(options)`
+: The instance options of the 2016 solvers and their generating functions: values multiplied by
+  `adjust` (`-r`) and truncated toward zero, as in 2016. Each option means what it says
+  (`costFunction` the costs, `durationFunction` the durations, `eastFunction` and `westFunction`
+  the $C_I$ and $C_G$ sides), and data files are read as written; the 2016 swap of durations and
+  costs is not applied. Unlike the 2016 code it accepts $t = p$. Formulas, and the translation of
+  2016 instances, on the [generator page](../instances/generator.qmd).
 
 `writePddlProblem(out, instance, front = nullptr)`, `defaultPddlName(instance)`
 : The PDDL problem for `pddl/multi-zeno-travel.pddl`, with the front appended as comments when

@@ -8,9 +8,10 @@ exhaustive oracle. They are the natural test cases for a planner or another solv
 
 ## The linear family (default generator) {#linear}
 
-With the default options (`-C 3 -D 3`) and `-r r`, after the [2016 swap](model.qmd#swap), the
-generator builds $d_i = r\,i$ and $c_i = r\,(n + 1 - i)$ for $i = 1, \dots, n$: cost is affine and
-decreasing in duration. [Theorem 10.1](../proofs.qmd#node-theorem-10-1) of the note gives the front
+With the default options (`-C 3 -D 3`) and `-r r`, the generator builds $d_i = r\,(n + 1 - i)$ and
+$c_i = r\,i$ for $i = 1, \dots, n$; numbering the cities by increasing duration, $d_i = r\,i$ and
+$c_i = r\,(n + 1 - i)$. Cost is affine and decreasing in duration, and the order of the cities does
+not matter to the front. [Theorem 10.1](../proofs.qmd#node-theorem-10-1) of the note gives the front
 in closed form. Let $s = 2t - p$, $\kappa = \lceil s/p \rceil$, $q_0 = \lfloor s/p \rfloor$,
 $\rho = s - p q_0$, and
 $$\Phi(T) = (p - \rho)\min(T,\ n q_0) + \rho \min(T,\ n(q_0 + 1)).$$

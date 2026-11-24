@@ -321,7 +321,7 @@ accepted: the 6 points are the Pareto front (all gaps relaxed: for every central
 </section>
 <section id="the-specification" class="level2">
 <h2 class="anchored" data-anchor-id="the-specification">The specification</h2>
-<p><code>zeno --certificate FILE</code> writes, next to the front, a certificate that a checker can verify without trusting the solver. The reference checker is <code>zeno check FILE</code>; the Lean checker in <code>lean/</code> (in progress) reads the same format. This page defines the format and what a checker must verify. The proofs behind each obligation are in <code>doc/theory/exact-front.md</code>.</p>
+<p><code>zeno --certificate FILE</code> writes, next to the front, a certificate that a checker can verify without trusting the solver. The reference checker is <code>zeno check FILE</code>; the Lean checker in <code>lean/</code> (<code>lake exe zeno-check FILE</code>), whose soundness is proved in Lean, reads the same format. This page defines the format and what a checker must verify. The proofs behind each obligation are in <code>doc/theory/exact-front.md</code>.</p>
 <section id="what-a-certificate-proves" class="level3">
 <h3 class="anchored" data-anchor-id="what-a-certificate-proves">What a certificate proves</h3>
 <p>For an instance with symmetric durations and a front <span class="math inline">\((C_1, M_1), \dots, (C_r, M_r)\)</span> with <span class="math inline">\(M_1 &lt; \dots &lt; M_r\)</span> and <span class="math inline">\(C_1 &gt; \dots &gt; C_r\)</span>, the certificate shows that this list is exactly the Pareto front:</p>

@@ -14,8 +14,11 @@ with `#` are comments.
 
 The tables below list every instance with the size of its front, from `zeno`'s baseline
 (`bench/baselines/zeno/apple-m4-max/zeno.json`). The timings of every solver on them are on the
-[results page](../results.qmd). The `regimes` header describes the generator before the
-[2016 swap](model.qmd#swap); the instances solved have $d_i = i$ and $c_i = n + 1 - i$.
+[results page](../results.qmd). The suites are written in the current meaning of the options:
+`families/log-linear` and `families/sqrt-linear` were rewritten when the 2016 swap was removed
+([2016 and paper instances](generator.qmd#paper)). They build the same instances as before up to
+the order of the cities, so their fronts, and the baselines recorded before the change, still
+apply.
 
 {{< include _suites-detail.md >}}
 
@@ -61,7 +64,11 @@ Instances of note, as documented in the file:
   a file without and with a trailing blank line. The 2016 `zenoSolver_noDuplicate` kept the last
   plan of a PPP instead of the best one, and the blank line used to change the instance.
 - The first sixteen use the default generator, including the $n = t$ instances of Table 1 of the
-  EvoCOP 2015 paper (front sizes 5, 10, 17); the next seven use other families and scales.
+  EvoCOP 2015 paper (front sizes 5, 10, 17); the next seven use other families and scales. Their
+  names keep the 2016 generator flags, and their arguments are written in the current meaning:
+  `n3t5p2-C1D4r10` runs `-n 3 -t 5 -p 2 -r 10 -C 4 -D 1`
+  ([2016 and paper instances](generator.qmd#paper)). Six of them were rewritten this way when the
+  2016 swap was removed, and their golden fronts did not change.
 
 ## Lean test sets
 

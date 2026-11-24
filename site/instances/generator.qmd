@@ -3,10 +3,13 @@ title: "Generator"
 subtitle: "The families -C/-D/-E/-W, the scale options, and the instances they build"
 ---
 
-Without `-d`, `zeno` builds the instance with the generator of the 2016 solvers, from the options
-`-n -t -p -C -D -E -W -r -j -k -l -m -x -y` ([command line](../solver/cli.qmd#instance-options)).
-The construction is that of `legacy::buildInstance` (`src/zeno/legacy_input.cpp`), quirks
-included, so `zeno` and the 2016 `zenoSolver` see the same instance for the same options.
+Without `-d`, `zeno` builds the instance with the generating functions of the 2016 solvers, from
+the options `-n -t -p -C -D -E -W -r -j -k -l -m -x -y`
+([command line](../solver/cli.qmd#instance-options)). Every option means what its name says:
+`-C` sets the **costs**, `-D` the **durations**, `-E` the **$C_I$-side** and `-W` the
+**$C_G$-side** durations. The construction is `legacy::buildInstance`
+(`src/zeno/legacy_input.cpp`). The 2016 solvers read the same options differently; see
+[2016 and paper instances](#paper).
 
 ## Generating functions
 
@@ -30,39 +33,15 @@ For cities $i = 1, \dots, n$, with $r$ = `-r`, $(j, k)$ = `-j -k`, $(l, m)$ = `-
 
 1. Costs on increasing arguments, durations on **decreasing** ones:
    $$c_i = x\,f_C(\lfloor j\,i + k \rfloor) + y, \qquad d_i = x\,f_D(\lfloor l\,(n+1-i) + m \rfloor) + y.$$
-   With `-E` and `-W` (both needed; `-D` is then ignored), $d_i$ uses $f_E$ and the $C_G$-side
-   $\bar d_i = x\,f_W(\lfloor l\,(n+1-i) + m \rfloor) + y$.
+   With `-E` and `-W` (both needed; `-D` is then ignored) the instance is non-symmetric:
+   $$d_i = x\,f_E(\lfloor l\,(n+1-i) + m \rfloor) + y, \qquad \bar d_i = x\,f_W(\lfloor l\,(n+1-i) + m \rfloor) + y.$$
+   Otherwise $\bar d = d$.
 2. Every value is multiplied by $r$ and truncated toward zero: $v \leftarrow \operatorname{trunc}(r\,v)$.
    `-r 100` keeps slowly growing functions such as $\ln$ from collapsing onto a few integers.
-3. **The swap.** If $d_1 > d_2$, durations and costs are exchanged and $\bar d$ is reversed
-   ([model](model.qmd#swap)). For increasing functions on decreasing arguments $d_1 > d_2$ holds
-   unless truncation makes the first two values equal. So in practice:
 
-| Options | Swap? | Durations $d_i$ | $C_G$ side $\bar d_i$ | Costs $c_i$ |
-|---|---|---|---|---|
-| `-C a -D b` | yes (usual) | $\operatorname{trunc}(r\,(x f_a(ji+k)+y))$ | $= d_i$ | $\operatorname{trunc}(r\,(x f_b(l(n+1-i)+m)+y))$ |
-| `-C a -D b` | no (tie) | $\operatorname{trunc}(r\,(x f_b(l(n+1-i)+m)+y))$ | $= d_i$ | $\operatorname{trunc}(r\,(x f_a(ji+k)+y))$ |
-| `-C a -E e -W w` | yes (usual) | $\operatorname{trunc}(r\,(x f_a(ji+k)+y))$ | $\operatorname{trunc}(r\,(x f_w(li+m)+y))$ | $\operatorname{trunc}(r\,(x f_e(l(n+1-i)+m)+y))$ |
-| `-C a -E e -W w` | no (tie) | $\operatorname{trunc}(r\,(x f_e(l(n+1-i)+m)+y))$ | $\operatorname{trunc}(r\,(x f_w(l(n+1-i)+m)+y))$ | $\operatorname{trunc}(r\,(x f_a(ji+k)+y))$ |
-
-(the floors inside $f$ are left out for readability). After the usual swap, durations increase
-with $i$ and costs decrease: faster cities cost more, which is what makes the front non-trivial.
-
-::: {.callout-warning}
-## Non-symmetric options that give a symmetric instance
-
-After the swap, the $C_I$-side durations come from `-C` and the $C_G$-side ones from `-W`. When the
-two functions coincide the instance is **symmetric**, whatever `-E` says. `-n 3 -E 1 -W 3` (with
-the default `-C 3`) is symmetric, and `zeno` solves it as such. Use a `-W` different from `-C`,
-for example `-E 3 -W 2`:
-
-```text
-$ zeno generate -n 4 -t 3 -p 2 -E 3 -W 2 -r 10
-10 20 30 40
-10 14 17 20
-40 30 20 10
-```
-:::
+With increasing functions, the first city is the slowest and the cheapest: faster cities cost
+more, which is what makes the front non-trivial. The order of the cities does not matter to the
+front.
 
 ## Examples
 
@@ -70,21 +49,58 @@ These are the outputs of `zeno generate` (durations, then costs; 3 lines when no
 
 | Options | Instance |
 |---|---|
-| `-n 4` (defaults, linear) | $d = (1, 2, 3, 4)$, $c = (4, 3, 2, 1)$ |
-| `-n 4 -C 2 -D 2 -r 10` | $d = (10, 14, 17, 20)$, $c = (20, 17, 14, 10)$ |
-| `-n 10 -D 1 -r 100` | $d = (100, 200, \dots, 1000)$, $c = (230, 219, 207, 194, 179, 160, 138, 109, 69, 0)$ |
-| `-n 10 -D 1` (tie: no swap) | $d = (2, 2, 2, 1, 1, 1, 1, 1, 0, 0)$, $c = (1, 2, \dots, 10)$ |
-| `-n 4 -E 3 -W 2 -r 10` | $d = (10, 20, 30, 40)$, $\bar d = (10, 14, 17, 20)$, $c = (40, 30, 20, 10)$ |
+| `-n 4` (defaults, linear) | $d = (4, 3, 2, 1)$, $c = (1, 2, 3, 4)$ |
+| `-n 4 -C 2 -D 2 -r 10` | $d = (20, 17, 14, 10)$, $c = (10, 14, 17, 20)$ |
+| `-n 10 -D 1 -r 100` | $d = (230, 219, 207, 194, 179, 160, 138, 109, 69, 0)$, $c = (100, 200, \dots, 1000)$ |
+| `-n 10 -D 1` | $d = (2, 2, 2, 1, 1, 1, 1, 1, 0, 0)$, $c = (1, 2, \dots, 10)$ |
+| `-n 4 -E 3 -W 2 -r 10` | $d = (40, 30, 20, 10)$, $\bar d = (20, 17, 14, 10)$, $c = (10, 20, 30, 40)$ |
 
 Zero values are allowed and do occur: $\ln 1 = 0$, so the log family has a city of duration or
 cost 0.
+
+## 2016 and paper instances {#paper}
+
+The 2016 solvers, and the papers' instances, used the same generating functions, then exchanged
+the duration and cost vectors (and reversed the $C_G$-side durations) whenever the first duration
+exceeded the second. Their generator computes durations on decreasing arguments, so for an
+increasing function this always happened, unless truncation made the first two durations equal.
+`zeno` does not do this. To rebuild a 2016 instance, translate its options:
+
+| 2016 / paper | `zeno` |
+|---|---|
+| `-C a -D b` | `-C b -D a`, and `-j -k` exchanged with `-l -m` |
+| `-C c -E a -W b` | `-C a -E c -W b` |
+| `-d FILE` with $d_1 > d_2$ | a file with the lines exchanged: costs, then durations (3 lines: costs, the $C_G$-side line reversed, the $C_I$-side line) |
+
+`-n -t -p -r -x -y` are unchanged. Translated options build the 2016 instance with its cities in
+the reverse order, which leaves the front unchanged; a translated data file builds it exactly. Two
+cases need care:
+
+- **No swap in 2016.** If the 2016 run did not swap, keep its options as they are. To tell, run
+  `zeno generate` with the 2016 options: the 2016 solver swapped exactly when the first duration it
+  prints exceeds the second. For example `-n 10 -D 1` (with `-r 1`) starts $d = (2, 2, \dots)$, so
+  the 2016 solver did not swap it, while `-n 10 -D 1 -r 100` starts $d = (230, 219, \dots)$ and was
+  swapped.
+- **Non-symmetric scales.** `zeno` scales both duration sides with `-l -m`. The `-E`/`-W`
+  translation is exact when the 2016 instance had the same `-j -k` as `-l -m`, in particular at the
+  defaults. Otherwise write the 2016 instance as a data file.
+
+With these rules, a 2016 instance whose two duration functions coincided after the swap, such as
+`-C 3 -E 1 -W 3`, was in fact symmetric; its translation `-C 1 -E 3 -W 3` is symmetric too.
+
+The committed suites are written in the current meaning. When the swap was removed, two benchmark
+instances (`families/log-linear` and `families/sqrt-linear`) and six golden instances were
+rewritten this way, and every front stayed the same. The golden names keep their 2016 flags: the
+golden `n3t5p2-C1D4r10` runs `-n 3 -t 5 -p 2 -r 10 -C 4 -D 1` (header of
+`tests/golden/instances.txt`).
 
 ## The families in the suites
 
 The `families` suite runs every family on $n = 10$, $t = 8$, $p = 3$
 ([suites](suites.qmd#suite-families)): `linear` (`-C 3 -D 3`), `log` (`-C 1 -D 1 -r 100`), `sqrt`
 (`-C 2 -D 2 -r 100`), `pow2` (`-C 4 -D 4`), `staircase` (`-C 5 -D 5 -r 10`), and the mixed
-`log-linear` and `sqrt-linear`. The default family is the only one with a closed-form front
+`log-linear` (logarithmic durations and linear costs, `-C 3 -D 1 -r 100`) and `sqrt-linear`
+(`-C 3 -D 2 -r 100`). The default family is the only one with a closed-form front
 ([known fronts](known-fronts.qmd)). The others need the general algorithm, and on them the 2016
 greedy can miss points.
 

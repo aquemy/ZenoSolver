@@ -23,8 +23,8 @@
 | `families/sqrt` | `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` | 81 | 3.7 ms | timeout | 160 ms | 57 ms | 38 kB |
 | `families/pow2` | `-n 10 -t 8 -p 3 -C 4 -D 4` | 46 | 5.0 ms | timeout | 100 ms | 35 ms | 20 kB |
 | `families/staircase` | `-n 10 -t 8 -p 3 -C 5 -D 5 -r 10` | 133 | 3.7 ms | timeout | 60 ms | 32 ms | 57 kB |
-| `families/log-linear` | `-n 10 -t 8 -p 3 -C 1 -D 3 -r 100` | 46 | 3.6 ms | timeout | 60 ms | 29 ms | 19 kB |
-| `families/sqrt-linear` | `-n 10 -t 8 -p 3 -C 2 -D 3 -r 100` | 75 | 3.7 ms | timeout | 100 ms | 42 ms | 35 kB |
+| `families/log-linear` | `-n 10 -t 8 -p 3 -r 100 -C 3 -D 1` | 46 | 3.6 ms | timeout | 60 ms | 29 ms | 19 kB |
+| `families/sqrt-linear` | `-n 10 -t 8 -p 3 -r 100 -C 3 -D 2` | 75 | 3.7 ms | timeout | 100 ms | 42 ms | 35 kB |
 | `adversarial/lpt-counterexample` | `-n 2 -t 5 -p 2 -d lpt-counterexample.dat` | 6 | 2.1 ms | 2.3 ms | 40 ms | 22 ms | 1 kB |
 | `adversarial/clustered` | `-n 8 -t 9 -p 3 -d clustered.dat` | 66 | 3.6 ms | timeout | 40 ms | 29 ms | 30 kB |
 | `adversarial/multiples` | `-n 6 -t 8 -p 3 -d multiples.dat` | 26 | 3.6 ms | 571 ms | 40 ms | 24 ms | 10 kB |

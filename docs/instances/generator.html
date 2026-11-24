@@ -257,6 +257,7 @@ window.Quarto = {
   <li><a href="#generating-functions" id="toc-generating-functions" class="nav-link active" data-scroll-target="#generating-functions">Generating functions</a></li>
   <li><a href="#construction" id="toc-construction" class="nav-link" data-scroll-target="#construction">Construction</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#paper" id="toc-paper" class="nav-link" data-scroll-target="#paper">2016 and paper instances</a></li>
   <li><a href="#the-families-in-the-suites" id="toc-the-families-in-the-suites" class="nav-link" data-scroll-target="#the-families-in-the-suites">The families in the suites</a></li>
   </ul>
 </nav>
@@ -284,7 +285,7 @@ window.Quarto = {
 </header>
 
 
-<p>Without <code>-d</code>, <code>zeno</code> builds the instance with the generator of the 2016 solvers, from the options <code>-n -t -p -C -D -E -W -r -j -k -l -m -x -y</code> (<a href="../solver/cli.html#instance-options">command line</a>). The construction is that of <code>legacy::buildInstance</code> (<code>src/zeno/legacy_input.cpp</code>), quirks included, so <code>zeno</code> and the 2016 <code>zenoSolver</code> see the same instance for the same options.</p>
+<p>Without <code>-d</code>, <code>zeno</code> builds the instance with the generating functions of the 2016 solvers, from the options <code>-n -t -p -C -D -E -W -r -j -k -l -m -x -y</code> (<a href="../solver/cli.html#instance-options">command line</a>). Every option means what its name says: <code>-C</code> sets the <strong>costs</strong>, <code>-D</code> the <strong>durations</strong>, <code>-E</code> the <strong><span class="math inline">\(C_I\)</span>-side</strong> and <code>-W</code> the <strong><span class="math inline">\(C_G\)</span>-side</strong> durations. The construction is <code>legacy::buildInstance</code> (<code>src/zeno/legacy_input.cpp</code>). The 2016 solvers read the same options differently; see <a href="#paper">2016 and paper instances</a>.</p>
 <section id="generating-functions" class="level2">
 <h2 class="anchored" data-anchor-id="generating-functions">Generating functions</h2>
 <p><code>-C</code>, <code>-D</code>, <code>-E</code> and <code>-W</code> each take a code:</p>
@@ -335,76 +336,10 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="construction">Construction</h2>
 <p>For cities <span class="math inline">\(i = 1, \dots, n\)</span>, with <span class="math inline">\(r\)</span> = <code>-r</code>, <span class="math inline">\((j, k)\)</span> = <code>-j -k</code>, <span class="math inline">\((l, m)\)</span> = <code>-l -m</code> and <span class="math inline">\((x, y)\)</span> = <code>-x -y</code> (defaults <span class="math inline">\(r = 1\)</span>, <span class="math inline">\(j = l = x = 1\)</span>, <span class="math inline">\(k = m = y = 0\)</span>):</p>
 <ol type="1">
-<li>Costs on increasing arguments, durations on <strong>decreasing</strong> ones: <span class="math display">\[c_i = x\,f_C(\lfloor j\,i + k \rfloor) + y, \qquad d_i = x\,f_D(\lfloor l\,(n+1-i) + m \rfloor) + y.\]</span> With <code>-E</code> and <code>-W</code> (both needed; <code>-D</code> is then ignored), <span class="math inline">\(d_i\)</span> uses <span class="math inline">\(f_E\)</span> and the <span class="math inline">\(C_G\)</span>-side <span class="math inline">\(\bar d_i = x\,f_W(\lfloor l\,(n+1-i) + m \rfloor) + y\)</span>.</li>
+<li>Costs on increasing arguments, durations on <strong>decreasing</strong> ones: <span class="math display">\[c_i = x\,f_C(\lfloor j\,i + k \rfloor) + y, \qquad d_i = x\,f_D(\lfloor l\,(n+1-i) + m \rfloor) + y.\]</span> With <code>-E</code> and <code>-W</code> (both needed; <code>-D</code> is then ignored) the instance is non-symmetric: <span class="math display">\[d_i = x\,f_E(\lfloor l\,(n+1-i) + m \rfloor) + y, \qquad \bar d_i = x\,f_W(\lfloor l\,(n+1-i) + m \rfloor) + y.\]</span> Otherwise <span class="math inline">\(\bar d = d\)</span>.</li>
 <li>Every value is multiplied by <span class="math inline">\(r\)</span> and truncated toward zero: <span class="math inline">\(v \leftarrow \operatorname{trunc}(r\,v)\)</span>. <code>-r 100</code> keeps slowly growing functions such as <span class="math inline">\(\ln\)</span> from collapsing onto a few integers.</li>
-<li><strong>The swap.</strong> If <span class="math inline">\(d_1 &gt; d_2\)</span>, durations and costs are exchanged and <span class="math inline">\(\bar d\)</span> is reversed (<a href="../instances/model.html#swap">model</a>). For increasing functions on decreasing arguments <span class="math inline">\(d_1 &gt; d_2\)</span> holds unless truncation makes the first two values equal. So in practice:</li>
 </ol>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Options</th>
-<th>Swap?</th>
-<th>Durations <span class="math inline">\(d_i\)</span></th>
-<th><span class="math inline">\(C_G\)</span> side <span class="math inline">\(\bar d_i\)</span></th>
-<th>Costs <span class="math inline">\(c_i\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>-C a -D b</code></td>
-<td>yes (usual)</td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_a(ji+k)+y))\)</span></td>
-<td><span class="math inline">\(= d_i\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_b(l(n+1-i)+m)+y))\)</span></td>
-</tr>
-<tr class="even">
-<td><code>-C a -D b</code></td>
-<td>no (tie)</td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_b(l(n+1-i)+m)+y))\)</span></td>
-<td><span class="math inline">\(= d_i\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_a(ji+k)+y))\)</span></td>
-</tr>
-<tr class="odd">
-<td><code>-C a -E e -W w</code></td>
-<td>yes (usual)</td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_a(ji+k)+y))\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_w(li+m)+y))\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_e(l(n+1-i)+m)+y))\)</span></td>
-</tr>
-<tr class="even">
-<td><code>-C a -E e -W w</code></td>
-<td>no (tie)</td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_e(l(n+1-i)+m)+y))\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_w(l(n+1-i)+m)+y))\)</span></td>
-<td><span class="math inline">\(\operatorname{trunc}(r\,(x f_a(ji+k)+y))\)</span></td>
-</tr>
-</tbody>
-</table>
-<p>(the floors inside <span class="math inline">\(f\)</span> are left out for readability). After the usual swap, durations increase with <span class="math inline">\(i\)</span> and costs decrease: faster cities cost more, which is what makes the front non-trivial.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Non-symmetric options that give a symmetric instance
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>After the swap, the <span class="math inline">\(C_I\)</span>-side durations come from <code>-C</code> and the <span class="math inline">\(C_G\)</span>-side ones from <code>-W</code>. When the two functions coincide the instance is <strong>symmetric</strong>, whatever <code>-E</code> says. <code>-n 3 -E 1 -W 3</code> (with the default <code>-C 3</code>) is symmetric, and <code>zeno</code> solves it as such. Use a <code>-W</code> different from <code>-C</code>, for example <code>-E 3 -W 2</code>:</p>
-<pre class="text"><code>$ zeno generate -n 4 -t 3 -p 2 -E 3 -W 2 -r 10
-10 20 30 40
-10 14 17 20
-40 30 20 10</code></pre>
-</div>
-</div>
+<p>With increasing functions, the first city is the slowest and the cheapest: faster cities cost more, which is what makes the front non-trivial. The order of the cities does not matter to the front.</p>
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
@@ -423,31 +358,68 @@ Non-symmetric options that give a symmetric instance
 <tbody>
 <tr class="odd">
 <td><code>-n 4</code> (defaults, linear)</td>
-<td><span class="math inline">\(d = (1, 2, 3, 4)\)</span>, <span class="math inline">\(c = (4, 3, 2, 1)\)</span></td>
+<td><span class="math inline">\(d = (4, 3, 2, 1)\)</span>, <span class="math inline">\(c = (1, 2, 3, 4)\)</span></td>
 </tr>
 <tr class="even">
 <td><code>-n 4 -C 2 -D 2 -r 10</code></td>
-<td><span class="math inline">\(d = (10, 14, 17, 20)\)</span>, <span class="math inline">\(c = (20, 17, 14, 10)\)</span></td>
+<td><span class="math inline">\(d = (20, 17, 14, 10)\)</span>, <span class="math inline">\(c = (10, 14, 17, 20)\)</span></td>
 </tr>
 <tr class="odd">
 <td><code>-n 10 -D 1 -r 100</code></td>
-<td><span class="math inline">\(d = (100, 200, \dots, 1000)\)</span>, <span class="math inline">\(c = (230, 219, 207, 194, 179, 160, 138, 109, 69, 0)\)</span></td>
+<td><span class="math inline">\(d = (230, 219, 207, 194, 179, 160, 138, 109, 69, 0)\)</span>, <span class="math inline">\(c = (100, 200, \dots, 1000)\)</span></td>
 </tr>
 <tr class="even">
-<td><code>-n 10 -D 1</code> (tie: no swap)</td>
+<td><code>-n 10 -D 1</code></td>
 <td><span class="math inline">\(d = (2, 2, 2, 1, 1, 1, 1, 1, 0, 0)\)</span>, <span class="math inline">\(c = (1, 2, \dots, 10)\)</span></td>
 </tr>
 <tr class="odd">
 <td><code>-n 4 -E 3 -W 2 -r 10</code></td>
-<td><span class="math inline">\(d = (10, 20, 30, 40)\)</span>, <span class="math inline">\(\bar d = (10, 14, 17, 20)\)</span>, <span class="math inline">\(c = (40, 30, 20, 10)\)</span></td>
+<td><span class="math inline">\(d = (40, 30, 20, 10)\)</span>, <span class="math inline">\(\bar d = (20, 17, 14, 10)\)</span>, <span class="math inline">\(c = (10, 20, 30, 40)\)</span></td>
 </tr>
 </tbody>
 </table>
 <p>Zero values are allowed and do occur: <span class="math inline">\(\ln 1 = 0\)</span>, so the log family has a city of duration or cost 0.</p>
 </section>
+<section id="paper" class="level2">
+<h2 class="anchored" data-anchor-id="paper">2016 and paper instances</h2>
+<p>The 2016 solvers, and the papers’ instances, used the same generating functions, then exchanged the duration and cost vectors (and reversed the <span class="math inline">\(C_G\)</span>-side durations) whenever the first duration exceeded the second. Their generator computes durations on decreasing arguments, so for an increasing function this always happened, unless truncation made the first two durations equal. <code>zeno</code> does not do this. To rebuild a 2016 instance, translate its options:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>2016 / paper</th>
+<th><code>zeno</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>-C a -D b</code></td>
+<td><code>-C b -D a</code>, and <code>-j -k</code> exchanged with <code>-l -m</code></td>
+</tr>
+<tr class="even">
+<td><code>-C c -E a -W b</code></td>
+<td><code>-C a -E c -W b</code></td>
+</tr>
+<tr class="odd">
+<td><code>-d FILE</code> with <span class="math inline">\(d_1 &gt; d_2\)</span></td>
+<td>a file with the lines exchanged: costs, then durations (3 lines: costs, the <span class="math inline">\(C_G\)</span>-side line reversed, the <span class="math inline">\(C_I\)</span>-side line)</td>
+</tr>
+</tbody>
+</table>
+<p><code>-n -t -p -r -x -y</code> are unchanged. Translated options build the 2016 instance with its cities in the reverse order, which leaves the front unchanged; a translated data file builds it exactly. Two cases need care:</p>
+<ul>
+<li><strong>No swap in 2016.</strong> If the 2016 run did not swap, keep its options as they are. To tell, run <code>zeno generate</code> with the 2016 options: the 2016 solver swapped exactly when the first duration it prints exceeds the second. For example <code>-n 10 -D 1</code> (with <code>-r 1</code>) starts <span class="math inline">\(d = (2, 2, \dots)\)</span>, so the 2016 solver did not swap it, while <code>-n 10 -D 1 -r 100</code> starts <span class="math inline">\(d = (230, 219, \dots)\)</span> and was swapped.</li>
+<li><strong>Non-symmetric scales.</strong> <code>zeno</code> scales both duration sides with <code>-l -m</code>. The <code>-E</code>/<code>-W</code> translation is exact when the 2016 instance had the same <code>-j -k</code> as <code>-l -m</code>, in particular at the defaults. Otherwise write the 2016 instance as a data file.</li>
+</ul>
+<p>With these rules, a 2016 instance whose two duration functions coincided after the swap, such as <code>-C 3 -E 1 -W 3</code>, was in fact symmetric; its translation <code>-C 1 -E 3 -W 3</code> is symmetric too.</p>
+<p>The committed suites are written in the current meaning. When the swap was removed, two benchmark instances (<code>families/log-linear</code> and <code>families/sqrt-linear</code>) and six golden instances were rewritten this way, and every front stayed the same. The golden names keep their 2016 flags: the golden <code>n3t5p2-C1D4r10</code> runs <code>-n 3 -t 5 -p 2 -r 10 -C 4 -D 1</code> (header of <code>tests/golden/instances.txt</code>).</p>
+</section>
 <section id="the-families-in-the-suites" class="level2">
 <h2 class="anchored" data-anchor-id="the-families-in-the-suites">The families in the suites</h2>
-<p>The <code>families</code> suite runs every family on <span class="math inline">\(n = 10\)</span>, <span class="math inline">\(t = 8\)</span>, <span class="math inline">\(p = 3\)</span> (<a href="../instances/suites.html#suite-families">suites</a>): <code>linear</code> (<code>-C 3 -D 3</code>), <code>log</code> (<code>-C 1 -D 1 -r 100</code>), <code>sqrt</code> (<code>-C 2 -D 2 -r 100</code>), <code>pow2</code> (<code>-C 4 -D 4</code>), <code>staircase</code> (<code>-C 5 -D 5 -r 10</code>), and the mixed <code>log-linear</code> and <code>sqrt-linear</code>. The default family is the only one with a closed-form front (<a href="../instances/known-fronts.html">known fronts</a>). The others need the general algorithm, and on them the 2016 greedy can miss points.</p>
+<p>The <code>families</code> suite runs every family on <span class="math inline">\(n = 10\)</span>, <span class="math inline">\(t = 8\)</span>, <span class="math inline">\(p = 3\)</span> (<a href="../instances/suites.html#suite-families">suites</a>): <code>linear</code> (<code>-C 3 -D 3</code>), <code>log</code> (<code>-C 1 -D 1 -r 100</code>), <code>sqrt</code> (<code>-C 2 -D 2 -r 100</code>), <code>pow2</code> (<code>-C 4 -D 4</code>), <code>staircase</code> (<code>-C 5 -D 5 -r 10</code>), and the mixed <code>log-linear</code> (logarithmic durations and linear costs, <code>-C 3 -D 1 -r 100</code>) and <code>sqrt-linear</code> (<code>-C 3 -D 2 -r 100</code>). The default family is the only one with a closed-form front (<a href="../instances/known-fronts.html">known fronts</a>). The others need the general algorithm, and on them the 2016 greedy can miss points.</p>
 <p>Every instance the generator builds without <code>-E</code>/<code>-W</code> is symmetric, and every PDDL problem <code>zeno</code> writes from it satisfies (A1), so its front is exact.</p>
 
 

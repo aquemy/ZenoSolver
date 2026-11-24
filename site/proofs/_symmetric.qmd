@@ -145,7 +145,7 @@ theorem Admissible.exists_plan {N : Network n} (hS : N.dbar = N.d) {p : ℕ} (hp
       planCost c P = totalCost c X ∧ planMakespan P = 2 * maxLoad N.d X := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -201,7 +201,7 @@ structure RoleConfig (n p : ℕ) where
   sum_drop_eq_sum_pick : ∑ k, drop k = ∑ k, pick k
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
+[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
 
 :::
 
@@ -331,7 +331,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       2 * t - p ≤ size cfg.groups := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -374,7 +374,7 @@ theorem RoleConfig.exists_shrink {s : ℕ} (hps : p ≤ s) : ∀ (N : ℕ) (cfg 
   …
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
 
@@ -387,7 +387,7 @@ theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} 
     ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
 ```
 
-[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -427,7 +427,7 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness
   …
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
 
@@ -436,7 +436,7 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness
 theorem admissible_groups : Admissible R.groups := …
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -505,7 +505,7 @@ theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤
       totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
 ```
 
-[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -580,7 +580,7 @@ theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -655,7 +655,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -748,7 +748,7 @@ theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
 
@@ -763,7 +763,7 @@ theorem FeasibleAnywhere.exists_admissible {N : Network n} (hS : N.dbar = N.d) (
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -1118,7 +1118,7 @@ theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} 
     ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
 ```
 
-[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
 
 :::
 
