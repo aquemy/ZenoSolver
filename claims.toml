@@ -458,6 +458,13 @@ lean      = "ZenoFront.Cert.check_sound"
 paper     = "Thm 9.1, doc/theory/exact-front.md §9"
 created   = "2026-11-23"
 
+[claims.lem-9-2]
+kind      = "lemma"
+statement = "Lemma 9.2 (potentials) [X2]: in a finite graph, a map V to K ∪ {∞} with V(target) ≤ 0 and V(u) ≤ wt(u, v) + V(v) on every arc gives V(source) at most the weight of every path from the source to the target."
+status    = "math.proved-informal"
+paper     = "Lemma 9.2, doc/theory/exact-front.md §9"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
