@@ -1,0 +1,31 @@
+{
+  "binaries": {
+    "build/checks/bin/config_front": "28f284e8aaac61cf660d17da1f41e36e695a2a5efcd90056b183b4b79c09f4cc",
+    "build/checks/bin/simple_plans": "199d9e885f7be737c4da8fed01c81c45dd6138b24812d99de16f54300de2aa18",
+    "build/checks/bin/truth": "580d57e90cbf08d4954c4ef171d36310117fda8dd9422d6f1d312d3ad30aec2c",
+    "build/release/zeno": "28ccc7c7aee5ab95d1953bb55e7bddd51b03e311aef5480a06f055c3c7814adc"
+  },
+  "claim": "exp-e4-nonsymmetric-front",
+  "cpus": 16,
+  "created_at": "2026-11-24T10:03:56+00:00",
+  "experiment": "E4_nonsymmetric_front",
+  "figures": [
+    "E4_nonsymmetric_front/nonsymmetric_fronts.png",
+    "E4_nonsymmetric_front/nonsymmetric_fronts.svg"
+  ],
+  "git_dirty": false,
+  "git_sha": "d90b3006488a75365faf437a9bae79a551384196",
+  "host": "proofs-ws.local",
+  "passed": true,
+  "platform": "macOS-15.7.1-arm64-arm-64bit-Mach-O",
+  "runtime_s": 23.8,
+  "seed": 0,
+  "versions": {
+    "cxx": "Apple clang version 17.0.0 (clang-1700.3.19.1)",
+    "lean": "leanprover/lean4:v4.36.0",
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.5",
+    "ortools": "9.15.6755",
+    "python": "3.13.11"
+  }
+}

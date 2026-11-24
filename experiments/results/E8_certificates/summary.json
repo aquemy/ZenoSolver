@@ -1,0 +1,95 @@
+{
+  "claim": "exp-e8-certificates",
+  "criterion": "both checkers give the expected verdict on the 41 corpus files, accept every fresh certificate, and never accept a mutant whose front is false, whose plans fail the independent simulator, or which lacks an assumption a bound needs",
+  "experiment": "E8_certificates",
+  "explanation": "4056 mutants; 3904 had to be rejected and 0 were accepted. The checkers disagree on 0 mutants (allowed only where either verdict is correct).",
+  "figures": [
+    "E8_certificates/certificate_mutants.png",
+    "E8_certificates/certificate_mutants.svg"
+  ],
+  "hypothesis": "Theorem 9.1: a certificate whose obligations 1-4 hold lists exactly the Pareto front; a sound checker therefore never accepts a false front.",
+  "metrics": {
+    "checker_disagreements": 0,
+    "corpus_files": 41,
+    "corpus_wrong_verdicts": [],
+    "disagreement_examples": [],
+    "fresh_not_written_open_bracket": 0,
+    "fresh_rejected": [],
+    "fresh_written": {
+      "non-symmetric": 300,
+      "symmetric": 400
+    },
+    "mutants": {
+      "change-passenger": {
+        "cpp_rejected": 679,
+        "cpp_timeout": 0,
+        "lean_rejected": 679,
+        "lean_timeout": 0,
+        "must_reject": 679,
+        "mutants": 679
+      },
+      "drop-assumption": {
+        "cpp_rejected": 718,
+        "cpp_timeout": 0,
+        "lean_rejected": 718,
+        "lean_timeout": 0,
+        "must_reject": 718,
+        "mutants": 718
+      },
+      "drop-point": {
+        "cpp_rejected": 410,
+        "cpp_timeout": 0,
+        "lean_rejected": 410,
+        "lean_timeout": 0,
+        "must_reject": 410,
+        "mutants": 410
+      },
+      "lower-cost": {
+        "cpp_rejected": 667,
+        "cpp_timeout": 0,
+        "lean_rejected": 667,
+        "lean_timeout": 0,
+        "must_reject": 667,
+        "mutants": 667
+      },
+      "lower-makespan": {
+        "cpp_rejected": 722,
+        "cpp_timeout": 0,
+        "lean_rejected": 722,
+        "lean_timeout": 0,
+        "must_reject": 722,
+        "mutants": 722
+      },
+      "shift-leg": {
+        "cpp_rejected": 708,
+        "cpp_timeout": 0,
+        "lean_rejected": 708,
+        "lean_timeout": 0,
+        "must_reject": 708,
+        "mutants": 720
+      },
+      "weaken-gap": {
+        "cpp_rejected": 140,
+        "cpp_timeout": 0,
+        "lean_rejected": 140,
+        "lean_timeout": 0,
+        "must_reject": 0,
+        "mutants": 140
+      }
+    },
+    "mutation_bases": 722,
+    "unsound_acceptances": 0,
+    "unsound_examples": []
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "corpus": "lean/test/certificates (accepted/, rejected/)",
+    "fresh": "400 symmetric (n<=6, p<=5, t<=p+6, d in [1,25]) and 300 non-symmetric (n<=3, p<=3, t<=p+3, d, dbar in [1,15]) instances",
+    "mutants": "7 mutation kinds per accepted certificate, where applicable"
+  },
+  "tests": [
+    "thm-9-1"
+  ]
+}

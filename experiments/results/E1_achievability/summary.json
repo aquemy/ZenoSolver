@@ -1,0 +1,51 @@
+{
+  "claim": "exp-e1-achievability",
+  "criterion": "every plan printed by `zeno --plans` is feasible under the independent simulator and has exactly the cost and makespan of its front point (0 mismatches)",
+  "experiment": "E1_achievability",
+  "explanation": "12,068 symmetric front points and 723 non-symmetric ones were replayed; 0 plans failed the simulator or missed their point.",
+  "figures": [
+    "E1_achievability/achievability.png",
+    "E1_achievability/achievability.svg"
+  ],
+  "hypothesis": "Theorem 4.1: under (S), an admissible partition gives a plan of makespan equal to its largest load, so every point of the front `zeno` computes is achieved by a real plan.",
+  "metrics": {
+    "failures": [],
+    "nonsymmetric_mismatches": 0,
+    "nonsymmetric_points_replayed": 723,
+    "per_family": {
+      "generator": {
+        "failures": 0,
+        "instances": 150,
+        "points": 5670
+      },
+      "non-symmetric": {
+        "failures": 0,
+        "instances": 200,
+        "points": 723
+      },
+      "random": {
+        "failures": 0,
+        "instances": 400,
+        "points": 6398
+      }
+    },
+    "symmetric_mismatches": 0,
+    "symmetric_points_replayed": 12068
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "generator": "n<=12, p<=6, t<=p+10, -C/-D in 1..5, -r in {1,10,100}, positive durations only",
+    "instances": {
+      "generator": 150,
+      "non-symmetric": 200,
+      "random": 400
+    },
+    "non-symmetric": "n<=4, p<=4, t<=p+4, d, dbar in [1,20]",
+    "random": "n<=8, p<=6, t<=p+8, d in [1,30], c in [0,50]; half with anti-correlated costs"
+  },
+  "tests": [
+    "thm-4-1"
+  ]
+}

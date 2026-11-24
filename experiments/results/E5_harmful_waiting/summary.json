@@ -1,0 +1,302 @@
+{
+  "claim": "exp-e5-harmful-waiting",
+  "criterion": "on the instance of Proposition 6.5 the cheapest point with makespan <= 73 costs 14 when waiting is ignored and 18 with exact waiting, and zeno, zenoOracle and config_front all give the front stated in the note",
+  "experiment": "E5_harmful_waiting",
+  "explanation": "Ignoring waiting gives [(14, 72), (30, 50)] on the Prop 6.5 instance, which no plan reaches: the cheapest plan within makespan 73 costs 18, not 14. Harmful waiting is rare at the configuration level (1 of 900,143, 29 of 1,011,529, 28 of 506,408) but changes the front of 9 of 150 instances shaped like Prop 6.5 and 0 of 150 uniform ones.",
+  "figures": [
+    "E5_harmful_waiting/harmful_waiting.png",
+    "E5_harmful_waiting/harmful_waiting.svg"
+  ],
+  "hypothesis": "Conjecture 6.5 (no harmful waiting) would make the front the Pareto set of (cost, largest load) over role configurations; Proposition 6.5 says it is not.",
+  "metrics": {
+    "configuration_search": {
+      "one shortest crossing per plane, p<=4, <=5 links, d<=20": {
+        "harmful": 29,
+        "tested": 1011529
+      },
+      "one shortest crossing per plane, p<=5, <=6 links, d<=30": {
+        "harmful": 28,
+        "tested": 506408
+      },
+      "random crossings, p<=4, <=4 links, d<=12": {
+        "harmful": 1,
+        "tested": 900143
+      }
+    },
+    "front_level": {
+      "uniform": {
+        "changed": 0,
+        "compared": 150,
+        "wilson95": [
+          0.0,
+          0.025
+        ]
+      },
+      "waiting": {
+        "changed": 9,
+        "compared": 150,
+        "wilson95": [
+          0.0319,
+          0.1101
+        ]
+      }
+    },
+    "front_level_examples": [
+      {
+        "c": [
+          3,
+          2
+        ],
+        "d": [
+          2,
+          14
+        ],
+        "dbar": [
+          1,
+          8
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          6,
+          2,
+          2
+        ],
+        "d": [
+          1,
+          10,
+          13
+        ],
+        "dbar": [
+          2,
+          6,
+          4
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          3,
+          0
+        ],
+        "d": [
+          3,
+          15
+        ],
+        "dbar": [
+          2,
+          9
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          5,
+          2,
+          1
+        ],
+        "d": [
+          2,
+          11,
+          20
+        ],
+        "dbar": [
+          2,
+          6,
+          10
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          6,
+          0
+        ],
+        "d": [
+          2,
+          13
+        ],
+        "dbar": [
+          2,
+          8
+        ],
+        "family": "waiting",
+        "p": 4,
+        "t": 6
+      },
+      {
+        "c": [
+          3,
+          0,
+          0
+        ],
+        "d": [
+          3,
+          16,
+          17
+        ],
+        "dbar": [
+          2,
+          8,
+          6
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          3,
+          0
+        ],
+        "d": [
+          1,
+          19
+        ],
+        "dbar": [
+          3,
+          8
+        ],
+        "family": "waiting",
+        "p": 3,
+        "t": 5
+      },
+      {
+        "c": [
+          5,
+          1
+        ],
+        "d": [
+          3,
+          16
+        ],
+        "dbar": [
+          2,
+          8
+        ],
+        "family": "waiting",
+        "p": 4,
+        "t": 7
+      }
+    ],
+    "points_only_without_waiting": [
+      [
+        14,
+        72
+      ],
+      [
+        30,
+        50
+      ]
+    ],
+    "prop65_cheapest_within_73_exact": 18,
+    "prop65_cheapest_within_73_ignoring_waiting": 14,
+    "prop65_front_exact": [
+      [
+        10,
+        90
+      ],
+      [
+        14,
+        74
+      ],
+      [
+        18,
+        68
+      ],
+      [
+        22,
+        66
+      ],
+      [
+        26,
+        52
+      ],
+      [
+        34,
+        42
+      ],
+      [
+        38,
+        36
+      ],
+      [
+        42,
+        30
+      ],
+      [
+        50,
+        18
+      ]
+    ],
+    "prop65_front_ignoring_waiting": [
+      [
+        10,
+        90
+      ],
+      [
+        14,
+        72
+      ],
+      [
+        18,
+        68
+      ],
+      [
+        22,
+        66
+      ],
+      [
+        26,
+        52
+      ],
+      [
+        30,
+        50
+      ],
+      [
+        34,
+        42
+      ],
+      [
+        38,
+        36
+      ],
+      [
+        42,
+        30
+      ],
+      [
+        50,
+        18
+      ]
+    ],
+    "prop65_simple_plans_exact_equals_oracle": true,
+    "prop65_zeno_closed_bracket": true
+  },
+  "passed": true,
+  "refutes": [
+    "paper-no-harmful-waiting"
+  ],
+  "seed": 0,
+  "sizes": {
+    "configuration_search": {
+      "one shortest crossing per plane, p<=4, <=5 links, d<=20": "200,000 trials x 8 seeds",
+      "one shortest crossing per plane, p<=5, <=6 links, d<=30": "100,000 trials x 8 seeds",
+      "random crossings, p<=4, <=4 links, d<=12": "200,000 trials x 8 seeds"
+    },
+    "front_level": "300 instances, half uniform (d, dbar in [1,20]), half shaped like Prop 6.5; n<=3, p<=4, t<=7, s<=10"
+  },
+  "tests": [
+    "prop-6-5"
+  ]
+}

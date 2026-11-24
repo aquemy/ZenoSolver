@@ -1,0 +1,49 @@
+{
+  "claim": "exp-e3-forest-dp",
+  "criterion": "CP-SAT's E(T) equals zeno's cost at every front level and at the level below the next point, the level below the fastest point is infeasible, and the Lean zeno-front gives the same front",
+  "experiment": "E3_forest_dp",
+  "explanation": "23,346 levels over 320 instances (up to n = 12, t = 28, p = 10) agree with an independent CP-SAT model; 37 instances needed the forest bound in their certificate (L < E somewhere), the case where E is not the relaxation.",
+  "figures": [
+    "E3_forest_dp/forest_dp_vs_cpsat.png",
+    "E3_forest_dp/forest_dp_vs_cpsat.svg"
+  ],
+  "hypothesis": "Theorem 7.5: the link-forest DP returns E(T), the least cost of an admissible partition at level T, so the front zeno builds from it is the Pareto set of (E(T), 2T).",
+  "metrics": {
+    "cpsat_mismatches": 0,
+    "cpsat_timeouts": 0,
+    "front_points": 11676,
+    "instances": 320,
+    "instances_with_forest_gaps": 37,
+    "lean_compared": 320,
+    "lean_differ": 0,
+    "lean_examples": [],
+    "lean_failed": 0,
+    "levels_checked": 23346,
+    "max_front": 400,
+    "mismatch_examples": []
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "large": {
+      "c": "0..60",
+      "d": "0..80",
+      "instances": 120,
+      "n": "2..12",
+      "p": "2..10",
+      "t": "p..28"
+    },
+    "medium": {
+      "c": "0..60",
+      "d": "0..40",
+      "instances": 200,
+      "n": "2..8",
+      "p": "2..6",
+      "t": "p..16"
+    }
+  },
+  "tests": [
+    "thm-7-5"
+  ]
+}

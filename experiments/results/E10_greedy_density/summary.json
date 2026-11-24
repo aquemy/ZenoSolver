@@ -1,0 +1,390 @@
+{
+  "claim": "exp-e10-greedy-density",
+  "criterion": "the reimplemented greedy differs from the golden fronts exactly on lpt-counterexample and n3t5p2-C1D4r10, its pruning never changes a front, and no greedy point beats the exact front",
+  "experiment": "E10_greedy_density",
+  "explanation": "Outside the linear family the greedy is exact on 2,274 of 2,772 instances (82.0%, 95% CI 80.6%-83.4%) and finds 93.9% of the front points. With p = 1 or t - p <= 2 it is exact on 1,512 of 1,512 instances: every miss in this sample has p >= 2 and t - p >= 3 (an observation, not a claim). On the linear family it is exact on 924 of 924 (95% CI 99.6%-100.0%): evidence for Conjecture 10.2, not a proof.",
+  "figures": [
+    "E10_greedy_density/greedy_heatmap.png",
+    "E10_greedy_density/greedy_heatmap.svg",
+    "E10_greedy_density/greedy_curves.png",
+    "E10_greedy_density/greedy_curves.svg"
+  ],
+  "hypothesis": "The papers claim their per-PPP greedy is optimal; \u00a75 refutes it with two counterexamples. Conjecture 10.2 says it is exact on the linear family.",
+  "metrics": {
+    "by_family": {
+      "anti": {
+        "exact": 663,
+        "front_points": 28283,
+        "instances": 924,
+        "points_right": 26148,
+        "wilson95": [
+          0.6876,
+          0.7456
+        ]
+      },
+      "generator": {
+        "exact": 824,
+        "front_points": 19330,
+        "instances": 924,
+        "points_right": 18431,
+        "wilson95": [
+          0.8701,
+          0.9102
+        ]
+      },
+      "linear-affine": {
+        "exact": 616,
+        "front_points": 10701,
+        "instances": 616,
+        "points_right": 10701,
+        "wilson95": [
+          0.9938,
+          1.0
+        ]
+      },
+      "linear-generator": {
+        "exact": 308,
+        "front_points": 6356,
+        "instances": 308,
+        "points_right": 6356,
+        "wilson95": [
+          0.9877,
+          1.0
+        ]
+      },
+      "random": {
+        "exact": 787,
+        "front_points": 8669,
+        "instances": 924,
+        "points_right": 8248,
+        "wilson95": [
+          0.8274,
+          0.8732
+        ]
+      }
+    },
+    "by_n": {
+      "2": {
+        "exact": 348,
+        "instances": 396
+      },
+      "3": {
+        "exact": 333,
+        "instances": 396
+      },
+      "4": {
+        "exact": 329,
+        "instances": 396
+      },
+      "5": {
+        "exact": 313,
+        "instances": 396
+      },
+      "6": {
+        "exact": 319,
+        "instances": 396
+      },
+      "7": {
+        "exact": 316,
+        "instances": 396
+      },
+      "8": {
+        "exact": 316,
+        "instances": 396
+      }
+    },
+    "by_t_minus_p": {
+      "p=1": {
+        "exact": 567,
+        "instances": 567
+      },
+      "t-p=0": {
+        "exact": 315,
+        "instances": 315
+      },
+      "t-p=1": {
+        "exact": 315,
+        "instances": 315
+      },
+      "t-p=2": {
+        "exact": 315,
+        "instances": 315
+      },
+      "t-p=3": {
+        "exact": 264,
+        "instances": 315
+      },
+      "t-p=4": {
+        "exact": 193,
+        "instances": 315
+      },
+      "t-p=5": {
+        "exact": 120,
+        "instances": 252
+      },
+      "t-p=6": {
+        "exact": 98,
+        "instances": 189
+      },
+      "t-p=7": {
+        "exact": 47,
+        "instances": 126
+      },
+      "t-p=8": {
+        "exact": 40,
+        "instances": 63
+      }
+    },
+    "by_t_p": {
+      "t10p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t10p2": {
+        "exact": 40,
+        "instances": 63
+      },
+      "t10p3": {
+        "exact": 16,
+        "instances": 63
+      },
+      "t10p4": {
+        "exact": 40,
+        "instances": 63
+      },
+      "t10p5": {
+        "exact": 31,
+        "instances": 63
+      },
+      "t10p6": {
+        "exact": 58,
+        "instances": 63
+      },
+      "t2p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t2p2": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t3p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t3p2": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t3p3": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t4p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t4p2": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t4p3": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t4p4": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t5p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t5p2": {
+        "exact": 49,
+        "instances": 63
+      },
+      "t5p3": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t5p4": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t5p5": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t6p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t6p2": {
+        "exact": 39,
+        "instances": 63
+      },
+      "t6p3": {
+        "exact": 31,
+        "instances": 63
+      },
+      "t6p4": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t6p5": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t6p6": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t7p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t7p2": {
+        "exact": 40,
+        "instances": 63
+      },
+      "t7p3": {
+        "exact": 21,
+        "instances": 63
+      },
+      "t7p4": {
+        "exact": 58,
+        "instances": 63
+      },
+      "t7p5": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t7p6": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t8p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t8p2": {
+        "exact": 40,
+        "instances": 63
+      },
+      "t8p3": {
+        "exact": 22,
+        "instances": 63
+      },
+      "t8p4": {
+        "exact": 48,
+        "instances": 63
+      },
+      "t8p5": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t8p6": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t9p1": {
+        "exact": 63,
+        "instances": 63
+      },
+      "t9p2": {
+        "exact": 31,
+        "instances": 63
+      },
+      "t9p3": {
+        "exact": 18,
+        "instances": 63
+      },
+      "t9p4": {
+        "exact": 27,
+        "instances": 63
+      },
+      "t9p5": {
+        "exact": 27,
+        "instances": 63
+      },
+      "t9p6": {
+        "exact": 63,
+        "instances": 63
+      }
+    },
+    "exact_when_p1_or_t_minus_p_le_2": [
+      1512,
+      1512
+    ],
+    "greedy_beats_front": [],
+    "instances": 3696,
+    "linear_exact": 924,
+    "linear_instances": 924,
+    "linear_misses": [],
+    "linear_wilson95": [
+      0.9959,
+      1.0
+    ],
+    "nonlinear_exact": 2274,
+    "nonlinear_instances": 2772,
+    "nonlinear_points_found": 0.9386,
+    "nonlinear_share_exact": 0.8203,
+    "nonlinear_wilson95": [
+      0.8056,
+      0.8342
+    ],
+    "timeouts": 0,
+    "validation": {
+      "expected_fails": [
+        "lpt-counterexample",
+        "n3t5p2-C1D4r10"
+      ],
+      "golden_differs_on": [
+        "lpt-counterexample",
+        "n3t5p2-C1D4r10"
+      ],
+      "golden_instances": 27,
+      "missed_points": {
+        "lpt-counterexample": [
+          [
+            260,
+            60
+          ]
+        ],
+        "n3t5p2-C1D4r10": [
+          [
+            260,
+            60
+          ]
+        ]
+      },
+      "ok": true,
+      "pruning_never_changes_front": true
+    }
+  },
+  "passed": true,
+  "refutes": [
+    "paper-greedy-optimal"
+  ],
+  "seed": 0,
+  "sizes": {
+    "generator": "3 of the 24 non-linear -C/-D pairs per cell, -r in {1,10,100}",
+    "grid": "n in 2..8, t in 2..10, p in 1..min(t, 6)",
+    "linear": "-C 3 -D 3 with -r in {1,10}; data files d_i = r0 i (r0 in 1..5), c_i = alpha - beta i (beta in 0..5, alpha in [beta n, beta n + 30])",
+    "per_cell": {
+      "anti": 3,
+      "generator": 3,
+      "linear-affine": 2,
+      "linear-generator": 1,
+      "random": 3
+    },
+    "random": "d in [1,30], c in [0,50] (uniform or anti-correlated)",
+    "timeout_s": 300
+  },
+  "tests": [
+    "paper-greedy-optimal",
+    "claim-5",
+    "conj-10-2"
+  ]
+}

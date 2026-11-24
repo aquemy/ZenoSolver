@@ -548,3 +548,112 @@ created   = "2026-11-23"
 # ===========================================================================
 # Experiments
 # ===========================================================================
+#
+# The seeded validation campaign in experiments/ (experiments/README.md). Each experiment is
+# experiments/<EN_name>/run.py (seed 0) and writes its verdict, provenance and figures to
+# experiments/results/<EN_name>/. Extra fields: `tests` lists the claims an experiment bears on,
+# `refutes` those its evidence contradicts, `code` and `results` locate it. `status` uses the science
+# vocabulary: sci.supported (the evidence agrees with the claims tested; for a search, no
+# counterexample in the sample, which is not a proof) and sci.measured (a measurement).
+
+[claims.exp-e1-achievability]
+kind      = "experiment"
+statement = "E1 (achievability): every plan `zeno --plans` prints for a front point is feasible under an independent simulator and reaches exactly that point: 12,068 points on 550 symmetric instances (random data and generator families) and 723 on 200 non-symmetric ones, 0 mismatches."
+status    = "sci.supported"
+tests     = ["thm-4-1"]
+code      = "experiments/E1_achievability/run.py"
+results   = "experiments/results/E1_achievability"
+paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
+created   = "2026-11-24"
+
+[claims.exp-e2-symmetric-front]
+kind      = "experiment"
+statement = "E2 (symmetric front): zeno's front equals the front of the exhaustive search over all plans (truth.cpp; central flights absent or useless, so (A1) holds) on 1,000 tiny instances in each regime, and the front of every role-configuration schedule (zenoOracle) on 1,000 instances with n ≤ 5, t ≤ 6: 3,000 comparisons, 0 mismatches."
+status    = "sci.supported"
+tests     = ["thm-4-7", "cor-4-8"]
+code      = "experiments/E2_symmetric_front/run.py"
+results   = "experiments/results/E2_symmetric_front"
+paper     = "Thm 4.7 and Cor 4.8, doc/theory/exact-front.md §4.3-4.4"
+created   = "2026-11-24"
+
+[claims.exp-e3-forest-dp]
+kind      = "experiment"
+statement = "E3 (link-forest DP): on 320 random instances up to n = 12, t = 28, p = 10, an independent CP-SAT model of E(T) agrees with zeno at 23,346 levels (every front level, the level below each next point, and infeasibility below the fastest point), and the Lean solver zeno-front returns the same front on all 320."
+status    = "sci.supported"
+tests     = ["thm-7-5"]
+code      = "experiments/E3_forest_dp/run.py"
+results   = "experiments/results/E3_forest_dp"
+paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
+created   = "2026-11-24"
+
+[claims.exp-e4-nonsymmetric-front]
+kind      = "experiment"
+statement = "E4 (non-symmetric front): the front of role-configuration schedules with exact waiting (config_front) equals the front of all plans (truth, central flights none or useless) in 1,190 comparisons and of all simple plans with up to s + 1 landings in 800, including 400 instances shaped like Prop 6.5; zeno closed its bracket on all 1,990 and matched, using the roles, lagrangian, balanced and search bounds."
+status    = "sci.supported"
+tests     = ["thm-6-1", "thm-6-9", "cor-6-10"]
+code      = "experiments/E4_nonsymmetric_front/run.py"
+results   = "experiments/results/E4_nonsymmetric_front"
+paper     = "Thm 6.1, Thm 6.9 and Cor 6.10, doc/theory/exact-front.md §6"
+created   = "2026-11-24"
+
+[claims.exp-e5-harmful-waiting]
+kind      = "experiment"
+statement = "E5 (harmful waiting): on the instance of Proposition 6.5 the front with waiting ignored contains (14, 72) and (30, 50), while zeno, zenoOracle, config_front and simple_plans with exact waiting give the note's front, whose cheapest point within makespan 73 costs 18. Harmful waiting appears in 58 of 2.4 million random role configurations and changes the front of 9 of 150 instances shaped like Prop 6.5 (0 of 150 uniform)."
+status    = "sci.supported"
+tests     = ["prop-6-5"]
+refutes   = ["paper-no-harmful-waiting"]
+code      = "experiments/E5_harmful_waiting/run.py"
+results   = "experiments/results/E5_harmful_waiting"
+paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
+created   = "2026-11-24"
+
+[claims.exp-e6-conj410-search]
+kind      = "experiment"
+statement = "E6 (converse without (A1), targeted search): of 100,000 random tiny symmetric instances, 231 have a certificate gap where L < E; with the shortest central flights the triangle inequality allows, the exhaustive search over all plans finds no plan cheaper than E in any of the 255 gaps (0 counterexamples). A search, not a proof; it stands independently of the proof of Theorem 4.10 (formerly Conjecture 4.10)."
+status    = "sci.supported"
+tests     = ["thm-4-10"]
+code      = "experiments/E6_conj410_search/run.py"
+results   = "experiments/results/E6_conj410_search"
+paper     = "Thm 4.10 (formerly Conj 4.10), doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
+[claims.exp-e7-scaling]
+kind      = "experiment"
+statement = "E7 (scaling): on the square-root family (n = 20, t = 12, p = 4, -r from 1 to 10,000, so 16 to 173,606 levels) zeno's time grows as levels^0.39, within the degree 2 of the pseudo-polynomial bound; every sweep in n, t and p finishes. On a frontier of 24 (n, t, p) points with a 60 s limit, 16 finish (up to n = 5000, t = 20, p = 4; n = 1000, t = 100, p = 10; n = 100, t = 500, p = 50) and 8 time out (among them n = t = 1000, p = 100). Measured on a shared host (load average 18.6-38.8 on 16 cores), so the times are upper bounds."
+status    = "sci.measured"
+tests     = ["cor-8-3"]
+code      = "experiments/E7_scaling/run.py"
+results   = "experiments/results/E7_scaling"
+paper     = "Thm 7.5 and Cor 8.3, doc/theory/exact-front.md §7.4 and §8"
+created   = "2026-11-24"
+
+[claims.exp-e8-certificates]
+kind      = "experiment"
+statement = "E8 (certificates): the C++ and Lean checkers give the expected verdict on all 41 corpus certificates and accept all 700 fresh ones (400 version 1, 300 version 2); of 4,056 mutants (dropped points, lowered costs or makespans, shifted legs, changed passengers, weakened gaps, dropped assumptions), 3,904 state a false front, fail the independent simulator or lack a needed assumption, and neither checker accepts any of them. The checkers never disagree."
+status    = "sci.supported"
+tests     = ["thm-9-1"]
+code      = "experiments/E8_certificates/run.py"
+results   = "experiments/results/E8_certificates"
+paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+created   = "2026-11-24"
+
+[claims.exp-e9-linear-family]
+kind      = "experiment"
+statement = "E9 (linear family): on 303 generator instances (-C 3 -D 3) and 300 data files d_i = r0 i, c_i = α − βi (25 with β = 0), zeno's front equals the closed form of Theorem 10.1 point for point (92,550 points, fronts up to 1,939 points), no certificate needs the forest bound, and the note's sizes 1,090, 540 and 399 are reproduced."
+status    = "sci.supported"
+tests     = ["thm-10-1"]
+code      = "experiments/E9_linear_family/run.py"
+results   = "experiments/results/E9_linear_family"
+paper     = "Thm 10.1, doc/theory/exact-front.md §10"
+created   = "2026-11-24"
+
+[claims.exp-e10-greedy-density]
+kind      = "experiment"
+statement = "E10 (greedy exactness density): the papers' per-PPP greedy (EvoCOP 2015 Alg. 1, reimplemented and validated: it misses (260, 60) on exactly the two golden instances where the 2016 solver failed) returns the exact front on 2,274 of 2,772 random and generator instances with n ≤ 8, t ≤ 10, p ≤ 6 (82.0%, 95% Wilson [80.6%, 83.4%]) and finds 93.9% of their front points; every miss has p ≥ 2 and t − p ≥ 3. On the linear family it is exact on 924 of 924 (95% Wilson [99.6%, 100%]): evidence for Conjecture 10.2, not a proof."
+status    = "sci.supported"
+tests     = ["paper-greedy-optimal", "claim-5", "conj-10-2"]
+refutes   = ["paper-greedy-optimal"]
+code      = "experiments/E10_greedy_density/run.py"
+results   = "experiments/results/E10_greedy_density"
+paper     = "§5 and Conj 10.2, doc/theory/exact-front.md; EvoCOP 2015 Alg. 1"
+created   = "2026-11-24"

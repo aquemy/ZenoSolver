@@ -1,0 +1,39 @@
+{
+  "claim": "exp-e4-nonsymmetric-front",
+  "criterion": "the front of role-configuration schedules equals the front of all plans (truth) and of all simple plans with up to s+1 landings, and every front zeno reports exact equals them",
+  "experiment": "E4_nonsymmetric_front",
+  "explanation": "1190 all-plans and 800 all-simple-plans comparisons; 0 differ from the role-configuration front. zeno closed its bracket on 1990 of them, with gap kinds {'roles': 2048, 'balanced': 1226, 'relaxed': 91, 'lagrangian': 834, 'search': 37}, and matched the reference on all.",
+  "figures": [
+    "E4_nonsymmetric_front/nonsymmetric_fronts.png",
+    "E4_nonsymmetric_front/nonsymmetric_fronts.svg"
+  ],
+  "hypothesis": "Under (A1-NS), every plan is weakly dominated by a role configuration whose template is no later (Thm 6.9), so the front is the Pareto set of (cost, least makespan) over role configurations (Cor 6.10); zeno's role-load bounds (Thm 6.1) and its search are then sound.",
+  "metrics": {
+    "certificate_gap_kinds_when_exact": {
+      "balanced": 1226,
+      "lagrangian": 834,
+      "relaxed": 91,
+      "roles": 2048,
+      "search": 37
+    },
+    "differences": [],
+    "simple_compared": 800,
+    "simple_zeno_exact": 800,
+    "truth_compared": 1190,
+    "truth_zeno_exact": 1190,
+    "waiting_family_compared": 400
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "simple": "800 instances, half uniform (d, dbar in [1,20]) and half shaped like Prop 6.5; n<=3, p<=4, t<=7, s<=8 (s<=7 when n=3), up to s+1 landings",
+    "timeout_s": 600,
+    "truth": "800 instances (x2 central regimes when n=2); n<=2, p<=3, t<=min(5,p+3), d, dbar in [1,6], c in [0,6], up to s+3 landings"
+  },
+  "tests": [
+    "thm-6-1",
+    "thm-6-9",
+    "cor-6-10"
+  ]
+}
