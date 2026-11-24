@@ -497,12 +497,28 @@ theorem card_ofCounts (v : Fin n → ℕ) : (ofCounts v).card = ∑ x, v x := by
 theorem Loc.isCI_eq_false_of_ne {x : Loc n} (h : x ≠ .ci) : x.isCI = false := by
   cases x <;> simp_all
 
-/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
-gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
-records of type `B`, `B̄`, and `A` or `Ā` of their plane, and whose groups have at least
-`2t − p` landings. No assumption on durations is needed; under (S) and (A1), or on a plan
-without central flights, the records' types are those of the segments. -/
-theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+/-- **Step 2 for a plan.** Every passenger of a feasible plan has a transfer: a leg `C_I → x`
+and a leg leaving `x` not towards `C_I`, both carrying it. -/
+theorem Feasible.exists_transfers {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
+      ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧ ℓn.dst ≠ .ci := by
+  intro π
+  obtain ⟨route, hperm, hroute, hfin⟩ := hP.pax π
+  obtain ⟨x, ℓo, hℓo, ℓn, hℓn, h⟩ := exists_transfer route 0 hroute
+    (fun ℓ hℓ => hP.flies_of_mem_allLegs
+      (mem_allLegs_of_mem_paxLegs (hperm.mem_iff.mp hℓ)).1) hfin
+  exact ⟨x, ℓo, hperm.mem_iff.mp hℓo, ℓn, hperm.mem_iff.mp hℓn, h⟩
+
+/-- **Direct selection from transfers (Lemma 4.3(b)).** If every plane flies from `C_I` to
+`C_G` and every passenger has a transfer (a leg `C_I → x` and a leg leaving `x` not towards
+`C_I`, both carrying it), with `p ≤ t`, there is a role configuration whose drop-offs, pick-ups
+and crossings are the cities of landing records of type `B`, `B̄`, and `A` or `Ā` of their
+plane, and whose groups have at least `2t − p` landings. The passengers' own routes are not
+used. -/
+theorem exists_roleConfig_of_transfers {N : Network n} {P : Plan n t p}
+    (hplanes : ∀ k, PlaneFeasible N (P k))
+    (htr : ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
+      ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧ ℓn.dst ≠ .ci) :
     ∃ cfg : RoleConfig n p,
       (∀ k, cfg.drop k ≤ recCities (fun r => r.2.1 && r.2.2) (landingRecs (P k))) ∧
       (∀ k, cfg.pick k ≤ recCities (fun r => !r.2.1 && !r.2.2) (landingRecs (P k))) ∧
@@ -510,15 +526,6 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       2 * t - p ≤ size cfg.groups := by
   classical
   set R : Fin p → List (Fin n × Bool × Bool) := fun k => landingRecs (P k) with hR
-  -- Step 2: every passenger's transfer.
-  have htr : ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
-      ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧ ℓn.dst ≠ .ci := by
-    intro π
-    obtain ⟨route, hperm, hroute, hfin⟩ := hP.pax π
-    obtain ⟨x, ℓo, hℓo, ℓn, hℓn, h⟩ := exists_transfer route 0 hroute
-      (fun ℓ hℓ => hP.flies_of_mem_allLegs
-        (mem_allLegs_of_mem_paxLegs (hperm.mem_iff.mp hℓ)).1) hfin
-    exact ⟨x, ℓo, hperm.mem_iff.mp hℓo, ℓn, hperm.mem_iff.mp hℓn, h⟩
   choose xπ ℓo hℓo ℓn hℓn hsrc_o hdst_o hsrc_n hdst_n using htr
   have hpax_o : ∀ π, (ℓo π).pax = some π := fun π => (mem_allLegs_of_mem_paxLegs (hℓo π)).2
   have hpax_n : ∀ π, (ℓn π).pax = some π := fun π => (mem_allLegs_of_mem_paxLegs (hℓn π)).2
@@ -543,7 +550,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       rw [countP_allLegs] at this
       refine this.trans (le_of_eq ?_)
       rw [hA, hb, ← Finset.sum_add_distrib]
-      exact Finset.sum_congr rfl fun k _ => ((hP.planes k).entry_city x).symm
+      exact Finset.sum_congr rfl fun k _ => ((hplanes k).entry_city x).symm
     have h₂ : #{π | xπ π = x} ≤ A x + bb x := by
       have := card_le_countP_of_injective {π | xπ π = x} (allLegs P)
         (fun ℓ => !ℓ.dst.isCI && ℓ.src.isCityWith (fun y => decide (y = x))) ℓn
@@ -554,7 +561,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       rw [countP_allLegs] at this
       refine this.trans (le_of_eq ?_)
       rw [hA, hbb, ← Finset.sum_add_distrib]
-      exact Finset.sum_congr rfl fun k _ => ((hP.planes k).exitG_city x).symm
+      exact Finset.sum_congr rfl fun k _ => ((hplanes k).exitG_city x).symm
     omega
   have ht : t = ∑ x, #{π | xπ π = x} := by
     rw [← Finset.card_eq_sum_card_fiberwise (f := xπ) (t := univ) fun π _ => Finset.mem_univ _]
@@ -575,7 +582,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
     with hCr
   have hcr : ∀ k, (Cr k).card = 2 * cntAbar (fun _ => true) (R k) + 1 := by
     intro k
-    have h₁ := (hP.planes k).cntA_eq
+    have h₁ := (hplanes k).cntA_eq
     have h₂ := countP_cross_eq (landingRecs (P k))
     show (recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))).card =
       2 * cntAbar (fun _ => true) (landingRecs (P k)) + 1
@@ -600,7 +607,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       have h₃ : (cfg.pick k).card = ∑ x, pk x k := card_ofCounts _
       have h₄ : (cfg.cross k).card = 2 * cntAbar (fun _ => true) (R k) + 1 := hcr k
       have h₅ : cntA (fun _ => true) (R k) = cntAbar (fun _ => true) (R k) + 1 :=
-        (hP.planes k).cntA_eq
+        (hplanes k).cntA_eq
       omega
     have h₁ : size cfg.groups + p = ∑ k, ((cfg.groups k).card + 1) := by
       rw [size, Finset.sum_add_distrib]
@@ -622,14 +629,30 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
     rw [count_ofCounts, count_recCities]
     exact hpk_le y k
 
-/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
-dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
-`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
-theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
+gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
+records of type `B`, `B̄`, and `A` or `Ā` of their plane, and whose groups have at least
+`2t − p` landings. No assumption on durations is needed; under (S) and (A1), or on a plan
+without central flights, the records' types are those of the segments. -/
+theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    ∃ cfg : RoleConfig n p,
+      (∀ k, cfg.drop k ≤ recCities (fun r => r.2.1 && r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.pick k ≤ recCities (fun r => !r.2.1 && !r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.cross k = recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))) ∧
+      2 * t - p ≤ size cfg.groups :=
+  exists_roleConfig_of_transfers hP.planes hP.exists_transfers
+
+/-- **Theorem 4.7 from transfers.** Under (S) and (A1), with `p ≤ t`: if every plane flies from
+`C_I` to `C_G` and every passenger has a transfer, some admissible `X_1, …, X_p` has
+`Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan for every plane, and total cost at most the
+plan's cost. -/
+theorem exists_admissible_of_transfers {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {P : Plan n t p} (hplanes : ∀ k, PlaneFeasible N (P k))
+    (htr : ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
+      ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧ ℓn.dst ≠ .ci) (hpt : p ≤ t) :
     ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
-  obtain ⟨cfg, hdr, hpk, hcr, hsize⟩ := hP.exists_roleConfig_records
+  obtain ⟨cfg, hdr, hpk, hcr, hsize⟩ := exists_roleConfig_of_transfers hplanes htr
   -- The groups are sub-multisets of the planes' landings.
   have hsub : ∀ k, cfg.groups k ≤ routeLandings (P k) := by
     intro k
@@ -642,12 +665,21 @@ theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.
   refine ⟨X, hX, hXsize, fun k => ?_, ?_⟩
   · calc 2 * load N.d (X k) ≤ 2 * load N.d (routeLandings (P k)) :=
           Nat.mul_le_mul_left 2 (load_mono _ ((hle k).trans (hsub k)))
-      _ ≤ endTime 0 (P k) := (hP.planes k).two_mul_load_landings_le hS hA1
+      _ ≤ endTime 0 (P k) := (hplanes k).two_mul_load_landings_le hS hA1
       _ ≤ planMakespan P := endTime_le_planMakespan P k
   · calc totalCost c X ≤ ∑ k, cost c (routeLandings (P k)) :=
           Finset.sum_le_sum fun k _ => cost_mono c ((hle k).trans (hsub k))
       _ = ∑ k, landCostSum c (P k) :=
           Finset.sum_congr rfl fun k _ => (landCostSum_eq_cost c (P k)).symm
       _ = planCost c P := rfl
+
+/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
+dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
+`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
+theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P :=
+  exists_admissible_of_transfers hS hA1 c hP.planes hP.exists_transfers hpt
 
 end ZenoFront

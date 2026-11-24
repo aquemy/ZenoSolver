@@ -116,6 +116,7 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
+| `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -262,6 +263,26 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   count `passengers at x ≤ #A_x + min(#B_x, #B̄_x)` comes from two injections: passengers into
   landings entered from `C_I`, and passengers into landings exited towards `C_G`.
 * **PAR**, then **SH** in partition form (`Admissible.exists_shrink`).
+
+**Planes ending anywhere (`Bridge.lean`)**
+
+* `Feasible.anywhere`, `achievable_subset_achievableAnywhere`: a feasible plan is a plan of the
+  variant (`FeasibleAnywhere`: planes may end anywhere, the makespan is the last arrival), with
+  the same cost and makespan.
+* `exists_admissible_of_transfers` (`Converse.lean`): Theorem 4.7 for planes that all end in
+  `C_G` and passengers that each have a transfer. The passengers' routes are not needed.
+* `FeasibleAnywhere.exists_admissible` (**Theorem 4.9, B3**): under (S) and (A1), with `p ≤ t`,
+  every plan of the variant with cost `C` and makespan `M′` yields an admissible partition with
+  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` for every plane, and `Σ_k c(X_k) ≤ C`. Every route is
+  cut after its last transfer leg and closed in `C_G` (`cutRoute`): after a final `C_I → x`, the
+  flight `x → C_G` leaving on arrival is appended. Theorem 4.7 from transfers then applies to the
+  planes that are not idle, and AP to the idle ones (`Admissible.addPlanes_le`).
+* `Cert.check_sound_anywhere`: if `check` accepts, the listed points are the Pareto front of the
+  variant, for every `dc` satisfying (A1). So the two fronts are equal on every certified
+  instance (`Cert.minimal_achievable_iff_anywhere`).
+* `minimal_achievable_iff_anywhere`: on every instance, the two fronts are equal under (S), (A1)
+  and Theorem 4.1. Theorem 4.1 is not formalised, so it is a hypothesis
+  (`AdmissibleAchievable`).
 
 **Forest bound (`AdmissibleBound.lean`)**
 
@@ -457,12 +478,14 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   integers in both.
   * Plans may fly central–central legs of any duration `dc`, may wait anywhere and may hand
     passengers over anywhere.
-  * Planes must end in `C_G`. This is the format's semantics, not PDDL's; see bridge B3 below.
+  * Planes must end in `C_G` in `Cert.check_sound` (the format's semantics).
+    `Cert.check_sound_anywhere` lets them end anywhere, with the last arrival as makespan (PDDL
+    without plane goals), for every `dc` satisfying (A1) (bridge B3).
   * With `forest` gaps, the theorem assumes (A1) on `dc` (`dc i j ≥ d i + d j`, including
     `i = j`). Every PDDL file the generator emits satisfies it.
   * Version 2: with `roles` or `lagrangian` bounds, which need `A1-NS` listed,
     `Cert2.check_sound` assumes (A1-NS) on `dc` (`dc i j ≥ min(d_i + d_j, d̄_i + d̄_j)`).
-    Otherwise it holds for every `dc`. Plans must end in `C_G` here too: bridge B3 is not done.
+    Otherwise it holds for every `dc`. Plans must end in `C_G` here: bridge B3 is done for format v1 only.
 * **Parser.** `parseAnyCert` and `ZenoCheck.lean` are **outside the verified statement**.
   `Cert.check_sound` and `Cert2.check_sound` are about the parsed values, so a parser bug could make the checker verify a
   different front than the file's. The parser only translates numbers and `1`-based indices; it
@@ -513,15 +536,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
 **P4.**
 
 - [x] Checker performance at suite scale: the 66 suite certificates in 5.7 s (478 s before).
-- [ ] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
-      front under (S) + (A1). AP (step 4) is done. Missing are steps 1–3 of Theorem 4.9 on the
-      routes, then `Feasible.exists_admissible` on the planes that are not idle:
-      * remove central flights and clean;
-      * cut every route after its last loaded leg;
-      * append `x → C_G` where a route ends after a passenger's first leg `C_I → x`.
-
-      The checker's soundness for that semantics would then follow as for
-      `Cert.check_sound_A1`.
+- [x] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
+      front under (S) + (A1) (`FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere`).
+      On instances without a certificate, the front equality also needs Theorem 4.1
+      (`minimal_achievable_iff_anywhere` takes it as a hypothesis).
 - [ ] Theorem 4.1: forest `T`-join, links, schedule with drop-offs first and at most one
       pick-up per plane, makespan = largest load. Not needed by the checker.
 - [x] Link-forest lemma (2.6, only if; `Admissible.exists_linkForest`) and the tree DP
