@@ -245,5 +245,17 @@ paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 5. The per-PPP greedy of both papers is not exact
+# ===========================================================================
+
+[claims.claim-5]
+kind         = "claim"
+statement    = "Section 5 (greedy counterexamples): the per-PPP greedy of both papers, longest flights first to the least-loaded plane, misses front points: for d = (6, 10), c = (40, 20), t = 5, p = 2 it flies the landings of the front point (260, 60) in makespan 68, and for d = (1, 3), c = (9, 5), t = 4, p = 2 it misses (42, 12)."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Examples.lptCounterexample_front"
+paper        = "§5, doc/theory/exact-front.md"
+created      = "2026-11-23"
+
+# ===========================================================================
 # Experiments
 # ===========================================================================
