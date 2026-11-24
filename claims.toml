@@ -181,6 +181,14 @@ lean      = "ZenoFront.RoleConfig"
 paper     = "Def 4.2, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
+[claims.lem-4-3]
+kind         = "lemma"
+statement    = "Lemma 4.3 (direct selection) [DS]: (a) in a simple plan with clean journeys every journey is C_I → x → C_G; (b) such a plan on planes Q, routes ending in C_G, gives a role configuration on Q with passenger count at least t, cost at most the plan's, λ_k ≤ F_k and groups inside the planes' landings."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.exists_roleConfig_records"
+paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2"
+created      = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
