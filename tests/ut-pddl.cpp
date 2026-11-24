@@ -153,9 +153,8 @@ int main()
         check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, "data file round trip");
     }
 
-    // Data files are read as written, even with decreasing durations; the
-    // 2016 swap (durations and costs trade places, C_G side reversed) only
-    // applies to them on request.
+    // Data files are read as written, even with decreasing durations (the 2016
+    // solvers swapped durations and costs then; zeno does not).
     {
         const auto path = std::filesystem::temp_directory_path() / "zeno-ut-swap.dat";
         {
@@ -167,23 +166,15 @@ int main()
         options.t = 4;
         options.p = 2;
         options.dataFile = path.string();
-        bool swapped = true;
-        const zeno::Instance literal = zeno::legacy::buildInstance(options, &swapped);
-        check(!swapped, "data file: no swap by default");
+        const zeno::Instance literal = zeno::legacy::buildInstance(options);
         check(literal.d == std::vector<zeno::Time>{9, 2, 9, 9} && literal.dbar == std::vector<zeno::Time>{8, 7, 8, 3}
                   && literal.c == std::vector<zeno::Cost>{14, 13, 17, 15},
               "data file read as written");
-        options.legacySwap = true;
-        const zeno::Instance legacy = zeno::legacy::buildInstance(options, &swapped);
-        check(swapped, "data file: --legacy-swap swaps");
-        check(legacy.d == std::vector<zeno::Time>{14, 13, 17, 15} && legacy.dbar == std::vector<zeno::Time>{3, 8, 7, 8}
-                  && legacy.c == std::vector<zeno::Cost>{9, 2, 9, 9},
-              "data file: the 2016 swap");
         std::filesystem::remove(path);
     }
 
-    // Generated instances keep the 2016 meaning, and `zeno generate` output
-    // reads back as the same instance.
+    // Generator options mean what they say, and `zeno generate` output reads
+    // back as the same instance.
     {
         const auto roundTrip = [&](const zeno::legacy::Options& generated, const char* what) {
             const zeno::Instance instance = zeno::legacy::buildInstance(generated);
@@ -209,23 +200,20 @@ int main()
         sym.costFunction = 2;
         sym.durationFunction = 4;
         sym.adjust = 10;
-        bool swapped = false;
-        const zeno::Instance generated = zeno::legacy::buildInstance(sym, &swapped);
-        check(swapped, "generated instance: the 2016 swap applies");
-        check(std::ranges::is_sorted(generated.d), "generated durations increase after the swap");
-        roundTrip(sym, "generate round trip (symmetric)");
+        const zeno::Instance generated = roundTrip(sym, "generate round trip (symmetric)");
+        // -D 4 (2^i) at l (n + 1 - i): durations 2^5, ..., 2^1 times 10; -C 2 (sqrt i) times 10, truncated.
+        check(generated.d == std::vector<zeno::Time>{320, 160, 80, 40, 20}, "-D sets the durations");
+        check(generated.c == std::vector<zeno::Cost>{10, 14, 17, 20, 22}, "-C sets the costs");
 
         zeno::legacy::Options ns = sym;
         ns.costFunction = 3;
         ns.eastFunction = 1;
         ns.westFunction = 3;
         ns.adjust = 100;
-        const zeno::Instance legacyNs = roundTrip(ns, "generate round trip (-E -W)");
-        check(legacyNs.symmetric(), "-E 1 -W 3 with the 2016 swap: -C (identity) sets the C_I side, as -W does");
-        ns.legacySwap = false;
-        const zeno::Instance intended = roundTrip(ns, "generate round trip (--no-legacy-swap)");
-        check(!intended.symmetric(), "--no-legacy-swap: -E sets the C_I side, -W the C_G side");
-        check(intended.c == std::vector<zeno::Cost>{100, 200, 300, 400, 500}, "--no-legacy-swap: -C sets the costs");
+        const zeno::Instance nonSymmetric = roundTrip(ns, "generate round trip (-E -W)");
+        check(!nonSymmetric.symmetric(), "-E 1 -W 3 is non-symmetric");
+        check(nonSymmetric.dbar == std::vector<zeno::Time>{500, 400, 300, 200, 100}, "-W sets the C_G side");
+        check(nonSymmetric.c == std::vector<zeno::Cost>{100, 200, 300, 400, 500}, "-C sets the costs");
     }
 
     if(failures == 0)

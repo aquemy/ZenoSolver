@@ -6,5 +6,5 @@ log|-n 10 -t 8 -p 3 -C 1 -D 1 -r 100
 sqrt|-n 10 -t 8 -p 3 -C 2 -D 2 -r 100
 pow2|-n 10 -t 8 -p 3 -C 4 -D 4
 staircase|-n 10 -t 8 -p 3 -C 5 -D 5 -r 10
-log-linear|-n 10 -t 8 -p 3 -C 1 -D 3 -r 100
-sqrt-linear|-n 10 -t 8 -p 3 -C 2 -D 3 -r 100
+log-linear|-n 10 -t 8 -p 3 -r 100 -C 3 -D 1
+sqrt-linear|-n 10 -t 8 -p 3 -r 100 -C 3 -D 2

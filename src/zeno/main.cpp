@@ -206,14 +206,7 @@ int runFront(const std::vector<std::string>& args)
     rejectLeftovers(rest);
     options.plans = plans || certificate.has_value();
 
-    bool swapped = false;
-    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options, &swapped);
-    if(swapped && parsed.options.dataFile)
-        std::cerr << "zeno: note: --legacy-swap: the duration and cost lines of " << *parsed.options.dataFile
-                  << " were swapped, as the 2016 solvers did\n";
-    if(swapped && !parsed.options.dataFile && parsed.options.eastFunction && parsed.options.westFunction)
-        std::cerr << "zeno: note: the 2016 swap made -C set the C_I-side durations and -E the costs; "
-                     "--no-legacy-swap keeps -E for the C_I side and -C for the costs\n";
+    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
     if(!instance.symmetric())
         return runBracket(instance, options, plans, certificate, stats);
     const zeno::SolveResult result = zeno::solveFront(instance, options);
