@@ -344,7 +344,7 @@ created      = "2026-11-23"
 [claims.conj-6-7]
 kind      = "conjecture"
 statement = "Conjecture 6.7 (extended Proposition I): under (AΔ), the front equals the front of role configurations extended with shuttle triples, each adding exactly one landing, with exact makespans."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "Conj 6.7, doc/theory/exact-front.md §6.4"
 created   = "2026-11-23"
 
@@ -376,6 +376,41 @@ kind      = "claim"
 statement = "End of section 6.2: under (A1-NS), on instances with a city with d_x = d̄_x = 0, plans that are not event-ordered never beat the front of Corollary 6.10."
 status    = "math.proved-informal"
 paper     = "end of §6.2, doc/theory/exact-front.md"
+created   = "2026-11-24"
+
+[claims.prop-6-7]
+kind      = "proposition"
+statement = "Proposition 6.7 (shuttles are not enough): for n = 2, d = (1, 3), d̄ = (3, 1), d_12 = 2, t = 3, p = 2 and any costs, (AΔ) holds and (A1-NS) fails, some plan has makespan 8, and every plan whose central flights all lie in segments of type Ā (from C_G to C_I) has makespan at least 10; with c = (6, 1) the front is {(4, 10), (15, 8)}."
+status    = "math.proved-informal"
+paper     = "Prop 6.7, doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
+[claims.def-6-17]
+kind      = "definition"
+statement = "Definition 6.17: a shuttle triple at (x, y) is a drop-off at x, a shuttle C_G → x → y → C_I carrying the dropped passenger to y, and a pick-up at y; a split crossing at (x, y) is a segment C_I → x → y → C_G with an empty central flight, which acts as a drop-off at x and a pick-up at y."
+status    = "math.proved-informal"
+paper     = "Def 6.17, doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
+[claims.prop-6-18]
+kind      = "proposition"
+statement = "Proposition 6.18 (a)–(c), computed by exhaustive search: under (AΔ) without (A1-NS), segments with one central flight do not complete the front. (a) For n = 2, d = (1, 7), d̄ = (7, 1), d_12 = 6, t = 5, p = 2 the least makespan is 32, but 34 with at most three central landings per segment and 36 without central flights (the role configurations, by Corollary 6.10). (b) On a table without the flight 1–2, a front point needs a walk through a third city. (c) For d = (3, 8), d̄ = (8, 3), d_12 = 5, t = 7, p = 3 the least makespan 41 needs six central landings in a segment (43 with at most five). Part (d) is the separate record claim-6-18-d."
+status    = "math.proved-informal"
+paper     = "Prop 6.18 (a)–(c), doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
+[claims.claim-6-18-d]
+kind      = "claim"
+statement = "Proposition 6.18(d): for n = 3, d = (7, 1, 3), d̄ = (2, 6, 6), c = (4, 7, 4), d_12 = 7, d_13 = 5, d_23 = 3, t = 7, p = 3, the point (73, 29) of the front (exhaustive search) is reached by no plan whose central flights all lie in crossings, so it needs central flights in segments of another type; the plan found uses a pick-up segment C_G → 3 → 1 → 3 → C_G. The class claim rests on the flow model restricted to segment classes, whose exactness has no written proof."
+status    = "math.conjectured"
+paper     = "Prop 6.18(d), doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
+[claims.lem-6-19]
+kind      = "lemma"
+statement = "Lemma 6.19 (cut bound): with Φ the least flight time of a sequence of flights from C_I to C_G, every feasible plan has Σ_k F_k ≥ (2t − p)Φ, hence makespan at least (2t − p)Φ/p; under (AΔ), Φ = min_x (d_x + d̄_x)."
+status    = "math.proved-informal"
+paper     = "Lemma 6.19, doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 
 # ===========================================================================
