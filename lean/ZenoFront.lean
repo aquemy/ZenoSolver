@@ -29,6 +29,8 @@ public import ZenoFront.Converse
 public import ZenoFront.Bridge
 public import ZenoFront.Achievability
 public import ZenoFront.Breakpoints
+public import ZenoFront.MinCost
+public import ZenoFront.TreeExact
 public import ZenoFront.Solver
 public import ZenoFront.AdmissibleBound
 public import ZenoFront.LinkForest

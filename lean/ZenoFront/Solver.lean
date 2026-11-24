@@ -5,6 +5,8 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Achievability
+public import ZenoFront.MinCost
+public import ZenoFront.TreeExact
 public import ZenoFront.AdmissibleBound
 public import ZenoFront.Breakpoints
 
@@ -45,54 +47,7 @@ open Finset
 
 variable {n p : ℕ}
 
-/-! ### `E(T)` -/
-
-/-- `E(T)`: the least cost of an admissible partition of `2t − p` landings into `p` groups whose
-loads are all at most `T` (`⊤` if there is none). -/
-noncomputable def minCost (d c : Fin n → ℕ) (t p T : ℕ) : WithTop ℕ :=
-  sInf {x | ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧ (∀ k, load d (X k) ≤ T) ∧
-    (totalCost c X : WithTop ℕ) = x}
-
-theorem minCost_le (d c : Fin n → ℕ) {t T : ℕ} {X : Groups n p} (hX : Admissible X)
-    (hsize : size X = 2 * t - p) (hT : ∀ k, load d (X k) ≤ T) :
-    minCost d c t p T ≤ totalCost c X :=
-  sInf_le ⟨X, hX, hsize, hT, rfl⟩
-
-/-- `E(T)` is attained when it is finite. -/
-theorem minCost_attained (d c : Fin n → ℕ) {t T C : ℕ} (h : minCost d c t p T = C) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧ (∀ k, load d (X k) ≤ T) ∧
-      totalCost c X = C := by
-  set S : Set (WithTop ℕ) := {x | ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-    (∀ k, load d (X k) ≤ T) ∧ (totalCost c X : WithTop ℕ) = x} with hS
-  have hne : S.Nonempty := by
-    by_contra hne
-    rw [Set.not_nonempty_iff_eq_empty] at hne
-    have : minCost d c t p T = ⊤ := by
-      change sInf S = ⊤
-      rw [hne, sInf_empty]
-    rw [this] at h
-    exact WithTop.top_ne_coe h
-  obtain ⟨X, hX, hsize, hT, hcost⟩ := csInf_mem hne
-  refine ⟨X, hX, hsize, hT, ?_⟩
-  have : (totalCost c X : WithTop ℕ) = C := hcost.trans h
-  exact WithTop.coe_injective this
-
-/-- `E` is non-increasing. -/
-theorem minCost_antitone (d c : Fin n → ℕ) (t p : ℕ) : Antitone (minCost d c t p) :=
-  fun _ _ hTT' => sInf_le_sInf fun _ ⟨X, hX, hsize, hT, hx⟩ =>
-    ⟨X, hX, hsize, fun k => (hT k).trans hTT', hx⟩
-
 /-! ### The σ-DP is attained -/
-
-theorem exists_mem_eq_of_inf_eq {ι : Type*} (s : Finset ι) (f : ι → WithTop ℕ) {v : ℕ}
-    (h : s.inf f = v) : ∃ i ∈ s, f i = v := by
-  have hne : s.Nonempty := by
-    by_contra h'
-    rw [Finset.not_nonempty_iff_eq_empty] at h'
-    subst h'
-    exact WithTop.top_ne_coe h
-  obtain ⟨i, hi, hfi⟩ := Finset.exists_mem_eq_inf s hne f
-  exact ⟨i, hi, hfi ▸ h⟩
 
 /-- **The σ-DP is attained.** If every finite plane option `opt m H = w` is the cost `w` of a
 group `Y` of `m` landings with `Q Y H`, every finite value of the σ-DP is the total cost of a
@@ -364,18 +319,29 @@ theorem minCost_eq_top_of_lt (d c : Fin n → ℕ) {t T : ℕ} (hp : 1 ≤ p)
   rw [mul_comm] at h₁
   omega
 
+/-- The estimate prefers the tree DP on lower levels. -/
+theorem useTreeDP_of_le (d c : Fin n → ℕ) (p t : ℕ) {T T' : ℕ} (hT : T ≤ T')
+    (h : useTreeDP d c p t T' = true) : useTreeDP d c p t T = true := by
+  simp only [useTreeDP, decide_eq_true_eq] at h ⊢
+  exact lt_of_le_of_lt (Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ (by omega))) h
+
 /-- **The solver.** The Pareto front of a symmetric instance (durations `d`, costs `c`, `t`
-passengers, `p` planes), by increasing makespan: the breakpoints of `E(T)`, computed by the
-σ-DP, found by splitting intervals (`breakpoints`) on the levels
-`d_min · ⌈s/p⌉, …, (2t − p) · d_max`. -/
+passengers, `p` planes), by increasing makespan: the breakpoints of `E(T)`, found by splitting
+intervals (`breakpoints`) on the levels `d_min · ⌈s/p⌉, …, (2t − p) · d_max`. At every level `E`
+is computed by the link-forest DP or the σ-DP, whichever `useTreeDP` estimates cheaper (both
+are exact). The σ-DP's subsets and their symmetric differences are computed once, and only if
+some level uses it: the estimate prefers the tree DP on low levels (`useTreeDP_of_le`), so this
+is the case iff the σ-DP is preferred at `(2t − p) · d_max`. -/
 def solveFront (d c : Fin n → ℕ) (t p : ℕ) : List (ℕ × ℕ) :=
   let s := 2 * t - p
   let Tmax := s * maxDur d
   let Tlo := minOf d * ((s + p - 1) / p)
   let table := oneplaneTable d c Tmax s
-  let subs := smallSubsetList (domReps d c) (min (p - 1) (t - p))
+  let subs := if useTreeDP d c p t Tmax then []
+    else smallSubsetList (domReps d c) (min (p - 1) (t - p))
   let xt := symmDiffTable subs
-  let E := sigmaAt subs xt d c p s table
+  let E := fun T => if useTreeDP d c p t T then treeBoundAt d c p s Tmax table T
+    else sigmaAt subs xt d c p s table T
   if Tlo ≤ Tmax then breakpoints E Tlo Tmax else []
 
 /-- The solver finds the breakpoints of `E` itself: it agrees with the scan of every level. -/
@@ -384,16 +350,31 @@ theorem solveFront_eq (d c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p �
   unfold solveFront
   set Tmax := (2 * t - p) * maxDur d with hTmax
   set Tlo := minOf d * ((2 * t - p + p - 1) / p) with hTlo
-  set E := sigmaAt (smallSubsetList (domReps d c) (min (p - 1) (t - p)))
-    (symmDiffTable (smallSubsetList (domReps d c) (min (p - 1) (t - p)))) d c p (2 * t - p)
-    (oneplaneTable d c Tmax (2 * t - p)) with hEdef
+  set E := fun T => if useTreeDP d c p t T then
+      treeBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T
+    else sigmaAt (if useTreeDP d c p t Tmax then []
+        else smallSubsetList (domReps d c) (min (p - 1) (t - p)))
+      (symmDiffTable (if useTreeDP d c p t Tmax then []
+        else smallSubsetList (domReps d c) (min (p - 1) (t - p)))) d c p (2 * t - p)
+      (oneplaneTable d c Tmax (2 * t - p)) T with hEdef
   have hE : ∀ T ≤ Tmax, E T = minCost d c t p T := by
     intro T hT
-    rw [← sigmaBoundAt_eq_minCost d c hp hpt (Tmax := Tmax) hT]
-    simp only [sigmaBoundAt, hT, ↓reduceIte, sigmaValue, sigmaAt, E]
+    simp only [E]
+    by_cases hT₁ : useTreeDP d c p t T = true
+    · rw [ite_eq_left hT₁]
+      exact treeBoundAt_eq_minCost d c hp hT
+    · rw [ite_eq_right hT₁]
+      have hmax : useTreeDP d c p t Tmax = false := by
+        cases h : useTreeDP d c p t Tmax with
+        | false => rfl
+        | true => exact absurd (useTreeDP_of_le d c p t hT h) hT₁
+      simp only [hmax, Bool.false_eq_true, ↓reduceIte]
+      rw [← sigmaBoundAt_eq_minCost d c hp hpt (Tmax := Tmax) hT]
+      simp only [sigmaBoundAt, hT, ↓reduceIte, sigmaValue, sigmaAt]
   have htop : ∀ T < Tlo, minCost d c t p T = ⊤ := fun T hT => minCost_eq_top_of_lt d c hp hT
   have hskip : ∀ j, j ≤ Tlo → ∀ T, 0 ≤ T → T < 0 + j → ¬ minCost d c t p T < ⊤ :=
     fun j hj T _ hT h => by rw [htop T (by omega)] at h; exact lt_irrefl _ h
+  change (if Tlo ≤ Tmax then breakpoints E Tlo Tmax else []) = _
   by_cases hlo : Tlo ≤ Tmax
   · rw [ite_eq_left hlo, breakpoints_eq_scanFront E hlo fun T T' h₁ h₂ h₃ => by
         rw [hE T' h₃, hE T (by omega)]
