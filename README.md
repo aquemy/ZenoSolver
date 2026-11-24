@@ -33,10 +33,12 @@ The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishe
 **Proofs and certificates.**
 
 - The theory note gives a complete written proof of every statement the symmetric solver relies on.
-- Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and, for version 1, by the Lean-verified checker in `lean/` (`lake exe zeno-check FILE`).
+- Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and by the Lean-verified checker in `lean/` (`lake exe zeno-check FILE`).
 - The Lean soundness theorem (`Cert.check_sound`, and `Cert.check_sound_rat` for rational times) states: if the checker accepts, the listed points are exactly the Pareto front among all feasible plans.
   - When every gap is closed by the relaxation L, this holds for any central-flight durations. That covers 386 of 400 random fronts and every front of the default generator.
   - When some gap uses the forest bound, it holds whenever central flights are no faster than through a hub (A1), via the converse theorem (Theorem 4.7), which is proved in Lean.
+  - It also holds for the PDDL semantics, in which planes may end anywhere (`Cert.check_sound_anywhere`, Theorem 4.9).
+- For non-symmetric instances (version 2), `Cert2.check_sound` states the same for the proof kinds `relaxed` (no assumption), `roles`, `lagrangian` and `balanced` (all three under A1-NS, through Theorem 6.1, proved in Lean). The Lean checker accepts all 150 certificates of a random non-symmetric test set, and agrees with `zeno check` on every verdict. It still rejects the kind `search`, which is not yet formalised.
 - CI writes certificates for the golden and random instances with `zeno` and checks them with both checkers. The compiled Lean checker verifies the certificates of all 66 benchmark-suite instances in 5.7 s in total (2.3 s for n = 100, t = 60, p = 10).
 
 **Non-symmetric instances.**
