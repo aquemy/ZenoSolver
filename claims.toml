@@ -608,7 +608,7 @@ created   = "2026-11-23"
 [claims.paper-general-graph-reduction]
 kind      = "conjecture"
 statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "arXiv:2304.14659 §2.4; Ex 6.11, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
