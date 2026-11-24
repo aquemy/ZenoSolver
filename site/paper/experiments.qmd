@@ -176,11 +176,55 @@ levels to the power 0.39, below the degree 2 of the bound. 16 of the 24 grid poi
 within 60 s, the largest being $n = 1000$, $t = 100$, $p = 10$, in 59 s with 18,982 front points;
 others include $n = 5000$, $t = 20$, $p = 4$ (31 s) and $n = 100$, $t = 500$, $p = 50$ (17 s).
 Instances such as $n = 500$, $t = 200$, $p = 20$ or $n = 100$, $t = 1000$, $p = 10$ timed out.
-The time is not monotone in $p$: for $n = 50$ and $t = 60$ it was 3.5 s with $p = 2$, 9.1 s with
-$p = 10$, 114 s with $p = 20$ and 0.04 s with $p = 40$, as $q_{\max} = \min(p, t - p + 1)$ first
-grows and then shrinks. [Pass]{.verdict}
+The time is not monotone in $p$: for $n = 50$ and $t = 60$ it was 3.5 s with $p = 2$, 1.0 s with
+$p = 5$, 9.1 s with $p = 10$, 114 s with $p = 20$ and 0.04 s with $p = 40$. As $p$ grows, the
+number of levels shrinks, from 35,814 to 1,215, while the trees of a link forest may have up to
+$q_{\max} = \min(p, t - p + 1)$ planes. [Pass]{.verdict}
 
 ![E7. Top: wall time against the number of levels on the duration sweep, and against each swept parameter. Bottom: the grid of $(n, t, p)$, against the instance size and against the work bound of Theorem 7.5, with timeouts marked.](figures/e7-scaling.svg){#fig-e7 .paper-fig}
+
+## Performances on the benchmark suites {#sec-bench}
+
+The repository also times ZenoSolver end to end on fixed suites of instances
+([`bench/`](https://github.com/aquemy/ZenoSolver/blob/master/bench/README.md)): an Apple M4 Max
+with 16 cores, all cores used, median of 3 runs and a timeout of 30 s per run. All 66 instances
+are solved, the slowest in 61 ms. Process start-up takes about 3 ms, the floor of every timing.
+
+In @tbl-table1, we report the time to solve an instance when increasing simultaneously $n$ and
+$t$ with two planes, on the default generator, $d_i = i$ and $c_i = n + 1 - i$. This is the linear
+family, so the size of the Pareto front is known in advance: with $2t - p = 2n - 2$ landings and
+$\kappa = n - 1$, Theorem 10.1 gives $(n - 1)\kappa + 1 = (n - 1)^2 + 1$ points, which the solver
+finds on every instance.
+
+| $n$ | $t$ | $p$ | Front size | $(n - 1)^2 + 1$ | Time |
+|---|---|---|---|---|---|
+| 3 | 3 | 2 | 5 | 5 | 2.2 ms |
+| 4 | 4 | 2 | 10 | 10 | 2.2 ms |
+| 5 | 5 | 2 | 17 | 17 | 2.2 ms |
+| 6 | 6 | 2 | 26 | 26 | 2.1 ms |
+| 7 | 7 | 2 | 37 | 37 | 3.3 ms |
+| 8 | 8 | 2 | 50 | 50 | 2.1 ms |
+| 9 | 9 | 2 | 65 | 65 | 2.1 ms |
+| 10 | 10 | 2 | 82 | 82 | 2.1 ms |
+
+: Increasing simultaneously $n$ and $t$ with $d_i = i$ and $c_i = n + 1 - i$ (suite `paper-table1`). {#tbl-table1}
+
+Larger instances of the same family, and the generator's other families on $n = 10$, $t = 8$,
+$p = 3$ (with `-r 100` for the logarithm and the square root), behave alike (@tbl-regimes).
+
+| Instance | $n$ | $t$ | $p$ | Front size | Time |
+|---|---|---|---|---|---|
+| many cities, few passengers | 200 | 3 | 2 | 399 | 3.7 ms |
+| balanced | 20 | 6 | 2 | 96 | 3.6 ms |
+| $p$ close to $t$ | 8 | 26 | 25 | 15 | 3.4 ms |
+| medium | 50 | 30 | 5 | 540 | 8.1 ms |
+| large | 100 | 60 | 10 | 1,090 | 60.6 ms |
+| logarithmic durations and costs | 10 | 8 | 3 | 46 | 3.7 ms |
+| square-root durations and costs | 10 | 8 | 3 | 81 | 3.7 ms |
+| powers of two | 10 | 8 | 3 | 46 | 5.0 ms |
+| staircase | 10 | 8 | 3 | 133 | 3.7 ms |
+
+: The five regimes of the suite `regimes`, all of the linear family, and four families of the suite `families`. {#tbl-regimes}
 
 ## E8: certificates {#sec-e8}
 
