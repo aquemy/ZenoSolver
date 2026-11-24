@@ -1,0 +1,113 @@
+---
+title: "Lean tools"
+subtitle: "zeno-check, the verified certificate checker, and zeno-front, the verified solver"
+---
+
+The Lean 4 project in `lean/` (library `ZenoFront`) formalizes the theory note and ships two
+executables. Both are compiled Lean programs whose central function carries a kernel-checked
+theorem. [Installation](install.qmd#the-lean-project) explains how to build them; the
+[blueprint](../proofs.qmd) maps every statement of the note to its Lean declarations.
+
+## `zeno-check`: the verified checker {#zeno-check}
+
+```sh
+lake exe zeno-check FILE     # or lean/.lake/build/bin/zeno-check FILE
+```
+
+It reads a certificate of either [version](certificates.qmd) and prints one of two verdicts:
+
+- `accepted: …` (exit code 0): the checking function returned `true`. The message names the
+  theorem that backs it and the scope of the claim, for example
+
+  ```text
+  accepted: the 6 points are the Pareto front (all gaps relaxed: for every central flight table; ZenoFront.Cert.check_sound)
+  accepted: the 9 points are the Pareto front of all feasible plans (version 2, fastest relaxed, 0 roles, 0 lagrangian, 6 balanced and 2 search gap(s), the others relaxed: for every central flight table satisfying A1-NS; ZenoFront.Cert2.check_sound)
+  ```
+
+  (the second is the instance of [Proposition 6.5](../proofs.qmd#node-proposition-6-5));
+- `rejected: <reason>` (exit code 1): the file is malformed or an obligation fails.
+
+Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
+verified function.
+
+What it verifies:
+
+| Version | Gap kinds | Fastest point | Soundness theorem |
+|---|---|---|---|
+| 1 (symmetric) | `relaxed`, `forest` | closed form $2 d_{\min} \lceil s/p \rceil$ | [`Cert.check_sound`](../proofs.qmd#node-theorem-9-1): if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times, `Cert.check_sound_anywhere` to planes ending anywhere (PDDL without plane goals). |
+| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan (`schedulableDomination_all`). When a certificate lists `EO`, the checker also tests that every listed plan is event-ordered (`Cert2.check_sound_EO`). |
+
+For `forest` gaps the Lean checker computes $E$ with the σ-DP over the non-dominated cities, or with
+the tree DP when it estimates that cheaper (`useTreeDP`); it proves only the lower-bound direction,
+which is all soundness needs. The C++ checker uses the link-forest DP. Both are exact and agree on
+every sample.
+
+## `zeno-front`: the verified solver {#zeno-front}
+
+```sh
+lake exe zeno-front FILE     # or lean/.lake/build/bin/zeno-front FILE
+```
+
+It reads an instance from the header of `FILE`, that is the lines `instance n t p`, `d …`,
+`dbar …` and `c …` of a certificate (an optional `zeno-certificate` line first, and anything after
+`c` ignored). It prints the Pareto front as `cost makespan` lines by increasing cost, as
+`zeno front` does. It needs symmetric durations and $1 \le p \le t$, and otherwise stops with an
+error (exit code 1). Any certificate written by `zeno` is a valid input:
+
+```sh
+zeno -n 10 -t 8 -p 3 --certificate inst.cert > /dev/null
+lake exe zeno-front inst.cert
+```
+
+The front is `ZenoFront.solveFront d c t p`. By
+[`solveFront_isParetoFront`](../proofs.qmd#node-verified-solver), under (S) and (A1) with
+$1 \le p \le t$, it is exactly the Pareto front of the feasible plans. The solver finds the levels
+where $E$ drops by splitting intervals between $d_{\min}\lceil s/p\rceil$ and $(2t-p)\,d_{\max}$.
+At each level it takes $L(T)$ when the bracket $L(T) \le E(T) \le U_2(T)$ closes, and otherwise runs
+the link-forest DP or the σ-DP, whichever is estimated cheaper. Both are proved equal to $E(T)$
+([Theorem 7.5](../proofs.qmd#node-theorem-7-5), [Theorem 7.6](../proofs.qmd#node-theorem-7-6)).
+
+It is slower than `zeno`, but it needs no certificate and no trust in the C++ code. On the 66
+suite instances it finishes every one within 60 s with the same front as `zeno front`
+([results](../results.qmd)).
+
+## Trust base {#trust}
+
+What a verdict of `zeno-check`, or a front of `zeno-front`, relies on:
+
+1. **The Lean kernel and three axioms.** Every theorem of `ZenoFront` is checked by the kernel and
+   depends only on `propext`, `Classical.choice` and `Quot.sound`. The axiom audit
+   (`lake env lean scripts/CheckAxioms.lean`) enforces this over every declaration of the
+   library, and rejects `sorryAx` and `Lean.ofReduceBool` (`native_decide`). CI runs it on every
+   change. The blueprint badges come from the same check (`collectAxioms`) on the listed
+   declarations.
+2. **The definitions.** A theorem is only as good as the match between its definitions and the
+   intended mathematics. For the checker these are `Feasible`, `planCost`, `planMakespan`,
+   `achievable` and `IsParetoFront` ([§1.2](../proofs.qmd#node-s1-2),
+   [§1.5](../proofs.qmd#node-s1-5)). Plans may fly central-to-central legs of any duration `dc`,
+   wait anywhere and hand passengers over anywhere; planes must end in $C_G$ in `Cert.check_sound`
+   (`Cert.check_sound_anywhere` lifts this for version 1); `forest` gaps assume (A1) on `dc`, and
+   the version 2 kinds other than `relaxed` assume (A1-NS).
+3. **The parser.** `parseAnyCert` and the `main` of `ZenoCheck.lean` / `ZenoFrontMain.lean` are
+   outside the verified statement: the theorems are about the parsed values, so a parser bug could
+   make the checker verify a different front than the file's. The parser only translates numbers and
+   1-based indices; it mirrors `readCertificate` in `src/zeno/certificate.cpp`.
+4. **The compiler.** `lake exe zeno-check` runs the checking function as compiled code, so its
+   verdict also trusts the Lean compiler and runtime, not only the kernel. To avoid that, a
+   certificate can be checked by the kernel with `decide +kernel`, as
+   `lean/ZenoFront/Examples.lean` does for two small certificates
+   ([§5](../proofs.qmd#node-s5)). That is practical for small certificates only.
+
+The listed plans of a certificate are re-simulated by the checker, so a solver bug in building
+plans can only cause a rejection. [Theorem 4.1](../proofs.qmd#node-theorem-4-1), the
+achievability construction, is not needed for soundness. It is machine-checked anyway, and it is
+what makes `zeno-front`'s points achievable.
+
+## Timings
+
+Apple M4 Max, compiled checker (`bench/baselines/lean/apple-m4-max/`):
+
+{{< include ../_results-checker.md >}}
+
+On the certificates that `zeno` writes for the 66 suite instances, see the
+[results page](../results.qmd).

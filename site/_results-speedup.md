@@ -1,0 +1,1 @@
+On the 21 instances that the 2016 `zenoSolver` finishes, `zeno` is 10 times faster at the median and up to 8,414 times faster (`paper-table1/n8t8p2`). Process start-up, about 3 ms, is the floor of every `zeno` timing.

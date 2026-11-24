@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Results – ZenoSolver</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles/provenance.css">
+<link rel="stylesheet" href="styles/site.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ZenoSolver</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Solver</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
+        <li>
+    <a class="dropdown-item" href="./solver/install.html">
+ <span class="dropdown-text">Installation and build</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./solver/cli.html">
+ <span class="dropdown-text">Command line</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./solver/api.html">
+ <span class="dropdown-text">C++ library</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./solver/certificates.html">
+ <span class="dropdown-text">Certificate format</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./solver/lean.html">
+ <span class="dropdown-text">Lean tools</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./solver/algorithm.html">
+ <span class="dropdown-text">Algorithm</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Instances</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
+        <li>
+    <a class="dropdown-item" href="./instances/model.html">
+ <span class="dropdown-text">Model and data files</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./instances/generator.html">
+ <span class="dropdown-text">Generator</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./instances/pddl.html">
+ <span class="dropdown-text">PDDL</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./instances/suites.html">
+ <span class="dropdown-text">Benchmark and golden suites</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./instances/known-fronts.html">
+ <span class="dropdown-text">Instances with known fronts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./instances/sizing.html">
+ <span class="dropdown-text">Size guidance</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./proofs.html"> 
+<span class="menu-text">Blueprint</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./results.html" aria-current="page"> 
+<span class="menu-text">Results</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/aquemy/ZenoSolver"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="./blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#correctness" id="toc-correctness" class="nav-link active" data-scroll-target="#correctness">Correctness</a></li>
+  <li><a href="#the-benchmark-suites" id="toc-the-benchmark-suites" class="nav-link" data-scroll-target="#the-benchmark-suites">The benchmark suites</a>
+  <ul class="collapse">
+  <li><a href="#per-instance" id="toc-per-instance" class="nav-link" data-scroll-target="#per-instance">Per instance</a></li>
+  </ul></li>
+  <li><a href="#time-against-the-level-range" id="toc-time-against-the-level-range" class="nav-link" data-scroll-target="#time-against-the-level-range">Time against the level range</a></li>
+  <li><a href="#the-lean-checker" id="toc-the-lean-checker" class="nav-link" data-scroll-target="#the-lean-checker">The Lean checker</a></li>
+  <li><a href="#ci" id="toc-ci" class="nav-link" data-scroll-target="#ci">Component benchmarks and CI</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Results</h1>
+<p class="subtitle lead">Correctness checks and timings, computed from the committed baselines</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every number on this page is computed from the JSON baselines committed under <code>bench/baselines/</code> when the site is built (<code>site/gen_pages.py</code>). None is typed by hand.</p>
+<p>Apple M4 Max, 16 cores, macOS, Release builds; recorded 2026-11-23, 2026-11-24. Source: <code>bench/baselines/*/apple-m4-max/</code>.</p>
+<section id="correctness" class="level2">
+<h2 class="anchored" data-anchor-id="correctness">Correctness</h2>
+<ul>
+<li><strong>Golden fronts.</strong> <code>zeno</code> reproduces all 27 fronts of the brute-force oracle (<a href="./instances/suites.html#golden">golden suite</a>). Five of them are instances on which the 2016 solvers were still wrong after their bookkeeping fixes, because their greedy schedule is not optimal (<a href="./proofs.html#node-s5">§5</a>).</li>
+<li><strong>Every level.</strong> <code>ut-zeno-core</code> compares the value of every level, the bracket order <span class="math inline">\(L \le E \le U_3 \le U\)</span> and the front with an independent enumeration oracle on random instances.</li>
+<li><strong>Non-symmetric.</strong> On 1,800 tiny random non-symmetric instances, every bracket closes and equals the oracle’s front.</li>
+<li><strong>Two solvers, one front.</strong> The Lean solver <code>zeno-front</code>, whose output is proved to be the front, gives the same front as <code>zeno front</code> on every suite instance (table below). CI compares the two on the golden, quick and three regime instances.</li>
+<li><strong>Certificates.</strong> CI writes certificates for the golden and random instances with <code>zeno</code> and has both checkers verify them. The Lean checker accepts the certificates of all 66 suite instances.</li>
+</ul>
+</section>
+<section id="the-benchmark-suites" class="level2">
+<h2 class="anchored" data-anchor-id="the-benchmark-suites">The benchmark suites</h2>
+<p>The 66 instances of <a href="./instances/suites.html#bench"><code>bench/instances</code></a>, with a timeout per instance:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Solver</th>
+<th>Finished</th>
+<th>Median</th>
+<th>Slowest</th>
+<th>Conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>zeno</code> (C++, all cores)</td>
+<td>66 of 66</td>
+<td>3.6 ms</td>
+<td>61 ms (<code>regimes/r5-n100t60p10</code>)</td>
+<td>30 s timeout, median of 3 runs</td>
+</tr>
+<tr class="even">
+<td>2016 <code>zenoSolver</code></td>
+<td>21 of 66</td>
+<td>20 ms (finished only)</td>
+<td>timeout on 45</td>
+<td>30 s timeout, median of 3 runs</td>
+</tr>
+<tr class="odd">
+<td>2016 <code>zenoSolver_naive</code></td>
+<td>21 of 66</td>
+<td>20 ms (finished only)</td>
+<td>timeout on 45</td>
+<td>30 s timeout, median of 3 runs</td>
+</tr>
+<tr class="even">
+<td>2016 <code>zenoSolver_noDuplicate</code></td>
+<td>21 of 66</td>
+<td>38 ms (finished only)</td>
+<td>timeout on 45</td>
+<td>30 s timeout, median of 3 runs</td>
+</tr>
+<tr class="odd">
+<td>Lean <code>zeno-front</code> (verified solver)</td>
+<td>66 of 66</td>
+<td>40 ms</td>
+<td>10.1 s (<code>regimes/r5-n100t60p10</code>)</td>
+<td>60 s timeout, one run; front equal to <code>zeno front</code> on 66 of 66</td>
+</tr>
+<tr class="even">
+<td>Lean <code>zeno-check</code> on <code>zeno</code>’s certificates</td>
+<td>66 of 66 accepted</td>
+<td>26 ms</td>
+<td>2.1 s (<code>regimes/r5-n100t60p10</code>)</td>
+<td>4.9 s in total</td>
+</tr>
+</tbody>
+</table>
+<p>On the 21 instances that the 2016 <code>zenoSolver</code> finishes, <code>zeno</code> is 10 times faster at the median and up to 8,414 times faster (<code>paper-table1/n8t8p2</code>). Process start-up, about 3 ms, is the floor of every <code>zeno</code> timing.</p>
+<p>The 2016 solvers (<code>zenoSolver</code>, <code>zenoSolver_naive</code>, <code>zenoSolver_noDuplicate</code>) were removed from the code; their baselines are kept for comparison, and commit <code>84ca92a</code> still builds them. Their fronts are those of the legacy greedy, wrong on some instances, so their front sizes are not a reference.</p>
+<section id="per-instance" class="level3">
+<h3 class="anchored" data-anchor-id="per-instance">Per instance</h3>
+<p>Front size and <code>zeno</code> time from <code>zeno.json</code> (median of 3 runs, all cores); 2016 <code>zenoSolver</code> (median of 3, 30 s timeout); Lean <code>zeno-front</code> (one run, 60 s timeout, “differs” if its front is not <code>zeno front</code>’s); Lean <code>zeno-check</code> on the certificate <code>zeno</code> writes, and that certificate’s size.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Instance</th>
+<th>Arguments</th>
+<th style="text-align: right;">Front</th>
+<th style="text-align: right;"><code>zeno</code></th>
+<th style="text-align: right;">2016 <code>zenoSolver</code></th>
+<th style="text-align: right;"><code>zeno-front</code></th>
+<th style="text-align: right;"><code>zeno-check</code></th>
+<th style="text-align: right;">Certificate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>quick/n5t5p2</code></td>
+<td><code>-n 5 -t 5 -p 2</code></td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">5.2 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">4 kB</td>
+</tr>
+<tr class="even">
+<td><code>quick/n6t5p3</code></td>
+<td><code>-n 6 -t 5 -p 3</code></td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">5.2 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">3 kB</td>
+</tr>
+<tr class="odd">
+<td><code>quick/n10t4p2</code></td>
+<td><code>-n 10 -t 4 -p 2</code></td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">14 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">5 kB</td>
+</tr>
+<tr class="even">
+<td><code>quick/lpt-counterexample</code></td>
+<td><code>-n 2 -t 5 -p 2 -d lpt-counterexample.dat</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">2.3 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">1 kB</td>
+</tr>
+<tr class="odd">
+<td><code>quick/multiples</code></td>
+<td><code>-n 6 -t 6 -p 3 -d multiples.dat</code></td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">20 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">4 kB</td>
+</tr>
+<tr class="even">
+<td><code>regimes/r1-n200t3p2</code></td>
+<td><code>-n 200 -t 3 -p 2</code></td>
+<td style="text-align: right;">399</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">410 ms</td>
+<td style="text-align: right;">34 ms</td>
+<td style="text-align: right;">68 kB</td>
+</tr>
+<tr class="odd">
+<td><code>regimes/r2-n20t6p2</code></td>
+<td><code>-n 20 -t 6 -p 2</code></td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">27 ms</td>
+<td style="text-align: right;">29 kB</td>
+</tr>
+<tr class="even">
+<td><code>regimes/r3-n8t26p25</code></td>
+<td><code>-n 8 -t 26 -p 25</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">3.4 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">29 ms</td>
+<td style="text-align: right;">13 kB</td>
+</tr>
+<tr class="odd">
+<td><code>regimes/r4-n50t30p5</code></td>
+<td><code>-n 50 -t 30 -p 5</code></td>
+<td style="text-align: right;">540</td>
+<td style="text-align: right;">8.1 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">700 ms</td>
+<td style="text-align: right;">214 ms</td>
+<td style="text-align: right;">877 kB</td>
+</tr>
+<tr class="even">
+<td><code>regimes/r5-n100t60p10</code></td>
+<td><code>-n 100 -t 60 -p 10</code></td>
+<td style="text-align: right;">1090</td>
+<td style="text-align: right;">61 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">10.1 s</td>
+<td style="text-align: right;">2.1 s</td>
+<td style="text-align: right;">3.9 MB</td>
+</tr>
+<tr class="odd">
+<td><code>paper-table1/n3t3p2</code></td>
+<td><code>-n 3 -t 3 -p 2</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">3.2 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">1 kB</td>
+</tr>
+<tr class="even">
+<td><code>paper-table1/n4t4p2</code></td>
+<td><code>-n 4 -t 4 -p 2</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">3.2 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">2 kB</td>
+</tr>
+<tr class="odd">
+<td><code>paper-table1/n5t5p2</code></td>
+<td><code>-n 5 -t 5 -p 2</code></td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">5.7 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">4 kB</td>
+</tr>
+<tr class="even">
+<td><code>paper-table1/n6t6p2</code></td>
+<td><code>-n 6 -t 6 -p 2</code></td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">56 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">7 kB</td>
+</tr>
+<tr class="odd">
+<td><code>paper-table1/n7t7p2</code></td>
+<td><code>-n 7 -t 7 -p 2</code></td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">3.3 ms</td>
+<td style="text-align: right;">1.0 s</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">12 kB</td>
+</tr>
+<tr class="even">
+<td><code>paper-table1/n8t8p2</code></td>
+<td><code>-n 8 -t 8 -p 2</code></td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">17.8 s</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">18 kB</td>
+</tr>
+<tr class="odd">
+<td><code>paper-table1/n9t9p2</code></td>
+<td><code>-n 9 -t 9 -p 2</code></td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">28 kB</td>
+</tr>
+<tr class="even">
+<td><code>paper-table1/n10t10p2</code></td>
+<td><code>-n 10 -t 10 -p 2</code></td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">41 kB</td>
+</tr>
+<tr class="odd">
+<td><code>families/linear</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 3 -D 3</code></td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">17 kB</td>
+</tr>
+<tr class="even">
+<td><code>families/log</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 1 -D 1 -r 100</code></td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">28 ms</td>
+<td style="text-align: right;">19 kB</td>
+</tr>
+<tr class="odd">
+<td><code>families/sqrt</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 100</code></td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">160 ms</td>
+<td style="text-align: right;">57 ms</td>
+<td style="text-align: right;">38 kB</td>
+</tr>
+<tr class="even">
+<td><code>families/pow2</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 4 -D 4</code></td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">5.0 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">100 ms</td>
+<td style="text-align: right;">35 ms</td>
+<td style="text-align: right;">20 kB</td>
+</tr>
+<tr class="odd">
+<td><code>families/staircase</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 5 -D 5 -r 10</code></td>
+<td style="text-align: right;">133</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">60 ms</td>
+<td style="text-align: right;">32 ms</td>
+<td style="text-align: right;">57 kB</td>
+</tr>
+<tr class="even">
+<td><code>families/log-linear</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 1 -D 3 -r 100</code></td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">60 ms</td>
+<td style="text-align: right;">29 ms</td>
+<td style="text-align: right;">19 kB</td>
+</tr>
+<tr class="odd">
+<td><code>families/sqrt-linear</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 3 -r 100</code></td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">100 ms</td>
+<td style="text-align: right;">42 ms</td>
+<td style="text-align: right;">35 kB</td>
+</tr>
+<tr class="even">
+<td><code>adversarial/lpt-counterexample</code></td>
+<td><code>-n 2 -t 5 -p 2 -d lpt-counterexample.dat</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">2.3 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">1 kB</td>
+</tr>
+<tr class="odd">
+<td><code>adversarial/clustered</code></td>
+<td><code>-n 8 -t 9 -p 3 -d clustered.dat</code></td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">29 ms</td>
+<td style="text-align: right;">30 kB</td>
+</tr>
+<tr class="even">
+<td><code>adversarial/multiples</code></td>
+<td><code>-n 6 -t 8 -p 3 -d multiples.dat</code></td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">571 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">10 kB</td>
+</tr>
+<tr class="odd">
+<td><code>adversarial/near-equal</code></td>
+<td><code>-n 10 -t 9 -p 4 -d near-equal.dat</code></td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">100 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">18 kB</td>
+</tr>
+<tr class="even">
+<td><code>adversarial/three-partition-m4</code></td>
+<td><code>-n 12 -t 8 -p 4 -d three-partition-m4.dat</code></td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">19 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-n/n5</code></td>
+<td><code>-n 5 -t 6 -p 3</code></td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">8.3 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">23 ms</td>
+<td style="text-align: right;">3 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-n/n10</code></td>
+<td><code>-n 10 -t 6 -p 3</code></td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">696 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">8 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-n/n20</code></td>
+<td><code>-n 20 -t 6 -p 3</code></td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">3.3 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">27 ms</td>
+<td style="text-align: right;">16 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-n/n40</code></td>
+<td><code>-n 40 -t 6 -p 3</code></td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">29 ms</td>
+<td style="text-align: right;">34 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-n/n80</code></td>
+<td><code>-n 80 -t 6 -p 3</code></td>
+<td style="text-align: right;">238</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">100 ms</td>
+<td style="text-align: right;">31 ms</td>
+<td style="text-align: right;">71 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-n/n160</code></td>
+<td><code>-n 160 -t 6 -p 3</code></td>
+<td style="text-align: right;">478</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">380 ms</td>
+<td style="text-align: right;">56 ms</td>
+<td style="text-align: right;">153 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-t/t4</code></td>
+<td><code>-n 8 -t 4 -p 3</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">3 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-t/t6</code></td>
+<td><code>-n 8 -t 6 -p 3</code></td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">143 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">6 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-t/t8</code></td>
+<td><code>-n 8 -t 8 -p 3</code></td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">8.1 s</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">13 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-t/t10</code></td>
+<td><code>-n 8 -t 10 -p 3</code></td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">28 ms</td>
+<td style="text-align: right;">19 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-t/t12</code></td>
+<td><code>-n 8 -t 12 -p 3</code></td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">29 ms</td>
+<td style="text-align: right;">27 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-t/t16</code></td>
+<td><code>-n 8 -t 16 -p 3</code></td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">32 ms</td>
+<td style="text-align: right;">53 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-t/t20</code></td>
+<td><code>-n 8 -t 20 -p 3</code></td>
+<td style="text-align: right;">92</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">34 ms</td>
+<td style="text-align: right;">89 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-t/t30</code></td>
+<td><code>-n 8 -t 30 -p 3</code></td>
+<td style="text-align: right;">134</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">90 ms</td>
+<td style="text-align: right;">54 ms</td>
+<td style="text-align: right;">201 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-t/t40</code></td>
+<td><code>-n 8 -t 40 -p 3</code></td>
+<td style="text-align: right;">183</td>
+<td style="text-align: right;">3.9 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">150 ms</td>
+<td style="text-align: right;">95 ms</td>
+<td style="text-align: right;">375 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p1</code></td>
+<td><code>-n 8 -t 13 -p 1</code></td>
+<td style="text-align: right;">176</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">33 ms</td>
+<td style="text-align: right;">117 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p2</code></td>
+<td><code>-n 8 -t 13 -p 2</code></td>
+<td style="text-align: right;">85</td>
+<td style="text-align: right;">3.4 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">27 ms</td>
+<td style="text-align: right;">53 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p3</code></td>
+<td><code>-n 8 -t 13 -p 3</code></td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">3.5 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">27 ms</td>
+<td style="text-align: right;">34 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p4</code></td>
+<td><code>-n 8 -t 13 -p 4</code></td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">25 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p5</code></td>
+<td><code>-n 8 -t 13 -p 5</code></td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">20 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p6</code></td>
+<td><code>-n 8 -t 13 -p 6</code></td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">26 ms</td>
+<td style="text-align: right;">16 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p7</code></td>
+<td><code>-n 8 -t 13 -p 7</code></td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">3.3 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">11 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p8</code></td>
+<td><code>-n 8 -t 13 -p 8</code></td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">11 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p9</code></td>
+<td><code>-n 8 -t 13 -p 9</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">3.4 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">25 ms</td>
+<td style="text-align: right;">7 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p10</code></td>
+<td><code>-n 8 -t 13 -p 10</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">14.5 s</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">7 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-p/p11</code></td>
+<td><code>-n 8 -t 13 -p 11</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">2.7 s</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">7 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-p/p12</code></td>
+<td><code>-n 8 -t 13 -p 12</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">354 ms</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">22 ms</td>
+<td style="text-align: right;">7 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-D/r1</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 1</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2.1 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">26 ms</td>
+<td style="text-align: right;">2 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-D/r10</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 10</code></td>
+<td style="text-align: right;">73</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">33 ms</td>
+<td style="text-align: right;">30 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-D/r100</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 100</code></td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">150 ms</td>
+<td style="text-align: right;">61 ms</td>
+<td style="text-align: right;">38 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-D/r1000</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 1000</code></td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">5.1 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">340 ms</td>
+<td style="text-align: right;">113 ms</td>
+<td style="text-align: right;">42 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-D/r10000</code></td>
+<td><code>-n 10 -t 8 -p 3 -C 2 -D 2 -r 10000</code></td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">9.4 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">1.8 s</td>
+<td style="text-align: right;">610 ms</td>
+<td style="text-align: right;">47 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-distinct/k2</code></td>
+<td><code>-n 24 -t 8 -p 3 -d distinct-2.dat</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2.2 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">40 ms</td>
+<td style="text-align: right;">24 ms</td>
+<td style="text-align: right;">4 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-distinct/k4</code></td>
+<td><code>-n 24 -t 8 -p 3 -d distinct-4.dat</code></td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">26 ms</td>
+<td style="text-align: right;">14 kB</td>
+</tr>
+<tr class="odd">
+<td><code>scaling-distinct/k8</code></td>
+<td><code>-n 24 -t 8 -p 3 -d distinct-8.dat</code></td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">3.6 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">50 ms</td>
+<td style="text-align: right;">27 ms</td>
+<td style="text-align: right;">35 kB</td>
+</tr>
+<tr class="even">
+<td><code>scaling-distinct/k24</code></td>
+<td><code>-n 24 -t 8 -p 3 -d distinct-24.dat</code></td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">3.7 ms</td>
+<td style="text-align: right;">timeout</td>
+<td style="text-align: right;">240 ms</td>
+<td style="text-align: right;">39 ms</td>
+<td style="text-align: right;">118 kB</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="time-against-the-level-range" class="level2">
+<h2 class="anchored" data-anchor-id="time-against-the-level-range">Time against the level range</h2>
+<p>The <code>sqrt</code> family on <span class="math inline">\(n = 10\)</span>, <span class="math inline">\(t = 8\)</span>, <span class="math inline">\(p = 3\)</span> with durations scaled by <code>-r</code> (<code>BM_SolveLargeDurations</code>, median of 3 runs). The number of levels grows linearly with <code>-r</code>. The number of levels the breakpoint search evaluates, and the time, grow only with its logarithm:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;"><code>-r</code></th>
+<th style="text-align: right;">Levels</th>
+<th style="text-align: right;">Levels evaluated</th>
+<th style="text-align: right;">Front size</th>
+<th style="text-align: right;">Median time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">1,081</td>
+<td style="text-align: right;">1,081</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">0.9 ms</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">10,811</td>
+<td style="text-align: right;">629</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">2.1 ms</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10,000</td>
+<td style="text-align: right;">108,111</td>
+<td style="text-align: right;">899</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">5.6 ms</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">100,000</td>
+<td style="text-align: right;">1,081,136</td>
+<td style="text-align: right;">1,164</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">2.7 ms</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1,000,000</td>
+<td style="text-align: right;">10,811,386</td>
+<td style="text-align: right;">1,442</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">3.3 ms</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10,000,000</td>
+<td style="text-align: right;">108,113,881</td>
+<td style="text-align: right;">1,707</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">3.8 ms</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-lean-checker" class="level2">
+<h2 class="anchored" data-anchor-id="the-lean-checker">The Lean checker</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Set</th>
+<th style="text-align: right;">Certificates</th>
+<th>Verdicts</th>
+<th style="text-align: right;">Median</th>
+<th>Slowest</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Lean <code>zeno-check</code>, test certificates (<code>lean/test/certificates</code>, versions 1 and 2)</td>
+<td style="text-align: right;">37</td>
+<td>19 accepted, 18 rejected (each as expected)</td>
+<td style="text-align: right;">24 ms</td>
+<td>2.4 s (<code>rejected/v2-balanced-missing-point</code>)</td>
+</tr>
+<tr class="even">
+<td>Lean <code>zeno-check</code>, version 2 certificates of random non-symmetric instances</td>
+<td style="text-align: right;">152</td>
+<td>151 accepted, 1 rejected</td>
+<td style="text-align: right;">23 ms</td>
+<td>2.3 s (<code>v2-random/e1w2</code>)</td>
+</tr>
+<tr class="odd">
+<td>Lean <code>zeno-check</code>, certificates whose cities all survive the dominance merge</td>
+<td style="text-align: right;">8</td>
+<td>8 accepted, 0 rejected</td>
+<td style="text-align: right;">185 ms</td>
+<td>12.5 s (<code>many-cities/n40t20p8C2D2r100</code>)</td>
+</tr>
+<tr class="even">
+<td>C++ <code>zeno check</code>, test certificates</td>
+<td style="text-align: right;">25</td>
+<td>13 accepted, 12 rejected (each as expected)</td>
+<td style="text-align: right;">2.1 ms</td>
+<td>5.1 ms (<code>accepted/forest-r25</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>rejected/</code> certificates of the test set are corrupted on purpose, so their rejection is the expected verdict. The one rejected random version 2 certificate is the <a href="./proofs.html#node-proposition-6-5">Proposition 6.5</a> instance (<code>v2-random/prop65</code>); <code>bench/README.md</code> notes that it needs the <code>search</code> kind. The certificate <code>zeno</code> writes today for that instance closes two gaps with <code>search</code>, and <code>zeno-check</code> accepts it (<a href="./solver/lean.html#zeno-check">Lean tools</a>).</p>
+</section>
+<section id="ci" class="level2">
+<h2 class="anchored" data-anchor-id="ci">Component benchmarks and CI</h2>
+<p>Each algorithm component has a Google Benchmark executable (<code>bm-core</code>, <code>bm-plan</code>, <code>bm-ns</code>), with counters that explain its time (peak RSS, states, gap levels, certificate bytes) and complexity fits to compare with the bounds of the note. Their baselines are in <code>bench/baselines/zeno/&lt;machine&gt;/</code>, recorded while other builds ran, so differences below 20% are noise.</p>
+<p><code>.github/workflows/bench.yml</code> runs every component benchmark and the <code>quick</code> suite on pull requests and writes the comparison with <code>bench/baselines/*/ci-ubuntu-24.04/</code> to the job summary, without blocking. A nightly run on the runner named by <code>ZS_BENCH_RUNNER</code> fails on a regression above <code>ZS_BENCH_THRESHOLD</code> (default 25%, with a 5 ms noise floor). See <a href="https://github.com/aquemy/ZenoSolver/blob/master/bench/README.md"><code>bench/README.md</code></a> for the tools and the baseline layout.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/quemy\.info\/ZenoSolver\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ZenoSolver, its theory note and the Lean formalization: Alexandre Quemy.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

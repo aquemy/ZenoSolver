@@ -1,0 +1,76 @@
+---
+title: "Benchmark and golden suites"
+subtitle: "The 66 benchmark instances, the 27 golden instances, and the Lean test sets"
+---
+
+## Benchmark suites {#bench}
+
+`bench/instances/*.txt` hold the instances that every solver is timed on. One instance per line,
+`name|arguments`, where the arguments are `zeno` instance options and `@DATA@` stands for
+`bench/instances/data/` (data files in the [2-line format](model.qmd#data-files)). Lines starting
+with `#` are comments.
+
+{{< include _suites.md >}}
+
+The tables below list every instance with the size of its front, from `zeno`'s baseline
+(`bench/baselines/zeno/apple-m4-max/zeno.json`). The timings of every solver on them are on the
+[results page](../results.qmd). The `regimes` header describes the generator before the
+[2016 swap](model.qmd#swap); the instances solved have $d_i = i$ and $c_i = n + 1 - i$.
+
+{{< include _suites-detail.md >}}
+
+To time a solver over the suites ([`bench/README.md`](https://github.com/aquemy/ZenoSolver/blob/master/bench/README.md)):
+
+```sh
+bench/tools/run_suite.py --exe build/bench/zeno \
+    --suite bench/instances/regimes.txt --suite bench/instances/families.txt \
+    --timeout 30 --repetitions 3 --machine apple-m4-max --out zeno.json
+bench/tools/check_regression.py baseline.json zeno.json [--threshold 0.10]
+```
+
+## Golden instances {#golden}
+
+`tests/golden/instances.txt` lists 27 tiny symmetric instances (`name|arguments`, `@DATA@` for
+`tests/golden/data/`). Their fronts, in `tests/golden/fronts/<name>.front` as `cost makespan`
+lines by increasing cost, were computed by the brute-force oracle `zenoOracle`
+(`tests/oracle/bruteForce.hpp`). The oracle enumerates every PPP, every beta set, and every
+assignment and order of flights to planes, and simulates the waiting exactly. It is exponential
+($t \le 5$; `n = 6 t = 6 p = 2` already takes minutes).
+
+{{< include _golden.md >}}
+
+For every instance, CTest checks that the front of `zeno` equals the golden front
+(`tests/golden/checkFront.cmake`) and that `zeno check` accepts its certificate
+(`checkCertificate.cmake`). Pairs known to fail go in `tests/golden/known-bugs.txt`, currently
+none; a listed pair that passes fails the suite. To regenerate the fronts:
+
+```sh
+tests/golden/regenerate.sh build/release/zenoOracle
+```
+
+Instances of note, as documented in the file:
+
+- `lpt-counterexample`: $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$. The point (260, 60) is
+  Pareto-optimal, but the greedy of Algorithm 1 (EvoCOP 2015) returns makespan 68 for its PPP.
+  Its front is also proved in Lean by the kernel alone (`Examples.lptCounterexample_front`,
+  [§5](../proofs.qmd#node-s5)).
+- `p3-first-counterexample`: $d = (1, 3)$, $c = (9, 5)$, $t = 4$, $p = 2$. The point (42, 12)
+  needs the plane making the drop-off to take the long crossing; `zenoSolver_noDuplicate` ended at
+  14.
+- `nodup-best-plan` and `trailing-newline`: $d = (1, 9)$, $c = (4, 1)$, $t = 5$, $p = 3$, read from
+  a file without and with a trailing blank line. The 2016 `zenoSolver_noDuplicate` kept the last
+  plan of a PPP instead of the best one, and the blank line used to change the instance.
+- The first sixteen use the default generator, including the $n = t$ instances of Table 1 of the
+  EvoCOP 2015 paper (front sizes 5, 10, 17); the next seven use other families and scales.
+
+## Lean test sets
+
+- `lean/test/certificates/accepted/` and `rejected/`: certificates written by `zeno`, and corrupted
+  copies with a comment saying what was broken (a wrong cost or duration, a broken route,
+  non-monotone points, a missing point, a `forest` gap relabelled `relaxed`, a missing assumption,
+  a truncated file, and version 2 cases such as the Proposition 6.5 instance without its point
+  (14, 74)). `bash lean/test/run.sh` checks each against its expected verdict.
+- `lean/test/instances/`: random instances for the end-to-end run (`lean/test/e2e.sh`), five of
+  them with a `forest` gap.
+- `lean/test/front-regimes.list`: the three suite regimes on which `zeno-front` is compared with
+  `zeno front` in CI.

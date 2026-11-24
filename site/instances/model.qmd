@@ -1,0 +1,125 @@
+---
+title: "Model and data files"
+subtitle: "What an instance is, the 2-line and 3-line data files, and the 2016 swap"
+---
+
+## The model
+
+A MultiZenoTravel instance ([§1.1 of the note](../proofs.qmd#node-s1-1)) has
+
+- two hubs, the initial city $C_I$ and the goal city $C_G$, and $n$ central cities $1, \dots, n$;
+- flights between a hub and a central city: $C_I$–$i$ lasts $d_i$, $i$–$C_G$ lasts $\bar d_i$,
+  in both directions. There is no flight $C_I$–$C_G$. Central-to-central flights may exist;
+- a landing cost $c_i$ in central city $i$ (landing in a hub is free);
+- $p$ planes and $t \ge p$ passengers, all in $C_I$ at time 0. A plane carries at most one
+  passenger, and boarding and debarking take no time.
+
+A plan flies every passenger to $C_G$ and ends every plane in $C_G$. Its **cost** is the sum of its
+landing costs and its **makespan** the time the last plane reaches $C_G$. The front is the set of
+Pareto-optimal (cost, makespan) pairs over all plans, which may wait anywhere, hand passengers over
+anywhere, and use central flights ([§1.2](../proofs.qmd#node-s1-2)). Every plan lands at least
+$s = 2t - p$ times in central cities ([Lemma 3.2](../proofs.qmd#node-lemma-3-2)).
+
+What `zeno` stores is `d`, `dbar`, `c`, `t` and `p`; durations, costs and times are non-negative
+integers. The assumptions ([§1.4](../proofs.qmd#node-s1-4)) are
+
+- **(S)**, symmetry: $d_i = \bar d_i$ for every city. Every instance the generator builds without
+  `-E`/`-W` is symmetric;
+- **(A1)**, under (S): central flights are no faster than through a hub, $d_{ij} \ge d_i + d_j$.
+  Every PDDL problem `zeno` writes satisfies it (central flights last
+  $\max(d_i, \bar d_i) + \max(d_j, \bar d_j) + 100$);
+- **(A1-NS)**, the non-symmetric version: $d_{ij} \ge \min(d_i + d_j, \bar d_i + \bar d_j)$.
+
+The front `zeno` prints is exact for symmetric instances under (A1). For non-symmetric ones it is
+exact wherever the certified bracket closes, under (A1-NS) when a bound needs it
+([command line](../solver/cli.qmd#front)).
+
+## Data files {#data-files}
+
+`-d FILE` reads the durations and costs from a file instead of the generator. `-n` must still be
+given and must match the file. Two layouts:
+
+**2 lines, symmetric:** durations, then costs.
+
+```text
+6 10
+40 20
+```
+
+This is `tests/golden/data/lpt-counterexample.dat`: $d = (6, 10)$, $c = (40, 20)$. With
+`-n 2 -t 5 -p 2` it is the smallest instance on which the 2016 greedy misses a front point
+([§5](../proofs.qmd#node-s5)).
+
+**3 lines, possibly non-symmetric:** $C_I$-side durations $d$, $C_G$-side durations $\bar d$,
+costs.
+
+```text
+3 19
+3 11
+5 1
+```
+
+This is the instance of [Proposition 6.5](../proofs.qmd#node-proposition-6-5)
+(`zeno -n 2 -t 7 -p 4 -d prop65.dat`), on which waiting is harmful. A 3-line file with equal
+first and second lines is symmetric.
+
+Reading rules (`src/zeno/legacy_input.cpp`):
+
+- tokens are separated by whitespace, and every non-blank line must have exactly $n$ of them;
+  blank lines are skipped, so a trailing newline or blank line is harmless (the golden instance
+  `trailing-newline` checks it);
+- each token is read as an integer (`std::stoi`): `3.7` reads as 3, and a token that does not
+  start with a number is an error;
+- the file must have 2 or 3 non-blank lines;
+- every value is then multiplied by `-r` (default 1) and truncated toward zero, as for generated
+  instances, and negative values are rejected.
+
+`zeno generate` writes the current instance in this format ([command line](../solver/cli.qmd#generate)).
+
+## The 2016 swap {#swap}
+
+::: {.callout-warning}
+After reading or generating the vectors, if $n > 1$ and **the first duration exceeds the second**,
+$d_1 > d_2$, `zeno` **exchanges the durations and the costs**, and reverses the $C_G$-side
+durations. The 2016 code assumed increasing durations and did this, and `zeno` keeps it so that
+both build the same instance from the same options.
+:::
+
+The rule, from `legacy::buildInstance`:
+
+```cpp
+if(n > 1 && d[0] > d[1])
+{
+    std::swap(d, c);           // durations <-> costs
+    std::ranges::reverse(de);  // C_G-side durations reversed
+}
+if(symmetric)
+    de = d;
+```
+
+Consequences:
+
+- **2-line file.** A file `5 3` / `1 2` is solved as durations $(1, 2)$ and costs $(5, 3)$.
+  `zeno front` prints a note on stderr when this happens to a data file:
+
+  ```text
+  zeno: note: the first duration exceeds the second, so the duration and cost lines of FILE were swapped, as the 2016 solvers did (order the cities to avoid it)
+  ```
+
+  `zeno pddl` and `zeno generate` apply the same swap without the note.
+- **3-line file.** The swap is worse: $d$ and $c$ are exchanged and $\bar d$ is reversed, so
+  each city gets another city's $C_G$-side duration. The file `5 3` / `7 8` / `1 2` becomes
+  $d = (1, 2)$, $\bar d = (8, 7)$, $c = (5, 3)$.
+- **The generator.** It computes durations on decreasing arguments, so for an increasing
+  generating function the first duration is the largest and the swap fires. Then `-C` sets the
+  *durations* and `-D` the *costs* ([generator](generator.qmd)). This is why the default instances
+  have $d_i = i$ and $c_i = n + 1 - i$.
+- **Ties.** After truncation the first two durations may be equal, and then nothing is swapped.
+  `-n 10 -D 1` (log, `-r 1`) gives $d = (2, 2, 2, 1, 1, 1, 1, 1, 0, 0)$ and $c = (1, \dots, 10)$,
+  whereas `-n 10 -D 1 -r 100` swaps and gives $d = (100, 200, \dots, 1000)$. The meaning of `-C`
+  and `-D` thus depends on `-r`.
+- **Round trips.** `zeno generate` writes the instance after the swap. If that instance still has
+  $d_1 > d_2$, reading the file back swaps it again.
+
+**To avoid the trap, order the cities by duration** so that $d_1 \le d_2$ (any order of the
+others is fine), and check the instance with `zeno generate ... -d FILE` before solving it.

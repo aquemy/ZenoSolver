@@ -1,0 +1,244 @@
+---
+title: "C++ library"
+subtitle: "The zeno::core library: types, entry points and internals"
+---
+
+Everything `zeno` does is in the static library `zeno_core` (CMake alias `zeno::core`), whose
+public headers are in `include/zeno/`. The command line (`src/zeno/main.cpp`) is a thin wrapper
+around it. There are no install rules: use the library from a CMake project with
+`add_subdirectory` (or `FetchContent`), then
+
+```cmake
+add_subdirectory(ZenoSolver)     # set ZS_BUILD_TESTS=OFF to skip the tests
+target_link_libraries(my_target PRIVATE zeno::core)
+```
+
+The library needs C++23. Namespace `zeno`; errors are reported by exceptions
+(`std::invalid_argument` for invalid input, `std::runtime_error` for I/O and parse errors).
+
+## Example
+
+```cpp
+#include <zeno/certificate.hpp>
+#include <zeno/legacy_input.hpp>
+#include <zeno/ns.hpp>
+#include <zeno/solve.hpp>
+
+#include <fstream>
+#include <iostream>
+
+int main()
+{
+    // A symmetric instance: d = dbar. Cities are 0-based in the library.
+    zeno::Instance instance{.d = {6, 10}, .dbar = {6, 10}, .c = {40, 20}, .t = 5, .p = 2};
+    instance.validate();
+
+    zeno::SolveOptions options;
+    options.plans = true; // build and check a plan per point (needed for a certificate)
+    const zeno::SolveResult result = zeno::solveFront(instance, options);
+    for(const zeno::FrontPoint& point : result.front) // by increasing makespan
+        std::cout << point.cost << " " << point.makespan << "\n";
+
+    const zeno::Certificate certificate = zeno::makeCertificate(instance, result);
+    std::ofstream out("front.cert");
+    zeno::writeCertificate(out, certificate);
+    const zeno::CertificateCheck check = zeno::checkCertificate(certificate);
+    std::cout << (check.ok ? "accepted" : "rejected") << "\n";
+
+    // A non-symmetric instance (Proposition 6.5 of the note): a certified bracket.
+    const zeno::Instance ns{.d = {3, 19}, .dbar = {3, 11}, .c = {5, 1}, .t = 7, .p = 4};
+    const zeno::BracketResult bracket = zeno::solveBracket(ns);
+    std::cout << bracket.upper.size() << " points, " << (bracket.exact() ? "exact" : "a bracket");
+    for(const auto& a : bracket.assumptions())
+        std::cout << ", assuming " << a;
+    std::cout << "\n";
+
+    // The instance of the command-line options -n 10 -t 8 -p 3 -C 2 -D 2 -r 100.
+    zeno::legacy::Options o;
+    o.n = 10;
+    o.t = 8;
+    o.p = 3;
+    o.costFunction = 2;
+    o.durationFunction = 2;
+    o.adjust = 100;
+    bool swapped = false;
+    const zeno::Instance generated = zeno::legacy::buildInstance(o, &swapped);
+    std::cout << zeno::solveFront(generated).front.size() << " points"
+              << (swapped ? " (durations and costs swapped)" : "") << "\n";
+}
+```
+
+```text
+320 48
+280 56
+260 60
+240 64
+200 72
+160 80
+accepted
+9 points, exact, assuming A1-NS
+81 points (durations and costs swapped)
+```
+
+`zeno` prints fronts by increasing *cost*; the library's `Front` is sorted by increasing
+*makespan*.
+
+## Types
+
+### `zeno/types.hpp`
+
+`Cost` and `Time` are `std::int64_t`. Durations are in the instance's time unit; the solver works
+with half makespans $T$, so a symmetric plan at level $T$ has makespan $2T$ (times the gcd of the
+durations). `kInfCost` (a quarter of the largest `int64`) stands for "no solution", `isInf(x)` tests
+for it, and `addCost(a, b)` is saturating addition.
+
+### `zeno/instance.hpp`
+
+`Instance`
+: `d` (durations $C_I \leftrightarrow i$), `dbar` (durations $C_G \leftrightarrow i$, equal to `d`
+  when symmetric), `c` (landing costs), `t`, `p`. `n()` is the number of cities, `landings()` is
+  $s = 2t - p$, `symmetric()` tests `d == dbar`, and `validate()` throws unless $1 \le p \le t$,
+  $n \ge 1$, the vectors have length $n$ and every value is non-negative. Central-to-central
+  flights are not part of an instance: they are assumed no faster than through a hub (A1).
+
+`FrontPoint`, `Front`
+: A point `{cost, makespan}`, ordered by `<=>`; a front is a `std::vector<FrontPoint>` sorted by
+  increasing makespan, hence strictly decreasing cost.
+
+`paretoFilter(points)`
+: Keeps the points that no other point weakly dominates (one per distinct objective vector),
+  sorted by increasing makespan.
+
+### `zeno/plan.hpp`
+
+`Leg`, `Plan`
+: A leg is `{from, to, depart, arrive, passenger}`. Locations are 0 for $C_I$, 1…$n$ for the
+  central cities (city $i$ of the instance is location $i+1$) and $n+1$ for $C_G$; `passenger`
+  is $-1$ when the plane flies empty. A plan is the legs of every plane, in order.
+
+`checkPlan(instance, plan) -> PlanCheck`
+: Simulates a plan against the model of the theory note, sharing no code with the plan builder:
+  every plane starts in $C_I$ at time $\ge 0$, chains its legs with exact durations and ends in
+  $C_G$; there is no $C_I$–$C_G$ flight and central-to-central legs are rejected; every passenger
+  rides a time-ordered chain of legs from $C_I$ to $C_G$; a leg carries at most one passenger.
+  Returns `ok`, the first violated rule in `error`, the `cost` and the `makespan`.
+
+`buildPlan(instance, reduced, forest)`
+: The plan of [Theorem 4.1](../proofs.qmd#node-theorem-4-1) for a link forest: every plane drops
+  one passenger per child edge, flies its filler as alternating crossings, then picks up the
+  passenger its parent dropped, waiting if needed.
+
+`mirrored(instance)`, `mirrorPlan(plan, n)`
+: The instance with $C_I$ and $C_G$ exchanged, and the time reversal of a plan, which turns plans
+  where every plane picks up at most once into plans where every plane drops off at most once.
+
+## Entry points
+
+### Symmetric fronts: `zeno/solve.hpp`
+
+`solveFront(instance, options = {}) -> SolveResult`
+: The exact Pareto front of a symmetric instance. Throws `std::invalid_argument` for an invalid or
+  non-symmetric instance. `SolveResult` holds `front`, `plans` (with `options.plans`, `plans[i]`
+  realises `front[i]` and was checked by `checkPlan`) and `stats`.
+
+`SolveOptions` is shared by both entry points:
+
+| Field | Default | Meaning |
+|---|---|---|
+| `threads` | 0 | Worker threads; 0 for all hardware threads. |
+| `plans` | `false` | Also build and check a plan for every front point. |
+| `levels` | `Automatic` | `LevelStrategy::Sweep` (bracket every level, then the exact DP on the open ones), `Search` (bisect for the breakpoints of $E$), or `Automatic` (sweep up to $2^{12}$ levels, search beyond). |
+| `table` | `Automatic` | Layout of the one-plane table: dense or staircase, chosen by size. |
+| `roleStates` | 2,000,000 | Non-symmetric: states of the balanced role program per level. |
+| `roleWork` | 50,000,000 | Non-symmetric: transitions of the balanced role program per level. |
+| `refineSeconds` | 30 | Non-symmetric: time after which the refinement of open gaps stops. |
+| `searchWork` | 20,000,000 | Non-symmetric: work limit of the exact gap search, per gap. |
+
+`SolveStats`
+: The level range (`lowestLevel`, `highestLevel`, `scale`, `levels`), `reducedCities`,
+  `maxTree`, how levels were settled (`closedByBracket`, `closedByPairs`, `closedByChains`,
+  `closedByMonotonicity`, `exactCalls`), the DP work (`work.states`, `work.relaxations`) and the
+  time per phase. `zeno --stats` prints them ([command line](cli.qmd#front)).
+
+### Non-symmetric brackets: `zeno/ns.hpp`
+
+`solveBracket(instance, options = {}) -> BracketResult`
+: A certified bracket of the front of any valid instance (for symmetric ones prefer
+  `solveFront`). `upper` lists points achieved by simulated plans, and `plans` the plans with
+  `options.plans`. For the gap between `upper[i]` and `upper[i + 1]`, `gapLower[i]` bounds the
+  cost of every plan with makespan below `upper[i + 1].makespan`, and `gapProof[i]` says how;
+  `fastestLower` and `fastestProof` rule out faster plans. `exact()` is true when the fastest
+  makespan is certified and every gap closed; `assumptions()` lists `"A1-NS"` when a closed gap
+  needs it. For an open gap, `openReason[i]` is `Incomplete` (a limit was reached) or
+  `Unscheduled` (a cheaper balanced configuration exists, but no schedule found fits the gap).
+
+`GapProof`
+: `Relaxed` (lemma R with role weight $\min(2d, 2\bar d)$: no assumption on central flights),
+  `Roles` (role relaxation), `Lagrangian` (Lagrangian relaxation of the per-city balance),
+  `Balanced` (the cheapest balanced role configuration), `Search` (exhaustive search over role
+  configurations with exact schedules). All but `Relaxed` need (A1-NS): `Roles`, `Lagrangian`
+  and `Balanced` through [Theorem 6.1](../proofs.qmd#node-theorem-6-1), `Search` through
+  [Theorem 6.9](../proofs.qmd#node-theorem-6-9), which covers every plan. `Open` marks a gap that
+  no bound closes.
+
+### Certificates: `zeno/certificate.hpp`
+
+`Certificate`
+: `version` (1 or 2), the `instance`, `assumptions` (`"S"`, `"A1"`, `"A1-NS"`), the `front` by
+  increasing makespan, one plan per point, one `GapBound` per gap, Lagrangian `multipliers` (v2),
+  and the `fastest` bound (v2). [Format](certificates.qmd).
+
+`makeCertificate(instance, result)`
+: The version 1 certificate of a solved front (requires `SolveOptions::plans`). A gap gets
+  `relaxed` when $L$ reaches the cost, `forest` otherwise.
+
+`makeBracketCertificate(instance, bracket)`
+: The version 2 certificate of an exact bracket (requires `exact()` and `SolveOptions::plans`);
+  throws `std::invalid_argument` otherwise.
+
+`writeCertificate(out, certificate)`, `readCertificate(in)`
+: Text I/O. The reader throws `std::runtime_error` with the line number on a syntax error, and
+  refuses values above $2^{36}$, $n$, $t$, $p$ above $10^5$ and more than $10^7$ legs.
+
+`checkCertificate(certificate) -> CertificateCheck`
+: The reference checker: `ok`, every failed obligation in `errors`, and in `relied` the
+  assumptions the accepted obligations needed. It uses the library's own dynamic programs for the
+  gap bounds, so it is a consistency check, not an independent proof; the Lean checker is the
+  independent one ([Lean tools](lean.qmd)).
+
+### Instances and files: `zeno/legacy_input.hpp`, `zeno/io.hpp`
+
+`legacy::Options`, `legacy::buildInstance(options, &swapped)`
+: The instance options of the 2016 solvers and the 2016 construction, quirks included: values
+  multiplied by `adjust` (`-r`) and truncated toward zero, and the swap of durations and costs
+  when `d[0] > d[1]`; `swapped` reports whether it happened. Unlike the 2016 code it accepts
+  $t = p$. Formulas on the [generator page](../instances/generator.qmd).
+
+`writePddlProblem(out, instance, front = nullptr)`, `defaultPddlName(instance)`
+: The PDDL problem for `pddl/multi-zeno-travel.pddl`, with the front appended as comments when
+  given ([PDDL](../instances/pddl.qmd)), and the 2016 default name
+  `zeno<n>n<t>t<p>pMulti.pddl`.
+
+`writeDataFile(out, instance)`
+: The data file read by `-d`: 2 lines if symmetric, 3 otherwise.
+
+`cli::parseInstanceArguments(args)`, `cli::instanceOptionsHelp()`, `cli::integerValue(flag, value)`
+: The command-line parser for the instance options (it consumes `-n -t -p -d -C -D -E -W -r -j -k
+  -l -m -x -y` and drops `-F`, leaving the other tokens in `rest`), its help text, and integer
+  parsing with an error naming the flag.
+
+## Internals
+
+These headers are public, for the tests and benchmarks; their interfaces may change.
+
+| Header | Content |
+|---|---|
+| `zeno/reduce.hpp` | `ReducedInstance` and `reduce(instance)`: dominated and equal cities merged ([Proposition 7.9](../proofs.qmd#node-proposition-7-9)), durations divided by their gcd, role weights (`fill`, `drop`, `pick`, `low`) for non-symmetric instances, `lowestLevel()` and `highestLevel()` ([Proposition 7.10](../proofs.qmd#node-proposition-7-10)), `maxTree()` $= \min(p, t-p+1)$. Kept cities of a symmetric instance form a staircase: $d$ strictly increasing, $c$ strictly decreasing. |
+| `zeno/one_plane.hpp` | `OnePlaneTable(d, c, maxLandings, maxLevel, layout)`: $G[m][T]$, the cheapest $m$ landings within $T$ ([Lemma 7.2](../proofs.qmd#node-lemma-7-2)), dense or as Pareto staircases (memory independent of the magnitude of the durations); `paretoPoints`, `witness`. |
+| `zeno/forest.hpp` | `relaxedCost` (the relaxation $L$, lemma R), `ForestProgram` / `forestCost` (link forests with trees of at most `maxTreePlanes` planes: 2 gives $U$, 3 gives $U_3$, `maxTree()` gives $E$ exactly, [Theorem 7.5](../proofs.qmd#node-theorem-7-5)), `LinkForest` and `ForestPlane`, `LevelStats`. |
+| `zeno/breakpoints.hpp` | `breakpoints(lo, flo, hi, fhi, f, threads)`: the breakpoints of a non-increasing function by parallel interval splitting, $O(r \log(hi - lo))$ evaluations for $r$ breakpoints. |
+| `zeno/roles.hpp` | Role configurations (`RoleConfig`), the exact balanced program `BalancedRoles` (DP over planes on the imbalance vector, [Proposition 6.6](../proofs.qmd#node-proposition-6-6); gives up beyond its state and work limits), `RoleRelaxation`, `lagrangianRoles` / `lagrangianValue`, `scheduleRoles`. |
+| `zeno/ns_search.hpp` | Template schedules ([Lemma 6.3](../proofs.qmd#node-lemma-6-3)): `templateMakespan`, `templatePlan`; `exactSchedule` (every drop-off order and matching of one configuration); `searchGap` (the exhaustive gap search of [Corollary 6.10](../proofs.qmd#node-corollary-6-10)). |
+| `zeno/parallel.hpp` | `workerCount(requested)` and `parallelFor(count, threads, body)`, dynamic scheduling, first exception rethrown. |
+
+Doxygen documentation of all headers is built by the `doc` target, with `-DZS_BUILD_DOC=ON`.

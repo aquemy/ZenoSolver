@@ -1,0 +1,902 @@
+## Non-symmetric case {#sec-nonsymmetric}
+
+Different durations to the two hubs (§6). Waiting can now be harmful, which refutes the assumption
+implicit in the arXiv paper's non-symmetric proof, and the front is characterised instead by
+*schedulable domination* (Theorem 6.9), machine-checked for every plan.
+
+### Theorem 6.1 (converse to role configurations) {#node-theorem-6-1}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (A1-NS) · **Uses** [3.1](#node-lemma-3-1), [4.3](#node-lemma-4-3), [4.4](#node-lemma-4-4)
+
+::: {.our-work}
+**Statement** (theory note, §6.1).
+
+**Theorem 6.1 (converse to role configurations) [N1].** Assume (A1-NS). For every feasible plan with cost $C$
+and makespan $M$ there is a role configuration on all $p$ planes with passenger count $t$, cost at most $C$
+and $\lambda_k \le F_k \le M$ for every $k$. (AΔ) is not needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Replace a central flight $a \to b$ departing at $e$ by $a \to h \to b$ through a hub $h$ with
+$\mathrm{dur}(a,h) + \mathrm{dur}(h,b) \le d_{ab}$, which exists by (A1-NS). The plane waits in $b$ until its
+next departure, and a passenger on board stays on board through $h$. Then clean (Lemma 3.1): a journey that
+passes through $C_I$ now starts there, one that passes through $C_G$ ends there. The plan is simple, costs no
+more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Replace a central flight $a \to b$ departing at $e$ by $a \to h \to b$ through a hub $h$ with
+$\mathrm{dur}(a,h) + \mathrm{dur}(h,b) \le d_{ab}$, which exists by (A1-NS). The plane waits in $b$ until its
+next departure, and a passenger on board stays on board through $h$. Then clean (Lemma 3.1): a journey that
+passes through $C_I$ now starts there, one that passes through $C_G$ ends there. The plan is simple, costs no
+more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
+:::
+
+**In Lean.** Central flights are split through the hub of the shorter detour (`Feasible.split`), which keeps the plan feasible with the same cost and no larger makespan.
+
+**Lean** `ZenoFront.Feasible.exists_roleConfig_ns` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 6.1 (converse to role configurations).** Under (A1-NS), with `p ≤ t`, every
+feasible plan gives a role configuration on the `p` planes with `2t − p` landings (passenger
+count `t`), cost at most the plan's, and every role load at most the makespan. -/
+theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ cfg : RoleConfig n p, size cfg.groups = 2 * t - p ∧
+      totalCost c cfg.groups ≤ planCost c P ∧ ∀ k, cfg.roleLoad N k ≤ planMakespan P := …
+```
+
+[`lean/ZenoFront/NonSymmetric.lean`, lines 474–517](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/NonSymmetric.lean#L474-L517){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 6.2 (relaxed role loads) {#node-lemma-6-2}
+
+**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (AΔ) · **Uses** [2.1](#node-lemma-2-1), [3.3](#node-lemma-3-3), [4.4](#node-lemma-4-4)
+
+::: {.our-work}
+**Statement** (theory note, §6.1).
+
+**Lemma 6.2 (relaxed role loads).** Assume (AΔ). For every feasible plan with cost $C$ and makespan $M$ there
+are multisets $\mathrm{Dr}_k$, $\mathrm{Pk}_k$, $\mathrm{Cr}_k$ ($k = 1,\dots,p$) with $|\mathrm{Cr}_k|$ odd,
+$\sum_k |\mathrm{Dr}_k| = \sum_k |\mathrm{Pk}_k|$ (only the totals balance), passenger count $t$, cost at most
+$C$ and $\lambda_k \le F_k \le M$. So the least cost $L_{\rm NS}(T)$ of such a family with every
+$\lambda_k \le T$ is a lower bound for every plan of makespan at most $T$, whatever its central flights and
+including shuttle triples (§6.4).
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Give each segment $\gamma$ any of its landings. By Lemma 3.3(b), $F(\gamma)$ is at least the role
+duration of its type at that landing, reading $A$ and $\bar A$ as crossings, $B$ as drop-offs and $\bar B$ as
+pick-ups. A segment has exactly one flight departing from a hub (its first) and one arriving in a hub (its
+last). Mapping each passenger to the segment of its first flight (from $C_I$, so of type $A$ or $B$) and to
+the segment of its last flight (into $C_G$, of type $A$ or $\bar B$) is injective by capacity, so
+$\#A + \#B \ge t$ and $\#A + \#\bar B \ge t$. Take all $A$ and $\bar A$ segments of plane $k$ as its
+crossings, so $|\mathrm{Cr}_k| = 2\#A_k - 1$ (Lemma 2.1), and $\min(\#B, \#\bar B)$ of the $B$ and of the
+$\bar B$ segments as drop-offs and pick-ups. The passenger count is $\min(\#B, \#\bar B) + \#A \ge t$.
+Shrink as in Lemma 4.4, removing in the second case a drop-off and a pick-up anywhere. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Give each segment $\gamma$ any of its landings. By Lemma 3.3(b), $F(\gamma)$ is at least the role
+duration of its type at that landing, reading $A$ and $\bar A$ as crossings, $B$ as drop-offs and $\bar B$ as
+pick-ups. A segment has exactly one flight departing from a hub (its first) and one arriving in a hub (its
+last). Mapping each passenger to the segment of its first flight (from $C_I$, so of type $A$ or $B$) and to
+the segment of its last flight (into $C_G$, of type $A$ or $\bar B$) is injective by capacity, so
+$\#A + \#B \ge t$ and $\#A + \#\bar B \ge t$. Take all $A$ and $\bar A$ segments of plane $k$ as its
+crossings, so $|\mathrm{Cr}_k| = 2\#A_k - 1$ (Lemma 2.1), and $\min(\#B, \#\bar B)$ of the $B$ and of the
+$\bar B$ segments as drop-offs and pick-ups. The passenger count is $\min(\#B, \#\bar B) + \#A \ge t$.
+Shrink as in Lemma 4.4, removing in the second case a drop-off and a pick-up anywhere. $\square$
+:::
+
+:::
+
+### Lemma 6.3 (template) {#node-lemma-6-3}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Uses** [3.3](#node-lemma-3-3)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Lemma 6.3 (template) [N3].** The template is a schedule, and its makespan is
+$$M_{\rm tmpl} = \max\Big(\max_k \lambda_k,\ \max_{(u,j;\,v,l) \in \mathcal L \text{ at } i}\ \mathrm{Pre}_u(j) + d_i + \bar d_i + \mathrm{Suf}_v(l)\Big).$$
+Every schedule of the same configuration, orders and matching has makespan at least $M_{\rm tmpl}$. So the
+least makespan of a role configuration is the minimum of $M_{\rm tmpl}$ over orders and matchings. No
+assumption on durations is needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* *Lower bound.* In any such schedule, plane $u$ starts its $j$-th drop-off after flying its earlier
+drop-offs, so this drop-off reaches $i$ no earlier than $\mathrm{Pre}_u(j) + d_i$. The linked pick-up of $v$
+leaves $i$ no earlier, flies $\bar d_i$ to $C_G$, and $v$ then still flies its later pick-ups, at least
+$\mathrm{Suf}_v(l)$. Also every plane flies $\lambda_k$ (Lemma 3.3(c)), so it finishes no earlier than
+$\lambda_k$.
+
+*Template.* Drop-offs come first and wait for nothing, so the $j$-th drop-off of $u$ reaches $i$ exactly at
+$\mathrm{Pre}_u(j) + d_i$, and no wait is cyclic. Let $\phi_v(l)$ be the time $v$ returns to $C_G$ after its
+$l$-th pick-up, with $\phi_v(0) = 2\delta(\mathrm{Dr}_v) + \delta(\mathrm{Cr}_v) + \bar\delta(\mathrm{Cr}_v)$.
+For the link $(u,j;v,l)$ at $i$,
+$\phi_v(l) = \max\big(\phi_v(l-1) + 2\bar d_i,\ \mathrm{Pre}_u(j) + d_i + \bar d_i\big)$. Unrolling, the last
+return of $v$ is the maximum of $\lambda_v$ and of the terms of the formula for the links into $v$. Planes
+without pick-ups finish at $\lambda_k$. The passenger count is $t$, so every passenger is carried. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* *Lower bound.* In any such schedule, plane $u$ starts its $j$-th drop-off after flying its earlier
+drop-offs, so this drop-off reaches $i$ no earlier than $\mathrm{Pre}_u(j) + d_i$. The linked pick-up of $v$
+leaves $i$ no earlier, flies $\bar d_i$ to $C_G$, and $v$ then still flies its later pick-ups, at least
+$\mathrm{Suf}_v(l)$. Also every plane flies $\lambda_k$ (Lemma 3.3(c)), so it finishes no earlier than
+$\lambda_k$.
+
+*Template.* Drop-offs come first and wait for nothing, so the $j$-th drop-off of $u$ reaches $i$ exactly at
+$\mathrm{Pre}_u(j) + d_i$, and no wait is cyclic. Let $\phi_v(l)$ be the time $v$ returns to $C_G$ after its
+$l$-th pick-up, with $\phi_v(0) = 2\delta(\mathrm{Dr}_v) + \delta(\mathrm{Cr}_v) + \bar\delta(\mathrm{Cr}_v)$.
+For the link $(u,j;v,l)$ at $i$,
+$\phi_v(l) = \max\big(\phi_v(l-1) + 2\bar d_i,\ \mathrm{Pre}_u(j) + d_i + \bar d_i\big)$. Unrolling, the last
+return of $v$ is the maximum of $\lambda_v$ and of the terms of the formula for the links into $v$. Planes
+without pick-ups finish at $\lambda_k$. The passenger count is $t$, so every passenger is carried. $\square$
+:::
+
+**In Lean.** `Sched.tmpl` is the closed form. Lean does not prove that the template is optimal for fixed orders and matching: soundness only needs Theorem 6.9, which bounds the closed form directly.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
+
+```lean
+/-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
+def tmpl (d db : Fin n → ℕ) : ℕ :=
+  max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 90–92](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/SearchGap.lean#L90-L92){.lean-src}
+
+:::
+
+### Corollary 6.4 (one pick-up never waits harmfully) {#node-corollary-6-4}
+
+**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (AΔ-path) · **Uses** [6.3](#node-lemma-6-3)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Corollary 6.4 (one pick-up never waits harmfully) [W1].** Assume (AΔ-path). If every plane has at most one
+pick-up, then $M_{\rm tmpl} = \max_k \lambda_k$ for every order and matching. The same holds if every plane has
+at most one drop-off.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* For a link $(u,j;v,1)$ at $i$, $\mathrm{Suf}_v(1) = 0$ and
+$\mathrm{Pre}_u(j) \le 2\delta(\mathrm{Dr}_u) - 2d_i$. Plane $u$ has a crossing $z$, since $|\mathrm{Cr}_u| \ge 1$,
+and $\bar d_i \le d_i + d_z + \bar d_z$. So the term is at most $2\delta(\mathrm{Dr}_u) + d_z + \bar d_z \le \lambda_u$.
+For the second claim, take a link $(u,1;v,l)$ at $i$. Then $\mathrm{Pre}_u(1) = 0$ and
+$\mathrm{Suf}_v(l) \le 2\bar\delta(\mathrm{Pk}_v) - 2\bar d_i$. Plane $v$ has a crossing $z$, and
+$d_i \le \bar d_i + \bar d_z + d_z$, so the term is at most
+$2\bar\delta(\mathrm{Pk}_v) + d_z + \bar d_z \le \lambda_v$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* For a link $(u,j;v,1)$ at $i$, $\mathrm{Suf}_v(1) = 0$ and
+$\mathrm{Pre}_u(j) \le 2\delta(\mathrm{Dr}_u) - 2d_i$. Plane $u$ has a crossing $z$, since $|\mathrm{Cr}_u| \ge 1$,
+and $\bar d_i \le d_i + d_z + \bar d_z$. So the term is at most $2\delta(\mathrm{Dr}_u) + d_z + \bar d_z \le \lambda_u$.
+For the second claim, take a link $(u,1;v,l)$ at $i$. Then $\mathrm{Pre}_u(1) = 0$ and
+$\mathrm{Suf}_v(l) \le 2\bar\delta(\mathrm{Pk}_v) - 2\bar d_i$. Plane $v$ has a crossing $z$, and
+$d_i \le \bar d_i + \bar d_z + d_z$, so the term is at most
+$2\bar\delta(\mathrm{Pk}_v) + d_z + \bar d_z \le \lambda_v$. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+This corrects §6.2 of the first version, which claimed that a pick-up after long drop-offs can push the
+makespan above the largest load. Under (AΔ-path) a single pick-up never does.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+This corrects §6.2 of the first version, which claimed that a pick-up after long drop-offs can push the
+makespan above the largest load. Under (AΔ-path) a single pick-up never does.
+:::
+
+:::
+
+### Conjecture 6.5 (no harmful waiting), refuted {#node-conjecture-6-5}
+
+**Lean** [informal]{.badge .informal} · **Note** [refuted]{.badge .refuted} · **Hypotheses** (AΔ-path) · **Uses** [6.1](#node-theorem-6-1), [6.3](#node-lemma-6-3)
+
+::: {.from-paper}
+**From the original paper** (Quemy, Schoenauer & Dreo, arXiv:2304.14659v1, §3.2 *Computing the Shortest Makespan and Constructing the Plan*).
+
+> If a non-symmetric instance is highly imbalanced in durations, while performing a $B\bar{B}$, there
+> is a chance that the plane performing $\bar{B}$ will have to wait. It implies that its makespan is not
+> the sum of the durations of its patterns but the moment the passenger arrives in the central city,
+> plus the remaining duration of its track. For this reason, we denote by $T_{i}$ the moment passenger
+> $i$ arrives in the central city she goes through.
+>
+> […]
+>
+> 4. For each city $i$ in $b$, greedily distribute by descending order of ${d}_{i}+{\bar{d}}_{i}$ the
+>    duration $2\min~({d}_{i},{\bar{d}}_{i})$ among the planes. The rules to add the sub-sequences are
+>    the same as in the first step. If ${d}_{i}<{\bar{d}}_{i}$, assign to the plane the makespace
+>    $max(D(p)+\bar{d}_{i}),T_{i})+\bar{d}_{i}$ where $D(p)$ is the duration of the partial track up to
+>    the moment the plane arrives in $C_{i}$.
+>
+> The optimal makespan for the given PPP is the longest duration among the $p$ planes.
+>
+> **Proposition:** For a given PPP $\psi_{0}$ and $\beta_{\text{set}}$, the algorithm returns the
+> optimal makespan.
+>
+> **Proof for the symmetric case:** The incompressible time to transport all passengers, according to
+> a given PPP is
+> $T(\psi_{0})=2\sum_{i\in b}(d_{i}+\bar{d}_{i})+\sum_{i\in\{a,\bar{a}\}}(d_{i}+\bar{d}_{i})$. A
+> theoretical optimal plan with this pattern repartition is a plan without any waiting point for any
+> plane. The above algorithm gives the optimal distribution of the set of times into $p$. Then, if a
+> plan can be constructed with such a makespan, it is optimal for the PPP. As it constructs such plan,
+> we can conclude that the algorithm is optimal for the PPP, thus proving Proposition I. $\square$
+>
+> **Proof for the non-symmetric case:** The above algorithm gives the optimal distribution of the set of
+> times into $p$ and provides a plan that minimizes the waiting time by starting the plan by the
+> patterns that could lead to a waiting time. $\square$
+:::
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Conjecture 6.5 (no harmful waiting) — false.** The conjecture stated: assume (AΔ-path); every role
+configuration has orders and a matching with $M_{\rm tmpl} = \max_k \lambda_k$. A weaker, front-level form,
+which would have sufficed for exact fronts, stated that the front equals the Pareto set of
+(cost, $\max_k \lambda_k$) over role configurations. Both forms are false.
+
+:::
+
+::: {.strengthen}
+**What fails.** The non-symmetric proof assumes that ordering the patterns "that could lead to a
+waiting time" first keeps the makespan at the role loads. Proposition 6.5 below is a counterexample:
+the waiting it forces is not removable by any order or matching, and the role-load front is strictly
+below the true front.
+:::
+
+### Proposition 6.5 (harmful waiting) {#node-proposition-6-5}
+
+**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (AΔ-path) · **Uses** [6.1](#node-theorem-6-1), [6.3](#node-lemma-6-3)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Proposition 6.5 (harmful waiting).** Take $n = 2$ central cities with $d = (3, 19)$, $\bar d = (3, 11)$,
+$c = (5, 1)$, $t = 7$ passengers and $p = 4$ planes, and no central flights (so (A1-NS) holds). (AΔ-path)
+holds: $\bar d_i \le d_i + d_z + \bar d_z$ for all $i, z$. The cheapest role configuration with every
+$\lambda_k \le 73$ costs 14, but no plan of makespan $\le 73$ costs less than 18: the role-load front and the
+true front differ.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Status.* The second half is computer-checked: the brute-force oracle (`tests/oracle/bruteForce.hpp`), which
+enumerates every pattern plan with its exact waiting, gives the front $(10, 90), (14, 74), (18, 68),
+(22, 66), (26, 52), (34, 42), (38, 36), (42, 30), (50, 18)$ as (cost, makespan), and `zeno`'s upper front
+equals it. That oracle enumerates role-configuration schedules; Corollary 6.10 shows that they suffice, and
+the exhaustive search over all plans (`checks/truth.cpp`, 937 million states, costs up to 60, so plans with
+extra landings included) gives the same front. The first half, and why every configuration of cost 14 and
+loads $\le 73$ waits, is the following argument.
+
+*Cost-14 configurations at level 73.* Write $1$ and $2$ for the cities. Loads: a crossing weighs 6 in city 1
+and 30 in city 2; a drop-off 6 and 38; a pick-up 6 and 22. A role configuration has $s = 10$ landings, so
+cost 14 means one landing in city 1 and nine in city 2. Each plane flies an odd number of crossings, and only
+one plane, $v$, can cross in city 1; a plane crossing three times in city 2 weighs 90. So the three other
+planes cross once, in city 2 (load 30), and with $\ell$ links (drop-off/pick-up pairs) $v$ crosses
+$10 - 2\ell - 3$ times. For $\ell \le 2$, $v$ crosses at least 3 times, two of them in city 2, so it weighs
+at least 66 and takes no link landing (a pick-up in city 2 adds 22); the other three planes can take one
+link landing each (30 + 38 or 30 + 22; two would exceed 73), which leaves at least one of the $2\ell$ link
+landings unplaced when $\ell = 2$, and fails the crossing count when $\ell \le 1$ ($v$ would weigh
+$6 + 4 \cdot 30$ or more). So $\ell = 3$: every plane crosses once, the three planes crossing in city 2 take
+one link landing each, and $v$ takes the other three; three drop-offs on $v$, or two, or one with two
+pick-ups, would weigh $6 + 38 + 38$ or more, so $v$ has three pick-ups (load $6 + 3 \cdot 22 = 72$) and the
+three others one drop-off each (load 68). Such a configuration exists, so the role-load bound at level 73 is
+14.
+
+*Why it waits.* Every drop-off reaches city 2 at time $\ge 19$. Plane $v$ starts in $C_I$ with no drop-off,
+so it crosses first and reaches city 2 for its first pick-up at time $6 + 11 = 17$; it waits until 19, and
+its two further pick-ups take 44 more: it finishes at $19 + 11 + 44 = 74 > 72 = \lambda_v$. The
+configuration-level form of the conjecture fails on it, and since every cost-14 configuration at level 73 is
+of this shape, so does the front-level form, as the oracle confirms. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof (theory note).*
+
+*Status.* The second half is computer-checked: the brute-force oracle (`tests/oracle/bruteForce.hpp`), which
+enumerates every pattern plan with its exact waiting, gives the front $(10, 90), (14, 74), (18, 68),
+(22, 66), (26, 52), (34, 42), (38, 36), (42, 30), (50, 18)$ as (cost, makespan), and `zeno`'s upper front
+equals it. That oracle enumerates role-configuration schedules; Corollary 6.10 shows that they suffice, and
+the exhaustive search over all plans (`checks/truth.cpp`, 937 million states, costs up to 60, so plans with
+extra landings included) gives the same front. The first half, and why every configuration of cost 14 and
+loads $\le 73$ waits, is the following argument.
+
+*Cost-14 configurations at level 73.* Write $1$ and $2$ for the cities. Loads: a crossing weighs 6 in city 1
+and 30 in city 2; a drop-off 6 and 38; a pick-up 6 and 22. A role configuration has $s = 10$ landings, so
+cost 14 means one landing in city 1 and nine in city 2. Each plane flies an odd number of crossings, and only
+one plane, $v$, can cross in city 1; a plane crossing three times in city 2 weighs 90. So the three other
+planes cross once, in city 2 (load 30), and with $\ell$ links (drop-off/pick-up pairs) $v$ crosses
+$10 - 2\ell - 3$ times. For $\ell \le 2$, $v$ crosses at least 3 times, two of them in city 2, so it weighs
+at least 66 and takes no link landing (a pick-up in city 2 adds 22); the other three planes can take one
+link landing each (30 + 38 or 30 + 22; two would exceed 73), which leaves at least one of the $2\ell$ link
+landings unplaced when $\ell = 2$, and fails the crossing count when $\ell \le 1$ ($v$ would weigh
+$6 + 4 \cdot 30$ or more). So $\ell = 3$: every plane crosses once, the three planes crossing in city 2 take
+one link landing each, and $v$ takes the other three; three drop-offs on $v$, or two, or one with two
+pick-ups, would weigh $6 + 38 + 38$ or more, so $v$ has three pick-ups (load $6 + 3 \cdot 22 = 72$) and the
+three others one drop-off each (load 68). Such a configuration exists, so the role-load bound at level 73 is
+14.
+
+*Why it waits.* Every drop-off reaches city 2 at time $\ge 19$. Plane $v$ starts in $C_I$ with no drop-off,
+so it crosses first and reaches city 2 for its first pick-up at time $6 + 11 = 17$; it waits until 19, and
+its two further pick-ups take 44 more: it finishes at $19 + 11 + 44 = 74 > 72 = \lambda_v$. The
+configuration-level form of the conjecture fails on it, and since every cost-14 configuration at level 73 is
+of this shape, so does the front-level form, as the oracle confirms. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+The same mechanism also opens the gap between makespans 42 and 52: a configuration of cost 30 has all loads
+$\le 50$, but its pick-up plane waits 2 at its first pick-up and finishes at 52.
+
+What survives: the role-load front is a lower bound (Theorem 6.1), the template is optimal for fixed orders
+and matching (Lemma 6.3), and Corollary 6.4 (one pick-up or one drop-off per plane) holds. Theorem 6.9 below
+shows that, under (A1-NS), the exact front of a non-symmetric instance is the Pareto set of (cost, least
+makespan) over role configurations (Corollary 6.10). Mechanism: harmful waiting needs a plane with several pick-ups in a city $y$ whose first
+pick-up arrives before the earliest drop-off there, i.e. $\min(\text{crossing}) + \bar d_y < d_y$; (AΔ-path)
+bounds $\bar d$ by $d$ but not $d$ by $\bar d$. A configuration-level search (`checks/waiting_search.cpp`)
+finds such configurations among random ones once every plane's crossing phase is short (§11).
+
+Theorem 6.1 bounds the role loads of the configuration it selects, but not its waiting: direct selection
+(Lemma 4.3) links drop-offs to pick-ups by counts per city, not by the plan's own hand-offs, so its links
+need not respect the plan's timing. Theorem 6.9 below selects links along the plan's hand-offs instead, after
+removing the hand-offs that the planes could have avoided. Lemma 6.8 settles when plans have an event order;
+Theorem 6.9 does not need one.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+The same mechanism also opens the gap between makespans 42 and 52: a configuration of cost 30 has all loads
+$\le 50$, but its pick-up plane waits 2 at its first pick-up and finishes at 52.
+
+What survives: the role-load front is a lower bound (Theorem 6.1), the template is optimal for fixed orders
+and matching (Lemma 6.3), and Corollary 6.4 (one pick-up or one drop-off per plane) holds. Theorem 6.9 below
+shows that, under (A1-NS), the exact front of a non-symmetric instance is the Pareto set of (cost, least
+makespan) over role configurations (Corollary 6.10). Mechanism: harmful waiting needs a plane with several pick-ups in a city $y$ whose first
+pick-up arrives before the earliest drop-off there, i.e. $\min(\text{crossing}) + \bar d_y < d_y$; (AΔ-path)
+bounds $\bar d$ by $d$ but not $d$ by $\bar d$. A configuration-level search (`checks/waiting_search.cpp`)
+finds such configurations among random ones once every plane's crossing phase is short (§11).
+
+Theorem 6.1 bounds the role loads of the configuration it selects, but not its waiting: direct selection
+(Lemma 4.3) links drop-offs to pick-ups by counts per city, not by the plan's own hand-offs, so its links
+need not respect the plan's timing. Theorem 6.9 below selects links along the plan's hand-offs instead, after
+removing the hand-offs that the planes could have avoided. Lemma 6.8 settles when plans have an event order;
+Theorem 6.9 does not need one.
+:::
+
+**In Lean.** The instance's version 2 certificate (`lean/test/certificates/accepted/v2-search-prop65.cert`) is accepted by the Lean checker `zeno-check`, whose soundness theorem is `Cert2.check_sound`; its two gaps are closed only by the `search` kind. That run is compiled code, so it is evidence, not a kernel proof of this proposition.
+
+:::
+
+### Proposition 6.6 (imbalance-vector DP) {#node-proposition-6-6}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Uses** [7.2](#node-lemma-7-2)
+
+::: {.our-work}
+**Statement** (theory note, §6.3).
+
+**Proposition 6.6 (imbalance-vector DP) [N5].** Process the planes in order, with states $(k, j, v)$: $k$
+planes processed, $j$ landings used, and $v = \sum_{k' \le k} (\mathrm{Dr}_{k'} - \mathrm{Pk}_{k'}) \in \mathbb Z^n$
+the imbalance. A plane option is a triple $(\mathrm{Dr}, \mathrm{Pk}, r)$ with $r$ odd, of weight
+$c(\mathrm{Dr}) + c(\mathrm{Pk}) + G^{\rm cr}[r][T - 2\delta(\mathrm{Dr}) - 2\bar\delta(\mathrm{Pk})]$; it adds
+$|\mathrm{Dr}| + |\mathrm{Pk}| + r$ to $j$ and $\mathrm{Dr} - \mathrm{Pk}$ to $v$. With states restricted to
+$\|v\|_1 \le t - p$, the shortest path from $(0, 0, 0)$ to $(p, s, 0)$ has weight $E_{\rm NS}(T)$. There are at
+most $(p+1)(s+1)\sum_{u \le t-p} 2^u \binom{n}{u}\binom{t-p}{u}$ states, a polynomial in $n$ and $s$ for fixed
+$t - p$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* A path gives a role configuration whose cost is its weight, with $G^{\rm cr}$-optimal crossings:
+the final imbalance 0 is the balance, and $|X| = s$ gives the passenger count $(s + p)/2 = t$. Conversely,
+take a role configuration with passenger count $t$ and every $\lambda_k \le T$, and let
+$N = \sum_k |\mathrm{Dr}_k|$ be its number of links. From $s = 2N + \sum_k |\mathrm{Cr}_k| \ge 2N + p$,
+$N \le t - p$. For a prefix of $k$ planes and a city $i$, let $D^{\le}(i)$, $P^{\le}(i)$ count the drop-offs
+and pick-ups at $i$ of these planes, and $D^{>}(i)$, $P^{>}(i)$ those of the others. By the balance,
+$v_k(i) = D^{\le}(i) - P^{\le}(i) = P^{>}(i) - D^{>}(i)$, so $|v_k(i)| \le D^{\le}(i)$ if $v_k(i) \ge 0$ and
+$|v_k(i)| \le D^{>}(i)$ otherwise. Summing over $i$, $\|v_k\|_1 \le N \le t - p$, so the configuration is a
+path of the restricted graph, of weight at most its cost. To count the vectors $v$, choose a support of $u$
+cities, signs, and positive values summing to at most $t - p$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* A path gives a role configuration whose cost is its weight, with $G^{\rm cr}$-optimal crossings:
+the final imbalance 0 is the balance, and $|X| = s$ gives the passenger count $(s + p)/2 = t$. Conversely,
+take a role configuration with passenger count $t$ and every $\lambda_k \le T$, and let
+$N = \sum_k |\mathrm{Dr}_k|$ be its number of links. From $s = 2N + \sum_k |\mathrm{Cr}_k| \ge 2N + p$,
+$N \le t - p$. For a prefix of $k$ planes and a city $i$, let $D^{\le}(i)$, $P^{\le}(i)$ count the drop-offs
+and pick-ups at $i$ of these planes, and $D^{>}(i)$, $P^{>}(i)$ those of the others. By the balance,
+$v_k(i) = D^{\le}(i) - P^{\le}(i) = P^{>}(i) - D^{>}(i)$, so $|v_k(i)| \le D^{\le}(i)$ if $v_k(i) \ge 0$ and
+$|v_k(i)| \le D^{>}(i)$ otherwise. Summing over $i$, $\|v_k\|_1 \le N \le t - p$, so the configuration is a
+path of the restricted graph, of weight at most its cost. To count the vectors $v$, choose a support of $u$
+cities, signs, and positive values summing to at most $t - p$. $\square$
+:::
+
+**In Lean.** The lower-bound direction (the DP is at most the cost of every balanced configuration), which is all the checker's `balanced` kind needs.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.BalData.value_le_totalCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The `balanced` program is a lower bound** on the cost of every balanced role configuration
+with `s` landings and role loads at most `T`, for durations `dR`, `dbR` (scaled) when the program
+weighs a drop-off `2 dR`, a pick-up `2 dbR`, `links ≥ (s − p)/2`, and `G` bounds the crossings. -/
+theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
+    (dc : Fin n → Fin n → ℕ) (hdW : D.dW = fun i => 2 * dR i)
+    (hpW : D.pW = fun i => 2 * dbR i) (hlinks : D.s ≤ 2 * D.links + p)
+    (hG : ∀ r τ (Y : Multiset (Fin n)), Y.card = r → r ≤ D.s → τ ≤ D.T →
+      load (fillW dR dbR) Y ≤ τ → D.G r τ ≤ cost D.c Y)
+    (cfg : RoleConfig n p) (hsize : size cfg.groups = D.s)
+    (hload : ∀ k, cfg.roleLoad ⟨dR, dbR, dc⟩ k ≤ D.T) :
+    D.value p ≤ (totalCost D.c cfg.groups : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/BalancedBound.lean`, lines 466–578](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/BalancedBound.lean#L466-L578){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Conjecture 6.7 (extended Proposition I) {#node-conjecture-6-7}
+
+**Lean** [informal]{.badge .informal} · **Note** [open problem]{.badge .open} · **Hypotheses** (AΔ)
+
+::: {.from-paper}
+**From the original paper** (Quemy, Schoenauer & Dreo, arXiv:2304.14659v1, §3.3 *Adapting the method to $B\bar{A}\bar{B}$ situations*).
+
+> Consider an instance $\Pi$ of the non-symmetric MultiZenoTravel problem. For each potential
+> $B\bar{A}\bar{B}$ situation going through $C_{i}$ and $C_{j}$, add a new city $C_{k}$ such that:
+> $$d_{k}^{B}=2d_{i} \quad (3) \qquad d_{k}^{\bar{B}}=2d_{j} \quad (4) \qquad d_{k}^{A}=\min(d_{i}+\bar{d}_{i},d_{j}+\bar{d}_{j}) \quad (5) \qquad d_{k}^{\bar{A}}=\bar{d}_{i}+d_{ij}+d_{j} \quad (6)$$
+> This transformation is illustrated by Figure 10. The transformation has $\mathcal{O}(n^{2})$
+> complexity and the resulting instance $\Pi^{*}$ is a non-symmetric MultiZenoTravel without any
+> $B\bar{A}\bar{B}$ situation.
+:::
+
+::: {.our-work}
+**Statement** (theory note, §6.4).
+
+**Conjecture 6.7 (extended Proposition I).** Under (AΔ), the front equals the front of role configurations
+extended with *shuttle triples* (each adding exactly one landing), with exact makespans.
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+The bound of Lemma 6.2 stays valid with shuttle triples. The arXiv construction of §3.3 (virtual cities)
+encodes the triples. It is sound only if a drop-off or pick-up at a virtual city is used together with its
+shuttle. Its equation (4) should read $d^{\bar B}_k = 2\bar d_j$. The non-symmetric proofs of §2.3 need
+repairs as well:
+
+* the "finite number of patterns" argument is defeated by 2-cycles;
+* "the central pattern cannot be $A$" is unproved;
+* the multiplicity "exactly 1" is unproved.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+The bound of Lemma 6.2 stays valid with shuttle triples. The arXiv construction of §3.3 (virtual cities)
+encodes the triples. It is sound only if a drop-off or pick-up at a virtual city is used together with its
+shuttle. Its equation (4) should read $d^{\bar B}_k = 2\bar d_j$. The non-symmetric proofs of §2.3 need
+repairs as well:
+
+* the "finite number of patterns" argument is defeated by 2-cycles;
+* "the central pattern cannot be $A$" is unproved;
+* the multiplicity "exactly 1" is unproved.
+:::
+
+:::
+
+::: {.strengthen}
+**The arXiv virtual-city construction.** It encodes the shuttle triples, but it is sound only if a
+drop-off or pick-up at a virtual city is used together with its shuttle, and its equation (4) should
+read $d^{\bar B}_k = 2\bar d_j$. Lemma 6.2's bound stays valid with shuttle triples.
+:::
+
+### Lemma 6.8 (event order) {#node-lemma-6-8}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Uses** [4.3](#node-lemma-4-3)(a)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Lemma 6.8 (event order).** The *next-leg relation* of a plan relates a leg to the next leg on its route and
+to the next leg of the journey it belongs to, if any.
+
+(a) A plan is event-ordered iff its next-leg relation has no cycle.
+
+(b) In a simple plan with clean journeys, a cycle of the next-leg relation passes through a central city $x$
+with $d_x = \bar d_x = 0$.
+
+(c) The template of a role configuration (§6.2), and the plan of Theorem 4.1, are event-ordered.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* (a) An event order extends the relation, so the relation has no cycle. Conversely, along the
+relation departure times do not decrease, since the next leg departs no earlier than the previous one
+arrives; sorting the legs by departure time, ties broken by a topological order of the acyclic relation,
+gives an event order.
+
+(b) Along each step the next leg departs no earlier than the previous one departs plus its duration, so every
+leg on a cycle has zero duration. Steps within one plane go forward on its route (§1.2, item 2), so a cycle
+contains a journey step between two planes. By Lemma 4.3(a) that step goes from a leg $C_I \to x$ to a leg
+$x \to C_G$, both on the cycle, so $d_x = \bar d_x = 0$.
+
+(c) Give the legs of a plane's drop-offs phase 1, of its crossings phase 2 and of its pick-ups phase 3. A step
+of the relation either stays on one plane and goes forward on its route, or follows a link from the first leg
+of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never decrease along the relation,
+and they increase at every step between two planes. A cycle therefore has no such step and stays on one
+route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* (a) An event order extends the relation, so the relation has no cycle. Conversely, along the
+relation departure times do not decrease, since the next leg departs no earlier than the previous one
+arrives; sorting the legs by departure time, ties broken by a topological order of the acyclic relation,
+gives an event order.
+
+(b) Along each step the next leg departs no earlier than the previous one departs plus its duration, so every
+leg on a cycle has zero duration. Steps within one plane go forward on its route (§1.2, item 2), so a cycle
+contains a journey step between two planes. By Lemma 4.3(a) that step goes from a leg $C_I \to x$ to a leg
+$x \to C_G$, both on the cycle, so $d_x = \bar d_x = 0$.
+
+(c) Give the legs of a plane's drop-offs phase 1, of its crossings phase 2 and of its pick-ups phase 3. A step
+of the relation either stays on one plane and goes forward on its route, or follows a link from the first leg
+of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never decrease along the relation,
+and they increase at every step between two planes. A cycle therefore has no such step and stays on one
+route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
+:::
+
+**In Lean.** `EventOrdered` is the definition; `EventOrdered.of_eoOK` proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.EventOrdered` [Lean definition]{.badge .ok}
+
+```lean
+/-- **Event-ordered plans** (§1.2 of the note). The legs have a total order (`rank`, injective)
+that extends every route and some journey of every passenger, and along which departure times
+do not decrease. Every plan with positive durations is event-ordered, and so is every PDDL plan.
+This is the scope of Theorem 6.9 when a city has `d = d̄ = 0`. -/
+def EventOrdered (P : Plan n t p) : Prop :=
+  ∃ rank : LegId P → ℕ, Function.Injective rank ∧
+    (∀ k (i j : Fin (P k).length), i < j → rank ⟨k, i⟩ < rank ⟨k, j⟩) ∧
+    (∀ x y, rank x < rank y → (legAt P x).dep ≤ (legAt P y).dep) ∧
+    ∀ π : Fin t, ∃ js : List (LegId P), (js.map (legAt P)).Perm (paxLegs P π) ∧
+      IsRoute .ci 0 (js.map (legAt P)) ∧ finalLoc .ci (js.map (legAt P)) = .cg ∧
+      js.Pairwise fun x y => rank x < rank y
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 104–114](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/SearchGap.lean#L104-L114){.lean-src}
+
+*Part* `ZenoFront.EventOrdered.of_eoOK` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The test is sound**: a plan it accepts is event-ordered. -/
+theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered P := …
+```
+
+[`lean/ZenoFront/EventOrderCheck.lean`, lines 134–158](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/EventOrderCheck.lean#L134-L158){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Theorem 6.9 (schedulable domination) {#node-theorem-6-9}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (A1-NS) · **Uses** [2.1](#node-lemma-2-1), [3.1](#node-lemma-3-1), [3.3](#node-lemma-3-3), [4.3](#node-lemma-4-3)(a), [4.4](#node-lemma-4-4), [6.1](#node-theorem-6-1), [6.3](#node-lemma-6-3)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS). Let a feasible plan have cost $C$ and makespan
+$M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
+orders of its drop-offs and pick-ups, and a link matching whose template has makespan at most $M$. Neither an
+event order, nor (AΔ), nor (AΔ-path) is needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* *Step 1: a simple plan with clean journeys.* Replace central flights and clean, as in the proof of
+Theorem 6.1; cost, arrival times, flight times and makespan do not increase. By Lemma 4.3(a), every journey is
+now a leg $\alpha_\pi : C_I \to x$ followed by a leg $\beta_\pi : x \to C_G$, which departs no earlier than
+$\alpha_\pi$ arrives. Every route is a sequence of segments, one per landing. For a segment $\gamma$ at a city
+$x$, let $a(\gamma)$ be the time its first leg arrives in $x$ and $e(\gamma)$ the time its second leg departs,
+so $a(\gamma) \le e(\gamma)$. From here on only the routes and the pairs $(\alpha_\pi, \beta_\pi)$ matter:
+the moves below keep the routes valid, but need not keep a plan in the sense of item 2 of §1.2.
+
+*Step 2: rewiring.* Next to the routes, keep a set of *loops*, empty at first: closed walks whose legs all
+depart and arrive at one time $\tau$, so last $0$, and alternate between hubs and central cities, so that a
+loop is made of segments too. A passenger is *carried through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one segment,
+of a route or of a loop. Otherwise it is a *hand-off*, from the segment $\gamma$ of $\alpha_\pi$ to the segment
+$\gamma'$ of $\beta_\pi$, both at its city $x$. While one of these moves applies, apply it.
+
+* *Exchange.* $\gamma$ is on the route of $u$, $\gamma'$ on the route of $v \ne u$, and
+  $a(\gamma') \le e(\gamma)$: $v$ is in $x$ before $u$ leaves. Give $u$ the legs of $v$ from $\beta_\pi$ on,
+  and $v$ the legs of $u$ after $\alpha_\pi$. Both routes stay valid: $\beta_\pi$ departs after $\alpha_\pi$
+  arrives, and the second leg of $\gamma$ departs after the first leg of $\gamma'$ arrives.
+* *Cut.* $\gamma$ and $\gamma'$ are on one route, $\gamma'$ before $\gamma$. The route gives
+  $e(\gamma') \le a(\gamma)$ and the journey $a(\gamma) \le e(\gamma')$, so every leg from $\beta_\pi$ to
+  $\alpha_\pi$ departs and arrives at $\tau = e(\gamma')$ and lasts $0$; in particular $d_x = \bar d_x = 0$.
+  These legs form a closed walk at $x$. Remove it from the route, which keeps the first leg of $\gamma'$ and
+  the second leg of $\gamma$, a segment at $x$ since $a(\gamma') \le \tau \le e(\gamma)$. The walk becomes a
+  loop; its segments are $(\alpha_\pi, \beta_\pi)$ and the segments strictly between $\gamma'$ and $\gamma$.
+* *Splice.* One of $\gamma, \gamma'$ is a segment $F$ of a loop at time $\tau$, the other a segment $\delta$ of
+  a route, and $e(\gamma) > a(\gamma')$. Then $a(\delta) < \tau \le e(\delta)$ or
+  $a(\delta) \le \tau < e(\delta)$: if $F = \gamma$, then $e(\gamma) = \tau > a(\delta)$ and
+  $\tau \le e(\delta)$ by the journey; if $F = \gamma'$, then $a(\delta) \le \tau$ by the journey and
+  $e(\delta) > \tau$. Insert the loop into the route at $\delta$: the first leg of $\delta$, the second leg of
+  $F$, the loop around to $F$, the first leg of $F$, the second leg of $\delta$. The route stays valid, and
+  $\pi$ is carried through by the new segment of $\alpha_\pi$ and $\beta_\pi$.
+
+Every move keeps the legs, so the cost, and every route's last leg or exchanges two of them, so the makespan.
+It keeps the routes valid and the loops closed walks at one time, and it carries one more passenger through.
+It carries none less: the only segments it breaks are $\gamma$ and $\gamma'$, and a segment carrying another
+passenger through holds both of that passenger's legs, so it is neither. So the moves
+stop, after at most $t$ of them. Then every hand-off from $\gamma$ to $\gamma'$ has $e(\gamma) \le a(\gamma')$:
+
+* between the routes of two planes, the exchange does not apply, so $e(\gamma) < a(\gamma')$;
+* on one route, the cut does not apply, so $\gamma'$ comes after $\gamma$, and $e(\gamma) \le a(\gamma')$
+  along the route;
+* between a loop and a route, the splice does not apply;
+* between two loops, at times $\tau$ and $\tau'$: $e(\gamma) = \tau$ is when $\alpha_\pi$ arrives and
+  $a(\gamma') = \tau'$ when $\beta_\pi$ departs.
+
+*Step 3: paths.* At each city $x$, draw an arrow from $\gamma$ to $\gamma'$ for each hand-off at $x$; the
+segments are those of the routes and of the loops. Each leg carries at most one passenger, so every segment
+has at most one outgoing and one incoming arrow. A $B$ has no incoming arrow, since its second leg returns to
+$C_I$, which clean journeys never reach, and a $\bar B$ has no outgoing arrow. So the arrows form disjoint
+paths $\gamma_0 \to \gamma_1 \to \dots \to \gamma_m$ with $m \ge 1$, and cycles. The inner segments of a path,
+and all segments of a cycle, have an incoming and an outgoing arrow, so they are $A$ segments, each dropping
+one passenger and picking up another. Along a path, by step 2,
+$a(\gamma_0) \le e(\gamma_0) \le a(\gamma_1) \le \dots \le e(\gamma_m)$.
+
+*Step 4: selection.* Attach each loop to any plane. Take every $A$ and $\bar A$ segment of each plane, on its
+route and its loops, as a crossing. A route from $C_I$ to $C_G$ has $\#A - \#\bar A = 1$ (Lemma 2.1) and a
+closed loop $0$, so each plane gets an odd number of crossings. For each path from a $B$ to a $\bar B$, take
+its $B$ as a drop-off and its $\bar B$ as a pick-up, linked to each other. Take no other segment. The balance
+holds link by link. A passenger carried through rides an $A$, which carries no arrow; every other passenger
+is an arrow of exactly one path or cycle. A cycle of $k$ arrows consists of $k$ $A$ segments. A path with $m$
+arrows contributes its $m - 1$ inner $A$ segments, one more for each end that is an $A$, and one link if it
+runs from a $B$ to a $\bar B$: at least $m$ in every case. So the passenger count, the number of links plus
+the number of $A$ segments, is at least $t$. Distinct segments have distinct first legs, each a leg of the plan
+of step 1 landing at the segment's city, so the selected segments are distinct landings of that plan and the
+cost is at most $C$. A route segment is simple and lasts its role duration (Lemma 3.3(c)); a loop segment has
+role duration $0$, since its legs last $0$. So $\lambda_k \le F_k \le M$, where $F_k$ is the flight time of
+the rewired route of plane $k$: it is valid, starts at time $\ge 0$ and ends by $M$.
+
+*Step 5: the closed form.* The closed form $M_{\rm tmpl}$ of Lemma 6.3 makes sense for any configuration,
+orders and matching. Order the drop-offs of each plane with those of its loops first, then those of its route
+in route order, and its pick-ups with those of its route in route order, then those of its loops. Use the
+links of step 4. Take a link from the $j$-th drop-off $\gamma$ of $u$ to the $l$-th pick-up $\gamma'$ of $v$,
+at $x$. If $\gamma$ is on the route, $u$ flies its earlier route drop-offs before $\gamma$, and the loop
+drop-offs weigh $0$, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$; if $\gamma$ is in a loop,
+$\mathrm{Pre}_u(j) = d_x = 0$. If $\gamma'$ is on the route, $v$ flies $\bar d_x$ to $C_G$ after
+$e(\gamma')$ and then its later route pick-ups, all by time $M$, and the loop pick-ups weigh $0$, so
+$e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop at time $\tau$,
+$\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$: every leg of a loop was a leg of a route
+before that route's last leg, which arrives by $M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
+with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
+
+*Step 6: shrink.* Lemma 4.4 ($t \ge p$, §1.1) brings the passenger count to $t$, deleting two crossings of a plane
+or a drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
+still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
+and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
+$M_{\rm tmpl}$ stays at most $M$. The configuration now has passenger count $t$, and by Lemma 6.3 its
+template has makespan $M_{\rm tmpl} \le M$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* *Step 1: a simple plan with clean journeys.* Replace central flights and clean, as in the proof of
+Theorem 6.1; cost, arrival times, flight times and makespan do not increase. By Lemma 4.3(a), every journey is
+now a leg $\alpha_\pi : C_I \to x$ followed by a leg $\beta_\pi : x \to C_G$, which departs no earlier than
+$\alpha_\pi$ arrives. Every route is a sequence of segments, one per landing. For a segment $\gamma$ at a city
+$x$, let $a(\gamma)$ be the time its first leg arrives in $x$ and $e(\gamma)$ the time its second leg departs,
+so $a(\gamma) \le e(\gamma)$. From here on only the routes and the pairs $(\alpha_\pi, \beta_\pi)$ matter:
+the moves below keep the routes valid, but need not keep a plan in the sense of item 2 of §1.2.
+
+*Step 2: rewiring.* Next to the routes, keep a set of *loops*, empty at first: closed walks whose legs all
+depart and arrive at one time $\tau$, so last $0$, and alternate between hubs and central cities, so that a
+loop is made of segments too. A passenger is *carried through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one segment,
+of a route or of a loop. Otherwise it is a *hand-off*, from the segment $\gamma$ of $\alpha_\pi$ to the segment
+$\gamma'$ of $\beta_\pi$, both at its city $x$. While one of these moves applies, apply it.
+
+* *Exchange.* $\gamma$ is on the route of $u$, $\gamma'$ on the route of $v \ne u$, and
+  $a(\gamma') \le e(\gamma)$: $v$ is in $x$ before $u$ leaves. Give $u$ the legs of $v$ from $\beta_\pi$ on,
+  and $v$ the legs of $u$ after $\alpha_\pi$. Both routes stay valid: $\beta_\pi$ departs after $\alpha_\pi$
+  arrives, and the second leg of $\gamma$ departs after the first leg of $\gamma'$ arrives.
+* *Cut.* $\gamma$ and $\gamma'$ are on one route, $\gamma'$ before $\gamma$. The route gives
+  $e(\gamma') \le a(\gamma)$ and the journey $a(\gamma) \le e(\gamma')$, so every leg from $\beta_\pi$ to
+  $\alpha_\pi$ departs and arrives at $\tau = e(\gamma')$ and lasts $0$; in particular $d_x = \bar d_x = 0$.
+  These legs form a closed walk at $x$. Remove it from the route, which keeps the first leg of $\gamma'$ and
+  the second leg of $\gamma$, a segment at $x$ since $a(\gamma') \le \tau \le e(\gamma)$. The walk becomes a
+  loop; its segments are $(\alpha_\pi, \beta_\pi)$ and the segments strictly between $\gamma'$ and $\gamma$.
+* *Splice.* One of $\gamma, \gamma'$ is a segment $F$ of a loop at time $\tau$, the other a segment $\delta$ of
+  a route, and $e(\gamma) > a(\gamma')$. Then $a(\delta) < \tau \le e(\delta)$ or
+  $a(\delta) \le \tau < e(\delta)$: if $F = \gamma$, then $e(\gamma) = \tau > a(\delta)$ and
+  $\tau \le e(\delta)$ by the journey; if $F = \gamma'$, then $a(\delta) \le \tau$ by the journey and
+  $e(\delta) > \tau$. Insert the loop into the route at $\delta$: the first leg of $\delta$, the second leg of
+  $F$, the loop around to $F$, the first leg of $F$, the second leg of $\delta$. The route stays valid, and
+  $\pi$ is carried through by the new segment of $\alpha_\pi$ and $\beta_\pi$.
+
+Every move keeps the legs, so the cost, and every route's last leg or exchanges two of them, so the makespan.
+It keeps the routes valid and the loops closed walks at one time, and it carries one more passenger through.
+It carries none less: the only segments it breaks are $\gamma$ and $\gamma'$, and a segment carrying another
+passenger through holds both of that passenger's legs, so it is neither. So the moves
+stop, after at most $t$ of them. Then every hand-off from $\gamma$ to $\gamma'$ has $e(\gamma) \le a(\gamma')$:
+
+* between the routes of two planes, the exchange does not apply, so $e(\gamma) < a(\gamma')$;
+* on one route, the cut does not apply, so $\gamma'$ comes after $\gamma$, and $e(\gamma) \le a(\gamma')$
+  along the route;
+* between a loop and a route, the splice does not apply;
+* between two loops, at times $\tau$ and $\tau'$: $e(\gamma) = \tau$ is when $\alpha_\pi$ arrives and
+  $a(\gamma') = \tau'$ when $\beta_\pi$ departs.
+
+*Step 3: paths.* At each city $x$, draw an arrow from $\gamma$ to $\gamma'$ for each hand-off at $x$; the
+segments are those of the routes and of the loops. Each leg carries at most one passenger, so every segment
+has at most one outgoing and one incoming arrow. A $B$ has no incoming arrow, since its second leg returns to
+$C_I$, which clean journeys never reach, and a $\bar B$ has no outgoing arrow. So the arrows form disjoint
+paths $\gamma_0 \to \gamma_1 \to \dots \to \gamma_m$ with $m \ge 1$, and cycles. The inner segments of a path,
+and all segments of a cycle, have an incoming and an outgoing arrow, so they are $A$ segments, each dropping
+one passenger and picking up another. Along a path, by step 2,
+$a(\gamma_0) \le e(\gamma_0) \le a(\gamma_1) \le \dots \le e(\gamma_m)$.
+
+*Step 4: selection.* Attach each loop to any plane. Take every $A$ and $\bar A$ segment of each plane, on its
+route and its loops, as a crossing. A route from $C_I$ to $C_G$ has $\#A - \#\bar A = 1$ (Lemma 2.1) and a
+closed loop $0$, so each plane gets an odd number of crossings. For each path from a $B$ to a $\bar B$, take
+its $B$ as a drop-off and its $\bar B$ as a pick-up, linked to each other. Take no other segment. The balance
+holds link by link. A passenger carried through rides an $A$, which carries no arrow; every other passenger
+is an arrow of exactly one path or cycle. A cycle of $k$ arrows consists of $k$ $A$ segments. A path with $m$
+arrows contributes its $m - 1$ inner $A$ segments, one more for each end that is an $A$, and one link if it
+runs from a $B$ to a $\bar B$: at least $m$ in every case. So the passenger count, the number of links plus
+the number of $A$ segments, is at least $t$. Distinct segments have distinct first legs, each a leg of the plan
+of step 1 landing at the segment's city, so the selected segments are distinct landings of that plan and the
+cost is at most $C$. A route segment is simple and lasts its role duration (Lemma 3.3(c)); a loop segment has
+role duration $0$, since its legs last $0$. So $\lambda_k \le F_k \le M$, where $F_k$ is the flight time of
+the rewired route of plane $k$: it is valid, starts at time $\ge 0$ and ends by $M$.
+
+*Step 5: the closed form.* The closed form $M_{\rm tmpl}$ of Lemma 6.3 makes sense for any configuration,
+orders and matching. Order the drop-offs of each plane with those of its loops first, then those of its route
+in route order, and its pick-ups with those of its route in route order, then those of its loops. Use the
+links of step 4. Take a link from the $j$-th drop-off $\gamma$ of $u$ to the $l$-th pick-up $\gamma'$ of $v$,
+at $x$. If $\gamma$ is on the route, $u$ flies its earlier route drop-offs before $\gamma$, and the loop
+drop-offs weigh $0$, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$; if $\gamma$ is in a loop,
+$\mathrm{Pre}_u(j) = d_x = 0$. If $\gamma'$ is on the route, $v$ flies $\bar d_x$ to $C_G$ after
+$e(\gamma')$ and then its later route pick-ups, all by time $M$, and the loop pick-ups weigh $0$, so
+$e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop at time $\tau$,
+$\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$: every leg of a loop was a leg of a route
+before that route's last leg, which arrives by $M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
+with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
+
+*Step 6: shrink.* Lemma 4.4 ($t \ge p$, §1.1) brings the passenger count to $t$, deleting two crossings of a plane
+or a drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
+still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
+and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
+$M_{\rm tmpl}$ stays at most $M$. The configuration now has passenger count $t$, and by Lemma 6.3 its
+template has makespan $M_{\rm tmpl} \le M$. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+The previous version of this proof kept a feasible, event-ordered plan through step 2. It exchanged only the
+hand-offs that overlap in the event order, so it needed one, and it left open plans that are not event-ordered
+on instances with a city of $d_x = \bar d_x = 0$. On such a plan an exchange could leave a journey whose two
+legs lie on one plane in the wrong order. The cut handles exactly that case: the two legs and everything
+between them happen at one instant, at a city with $d_x = \bar d_x = 0$, and the template does not need them
+in the plan's order, since their segments weigh nothing. `checks/sd_zero_check.py` runs the three moves and
+steps 3 to 6 on random plans of this kind (§11).
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+The previous version of this proof kept a feasible, event-ordered plan through step 2. It exchanged only the
+hand-offs that overlap in the event order, so it needed one, and it left open plans that are not event-ordered
+on instances with a city of $d_x = \bar d_x = 0$. On such a plan an exchange could leave a journey whose two
+legs lie on one plane in the wrong order. The cut handles exactly that case: the two legs and everything
+between them happen at one instant, at a city with $d_x = \bar d_x = 0$, and the template does not need them
+in the plan's order, since their segments weigh nothing. `checks/sd_zero_check.py` runs the three moves and
+steps 3 to 6 on random plans of this kind (§11).
+:::
+
+**In Lean.** Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`). `not_schedulableDomination` shows that the hypothesis `p ≤ t` is needed.
+
+**Lean** `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
+feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
+plan's and closed form at most its makespan. No event order and no hypothesis on zero durations
+is needed. -/
+theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p ≤ t) (hA : N.A1NS)
+    {P : Plan n t p} (hP : Feasible N P) :
+    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
+      S.tmpl N.d N.dbar ≤ planMakespan P := …
+```
+
+[`lean/ZenoFront/DominationAll.lean`, lines 345–473](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/DominationAll.lean#L345-L473){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Corollary 6.10 (non-symmetric front) {#node-corollary-6-10}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (A1-NS) · **Uses** [1.1](#node-lemma-1-1), [6.3](#node-lemma-6-3), [6.8](#node-lemma-6-8), [6.9](#node-theorem-6-9)
+
+::: {.our-work}
+**Statement** (theory note, §6.2).
+
+**Corollary 6.10 (non-symmetric front).** Assume (A1-NS). Let $m(\mathrm{cfg})$ be the least makespan of a
+role configuration (§6.2), let
+$$\mathcal K = \{(c(\mathrm{cfg}),\ m(\mathrm{cfg})) : \mathrm{cfg} \text{ a role configuration on the } p \text{ planes with passenger count } t\},$$
+and let $\mathcal A_{\rm eo} \subseteq \mathcal A$ be the set of points of feasible event-ordered plans. Then
+$\mathcal F = \mathrm{Min}\,\mathcal A_{\rm eo} = \mathrm{Min}\,\mathcal K$: a feasible plan with cost at most
+$C$ and makespan at most $M$ exists iff some configuration has cost at most $C$ and least makespan at most $M$,
+and then an event-ordered plan does too.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* $\mathcal K$ is finite, and each of its points is attained by a template, which is a feasible
+event-ordered plan (Lemma 6.8(c)); so $\mathcal K \subseteq \mathcal A_{\rm eo} \subseteq \mathcal A$. By
+Theorem 6.9, every point of $\mathcal A$ is weakly dominated by a point of $\mathcal K$. Lemma 1.1 applies to
+$\mathcal K \subseteq \mathcal A_{\rm eo}$ and to $\mathcal K \subseteq \mathcal A$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* $\mathcal K$ is finite, and each of its points is attained by a template, which is a feasible
+event-ordered plan (Lemma 6.8(c)); so $\mathcal K \subseteq \mathcal A_{\rm eo} \subseteq \mathcal A$. By
+Theorem 6.9, every point of $\mathcal A$ is weakly dominated by a point of $\mathcal K$. Lemma 1.1 applies to
+$\mathcal K \subseteq \mathcal A_{\rm eo}$ and to $\mathcal K \subseteq \mathcal A$. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+By Statement 1.2, the PDDL front tends to $\mathrm{Min}\,\mathcal A_{\rm eo}$ as ε → 0, so under (A1-NS) it is
+$\mathrm{Min}\,\mathcal K = \mathcal F$ whatever the durations. Plans that are not event-ordered have no PDDL
+counterpart, and they do not beat the front either.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+By Statement 1.2, the PDDL front tends to $\mathrm{Min}\,\mathcal A_{\rm eo}$ as ε → 0, so under (A1-NS) it is
+$\mathrm{Min}\,\mathcal K = \mathcal F$ whatever the durations. Plans that are not event-ordered have no PDDL
+counterpart, and they do not beat the front either.
+:::
+
+**In Lean.** The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.Cert2.check_sound_EO` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Soundness over event-ordered plans**, when some city has `d = d̄ = 0` and the certificate
+lists `EO`: the listed plans are event-ordered (`eoOK`), so the listed points are also the front
+of the event-ordered feasible plans (Corollary 6.10), the PDDL front in the limit. -/
+theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
+    (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) :
+    IsParetoFront (achievableEO (C.network dc) C.c C.t C.p) C.front := …
+```
+
+[`lean/ZenoFront/CheckerV2.lean`, lines 586–603](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/CheckerV2.lean#L586-L603){.lean-src} (statement only; the proof is elided)
+
+:::

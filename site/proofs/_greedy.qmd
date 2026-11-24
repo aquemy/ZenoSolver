@@ -1,0 +1,110 @@
+## Why the papers' greedy is not exact {#sec-greedy}
+
+Both papers schedule each fixed multiset of landings (a PPP) greedily and claim the result is the
+optimal makespan of that PPP. Their own words are in the grey boxes; §5 of the note gives the
+counterexamples, and the smallest one is checked by the Lean kernel.
+
+### The greedy counterexample {#node-s5}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S), (A1) · **Uses** [4.8](#node-corollary-4-8)
+
+::: {.from-paper}
+**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.3 *Computing the Shortest Makespan*, HAL preprint hal-01109777v1, pp. 5–6).
+
+> **Step 1: Handling P3-free PPPs** […] For a PPP with $\beta = 0$, greedy Algorithm 1 dispatches the
+> longest flight durations first, assigning them to the available planes with shortest 'private'
+> makespan (who have yet flown the less), ending with the one-way last flights from $C_I$ to $C_G$
+> (planes end in $C_G$). The algorithm returns the flight durations $(D^1_k)$ for all planes $k$ (to be
+> used in the second step), and the optimal makespan for the subproblem is obviously
+> $\max_k(D^1_k)$.
+>
+> **Step 2: Tackling Patterns P3** The second step consists in dispatching the durations of P3
+> patterns among the planes according to their previous flight durations $(D^1_k)_{k=1,\dots,p}$, by
+> sequentially assigning the longest P3 flight to the two planes with the smallest current flight
+> durations. This can be performed greedily again, with a slightly modified version of the
+> Algorithm 1, if we only consider the flight durations.
+
+```
+Algorithm 1  Computing the optimal makespan of PPP (e, w) when β = 0
+i ← 1 ; j ← 1               {Indices of cities in e and w resp., longest durations first}
+D_k ← 0, k = 1, ..., p                             {'Private' makespan for plane k}
+S_k ← EAST, k = 1, ..., p                     {All planes are in C_I, going eastward}
+while j ≤ t − p do
+  k ← ArgMin_i(D_i)                 {Plane with shortest private makespan, in C_I or C_G}
+  if S_k = EAST then
+    D_k ← D_k + 2d_{e_i}                          {From C_I to C_G through city C_{e_i}}
+    S_k ← WEST ; i ← i + 1
+  else
+    D_k ← D_k + 2d_{w_j}                          {From C_G to C_I through city C_{w_j}}
+    S_k ← EAST ; j ← j + 1
+  end if
+end while                                     {Are there persons and planes left in C_I?}
+while i ≤ t do
+  k ← ArgMin_{i; S_i=EAST} (D_i)              {Plane in C_I with shortest private makespan}
+  D_k ← D_k + 2d_{e_i}                            {From C_I to C_G through city C_{e_i}}
+  S_k ← WEST ; i ← i + 1
+end while
+return (D_k)_{k=1,...,p}          {All private makespans are needed for the second step}
+Makespan (e, w) = max_{k=1,...,p} {D_k}
+```
+:::
+
+::: {.from-paper}
+**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.3, HAL preprint hal-01109777v1, p. 7).
+
+> **Proposition**: For a given PPP $C$ and $\beta_{\rm set}$, the algorithm returns the optimal
+> makespan.
+>
+> **Proof**: The incompressible time to transport all passengers, according to a given
+> $\beta_{\rm set}$ is $T = 4\sum_{i\in\beta_{\rm set}} d_i + 2\sum_{i\in\{e',w'\}} d_i$. A theoretical
+> optimal plan with this pattern repartition is a plan without any waiting point for any plane. The
+> above algorithm gives the optimal distribution of the set of times into $p$. Then, if a plan can be
+> constructed with such a makespan, it is optimal for the PPP and the repartition of patterns. As it
+> exists a method to construct such a plan, we can conclude that the algorithm is optimal for the PPP
+> $C$ and $\beta_{\rm set}$. $\square$
+:::
+
+::: {.our-work}
+**Statement** (theory note, §5).
+
+Both papers prove optimality of a greedy that assigns the longest durations first to the least-loaded plane.
+The proof (arXiv §3.2) rests on the sentence "the above algorithm gives the optimal distribution of the set
+of times into $p$". The no-waiting construction is correct (Theorem 4.1); the optimal distribution is not.
+
+* $d = (6, 10)$, $p = 2$, $t = 5$, PPP $a = (10,10,6,6,6)$, $\bar a = (10,6,6)$: the greedy gives every
+  plane a 20-crossing first and ends at 52/68. The partition $\{10,10,10\} \mid \{6,6,6,6,6\}$ gives 60/60.
+  The front point (260, 60) is missed.
+* $d = (1,3)$, $c = (9,5)$, $t = 4$, $p = 2$: the point (42, 12) needs the plane making the drop-off to also
+  take the long crossing; the no-duplicate greedy ends at 14.
+
+Deciding $M(X) \le 2T$ is strongly NP-complete (Theorem 8.1), so no polynomial greedy can be exact unless
+P = NP.
+
+**In Lean.** `lptCounterexample_front` is the exact front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`, for every table of central flights, checked by `decide +kernel` (no compiled code is trusted). It contains `(260, 60)`. That the 2016 greedy misses this point is the hand computation of the note (52/68 instead of 60/60) and the recorded output of the 2016 solver; it is not a Lean statement.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.Examples.lptCounterexample_front` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The exact front of the LPT counterexample**, checked by the kernel: for every table of
+central flight durations, the Pareto front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`
+is `(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)`. In particular the point
+`(260, 60)`, which the papers' greedy misses, is on the front. -/
+theorem lptCounterexample_front (dc : Fin 2 → Fin 2 → ℕ) :
+    IsParetoFront (achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2)
+      [(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)] := …
+```
+
+[`lean/ZenoFront/Examples.lean`, lines 96–103](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Examples.lean#L96-L103){.lean-src} (statement only; the proof is elided)
+
+:::
+
+::: {.strengthen}
+**What fails.** "The above algorithm gives the optimal distribution of the set of times into $p$" is
+false: longest-first onto the least-loaded plane is a heuristic (LPT), not an exact partition, and the
+landings of a PPP must in addition be split so that the partition is *admissible*. Deciding whether a
+multiset of landings can be flown within a makespan is strongly NP-complete (Theorem 8.1), so no
+polynomial per-PPP rule can be exact unless P = NP. The no-waiting construction itself is correct
+(Theorem 4.1).
+:::
