@@ -1,7 +1,7 @@
-# name|arguments: the regimes of bench/instances/regimes.txt that zeno-front solves within CI
-# time (at most a few seconds each). r4 (n = 50, t = 30, p = 5) and r5 (n = 100, t = 60,
-# p = 10) take more than 60 s: the σ-DP's subset table grows with the number of non-dominated
-# cities.
+# name|arguments: the regimes of bench/instances/regimes.txt, all solved by zeno-front within CI
+# time (at most about 10 s each on an Apple M4 Max; r5, n = 100, t = 60, p = 10, is the slowest).
 r1-n200t3p2|-n 200 -t 3 -p 2
 r2-n20t6p2|-n 20 -t 6 -p 2
 r3-n8t26p25|-n 8 -t 26 -p 25
+r4-n50t30p5|-n 50 -t 30 -p 5
+r5-n100t60p10|-n 100 -t 60 -p 10
