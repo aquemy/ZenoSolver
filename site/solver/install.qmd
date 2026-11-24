@@ -1,0 +1,153 @@
+---
+title: "Installation and build"
+subtitle: "The C++ solver with CMake presets, and the Lean library and tools"
+---
+
+ZenoSolver has two independent parts. The **C++ solver** `zeno` and its library compute fronts and
+write certificates. The **Lean 4 project** in `lean/` holds the formalization, the verified checker
+`zeno-check` and the verified solver `zeno-front`. Neither needs the other to build. The end-to-end
+tests use both.
+
+## The C++ solver
+
+### Requirements
+
+- CMake ≥ 3.21;
+- a C++23 compiler: GCC ≥ 13, Clang ≥ 16 or Apple Clang ≥ 15;
+- optionally Doxygen, for the API documentation (`ZS_BUILD_DOC`).
+
+The solver has no other dependency. The benchmarks fetch Google Benchmark v1.9.1 when they are
+enabled.
+
+### Build with the presets
+
+```sh
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+```
+
+The binaries go to `build/<preset>/`, so `zeno` is `build/release/zeno`. Without presets:
+
+```sh
+cmake -S . -B build/default && cmake --build build/default -j
+```
+
+The presets are defined in `CMakePresets.json`:
+
+| Preset | Configuration | Purpose |
+|---|---|---|
+| `release` | `CMAKE_BUILD_TYPE=Release` | Optimised build with link-time optimisation. Tests included. |
+| `dev` | `Debug`, `CMAKE_EXPORT_COMPILE_COMMANDS=ON` | Debug build with `compile_commands.json`. |
+| `asan` | `RelWithDebInfo`, `ZS_SANITIZERS=address;undefined` | AddressSanitizer and UndefinedBehaviorSanitizer; any report fails the test. |
+| `bench` | `ZS_BUILD_BENCHMARKS=ON`, `ZS_BUILD_TESTS=OFF` | Release build of the component benchmarks and `zeno`, without the tests. |
+
+Each configure preset has a build preset of the same name, and `release`, `dev` and `asan` have a
+test preset. To build the solver alone, without the tests, the oracle and the golden suite:
+
+```sh
+cmake --preset release -DZS_BUILD_TESTS=OFF
+cmake --build build/release --target zeno
+```
+
+### Options
+
+Set with `-D<option>=<value>` at configure time (`CMakeLists.txt`):
+
+| Option | Default | Meaning |
+|---|---|---|
+| `ZS_BUILD_TESTS` | `ON` | Build the tests, the brute-force oracle and the golden suite. |
+| `ZS_BUILD_FUZZERS` | `OFF` | Build the libFuzzer targets (clang only; combine with `ZS_SANITIZERS`). |
+| `ZS_BUILD_BENCHMARKS` | `OFF` | Build the component benchmarks; fetches Google Benchmark v1.9.1. |
+| `ZS_BUILD_DOC` | `OFF` | Add the `doc` target (requires Doxygen). |
+| `ZS_ENABLE_IPO` | `ON` | Link-time optimisation in Release builds, when supported. |
+| `ZS_NATIVE` | `OFF` | Tune for the build machine (`-march=native`). Binaries are not portable. |
+| `ZS_SANITIZERS` | empty | Sanitizers to enable, e.g. `address;undefined`. |
+| `ZS_WARNINGS_AS_ERRORS` | `OFF` | Treat compiler warnings as errors. |
+
+### Targets
+
+| Target | What it is |
+|---|---|
+| `zeno` | The command-line solver ([command line](cli.qmd)). |
+| `zeno_core` (alias `zeno::core`) | The static library behind it ([C++ library](api.qmd)). |
+| `zenoOracle` | The brute-force oracle that produced the golden fronts (`tests/oracle`), with `ZS_BUILD_TESTS`. |
+| `ut-zeno-core`, `ut-oracle`, `ut-pddl` | Unit and property tests, with `ZS_BUILD_TESTS`. |
+| `fuzz-certificate-replay`, `fuzz-certificate` | Replay of the fuzzing corpus (with the tests), and the libFuzzer target (with `ZS_BUILD_FUZZERS`). |
+| `bm-core`, `bm-plan`, `bm-ns` | Component benchmarks, with `ZS_BUILD_BENCHMARKS` ([results](../results.qmd)). |
+
+### Tests
+
+`ctest --preset release` runs the golden suite and the unit tests. The golden tests compare the
+front of `zeno` with fronts computed by the brute-force oracle, and check that `zeno check` accepts
+the certificate of each ([golden suite](../instances/suites.qmd#golden)). `ut-zeno-core` compares
+the exact solver with a second, independent oracle (`tests/oracle/partitionEnum.hpp`) on random
+instances, and checks metamorphic properties: permuting cities, or adding dominated or duplicate
+cities, changes nothing; scaling durations or costs scales the front; adding $a$ to every cost adds
+$s \cdot a$ to every front cost. `ut-zeno-core <trials> <maxN> <maxT> <maxP> <maxS>` runs a larger
+sweep.
+
+The certificate reader and checker are fuzzed (`tests/fuzz/fuzz_certificate.cpp`). CTest replays
+the seed corpus on every platform, and CI runs libFuzzer with ASan and UBSan for two minutes on
+every pull request:
+
+```sh
+cmake -S . -B build/fuzz -DCMAKE_CXX_COMPILER=clang++ \
+      -DZS_BUILD_FUZZERS=ON -DZS_SANITIZERS="address;undefined"
+```
+
+## The Lean project
+
+The toolchain is pinned: Lean `v4.36.0` and Mathlib `v4.36.0` (`lean/lean-toolchain`,
+`lean/lakefile.toml`, `lean/lake-manifest.json`). Install Lean with
+[elan](https://github.com/leanprover/elan), then, from `lean/`:
+
+```sh
+lake exe cache get        # download the Mathlib build cache (never build Mathlib from source)
+lake build --wfail        # build ZenoFront; warnings, including `sorry`, are errors
+lake env lean scripts/CheckAxioms.lean   # axiom audit
+lake build zeno-check     # the compiled checker (first build compiles Mathlib's C code, ~1.5 min)
+lake build zeno-front     # the verified solver
+bash test/run.sh          # check the test certificates against their expected verdicts
+```
+
+The executables are written to `lean/.lake/build/bin/`. The Mathlib cache takes several
+gigabytes. When a second checkout of the repository already has it, copying
+`lean/.lake/packages` from there (copy-on-write, `cp -c` on APFS) avoids a second download; `lake
+build` then compiles only `ZenoFront`.
+
+The axiom audit fails if any declaration of a `ZenoFront` module uses an axiom other than
+`propext`, `Classical.choice` and `Quot.sound`; in particular it rejects `sorryAx` and
+`native_decide` ([Lean tools](lean.qmd#trust)).
+
+### End to end
+
+From the repository root, with both parts built:
+
+```sh
+# certificates of the golden and random instances, accepted by both checkers
+bash lean/test/e2e.sh build/release/zeno lean/.lake/build/bin/zeno-check
+
+# zeno-front against zeno front on the golden, quick and three regime instances
+bash lean/test/front.sh build/release/zeno lean/.lake/build/bin/zeno-front "$(mktemp -d)" \
+  "tests/golden/instances.txt|tests/golden/data" "bench/instances/quick.txt|bench/instances/data" \
+  "lean/test/front-regimes.list|bench/instances/data"
+```
+
+## Continuous integration
+
+Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once more under the
+sanitizers (`.github/workflows/ci.yml`). `.github/workflows/lean.yml` builds the Lean project, runs
+the axiom audit, a `grep` for `sorry` and `admit`, and the end-to-end checks, on every push and pull
+request that touches `lean/**` or the C++ solver. `.github/workflows/bench.yml` runs the benchmarks
+([results](../results.qmd#ci)).
+
+## This website
+
+The site is a [Quarto](https://quarto.org) project in `site/`, rendered into `docs/`, which GitHub
+Pages serves from `master`. With Quarto, a TeX distribution (for the PDF) and a built Lean project:
+
+```sh
+bash site/build.sh             # regenerate the blueprint and the tables, render into docs/
+bash site/build.sh --no-lean   # reuse site/lean-status.json instead of querying Lean
+```

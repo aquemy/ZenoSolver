@@ -1,0 +1,84 @@
+---
+title: "ZenoSolver"
+subtitle: "Exact Pareto fronts of MultiZenoTravel planning instances, with certificates and a Lean 4 proof"
+toc: false
+---
+
+MultiZenoTravel is a bi-objective planning benchmark: $p$ planes carry $t$ passengers from an
+initial city $C_I$ to a goal city $C_G$ through $n$ central cities, and every plan has a total
+**cost** (landing fees) and a **makespan**. ZenoSolver computes the exact Pareto front of an
+instance, so that multi-objective planners can be scored against the true front.
+
+```sh
+zeno -n 50 -t 30 -p 5            # 50 central cities, 30 passengers, 5 planes
+zeno -n 2 -t 5 -p 2 -d durations-and-costs.dat --certificate front.cert
+zeno check front.cert            # verify the certificate without trusting the solver
+```
+
+`zeno` prints the front as `cost makespan` lines by increasing cost. It is exact for symmetric
+durations, which includes every instance the generator emits. For non-symmetric durations it
+prints a certified bracket, and says whether the bracket closes into the exact front.
+
+## How it works
+
+The front is the set of breakpoints of $E(T)$, the least cost of an *admissible* partition of the
+$2t-p$ landings into $p$ groups whose durations each sum to at most $T$
+([Proposition 7.1](proofs.qmd#node-proposition-7-1)). `zeno` brackets $E$ between a relaxation $L$
+and the pairs and chains bounds $U$, $U_3$ on every level, and runs the exact link-forest dynamic
+program only where the bracket leaves a level open. The [algorithm page](solver/algorithm.qmd) has
+the details, and the [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
+the proofs.
+
+The 2016 ZenoSolver, published with the EvoCOP 2015 paper, scheduled each fixed multiset of
+landings greedily, and that greedy is not optimal ([§5](proofs.qmd#node-s5)). The current solver
+replaces it and reproduces every golden front of an exhaustive oracle, including those on which the
+2016 solvers were wrong.
+
+## Results at a glance
+
+On the 66 instances of the benchmark suites (Apple M4 Max):
+
+{{< include _results-summary.md >}}
+
+{{< include _results-speedup.md >}}
+
+The [results page](results.qmd) lists every instance.
+
+## What is proved
+
+{{< include _blueprint-stats.md >}}
+
+The front theorem is machine-checked for every instance with symmetric durations and central
+flights no faster than through a hub, assumptions (S) and (A1)
+([Corollary 4.8](proofs.qmd#node-corollary-4-8)). So are the exactness of both dynamic programs
+([Theorem 7.5](proofs.qmd#node-theorem-7-5), [Theorem 7.6](proofs.qmd#node-theorem-7-6)), the
+verified solver `zeno-front` ([`solveFront_isParetoFront`](proofs.qmd#node-verified-solver)) and
+the soundness of the certificate checker `zeno-check`, symmetric
+([Theorem 9.1](proofs.qmd#node-theorem-9-1)) and not
+([version 2](proofs.qmd#node-version-2-checker)). For non-symmetric instances the note proves
+*schedulable domination* ([Theorem 6.9](proofs.qmd#node-theorem-6-9), machine-checked). The
+exhaustive search over role configurations that closes the gaps left by harmful waiting
+([Proposition 6.5](proofs.qmd#node-proposition-6-5)) rests on it.
+
+::: {.callout-note appearance="simple"}
+**Who did what.** The model and the first algorithms are those of the original papers,
+Quemy & Schoenauer (EvoCOP 2015) and Quemy, Schoenauer & Dréo (arXiv:2304.14659, 2023). The
+current solver, the theory note that corrects the papers, the Lean 4 formalization and this website
+are the work of Alexandre Quemy. On the [blueprint](proofs.qmd), the papers' statements are
+reproduced verbatim in grey boxes with their attribution; blue and green boxes hold the note and
+the Lean development.
+:::
+
+## Explore
+
+- **Solver:** [installation](solver/install.qmd), [command line](solver/cli.qmd),
+  [C++ library](solver/api.qmd), [certificate format](solver/certificates.qmd),
+  [Lean tools](solver/lean.qmd), [algorithm](solver/algorithm.qmd).
+- **Instances:** [model and data files](instances/model.qmd), [generator](instances/generator.qmd),
+  [PDDL](instances/pddl.qmd), [benchmark and golden suites](instances/suites.qmd),
+  [instances with known fronts](instances/known-fronts.qmd), [size guidance](instances/sizing.qmd).
+- [**Blueprint:**](proofs.qmd) every statement of the theory note, with the papers' versions, the
+  Lean declarations and a status badge from `#print axioms`. Also as a [PDF](blueprint.pdf).
+- [**Results:**](results.qmd) timings and fronts on every suite instance, computed from the
+  committed baselines.
+- [**About:**](about.qmd) the papers, attribution, and what the note corrects.

@@ -1,0 +1,1295 @@
+{
+ "decls": {
+  "ZenoFront.Admissible": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Admissible",
+   "name": "ZenoFront.Admissible",
+   "range": {
+    "end": [
+     66,
+     66
+    ],
+    "name": [
+     66,
+     4
+    ],
+    "start": [
+     64,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Admissible.addPlane": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.AddPlane",
+   "name": "ZenoFront.Admissible.addPlane",
+   "range": {
+    "end": [
+     101,
+     58
+    ],
+    "name": [
+     48,
+     8
+    ],
+    "start": [
+     45,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Admissible.exists_card_touched_le": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.MinimalWitness",
+   "name": "ZenoFront.Admissible.exists_card_touched_le",
+   "range": {
+    "end": [
+     254,
+     86
+    ],
+    "name": [
+     250,
+     8
+    ],
+    "start": [
+     248,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Admissible.exists_plan": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Achievability",
+   "name": "ZenoFront.Admissible.exists_plan",
+   "range": {
+    "end": [
+     920,
+     11
+    ],
+    "name": [
+     809,
+     8
+    ],
+    "start": [
+     805,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Admissible.exists_shrink": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Shrink",
+   "name": "ZenoFront.Admissible.exists_shrink",
+   "range": {
+    "end": [
+     225,
+     66
+    ],
+    "name": [
+     220,
+     8
+    ],
+    "start": [
+     217,
+     0
+    ]
+   }
+  },
+  "ZenoFront.BalData.value_le_totalCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.BalancedBound",
+   "name": "ZenoFront.BalData.value_le_totalCost",
+   "range": {
+    "end": [
+     578,
+     14
+    ],
+    "name": [
+     469,
+     8
+    ],
+    "start": [
+     466,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Cert.check_sound": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Checker",
+   "name": "ZenoFront.Cert.check_sound",
+   "range": {
+    "end": [
+     404,
+     60
+    ],
+    "name": [
+     363,
+     8
+    ],
+    "start": [
+     359,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Cert2.check_sound": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.CheckerV2",
+   "name": "ZenoFront.Cert2.check_sound",
+   "range": {
+    "end": [
+     576,
+     60
+    ],
+    "name": [
+     491,
+     8
+    ],
+    "start": [
+     486,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Cert2.check_sound_EO": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.CheckerV2",
+   "name": "ZenoFront.Cert2.check_sound_EO",
+   "range": {
+    "end": [
+     603,
+     37
+    ],
+    "name": [
+     589,
+     8
+    ],
+    "start": [
+     586,
+     0
+    ]
+   }
+  },
+  "ZenoFront.EventOrdered": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.SearchGap",
+   "name": "ZenoFront.EventOrdered",
+   "range": {
+    "end": [
+     114,
+     44
+    ],
+    "name": [
+     108,
+     4
+    ],
+    "start": [
+     104,
+     0
+    ]
+   }
+  },
+  "ZenoFront.EventOrdered.of_eoOK": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.EventOrderCheck",
+   "name": "ZenoFront.EventOrdered.of_eoOK",
+   "range": {
+    "end": [
+     158,
+     66
+    ],
+    "name": [
+     135,
+     8
+    ],
+    "start": [
+     134,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Examples.lptCounterexample_front": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Examples",
+   "name": "ZenoFront.Examples.lptCounterexample_front",
+   "range": {
+    "end": [
+     103,
+     78
+    ],
+    "name": [
+     100,
+     8
+    ],
+    "start": [
+     96,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible": {
+   "axioms": [
+    "propext"
+   ],
+   "kind": "structure",
+   "module": "ZenoFront.Plan",
+   "name": "ZenoFront.Feasible",
+   "range": {
+    "end": [
+     160,
+     28
+    ],
+    "name": [
+     157,
+     10
+    ],
+    "start": [
+     155,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_admissible": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Converse",
+   "name": "ZenoFront.Feasible.exists_admissible",
+   "range": {
+    "end": [
+     683,
+     75
+    ],
+    "name": [
+     679,
+     8
+    ],
+    "start": [
+     676,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_relaxation": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.PlanBounds",
+   "name": "ZenoFront.Feasible.exists_relaxation",
+   "range": {
+    "end": [
+     403,
+     73
+    ],
+    "name": [
+     399,
+     8
+    ],
+    "start": [
+     396,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_roleConfig_ns": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.NonSymmetric",
+   "name": "ZenoFront.Feasible.exists_roleConfig_ns",
+   "range": {
+    "end": [
+     517,
+     55
+    ],
+    "name": [
+     477,
+     8
+    ],
+    "start": [
+     474,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_roleConfig_records": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Converse",
+   "name": "ZenoFront.Feasible.exists_roleConfig_records",
+   "range": {
+    "end": [
+     643,
+     62
+    ],
+    "name": [
+     637,
+     8
+    ],
+    "start": [
+     632,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.le_sum_hubArrivals": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.PlanBounds",
+   "name": "ZenoFront.Feasible.le_sum_hubArrivals",
+   "range": {
+    "end": [
+     165,
+     7
+    ],
+    "name": [
+     154,
+     8
+    ],
+    "start": [
+     153,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.minOf_le_cost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Checker",
+   "name": "ZenoFront.Feasible.minOf_le_cost",
+   "range": {
+    "end": [
+     133,
+     66
+    ],
+    "name": [
+     127,
+     8
+    ],
+    "start": [
+     126,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.minOf_le_makespan": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Checker",
+   "name": "ZenoFront.Feasible.minOf_le_makespan",
+   "range": {
+    "end": [
+     124,
+     28
+    ],
+    "name": [
+     112,
+     8
+    ],
+    "start": [
+     110,
+     0
+    ]
+   }
+  },
+  "ZenoFront.FeasibleAnywhere.exists_admissible": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Bridge",
+   "name": "ZenoFront.FeasibleAnywhere.exists_admissible",
+   "range": {
+    "end": [
+     504,
+     7
+    ],
+    "name": [
+     399,
+     8
+    ],
+    "start": [
+     395,
+     0
+    ]
+   }
+  },
+  "ZenoFront.IsParetoFront": {
+   "axioms": [],
+   "kind": "structure",
+   "module": "ZenoFront.Checker",
+   "name": "ZenoFront.IsParetoFront",
+   "range": {
+    "end": [
+     57,
+     53
+    ],
+    "name": [
+     54,
+     10
+    ],
+    "start": [
+     52,
+     0
+    ]
+   }
+  },
+  "ZenoFront.IsParityWitness": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "structure",
+   "module": "ZenoFront.Admissible",
+   "name": "ZenoFront.IsParityWitness",
+   "range": {
+    "end": [
+     62,
+     32
+    ],
+    "name": [
+     56,
+     10
+    ],
+    "start": [
+     52,
+     0
+    ]
+   }
+  },
+  "ZenoFront.IsParityWitness.card_add_one_le": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Admissible",
+   "name": "ZenoFront.IsParityWitness.card_add_one_le",
+   "range": {
+    "end": [
+     108,
+     7
+    ],
+    "name": [
+     103,
+     8
+    ],
+    "start": [
+     100,
+     0
+    ]
+   }
+  },
+  "ZenoFront.IsParityWitness.card_touched_le": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.SupportBound",
+   "name": "ZenoFront.IsParityWitness.card_touched_le",
+   "range": {
+    "end": [
+     106,
+     7
+    ],
+    "name": [
+     102,
+     8
+    ],
+    "start": [
+     100,
+     0
+    ]
+   }
+  },
+  "ZenoFront.IsParityWitness.card_touched_le_of_minimal": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.MinimalWitness",
+   "name": "ZenoFront.IsParityWitness.card_touched_le_of_minimal",
+   "range": {
+    "end": [
+     210,
+     47
+    ],
+    "name": [
+     199,
+     8
+    ],
+    "start": [
+     197,
+     0
+    ]
+   }
+  },
+  "ZenoFront.LTree": {
+   "axioms": [],
+   "kind": "inductive",
+   "module": "ZenoFront.LinkForest",
+   "name": "ZenoFront.LTree",
+   "range": {
+    "end": [
+     52,
+     51
+    ],
+    "name": [
+     51,
+     10
+    ],
+    "start": [
+     50,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Network": {
+   "axioms": [],
+   "kind": "structure",
+   "module": "ZenoFront.Plan",
+   "name": "ZenoFront.Network",
+   "range": {
+    "end": [
+     92,
+     24
+    ],
+    "name": [
+     89,
+     10
+    ],
+    "start": [
+     87,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Network.A1": {
+   "axioms": [],
+   "kind": "def",
+   "module": "ZenoFront.Converse",
+   "name": "ZenoFront.Network.A1",
+   "range": {
+    "end": [
+     52,
+     72
+    ],
+    "name": [
+     52,
+     4
+    ],
+    "start": [
+     51,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Network.A1NS": {
+   "axioms": [],
+   "kind": "def",
+   "module": "ZenoFront.NonSymmetric",
+   "name": "ZenoFront.Network.A1NS",
+   "range": {
+    "end": [
+     46,
+     61
+    ],
+    "name": [
+     45,
+     4
+    ],
+    "start": [
+     44,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Plan": {
+   "axioms": [],
+   "kind": "def",
+   "module": "ZenoFront.Plan",
+   "name": "ZenoFront.Plan",
+   "range": {
+    "end": [
+     85,
+     49
+    ],
+    "name": [
+     85,
+     7
+    ],
+    "start": [
+     84,
+     0
+    ]
+   }
+  },
+  "ZenoFront.PlaneFeasible.cntA_eq": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Converse",
+   "name": "ZenoFront.PlaneFeasible.cntA_eq",
+   "range": {
+    "end": [
+     380,
+     7
+    ],
+    "name": [
+     374,
+     8
+    ],
+    "start": [
+     373,
+     0
+    ]
+   }
+  },
+  "ZenoFront.PlaneFeasible.exists_segments": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.PlanBounds",
+   "name": "ZenoFront.PlaneFeasible.exists_segments",
+   "range": {
+    "end": [
+     394,
+     66
+    ],
+    "name": [
+     390,
+     8
+    ],
+    "start": [
+     389,
+     0
+    ]
+   }
+  },
+  "ZenoFront.RoleConfig": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "structure",
+   "module": "ZenoFront.Roles",
+   "name": "ZenoFront.RoleConfig",
+   "range": {
+    "end": [
+     53,
+     50
+    ],
+    "name": [
+     45,
+     10
+    ],
+    "start": [
+     43,
+     0
+    ]
+   }
+  },
+  "ZenoFront.RoleConfig.admissible_groups": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Roles",
+   "name": "ZenoFront.RoleConfig.admissible_groups",
+   "range": {
+    "end": [
+     109,
+     81
+    ],
+    "name": [
+     109,
+     8
+    ],
+    "start": [
+     108,
+     0
+    ]
+   }
+  },
+  "ZenoFront.RoleConfig.exists_shrink": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.NonSymmetric",
+   "name": "ZenoFront.RoleConfig.exists_shrink",
+   "range": {
+    "end": [
+     452,
+     37
+    ],
+    "name": [
+     443,
+     8
+    ],
+    "start": [
+     441,
+     0
+    ]
+   }
+  },
+  "ZenoFront.RoleConfig.isParityWitness_witness": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Roles",
+   "name": "ZenoFront.RoleConfig.isParityWitness_witness",
+   "range": {
+    "end": [
+     106,
+     9
+    ],
+    "name": [
+     83,
+     8
+    ],
+    "start": [
+     81,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Sched.tmpl": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.SearchGap",
+   "name": "ZenoFront.Sched.tmpl",
+   "range": {
+    "end": [
+     92,
+     93
+    ],
+    "name": [
+     91,
+     4
+    ],
+    "start": [
+     90,
+     0
+    ]
+   }
+  },
+  "ZenoFront.achievable": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Checker",
+   "name": "ZenoFront.achievable",
+   "range": {
+    "end": [
+     50,
+     75
+    ],
+    "name": [
+     49,
+     4
+    ],
+    "start": [
+     48,
+     0
+    ]
+   }
+  },
+  "ZenoFront.admissible_iff_exists_linkForest": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.TreeExact",
+   "name": "ZenoFront.admissible_iff_exists_linkForest",
+   "range": {
+    "end": [
+     541,
+     55
+    ],
+    "name": [
+     519,
+     8
+    ],
+    "start": [
+     516,
+     0
+    ]
+   }
+  },
+  "ZenoFront.domRep_le": {
+   "axioms": [],
+   "kind": "theorem",
+   "module": "ZenoFront.AdmissibleBound",
+   "name": "ZenoFront.domRep_le",
+   "range": {
+    "end": [
+     199,
+     33
+    ],
+    "name": [
+     182,
+     8
+    ],
+    "start": [
+     182,
+     0
+    ]
+   }
+  },
+  "ZenoFront.exists_transfer": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Converse",
+   "name": "ZenoFront.exists_transfer",
+   "range": {
+    "end": [
+     431,
+     18
+    ],
+    "name": [
+     409,
+     8
+    ],
+    "start": [
+     407,
+     0
+    ]
+   }
+  },
+  "ZenoFront.isLeast_oneplane": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.OnePlane",
+   "name": "ZenoFront.isLeast_oneplane",
+   "range": {
+    "end": [
+     139,
+     32
+    ],
+    "name": [
+     128,
+     8
+    ],
+    "start": [
+     125,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minCost_le_pairsBoundAt": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.PairBound",
+   "name": "ZenoFront.minCost_le_pairsBoundAt",
+   "range": {
+    "end": [
+     282,
+     9
+    ],
+    "name": [
+     262,
+     8
+    ],
+    "start": [
+     260,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_achievable_iff_anywhere_of_A1": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Achievability",
+   "name": "ZenoFront.minimal_achievable_iff_anywhere_of_A1",
+   "range": {
+    "end": [
+     935,
+     78
+    ],
+    "name": [
+     932,
+     8
+    ],
+    "start": [
+     930,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_achievable_iff_multisetPoints": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Achievability",
+   "name": "ZenoFront.minimal_achievable_iff_multisetPoints",
+   "range": {
+    "end": [
+     1037,
+     55
+    ],
+    "name": [
+     1033,
+     8
+    ],
+    "start": [
+     1030,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_admissiblePoints_iff": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Solver",
+   "name": "ZenoFront.minimal_admissiblePoints_iff",
+   "range": {
+    "end": [
+     268,
+     21
+    ],
+    "name": [
+     211,
+     8
+    ],
+    "start": [
+     209,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_iff_of_subset_of_dominated": {
+   "axioms": [],
+   "kind": "theorem",
+   "module": "ZenoFront.Bridge",
+   "name": "ZenoFront.minimal_iff_of_subset_of_dominated",
+   "range": {
+    "end": [
+     522,
+     50
+    ],
+    "name": [
+     510,
+     8
+    ],
+    "start": [
+     508,
+     0
+    ]
+   }
+  },
+  "ZenoFront.relaxCost_oneplane_le_totalCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Relaxation",
+   "name": "ZenoFront.relaxCost_oneplane_le_totalCost",
+   "range": {
+    "end": [
+     89,
+     12
+    ],
+    "name": [
+     81,
+     8
+    ],
+    "start": [
+     79,
+     0
+    ]
+   }
+  },
+  "ZenoFront.relaxedBoundAt_le_minCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.PairBound",
+   "name": "ZenoFront.relaxedBoundAt_le_minCost",
+   "range": {
+    "end": [
+     289,
+     79
+    ],
+    "name": [
+     285,
+     8
+    ],
+    "start": [
+     284,
+     0
+    ]
+   }
+  },
+  "ZenoFront.roleW_landingRecs_le": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.NonSymmetric",
+   "name": "ZenoFront.roleW_landingRecs_le",
+   "range": {
+    "end": [
+     309,
+     9
+    ],
+    "name": [
+     266,
+     8
+    ],
+    "start": [
+     264,
+     0
+    ]
+   }
+  },
+  "ZenoFront.schedulableDomination_all": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.DominationAll",
+   "name": "ZenoFront.schedulableDomination_all",
+   "range": {
+    "end": [
+     473,
+     5
+    ],
+    "name": [
+     349,
+     8
+    ],
+    "start": [
+     345,
+     0
+    ]
+   }
+  },
+  "ZenoFront.sigmaBoundAt_eq_minCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Solver",
+   "name": "ZenoFront.sigmaBoundAt_eq_minCost",
+   "range": {
+    "end": [
+     190,
+     11
+    ],
+    "name": [
+     146,
+     8
+    ],
+    "start": [
+     143,
+     0
+    ]
+   }
+  },
+  "ZenoFront.solveFront_isParetoFront": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.Solver",
+   "name": "ZenoFront.solveFront_isParetoFront",
+   "range": {
+    "end": [
+     449,
+     68
+    ],
+    "name": [
+     417,
+     8
+    ],
+    "start": [
+     414,
+     0
+    ]
+   }
+  },
+  "ZenoFront.treeBoundAt_eq_minCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.TreeExact",
+   "name": "ZenoFront.treeBoundAt_eq_minCost",
+   "range": {
+    "end": [
+     514,
+     83
+    ],
+    "name": [
+     491,
+     8
+    ],
+    "start": [
+     488,
+     0
+    ]
+   }
+  }
+ },
+ "library": {
+  "declarations": 3675,
+  "modules": 42,
+  "nonstandard": [],
+  "theorems": 2112
+ },
+ "meta": {
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "v4.36.0"
+ }
+}

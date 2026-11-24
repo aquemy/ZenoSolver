@@ -1,0 +1,67 @@
+---
+title: "Size guidance"
+subtitle: "How large an instance zeno solves, and what drives the time"
+---
+
+## Measured times
+
+`zeno` (all cores) on default-generator instances, Apple M4 Max, single runs. Every one of these
+instances belongs to the linear family, so its front size is $(n - 1)\kappa + 1$ with
+$\kappa = \lceil (2t-p)/p \rceil$ ([known fronts](known-fronts.qmd#linear)).
+
+| Instance | Landings $s = 2t - p$ | Front size | Time |
+|---|--:|--:|--:|
+| `-n 50 -t 50 -p 2` | 98 | 2,402 | 0.08 s |
+| `-n 1000 -t 10 -p 3` | 17 | 5,995 | 0.12 s |
+| `-n 200 -t 100 -p 10` | 190 | 3,782 | 1.2 s |
+| `-n 100 -t 500 -p 50` | 950 | 1,882 | 10.5 s |
+| `-n 500 -t 200 -p 20` | 380 | 9,482 | 33 s |
+| `-n 1000 -t 1000 -p 100` | 1,900 | 18,982 | > 240 s |
+
+Writing PDDL: `zeno pddl` with $n = 1000$ takes 0.36 s and writes 46 MB; the file is quadratic in
+$n$ ([PDDL](pddl.qmd#size)).
+
+Every one of the 66 [benchmark suite](suites.qmd#bench) instances is solved in at most 61 ms
+([results](../results.qmd)).
+
+## What drives the time
+
+From the algorithm ([algorithm](../solver/algorithm.qmd)) and the measurements:
+
+- **The number of landings** $s = 2t - p$ and the largest group $\hat m = s - p + 1$ set the size of
+  the one-plane table and of the knapsacks of the bracket, $O(p\,s^2 + n\,\hat m^2)$ per level. This
+  is the main cost on the large instances above: $t$ matters more than $n$.
+- **The level range** $T_{\rm hi} - T_{\rm lo} = (d_{\rm cheap} - d_{\min})\kappa$ multiplies the
+  per-level cost under `--levels sweep`. Under `search` (automatic beyond $2^{12}$ levels), the
+  solver evaluates $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels for $r$ front points, so scaling the
+  durations costs little: $10^8$ levels take about 4 ms (`BM_SolveLargeDurations`).
+- **The number of front points** $r$: one plan per point with `--plans` or `--certificate`, and a
+  certificate grows with the plans ($3.9$ MB and 240,000 legs for $n = 100$, $t = 60$, $p = 10$).
+- **The cities after reduction.** Dominated and equal cities are merged first, so many cities with
+  few distinct (duration, cost) pairs cost little. The default family keeps every city.
+- **Links.** The exact link-forest DP runs only on levels the bracket leaves open, and only when
+  link trees can have three planes or more, $q_{\max} = \min(p, t - p + 1) \ge 3$. Its cost grows
+  with $q_{\max}^2$. On default-generator instances such as `-n 200 -t 100 -p 10`, `--stats`
+  reports every level settled by the bracket ($L = U$) and no exact DP call.
+
+`--threads` parallelises the level evaluations; `--stats` shows where the time goes
+([command line](../solver/cli.qmd#front)).
+
+## Non-symmetric instances
+
+The non-symmetric bracket is much more expensive. The exact balanced role program has a state space
+growing like $(2n)^{t-p}$, and the gap search enumerates role configurations with every order and
+matching. Both stop at limits (2,000,000 states and 50,000,000 transitions per level, 20,000,000
+search steps per gap, 30 s of gap refinement; [`SolveOptions`](../solver/cli.qmd#limits)). Beyond
+them `zeno` reports the open gaps with their lower bounds instead of an exact front. The instance of
+[Proposition 6.5](../proofs.qmd#node-proposition-6-5) ($n = 2$, $t = 7$, $p = 4$) closes in a few
+milliseconds. Keep $t - p$ small for exact non-symmetric fronts.
+
+## The Lean tools
+
+- `zeno-check` on the certificate of a suite instance takes 26 ms at the median and 2.1 s at most
+  (3.9 MB, $n = 100$, $t = 60$, $p = 10$). The σ-DP it uses for `forest` gaps is exponential in the
+  number of cities that survive the dominance merge. When that is large it switches to the tree
+  DP, and certificates of `-n 40 -t 20 -p 8 -C 2 -D 2 -r 100` take 12.5 s.
+- `zeno-front` is slower than `zeno`: 10 s for $n = 100$, $t = 60$, $p = 10$, against 61 ms. It
+  finishes all 66 suite instances within 60 s ([results](../results.qmd)).

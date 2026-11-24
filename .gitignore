@@ -46,3 +46,9 @@ CMakeUserPresets.json
 
 # Python bytecode
 __pycache__/
+
+# The website (bash site/build.sh): Quarto's cache and the fetched fonts stay local. The rendered
+# site in docs/ is committed for GitHub Pages, so the *.html and *.txt rules above must not apply.
+/site/.quarto/
+/site/fonts/*.ttf
+!/docs/**

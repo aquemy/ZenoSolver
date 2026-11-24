@@ -1,0 +1,825 @@
+## Symmetric case: achievability, converse, front {#sec-symmetric}
+
+The heart of the note (§4). Theorem 4.1 flies every admissible partition with no waiting;
+Theorem 4.7 reduces every plan to an admissible partition; together they characterise the front
+(Corollary 4.8). All three are machine-checked.
+
+### Theorem 4.1 {#node-theorem-4-1}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [2.6](#node-lemma-2-6)
+
+::: {.from-paper}
+**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.3, HAL preprint hal-01109777v1, pp. 6–7).
+
+> **Proposition**: It is always possible to construct a feasible plan with the makespan returned by the
+> two-steps method described above.
+>
+> **Proof by construction**: Considering a P3 pattern performed by planes $p_1$ in $C_G$ and $p_2$ in
+> $C_I$ through city $C_i$. […] Let $\blacklozenge$ denote the time $t_1$ when plane $p_1$ arrives in
+> $C_i$ and $\lozenge$ the time $t_2$ when plane $p_2$ (with the person) arrives in $C_i$. If
+> $t_2 > t_1$ then plane $p_1$ will have to wait $t_2 - t_1$ in $C_i$ before flying back to $C_G$ with
+> the person. But the duration vector $(D^2_k)$ returned by the two steps algorithm is computed assuming
+> no waiting point. Consequently, the proposition is equivalent to assert that we can always build a
+> plan without any waiting point.
+>
+> In order to do so, for each P3, the idea is to perform the westward part as early as possible, and
+> on the opposite, to perform the eastward part as late as possible, thus ensuring that there is no
+> waiting time.
+>
+> In order to construct such an optimal plan, we will remember the cities of every plane and every
+> pattern during both previous steps of the algorithm. From there on, let us consider now only planes
+> that have to perform at least one P3 pattern.
+>
+> 1. For each plane, select the one with the maximum number of P3 patterns to be performed. In case of
+>    tie, select the plane with longest P3 duration, or the plane with the largest current 'private'
+>    makespan.
+> 2. Construct a partial schedule with only P1 and P2 patterns (Step 1 above).
+> 3. For every 'not already started' P3 pattern, add its eastward part at the end of the schedule by
+>    descending order of durations.
+> 4. For every 'already started' P3 pattern, add its westward part at the beginning of the schedule by
+>    ascending order of durations. $\square$
+:::
+
+::: {.our-work}
+**Statement** (theory note, §4.1).
+
+**Theorem 4.1.** Assume (S). For every multiset $X$ with $|X| = s$ and every admissible partition
+$X_1,\dots,X_p$ of $X$, there is a feasible plan whose central landings are exactly $X$ (so of cost $c(X)$),
+in which plane $k$ flies for $\ell(X_k)$ and picks up at most one passenger, and whose makespan is
+$\max_k \ell(X_k)$. The plan uses no central flight, so no assumption on them is needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Take a link forest $\Lambda$ (Lemma 2.6) and root each of its trees at a plane. For a link at $i$
+between a parent $u$ and a child $v$, $u$ will drop a passenger in $i$ (a segment $B$) and $v$ will pick it
+up (a segment $\bar B$). A non-root plane has exactly one parent link, so every plane picks up at most once.
+Plane $u$ uses one copy of $i$ from $X_u$ per link at $u$ labelled $i$ (F1), and its $r_u$ free landings, an
+odd number (F2), for crossings.
+
+*Schedule of plane $k$.* Let $\tau^{\rm dr}_k$ be twice the sum of the durations of its child links (its
+drop-offs) and $\tau^{\rm cr}_k$ the load of its free landings.
+
+1. Its drop-offs, one after the other from time 0: $C_I \to i \to C_I$, each carrying a new passenger from
+   $C_I$ and leaving it in $i$. These never wait.
+2. Its $r_k$ free landings as crossings $A, \bar A, A, \dots, A$; each $A$ carries a new passenger from
+   $C_I$ to $C_G$. These never wait.
+3. If $k$ has a parent link at $i$: $C_G \to i \to C_G$, leaving $i$ once the passenger dropped there by
+   its parent is present, and carrying it to $C_G$.
+
+*Timing.* The drop-off of $u$ at $i$ reaches $i$ at a time at most $\tau^{\rm dr}_u - d_i$. Its child $v$
+reaches $C_G$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v$, arrives in $i$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v + d_i$,
+leaves at the later of this time and the drop-off's arrival, and is back at a time at most
+$\max(\tau^{\rm dr}_v + \tau^{\rm cr}_v + 2d_i,\ \tau^{\rm dr}_u) = \max(\ell(X_v), \tau^{\rm dr}_u) \le \max(\ell(X_v), \ell(X_u))$.
+A plane without a parent link finishes at $\ell(X_k)$. Every plane flies exactly $\ell(X_k)$, as its segments
+are simple (Lemma 3.3(c)), so the makespan is $\max_k \ell(X_k)$.
+
+*Passengers.* Let $\Lambda$ have $N$ links. There are $\sum_k r_k = s - 2N$ crossings, and each plane makes
+one more $A$ than $\bar A$, so there are $(s - 2N + p)/2 = t - N$ segments $A$. They and the $N$ drop-offs
+carry $t$ distinct passengers out of $C_I$, each delivered to $C_G$ by its $A$ or by the pick-up linked to
+its drop-off. Every flight carries at most one passenger, every route ends in $C_G$, and the central landings
+are exactly $X$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Take a link forest $\Lambda$ (Lemma 2.6) and root each of its trees at a plane. For a link at $i$
+between a parent $u$ and a child $v$, $u$ will drop a passenger in $i$ (a segment $B$) and $v$ will pick it
+up (a segment $\bar B$). A non-root plane has exactly one parent link, so every plane picks up at most once.
+Plane $u$ uses one copy of $i$ from $X_u$ per link at $u$ labelled $i$ (F1), and its $r_u$ free landings, an
+odd number (F2), for crossings.
+
+*Schedule of plane $k$.* Let $\tau^{\rm dr}_k$ be twice the sum of the durations of its child links (its
+drop-offs) and $\tau^{\rm cr}_k$ the load of its free landings.
+
+1. Its drop-offs, one after the other from time 0: $C_I \to i \to C_I$, each carrying a new passenger from
+   $C_I$ and leaving it in $i$. These never wait.
+2. Its $r_k$ free landings as crossings $A, \bar A, A, \dots, A$; each $A$ carries a new passenger from
+   $C_I$ to $C_G$. These never wait.
+3. If $k$ has a parent link at $i$: $C_G \to i \to C_G$, leaving $i$ once the passenger dropped there by
+   its parent is present, and carrying it to $C_G$.
+
+*Timing.* The drop-off of $u$ at $i$ reaches $i$ at a time at most $\tau^{\rm dr}_u - d_i$. Its child $v$
+reaches $C_G$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v$, arrives in $i$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v + d_i$,
+leaves at the later of this time and the drop-off's arrival, and is back at a time at most
+$\max(\tau^{\rm dr}_v + \tau^{\rm cr}_v + 2d_i,\ \tau^{\rm dr}_u) = \max(\ell(X_v), \tau^{\rm dr}_u) \le \max(\ell(X_v), \ell(X_u))$.
+A plane without a parent link finishes at $\ell(X_k)$. Every plane flies exactly $\ell(X_k)$, as its segments
+are simple (Lemma 3.3(c)), so the makespan is $\max_k \ell(X_k)$.
+
+*Passengers.* Let $\Lambda$ have $N$ links. There are $\sum_k r_k = s - 2N$ crossings, and each plane makes
+one more $A$ than $\bar A$, so there are $(s - 2N + p)/2 = t - N$ segments $A$. They and the $N$ drop-offs
+carry $t$ distinct passengers out of $C_I$, each delivered to $C_G$ by its $A$ or by the pick-up linked to
+its drop-off. Every flight carries at most one passenger, every route ends in $C_G$, and the central landings
+are exactly $X$. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+This is the papers' rule ("western parts of P3 early, eastern parts late"), made precise by the link forest:
+the forest guarantees at most one pick-up per plane, which is what makes the timing argument work.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+This is the papers' rule ("western parts of P3 early, eastern parts late"), made precise by the link forest:
+the forest guarantees at most one pick-up per plane, which is what makes the timing argument work.
+:::
+
+**In Lean.** The plan is built on a rooted link forest (`LTree.routes`): each plane drops off its children's passengers, crosses its free landings, then picks up its parent's passenger.
+
+**Lean** `ZenoFront.Admissible.exists_plan` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.1 (achievability).** Under (S), with `p ≤ t`, every admissible partition `X` of
+`2t − p` landings is achieved by a feasible plan whose planes land exactly at the groups of `X`
+(up to relabelling the planes), so of cost `c(X)`, and whose makespan is `max_k 2 δ(X_k)`. The
+plan flies no central flight, so nothing is assumed on them. -/
+theorem Admissible.exists_plan {N : Network n} (hS : N.dbar = N.d) {p : ℕ} (hpt : p ≤ t)
+    (c : Fin n → ℕ) {X : Groups n p} (hX : Admissible X) (hsize : size X = 2 * t - p) :
+    ∃ P : Plan n t p, Feasible N P ∧
+      univ.val.map (fun k => routeLandings (P k)) = univ.val.map X ∧
+      planCost c P = totalCost c X ∧ planMakespan P = 2 * maxLoad N.d X := …
+```
+
+[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
+
+:::
+
+::: {.strengthen}
+**The papers' construction, made precise.** The papers' rule (westward parts of P3 early, eastward
+parts late) is right, but it is applied to whatever the greedy produced. The link forest guarantees
+that every plane picks up **at most once**, which is exactly what makes the no-waiting timing
+argument go through.
+:::
+
+### Definition 4.2 (role configuration) {#node-definition-4-2}
+
+**Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
+
+::: {.our-work}
+**Statement** (theory note, §4.2).
+
+**Definition 4.2 (role configuration).** A *role configuration* on a set $Q$ of planes is a family of
+multisets of central cities $\mathrm{Dr}_k$ (drop-offs), $\mathrm{Pk}_k$ (pick-ups) and $\mathrm{Cr}_k$
+(crossings), $k \in Q$, with $|\mathrm{Cr}_k|$ odd and the *per-city balance*
+$\sum_{k\in Q}\mathrm{Dr}_k = \sum_{k\in Q}\mathrm{Pk}_k$. Its *passenger count* is
+$t(\mathrm{cfg}) = \sum_k \big(|\mathrm{Dr}_k| + (|\mathrm{Cr}_k| + 1)/2\big)$, its cost is
+$\sum_k c(\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k)$, and the *role load* of plane $k$ is
+$$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k).$$
+With $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, the balance gives
+$\sum_k |X_k| = 2t(\mathrm{cfg}) - |Q|$, and under (S), $\lambda_k = \ell(X_k)$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+A plan is *simple* if each of its flights joins a hub and a central city; all its segments are then simple.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+A plan is *simple* if each of its flights joins a hub and a central city; all its segments are then simple.
+:::
+
+**Lean** `ZenoFront.RoleConfig` [Lean definition]{.badge .ok}
+
+```lean
+/-- A role configuration: per plane, drop-off halves, pick-up halves and an odd number of
+crossings, with as many drop-offs as pick-ups at every city. -/
+structure RoleConfig (n p : ℕ) where
+  /-- Drop-off halves `D_k` of each plane. -/
+  drop : Fin p → Multiset (Fin n)
+  /-- Pick-up halves `P_k` of each plane. -/
+  pick : Fin p → Multiset (Fin n)
+  /-- Crossings `Cr_k` of each plane. -/
+  cross : Fin p → Multiset (Fin n)
+  odd_card_cross : ∀ k, Odd (cross k).card
+  sum_drop_eq_sum_pick : ∑ k, drop k = ∑ k, pick k
+```
+
+[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
+
+:::
+
+### Lemma 4.3 (direct selection) {#node-lemma-4-3}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** simple, clean plan · **Uses** [2.1](#node-lemma-2-1), [3.1](#node-lemma-3-1), [3.3](#node-lemma-3-3)
+
+::: {.our-work}
+**Statement** (theory note, §4.2).
+
+**Lemma 4.3 (direct selection) [DS].** (a) In a simple plan with clean journeys, whether or not its routes end
+in $C_G$, every journey consists of exactly two flights, $C_I \to x$ and then $x \to C_G$, for a central
+city $x$.
+
+(b) Let $P$ be a simple plan on a set $Q$ of planes, every route ending in $C_G$, with clean journeys and
+cost $C$. Then there is a role configuration on $Q$ with $t(\mathrm{cfg}) \ge t$, cost at most $C$,
+$\lambda_k \le F_k$ for every $k$, and $\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ a sub-multiset of the
+central landings of plane $k$. No assumption on durations is needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* (a) The first flight of a journey departs from $C_I$, so it goes to a central city $x$. As
+$x \ne C_G$, the journey continues with a flight from $x$, which goes to a hub. That hub is not $C_I$
+(Lemma 3.1), so the flight arrives in $C_G$, and it is the last flight of the journey (Lemma 3.1).
+
+(b) *Journeys.* By (a), the first flight of a journey is the first flight of a segment of type $A$ or $B$,
+written $o(\pi)$, and its second flight is the second flight of a segment at the same city $x$ of type $A$ or
+$\bar B$, written $n(\pi)$. A segment has one first flight and one second flight, and by capacity a flight
+carries at most one passenger, so $o$ and $n$ are injective. Passenger $\pi$ is a *hand-off* if
+$o(\pi) \ne n(\pi)$. A $B$ is never an $n(\cdot)$, and a $\bar B$ never an $o(\cdot)$.
+
+*Counts at a city $x$.* Let $\beta_x$ be the number of $B$ segments at $x$ that are an $o(\cdot)$, and
+$\bar\beta_x$ the number of $\bar B$ segments at $x$ that are an $n(\cdot)$. Among the $A$ segments at $x$:
+$\theta_x$ are $o(\pi) = n(\pi)$ for some $\pi$ (*through*); $\omega_x$ are $o(\pi)$ and $n(\pi')$ with
+$\pi \ne \pi'$ (*swaps*); $\alpha_x$ are an $o(\cdot)$ and no $n(\cdot)$; $\bar\alpha_x$ are an $n(\cdot)$ and
+no $o(\cdot)$; the others are *empty*. Every hand-off at $x$ has its $o$ among the $\beta_x + \alpha_x + \omega_x$
+segments counted so, and its $n$ among the $\bar\beta_x + \bar\alpha_x + \omega_x$, and each of these segments
+serves exactly one hand-off at $x$ in that role. Hence
+$$\beta_x - \bar\beta_x = \bar\alpha_x - \alpha_x. \tag{1}$$
+Every passenger has exactly one $o$, so
+$$t = \textstyle\sum_x (\theta_x + \omega_x + \alpha_x + \beta_x). \tag{2}$$
+Let $z_k$ be the number of non-empty $A$ segments of plane $k$. Then
+$$\textstyle\sum_k z_k = \sum_x (\theta_x + \omega_x + \alpha_x + \bar\alpha_x). \tag{3}$$
+
+*Selection.* At each city $x$, let $\mu_x = \min(\beta_x, \bar\beta_x)$. Select $\mu_x$ of the $B$ segments at
+$x$ that are an $o(\cdot)$, and $\mu_x$ of the $\bar B$ segments at $x$ that are an $n(\cdot)$. For each plane
+$k$, let $z'_k = \max(z_k, 1)$, and select its $z_k$ non-empty $A$ segments, $z'_k - 1$ of its $\bar A$
+segments and, if $z_k = 0$, one (empty) $A$ segment. These exist: by Lemma 2.1, plane $k$ has at least one
+$A$, and $\#\bar A_k = \#A_k - 1 \ge z_k - 1$. Let $\mathrm{Dr}_k$, $\mathrm{Pk}_k$ and $\mathrm{Cr}_k$ be the
+cities of the selected $B$, $\bar B$, and $A$ or $\bar A$ segments of $k$. Then $|\mathrm{Cr}_k| = 2z'_k - 1$
+is odd, and the balance holds since both sides contain $\mu_x$ copies of $x$.
+
+*Count.* By (2) and (3),
+$t(\mathrm{cfg}) = \sum_x \mu_x + \sum_k z'_k \ge \sum_x \mu_x + \sum_k z_k = t + \sum_x (\mu_x - \beta_x + \bar\alpha_x)$.
+By (1), $\beta_x - \mu_x = (\beta_x - \bar\beta_x)^+ = (\bar\alpha_x - \alpha_x)^+ \le \bar\alpha_x$. So
+$t(\mathrm{cfg}) \ge t$.
+
+*Loads and cost.* The selected segments of $k$ are distinct and simple, and by Lemma 3.3(c) each lasts
+exactly its role duration: $2d_x$ for $B$, $2\bar d_x$ for $\bar B$, $d_x + \bar d_x$ for $A$ and $\bar A$.
+So $\lambda_k \le F_k$. Each selected segment contributes its single central landing, so
+$\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ is a sub-multiset of the landings of $k$, and the cost is at
+most $C$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* (a) The first flight of a journey departs from $C_I$, so it goes to a central city $x$. As
+$x \ne C_G$, the journey continues with a flight from $x$, which goes to a hub. That hub is not $C_I$
+(Lemma 3.1), so the flight arrives in $C_G$, and it is the last flight of the journey (Lemma 3.1).
+
+(b) *Journeys.* By (a), the first flight of a journey is the first flight of a segment of type $A$ or $B$,
+written $o(\pi)$, and its second flight is the second flight of a segment at the same city $x$ of type $A$ or
+$\bar B$, written $n(\pi)$. A segment has one first flight and one second flight, and by capacity a flight
+carries at most one passenger, so $o$ and $n$ are injective. Passenger $\pi$ is a *hand-off* if
+$o(\pi) \ne n(\pi)$. A $B$ is never an $n(\cdot)$, and a $\bar B$ never an $o(\cdot)$.
+
+*Counts at a city $x$.* Let $\beta_x$ be the number of $B$ segments at $x$ that are an $o(\cdot)$, and
+$\bar\beta_x$ the number of $\bar B$ segments at $x$ that are an $n(\cdot)$. Among the $A$ segments at $x$:
+$\theta_x$ are $o(\pi) = n(\pi)$ for some $\pi$ (*through*); $\omega_x$ are $o(\pi)$ and $n(\pi')$ with
+$\pi \ne \pi'$ (*swaps*); $\alpha_x$ are an $o(\cdot)$ and no $n(\cdot)$; $\bar\alpha_x$ are an $n(\cdot)$ and
+no $o(\cdot)$; the others are *empty*. Every hand-off at $x$ has its $o$ among the $\beta_x + \alpha_x + \omega_x$
+segments counted so, and its $n$ among the $\bar\beta_x + \bar\alpha_x + \omega_x$, and each of these segments
+serves exactly one hand-off at $x$ in that role. Hence
+$$\beta_x - \bar\beta_x = \bar\alpha_x - \alpha_x. \tag{1}$$
+Every passenger has exactly one $o$, so
+$$t = \textstyle\sum_x (\theta_x + \omega_x + \alpha_x + \beta_x). \tag{2}$$
+Let $z_k$ be the number of non-empty $A$ segments of plane $k$. Then
+$$\textstyle\sum_k z_k = \sum_x (\theta_x + \omega_x + \alpha_x + \bar\alpha_x). \tag{3}$$
+
+*Selection.* At each city $x$, let $\mu_x = \min(\beta_x, \bar\beta_x)$. Select $\mu_x$ of the $B$ segments at
+$x$ that are an $o(\cdot)$, and $\mu_x$ of the $\bar B$ segments at $x$ that are an $n(\cdot)$. For each plane
+$k$, let $z'_k = \max(z_k, 1)$, and select its $z_k$ non-empty $A$ segments, $z'_k - 1$ of its $\bar A$
+segments and, if $z_k = 0$, one (empty) $A$ segment. These exist: by Lemma 2.1, plane $k$ has at least one
+$A$, and $\#\bar A_k = \#A_k - 1 \ge z_k - 1$. Let $\mathrm{Dr}_k$, $\mathrm{Pk}_k$ and $\mathrm{Cr}_k$ be the
+cities of the selected $B$, $\bar B$, and $A$ or $\bar A$ segments of $k$. Then $|\mathrm{Cr}_k| = 2z'_k - 1$
+is odd, and the balance holds since both sides contain $\mu_x$ copies of $x$.
+
+*Count.* By (2) and (3),
+$t(\mathrm{cfg}) = \sum_x \mu_x + \sum_k z'_k \ge \sum_x \mu_x + \sum_k z_k = t + \sum_x (\mu_x - \beta_x + \bar\alpha_x)$.
+By (1), $\beta_x - \mu_x = (\beta_x - \bar\beta_x)^+ = (\bar\alpha_x - \alpha_x)^+ \le \bar\alpha_x$. So
+$t(\mathrm{cfg}) \ge t$.
+
+*Loads and cost.* The selected segments of $k$ are distinct and simple, and by Lemma 3.3(c) each lasts
+exactly its role duration: $2d_x$ for $B$, $2\bar d_x$ for $\bar B$, $d_x + \bar d_x$ for $A$ and $\bar A$.
+So $\lambda_k \le F_k$. Each selected segment contributes its single central landing, so
+$\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ is a sub-multiset of the landings of $k$, and the cost is at
+most $C$. $\square$
+:::
+
+**In Lean.** Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.Feasible.exists_roleConfig_records` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
+gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
+records of type `B`, `B̄`, and `A` or `Ā` of their plane, and whose groups have at least
+`2t − p` landings. No assumption on durations is needed; under (S) and (A1), or on a plan
+without central flights, the records' types are those of the segments. -/
+theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    ∃ cfg : RoleConfig n p,
+      (∀ k, cfg.drop k ≤ recCities (fun r => r.2.1 && r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.pick k ≤ recCities (fun r => !r.2.1 && !r.2.2) (landingRecs (P k))) ∧
+      (∀ k, cfg.cross k = recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))) ∧
+      2 * t - p ≤ size cfg.groups := …
+```
+
+[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 4.4 (shrinking) {#node-lemma-4-4}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal}
+
+::: {.our-work}
+**Statement** (theory note, §4.2).
+
+**Lemma 4.4 (shrinking) [SH].** If a role configuration on $Q$ has $t(\mathrm{cfg}) > t \ge |Q|$, deleting
+landings gives one on $Q$ with passenger count $t(\mathrm{cfg}) - 1$; its cost, its role loads and its groups
+$X_k$ do not increase. Repeating, there is one with passenger count exactly $t$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* If some $|\mathrm{Cr}_k| \ge 3$, delete two of its crossings. Otherwise every $|\mathrm{Cr}_k| = 1$,
+so $\sum_k |\mathrm{Dr}_k| = t(\mathrm{cfg}) - |Q| > t - |Q| \ge 0$: some plane $u$ drops off at some city
+$x$, and by the balance some plane $v$ picks up at $x$. Delete one copy of $x$ from $\mathrm{Dr}_u$ and one
+from $\mathrm{Pk}_v$. Oddness and balance are kept, and the passenger count drops by one. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* If some $|\mathrm{Cr}_k| \ge 3$, delete two of its crossings. Otherwise every $|\mathrm{Cr}_k| = 1$,
+so $\sum_k |\mathrm{Dr}_k| = t(\mathrm{cfg}) - |Q| > t - |Q| \ge 0$: some plane $u$ drops off at some city
+$x$, and by the balance some plane $v$ picks up at $x$. Delete one copy of $x$ from $\mathrm{Dr}_u$ and one
+from $\mathrm{Pk}_v$. Oddness and balance are kept, and the passenger count drops by one. $\square$
+:::
+
+**Lean** `ZenoFront.RoleConfig.exists_shrink` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 4.4 (SH), role form.** A role configuration with `s + 2N` landings, `p ≤ s`, has one
+with exactly `s` landings, each role a sub-multiset of the old one. -/
+theorem RoleConfig.exists_shrink {s : ℕ} (hps : p ≤ s) : ∀ (N : ℕ) (cfg : RoleConfig n p),
+    size cfg.groups = s + 2 * N → ∃ cfg' : RoleConfig n p, size cfg'.groups = s ∧
+      (∀ k, cfg'.drop k ≤ cfg.drop k) ∧ (∀ k, cfg'.pick k ≤ cfg.pick k) ∧
+      (∀ k, cfg'.cross k ≤ cfg.cross k)
+  …
+```
+
+[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Shrinking** (partition form of Lemma 4.4, SH): an admissible grouping with at least
+`s` landings, where `p ≤ s` and `s ≡ p (mod 2)`, contains an admissible grouping with exactly
+`s` landings. -/
+theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} (hps : p ≤ s)
+    (hpar : s % 2 = p % 2) (hs : s ≤ size X) :
+    ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
+```
+
+[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 4.5 (parity) {#node-lemma-4-5}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2)
+
+::: {.our-work}
+**Statement** (theory note, §4.2).
+
+**Lemma 4.5 (parity) [PAR].** For a role configuration on $Q$ with passenger count $t$, the groups
+$X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, $k \in Q$, form an admissible partition (Definition 2.2
+with the planes of $Q$) of a multiset of size $2t - |Q|$, with the same cost.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Put $h_{k,i} = (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) \bmod 2$. (h1): $h_{k,i} = 1$ forces
+$X_k(i) \ge 1$. (h2): $h_k \equiv |\mathrm{Dr}_k| + |\mathrm{Pk}_k| = |X_k| - |\mathrm{Cr}_k| \equiv |X_k| + 1$.
+(h3): $\sum_k h_{k,i} \equiv \sum_k (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) = 2\sum_k \mathrm{Dr}_k(i) \equiv 0$
+by the balance. The size is that of Definition 4.2. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Put $h_{k,i} = (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) \bmod 2$. (h1): $h_{k,i} = 1$ forces
+$X_k(i) \ge 1$. (h2): $h_k \equiv |\mathrm{Dr}_k| + |\mathrm{Pk}_k| = |X_k| - |\mathrm{Cr}_k| \equiv |X_k| + 1$.
+(h3): $\sum_k h_{k,i} \equiv \sum_k (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) = 2\sum_k \mathrm{Dr}_k(i) \equiv 0$
+by the balance. The size is that of Definition 4.2. $\square$
+:::
+
+**Lean** `ZenoFront.RoleConfig.isParityWitness_witness` [machine-checked]{.badge .ok}
+
+```lean
+/-- **PAR.** The grouping of a role configuration is admissible, with witness
+`h_{k,i} = (D_k(i) + P_k(i)) mod 2`. -/
+theorem isParityWitness_witness : IsParityWitness R.groups R.witness
+  …
+```
+
+[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
+
+```lean
+/-- **PAR**, admissibility form. -/
+theorem admissible_groups : Admissible R.groups := …
+```
+
+[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 4.6 (adding a plane) {#node-lemma-4-6}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.5](#node-lemma-2-5)
+
+::: {.our-work}
+**Statement** (theory note, §4.2).
+
+**Lemma 4.6 (adding a plane) [AP].** Let $(X_k)_{k \in Q}$ be admissible with $q = |Q|$,
+$\sum_k |X_k| = 2t - q$ and $t \ge q + 1$, and let $\star \notin Q$ be a further plane. Then some admissible
+partition $(Y_k)_{k \in Q \cup \{\star\}}$ has $\sum_k |Y_k| = 2t - q - 1$, $c(Y) \le c(X)$ and
+$\max_k \delta(Y_k) \le \max_k \delta(X_k)$. This corrects case (b) of the first version's Lemma 4.4, where
+the support has $2(t-q)$ entries, not $t - q$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Fix a parity matrix $h$. By Lemma 2.5, $f_k := |X_k| - h_k$ is odd and at least 1. In $X_k$, call
+*free* the $X_k(i) - h_{k,i}$ copies of each city $i$ beyond one copy for each $i \in \eta_k$; there are
+$f_k$ of them.
+
+*Case (a): some $f_k \ge 3$.* Let $y, y'$ be two free landings of $X_k$. Set $Y_k = X_k - \{y, y'\}$,
+$Y_\star = \{y\}$, keep the other groups, and give plane $\star$ a zero row. (h1) holds as
+$Y_k(i) \ge h_{k,i}$ for every $i$. (h2) holds for $k$, since $|Y_k| = |X_k| - 2$, and for $\star$, since
+$|Y_\star| = 1$ and $h_\star = 0$. (h3) is unchanged. Also $\delta(Y_\star) = d_y \le \delta(X_k)$ and
+$c(Y) = c(X) - c_{y'}$.
+
+*Case (b): every $f_k = 1$.* Then $2t - q = \sum_k (h_k + 1)$, so $\sum_k h_k = 2(t-q) \ge 2$. Some city $i$
+has a non-zero column, which is even, so $h_{u,i} = h_{v,i} = 1$ for two planes $u \ne v$. Set
+$Y_u = X_u - \{i\}$, $Y_v = X_v - \{i\}$ and $Y_\star = \{i\}$, set $h_{u,i} = h_{v,i} := 0$, and give plane
+$\star$ a zero row. (h1) holds for $j \ne i$, as $Y_u(j) = X_u(j)$. (h2) holds for $u$ and $v$, whose group
+size and row sum both drop by one, and for $\star$. Column $i$ drops by 2. $|Y_u| = h_u \ge 1$ (old $h_u$),
+$\delta(Y_\star) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Fix a parity matrix $h$. By Lemma 2.5, $f_k := |X_k| - h_k$ is odd and at least 1. In $X_k$, call
+*free* the $X_k(i) - h_{k,i}$ copies of each city $i$ beyond one copy for each $i \in \eta_k$; there are
+$f_k$ of them.
+
+*Case (a): some $f_k \ge 3$.* Let $y, y'$ be two free landings of $X_k$. Set $Y_k = X_k - \{y, y'\}$,
+$Y_\star = \{y\}$, keep the other groups, and give plane $\star$ a zero row. (h1) holds as
+$Y_k(i) \ge h_{k,i}$ for every $i$. (h2) holds for $k$, since $|Y_k| = |X_k| - 2$, and for $\star$, since
+$|Y_\star| = 1$ and $h_\star = 0$. (h3) is unchanged. Also $\delta(Y_\star) = d_y \le \delta(X_k)$ and
+$c(Y) = c(X) - c_{y'}$.
+
+*Case (b): every $f_k = 1$.* Then $2t - q = \sum_k (h_k + 1)$, so $\sum_k h_k = 2(t-q) \ge 2$. Some city $i$
+has a non-zero column, which is even, so $h_{u,i} = h_{v,i} = 1$ for two planes $u \ne v$. Set
+$Y_u = X_u - \{i\}$, $Y_v = X_v - \{i\}$ and $Y_\star = \{i\}$, set $h_{u,i} = h_{v,i} := 0$, and give plane
+$\star$ a zero row. (h1) holds for $j \ne i$, as $Y_u(j) = X_u(j)$. (h2) holds for $u$ and $v$, whose group
+size and row sum both drop by one, and for $\star$. Column $i$ drops by 2. $|Y_u| = h_u \ge 1$ (old $h_u$),
+$\delta(Y_\star) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
+:::
+
+**Lean** `ZenoFront.Admissible.addPlane` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 4.6 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
+landings gives an admissible grouping of `q + 1` planes with one landing less, no larger cost,
+and loads bounded by every bound on the old loads. -/
+theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤ size X)
+    (d c : Fin n → ℕ) :
+    ∃ Y : Groups n (q + 1), Admissible Y ∧ size Y + 1 = size X ∧
+      totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
+```
+
+[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Theorem 4.7 (converse) {#node-theorem-4-7}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S), (A1) · **Uses** [3.1](#node-lemma-3-1), [4.3](#node-lemma-4-3)–[4.5](#node-lemma-4-5)
+
+::: {.our-work}
+**Statement** (theory note, §4.3).
+
+**Theorem 4.7 (converse).** Assume (S) and (A1). For every feasible plan with cost $C$, makespan $M$ and flight
+times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ with $|X| = s$, $c(X) \le C$
+and $\ell(X_k) \le F_k \le M$ for every $k$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* *Step 1: remove central flights.* This step applies to any plan, whether or not its routes end in
+$C_G$. Replace a flight $a \to b$ between central cities, departing at $e$, by $a \to C_G$ departing at $e$
+followed by $C_G \to b$ departing on arrival. The plane reaches $b$ at $e + d_a + d_b \le e + d_{ab}$ by (S)
+and (A1), and waits there until its next departure, which is unchanged. A passenger on board is delivered at
+$C_G$: its journey is cut after $a \to C_G$. Central landings are unchanged ($C_G$ is free), and no arrival
+time and no $F_k$ increases; in a feasible plan the last flight of a route ends in $C_G$ and is never
+replaced, so the makespan is unchanged. After finitely many replacements the plan is simple.
+
+*Step 2.* Clean it (Lemma 3.1).
+
+*Step 3.* Lemma 4.3(b) on all $p$ planes gives a role configuration with passenger count at least $t$, cost at
+most $C$ and $\lambda_k \le F_k$. Lemma 4.4 ($t \ge p$) brings the count to $t$. Lemma 4.5 gives an
+admissible partition of a multiset of size $2t - p = s$ with $\ell(X_k) = \lambda_k \le F_k \le M$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* *Step 1: remove central flights.* This step applies to any plan, whether or not its routes end in
+$C_G$. Replace a flight $a \to b$ between central cities, departing at $e$, by $a \to C_G$ departing at $e$
+followed by $C_G \to b$ departing on arrival. The plane reaches $b$ at $e + d_a + d_b \le e + d_{ab}$ by (S)
+and (A1), and waits there until its next departure, which is unchanged. A passenger on board is delivered at
+$C_G$: its journey is cut after $a \to C_G$. Central landings are unchanged ($C_G$ is free), and no arrival
+time and no $F_k$ increases; in a feasible plan the last flight of a route ends in $C_G$ and is never
+replaced, so the makespan is unchanged. After finitely many replacements the plan is simple.
+
+*Step 2.* Clean it (Lemma 3.1).
+
+*Step 3.* Lemma 4.3(b) on all $p$ planes gives a role configuration with passenger count at least $t$, cost at
+most $C$ and $\lambda_k \le F_k$. Lemma 4.4 ($t \ge p$) brings the count to $t$. Lemma 4.5 gives an
+admissible partition of a multiset of size $2t - p = s$ with $\ell(X_k) = \lambda_k \le F_k \le M$. $\square$
+:::
+
+**In Lean.** The Lean proof does Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan: a central leg counts as passing through `C_G`, and under (A1) it lasts at least the weights of its two endpoints.
+
+**Lean** `ZenoFront.Feasible.exists_admissible` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
+dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
+`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
+theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Corollary 4.8 {#node-corollary-4-8}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S), (A1) · **Uses** [1.1](#node-lemma-1-1), [4.1](#node-theorem-4-1), [4.7](#node-theorem-4-7)
+
+::: {.from-paper}
+**From the original paper** (Quemy, Schoenauer & Dreo, arXiv:2304.14659v1, §2.2 *Symmetric MultiZenoTravel*).
+
+> **Proposition I:** Pareto-optimal plans are plans where exactly $2t-p$ (possibly identical) central
+> cities are used by a plane.
+>
+> […] For the rest of this paper, we make the following triangular inequality assumption:
+>
+> **Assumption:** $\forall(i,j,k)\in([1,n]\cup\{I,G\})^{3},~d_{ij}+d_{jk}\geq d_{ik}$ (A$\Delta$)
+>
+> […] **Assumption:** (Symmetry) $\forall i\in[1,n],~d_{i}=\bar{d}_{i}$ (S)
+:::
+
+::: {.our-work}
+**Statement** (theory note, §4.4).
+
+**Corollary 4.8.** Assume (S) and (A1). Let
+$M(X) = \min\{\max_k \ell(X_k) : X_1,\dots,X_p \text{ an admissible partition of } X\}$ ($\infty$ if there is
+none). Then
+$$\mathcal F = \mathrm{Min}\,\mathcal X, \qquad \mathcal X = \{(c(X), M(X)) : |X| = s,\ M(X) < \infty\},$$
+and every point of $\mathcal F$ is attained by a plan with exactly $s$ central landings (Theorem 4.1).
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* $\mathcal X$ is finite and, by Theorem 4.1, contained in $\mathcal A$. By Theorem 4.7, every point
+$(C, M)$ of $\mathcal A$ is weakly dominated by a point of $\mathcal X$, since $c(X) \le C$ and
+$M(X) \le \max_k \ell(X_k) \le M$. Lemma 1.1 applies. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* $\mathcal X$ is finite and, by Theorem 4.1, contained in $\mathcal A$. By Theorem 4.7, every point
+$(C, M)$ of $\mathcal A$ is weakly dominated by a point of $\mathcal X$, since $c(X) \le C$ and
+$M(X) \le \max_k \ell(X_k) \le M$. Lemma 1.1 applies. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+Both papers' Proposition I (Pareto-optimal plans need exactly $2t - p$ landings) holds only in this front
+sense. With zero costs, a plan with more landings can be Pareto-optimal. For $n = 1$, $d_1 = 1$, $c_1 = 0$,
+$p = 3$ and $t = 5$, the front is $\{(0, 6)\}$, attained with groups of sizes 3, 3 and 1, all odd. The plane
+with one landing can add a crossing pair $\bar A, A$ within its slack: the resulting plan has 9 landings and
+still attains $(0, 6)$.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+Both papers' Proposition I (Pareto-optimal plans need exactly $2t - p$ landings) holds only in this front
+sense. With zero costs, a plan with more landings can be Pareto-optimal. For $n = 1$, $d_1 = 1$, $c_1 = 0$,
+$p = 3$ and $t = 5$, the front is $\{(0, 6)\}$, attained with groups of sizes 3, 3 and 1, all odd. The plane
+with one landing can add a crossing pair $\bar A, A$ within its slack: the resulting plan has 9 landings and
+still attains $(0, 6)$.
+:::
+
+**Lean** `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
+`p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the multisets of `2t − p`
+landings that have an admissible partition. -/
+theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d)
+    (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
+```
+
+[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
+
+:::
+
+::: {.strengthen}
+**Proposition I, corrected.** Both papers state that Pareto-optimal *plans* use exactly $2t-p$
+landings. That is false as stated (with zero costs a plan with more landings can be Pareto-optimal;
+see the remark below the corollary), and the papers' proofs do not establish the reduction. What
+holds, and is now machine-checked, is the **front** statement: the front is the Pareto set of
+$(c(X), M(X))$ over multisets $X$ of $2t-p$ landings, where $M(X)$ is the least makespan of an
+**admissible** partition of $X$.
+:::
+
+### Theorem 4.9 (bridge) {#node-theorem-4-9}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S), (A1) · **Uses** [1.1](#node-lemma-1-1), [3.1](#node-lemma-3-1), [4.1](#node-theorem-4-1), [4.3](#node-lemma-4-3)–[4.8](#node-corollary-4-8)
+
+::: {.our-work}
+**Statement** (theory note, §4.5).
+
+**Theorem 4.9 (bridge) [B3].** Assume (S) and (A1). The front $\mathrm{Min}\,\mathcal A'$ of the variant in
+which planes may end anywhere and the makespan is the last arrival time (§1.2) equals $\mathcal F$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* A feasible plan is a plan of the variant with the same cost and makespan, since the last arrival of
+each route is its latest; so $\mathcal A \subseteq \mathcal A'$. Conversely, take a plan of the variant with
+cost $C$ and makespan $M'$. We build an admissible partition of a multiset of size $s$ with cost at most $C$
+and loads at most $M'$; its point in $\mathcal X$ (Corollary 4.8) weakly dominates $(C, M')$. So
+$\mathcal X \subseteq \mathcal A \subseteq \mathcal A'$ is finite and dominates both sets, and Lemma 1.1 gives
+$\mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal X = \mathcal F$.
+
+1. Apply Step 1 of Theorem 4.7, which applies to any plan. Clean the plan (Lemma 3.1). From every route,
+   delete the flights after its last flight that carries a passenger. Cost and arrival times do not
+   increase.
+2. A route that is not empty now ends with a flight carrying a passenger $\pi$. That flight joins a hub and a
+   central city, and it cannot arrive in $C_I$ or depart from $C_G$ (Lemma 3.1). So either it arrives in
+   $C_G$, or it is $C_I \to x$, the first flight of $\pi$'s journey, arriving at some time $a$. In the
+   second case the journey's second flight is $x \to C_G$ (Lemma 4.3(a)), departing at some
+   $e' \ge a$ and arriving at $e' + \bar d_x \le M'$. Append to the route a flight $x \to C_G$ departing at
+   $a$ and carrying $\pi$; it arrives at $a + \bar d_x \le M'$, and $\pi$'s old second flight becomes empty.
+   Do this for all such routes at once: it only adds flights and empties others, so each inequality
+   $e' \ge a$ refers to a flight that is still there.
+3. Every route is now empty (an *idle* plane) or ends in $C_G$. Let $Q$ be the set of the $q$ planes that are
+   not idle; $q \ge 1$ since $t \ge 1$, and $q \le p \le t$. On $Q$ this is a simple plan with clean
+   journeys, every route ending in $C_G$, of cost at most $C$, with $F_k \le M'$. Lemmas 4.3(b), 4.4 and 4.5
+   on $Q$ give an admissible partition over $Q$ of a multiset of size $2t - q$, with cost at most $C$ and
+   loads at most $M'$.
+4. Lemma 4.6, applied once per idle plane (each time with $t \ge q' + 1$ for the current number $q' < p \le t$
+   of planes), gives a partition over all $p$ planes of size $s$, without increasing the cost or the largest
+   load. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* A feasible plan is a plan of the variant with the same cost and makespan, since the last arrival of
+each route is its latest; so $\mathcal A \subseteq \mathcal A'$. Conversely, take a plan of the variant with
+cost $C$ and makespan $M'$. We build an admissible partition of a multiset of size $s$ with cost at most $C$
+and loads at most $M'$; its point in $\mathcal X$ (Corollary 4.8) weakly dominates $(C, M')$. So
+$\mathcal X \subseteq \mathcal A \subseteq \mathcal A'$ is finite and dominates both sets, and Lemma 1.1 gives
+$\mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal X = \mathcal F$.
+
+1. Apply Step 1 of Theorem 4.7, which applies to any plan. Clean the plan (Lemma 3.1). From every route,
+   delete the flights after its last flight that carries a passenger. Cost and arrival times do not
+   increase.
+2. A route that is not empty now ends with a flight carrying a passenger $\pi$. That flight joins a hub and a
+   central city, and it cannot arrive in $C_I$ or depart from $C_G$ (Lemma 3.1). So either it arrives in
+   $C_G$, or it is $C_I \to x$, the first flight of $\pi$'s journey, arriving at some time $a$. In the
+   second case the journey's second flight is $x \to C_G$ (Lemma 4.3(a)), departing at some
+   $e' \ge a$ and arriving at $e' + \bar d_x \le M'$. Append to the route a flight $x \to C_G$ departing at
+   $a$ and carrying $\pi$; it arrives at $a + \bar d_x \le M'$, and $\pi$'s old second flight becomes empty.
+   Do this for all such routes at once: it only adds flights and empties others, so each inequality
+   $e' \ge a$ refers to a flight that is still there.
+3. Every route is now empty (an *idle* plane) or ends in $C_G$. Let $Q$ be the set of the $q$ planes that are
+   not idle; $q \ge 1$ since $t \ge 1$, and $q \le p \le t$. On $Q$ this is a simple plan with clean
+   journeys, every route ending in $C_G$, of cost at most $C$, with $F_k \le M'$. Lemmas 4.3(b), 4.4 and 4.5
+   on $Q$ give an admissible partition over $Q$ of a multiset of size $2t - q$, with cost at most $C$ and
+   loads at most $M'$.
+4. Lemma 4.6, applied once per idle plane (each time with $t \ge q' + 1$ for the current number $q' < p \le t$
+   of planes), gives a partition over all $p$ planes of size $s$, without increasing the cost or the largest
+   load. $\square$
+:::
+
+**Lean** `ZenoFront.minimal_achievable_iff_anywhere_of_A1` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.9 (bridge B3).** Under (S) and (A1), with `p ≤ t`, the feasible plans and the
+plans whose planes end anywhere have the same minimal (cost, makespan) pairs. -/
+theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
+```
+
+[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.9 (bridge B3), converse direction.** Under (S) and (A1), with `p ≤ t`, every
+plan whose planes may end anywhere is weakly dominated by an admissible partition: some
+admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan (the last arrival)
+for every plane, and total cost at most the plan's cost. -/
+theorem FeasibleAnywhere.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {P : Plan n t p} (hP : FeasibleAnywhere N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Conjecture 4.10 {#node-conjecture-4-10}
+
+**Lean** [informal]{.badge .informal} · **Note** [open problem]{.badge .open} · **Hypotheses** (S), (AΔ)
+
+::: {.from-paper}
+**From the original paper** (Quemy, Schoenauer & Dreo, arXiv:2304.14659v1, §2.2).
+
+> **Definition:** (($B\bar{B}$)-pairing) Consider a pattern $B$ and $\bar{B}$ in a list of patterns,
+> both of multiplicity $0$ and using respectively the central city $C_{i}$ and $C_{j}$. Pairing them
+> consists in using the central city $C^{*}=\text{argmin}~(d_{i}+\bar{d}_{i},d_{j}+\bar{d}_{j})$.
+>
+> In the symmetric case, the condition becomes $C^{*}=\text{argmin}~(d_{i},d_{j})$. Under
+> Assumption $(S)$, the duration of both patterns involved in the pairing is lower or equal to its
+> duration before the pairing.
+>
+> […] Those steps transform any $(k,\phi)$ into a $(k,\phi_{0})$. Indeed, the cardinality of each type
+> of patterns defined by $k$ is conserved but for each single pattern, its multiplicity is now zero. On
+> top of that, each city that appeared in $\phi_{0}$ also appears in $\phi$ which implies a lower cost
+> of all feasible plans on $(k,\phi_{0})$. The set $\mathcal{P}(k,\phi_{0})$ is not empty since we
+> constructed a valid plan. The duration of each pattern remains the same or is lower than in the
+> original plan due to the reduction. The ($B\bar{B}$)-pairing also let unchanged the duration for one
+> of the pattern and lower it for the second one involved in the couple due to the symmetric
+> assumption (S). As a result, the transformed plan dominates the original one while using only $2t-p$
+> cities, thus proving Proposition I under Assumption (A$\Delta$) and Assumption (S). $\square$
+:::
+
+::: {.our-work}
+**Statement** (theory note, §4.6).
+
+**Conjecture 4.10.** Theorem 4.7 holds under (S) and (AΔ), without (A1).
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+Lemmas 4.3–4.5 need only a simple plan, so the conjecture is equivalent to **Step 1 without (A1)**: every
+feasible plan is weakly dominated, in (cost, makespan), by a simple feasible plan (if the conjecture holds,
+Theorem 4.1 provides one). Splitting $a \to b$ through $C_G$ now costs $d_a + d_b$, which can exceed
+$d_{ab}$. A segment can then only pay for one of its landings ($2d_a + 2d_b \le F(\gamma)$ is false in
+general), while the hand-offs at $a$ and at $b$ may involve different planes.
+
+This is exactly the "Figure 4" case of the arXiv paper. Its pairing argument has two flaws:
+
+* It concludes "lower cost" from set inclusion ("each city in $\phi_0$ appears in $\phi$"). But moving both
+  halves of a pairing to $C^\star = \arg\min(d_i, d_j)$ costs $2c_{C^\star}$, which can exceed $c_i + c_j$.
+* It concludes "dominates" from per-pattern durations, which ignores the synchronisation of the new pairs.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+Lemmas 4.3–4.5 need only a simple plan, so the conjecture is equivalent to **Step 1 without (A1)**: every
+feasible plan is weakly dominated, in (cost, makespan), by a simple feasible plan (if the conjecture holds,
+Theorem 4.1 provides one). Splitting $a \to b$ through $C_G$ now costs $d_a + d_b$, which can exceed
+$d_{ab}$. A segment can then only pay for one of its landings ($2d_a + 2d_b \le F(\gamma)$ is false in
+general), while the hand-offs at $a$ and at $b$ may involve different planes.
+
+This is exactly the "Figure 4" case of the arXiv paper. Its pairing argument has two flaws:
+
+* It concludes "lower cost" from set inclusion ("each city in $\phi_0$ appears in $\phi$"). But moving both
+  halves of a pairing to $C^\star = \arg\min(d_i, d_j)$ costs $2c_{C^\star}$, which can exceed $c_i + c_j$.
+* It concludes "dominates" from per-pattern durations, which ignores the synchronisation of the new pairs.
+:::
+
+:::
+
+::: {.strengthen}
+**Where the arXiv pairing argument fails** (§4.6 of the note). Moving both halves of a pairing to
+$C^\star$ costs $2c_{C^\star}$, which can exceed $c_i + c_j$, so "each city in $\phi_0$ appears in
+$\phi$" does not give a lower cost; and per-pattern durations ignore the synchronisation of the new
+pairs. Without (A1) the front is still certified wherever the bracket $L \le C^\star \le E$ closes.
+:::

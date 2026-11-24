@@ -1,0 +1,56 @@
+---
+title: "Certificate format"
+subtitle: "What a front certificate proves, its syntax, and versions 1 and 2"
+---
+
+A certificate lists one plan per front point and one lower bound per gap between consecutive
+points. A checker that verifies its four obligations has proved that the list is the Pareto front,
+without trusting the solver ([Theorem 9.1](../proofs.qmd#node-theorem-9-1)). `zeno --certificate
+FILE` writes one, `zeno check FILE` verifies it ([command line](cli.qmd#check)), and so does the
+Lean checker `zeno-check`, whose acceptance is backed by a kernel-checked soundness theorem
+([Lean tools](lean.qmd#zeno-check)).
+
+The rest of this page is `doc/certificate-format.md`, the specification both checkers follow,
+included as it stands in the repository.
+
+## A small certificate
+
+`zeno -n 2 -t 5 -p 2 -d tests/golden/data/lpt-counterexample.dat --certificate lpt.cert` writes,
+for $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$:
+
+```text
+zeno-certificate 1
+instance 2 5 2
+d 6 10
+dbar 6 10
+c 40 20
+assume S
+front 6
+320 48
+280 56
+260 60
+240 64
+200 72
+160 80
+plan 1 2
+plane 1 …
+…
+lower-bounds 5
+…
+end
+```
+
+The points are listed by increasing makespan. `assume S` only: every gap of this front is closed
+by the relaxation $L$, so the certificate holds for central flights of any duration. Both checkers
+accept it:
+
+```text
+$ zeno check lpt.cert
+certificate accepted, assuming S
+$ lake exe zeno-check lpt.cert
+accepted: the 6 points are the Pareto front (all gaps relaxed: for every central flight table; ZenoFront.Cert.check_sound)
+```
+
+## The specification
+
+{{< include _certificate-format.md >}}

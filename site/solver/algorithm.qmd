@@ -1,0 +1,147 @@
+---
+title: "Algorithm"
+subtitle: "Bracket, link-forest DP, breakpoint search, and the non-symmetric pipeline"
+---
+
+This page summarises how `zeno` computes a front. The proofs are in the
+[theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md) (§7 for
+the symmetric algorithm, §6.5 for the non-symmetric one), and each step links to its node of the
+[blueprint](../proofs.qmd).
+
+## The reformulation
+
+A plan lands at least $s = 2t - p$ times in central cities
+([Lemma 3.2](../proofs.qmd#node-lemma-3-2)). Under (S) and (A1), the front is reached by plans
+with exactly $s$ landings, split among the planes as an **admissible partition**
+([Corollary 4.8](../proofs.qmd#node-corollary-4-8)): a partition $X_1, \dots, X_p$ of a multiset
+$X$ of cities with a parity matrix, that is, in every connected component of the plane–city graph,
+an even number of planes land an even number of times
+([Definition 2.2](../proofs.qmd#node-definition-2-2),
+[Lemma 2.4](../proofs.qmd#node-lemma-2-4)). An admissible partition is flown with no waiting, in
+makespan $2\max_k \delta(X_k)$ where $\delta$ sums the durations
+([Theorem 4.1](../proofs.qmd#node-theorem-4-1)), and no plan does better
+([Theorem 4.7](../proofs.qmd#node-theorem-4-7)).
+
+With integer durations divided by their gcd $g$, let
+$$E(T) = \min\{c(X) : |X| = s,\ X_1,\dots,X_p \text{ admissible},\ \delta(X_k) \le T\ \forall k\}.$$
+$E$ is non-increasing, and the front is the set of its breakpoints, $(E(T), 2gT)$ wherever
+$E(T) < E(T-1)$ ([Proposition 7.1](../proofs.qmd#node-proposition-7-1)). Only the levels
+$T_{\rm lo} = d_{\min}\kappa \le T \le T_{\rm hi} = d_{\rm cheap}\kappa$ matter, with
+$\kappa = \lceil s/p \rceil$ ([Proposition 7.10](../proofs.qmd#node-proposition-7-10)): below,
+there is no plan; above, $E$ is the cheapest cost $s\,c_{\min}$.
+
+## Symmetric pipeline
+
+1. **Reduce.** Divide the durations by their gcd, merge equal cities and drop dominated ones
+   ($d_{i'} \le d_i$ and $c_{i'} \le c_i$), which changes neither $E$ nor the front
+   ([Proposition 7.9](../proofs.qmd#node-proposition-7-9)). The kept cities form a staircase:
+   durations strictly increasing, costs strictly decreasing (`reduce`, `zeno/reduce.hpp`).
+2. **One-plane table.** $G[m][T]$, the cheapest $m$ landings whose durations sum to at most $T$
+   ([Lemma 7.2](../proofs.qmd#node-lemma-7-2)). It is stored densely when small, otherwise as one
+   Pareto staircase of (load, cost) per $m$, so that memory does not depend on the magnitude of the
+   durations (`OnePlaneTable`).
+3. **Bracket each level.** Three knapsacks over planes and landings combine *gadgets*:
+   - $L(T)$: single planes of any size, no admissibility. It is a lower bound on the cost of
+     every plan of makespan at most $2T$, whatever the central flights (lemma R,
+     [Lemma 3.4](../proofs.qmd#node-lemma-3-4));
+   - $U(T)$: single planes of odd size, and *pairs*, two planes of even size linked at a city;
+   - $U_3(T)$: in addition, *chains* of three planes.
+
+   $L \le E \le U_3 \le U$ ([Proposition 7.3](../proofs.qmd#node-proposition-7-3)). $E = U$ when
+   useful link trees have at most two planes, $q_{\max} = \min(p, t-p+1) \le 2$, and $E = U_3$ when
+   $q_{\max} \le 3$ ([Proposition 7.4](../proofs.qmd#node-proposition-7-4)). A level is *settled*
+   when the bracket closes.
+4. **Exact DP on the open levels.** On the levels where $L < U_3$, the **link-forest DP** computes
+   $E(T)$ exactly ([Theorem 7.5](../proofs.qmd#node-theorem-7-5)). A partition is admissible iff
+   it has a *link forest* ([Lemma 2.6](../proofs.qmd#node-lemma-2-6)): a forest on the planes
+   whose edges carry city labels, each edge $\{u, v\}$ labelled $i$ using one landing in $i$ of
+   both $X_u$ and $X_v$, such that every plane keeps an odd number of *free landings*
+   ([Definition (link forest)](../proofs.qmd#node-definition-link-forest)). In the plan, a link
+   at $i$ is a passenger dropped off in $i$ by one plane and picked up by the other. Trees have at most $q_{\max}$ planes
+   ([Corollary 2.7](../proofs.qmd#node-corollary-2-7)). The DP roots every tree and combines child
+   subtrees as Pareto staircases over $(\tau, \text{cost})$, $\tau$ being the part of a plane's load
+   taken by its child edges, so its work depends on the staircase sizes and not on $T$
+   (`ForestProgram`, `zeno/forest.hpp`). Because $E$ is non-increasing, equal values at both ends
+   of an interval fix it on the whole interval (`monotone` in `--stats`).
+5. **Find the breakpoints.** `--levels sweep` evaluates every level; `--levels search` splits every
+   interval $(a, b)$ with $E(a) > E(b)$ at up to `threads` evenly spaced levels evaluated in
+   parallel. Pieces with equal ends are constant, so with $r$ breakpoints it evaluates
+   $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels (`breakpoints`, `zeno/breakpoints.hpp`). The default,
+   `auto`, sweeps up to $2^{12}$ levels and searches beyond, which is why the time grows with the
+   logarithm of the level range.
+6. **Plans.** For each point, the partition is rebuilt from the exact method's choices, a link
+   forest computed from it, and the plan of [Theorem 4.1](../proofs.qmd#node-theorem-4-1) built.
+   Every plane first drops off one passenger per child edge ($C_I \to b \to C_I$), then flies its
+   free landings as alternating crossings, then picks up the passenger its parent dropped
+   ($C_G \to a \to C_G$). Every plan is re-simulated by `checkPlan`, which shares no code with the
+   builder.
+7. **Certificate.** Each gap gets `relaxed` when $L$ already reaches the cost at the level below
+   the next point, `forest` otherwise ([certificate format](certificates.qmd)).
+
+Why the 2016 solvers were wrong: they fixed the multiset of landings (a PPP) and scheduled it
+greedily, longest first onto the least-loaded plane. That is a heuristic, and deciding whether a
+fixed multiset can be flown within a makespan is strongly NP-complete
+([§5](../proofs.qmd#node-s5), [Theorem 8.1](../proofs.qmd#node-theorem-8-1)). The link-forest
+DP does not fix the multiset. Its cost is pseudo-polynomial
+([Corollary 8.3](../proofs.qmd#node-corollary-8-3)).
+
+## Non-symmetric pipeline {#nonsymmetric}
+
+When the durations to $C_I$ ($d$) and to $C_G$ ($\bar d$) differ, a landing's weight depends on its
+role: a **crossing** $C_I \to i \to C_G$ or back weighs $d_i + \bar d_i$, a **drop-off**
+$C_I \to i \to C_I$ weighs $2d_i$, a **pick-up** $C_G \to i \to C_G$ weighs $2\bar d_i$. A *role
+configuration* assigns roles per plane, each plane flying an odd number of crossings, with drop-offs
+and pick-ups balanced city by city ([Definition 4.2](../proofs.qmd#node-definition-4-2)). A
+pick-up may have to wait for its drop-off, and that waiting can be harmful: the role loads alone do
+not give the front ([Proposition 6.5](../proofs.qmd#node-proposition-6-5)). So `zeno` computes a
+**certified bracket** (`solveBracket`, `zeno/ns.hpp`):
+
+1. **Upper points.** Plans built from link forests in which every plane picks up at most once (or,
+   by time reversal, drops off at most once), and from the cheapest balanced role configurations
+   found in the gaps, all scheduled and simulated with their waiting. Every printed point is a real
+   plan.
+2. **Lower bounds per gap,** for every plan of makespan below the next point:
+   - `relaxed`: lemma R with weight $\min(2d_i, 2\bar d_i)$ per landing. No assumption on central
+     flights;
+   - `roles`: the role relaxation (each plane an odd number $\ge 1$ of crossings, all loads adding
+     up to the crossing weight of the landings);
+   - `lagrangian`: a Lagrangian relaxation of the per-city balance, with one multiplier per city;
+   - `balanced`: the exact program over balanced role configurations, a DP over planes on the
+     imbalance vector ([Proposition 6.6](../proofs.qmd#node-proposition-6-6)), exponential in
+     $t - p$ and stopped at the `roleStates` and `roleWork` limits;
+   - `search`: the exhaustive search over role configurations of cost below the gap's cost, each
+     with every drop-off order and drop-off-to-pick-up matching, the closed form of the template
+     schedule ([Lemma 6.3](../proofs.qmd#node-lemma-6-3)) giving its makespan. It stops at the
+     `searchWork` limit. It is the only kind that closes gaps opened by harmful waiting.
+
+   `roles`, `lagrangian` and `balanced` need (A1-NS) through
+   [Theorem 6.1](../proofs.qmd#node-theorem-6-1): every plan is weakly dominated by a role
+   configuration with the same cost and loads at most its makespan. `search` needs (A1-NS) through
+   [Theorem 6.9](../proofs.qmd#node-theorem-6-9), *schedulable domination*: every plan is
+   dominated by a role configuration whose template schedule is no later. Theorem 6.9 holds for
+   every plan, also on instances with a city of $d = \bar d = 0$, so no event-order assumption is
+   needed.
+3. **Report.** The front is exact when the fastest makespan is certified and every gap is closed.
+   Otherwise `zeno` lists each open gap with its proved lower bound and the reason it stays open,
+   rather than print a front it cannot prove ([command line](cli.qmd#front)). The refinement of
+   open gaps stops after `refineSeconds`.
+
+On 1,800 random tiny non-symmetric instances checked against the brute-force oracle, every bracket
+closes and equals the oracle's front (`README.md`).
+
+## Complexity
+
+From §8 of the note, with $\hat m = s - p + 1$ (the largest group) and $q_{\max} = \min(p, t-p+1)$:
+
+| Step | Time |
+|---|---|
+| One-plane table $G$, all levels | $O(n\,\hat m\,T_{\rm hi})$ |
+| $L$ and $U$, per level | $O(p\,s^2 + n\,\hat m^2)$ |
+| $U_3$ chains, per level | $O(n^2\,\hat m\,s + p\,s^2)$ |
+| Link-forest DP, per level | $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ |
+| Plan for one point | $O(s + n + p)$, up to union–find |
+
+These are the bounds of the dense algorithm. The staircase representations make the table and
+the forest DP independent of the magnitude of the durations in practice, and the breakpoint search
+evaluates $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels instead of all of them. Measured scaling is on
+the [results](../results.qmd) and [size guidance](../instances/sizing.qmd) pages.

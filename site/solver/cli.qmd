@@ -1,0 +1,233 @@
+---
+title: "Command line"
+subtitle: "The four commands of zeno and every option"
+---
+
+```text
+zeno [front] [instance options] [--threads N] [--levels MODE] [--plans] [--certificate FILE] [--stats]
+zeno check CERTIFICATE
+zeno pddl [instance options] [-O FILE] [--no-front]
+zeno generate [instance options] [-O FILE]
+```
+
+The first argument selects the command; without one, `zeno` runs `front`. `-h` or `--help`
+anywhere prints the help below, which is the output of the current build (regenerated with the
+site). An unknown option is an error.
+
+{{< include _zeno-help.md >}}
+
+Exit codes: 0 on success; 1 on an error (the message on stderr starts with `zeno:`); 2 when
+`zeno check` rejects a certificate.
+
+## Instance options {#instance-options}
+
+All four commands but `check` build an instance from the same options, those of the 2016
+`zenoSolver`, and build the same instance from them, quirks included. The
+[generator page](../instances/generator.qmd) gives the formulas, and the
+[model page](../instances/model.qmd) the data file formats.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `-n N` | 3 | Central cities. |
+| `-t N` | 3 | Passengers. |
+| `-p N` | 2 | Planes, $1 \le p \le t$. Unlike the 2016 solvers, $t = p$ is accepted. |
+| `-d FILE` | — | Data file: durations then costs (2 lines, symmetric), or C~I~-side durations, C~G~-side durations, costs (3 lines). Every line has $n$ integers. Overrides the generator. |
+| `-C K` | 3 | Cost generator: 1 log, 2 sqrt, 3 identity, 4 power of two, 5 staircase. |
+| `-D K` | 3 | Duration generator, same codes. |
+| `-E K`, `-W K` | — | Non-symmetric durations: `-E` generates the C~I~-side durations, `-W` the C~G~-side ones. Both are needed; `-D` is then ignored. |
+| `-r R` | 1 | Multiply every value by $R$ before truncating it to an integer. |
+| `-j`, `-k` | 1, 0 | Scale and translation of the cost generator's argument. |
+| `-l`, `-m` | 1, 0 | Scale and translation of the duration generators' argument. |
+| `-x`, `-y` | 1, 0 | Scale and translation of the output of every generator. |
+| `-F` | — | Accepted for compatibility and ignored: the front is always printed. |
+
+`-n`, `-t`, `-p`, `-C`, `-D`, `-E`, `-W` and `-r` take integers; `-j`, `-k`, `-l`, `-m`, `-x` and
+`-y` take decimal numbers.
+
+::: {.callout-warning}
+## The 2016 swap
+
+After building the vectors, if $n > 1$ and the first duration exceeds the second, the durations and
+the costs are **exchanged** (and the C~G~-side durations reversed), as the 2016 code did. This
+always happens with the default generator, and to any data file whose first duration is the larger.
+`front` prints a note on stderr when it happens to a data file. See
+[the swap trap](../instances/model.qmd#swap).
+:::
+
+## `front`: the Pareto front {#front}
+
+```sh
+zeno -n 2 -t 3 -p 2
+```
+```text
+4 8
+6 6
+8 4
+```
+
+One `cost makespan` line per front point, by increasing cost (so by decreasing makespan). Costs
+and durations are integers, and so is every makespan.
+
+**Symmetric instances** (durations to $C_I$ and to $C_G$ equal, every generated instance without
+`-E`/`-W`): the front is exact. A `zeno` instance has no central-to-central flights; the front is
+that of the model in which they exist but are no faster than through a hub, assumption (A1), as in
+every PDDL file `zeno` writes ([Corollary 4.8](../proofs.qmd#node-corollary-4-8) with
+[Proposition 7.1](../proofs.qmd#node-proposition-7-1)). When every gap of the front is closed by
+the relaxation $L$, the same front holds for central flights of any duration; the certificate then
+lists only `relaxed` gaps.
+
+**Non-symmetric instances** (`-E`/`-W`, or a 3-line data file with different lines): `zeno`
+computes a certified bracket ([algorithm](algorithm.qmd#nonsymmetric)). Stdout lists the points
+achieved by simulated plans, and stderr reports which gaps between them a lower bound closes:
+
+```sh
+zeno -n 4 -t 3 -p 2 -E 3 -W 2 -r 10 > front.txt
+```
+```text
+non-symmetric instance: 12 achieved points; fastest makespan certified; 11 of 11 gaps certified; the front is exact, assuming A1-NS
+```
+
+When the fastest makespan is certified and every gap is closed, the printed points are the exact
+front, under the listed assumption (A1-NS) when a bound needs it. Otherwise the report says
+`the front is a bracket` and lists each open gap:
+
+```text
+  open gap between makespans M1 and M2: a plan with makespan < M2 costs at least B (achieved: C; REASON)
+```
+
+where the reason is either "a cheaper balanced configuration exists, no schedule found within the
+gap" or "the exact balanced program gave up" (a limit of `SolveOptions` was reached,
+[below](#limits)).
+
+### Solver options
+
+`--threads N`
+: Worker threads for the level evaluations. Default 0: all hardware threads.
+
+`--levels MODE`
+: How the levels $T$ (half makespans, in units of the gcd of the durations) are visited.
+  `sweep` brackets every level between $T_{\rm lo}$ and $T_{\rm hi}$, then runs the exact DP on
+  the open ones. `search` bisects for the breakpoints of $E$, which evaluates
+  $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels for $r$ breakpoints. `auto` (the default) sweeps when
+  the range has at most $2^{12}$ levels and searches beyond. Use `search` for wide level ranges,
+  for example durations scaled by a large `-r`.
+
+`--plans`
+: After the front, print a plan for every point, each checked by simulation (`checkPlan`). One
+  block per point, from the cheapest, then one line per plane, legs as
+  `from->to[depart,arrive]` with `pK` when passenger $K$ is aboard. Locations are `CI`, `c1`…`cn`
+  and `CG`.
+
+  ```text
+  # cost 6, makespan 6
+  plane 1: CI->c1[0,1]p1 c1->CI[1,2] CI->c2[2,4]p2 c2->CG[4,6]p2
+  plane 2: CI->c2[0,2]p3 c2->CG[2,4]p3 CG->c1[4,5] c1->CG[5,6]p1
+  ```
+
+  Here plane 1 drops passenger 1 in city 1 and returns empty, and plane 2 picks that passenger
+  up on its way back to $C_G$.
+
+`--certificate FILE`
+: Write a certificate of the front to `FILE` ([format](certificates.qmd)): version 1 for
+  symmetric instances, version 2 for non-symmetric ones. A non-symmetric front gets a certificate
+  only when its bracket is exact; otherwise `zeno` stops with
+  `no certificate: the front is a bracket with open gaps`. Implies building the plans.
+
+`--stats`
+: Print solver statistics on stderr:
+
+  ```text
+  levels 2..4 (x1, 3 levels), cities 2, max tree 2
+  settled: bracket 3, pairs 0, chains 0, monotone 0, exact 0
+  work: 5 states, 105 relaxations
+  seconds: table 4.084e-06, bracket 3.9708e-05, chains 0, exact 0, plans 6.6083e-05
+  ```
+
+  - `levels`: the range $[T_{\rm lo}, T_{\rm hi}]$ of scaled half makespans, the gcd the durations
+    were divided by (`x`), and the number of levels in the range;
+  - `cities`: cities left after the dominance reduction; `max tree`: $\min(p, t-p+1)$, the
+    largest useful link tree;
+  - `settled`: how the value of each evaluated level was established. `bracket` when
+    $L = U$; `pairs` when $U$ is exact (trees of at most 2 planes); `chains` when $U_3$ settles
+    it; `monotone` when $E$ takes equal values at both ends of an interval; `exact` counts the
+    link-forest DP evaluations;
+  - `work`: DP cells written and candidate transitions examined, summed;
+  - `seconds`: time in the one-plane table, the bracket, the chains bound, the exact DP and the
+    plans.
+
+## `check`: verify a certificate {#check}
+
+```sh
+zeno -n 2 -t 5 -p 2 -d tests/golden/data/lpt-counterexample.dat --certificate lpt.cert
+zeno check lpt.cert
+```
+```text
+certificate accepted, assuming S
+```
+
+`zeno check` reads a certificate of either version and verifies the four obligations of the
+[format](certificates.qmd). On success it prints the assumptions the accepted obligations
+needed (`S`: symmetric durations; `A1`: central flights no faster than through a hub, needed by
+`forest` gaps; `A1-NS` for the version 2 kinds other than `relaxed`). On failure it prints one
+`error:` line per failed obligation, then `certificate rejected`, and exits with code 2.
+
+`zeno check` reuses the solver library's dynamic programs for the gap bounds, so it is a consistency
+check of the solver, not an independent proof. The Lean checker
+[`zeno-check`](lean.qmd#zeno-check) is the independent one.
+
+## `pddl`: write a PDDL problem {#pddl}
+
+```sh
+zeno pddl -n 10 -t 8 -p 3            # writes zeno10n8t3pMulti.pddl
+zeno pddl -n 10 -t 8 -p 3 -O p.pddl --no-front
+```
+
+Writes the instance as a PDDL 2.1 problem for the domain `pddl/multi-zeno-travel.pddl`
+([PDDL page](../instances/pddl.qmd)). The default file name is `zeno<n>n<t>t<p>pMulti.pddl`, the
+2016 one; `-O FILE` sets it. For a symmetric instance the front is solved and appended as
+comments, unless `--no-front`. Non-symmetric problems are written without a front.
+
+## `generate`: write a data file {#generate}
+
+```sh
+zeno generate -n 4 -t 3 -p 2 -C 2 -D 2 -r 10
+```
+```text
+10 14 17 20
+20 17 14 10
+```
+
+Writes the instance that the options describe as a data file for `-d`: durations then costs for a
+symmetric instance, or C~I~-side durations, C~G~-side durations, costs otherwise. Without
+`-O FILE` it writes to standard output. `-t` and `-p` are validated but not written.
+
+The output is the instance *after* the 2016 swap. Reading it back with `-d` gives the same instance
+only if its first duration does not exceed its second; otherwise the swap applies again. A data
+file `5 3` / `9 1` is solved as durations `9 1` and costs `5 3`, `generate` writes it that way, and
+reading that back gives `5 3` / `9 1` again. Order the cities by increasing duration
+([the swap trap](../instances/model.qmd#swap)).
+
+## Limits of the non-symmetric bracket {#limits}
+
+The non-symmetric bracket stops some of its searches at limits set in `zeno::SolveOptions`
+(`include/zeno/solve.hpp`). The command line uses the defaults; the [library](api.qmd) can change
+them.
+
+| Field | Default | Limits |
+|---|---|---|
+| `roleStates` | 2,000,000 | States of the exact balanced role program, per level. |
+| `roleWork` | 50,000,000 | Transitions of the exact balanced role program, per level. |
+| `refineSeconds` | 30 | Time after which the refinement of open gaps stops; the remaining gaps stay open, with their lower bounds. |
+| `searchWork` | 20,000,000 | Work of the exhaustive gap search (role configurations with exact schedules), per gap. |
+
+A gap left open by a limit is reported as such (`the exact balanced program gave up`). It is not
+an error: the printed points are still achieved by simulated plans, and the reported lower bounds
+are still proved.
+
+## Values and limits
+
+- Durations, costs and times are non-negative integers (`std::int64_t`). The instance is validated:
+  $n \ge 1$, $1 \le p \le t$, every vector of length $n$, every value non-negative.
+- The certificate reader refuses values above $2^{36}$, $n$, $t$ or $p$ above $10^5$, and more than
+  $10^7$ legs, so no sum in the checker can overflow.
+- For sizes and running times, see the [size guidance](../instances/sizing.qmd).

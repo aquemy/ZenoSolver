@@ -1,0 +1,59 @@
+---
+title: "Exact Pareto fronts for MultiZenoTravel"
+subtitle: "Blueprint: the theory note, the papers' statements, and the Lean formalization"
+author: "Alexandre Quemy"
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: a4
+    geometry: [margin=2.2cm]
+    # STIX Two from TeX Live's static OTF files (by file name, so that bold and italic resolve;
+    # the system font is variable and would lose its bold). Covers Greek and the note's symbols.
+    mainfont: STIXTwoText
+    mainfontoptions:
+      - Extension=.otf
+      - UprightFont=*-Regular
+      - BoldFont=*-Bold
+      - ItalicFont=*-Italic
+      - BoldItalicFont=*-BoldItalic
+    mathfont: STIXTwoMath-Regular.otf
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    colorlinks: true
+    include-in-header:
+      - tex/provenance.tex
+      - text: |
+          % STIX Two Text has no arrows or inequalities: in running text take them from the
+          % math font; in code (JuliaMono, the monospace family) keep the font's own glyph.
+          \usepackage{newunicodechar}
+          \makeatletter
+          \newcommand{\zs@sym}[2]{\ifmmode #1\else
+            \edef\zs@fam{\f@family}\edef\zs@tt{\ttdefault}%
+            \ifx\zs@fam\zs@tt\symbol{#2}\else\ensuremath{#1}\fi\fi}
+          \newunicodechar{→}{\zs@sym{\rightarrow}{"2192}}
+          \newunicodechar{←}{\zs@sym{\leftarrow}{"2190}}
+          \newunicodechar{≥}{\zs@sym{\geq}{"2265}}
+          \newunicodechar{≤}{\zs@sym{\leq}{"2264}}
+          \newunicodechar{≠}{\zs@sym{\neq}{"2260}}
+          \makeatother
+    code-overflow: wrap
+---
+
+This document is the PDF form of the blueprint at <https://quemy.info/ZenoSolver/proofs.html>. It
+follows the theory note `doc/theory/exact-front.md` of the ZenoSolver repository
+(<https://github.com/aquemy/ZenoSolver>), which corrects the optimality arguments of Quemy &
+Schoenauer (EvoCOP 2015) and Quemy, Schoenauer & Dréo (arXiv:2304.14659, 2023).
+
+Grey boxes reproduce the papers verbatim, with their attribution, for scholarly comparison. Blue
+boxes hold the note's statement and proof and the Lean declarations of `lean/ZenoFront`, with
+their status: *machine-checked* when every declaration formalising the statement uses no axiom
+beyond `propext`, `Classical.choice` and `Quot.sound`; *Lean definition*; *informal* when the
+statement is not in Lean. Green boxes record what the note corrects.
+
+{{< include _blueprint-stats.md >}}
+
+{{< include proofs/_summary.md >}}
+
+{{< include proofs/_sections.qmd >}}

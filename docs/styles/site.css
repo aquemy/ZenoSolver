@@ -1,0 +1,62 @@
+/* Site-wide additions to the cosmo theme (the provenance boxes are in provenance.css). */
+
+/* Wide tables scroll inside their box instead of the page. */
+.table-responsive, main table {
+  display: block;
+  overflow-x: auto;
+}
+main table code {
+  white-space: nowrap;
+}
+
+/* Long inline code (signatures, paths, commands) may break across lines outside tables. */
+main p code, main li code, main dt code, main dd code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* MathJax does not break long inline formulas: on narrow screens a provenance box scrolls
+   sideways instead of the page. */
+.from-paper, .our-work, .strengthen {
+  overflow-x: auto;
+}
+
+/* Wide display equations scroll in their own box on narrow screens. */
+mjx-container[display="true"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Lean and shell listings: a little tighter than the theme, and wrapped rather than scrolled
+   (Quarto's code-overflow: wrap does not reach languages it does not highlight, such as lean). */
+pre.sourceCode, div.sourceCode pre, pre {
+  font-size: 0.86em;
+}
+main pre, main pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A green box opens with a bold lead-in followed by prose: only the lead-in is a title. */
+.strengthen > p:first-child {
+  font-variant: normal;
+  letter-spacing: normal;
+  color: inherit;
+}
+.strengthen > p:first-child > strong:first-child {
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  color: #1e7a32;
+}
+
+/* The one-line status row under each blueprint node. */
+.our-work + p, h3 + p .badge {
+  vertical-align: baseline;
+}
+
+/* Keyboard-ish option names in definition lists. */
+dl dt code {
+  font-weight: 600;
+}

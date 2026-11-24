@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>C++ library – ZenoSolver</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles/provenance.css">
+<link rel="stylesheet" href="../styles/site.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ZenoSolver</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Solver</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
+        <li>
+    <a class="dropdown-item" href="../solver/install.html">
+ <span class="dropdown-text">Installation and build</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../solver/cli.html">
+ <span class="dropdown-text">Command line</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../solver/api.html">
+ <span class="dropdown-text">C++ library</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../solver/certificates.html">
+ <span class="dropdown-text">Certificate format</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../solver/lean.html">
+ <span class="dropdown-text">Lean tools</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../solver/algorithm.html">
+ <span class="dropdown-text">Algorithm</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Instances</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
+        <li>
+    <a class="dropdown-item" href="../instances/model.html">
+ <span class="dropdown-text">Model and data files</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../instances/generator.html">
+ <span class="dropdown-text">Generator</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../instances/pddl.html">
+ <span class="dropdown-text">PDDL</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../instances/suites.html">
+ <span class="dropdown-text">Benchmark and golden suites</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../instances/known-fronts.html">
+ <span class="dropdown-text">Instances with known fronts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../instances/sizing.html">
+ <span class="dropdown-text">Size guidance</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../proofs.html"> 
+<span class="menu-text">Blueprint</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../results.html"> 
+<span class="menu-text">Results</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/aquemy/ZenoSolver"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#example" id="toc-example" class="nav-link active" data-scroll-target="#example">Example</a></li>
+  <li><a href="#types" id="toc-types" class="nav-link" data-scroll-target="#types">Types</a>
+  <ul class="collapse">
+  <li><a href="#zenotypes.hpp" id="toc-zenotypes.hpp" class="nav-link" data-scroll-target="#zenotypes.hpp"><code>zeno/types.hpp</code></a></li>
+  <li><a href="#zenoinstance.hpp" id="toc-zenoinstance.hpp" class="nav-link" data-scroll-target="#zenoinstance.hpp"><code>zeno/instance.hpp</code></a></li>
+  <li><a href="#zenoplan.hpp" id="toc-zenoplan.hpp" class="nav-link" data-scroll-target="#zenoplan.hpp"><code>zeno/plan.hpp</code></a></li>
+  </ul></li>
+  <li><a href="#entry-points" id="toc-entry-points" class="nav-link" data-scroll-target="#entry-points">Entry points</a>
+  <ul class="collapse">
+  <li><a href="#symmetric-fronts-zenosolve.hpp" id="toc-symmetric-fronts-zenosolve.hpp" class="nav-link" data-scroll-target="#symmetric-fronts-zenosolve.hpp">Symmetric fronts: <code>zeno/solve.hpp</code></a></li>
+  <li><a href="#non-symmetric-brackets-zenons.hpp" id="toc-non-symmetric-brackets-zenons.hpp" class="nav-link" data-scroll-target="#non-symmetric-brackets-zenons.hpp">Non-symmetric brackets: <code>zeno/ns.hpp</code></a></li>
+  <li><a href="#certificates-zenocertificate.hpp" id="toc-certificates-zenocertificate.hpp" class="nav-link" data-scroll-target="#certificates-zenocertificate.hpp">Certificates: <code>zeno/certificate.hpp</code></a></li>
+  <li><a href="#instances-and-files-zenolegacy_input.hpp-zenoio.hpp" id="toc-instances-and-files-zenolegacy_input.hpp-zenoio.hpp" class="nav-link" data-scroll-target="#instances-and-files-zenolegacy_input.hpp-zenoio.hpp">Instances and files: <code>zeno/legacy_input.hpp</code>, <code>zeno/io.hpp</code></a></li>
+  </ul></li>
+  <li><a href="#internals" id="toc-internals" class="nav-link" data-scroll-target="#internals">Internals</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">C++ library</h1>
+<p class="subtitle lead">The zeno::core library: types, entry points and internals</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Everything <code>zeno</code> does is in the static library <code>zeno_core</code> (CMake alias <code>zeno::core</code>), whose public headers are in <code>include/zeno/</code>. The command line (<code>src/zeno/main.cpp</code>) is a thin wrapper around it. There are no install rules: use the library from a CMake project with <code>add_subdirectory</code> (or <code>FetchContent</code>), then</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">add_subdirectory</span>(ZenoSolver)     <span class="co"># set ZS_BUILD_TESTS=OFF to skip the tests</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">target_link_libraries</span>(<span class="bn">my_target</span> <span class="ot">PRIVATE</span> <span class="bn">zeno::core</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The library needs C++23. Namespace <code>zeno</code>; errors are reported by exceptions (<code>std::invalid_argument</code> for invalid input, <code>std::runtime_error</code> for I/O and parse errors).</p>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;zeno/certificate.hpp&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;zeno/legacy_input.hpp&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;zeno/ns.hpp&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;zeno/solve.hpp&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;fstream&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A symmetric instance: d = dbar. Cities are 0-based in the library.</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    zeno<span class="op">::</span>Instance instance<span class="op">{.</span>d <span class="op">=</span> <span class="op">{</span><span class="dv">6</span><span class="op">,</span> <span class="dv">10</span><span class="op">},</span> <span class="op">.</span>dbar <span class="op">=</span> <span class="op">{</span><span class="dv">6</span><span class="op">,</span> <span class="dv">10</span><span class="op">},</span> <span class="op">.</span>c <span class="op">=</span> <span class="op">{</span><span class="dv">40</span><span class="op">,</span> <span class="dv">20</span><span class="op">},</span> <span class="op">.</span>t <span class="op">=</span> <span class="dv">5</span><span class="op">,</span> <span class="op">.</span>p <span class="op">=</span> <span class="dv">2</span><span class="op">};</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    instance<span class="op">.</span>validate<span class="op">();</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    zeno<span class="op">::</span>SolveOptions options<span class="op">;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    options<span class="op">.</span>plans <span class="op">=</span> <span class="kw">true</span><span class="op">;</span> <span class="co">// build and check a plan per point (needed for a certificate)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>SolveResult result <span class="op">=</span> zeno<span class="op">::</span>solveFront<span class="op">(</span>instance<span class="op">,</span> options<span class="op">);</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="at">const</span> zeno<span class="op">::</span>FrontPoint<span class="op">&amp;</span> point <span class="op">:</span> result<span class="op">.</span>front<span class="op">)</span> <span class="co">// by increasing makespan</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> point<span class="op">.</span>cost <span class="op">&lt;&lt;</span> <span class="st">" "</span> <span class="op">&lt;&lt;</span> point<span class="op">.</span>makespan <span class="op">&lt;&lt;</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>Certificate certificate <span class="op">=</span> zeno<span class="op">::</span>makeCertificate<span class="op">(</span>instance<span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>ofstream out<span class="op">(</span><span class="st">"front.cert"</span><span class="op">);</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    zeno<span class="op">::</span>writeCertificate<span class="op">(</span>out<span class="op">,</span> certificate<span class="op">);</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>CertificateCheck check <span class="op">=</span> zeno<span class="op">::</span>checkCertificate<span class="op">(</span>certificate<span class="op">);</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="op">(</span>check<span class="op">.</span>ok <span class="op">?</span> <span class="st">"accepted"</span> <span class="op">:</span> <span class="st">"rejected"</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A non-symmetric instance (Proposition 6.5 of the note): a certified bracket.</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>Instance ns<span class="op">{.</span>d <span class="op">=</span> <span class="op">{</span><span class="dv">3</span><span class="op">,</span> <span class="dv">19</span><span class="op">},</span> <span class="op">.</span>dbar <span class="op">=</span> <span class="op">{</span><span class="dv">3</span><span class="op">,</span> <span class="dv">11</span><span class="op">},</span> <span class="op">.</span>c <span class="op">=</span> <span class="op">{</span><span class="dv">5</span><span class="op">,</span> <span class="dv">1</span><span class="op">},</span> <span class="op">.</span>t <span class="op">=</span> <span class="dv">7</span><span class="op">,</span> <span class="op">.</span>p <span class="op">=</span> <span class="dv">4</span><span class="op">};</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>BracketResult bracket <span class="op">=</span> zeno<span class="op">::</span>solveBracket<span class="op">(</span>ns<span class="op">);</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> bracket<span class="op">.</span>upper<span class="op">.</span>size<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">" points, "</span> <span class="op">&lt;&lt;</span> <span class="op">(</span>bracket<span class="op">.</span>exact<span class="op">()</span> <span class="op">?</span> <span class="st">"exact"</span> <span class="op">:</span> <span class="st">"a bracket"</span><span class="op">);</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="at">const</span> <span class="kw">auto</span><span class="op">&amp;</span> a <span class="op">:</span> bracket<span class="op">.</span>assumptions<span class="op">())</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">", assuming "</span> <span class="op">&lt;&lt;</span> a<span class="op">;</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The instance of the command-line options -n 10 -t 8 -p 3 -C 2 -D 2 -r 100.</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    zeno<span class="op">::</span>legacy<span class="op">::</span>Options o<span class="op">;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>n <span class="op">=</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>t <span class="op">=</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>p <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>costFunction <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>durationFunction <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>adjust <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> swapped <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>Instance generated <span class="op">=</span> zeno<span class="op">::</span>legacy<span class="op">::</span>buildInstance<span class="op">(</span>o<span class="op">,</span> <span class="op">&amp;</span>swapped<span class="op">);</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> zeno<span class="op">::</span>solveFront<span class="op">(</span>generated<span class="op">).</span>front<span class="op">.</span>size<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">" points"</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;&lt;</span> <span class="op">(</span>swapped <span class="op">?</span> <span class="st">" (durations and costs swapped)"</span> <span class="op">:</span> <span class="st">""</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>320 48
+280 56
+260 60
+240 64
+200 72
+160 80
+accepted
+9 points, exact, assuming A1-NS
+81 points (durations and costs swapped)</code></pre>
+<p><code>zeno</code> prints fronts by increasing <em>cost</em>; the library’s <code>Front</code> is sorted by increasing <em>makespan</em>.</p>
+</section>
+<section id="types" class="level2">
+<h2 class="anchored" data-anchor-id="types">Types</h2>
+<section id="zenotypes.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="zenotypes.hpp"><code>zeno/types.hpp</code></h3>
+<p><code>Cost</code> and <code>Time</code> are <code>std::int64_t</code>. Durations are in the instance’s time unit; the solver works with half makespans <span class="math inline">\(T\)</span>, so a symmetric plan at level <span class="math inline">\(T\)</span> has makespan <span class="math inline">\(2T\)</span> (times the gcd of the durations). <code>kInfCost</code> (a quarter of the largest <code>int64</code>) stands for “no solution”, <code>isInf(x)</code> tests for it, and <code>addCost(a, b)</code> is saturating addition.</p>
+</section>
+<section id="zenoinstance.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="zenoinstance.hpp"><code>zeno/instance.hpp</code></h3>
+<dl>
+<dt><code>Instance</code></dt>
+<dd>
+<code>d</code> (durations <span class="math inline">\(C_I \leftrightarrow i\)</span>), <code>dbar</code> (durations <span class="math inline">\(C_G \leftrightarrow i\)</span>, equal to <code>d</code> when symmetric), <code>c</code> (landing costs), <code>t</code>, <code>p</code>. <code>n()</code> is the number of cities, <code>landings()</code> is <span class="math inline">\(s = 2t - p\)</span>, <code>symmetric()</code> tests <code>d == dbar</code>, and <code>validate()</code> throws unless <span class="math inline">\(1 \le p \le t\)</span>, <span class="math inline">\(n \ge 1\)</span>, the vectors have length <span class="math inline">\(n\)</span> and every value is non-negative. Central-to-central flights are not part of an instance: they are assumed no faster than through a hub (A1).
+</dd>
+<dt><code>FrontPoint</code>, <code>Front</code></dt>
+<dd>
+A point <code>{cost, makespan}</code>, ordered by <code>&lt;=&gt;</code>; a front is a <code>std::vector&lt;FrontPoint&gt;</code> sorted by increasing makespan, hence strictly decreasing cost.
+</dd>
+<dt><code>paretoFilter(points)</code></dt>
+<dd>
+Keeps the points that no other point weakly dominates (one per distinct objective vector), sorted by increasing makespan.
+</dd>
+</dl>
+</section>
+<section id="zenoplan.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="zenoplan.hpp"><code>zeno/plan.hpp</code></h3>
+<dl>
+<dt><code>Leg</code>, <code>Plan</code></dt>
+<dd>
+A leg is <code>{from, to, depart, arrive, passenger}</code>. Locations are 0 for <span class="math inline">\(C_I\)</span>, 1…<span class="math inline">\(n\)</span> for the central cities (city <span class="math inline">\(i\)</span> of the instance is location <span class="math inline">\(i+1\)</span>) and <span class="math inline">\(n+1\)</span> for <span class="math inline">\(C_G\)</span>; <code>passenger</code> is <span class="math inline">\(-1\)</span> when the plane flies empty. A plan is the legs of every plane, in order.
+</dd>
+<dt><code>checkPlan(instance, plan) -&gt; PlanCheck</code></dt>
+<dd>
+Simulates a plan against the model of the theory note, sharing no code with the plan builder: every plane starts in <span class="math inline">\(C_I\)</span> at time <span class="math inline">\(\ge 0\)</span>, chains its legs with exact durations and ends in <span class="math inline">\(C_G\)</span>; there is no <span class="math inline">\(C_I\)</span>–<span class="math inline">\(C_G\)</span> flight and central-to-central legs are rejected; every passenger rides a time-ordered chain of legs from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span>; a leg carries at most one passenger. Returns <code>ok</code>, the first violated rule in <code>error</code>, the <code>cost</code> and the <code>makespan</code>.
+</dd>
+<dt><code>buildPlan(instance, reduced, forest)</code></dt>
+<dd>
+The plan of <a href="../proofs.html#node-theorem-4-1">Theorem 4.1</a> for a link forest: every plane drops one passenger per child edge, flies its filler as alternating crossings, then picks up the passenger its parent dropped, waiting if needed.
+</dd>
+<dt><code>mirrored(instance)</code>, <code>mirrorPlan(plan, n)</code></dt>
+<dd>
+The instance with <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_G\)</span> exchanged, and the time reversal of a plan, which turns plans where every plane picks up at most once into plans where every plane drops off at most once.
+</dd>
+</dl>
+</section>
+</section>
+<section id="entry-points" class="level2">
+<h2 class="anchored" data-anchor-id="entry-points">Entry points</h2>
+<section id="symmetric-fronts-zenosolve.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="symmetric-fronts-zenosolve.hpp">Symmetric fronts: <code>zeno/solve.hpp</code></h3>
+<dl>
+<dt><code>solveFront(instance, options = {}) -&gt; SolveResult</code></dt>
+<dd>
+The exact Pareto front of a symmetric instance. Throws <code>std::invalid_argument</code> for an invalid or non-symmetric instance. <code>SolveResult</code> holds <code>front</code>, <code>plans</code> (with <code>options.plans</code>, <code>plans[i]</code> realises <code>front[i]</code> and was checked by <code>checkPlan</code>) and <code>stats</code>.
+</dd>
+</dl>
+<p><code>SolveOptions</code> is shared by both entry points:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>threads</code></td>
+<td>0</td>
+<td>Worker threads; 0 for all hardware threads.</td>
+</tr>
+<tr class="even">
+<td><code>plans</code></td>
+<td><code>false</code></td>
+<td>Also build and check a plan for every front point.</td>
+</tr>
+<tr class="odd">
+<td><code>levels</code></td>
+<td><code>Automatic</code></td>
+<td><code>LevelStrategy::Sweep</code> (bracket every level, then the exact DP on the open ones), <code>Search</code> (bisect for the breakpoints of <span class="math inline">\(E\)</span>), or <code>Automatic</code> (sweep up to <span class="math inline">\(2^{12}\)</span> levels, search beyond).</td>
+</tr>
+<tr class="even">
+<td><code>table</code></td>
+<td><code>Automatic</code></td>
+<td>Layout of the one-plane table: dense or staircase, chosen by size.</td>
+</tr>
+<tr class="odd">
+<td><code>roleStates</code></td>
+<td>2,000,000</td>
+<td>Non-symmetric: states of the balanced role program per level.</td>
+</tr>
+<tr class="even">
+<td><code>roleWork</code></td>
+<td>50,000,000</td>
+<td>Non-symmetric: transitions of the balanced role program per level.</td>
+</tr>
+<tr class="odd">
+<td><code>refineSeconds</code></td>
+<td>30</td>
+<td>Non-symmetric: time after which the refinement of open gaps stops.</td>
+</tr>
+<tr class="even">
+<td><code>searchWork</code></td>
+<td>20,000,000</td>
+<td>Non-symmetric: work limit of the exact gap search, per gap.</td>
+</tr>
+</tbody>
+</table>
+<dl>
+<dt><code>SolveStats</code></dt>
+<dd>
+The level range (<code>lowestLevel</code>, <code>highestLevel</code>, <code>scale</code>, <code>levels</code>), <code>reducedCities</code>, <code>maxTree</code>, how levels were settled (<code>closedByBracket</code>, <code>closedByPairs</code>, <code>closedByChains</code>, <code>closedByMonotonicity</code>, <code>exactCalls</code>), the DP work (<code>work.states</code>, <code>work.relaxations</code>) and the time per phase. <code>zeno --stats</code> prints them (<a href="../solver/cli.html#front">command line</a>).
+</dd>
+</dl>
+</section>
+<section id="non-symmetric-brackets-zenons.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="non-symmetric-brackets-zenons.hpp">Non-symmetric brackets: <code>zeno/ns.hpp</code></h3>
+<dl>
+<dt><code>solveBracket(instance, options = {}) -&gt; BracketResult</code></dt>
+<dd>
+A certified bracket of the front of any valid instance (for symmetric ones prefer <code>solveFront</code>). <code>upper</code> lists points achieved by simulated plans, and <code>plans</code> the plans with <code>options.plans</code>. For the gap between <code>upper[i]</code> and <code>upper[i + 1]</code>, <code>gapLower[i]</code> bounds the cost of every plan with makespan below <code>upper[i + 1].makespan</code>, and <code>gapProof[i]</code> says how; <code>fastestLower</code> and <code>fastestProof</code> rule out faster plans. <code>exact()</code> is true when the fastest makespan is certified and every gap closed; <code>assumptions()</code> lists <code>"A1-NS"</code> when a closed gap needs it. For an open gap, <code>openReason[i]</code> is <code>Incomplete</code> (a limit was reached) or <code>Unscheduled</code> (a cheaper balanced configuration exists, but no schedule found fits the gap).
+</dd>
+<dt><code>GapProof</code></dt>
+<dd>
+<code>Relaxed</code> (lemma R with role weight <span class="math inline">\(\min(2d, 2\bar d)\)</span>: no assumption on central flights), <code>Roles</code> (role relaxation), <code>Lagrangian</code> (Lagrangian relaxation of the per-city balance), <code>Balanced</code> (the cheapest balanced role configuration), <code>Search</code> (exhaustive search over role configurations with exact schedules). All but <code>Relaxed</code> need (A1-NS): <code>Roles</code>, <code>Lagrangian</code> and <code>Balanced</code> through <a href="../proofs.html#node-theorem-6-1">Theorem 6.1</a>, <code>Search</code> through <a href="../proofs.html#node-theorem-6-9">Theorem 6.9</a>, which covers every plan. <code>Open</code> marks a gap that no bound closes.
+</dd>
+</dl>
+</section>
+<section id="certificates-zenocertificate.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="certificates-zenocertificate.hpp">Certificates: <code>zeno/certificate.hpp</code></h3>
+<dl>
+<dt><code>Certificate</code></dt>
+<dd>
+<code>version</code> (1 or 2), the <code>instance</code>, <code>assumptions</code> (<code>"S"</code>, <code>"A1"</code>, <code>"A1-NS"</code>), the <code>front</code> by increasing makespan, one plan per point, one <code>GapBound</code> per gap, Lagrangian <code>multipliers</code> (v2), and the <code>fastest</code> bound (v2). <a href="../solver/certificates.html">Format</a>.
+</dd>
+<dt><code>makeCertificate(instance, result)</code></dt>
+<dd>
+The version 1 certificate of a solved front (requires <code>SolveOptions::plans</code>). A gap gets <code>relaxed</code> when <span class="math inline">\(L\)</span> reaches the cost, <code>forest</code> otherwise.
+</dd>
+<dt><code>makeBracketCertificate(instance, bracket)</code></dt>
+<dd>
+The version 2 certificate of an exact bracket (requires <code>exact()</code> and <code>SolveOptions::plans</code>); throws <code>std::invalid_argument</code> otherwise.
+</dd>
+<dt><code>writeCertificate(out, certificate)</code>, <code>readCertificate(in)</code></dt>
+<dd>
+Text I/O. The reader throws <code>std::runtime_error</code> with the line number on a syntax error, and refuses values above <span class="math inline">\(2^{36}\)</span>, <span class="math inline">\(n\)</span>, <span class="math inline">\(t\)</span>, <span class="math inline">\(p\)</span> above <span class="math inline">\(10^5\)</span> and more than <span class="math inline">\(10^7\)</span> legs.
+</dd>
+<dt><code>checkCertificate(certificate) -&gt; CertificateCheck</code></dt>
+<dd>
+The reference checker: <code>ok</code>, every failed obligation in <code>errors</code>, and in <code>relied</code> the assumptions the accepted obligations needed. It uses the library’s own dynamic programs for the gap bounds, so it is a consistency check, not an independent proof; the Lean checker is the independent one (<a href="../solver/lean.html">Lean tools</a>).
+</dd>
+</dl>
+</section>
+<section id="instances-and-files-zenolegacy_input.hpp-zenoio.hpp" class="level3">
+<h3 class="anchored" data-anchor-id="instances-and-files-zenolegacy_input.hpp-zenoio.hpp">Instances and files: <code>zeno/legacy_input.hpp</code>, <code>zeno/io.hpp</code></h3>
+<dl>
+<dt><code>legacy::Options</code>, <code>legacy::buildInstance(options, &amp;swapped)</code></dt>
+<dd>
+The instance options of the 2016 solvers and the 2016 construction, quirks included: values multiplied by <code>adjust</code> (<code>-r</code>) and truncated toward zero, and the swap of durations and costs when <code>d[0] &gt; d[1]</code>; <code>swapped</code> reports whether it happened. Unlike the 2016 code it accepts <span class="math inline">\(t = p\)</span>. Formulas on the <a href="../instances/generator.html">generator page</a>.
+</dd>
+<dt><code>writePddlProblem(out, instance, front = nullptr)</code>, <code>defaultPddlName(instance)</code></dt>
+<dd>
+The PDDL problem for <code>pddl/multi-zeno-travel.pddl</code>, with the front appended as comments when given (<a href="../instances/pddl.html">PDDL</a>), and the 2016 default name <code>zeno&lt;n&gt;n&lt;t&gt;t&lt;p&gt;pMulti.pddl</code>.
+</dd>
+<dt><code>writeDataFile(out, instance)</code></dt>
+<dd>
+The data file read by <code>-d</code>: 2 lines if symmetric, 3 otherwise.
+</dd>
+<dt><code>cli::parseInstanceArguments(args)</code>, <code>cli::instanceOptionsHelp()</code>, <code>cli::integerValue(flag, value)</code></dt>
+<dd>
+The command-line parser for the instance options (it consumes <code>-n -t -p -d -C -D -E -W -r -j -k   -l -m -x -y</code> and drops <code>-F</code>, leaving the other tokens in <code>rest</code>), its help text, and integer parsing with an error naming the flag.
+</dd>
+</dl>
+</section>
+</section>
+<section id="internals" class="level2">
+<h2 class="anchored" data-anchor-id="internals">Internals</h2>
+<p>These headers are public, for the tests and benchmarks; their interfaces may change.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Header</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>zeno/reduce.hpp</code></td>
+<td><code>ReducedInstance</code> and <code>reduce(instance)</code>: dominated and equal cities merged (<a href="../proofs.html#node-proposition-7-9">Proposition 7.9</a>), durations divided by their gcd, role weights (<code>fill</code>, <code>drop</code>, <code>pick</code>, <code>low</code>) for non-symmetric instances, <code>lowestLevel()</code> and <code>highestLevel()</code> (<a href="../proofs.html#node-proposition-7-10">Proposition 7.10</a>), <code>maxTree()</code> <span class="math inline">\(= \min(p, t-p+1)\)</span>. Kept cities of a symmetric instance form a staircase: <span class="math inline">\(d\)</span> strictly increasing, <span class="math inline">\(c\)</span> strictly decreasing.</td>
+</tr>
+<tr class="even">
+<td><code>zeno/one_plane.hpp</code></td>
+<td><code>OnePlaneTable(d, c, maxLandings, maxLevel, layout)</code>: <span class="math inline">\(G[m][T]\)</span>, the cheapest <span class="math inline">\(m\)</span> landings within <span class="math inline">\(T\)</span> (<a href="../proofs.html#node-lemma-7-2">Lemma 7.2</a>), dense or as Pareto staircases (memory independent of the magnitude of the durations); <code>paretoPoints</code>, <code>witness</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>zeno/forest.hpp</code></td>
+<td><code>relaxedCost</code> (the relaxation <span class="math inline">\(L\)</span>, lemma R), <code>ForestProgram</code> / <code>forestCost</code> (link forests with trees of at most <code>maxTreePlanes</code> planes: 2 gives <span class="math inline">\(U\)</span>, 3 gives <span class="math inline">\(U_3\)</span>, <code>maxTree()</code> gives <span class="math inline">\(E\)</span> exactly, <a href="../proofs.html#node-theorem-7-5">Theorem 7.5</a>), <code>LinkForest</code> and <code>ForestPlane</code>, <code>LevelStats</code>.</td>
+</tr>
+<tr class="even">
+<td><code>zeno/breakpoints.hpp</code></td>
+<td><code>breakpoints(lo, flo, hi, fhi, f, threads)</code>: the breakpoints of a non-increasing function by parallel interval splitting, <span class="math inline">\(O(r \log(hi - lo))\)</span> evaluations for <span class="math inline">\(r\)</span> breakpoints.</td>
+</tr>
+<tr class="odd">
+<td><code>zeno/roles.hpp</code></td>
+<td>Role configurations (<code>RoleConfig</code>), the exact balanced program <code>BalancedRoles</code> (DP over planes on the imbalance vector, <a href="../proofs.html#node-proposition-6-6">Proposition 6.6</a>; gives up beyond its state and work limits), <code>RoleRelaxation</code>, <code>lagrangianRoles</code> / <code>lagrangianValue</code>, <code>scheduleRoles</code>.</td>
+</tr>
+<tr class="even">
+<td><code>zeno/ns_search.hpp</code></td>
+<td>Template schedules (<a href="../proofs.html#node-lemma-6-3">Lemma 6.3</a>): <code>templateMakespan</code>, <code>templatePlan</code>; <code>exactSchedule</code> (every drop-off order and matching of one configuration); <code>searchGap</code> (the exhaustive gap search of <a href="../proofs.html#node-corollary-6-10">Corollary 6.10</a>).</td>
+</tr>
+<tr class="odd">
+<td><code>zeno/parallel.hpp</code></td>
+<td><code>workerCount(requested)</code> and <code>parallelFor(count, threads, body)</code>, dynamic scheduling, first exception rethrown.</td>
+</tr>
+</tbody>
+</table>
+<p>Doxygen documentation of all headers is built by the <code>doc</code> target, with <code>-DZS_BUILD_DOC=ON</code>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/quemy\.info\/ZenoSolver\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ZenoSolver, its theory note and the Lean formalization: Alexandre Quemy.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

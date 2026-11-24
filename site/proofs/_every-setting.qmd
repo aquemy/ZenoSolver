@@ -1,0 +1,280 @@
+## Lemmas valid in every setting {#sec-every-setting}
+
+Counting and segment durations (§3). They hold for every plan, with any central flights, and give
+the relaxation $L$ that the checker uses without any assumption on central flights.
+
+### Lemma 3.1 (cleaning) {#node-lemma-3-1}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
+
+::: {.our-work}
+**Statement** (theory note, §3).
+
+**Lemma 3.1 (cleaning).** Every plan can be changed, keeping all routes (hence cost, makespan and flight
+times), so that every journey is *clean*: its first flight is its only flight departing from $C_I$, and its
+last flight is its only flight arriving in $C_G$. A clean journey has no flight arriving in $C_I$ and none
+departing from $C_G$.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* Replace each journey by its part from its last flight departing from $C_I$ to the first later flight
+arriving in $C_G$, which exists since the journey ends in $C_G$. This is a journey, and capacity only gets
+looser. In a clean journey, a flight arriving in $C_I$ would be followed by a flight departing from $C_I$
+other than the first, since the journey ends in $C_G$. A flight departing from $C_G$ would follow a flight
+arriving in $C_G$ other than the last. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* Replace each journey by its part from its last flight departing from $C_I$ to the first later flight
+arriving in $C_G$, which exists since the journey ends in $C_G$. This is a journey, and capacity only gets
+looser. In a clean journey, a flight arriving in $C_I$ would be followed by a flight departing from $C_I$
+other than the first, since the journey ends in $C_G$. A flight departing from $C_G$ would follow a flight
+arriving in $C_G$ other than the last. $\square$
+:::
+
+**In Lean.** Lean does not rewrite journeys: `exists_transfer` extracts, from every passenger's route, the leg `C_I → x` followed by a leg leaving `x` not towards `C_I` that the cleaned journey would keep.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.exists_transfer` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Step 2.** A route from `C_I` to `C_G` has a leg `C_I → x` followed, later, by a leg leaving
+`x` that does not arrive at `C_I`: the last departure from `C_I` and the next leg. -/
+theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), IsRoute .ci τ l →
+    (∀ ℓ ∈ l, Flies N ℓ) → finalLoc .ci l = .cg →
+    ∃ x : Fin n, ∃ ℓo ∈ l, ∃ ℓn ∈ l, ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧
+      ℓn.dst ≠ .ci
+  …
+```
+
+[`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 3.2 (counting) {#node-lemma-3-2}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal}
+
+::: {.our-work}
+**Statement** (theory note, §3).
+
+**Lemma 3.2 (counting).** A feasible plan has at least $s = 2t - p$ segments, hence at least $s$ landings in
+central cities.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* For plane $k$, let $D^I_k$ and $A^I_k$ be its numbers of flights departing from and arriving in
+$C_I$, and $D^G_k$, $A^G_k$ the same for $C_G$. The route is in $C_I$ at its start and after each arrival
+there, and leaves after each of these visits since it ends in $C_G$: $D^I_k = A^I_k + 1$. It is in $C_G$ only
+after arrivals, and leaves after each but the last: $D^G_k = A^G_k - 1$. The first flight of each journey
+departs from $C_I$ and the last arrives in $C_G$; by capacity both maps are injective, so
+$\sum_k D^I_k \ge t$ and $\sum_k A^G_k \ge t$. Segments end exactly at arrivals in hubs, so plane $k$ has
+$A^I_k + A^G_k = D^I_k - 1 + A^G_k$ segments, and the plan at least $t - p + t = s$. Each segment contains a
+landing in a central city, and different segments contain different landings. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* For plane $k$, let $D^I_k$ and $A^I_k$ be its numbers of flights departing from and arriving in
+$C_I$, and $D^G_k$, $A^G_k$ the same for $C_G$. The route is in $C_I$ at its start and after each arrival
+there, and leaves after each of these visits since it ends in $C_G$: $D^I_k = A^I_k + 1$. It is in $C_G$ only
+after arrivals, and leaves after each but the last: $D^G_k = A^G_k - 1$. The first flight of each journey
+departs from $C_I$ and the last arrives in $C_G$; by capacity both maps are injective, so
+$\sum_k D^I_k \ge t$ and $\sum_k A^G_k \ge t$. Segments end exactly at arrivals in hubs, so plane $k$ has
+$A^I_k + A^G_k = D^I_k - 1 + A^G_k$ segments, and the plan at least $t - p + t = s$. Each segment contains a
+landing in a central city, and different segments contain different landings. $\square$
+:::
+
+::: {.content-visible when-format="html"}
+::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
+No cleaning and no segment types are needed.
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+
+No cleaning and no segment types are needed.
+:::
+
+**In Lean.** Leg counting along each route: `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`, and every passenger leaves `C_I` and reaches `C_G` on its own leg.
+
+**Lean** `ZenoFront.Feasible.le_sum_hubArrivals` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Counting.** A feasible plan has at least `2t − p` segments: `2t ≤ Σ_k #hub arrivals + p`. -/
+theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    2 * t ≤ ∑ k, hubArrivals (P k) + p := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 3.3 (segment durations) {#node-lemma-3-3}
+
+**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) or (AΔ)
+
+::: {.our-work}
+**Statement** (theory note, §3).
+
+**Lemma 3.3 (segment durations).** Let a segment $\gamma$ visit the central cities $x_1,\dots,x_m$ in this
+order.
+
+(a) Under (S), $F(\gamma) \ge d_{x_1} + d_{x_m} \ge 2\min(d_{x_1}, d_{x_m})$.
+
+(b) Under (AΔ), for every $j$, $F(\gamma) \ge d_{x_j} + \bar d_{x_j}$ for types $A$ and $\bar A$,
+$F(\gamma) \ge 2d_{x_j}$ for $B$ and $F(\gamma) \ge 2\bar d_{x_j}$ for $\bar B$.
+
+(c) A simple segment at $x$ lasts exactly $d_x + \bar d_x$ (types $A$, $\bar A$), $2d_x$ ($B$) or $2\bar d_x$
+($\bar B$).
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* (c) It is two hub flights. (a) The first flight joins a hub to $x_1$ and lasts $d_{x_1}$ under (S);
+the last joins $x_m$ to a hub and lasts $d_{x_m}$; for $m = 1$ these are the two flights, and every flight
+lasts at least 0. (b) All hub flights exist, so by (AΔ) and induction along the route, the part of $\gamma$
+from its first hub to $x_j$ lasts at least the direct flight between them, and likewise from $x_j$ to its
+last hub. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* (c) It is two hub flights. (a) The first flight joins a hub to $x_1$ and lasts $d_{x_1}$ under (S);
+the last joins $x_m$ to a hub and lasts $d_{x_m}$; for $m = 1$ these are the two flights, and every flight
+lasts at least 0. (b) All hub flights exist, so by (AΔ) and induction along the route, the part of $\gamma$
+from its first hub to $x_j$ lasts at least the direct flight between them, and likewise from $x_j$ to its
+last hub. $\square$
+:::
+
+**In Lean.** Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (c) is `roleW_landingRecs_le` on routes without central flights. Part (b), under (AΔ), is not formalized.
+
+**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+
+*Part* `ZenoFront.PlaneFeasible.exists_segments` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Segments of a plane**, under (S): `2 δ(Z) ≤` the plane's end time. -/
+theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+    {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
+    ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.d Z ≤ endTime 0 legs ∧
+      cost c Z ≤ landCostSum c legs := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
+
+*Part* `ZenoFront.roleW_landingRecs_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Role weights on a route without central flights**: the role weights of its landing
+records add up to at most its flight time. -/
+theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : Loc n) (τ : ℕ),
+    IsRoute x τ legs → (∀ ℓ ∈ legs, Flies N ℓ ∧ ℓ.central = false) → x.isHub = true →
+      ((landingRecs legs).map (roleW N)).sum ≤ durSum legs
+  …
+```
+
+[`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
+
+:::
+
+### Lemma 3.4 (relaxation) {#node-lemma-3-4}
+
+**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [3.2](#node-lemma-3-2), [3.3](#node-lemma-3-3)
+
+::: {.from-paper}
+**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.2 *Pareto Optimal Plans*, HAL preprint hal-01109777v1, pp. 3–4).
+
+> Let us make another simplifying assumption:\
+> **Assumption A1**: $\forall (i, j) \in [1, n]^2, d_i + d_j < d_{ij}$. Then the following holds.
+>
+> **Proposition**: Pareto-optimal plans are plans where exactly $2t - p$ (possibly identical) central
+> cities are used by a flight.
+>
+> **Proof**: Consider a plan where a person flies from $C_i$ to $C_j$. Using the same plane, the same
+> person could fly instead from $C_i$ to $C_G$, and the plane would return empty to $C_j$. The plan
+> could continue unchanged from thereon: because of the hypothesis on makespans, the needed resource
+> would be in $C_j$ on time. Moreover, the total cost is unchanged, and the total makespan is lower or
+> equal to the original one: the new plan thus Pareto-dominates the original one.
+>
+> Iterating the same reasoning for each person, and each empty plane, we conclude that there are no
+> flights between central cities in Pareto-optimal plans. Thus bringing the $t$ persons from $C_I$ to
+> $C_G$ will amount to carry each person through one central city: $t$ flights will be needed from
+> $C_I$ to one $C_i$, then $t$ flights from $C_i$ to $C_G$. Finally, because planes do not need to come
+> back from $C_G$ in the end, only $t - p$ flights back empty will be needed, possibly through some
+> different central cities – hence the result. $\square$
+>
+> *Footnote 3 (on Assumption A1):* This might look unrealistic in real-world logistic domain. However,
+> we hypothesize that the proposition still holds with the weaker condition that for any cities
+> $C_i, C_j, C_k$ (if we state the cost of $C_I$ and $C_G$ are respectively $C_0$ and $C_{n+1}$),
+> $d_{ik} \le d_{ij} + d_{jk}$ (triangle inequality).
+:::
+
+::: {.our-work}
+**Statement** (theory note, §3).
+
+**Lemma 3.4 (relaxation) [R].** Assume (S). For every feasible plan with cost $C$ and makespan $M$ there are
+non-empty multisets $Y_1,\dots,Y_p$ with $\sum_k |Y_k| = s$, $c(Y_1 + \dots + Y_p) \le C$, and
+$\ell(Y_k) \le F_k \le M$ for every $k$. Hence, with integer durations, $C \ge L(\lfloor M/2\rfloor)$, where
+$$L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = s,\ Y_k \ne \emptyset \text{ and } \delta(Y_k) \le T\ \forall k\Big\}
+\quad(\min\emptyset = \infty).$$
+No assumption on central flights is needed.
+
+::: {.content-visible when-format="html"}
+::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+*Proof.* For a segment $\gamma$, let $x^\star(\gamma)$ be whichever of its first and last central cities has
+the smaller $d$. By Lemma 3.3(a), $F(\gamma) \ge 2d_{x^\star(\gamma)}$. Every route goes from $C_I$ to $C_G$,
+so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose one segment
+per plane and any $s - p$ others, and let $Y_k$ collect $x^\star(\gamma)$ over the chosen segments $\gamma$
+of plane $k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
+$c(Y) \le C$. Also $\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M$.
+With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
+:::
+:::
+
+::: {.content-visible unless-format="html"}
+*Proof.* For a segment $\gamma$, let $x^\star(\gamma)$ be whichever of its first and last central cities has
+the smaller $d$. By Lemma 3.3(a), $F(\gamma) \ge 2d_{x^\star(\gamma)}$. Every route goes from $C_I$ to $C_G$,
+so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose one segment
+per plane and any $s - p$ others, and let $Y_k$ collect $x^\star(\gamma)$ over the chosen segments $\gamma$
+of plane $k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
+$c(Y) \le C$. Also $\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M$.
+With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
+:::
+
+**Lean** `ZenoFront.Feasible.exists_relaxation` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma R** (relaxation). Under (S), whatever the central flights, a feasible plan with
+`1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size `s = 2t − p`, with
+`2 δ(Y_k) ≤` the makespan for every plane and total cost at most the plan's cost. -/
+theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ Y : Groups n p, (∀ k, 1 ≤ (Y k).card) ∧ size Y = 2 * t - p ∧
+      (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.relaxCost_oneplane_le_totalCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The relaxation is a lower bound.** For every grouping into `p` non-empty groups of total
+size `s` and loads at most `T`, `L(T) = relaxCost (G[·][T]) p s ≤ Σ_k c(Y_k)`. -/
+theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : Groups n p)
+    (hpos : ∀ k, 1 ≤ (Y k).card) (hsize : size Y = s) (hload : ∀ k, load d (Y k) ≤ T) :
+    relaxCost (fun m => oneplane d c m T) p s ≤ (totalCost c Y : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
+
+:::
+
+::: {.strengthen}
+**What survives of the papers' Proposition.** The papers' "Pareto-optimal plans use exactly $2t-p$
+central cities" needs (A1) and is true only in the sense of the front (Corollary 4.8). Lemma 3.2 keeps
+its lower-bound half with **no assumption at all**: every plan lands at least $2t-p$ times, and
+Lemma 3.4 turns that into a cost bound $L$ valid for any central flights.
+:::

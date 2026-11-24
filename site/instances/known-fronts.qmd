@@ -1,0 +1,94 @@
+---
+title: "Instances with known fronts"
+subtitle: "Closed forms, the Table 1 family, and small instances with checked fronts"
+---
+
+Some instances have fronts known independently of `zeno`: in closed form, or computed by an
+exhaustive oracle. They are the natural test cases for a planner or another solver.
+
+## The linear family (default generator) {#linear}
+
+With the default options (`-C 3 -D 3`) and `-r r`, after the [2016 swap](model.qmd#swap), the
+generator builds $d_i = r\,i$ and $c_i = r\,(n + 1 - i)$ for $i = 1, \dots, n$: cost is affine and
+decreasing in duration. [Theorem 10.1](../proofs.qmd#node-theorem-10-1) of the note gives the front
+in closed form. Let $s = 2t - p$, $\kappa = \lceil s/p \rceil$, $q_0 = \lfloor s/p \rfloor$,
+$\rho = s - p q_0$, and
+$$\Phi(T) = (p - \rho)\min(T,\ n q_0) + \rho \min(T,\ n(q_0 + 1)).$$
+Then the front is
+$$\mathcal F = \big\{\big(r\,((n+1)\,s - \Phi(T)),\ 2rT\big) : \kappa \le T \le n\kappa\big\},$$
+with **$(n - 1)\kappa + 1$ points**, every $T$ in the range being a breakpoint. The theorem needs
+only (S): the front is the same **whatever the central flights**, and every certificate of this
+family has only `relaxed` gaps. In general, the theorem covers $d_i = i$ and
+$c_i = \alpha - \beta i$ with $\beta > 0$ and $\alpha \ge \beta n$.
+
+The same in Python, by increasing cost as `zeno` prints it:
+
+```python
+def linear_front(n, t, p, r=1):
+    """Front of zeno -n n -t t -p p -r r (default generator), Theorem 10.1."""
+    s = 2 * t - p
+    q0, rho = divmod(s, p)
+    kappa = -(-s // p)
+    phi = lambda T: (p - rho) * min(T, n * q0) + rho * min(T, n * (q0 + 1))
+    return sorted((r * ((n + 1) * s - phi(T)), 2 * r * T) for T in range(kappa, n * kappa + 1))
+```
+
+It agrees with `zeno` point for point on, among others, `-n 10 -t 8 -p 3` (46 points),
+`-n 7 -t 5 -p 4` (13), `-n 5 -t 9 -p 4 -r 3` (17), `-n 20 -t 6 -p 2 -r 7` (96) and `-n 12 -t 13 -p 5`
+(56). The note's own check compared the closed form with the link-forest DP on 336 instances and
+5,844 levels.
+
+The count matches the suite: the `regimes` instances have fronts of 399 ($n = 200$, $t = 3$,
+$p = 2$), 540 ($n = 50$, $t = 30$, $p = 5$) and 1,090 points ($n = 100$, $t = 60$, $p = 10$), each
+$(n-1)\kappa + 1$.
+
+### Table 1 of EvoCOP 2015: `-n N -t N -p 2` {#table1}
+
+For $n = t = N$ and $p = 2$: $s = 2N - 2$, $\kappa = q_0 = N - 1$ and $\rho = 0$, so
+$\Phi(T) = 2T$ on the range and
+$$\mathcal F = \{(2(N^2 - 1) - 2T,\ 2T) : N - 1 \le T \le N(N-1)\}.$$
+Every point has cost + makespan $= 2(N^2 - 1)$. The front runs from $(2N(N-1),\ 2(N-1))$, the
+fastest, to $(2(N-1),\ 2N(N-1))$, the cheapest, and has exactly
+$$(N-1)^2 + 1 \text{ points}.$$
+That is the front size of Table 1 of the EvoCOP 2015 paper, and `zeno` reproduces it for every
+$N$ up to 50 (2,402 points at $N = 50$). The `paper-table1` suite holds $N = 3, \dots, 10$:
+
+{{< include _table1.md >}}
+
+### What the closed form does not cover
+
+- **Offset progressions** $d_i = a + bi$ with $a > 0$: $G$ need not be convex and $L < E$ occurs.
+  With $d = (5, 7, 9, 11)$, $c_i = 24 - 2d_i$, $t = 7$ and $p = 4$, $L(20) = 80 < E(20) = 84$.
+- **The other generator families** (log, sqrt, $2^i$, staircase) have no closed form. On them the
+  front needs the general algorithm, and the 2016 greedy can miss points. Whether that greedy is
+  exact on the linear family is open ([Conjecture 10.2](../proofs.qmd#node-conjecture-10-2)); it
+  agreed on 115 small instances.
+
+## The ends of every front {#ends}
+
+Whatever the family, under (S), [Proposition 7.10](../proofs.qmd#node-proposition-7-10) fixes the
+two ends of the front:
+
+- the fastest makespan is $M_1 = 2\,d_{\min}\,\kappa$;
+- the cheapest cost is $s\,c_{\min}$, reached first at makespan $2\,d_{\rm cheap}\,\kappa$, where
+  $d_{\rm cheap}$ is the shortest duration among the cheapest cities.
+
+Certificates rely on both (obligations 2 and 4 of the [format](../solver/certificates.qmd)).
+
+## Small instances with checked fronts {#checked}
+
+- **The 27 golden instances** ([suites](suites.qmd#golden)): fronts of the exhaustive oracle, in
+  `tests/golden/fronts/`.
+- **The LPT counterexample**, $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$: six points, (160, 80),
+  (200, 72), (240, 64), (260, 60), (280, 56) and (320, 48). The 2016 greedy misses (260, 60). This
+  front is proved in Lean by the kernel alone, for every table of central flights
+  (`Examples.lptCounterexample_front`, [§5](../proofs.qmd#node-s5)).
+- **Proposition 6.5**, non-symmetric: $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$,
+  $p = 4$, no central flights. The front is (10, 90), (14, 74), (18, 68), (22, 66), (26, 52),
+  (34, 42), (38, 36), (42, 30), (50, 18), as (cost, makespan). An exhaustive search over all plans
+  (937 million states) gives the same front. It is the instance on which waiting is harmful: the
+  role-load bound alone stays below the front, and two of its gaps are closed only by the `search`
+  kind ([Proposition 6.5](../proofs.qmd#node-proposition-6-5)).
+- **Zero costs**, $n = 1$, $d_1 = 1$, $c_1 = 0$, $t = 5$, $p = 3$: the front is the single point
+  (0, 6), and plans with more than $s$ landings also reach it (the remark under
+  [Corollary 4.8](../proofs.qmd#node-corollary-4-8)).

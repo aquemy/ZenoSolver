@@ -1,0 +1,70 @@
+---
+title: "PDDL"
+subtitle: "The domain file, the problems zeno writes, and plane goals"
+---
+
+MultiZenoTravel was designed as a benchmark for multi-objective temporal planners. `zeno pddl`
+writes any instance as a PDDL 2.1 problem for the domain in `pddl/`, with its exact front as
+comments, so that a planner's output can be scored against the true front.
+
+## The domain
+
+`pddl/multi-zeno-travel.pddl` (PDDL 2.1 level 3: durative actions and numeric fluents), as it
+stands in the repository:
+
+{{< include _pddl-domain.md >}}
+
+- `fly` lasts `(timeTerre ?from ?to)`. Its only condition is that the plane is at `?from` at the
+  start, and it adds `(citythreat ?to)` to `total-cost` when it lands.
+- `board` and `debark` are instantaneous, and `(libre ?a)` holds while plane `?a` is empty, which
+  enforces capacity one.
+- The metric minimises `total-time` and `total-cost` together.
+
+## Problems
+
+```sh
+zeno pddl [instance options] [-O FILE] [--no-front]
+```
+
+The default file name is `zeno<n>n<t>t<p>pMulti.pddl`. A complete example, for $n = 2$, $t = 2$,
+$p = 1$ (durations $(1, 2)$, costs $(2, 1)$ after the [swap](model.qmd#swap)):
+
+{{< include _pddl-problem.md >}}
+
+- `city0` is $C_I$, `city1`…`cityN` the central cities, `city(N+1)` is $C_G$; `citythreat` is the
+  landing cost, 0 for both hubs.
+- `timeTerre` is written for both orders of every pair: $d_i$ between $C_I$ and $i$, $\bar d_i$
+  between $C_G$ and $i$, and $\max(d_i, \bar d_i) + \max(d_j, \bar d_j) + 100$ between two central
+  cities. Central flights are never faster than through a hub, so every problem satisfies (A1)
+  when symmetric and (A1-NS) otherwise. They are written for every pair, so the file is quadratic
+  in $n$.
+- Every person and every plane starts in $C_I$, and the goal puts all of them in $C_G$.
+- The trailing comments list the durations (both sides when non-symmetric), the costs, and, for a
+  symmetric instance without `--no-front`, the Pareto front as `makespan cost` lines. Note the
+  order: makespan first, the reverse of `zeno front`'s `cost makespan`.
+
+## Plane goals {#plane-goals}
+
+The goal requires every **plane** to end in $C_G$ as well as every person. Problem files written
+before plane goals were added (pull request #9) only constrain the persons: planes may end
+anywhere, and the makespan is the last arrival. For symmetric instances under (A1) that variant
+has the same front ([Theorem 4.9](../proofs.qmd#node-theorem-4-9), machine-checked), so the fronts
+in old files remain valid. The Lean checker covers it too, for certificates of version 1
+(`Cert.check_sound_anywhere`).
+
+## Makespan semantics {#semantics}
+
+`board` and `debark` take no time in the model. Under the ε-separation of PDDL 2.1, a planner's
+plan with $k$ actions on its critical path ends at $M + O(k\varepsilon)$, where $M$ is the sum of
+the flight durations on that path. ZenoSolver reports $M$, the makespan in the limit
+$\varepsilon \to 0$. [Statement 1.2](../proofs.qmd#node-statement-1-2) of the note argues the
+correspondence in both directions (a sketch, not formalised). Plans of the domain are event-ordered,
+and for those the front is the same ([Corollary 6.10](../proofs.qmd#node-corollary-6-10)).
+Whether PDDL planners and VAL accept zero-duration actions is not checked.
+
+## Size
+
+The writer is quadratic in $n$, because of the central flights: about $2n^2$ `timeTerre` lines.
+On an Apple M4 Max, a problem with $n = 1000$ is written in 0.36 s and takes 46 MB. Without
+`--no-front`, `zeno pddl` also solves the instance first, which adds its solve time
+([size guidance](sizing.qmd)).
