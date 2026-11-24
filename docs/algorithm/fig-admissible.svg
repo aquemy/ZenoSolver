@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 990" width="1200" height="990">
+  <defs>
+    <style type="text/css"><![CDATA[
+      /* THEME: clean - deterministic system monospace. NO network @import.
+         Never add an @import here (and never write &amp; inside CDATA - the literal
+         &amp; breaks the URL, the font silently fails, and the render becomes
+         non-deterministic). For the retro VT323 look, copy assets/scaffold-retro.svg
+         instead - it embeds the font as base64 (also zero-network). adv ≈ 0.60em. */
+      text          { fill: #111111; font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .mono         { font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .title        { font-size: 40px; font-weight: 500; }
+      .section-label{ font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* INPUTS / OUTPUTS / zone tags */
+      .layer-tag    { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* tag above a band / layer / boundary */
+      .layer-label  { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }
+      .zone-label   { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* under a zone-band cell */
+      .box-h        { font-size: 28px; }                                       /* box heading */
+      .box-s        { font-size: 17px; fill: #6b7280; }                        /* box subtext, gray */
+      .box-v        { font-size: 18px; fill: #475569; }                        /* box value, slate */
+      .center-h     { font-size: 32px; fill: #ffffff; }                        /* heading on a genuinely DARK fill */
+      .center-s     { font-size: 18px; fill: #ffffff; }                        /* subtext on a dark fill */
+      .arrow-label  { font-size: 20px; fill: #6b7280; font-style: italic; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }  /* verb on a connector; white halo */
+      .caption      { font-size: 22px; fill: #111111; }                        /* one-line takeaway, bottom-center */
+      .id-big       { font-size: 76px; letter-spacing: 4px; }                  /* hero identifier (anatomy) */
+      .id-uuid      { font-size: 32px; letter-spacing: 1px; fill: #475569; }
+      .segment-label{ font-size: 20px; letter-spacing: 2px; }                  /* anatomy segment label */
+      .range        { font-size: 38px; }                                       /* big number in a zone band */
+      .signal-code  { font-size: 28px; }                                       /* legend code */
+      .signal-name  { font-size: 18px; fill: #475569; }                        /* legend name / gloss */
+    
+      .h24 { font-size: 24px; }
+      .h22 { font-size: 22px; }
+      .s19 { font-size: 19px; fill: #475569; }
+      .s18 { font-size: 18px; fill: #6b7280; }
+      .s17 { font-size: 17px; fill: #6b7280; }
+      .tok { font-size: 24px; }
+      .cell { font-size: 22px; }
+      .tag  { font-size: 16px; letter-spacing: 3px; fill: #6b7280; }
+    ]]></style>
+
+    <!-- Watercolor wash - feTurbulence + feDisplacementMap + blur. Put on COLORED FILL rects / shapes. -->
+    <filter id="wash-a" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="3" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" scale="16"/>
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <filter id="wash-b" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="9"/>
+      <feDisplacementMap in="SourceGraphic" scale="14"/>
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="wash-c" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="14"/>
+      <feDisplacementMap in="SourceGraphic" scale="18"/>
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <!-- Ink wobble - turbulence + small displacement, NO blur. Put on STROKES of 2-D shapes. -->
+    <filter id="ink-a" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+    <filter id="ink-b" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="13"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.8"/>
+    </filter>
+    <filter id="ink-c" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="21"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1200" height="990" fill="#ffffff"/>
+  <text x="600.0" y="50" text-anchor="middle" class="title">Admissible partitions</text>
+  <path d="M 328 68 Q 464 65 600 68 Q 736 71 872 67" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round" filter="url(#ink-a)"/>
+  <path d="M 600.00 105.00 L 599.77 145.50 L 600.48 186.00 L 600.40 226.50 L 599.54 267.00 L 598.82 307.50 L 600.95 348.00 L 598.85 388.50 L 598.87 429.00 L 600.62 469.50 L 600.40 510.00 L 600.38 550.50 L 599.34 591.00 L 599.03 631.50 L 599.30 672.00 L 601.15 712.50 L 601.18 753.00 L 600.16 793.50 L 599.47 834.00 L 599.80 874.50 L 600.00 915.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="300.0" y="120.0" text-anchor="middle" class="mono section-label">ADMISSIBLE</text>
+  <text x="300.0" y="152.0" text-anchor="middle" class="mono s19">X = {2, 2, 3, 3}</text>
+  <text x="70.0" y="192.0" text-anchor="start" class="mono tag">GROUPS</text>
+  <rect x="72" y="199" width="216" height="158" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
+  <rect x="80" y="207" width="200" height="142" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="180.0" y="240.0" text-anchor="middle" class="mono h22">PLANE 1</text>
+  <text x="180.0" y="335.0" text-anchor="middle" class="mono s17">size 2: even</text>
+  <rect x="122.0" y="259.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-a)"/>
+  <rect x="128.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="150.0" y="295.5" text-anchor="middle" class="mono tok">2</text>
+  <rect x="182.0" y="259.0" width="56" height="56" fill="#8fbcb1" opacity="0.62" filter="url(#wash-c)"/>
+  <rect x="188.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-a)"/>
+  <text x="210.0" y="295.5" text-anchor="middle" class="mono tok">3</text>
+  <rect x="312" y="199" width="216" height="158" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
+  <rect x="320" y="207" width="200" height="142" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="420.0" y="240.0" text-anchor="middle" class="mono h22">PLANE 2</text>
+  <text x="420.0" y="335.0" text-anchor="middle" class="mono s17">size 2: even</text>
+  <rect x="362.0" y="259.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-a)"/>
+  <rect x="368.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="390.0" y="295.5" text-anchor="middle" class="mono tok">2</text>
+  <rect x="422.0" y="259.0" width="56" height="56" fill="#8fbcb1" opacity="0.62" filter="url(#wash-c)"/>
+  <rect x="428.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-a)"/>
+  <text x="450.0" y="295.5" text-anchor="middle" class="mono tok">3</text>
+  <g transform="translate(0 16)">
+  <text x="70.0" y="392.0" text-anchor="start" class="mono tag">PARITY MATRIX h</text>
+  <text x="225.0" y="428.0" text-anchor="middle" class="mono s17">city 1</text>
+  <text x="305.0" y="428.0" text-anchor="middle" class="mono s17">city 2</text>
+  <text x="385.0" y="428.0" text-anchor="middle" class="mono s17">city 3</text>
+  <text x="485.0" y="428.0" text-anchor="middle" class="mono s17">row sum</text>
+  <path d="M 90.00 442.00 L 130.00 441.35 L 170.00 440.82 L 210.00 442.15 L 250.00 441.17 L 290.00 442.97 L 330.00 442.12 L 370.00 441.87 L 410.00 443.12 L 450.00 442.14 L 490.00 442.74 L 530.00 442.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="135.0" y="486.0" text-anchor="middle" class="mono s18">plane 1</text>
+  <text x="225.0" y="486.0" text-anchor="middle" class="mono cell">0</text>
+  <rect x="285" y="458" width="40" height="40" fill="#dcc085" opacity="0.7" filter="url(#wash-b)"/>
+  <text x="305.0" y="486.0" text-anchor="middle" class="mono cell">1</text>
+  <text x="385.0" y="486.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="485.0" y="485.0" text-anchor="middle" class="mono s18">1: odd ✓</text>
+  <text x="135.0" y="532.0" text-anchor="middle" class="mono s18">plane 2</text>
+  <text x="225.0" y="532.0" text-anchor="middle" class="mono cell">0</text>
+  <rect x="285" y="504" width="40" height="40" fill="#dcc085" opacity="0.7" filter="url(#wash-c)"/>
+  <text x="305.0" y="532.0" text-anchor="middle" class="mono cell">1</text>
+  <text x="385.0" y="532.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="485.0" y="531.0" text-anchor="middle" class="mono s18">1: odd ✓</text>
+  <path d="M 90.00 550.00 L 130.00 549.91 L 170.00 549.82 L 210.00 549.75 L 250.00 550.76 L 290.00 549.13 L 330.00 550.80 L 370.00 550.56 L 410.00 550.32 L 450.00 549.05 L 490.00 549.53 L 530.00 550.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="135.0" y="582.0" text-anchor="middle" class="mono s18">column</text>
+  <text x="225.0" y="583.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="305.0" y="583.0" text-anchor="middle" class="mono cell">2</text>
+  <text x="385.0" y="583.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="485.0" y="582.0" text-anchor="middle" class="mono s18">all even ✓</text>
+  <text x="70.0" y="640.0" text-anchor="start" class="mono tag">GRAPH H</text>
+  <path d="M 210.00 712.00 L 229.19 740.58 L 250.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 210.00 712.00 L 237.90 723.45 L 266.08 734.21 L 294.42 744.54 L 321.66 757.64 L 350.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 390.00 712.00 L 362.31 723.98 L 334.02 734.44 L 306.08 745.80 L 278.25 757.43 L 250.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 390.00 712.00 L 370.65 740.47 L 350.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="210" cy="688" r="32" fill="#d2cabb" opacity="0.5" filter="url(#wash-a)"/>
+  <circle cx="210" cy="688" r="25" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-b)"/>
+  <text x="210.0" y="695.5" text-anchor="middle" class="mono h22">P1</text>
+  <circle cx="390" cy="688" r="32" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+  <circle cx="390" cy="688" r="25" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+  <text x="390.0" y="695.5" text-anchor="middle" class="mono h22">P2</text>
+  <rect x="224.0" y="764.0" width="52" height="52" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-b)"/>
+  <rect x="230.0" y="770.0" width="40" height="40" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-c)"/>
+  <text x="250.0" y="798.5" text-anchor="middle" class="mono tok">2</text>
+  <rect x="324.0" y="764.0" width="52" height="52" fill="#8fbcb1" opacity="0.62" filter="url(#wash-a)"/>
+  <rect x="330.0" y="770.0" width="40" height="40" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="350.0" y="798.5" text-anchor="middle" class="mono tok">3</text>
+  <text x="300.0" y="845.0" text-anchor="middle" class="mono s18">one component, two even planes ✓</text>
+  <text x="300.0" y="888.0" text-anchor="middle" class="mono s19">cost 14, δ = 8 and 8: point (14, 16)</text>
+  </g>
+  <text x="900.0" y="120.0" text-anchor="middle" class="mono section-label">NOT ADMISSIBLE</text>
+  <text x="900.0" y="152.0" text-anchor="middle" class="mono s19">X = {1, 2, 2, 3}</text>
+  <text x="670.0" y="192.0" text-anchor="start" class="mono tag">GROUPS</text>
+  <rect x="672" y="199" width="216" height="158" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+  <rect x="680" y="207" width="200" height="142" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+  <text x="780.0" y="240.0" text-anchor="middle" class="mono h22">PLANE 1</text>
+  <text x="780.0" y="335.0" text-anchor="middle" class="mono s17">size 2: even</text>
+  <rect x="722.0" y="259.0" width="56" height="56" fill="#d3a3ad" opacity="0.6000000000000001" filter="url(#wash-b)"/>
+  <rect x="728.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-c)"/>
+  <text x="750.0" y="295.5" text-anchor="middle" class="mono tok">1</text>
+  <rect x="782.0" y="259.0" width="56" height="56" fill="#8fbcb1" opacity="0.62" filter="url(#wash-a)"/>
+  <rect x="788.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="810.0" y="295.5" text-anchor="middle" class="mono tok">3</text>
+  <rect x="912" y="199" width="216" height="158" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+  <rect x="920" y="207" width="200" height="142" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+  <text x="1020.0" y="240.0" text-anchor="middle" class="mono h22">PLANE 2</text>
+  <text x="1020.0" y="335.0" text-anchor="middle" class="mono s17">size 2: even</text>
+  <rect x="962.0" y="259.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-b)"/>
+  <rect x="968.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-c)"/>
+  <text x="990.0" y="295.5" text-anchor="middle" class="mono tok">2</text>
+  <rect x="1022.0" y="259.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-a)"/>
+  <rect x="1028.0" y="265.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="1050.0" y="295.5" text-anchor="middle" class="mono tok">2</text>
+  <g transform="translate(0 16)">
+  <text x="670.0" y="392.0" text-anchor="start" class="mono tag">PARITY MATRIX h</text>
+  <text x="825.0" y="428.0" text-anchor="middle" class="mono s17">city 1</text>
+  <text x="905.0" y="428.0" text-anchor="middle" class="mono s17">city 2</text>
+  <text x="985.0" y="428.0" text-anchor="middle" class="mono s17">city 3</text>
+  <text x="1085.0" y="428.0" text-anchor="middle" class="mono s17">row sum</text>
+  <path d="M 690.00 442.00 L 730.00 441.05 L 770.00 441.46 L 810.00 442.76 L 850.00 441.37 L 890.00 442.21 L 930.00 442.25 L 970.00 442.90 L 1010.00 442.35 L 1050.00 441.59 L 1090.00 440.83 L 1130.00 442.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="735.0" y="486.0" text-anchor="middle" class="mono s18">plane 1</text>
+  <text x="825.0" y="486.0" text-anchor="middle" class="mono cell">a</text>
+  <text x="905.0" y="486.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="985.0" y="486.0" text-anchor="middle" class="mono cell">b</text>
+  <text x="1085.0" y="485.0" text-anchor="middle" class="mono s18">a + b = 1</text>
+  <text x="735.0" y="532.0" text-anchor="middle" class="mono s18">plane 2</text>
+  <text x="825.0" y="532.0" text-anchor="middle" class="mono cell">0</text>
+  <rect x="885" y="504" width="40" height="40" fill="#dcc085" opacity="0.7" filter="url(#wash-c)"/>
+  <text x="905.0" y="532.0" text-anchor="middle" class="mono cell">1</text>
+  <text x="985.0" y="532.0" text-anchor="middle" class="mono cell">0</text>
+  <text x="1085.0" y="531.0" text-anchor="middle" class="mono s18">1: odd ✓</text>
+  <path d="M 690.00 550.00 L 730.00 550.04 L 770.00 549.45 L 810.00 551.13 L 850.00 549.98 L 890.00 550.36 L 930.00 550.24 L 970.00 549.93 L 1010.00 550.09 L 1050.00 549.76 L 1090.00 550.57 L 1130.00 550.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="735.0" y="582.0" text-anchor="middle" class="mono s18">column</text>
+  <text x="825.0" y="583.0" text-anchor="middle" class="mono cell">a</text>
+  <text x="905.0" y="583.0" text-anchor="middle" class="mono cell">1</text>
+  <text x="985.0" y="583.0" text-anchor="middle" class="mono cell">b</text>
+  <text x="1085.0" y="582.0" text-anchor="middle" class="mono s18">city 2 odd ✗</text>
+  <text x="670.0" y="640.0" text-anchor="start" class="mono tag">GRAPH H</text>
+  <path d="M 790.00 712.00 L 760.62 740.66 L 730.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 790.00 712.00 L 820.39 739.58 L 850.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 1020.00 712.00 L 1020.00 768.00" fill="none" stroke="#111111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="790" cy="688" r="32" fill="#d2cabb" opacity="0.5" filter="url(#wash-a)"/>
+  <circle cx="790" cy="688" r="25" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-b)"/>
+  <text x="790.0" y="695.5" text-anchor="middle" class="mono h22">P1</text>
+  <circle cx="1020" cy="688" r="32" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+  <circle cx="1020" cy="688" r="25" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+  <text x="1020.0" y="695.5" text-anchor="middle" class="mono h22">P2</text>
+  <rect x="704.0" y="764.0" width="52" height="52" fill="#d3a3ad" opacity="0.6000000000000001" filter="url(#wash-b)"/>
+  <rect x="710.0" y="770.0" width="40" height="40" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-c)"/>
+  <text x="730.0" y="798.5" text-anchor="middle" class="mono tok">1</text>
+  <rect x="824.0" y="764.0" width="52" height="52" fill="#8fbcb1" opacity="0.62" filter="url(#wash-a)"/>
+  <rect x="830.0" y="770.0" width="40" height="40" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="850.0" y="798.5" text-anchor="middle" class="mono tok">3</text>
+  <rect x="994.0" y="764.0" width="52" height="52" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-c)"/>
+  <rect x="1000.0" y="770.0" width="40" height="40" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-a)"/>
+  <text x="1020.0" y="798.5" text-anchor="middle" class="mono tok">2</text>
+  <text x="900.0" y="845.0" text-anchor="middle" class="mono s18">{plane 2, city 2}: one even plane ✗</text>
+  <text x="900.0" y="888.0" text-anchor="middle" class="mono s19">cost 22, δ = 7 and 6: not a candidate</text>
+  </g>
+  <text x="600.0" y="956" text-anchor="middle" class="caption">h exists iff every component of H holds an even number of even planes</text>
+</svg>

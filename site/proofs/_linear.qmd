@@ -1,13 +1,13 @@
 ## The linear family (default generator) {#sec-linear}
 
 The generator's default instances have costs affine in durations. §10 gives their front in closed
-form, which is why the published benchmark fronts are probably right despite the greedy.
+form, valid whatever the central flights.
 
 ### Theorem 10.1 {#node-theorem-10-1}
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [1.1](#node-lemma-1-1), [2.9](#node-lemma-2-9), [3.4](#node-lemma-3-4), [4.1](#node-theorem-4-1), [7.2](#node-lemma-7-2), [7.10](#node-proposition-7-10)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §10).
 
 **Theorem 10.1.** Assume (S), $d_i = i$ and $c_i = \alpha - \beta i$ for $i = 1,\dots,n$, with $\beta \ge 0$ and
@@ -79,9 +79,6 @@ What the theorem does not cover:
   occurs. With $d = (5, 7, 9, 11)$, $c_i = 24 - 2d_i$, $t = 7$ and $p = 4$, $L(20) = 80 < E(20) = 84$ (by
   enumeration; 4 of 5,904 levels on 150 random offset instances). Contiguity from the step is essential: the
   two-city instance $d = (6, 10)$ of §5 is affine as well.
-* **Conjecture 10.2.** The papers' per-PPP greedy reaches the front of Theorem 10.1. Evidence: equal fronts on
-  115 instances with $n \le 6$, $p \le 5$ and $s \le 11$. Correctness does not depend on it, since the front
-  is in closed form.
 * The other generator families (logarithm, square root, $2^i$, $(5/2)i$) have no closed form; the general
   algorithm applies.
 :::
@@ -101,9 +98,6 @@ What the theorem does not cover:
   occurs. With $d = (5, 7, 9, 11)$, $c_i = 24 - 2d_i$, $t = 7$ and $p = 4$, $L(20) = 80 < E(20) = 84$ (by
   enumeration; 4 of 5,904 levels on 150 random offset instances). Contiguity from the step is essential: the
   two-city instance $d = (6, 10)$ of §5 is affine as well.
-* **Conjecture 10.2.** The papers' per-PPP greedy reaches the front of Theorem 10.1. Evidence: equal fronts on
-  115 instances with $n \le 6$, $p \le 5$ and $s \le 11$. Correctness does not depend on it, since the front
-  is in closed form.
 * The other generator families (logarithm, square root, $2^i$, $(5/2)i$) have no closed form; the general
   algorithm applies.
 :::
@@ -114,7 +108,7 @@ What the theorem does not cover:
 
 **Lean** [informal]{.badge .informal} · **Note** [open problem]{.badge .open} · **Hypotheses** (S), (A1)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §10).
 
 **Conjecture 10.2.** The papers' per-PPP greedy reaches the front of Theorem 10.1. Evidence: equal fronts on

@@ -1,0 +1,45 @@
+/* Shared visual tokens of the site: every chart and interactive figure uses these roles, so light
+   and dark switch in one place. Values: the dataviz skill's reference palette (validated slots
+   1-3, light and dark steps chosen separately, not flipped). Quarto adds .quarto-dark to <body>
+   in dark mode; the media query covers pages rendered without the toggle. */
+
+:root {
+  --zs-surface: #fcfcfb;
+  --zs-surface-2: #f3f2ef;
+  --zs-ink: #0b0b0b;           /* text-primary */
+  --zs-ink-2: #52514e;         /* text-secondary */
+  --zs-ink-3: #8a8983;         /* muted: grid, axes */
+  --zs-rule: #e2e1dc;          /* gridlines, borders */
+  --zs-series-1: #2a78d6;      /* blue: the exact front, zeno */
+  --zs-series-2: #eb6834;      /* orange: the 2016 solver, a highlighted plan */
+  --zs-series-3: #1baf7a;      /* aqua: a third series (bounds, passengers) */
+  --zs-accent: #2a78d6;
+}
+
+body.quarto-dark {
+  --zs-surface: #1a1a19;
+  --zs-surface-2: #242422;
+  --zs-ink: #f0efec;
+  --zs-ink-2: #c3c2b7;
+  --zs-ink-3: #8f8e86;
+  --zs-rule: #3a3a37;
+  --zs-series-1: #3987e5;
+  --zs-series-2: #d95926;
+  --zs-series-3: #199e70;
+  --zs-accent: #3987e5;
+}
+
+/* Categorical passenger colours for plan views (slots 1, 3, 5, 7 of the reference palette, so they
+   never collide with the front's blue/orange pair in one figure). */
+:root {
+  --zs-pax-1: #2a78d6;
+  --zs-pax-2: #1baf7a;
+  --zs-pax-3: #e87ba4;
+  --zs-pax-4: #6250d6;
+}
+body.quarto-dark {
+  --zs-pax-1: #3987e5;
+  --zs-pax-2: #199e70;
+  --zs-pax-3: #d55181;
+  --zs-pax-4: #9085e9;
+}

@@ -36,10 +36,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,11 +74,174 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
 
+<link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/provenance.css">
 <link rel="stylesheet" href="styles/site.css">
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -92,71 +259,21 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
-<span class="menu-text">Home</span></a>
+    <a class="nav-link" href="./problem.html"> 
+<span class="menu-text">Problem</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Solver</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
-        <li>
-    <a class="dropdown-item" href="./solver/install.html">
- <span class="dropdown-text">Installation and build</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./paper/index.html"> 
+<span class="menu-text">Paper</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/cli.html">
- <span class="dropdown-text">Command line</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./instances/index.html"> 
+<span class="menu-text">Instances</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/api.html">
- <span class="dropdown-text">C++ library</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./solver/install.html"> 
+<span class="menu-text">Solver</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/certificates.html">
- <span class="dropdown-text">Certificate format</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/lean.html">
- <span class="dropdown-text">Lean tools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/algorithm.html">
- <span class="dropdown-text">Algorithm</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Instances</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
-        <li>
-    <a class="dropdown-item" href="./instances/model.html">
- <span class="dropdown-text">Model and data files</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/generator.html">
- <span class="dropdown-text">Generator</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/pddl.html">
- <span class="dropdown-text">PDDL</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/suites.html">
- <span class="dropdown-text">Benchmark and golden suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/known-fronts.html">
- <span class="dropdown-text">Instances with known fronts</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/sizing.html">
- <span class="dropdown-text">Size guidance</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Theory</span>
@@ -181,14 +298,6 @@ ul.task-list li input[type="checkbox"] {
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="./experiments.html"> 
-<span class="menu-text">Experiments</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./results.html"> 
-<span class="menu-text">Results</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -199,19 +308,10 @@ ul.task-list li input[type="checkbox"] {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="./blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
-</i> 
-<span class="menu-text"></span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -223,6 +323,7 @@ ul.task-list li input[type="checkbox"] {
     
 <!-- main -->
 <main class="content" id="quarto-document-content">
+
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -245,28 +346,18 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>Every result of the <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md">theory note</a> is a <strong>claim</strong> in the registry <code>claims.toml</code>, and every change to its status is a <a href="https://conventional-knowledge-commits.org/">Conventional Knowledge Commit</a>: a commit whose type (<code>proof</code>, <code>formalize</code>, <code>conjecture</code>, <code>refute</code>, <code>lit</code>, …) and footers (<code>Status:</code>, <code>Depends-On:</code>, <code>Closes:</code>, <code>Disproves:</code>) record what it asserts and what it rests on (<a href="https://github.com/aquemy/ZenoSolver/blob/master/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a>). The graph below is rebuilt from those commits when the site is built.</p>
-<p>The graph has <strong>57 claims</strong>, 27 Lean declarations that close them and 2 refutations, joined by 23 <code>Closes</code>, 80 <code>Depends-On</code>, 2 <code>Disproves</code> edges. By effective status, the claims are <strong>23</strong> machine-checked, <strong>28</strong> proof in the note, <strong>4</strong> conjectured, <strong>2</strong> disproved. The replay has <strong>59 knowledge commits</strong>, all of 2026-11-24; the other 221 commits of the history (features, fixes, documentation) are left out.</p>
+<p>The graph has <strong>91 claims</strong>, 38 Lean declarations that close them and 2 refutations, joined by 36 <code>Closes</code>, 163 <code>Depends-On</code>, 2 <code>Disproves</code>, 1 <code>Proves</code> edges. By effective status, the claims are <strong>11</strong> machine-checked, <strong>62</strong> proof in the note, <strong>4</strong> conjectured, <strong>2</strong> disproved. The replay has <strong>112 knowledge commits</strong>, all of 2026-11-24; the other 243 commits of the history (features, fixes, documentation) are left out.</p>
 <p>A node’s colour is its <strong>effective status</strong>: the weakest of its own status and of everything it depends on, so an open or refuted claim colours every result that rests on it. Click a node to trace its dependencies; press <strong>Play</strong>, or drag the slider, to replay the knowledge commits in order.</p>
 <iframe src="graph/claimgraph-viewer.html" title="Claim graph viewer" loading="lazy" style="width:100%;height:820px;border:1px solid var(--bs-border-color,#dee2e6);border-radius:6px">
 </iframe>
-<p><a href="graph/claimgraph-viewer.html">Open the viewer on its own page</a> · <a href="graph/claimgraph.json">the graph as JSON</a> · <a href="./history.html">the commit history</a></p>
+<p><a href="graph/claimgraph-viewer.html">Open the viewer on its own page</a> · <a href="./history.html">the commit history</a></p>
 <p>The statuses are those of the ledger:</p>
 <ul>
 <li><strong>machine-checked</strong>: a clean Lean kernel proof (axioms among <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>), recorded by a <code>formalize</code> commit that closes the claim with its declaration;</li>
 <li><strong>proved informally</strong>: a complete written proof in the note;</li>
 <li><strong>conjectured</strong>: open, or only sketched, in the note;</li>
-<li><strong>disproved</strong>: refuted by a counterexample, like the papers’ claims that their per-PPP greedy is optimal and that waiting is never harmful.</li>
+<li><strong>disproved</strong>: refuted by a counterexample, like the conjecture that shuttle triples complete the non-symmetric front (Conjecture 6.7), or a converse under (S) alone (Example 4.13).</li>
 </ul>
-<div class="callout callout-style-simple callout-note">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Where the graph and the blueprint differ.</strong> The ledger counts <a href="./proofs.html#node-lemma-1-1">Lemma 1.1</a> (<code>lem-1-1</code>), <a href="./proofs.html#node-lemma-2-1">Lemma 2.1</a> (<code>lem-2-1</code>) as machine-checked: its entry records the Lean form, which is narrower than the note’s statement. The blueprint badges a node machine-checked only when its Lean covers the whole statement, so it lists these declarations as formalised parts and keeps the note’s status.</p>
-</div>
-</div>
-</div>
 <section id="how-it-is-built" class="level2">
 <h2 class="anchored" data-anchor-id="how-it-is-built">How it is built</h2>
 <p><code>site/gen_graph.py</code> reads the history with <a href="https://github.com/hotherio/claimgraph">claimgraph</a> and keeps only the knowledge commits, those whose type belongs to a CKC profile. The other commits (features, fixes, documentation) would add a node per scope and a replay step each, with no claim status to show, so the graph and its replay are compacted to the knowledge commits. The registry <code>claims.toml</code> gives each claim its statement and Lean declarations. <code>claimgraph status . --claims claims.toml</code> prints the same statuses from the command line.</p>
@@ -277,6 +368,19 @@ ul.task-list li input[type="checkbox"] {
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -684,8 +788,8 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>
     <div class="nav-footer-right">
-<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
-</div>
+      &nbsp;
+    </div>
   </div>
 </footer>
 

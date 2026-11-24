@@ -21,18 +21,16 @@ Exit codes: 0 on success; 1 on an error (the message on stderr starts with `zeno
 
 ## Instance options {#instance-options}
 
-All four commands but `check` build an instance from the same options. They are the options of the
-2016 `zenoSolver`, and each means what its name says: `-C` the costs, `-D` the durations, `-E` and
-`-W` the two duration sides; data files are read as written. The
-[generator page](../instances/generator.qmd) gives the formulas and the translation of 2016 and
-paper instances, whose options read differently, and the [model page](../instances/model.qmd) the
-data file formats.
+All four commands but `check` build an instance from the same options, and each means what its
+name says: `-C` the costs, `-D` the durations, `-E` and `-W` the two duration sides; data files are
+read as written. The [generator page](../instances/generator.qmd) gives the formulas, and the
+[model page](../instances/model.qmd) the data file formats.
 
 | Option | Default | Meaning |
 |---|---|---|
 | `-n N` | 3 | Central cities. |
 | `-t N` | 3 | Passengers. |
-| `-p N` | 2 | Planes, $1 \le p \le t$. Unlike the 2016 solvers, $t = p$ is accepted. |
+| `-p N` | 2 | Planes, $1 \le p \le t$. |
 | `-d FILE` | — | Data file: durations then costs (2 lines, symmetric), or C~I~-side durations, C~G~-side durations, costs (3 lines). Every line has $n$ integers. Overrides the generator. |
 | `-C K` | 3 | Cost generator: 1 log, 2 sqrt, 3 identity, 4 power of two, 5 staircase. |
 | `-D K` | 3 | Duration generator, same codes. |
@@ -178,8 +176,8 @@ zeno pddl -n 10 -t 8 -p 3 -O p.pddl --no-front
 ```
 
 Writes the instance as a PDDL 2.1 problem for the domain `pddl/multi-zeno-travel.pddl`
-([PDDL page](../instances/pddl.qmd)). The default file name is `zeno<n>n<t>t<p>pMulti.pddl`, the
-2016 one; `-O FILE` sets it. For a symmetric instance the front is solved and appended as
+([PDDL page](../instances/pddl.qmd)). The default file name is `zeno<n>n<t>t<p>pMulti.pddl`; `-O FILE`
+sets it. For a symmetric instance the front is solved and appended as
 comments, unless `--no-front`. Non-symmetric problems are written without a front.
 
 ## `generate`: write a data file {#generate}

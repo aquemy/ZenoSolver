@@ -36,10 +36,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,11 +74,174 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
 
+<link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/provenance.css">
 <link rel="stylesheet" href="styles/site.css">
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -92,71 +259,21 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
-<span class="menu-text">Home</span></a>
+    <a class="nav-link" href="./problem.html"> 
+<span class="menu-text">Problem</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Solver</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
-        <li>
-    <a class="dropdown-item" href="./solver/install.html">
- <span class="dropdown-text">Installation and build</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./paper/index.html"> 
+<span class="menu-text">Paper</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/cli.html">
- <span class="dropdown-text">Command line</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./instances/index.html"> 
+<span class="menu-text">Instances</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/api.html">
- <span class="dropdown-text">C++ library</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./solver/install.html"> 
+<span class="menu-text">Solver</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/certificates.html">
- <span class="dropdown-text">Certificate format</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/lean.html">
- <span class="dropdown-text">Lean tools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/algorithm.html">
- <span class="dropdown-text">Algorithm</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Instances</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
-        <li>
-    <a class="dropdown-item" href="./instances/model.html">
- <span class="dropdown-text">Model and data files</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/generator.html">
- <span class="dropdown-text">Generator</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/pddl.html">
- <span class="dropdown-text">PDDL</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/suites.html">
- <span class="dropdown-text">Benchmark and golden suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/known-fronts.html">
- <span class="dropdown-text">Instances with known fronts</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/sizing.html">
- <span class="dropdown-text">Size guidance</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Theory</span>
@@ -181,14 +298,6 @@ ul.task-list li input[type="checkbox"] {
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="./experiments.html"> 
-<span class="menu-text">Experiments</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./results.html"> 
-<span class="menu-text">Results</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -199,19 +308,10 @@ ul.task-list li input[type="checkbox"] {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="./blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
-</i> 
-<span class="menu-text"></span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -223,6 +323,7 @@ ul.task-list li input[type="checkbox"] {
     
 <!-- main -->
 <main class="content" id="quarto-document-content">
+
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -448,233 +549,604 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td style="text-align: right;">27</td>
 <td>2026-11-24</td>
-<td><a href="https://github.com/aquemy/ZenoSolver/commit/4b398c028e154c8d84cf92f4976110f9da7d1eb0"><code>4b398c0</code></a></td>
-<td>lit(papers): the papers’ per-PPP greedy schedule is optimal</td>
-<td><code>paper-greedy-optimal</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">28</td>
-<td>2026-11-24</td>
-<td><a href="https://github.com/aquemy/ZenoSolver/commit/6e5085f9bd979f643bbb35f307e173c3fc05c523"><code>6e5085f</code></a></td>
-<td>refute(greedy)!: the per-PPP greedy of both papers is not optimal</td>
-<td><code>paper-greedy-optimal</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">29</td>
-<td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/46237f95a6cbfdbfa23bc2f8d9277ed2acea7415"><code>46237f9</code></a></td>
 <td>formalize(lean): Theorem 6.1, every plan gives a role configuration</td>
 <td><code>ZenoFront.Feasible.exists_roleConfig_ns</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">30</td>
+<td style="text-align: right;">28</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/dcee47b98e4939acfd7700e290f21a6a0e3b44d9"><code>dcee47b</code></a></td>
 <td>proof(theory): Lemma 6.2, relaxed role loads bound every plan</td>
 <td><code>lem-6-2</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">31</td>
+<td style="text-align: right;">29</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/bf2991c1277bf59b721f159f4d51b2990c688b29"><code>bf2991c</code></a></td>
 <td>proof(theory): Lemma 6.3, the template schedule and its makespan</td>
 <td><code>lem-6-3</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">32</td>
+<td style="text-align: right;">30</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/8cc034ee3a3fb9db83d42b1438544bbbb1c77389"><code>8cc034e</code></a></td>
 <td>proof(theory): Corollary 6.4, one pick-up never waits harmfully</td>
 <td><code>cor-6-4</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">33</td>
-<td>2026-11-24</td>
-<td><a href="https://github.com/aquemy/ZenoSolver/commit/b2249179e50195d3aae6b44d78836da77b3856bc"><code>b224917</code></a></td>
-<td>lit(papers): no plane waits harmfully for a passenger</td>
-<td><code>paper-no-harmful-waiting</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">34</td>
+<td style="text-align: right;">31</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/b1174248afb9d6df1f70e4b1e8987e30b19cab08"><code>b117424</code></a></td>
 <td>proof(theory): Proposition 6.5, waiting can be harmful</td>
 <td><code>prop-6-5</code></td>
 </tr>
-<tr class="odd">
-<td style="text-align: right;">35</td>
-<td>2026-11-24</td>
-<td><a href="https://github.com/aquemy/ZenoSolver/commit/5d64ff11893e57a4b13daf5e423ffb8438c5bc88"><code>5d64ff1</code></a></td>
-<td>refute(waiting)!: waiting can be harmful, so role loads do not give the front</td>
-<td><code>paper-no-harmful-waiting</code></td>
-</tr>
 <tr class="even">
-<td style="text-align: right;">36</td>
+<td style="text-align: right;">32</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/be5bab548654ed34fd2e2abd657dad5a70427877"><code>be5bab5</code></a></td>
 <td>formalize(lean): Lemma 7.2, the one-plane table</td>
 <td><code>ZenoFront.isLeast_oneplane</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">37</td>
+<td style="text-align: right;">33</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/915b444f6a846e41b9cb80d6bdabc28be87e4b6c"><code>915b444</code></a></td>
 <td>proof(theory): Proposition 6.6, the imbalance-vector DP</td>
 <td><code>prop-6-6</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">38</td>
+<td style="text-align: right;">34</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/77e0cb9ba86628fcf888e1dbc0d681461763fefd"><code>77e0cb9</code></a></td>
 <td>conjecture(theory): Conjecture 6.7, shuttle triples complete the front</td>
 <td><code>conj-6-7</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">39</td>
+<td style="text-align: right;">35</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/7d428002e76fb07fdfd680b67554aed842511b7d"><code>7d42800</code></a></td>
 <td>proof(theory): Lemma 6.8, event order</td>
 <td><code>lem-6-8</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">40</td>
+<td style="text-align: right;">36</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/075a9e14d5d313a0866b86bbb305784231906dbe"><code>075a9e1</code></a></td>
 <td>formalize(lean): Theorem 6.9, schedulable domination for every plan</td>
 <td><code>ZenoFront.schedulableDomination_all</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">41</td>
+<td style="text-align: right;">37</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/923f6e106639021a362414a5fc1213554f119575"><code>923f6e1</code></a></td>
 <td>proof(theory): Corollary 6.10, the non-symmetric front</td>
 <td><code>cor-6-10</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">42</td>
+<td style="text-align: right;">38</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/fd8c9fc826df3184e41ead66a006475e40051970"><code>fd8c9fc</code></a></td>
 <td>proof(theory): end of §6.2, plans that are not event-ordered</td>
 <td><code>claim-6-2-end</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">43</td>
+<td style="text-align: right;">39</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/370e4440e4bfea2ee4d1c7efbcbb86b1536a1179"><code>370e444</code></a></td>
 <td>formalize(lean): Proposition 7.1, the front is the breakpoints of E</td>
 <td><code>ZenoFront.minimal_admissiblePoints_iff</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">44</td>
+<td style="text-align: right;">40</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/bf17cabd8de3f9837749a697f593bd078eb05fce"><code>bf17cab</code></a></td>
 <td>proof(theory): Proposition 7.3, L ≤ E ≤ U_3 ≤ U</td>
 <td><code>prop-7-3</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">45</td>
+<td style="text-align: right;">41</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/152efd7087464e0722739e8f1fa1a324761e8c6a"><code>152efd7</code></a></td>
 <td>proof(theory): Proposition 7.4, when the upper bounds are exact</td>
 <td><code>prop-7-4</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">46</td>
+<td style="text-align: right;">42</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/f56fe5ea87f6861791c2243cc2ded31bb88c11c3"><code>f56fe5e</code></a></td>
 <td>formalize(lean): Theorem 7.5, the link-forest DP computes E(T)</td>
 <td><code>ZenoFront.treeBoundAt_eq_minCost</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">47</td>
+<td style="text-align: right;">43</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/fc53358d84dd6510521dac71279b7f6cd87a16ec"><code>fc53358</code></a></td>
 <td>formalize(lean): Theorem 7.6, the σ-DP computes E(T)</td>
 <td><code>ZenoFront.sigmaBoundAt_eq_minCost</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">48</td>
+<td style="text-align: right;">44</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/94666efab82c6c49f4a61d0172ed8cf0d8367faf"><code>94666ef</code></a></td>
 <td>proof(theory): Lemma 7.7, Pareto sets of combined sets</td>
 <td><code>lem-7-7</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">49</td>
+<td style="text-align: right;">45</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/1e2137162708481b4ff32a5704aedc039c295429"><code>1e21371</code></a></td>
 <td>proof(theory): Proposition 7.8, the Pareto-set variant of the σ-DP</td>
 <td><code>prop-7-8</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">50</td>
+<td style="text-align: right;">46</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/28fb4e0778f7ee9d8e02c958e6d44fad87430899"><code>28fb4e0</code></a></td>
 <td>proof(theory): Proposition 7.9, dominated cities can be removed</td>
 <td><code>prop-7-9</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">51</td>
+<td style="text-align: right;">47</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/280e9d975baa6d6e8edebfda157d18d768fa79e7"><code>280e9d9</code></a></td>
 <td>proof(theory): Proposition 7.10, the ends of the front in closed form</td>
 <td><code>prop-7-10</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">52</td>
+<td style="text-align: right;">48</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/7e5c7166757fecd7640a06de667ca0ecf8133c7c"><code>7e5c716</code></a></td>
 <td>proof(theory): Theorem 8.1, deciding M(X) ≤ 2T is strongly NP-complete</td>
 <td><code>thm-8-1</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">53</td>
+<td style="text-align: right;">49</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/a1e3dc81a5acdbfa73092af00a37823c25dd913a"><code>a1e3dc8</code></a></td>
 <td>proof(theory): Proposition 8.2, the complexity for a fixed number of planes</td>
 <td><code>prop-8-2</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">54</td>
+<td style="text-align: right;">50</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/06657acbb9521079050f94969ed59de7814baa3b"><code>06657ac</code></a></td>
 <td>proof(theory): Corollary 8.3, the front in pseudo-polynomial time</td>
 <td><code>cor-8-3</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">55</td>
+<td style="text-align: right;">51</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/6bda0bf9547ef091e778de2ccfd0905ddf5de634"><code>6bda0bf</code></a></td>
 <td>formalize(lean): Theorem 9.1, certificate obligations imply the front</td>
 <td><code>ZenoFront.Cert.check_sound</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">56</td>
+<td style="text-align: right;">52</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/f07eddc694d03056198fc1cee9ec90c67d5cb3a9"><code>f07eddc</code></a></td>
 <td>proof(theory): Lemma 9.2, potentials bound path weights</td>
 <td><code>lem-9-2</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">57</td>
+<td style="text-align: right;">53</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/39da918575f1ffffbcec8574c9c0f6abdea4ea9c"><code>39da918</code></a></td>
 <td>proof(theory): Lemma 9.3, default potentials for the σ-DP</td>
 <td><code>lem-9-3</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">58</td>
+<td style="text-align: right;">54</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/b24300b85412a13f89d5e9419cbb57c58898548d"><code>b24300b</code></a></td>
 <td>proof(theory): Theorem 10.1, the front of the linear family in closed form</td>
 <td><code>thm-10-1</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">59</td>
+<td style="text-align: right;">55</td>
 <td>2026-11-24</td>
 <td><a href="https://github.com/aquemy/ZenoSolver/commit/260d53920c587987870c02d98d3dbf7eb5d3145f"><code>260d539</code></a></td>
 <td>conjecture(theory): Conjecture 10.2, the papers’ greedy on the linear family</td>
 <td><code>conj-10-2</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">56</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/a8a205800af56ff6680acb296999066cf3a4fd6a"><code>a8a2058</code></a></td>
+<td>proof(theory): Lemma 4.11, removing two landings keeps a partition admissible</td>
+<td><code>lem-4-11</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">57</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/5fa0245ea4196299a80d4522b94d3a084c3e2974"><code>5fa0245</code></a></td>
+<td>proof(theory): Theorem 4.10, the converse without (A1)</td>
+<td><code>thm-4-10</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">58</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/160a162114935f3abe0eb28540c6f2117aa8e8ed"><code>160a162</code></a></td>
+<td>proof(theory): Corollary 4.12, the symmetric fronts under (AΔ)</td>
+<td><code>cor-4-12</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">59</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/2c86701b80470e3e575f0f5988a86ae2f5beeff6"><code>2c86701</code></a></td>
+<td>proof(theory): Example 4.13, a plan beats the admissible front without (AΔ)</td>
+<td><code>claim-4-13</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">60</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/ce6f467e5c7bf2f1fd503b150b72dbd87c6dd19a"><code>ce6f467</code></a></td>
+<td>conjecture(theory): the converse under (S) alone</td>
+<td><code>claim-converse-s-only</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">61</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/f15f87ba76be1033018fa83e895e0329c1131217"><code>f15f87b</code></a></td>
+<td>refute(converse)!: the converse fails without (A1) and (AΔ)</td>
+<td><code>claim-converse-s-only</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">62</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/946acfad8e840154e7bbff74af9275e9494a781d"><code>946acfa</code></a></td>
+<td>review(lean): Lemma 1.1 is only partly formalised</td>
+<td><code>lem-1-1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">63</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/e9b821e231c1f5577bf522428b44388f5d78b0db"><code>e9b821e</code></a></td>
+<td>review(lean): Lemma 2.1 is only partly formalised</td>
+<td><code>lem-2-1</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">64</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/1876760ba93c6327bde25f675e90b442e8234a5d"><code>1876760</code></a></td>
+<td>review(lean): Lemma 2.6 is only partly formalised</td>
+<td><code>lem-2-6</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">65</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/88b9cebcb7743f788a78a3478202a03e56383c81"><code>88b9ceb</code></a></td>
+<td>review(lean): Lemma 2.8 is only partly formalised</td>
+<td><code>lem-2-8</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">66</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/08945aa1c9367fa9823571bbff087a7bd0dbf638"><code>08945aa</code></a></td>
+<td>review(lean): Lemma 3.2 is only partly formalised</td>
+<td><code>lem-3-2</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">67</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/6b2084ccb71b30ef5f042f80811b5bf19fec94e9"><code>6b2084c</code></a></td>
+<td>review(lean): Lemma 3.4 is only partly formalised</td>
+<td><code>lem-3-4</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">68</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/5a1cd8e2779375613b20f62cfdf773d8f762907f"><code>5a1cd8e</code></a></td>
+<td>review(lean): Theorem 4.1 is only partly formalised</td>
+<td><code>thm-4-1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">69</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/3c4c8fe5732d585e40c7fd8e002ac16c3360a6fb"><code>3c4c8fe</code></a></td>
+<td>review(lean): Theorem 4.7 is only partly formalised</td>
+<td><code>thm-4-7</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">70</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/142d6ab580cd75e92983becbb0b5b330535435a4"><code>142d6ab</code></a></td>
+<td>review(lean): Theorem 6.1 is only partly formalised</td>
+<td><code>thm-6-1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">71</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/4ae2aeb541baf7b42051de217ee6d121daaeab54"><code>4ae2aeb</code></a></td>
+<td>review(lean): Theorem 6.9 is only partly formalised</td>
+<td><code>thm-6-9</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">72</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/0ad626c6a67540c2af8a5cf6b07ec875432dbfb5"><code>0ad626c</code></a></td>
+<td>review(lean): Proposition 7.1 is only partly formalised</td>
+<td><code>prop-7-1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">73</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/c1890acff6ee404ff81d714a188c9444348cdd66"><code>c1890ac</code></a></td>
+<td>review(lean): Lemma 7.2 is only partly formalised</td>
+<td><code>lem-7-2</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">74</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/87c7cd8a7fde3db989569ddf462ab924afa74604"><code>87c7cd8</code></a></td>
+<td>review(lean): Theorem 7.5 is only partly formalised</td>
+<td><code>thm-7-5</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">75</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/0cd2d970ec2602955cc65d211ccc9520d09993bb"><code>0cd2d97</code></a></td>
+<td>review(lean): Theorem 7.6 is only partly formalised</td>
+<td><code>thm-7-6</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">76</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/857ab64d703ba82408e418467e9b4af495872615"><code>857ab64</code></a></td>
+<td>review(lean): Theorem 9.1 is only partly formalised</td>
+<td><code>thm-9-1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">77</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/7c58fa3ef137aa7ba8b29ab85840dcab867a3211"><code>7c58fa3</code></a></td>
+<td>review(lean): Corollary 4.8 stays machine-checked</td>
+<td><code>cor-4-8</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">78</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac"><code>6c6fdb8</code></a></td>
+<td>formalize(lean): the segment bound F(γ) ≥ 2 d_x under (S) and (AΔ)</td>
+<td><code>ZenoFront.segment_bound</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">79</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/1b86268184e1fb562a4e5eb4c76c41b94907c61c"><code>1b86268</code></a></td>
+<td>formalize(lean): Lemma 4.11, removing two landings keeps a partition admissible</td>
+<td><code>ZenoFront.Admissible.exists_remove_two</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">80</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/3f228fc64911a105dde0d51ca76c7a8f1d64cace"><code>3f228fc</code></a></td>
+<td>formalize(lean): Steps 2–5 of Theorem 4.10, links, re-pairing and Lemma 2.3</td>
+<td><code>ZenoFront.exists_admissible_of_blocks</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">81</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7"><code>e1ee5c4</code></a></td>
+<td>formalize(lean): Theorem 4.10, the converse under the triangle inequality</td>
+<td><code>ZenoFront.Feasible.exists_admissible_ATri</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">82</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600"><code>ee385d0</code></a></td>
+<td>formalize(lean): Theorem 4.7 with the per-plane bound ℓ(X_k) ≤ F_k</td>
+<td><code>ZenoFront.Feasible.exists_admissible_A1_flightTime</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">83</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7"><code>c6ab63a</code></a></td>
+<td>formalize(lean): Corollary 4.12, the fronts under (AΔ)</td>
+<td><code>ZenoFront.minimal_achievable_iff_multisetPoints_ATri</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">84</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7"><code>0d3ed68</code></a></td>
+<td>formalize(lean): Corollary 4.12, forest gaps and the checker under (AΔ)</td>
+<td><code>ZenoFront.Cert.check_sound_ATri</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">85</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/b736245832c61fa6181a8eb38b5fc36df54042f4"><code>b736245</code></a></td>
+<td>experiment(e1): every front point of zeno is reached by a simulated plan</td>
+<td><code>e1</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">86</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/829a578ebccfd9543a8a9388de1dc3eca33592b6"><code>829a578</code></a></td>
+<td>experiment(e2): no plan beats zeno’s symmetric front on exhaustive searches</td>
+<td><code>e2</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">87</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/e77cad3fb41410513334817cbae8b90f49679e50"><code>e77cad3</code></a></td>
+<td>experiment(e3): the link-forest DP’s levels match a CP-SAT model of E(T)</td>
+<td><code>e3</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">88</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/0b00018a9dccd5f1d2a2a36d801727c292a21500"><code>0b00018</code></a></td>
+<td>experiment(e4): role configurations with exact waiting give the non-symmetric front</td>
+<td><code>e4</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">89</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/bd1b1fe992e60d7469ff91eb91c5975d857899ab"><code>bd1b1fe</code></a></td>
+<td>experiment(e5): waiting changes the front of Proposition 6.5’s instance</td>
+<td><code>e5</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">90</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/7c0f3178c5b5dbf33258ac220d9b0eb4fcd7b9c8"><code>7c0f317</code></a></td>
+<td>experiment(e6): no plan beats E inside a forest gap, targeted search</td>
+<td><code>e6</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">91</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/3895c2eef36fa028bdf1291ce559bf78945ea52c"><code>3895c2e</code></a></td>
+<td>experiment~(e7): zeno’s time grows sublinearly in the level range; frontier of sizes</td>
+<td><code>e7</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">92</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/18ae64aceaf316b888dda40dfcba26af92061d4c"><code>18ae64a</code></a></td>
+<td>experiment(e8): no checker accepts a certificate with a false front</td>
+<td><code>e8</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">93</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/9759eb654f225a910547656ec7853715febc84ba"><code>9759eb6</code></a></td>
+<td>experiment(e9): the linear family’s front is the closed form of Theorem 10.1</td>
+<td><code>e9</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">94</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/9044113e32e2d7f016c3de6d53cfc3403e2fc241"><code>9044113</code></a></td>
+<td>experiment(e10): how often the papers’ greedy returns the exact front</td>
+<td><code>e10</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">95</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/47a70e05b91e152ace85228aecba934d87c35bdc"><code>47a70e0</code></a></td>
+<td>proof(theory): Proposition 6.7, shuttles are not enough</td>
+<td><code>prop-6-7</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">96</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/595f1854cc11ec04358f815ecaea0c20304a124a"><code>595f185</code></a></td>
+<td>refute(theory)!: shuttle triples do not complete the non-symmetric front</td>
+<td><code>conj-6-7</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">97</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/bfcacb9234fc1c6e5661d0f548fa9c704ec02142"><code>bfcacb9</code></a></td>
+<td>state(theory): Definition 6.17, shuttle triples and split crossings</td>
+<td><code>def-6-17</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">98</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/c0c93f6f59c53d2545303717728645b518b251aa"><code>c0c93f6</code></a></td>
+<td>proof(theory): Proposition 6.18, one central flight per segment is not enough</td>
+<td><code>prop-6-18</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">99</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/13784335aa02b260d53ebd0e8552eddfa3066c24"><code>1378433</code></a></td>
+<td>proof(theory): Lemma 6.19, the cut bound on total flight time</td>
+<td><code>lem-6-19</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">100</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/c7edf1f7f6e02362c29033756758c6d48eca816e"><code>c7edf1f</code></a></td>
+<td>proof(theory): Proposition 6.7 covers every plan with central flights in returns</td>
+<td><code>prop-6-7</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">101</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/52f05a133ff144ba170e83f01a9b2de4a7a204af"><code>52f05a1</code></a></td>
+<td>proof(theory): Proposition 6.18 (a)-(c), verified by exhaustive search</td>
+<td><code>prop-6-18</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">102</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/5db01c301f2fe67a4cc68e3775461213e41ced8c"><code>5db01c3</code></a></td>
+<td>conjecture~(theory): Proposition 6.18(d), a front that needs central flights outside crossings</td>
+<td><code>claim-6-18-d</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">103</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/221cce8bef0314099cdccfbe45ea39ced5881b9f"><code>221cce8</code></a></td>
+<td>review(lean): Lemma 4.11 is machine-checked</td>
+<td><code>lem-4-11</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">104</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/0c51a0a5880b6711ded08389c1dfef13bfdf736c"><code>0c51a0a</code></a></td>
+<td>review(lean): Theorem 4.10 is kernel-checked in full</td>
+<td><code>thm-4-10</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">105</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/6c5976d50e52636528b018ca3a6bf6f280e4e3c3"><code>6c5976d</code></a></td>
+<td>review(lean): Theorem 4.7 is kernel-checked in full</td>
+<td><code>thm-4-7</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">106</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/3df94f061c51ea0baea68ead8acc88a51806be69"><code>3df94f0</code></a></td>
+<td>review(lean): Corollary 4.12 is only partly formalised</td>
+<td><code>cor-4-12</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">107</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/e8ab86833c72f4efe8d4f4daf69a2817067c6c5d"><code>e8ab868</code></a></td>
+<td>proof(theory): Proposition 6.12, the reduced front is attained</td>
+<td><code>prop-6-12</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">108</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/f627af5dddf825fc87e2ba8fdfe08760792b1c06"><code>f627af5</code></a></td>
+<td>proof(theory): Proposition 6.13, same least cost</td>
+<td><code>prop-6-13</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">109</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/2f5931593b28c412396bd22753ec85cdd5c264b2"><code>2f59315</code></a></td>
+<td>proof(theory): Example 6.11, the reduction misses the front</td>
+<td><code>claim-6-11</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">110</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/cb526f6dc8f5d0ceb56f780ca5c9439daf814e16"><code>cb526f6</code></a></td>
+<td>proof(theory): Proposition 6.14, dominated cities, Pareto paths</td>
+<td><code>prop-6-14</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">111</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/3d00eba49f3a5991ac9f67b443f8b3a57e90f627"><code>3d00eba</code></a></td>
+<td>proof(theory): Proposition 6.15, where the reduction is exact</td>
+<td><code>prop-6-15</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">112</td>
+<td>2026-11-24</td>
+<td><a href="https://github.com/aquemy/ZenoSolver/commit/88b5db5e93b37da94958299f2585877f6d2c93b6"><code>88b5db5</code></a></td>
+<td>proof(theory): Proposition 6.16, time-expanded flows</td>
+<td><code>prop-6-16</code></td>
 </tr>
 </tbody>
 </table>
@@ -686,6 +1158,19 @@ ul.task-list li input[type="checkbox"] {
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -1093,8 +1578,8 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>
     <div class="nav-footer-right">
-<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
-</div>
+      &nbsp;
+    </div>
   </div>
 </footer>
 

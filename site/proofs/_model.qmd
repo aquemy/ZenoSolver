@@ -1,51 +1,15 @@
 ## The model {#sec-model}
 
-The instance, the plans and the Pareto front, as fixed in §1 of the note. The papers define the
-model informally; the note makes plans precise (routes, journeys, capacity, waiting) and the Lean
-development transcribes that definition. Definitions are the trusted interface of the whole
-formalization: every theorem below is about these objects.
+The instance, the plans and the Pareto front, as fixed in §1 of the note. Plans are precise
+objects (routes, journeys, capacity, waiting), and the Lean development transcribes that
+definition. Definitions are the trusted interface of the whole formalization: every theorem below
+is about these objects.
 
 ### Instances {#node-s1-1}
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.from-paper}
-**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.1 *Instances*, HAL preprint hal-01109777v1, pp. 2–3).
-
-> Let us introduce some notations related to the planning problem briefly presented in the
-> introduction: a MultiZenoTravel instance (Figure 1) is defined by the following elements:
->
-> – $n$ central cities, organized as a clique in which every node is connected to $C_I$ and $C_G$, respectively the initial city and the goal city.\
-> – $c \in (\mathbb R^+)^n$, where $c_i$ is the cost for landing in $C_i$.\
-> – $D \in (\mathbb R^+)^{n\times n}$, where $D_{ij}$ is the flying time between $C_i$ and $C_j$.\
-> – $d^I \in (\mathbb R^+)^n$, where $d^I_i$ is the flying time between $C_I$ and $C_i$.\
-> – $d^G \in (\mathbb R^+)^n$, where $d^G_i$ is the flying time between $C_i$ and $C_G$.\
-> – $p$ planes, initially in $C_I$, that have a capacity of an unique person.\
-> – $t$ persons, initially in $C_I$.
->
-> As said, the goal is to carry all $t$ persons, initially in $c_I$, to $c_G$ using $p$ planes,
-> minimizing both the makespan and the cost of the plan. In order to ease the identification of the
-> true Pareto Front, a symmetry constraint is added: $\forall i \in [1, n], d^I_i = d^G_i$ and from
-> thereon we will refer to a unique vector $d$.
-:::
-
-::: {.from-paper}
-**From the original paper** (Quemy, Schoenauer & Dreo, arXiv:2304.14659v1, §2.1 *Instances*).
-
-> Let us introduce some notations related to the planning problem briefly presented in the
-> introduction: a non-symmetric clique MultiZenoTravel instance (Figure 1) is defined by the following
-> elements: […] $d\in(\mathbb{R}^{+})^{n}$, where $d_{i}$ is the flying time between $C_{I}$ and
-> $C_{i}$. $\bar{d}\in(\mathbb{R}^{+})^{n}$, where $\bar{d}_{i}$ is the flying time between $C_{i}$
-> and $C_{G}$. […]
->
-> An instance of the symmetric clique MultiZenoTravel problem is an instance such that $d=\bar{d}$.
-> […]
->
-> Figure 2 illustrates an admissible solution. Note that the makespan for a plan is not necessarily the
-> largest sum of the flights' duration as some planes might have to wait for others.
-:::
-
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.1).
 
 * Cities: $C_I$ (initial) and $C_G$ (goal), the *hubs*, and central cities $1,\dots,n$.
@@ -71,7 +35,7 @@ structure Network (n : ℕ) where
   dc : Fin n → Fin n → ℕ
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
 
 :::
 
@@ -79,7 +43,7 @@ structure Network (n : ℕ) where
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.2).
 
 **Definition (plan).** A plan on a finite set $Q$ of planes (all $p$ planes unless stated otherwise)
@@ -135,7 +99,7 @@ there is at least one leg since $t \ge 1$. $\mathcal A'$ is the set of pairs $(C
 abbrev Plan (n t p : ℕ) := Fin p → List (Leg n t)
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
 
 **Lean** `ZenoFront.Feasible` [Lean definition]{.badge .ok}
 
@@ -148,7 +112,7 @@ structure Feasible (N : Network n) (P : Plan n t p) : Prop where
     finalLoc .ci route = .cg
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
 
 **Lean** `ZenoFront.achievable` [Lean definition]{.badge .ok}
 
@@ -158,23 +122,15 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
   {x | ∃ P : Plan n t p, Feasible N P ∧ (planCost c P, planMakespan P) = x}
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
 
-:::
-
-::: {.strengthen}
-**What the note makes precise.** Neither paper defines a plan. Both reason with flight *patterns*
-(P1–P3; $A$, $\bar A$, $B$, $\bar B$) and treat waiting informally. The note's definition, and its Lean
-transcription, allow every behaviour a planner could produce: central flights of any duration,
-waiting anywhere, hand-offs anywhere, zero durations. Every lower bound below is proved against
-*all* such plans, not against pattern plans.
 :::
 
 ### Statement 1.2 (PDDL correspondence) {#node-statement-1-2}
 
 **Lean** [informal]{.badge .informal} · **Note** [sketch]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.3).
 
 **Statement 1.2 (PDDL correspondence, S).** A plan of the domain under ε-separation yields a plan of §1.2
@@ -197,42 +153,12 @@ is argued, not formalised.
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.from-paper}
-**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.2 *Pareto Optimal Plans*, HAL preprint hal-01109777v1, pp. 3–4).
-
-> Let us make another simplifying assumption:\
-> **Assumption A1**: $\forall (i, j) \in [1, n]^2, d_i + d_j < d_{ij}$. Then the following holds.
->
-> **Proposition**: Pareto-optimal plans are plans where exactly $2t - p$ (possibly identical) central
-> cities are used by a flight.
->
-> **Proof**: Consider a plan where a person flies from $C_i$ to $C_j$. Using the same plane, the same
-> person could fly instead from $C_i$ to $C_G$, and the plane would return empty to $C_j$. The plan
-> could continue unchanged from thereon: because of the hypothesis on makespans, the needed resource
-> would be in $C_j$ on time. Moreover, the total cost is unchanged, and the total makespan is lower or
-> equal to the original one: the new plan thus Pareto-dominates the original one.
->
-> Iterating the same reasoning for each person, and each empty plane, we conclude that there are no
-> flights between central cities in Pareto-optimal plans. Thus bringing the $t$ persons from $C_I$ to
-> $C_G$ will amount to carry each person through one central city: $t$ flights will be needed from
-> $C_I$ to one $C_i$, then $t$ flights from $C_i$ to $C_G$. Finally, because planes do not need to come
-> back from $C_G$ in the end, only $t - p$ flights back empty will be needed, possibly through some
-> different central cities – hence the result. $\square$
->
-> *Footnote 3 (on Assumption A1):* This might look unrealistic in real-world logistic domain. However,
-> we hypothesize that the proposition still holds with the weaker condition that for any cities
-> $C_i, C_j, C_k$ (if we state the cost of $C_I$ and $C_G$ are respectively $C_0$ and $C_{n+1}$),
-> $d_{ik} \le d_{ij} + d_{jk}$ (triangle inequality).
-:::
-
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.4).
 
 Used only where stated.
 
 * (S) symmetry: $d_i = \bar d_i$ for all $i$.
-* (A1) central flights are useless: under (S), $d_{ij} \ge d_i + d_j$ for every existing central flight.
-  This is the EvoCOP 2015 assumption (stated there with $>$).
 * (A1-NS) $d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)$ for every existing central flight.
 * (AΔ) triangle inequality for the flights that exist: $\mathrm{dur}(a,b) \le \mathrm{dur}(a,x) + \mathrm{dur}(x,b)$
   whenever the three flights exist.
@@ -240,7 +166,7 @@ Used only where stated.
   $d_i \le \bar d_i + \bar d_z + d_z$. A hub leg of $i$ is no longer than the detour through $z$ and the
   other hub. (S) implies it, and (AΔ) implies it when the central flight $i$–$z$ exists.
 
-**In Lean.** (S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j` (the paper's strict `<` weakened to `≤`), `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`.
+**In Lean.** (S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j`, `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`.
 
 **Lean** `ZenoFront.Network.A1` [Lean definition]{.badge .ok}
 
@@ -249,7 +175,7 @@ Used only where stated.
 def Network.A1 (N : Network n) : Prop := ∀ i j, N.d i + N.d j ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 51–52](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Converse.lean#L51-L52){.lean-src}
+[`lean/ZenoFront/Converse.lean`, lines 51–52](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Converse.lean#L51-L52){.lean-src}
 
 **Lean** `ZenoFront.Network.A1NS` [Lean definition]{.badge .ok}
 
@@ -259,7 +185,7 @@ def Network.A1NS (N : Network n) : Prop :=
   ∀ i j, min (N.d i + N.d j) (N.dbar i + N.dbar j) ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
+[`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
 
 :::
 
@@ -267,7 +193,7 @@ def Network.A1NS (N : Network n) : Prop :=
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.5).
 
 For points $y, z \in \mathbb K^2$ (cost, makespan), $y \preceq z$, *$y$ weakly dominates $z$*, if
@@ -288,7 +214,7 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
   antichain : F.Pairwise fun a b => ¬ a ≤ b ∧ ¬ b ≤ a
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
 
 :::
 
@@ -296,7 +222,7 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
 
 **Lean** [informal]{.badge .informal} · **Note** [definition]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.5).
 
 **Notation.** $s = 2t - p$, so $s \ge p$ and $s \equiv p \pmod 2$; $\kappa = \lceil s/p\rceil$;
@@ -314,7 +240,7 @@ any $Q$, with $p$ replaced by $|Q|$.
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §1.5).
 
 **Lemma 1.1 (dominating subset).** Let $\mathcal S' \subseteq \mathcal S \subseteq \mathbb K^2$ with
@@ -354,6 +280,6 @@ theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' 
     Minimal (· ∈ A) x ↔ Minimal (· ∈ A') x := …
 ```
 
-[`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
 
 :::

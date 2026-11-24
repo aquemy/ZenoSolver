@@ -1,0 +1,45 @@
+---
+title: "Instances"
+description: "Every instance of the test and benchmark suites, with its exact Pareto front plotted."
+css: ../styles/instances.css
+---
+
+<!-- The fronts are computed by zeno: python3 site/gen_fronts.py writes instances/fronts.json and
+     instances/_catalogue.md (the sections below). js/catalogue.js draws the cards. -->
+
+Each card below plots the Pareto front of one instance as computed by zeno: cost on the horizontal
+axis, makespan on the vertical one, and a staircase through the front's points. Moving right along
+the staircase trades a higher cost for a shorter makespan. Hover a point for its values, or
+*Enlarge* a card for a larger plot and the table of its points. A card names the instance as its
+suite does and gives the arguments zeno runs, from which any front can be recomputed:
+
+```bash
+build/release/zeno -n 10 -t 8 -p 3 -C 3 -D 3
+```
+
+The instances come from the regression tests (the golden instances), the benchmark suites, and a
+few metric instances whose cities are random points in the plane or on a sphere. How they are
+built is documented on the sub-pages:
+
+- [Model and data files](model.qmd): what an instance is, and the 2-line and 3-line data files.
+- [Generator](generator.qmd): the families `-C`, `-D`, `-E`, `-W`, and the scale options.
+- [PDDL](pddl.qmd): the domain file and the problems `zeno pddl` writes.
+- [Benchmark and golden suites](suites.qmd): the suite files and what each one measures.
+- [Instances with known fronts](known-fronts.qmd): closed forms and fronts checked by an
+  exhaustive oracle.
+- [Size guidance](sizing.qmd): how large an instance zeno solves, and what drives the time.
+
+All instances here but one are symmetric, and their fronts are exact. The non-symmetric metric
+instance (`--hubs apart`) is marked *bracket*: zeno prints the plans it achieves and reports on its
+standard error which gaps its lower bounds certify; for this instance they do not certify them all.
+
+::: {#zs-catalogue data-zs-fronts="fronts.json"}
+:::
+
+{{< include _catalogue.md >}}
+
+```{=html}
+<noscript><p>The plots need JavaScript. The fronts are in <a href="fronts.json">fronts.json</a>.</p></noscript>
+<script src="../js/fronts.js"></script>
+<script src="../js/catalogue.js"></script>
+```

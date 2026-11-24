@@ -36,10 +36,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -69,41 +73,175 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
+<link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/provenance.css">
 <link rel="stylesheet" href="styles/site.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -121,71 +259,21 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
-<span class="menu-text">Home</span></a>
+    <a class="nav-link" href="./problem.html"> 
+<span class="menu-text">Problem</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Solver</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
-        <li>
-    <a class="dropdown-item" href="./solver/install.html">
- <span class="dropdown-text">Installation and build</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./paper/index.html"> 
+<span class="menu-text">Paper</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/cli.html">
- <span class="dropdown-text">Command line</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./instances/index.html"> 
+<span class="menu-text">Instances</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/api.html">
- <span class="dropdown-text">C++ library</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="./solver/install.html"> 
+<span class="menu-text">Solver</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/certificates.html">
- <span class="dropdown-text">Certificate format</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/lean.html">
- <span class="dropdown-text">Lean tools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./solver/algorithm.html">
- <span class="dropdown-text">Algorithm</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Instances</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
-        <li>
-    <a class="dropdown-item" href="./instances/model.html">
- <span class="dropdown-text">Model and data files</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/generator.html">
- <span class="dropdown-text">Generator</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/pddl.html">
- <span class="dropdown-text">PDDL</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/suites.html">
- <span class="dropdown-text">Benchmark and golden suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/known-fronts.html">
- <span class="dropdown-text">Instances with known fronts</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./instances/sizing.html">
- <span class="dropdown-text">Size guidance</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Theory</span>
@@ -210,14 +298,6 @@ window.Quarto = {
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="./experiments.html"> 
-<span class="menu-text">Experiments</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./results.html"> 
-<span class="menu-text">Results</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link active" href="./about.html" aria-current="page"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -228,19 +308,10 @@ window.Quarto = {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="./blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
-</i> 
-<span class="menu-text"></span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -254,16 +325,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-original-papers" id="toc-the-original-papers" class="nav-link active" data-scroll-target="#the-original-papers">The original papers</a></li>
-  <li><a href="#this-project" id="toc-this-project" class="nav-link" data-scroll-target="#this-project">This project</a></li>
-  <li><a href="#what-the-note-corrects" id="toc-what-the-note-corrects" class="nav-link" data-scroll-target="#what-the-note-corrects">What the note corrects</a>
-  <ul class="collapse">
-  <li><a href="#f1" id="toc-f1" class="nav-link" data-scroll-target="#f1">The per-PPP greedy is not optimal</a></li>
-  <li><a href="#f2" id="toc-f2" class="nav-link" data-scroll-target="#f2">Proposition I holds only for the front</a></li>
-  <li><a href="#f3" id="toc-f3" class="nav-link" data-scroll-target="#f3">Waiting can be harmful in the non-symmetric case</a></li>
-  <li><a href="#f4" id="toc-f4" class="nav-link" data-scroll-target="#f4">The pairing argument without (A1) is incomplete</a></li>
-  <li><a href="#holds" id="toc-holds" class="nav-link" data-scroll-target="#holds">What still holds</a></li>
-  </ul></li>
+  <li><a href="#the-project" id="toc-the-project" class="nav-link active" data-scroll-target="#the-project">The project</a></li>
   <li><a href="#honesty" id="toc-honesty" class="nav-link" data-scroll-target="#honesty">Honesty: what is proved, and how</a></li>
   <li><a href="#this-website" id="toc-this-website" class="nav-link" data-scroll-target="#this-website">This website</a></li>
   </ul>
@@ -272,10 +334,11 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">About</h1>
-<p class="subtitle lead">The papers, attribution, and what the theory note corrects</p>
+<p class="subtitle lead">The project, what is proved and how, and how this site is built</p>
 </div>
 
 
@@ -292,66 +355,25 @@ window.Quarto = {
 </header>
 
 
-<section id="the-original-papers" class="level2">
-<h2 class="anchored" data-anchor-id="the-original-papers">The original papers</h2>
-<blockquote class="blockquote">
-<p>Alexandre Quemy, Marc Schoenauer. <em>True Pareto Fronts for Multi-Objective AI Planning Instances.</em> European Conference on Combinatorial Optimization, EvoCOP 2015, Copenhagen, LNCS 9026, Springer, pp.&nbsp;197–208, 2015. <a href="https://hal.science/hal-01109777">hal-01109777</a>.</p>
-</blockquote>
-<blockquote class="blockquote">
-<p>Alexandre Quemy, Marc Schoenauer, Johann Dréo. <a href="https://arxiv.org/abs/2304.14659">arXiv:2304.14659</a>, 2023. Extends the approach to non-symmetric durations.</p>
-</blockquote>
-<blockquote class="blockquote">
-<p>Alexandre Quemy, Marc Schoenauer, Vincent Vidal, Johann Dréo, Pierre Savéant. <em>Solving Large MultiZenoTravel Benchmarks with Divide-and-Evolve.</em> Learning and Intelligent Optimization, LION 9, Lille, LNCS 8994, Springer, pp.&nbsp;262–267, 2015. <a href="https://hal.science/hal-01109776">hal-01109776</a>.</p>
-</blockquote>
-<p>The model, the benchmark and the first ZenoSolver (2016) are those of these papers. Please cite them for MultiZenoTravel.</p>
-</section>
-<section id="this-project" class="level2">
-<h2 class="anchored" data-anchor-id="this-project">This project</h2>
-<p>The current solver <code>zeno</code>, the theory note <code>doc/theory/exact-front.md</code>, the Lean 4 formalization in <code>lean/</code>, the certificate format and checkers, the benchmarks and this website are the work of <strong>Alexandre Quemy</strong>, in the repository <a href="https://github.com/aquemy/ZenoSolver"><code>aquemy/ZenoSolver</code></a>.</p>
-<div class="callout callout-style-simple callout-important">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Attribution and fair use.</strong> Throughout the <a href="./proofs.html">blueprint</a>, the papers’ statements and proofs are reproduced <strong>verbatim</strong> in grey boxes marked <em>From the original paper</em>, with the paper, section and page, solely for scholarly comparison with the note and the formalization. That material remains its authors’ and publishers’. The blue and green boxes hold this project’s contribution.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="what-the-note-corrects" class="level2">
-<h2 class="anchored" data-anchor-id="what-the-note-corrects">What the note corrects</h2>
-<p>The note’s §5 and §6 and the draft erratum (<a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/erratum.md"><code>doc/erratum.md</code></a>) give the details. In short:</p>
-<section id="f1" class="level3">
-<h3 class="anchored" data-anchor-id="f1">The per-PPP greedy is not optimal</h3>
-<p>Both papers fix a multiset of landings (a PPP) and schedule it greedily, longest flights first onto the least-loaded plane (EvoCOP 2015 Algorithm 1, arXiv §3.2), and claim the result is the optimal makespan of that PPP. It is not. On <span class="math inline">\(d = (6, 10)\)</span>, <span class="math inline">\(c = (40, 20)\)</span>, <span class="math inline">\(t = 5\)</span>, <span class="math inline">\(p = 2\)</span> the 2016 solver misses the front point (260, 60) (<a href="./proofs.html#node-s5">§5</a>). That front is checked by the Lean kernel alone (<code>Examples.lptCounterexample_front</code>). No polynomial per-PPP rule can be exact unless P = NP: deciding whether a multiset of landings can be flown within a makespan is strongly NP-complete (<a href="./proofs.html#node-theorem-8-1">Theorem 8.1</a>).</p>
-</section>
-<section id="f2" class="level3">
-<h3 class="anchored" data-anchor-id="f2">Proposition I holds only for the front</h3>
-<p>“Pareto-optimal plans use exactly <span class="math inline">\(2t - p\)</span> central cities” is false for plans: with zero costs, a plan with more landings can be Pareto-optimal. What holds is the front statement: the front is the Pareto set of <span class="math inline">\((c(X), M(X))\)</span> over multisets <span class="math inline">\(X\)</span> of <span class="math inline">\(2t - p\)</span> landings, with <span class="math inline">\(M(X)\)</span> the least makespan of an <strong>admissible</strong> partition of <span class="math inline">\(X\)</span> (<a href="./proofs.html#node-corollary-4-8">Corollary 4.8</a>, machine-checked).</p>
-</section>
-<section id="f3" class="level3">
-<h3 class="anchored" data-anchor-id="f3">Waiting can be harmful in the non-symmetric case</h3>
-<p>The arXiv paper’s non-symmetric argument assumes that no plane has to wait harmfully for a passenger. That is false, even with no central flights and under the triangle inequality (<a href="./proofs.html#node-conjecture-6-5">Conjecture 6.5, refuted</a>; <a href="./proofs.html#node-proposition-6-5">Proposition 6.5</a>). The note replaces the assumption with <em>schedulable domination</em> (<a href="./proofs.html#node-theorem-6-9">Theorem 6.9</a>, machine-checked for every plan). An exhaustive search over role configurations with exact schedules is therefore sound, and <code>zeno</code> uses it to close such gaps.</p>
-</section>
-<section id="f4" class="level3">
-<h3 class="anchored" data-anchor-id="f4">The pairing argument without (A1) is incomplete</h3>
-<p>Without (A1), the arXiv pairing argument concludes “lower cost” from a set inclusion and “dominates” from per-pattern durations; both steps fail. The note proves the converse it was meant to establish under the triangle inequality (AΔ) instead (<a href="./proofs.html#node-theorem-4-10">Theorem 4.10</a>, formerly Conjecture 4.10, a written proof not yet in Lean). The front characterisation then holds under (AΔ) too (<a href="./proofs.html#node-corollary-4-12">Corollary 4.12</a>). Some hypothesis is needed: with central flights that violate both (A1) and (AΔ), a plan can beat every admissible partition (<a href="./proofs.html#node-example-4-13">Example 4.13</a>).</p>
-</section>
-<section id="holds" class="level3">
-<h3 class="anchored" data-anchor-id="holds">What still holds</h3>
-<p>The model, the flight patterns, the lower bound of <span class="math inline">\(2t - p\)</span> landings, and the no-waiting construction of a plan from an admissible partition (<a href="./proofs.html#node-theorem-4-1">Theorem 4.1</a>, machine-checked). On the default generator the front is known in closed form, and the published benchmark fronts of that family are probably right despite the greedy (Conjecture 10.2, checked on 115 instances, not proved).</p>
-</section>
+<section id="the-project" class="level2">
+<h2 class="anchored" data-anchor-id="the-project">The project</h2>
+<p>ZenoSolver computes the exact Pareto fronts, cost against makespan, of MultiZenoTravel multi-objective planning instances, and proves them. It consists of the solver <code>zeno</code>, the theory note <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md"><code>doc/theory/exact-front.md</code></a>, the Lean 4 formalization in <code>lean/</code>, the certificate format and its two checkers, the benchmarks and the experiments. All are the work of <strong>Alexandre Quemy</strong>, in the repository <a href="https://github.com/aquemy/ZenoSolver"><code>aquemy/ZenoSolver</code></a>.</p>
 </section>
 <section id="honesty" class="level2">
 <h2 class="anchored" data-anchor-id="honesty">Honesty: what is proved, and how</h2>
-<p>The blueprint has <strong>66 nodes</strong>. <strong>21</strong> are machine-checked theorems and <strong>7</strong> are Lean definitions. <strong>14</strong> have formalised parts, and <strong>24</strong> are not in Lean. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>.</p>
-<p>The blueprint’s badges are computed when the site is built, from <code>collectAxioms</code> on the Lean declarations each node lists. A node is badged machine-checked only if the declarations that formalise its <strong>whole</strong> statement are axiom-clean theorems. Declarations covering only part of a statement are listed under it, with their own badges, and the node keeps the note’s status. The generator stops if a declaration is missing or a label is not found in the note.</p>
+<p>The blueprint has <strong>76 nodes</strong>. <strong>23</strong> are machine-checked theorems and <strong>7</strong> are Lean definitions. <strong>14</strong> have formalised parts, and <strong>32</strong> are not in Lean. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>. These counts are from the last local Lean audit; 12 declarations added since then are badged from the <code>#print axioms</code> footers of their commits, which CI re-checks on every push.</p>
+<p>The blueprint’s badges are computed when the site is built, from <code>collectAxioms</code> on the Lean declarations each node lists. A node is badged machine-checked only if the declarations that formalise its <strong>whole</strong> statement are axiom-clean theorems. Declarations covering only part of a statement are listed under it, with their own badges, and the node keeps the note’s status. The generator stops if a declaration is missing or a label is not found in the note. The same badges appear next to every theorem cited in the <a href="./paper/index.html">paper</a>.</p>
 <p>The compiled tools add trust in the Lean compiler and in an unverified parser (<a href="./solver/lean.html#trust">trust base</a>).</p>
 </section>
 <section id="this-website" class="level2">
 <h2 class="anchored" data-anchor-id="this-website">This website</h2>
-<p>Built with <a href="https://quarto.org">Quarto</a> from <code>site/</code> into <code>docs/</code> (<a href="./solver/install.html#this-website">how</a>). The blueprint pages are generated from <code>site/blueprint.toml</code>, the theory note and the Lean sources by <code>site/gen_blueprint.py</code>; the tables from the committed baselines by <code>site/gen_pages.py</code>; the claim graph and the history from the knowledge commits and <code>claims.toml</code> by <code>site/gen_graph.py</code>. The paper excerpts are in <code>site/paper/</code>.</p>
+<p>Built with <a href="https://quarto.org">Quarto</a> from <code>site/</code> into <code>docs/</code> (<a href="./solver/install.html#this-website">how</a>). Generated, never typed by hand:</p>
+<ul>
+<li>the blueprint, from <code>site/blueprint.toml</code>, the theory note and the Lean sources (<code>site/gen_blueprint.py</code>);</li>
+<li>the result tables, from the committed benchmark baselines (<code>site/gen_pages.py</code>);</li>
+<li>the claim graph and its history, from the knowledge commits and <code>claims.toml</code> (<code>site/gen_graph.py</code>);</li>
+<li>the plans of the <a href="./problem.html">problem page</a>, the <a href="./instances/index.html">instance fronts</a> and the figures of the <a href="./solver/algorithm.html">algorithm page</a>, computed with <code>zeno</code> (<code>site/gen_problem.py</code>, <code>site/gen_fronts.py</code>, <code>site/gen_algorithm.py</code>).</li>
+</ul>
 
 
 </section>
@@ -359,6 +381,19 @@ window.Quarto = {
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -766,8 +801,8 @@ window.Quarto = {
       &nbsp;
     </div>
     <div class="nav-footer-right">
-<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
-</div>
+      &nbsp;
+    </div>
   </div>
 </footer>
 

@@ -50,7 +50,8 @@ given and must match the file. Two layouts:
 ```
 
 This is `tests/golden/data/lpt-counterexample.dat`: $d = (6, 10)$, $c = (40, 20)$. With
-`-n 2 -t 5 -p 2` it is the smallest instance on which the 2016 greedy misses a front point
+`-n 2 -t 5 -p 2` it is the smallest instance on which a greedy schedule of the landings misses a
+front point
 ([§5](../proofs.qmd#node-s5)).
 
 **3 lines, possibly non-symmetric:** $C_I$-side durations $d$, $C_G$-side durations $\bar d$,
@@ -81,8 +82,3 @@ A data file is read **as written**: the first line holds durations and the last 
 order of the cities, and the order of the cities does not change the front. `zeno generate` writes
 an instance in this format ([command line](../solver/cli.qmd#generate)), so its output reads back
 as the same instance.
-
-The 2016 solvers read a data file differently when its first duration exceeded its second: they
-exchanged the duration and cost lines, and reversed the $C_G$-side durations. To reproduce a 2016
-result from such a file, write it with the lines in the order the 2016 solver used them
-([2016 and paper instances](generator.qmd#paper)).

@@ -15,8 +15,6 @@
 #             inline, but the node keeps the note's status: a node is never badged above what its
 #             own Lean covers.
 #   covers    one line: what the Lean states, when it differs in form from the note.
-#   paper     verbatim extracts (site/paper/<id>.md) shown in grey boxes.
-#   strengthen  markdown for a green box: what the note corrects in the papers.
 #   note_status optional override of the status-table entry (used where one table row covers two
 #             statements).
 #   paras     for a statement without a proof in the note: how many paragraphs it has (by default
@@ -28,10 +26,10 @@
 id = "model"
 title = "The model"
 intro = """
-The instance, the plans and the Pareto front, as fixed in §1 of the note. The papers define the
-model informally; the note makes plans precise (routes, journeys, capacity, waiting) and the Lean
-development transcribes that definition. Definitions are the trusted interface of the whole
-formalization: every theorem below is about these objects.
+The instance, the plans and the Pareto front, as fixed in §1 of the note. Plans are precise
+objects (routes, journeys, capacity, waiting), and the Lean development transcribes that
+definition. Definitions are the trusted interface of the whole formalization: every theorem below
+is about these objects.
 """
 
 [[node]]
@@ -39,7 +37,6 @@ section = "model"
 label = "§1.1"
 title = "Instances"
 lean = ["ZenoFront.Network"]
-paper = ["evocop-model", "arxiv-model"]
 covers = "`Network` holds the durations `d`, `dbar` and an arbitrary table `dc` of central flights; costs are a separate argument `c : Fin n → ℕ`. Durations, costs and times are natural numbers (format v1); `Cert.check_sound_rat` extends the checker's soundness to rational times."
 
 [[node]]
@@ -48,13 +45,6 @@ label = "§1.2"
 title = "Plans, cost and makespan"
 lean = ["ZenoFront.Plan", "ZenoFront.Feasible", "ZenoFront.achievable"]
 covers = "A plan gives every plane a list of legs (`Leg`: from, to, departure, arrival, passenger). `Feasible` requires routes chained from `C_I` at time ≥ 0 and ending in `C_G`, legs of exact duration, and every passenger's legs ordered into a route from `C_I` to `C_G`; capacity one holds by construction, since a leg names at most one passenger."
-strengthen = """
-**What the note makes precise.** Neither paper defines a plan. Both reason with flight *patterns*
-(P1–P3; $A$, $\\bar A$, $B$, $\\bar B$) and treat waiting informally. The note's definition, and its Lean
-transcription, allow every behaviour a planner could produce: central flights of any duration,
-waiting anywhere, hand-offs anywhere, zero durations. Every lower bound below is proved against
-*all* such plans, not against pattern plans.
-"""
 
 [[node]]
 section = "model"
@@ -66,8 +56,7 @@ section = "model"
 label = "§1.4"
 title = "Assumptions"
 lean = ["ZenoFront.Network.A1", "ZenoFront.Network.A1NS"]
-paper = ["evocop-a1-prop"]
-covers = "(S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j` (the paper's strict `<` weakened to `≤`), `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`."
+covers = "(S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j`, `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`."
 
 [[node]]
 section = "model"
@@ -93,7 +82,7 @@ title = "Segments, admissible partitions, link forests"
 intro = """
 The combinatorial core (§2 of the note). A partition of the landings among the planes can be flown
 without waiting exactly when it is *admissible*, a parity condition that is a $\\mathcal T$-join of the
-plane-city incidence graph. Neither paper has this notion: it is what replaces their per-PPP greedy.
+plane-city incidence graph. It is what makes the front computable without fixing a schedule.
 """
 
 [[node]]
@@ -107,13 +96,7 @@ section = "admissibility"
 label = "Definition 2.2"
 paras = 3
 lean =["ZenoFront.IsParityWitness", "ZenoFront.Admissible"]
-paper = ["evocop-ppp"]
 covers = "`IsParityWitness X h` is (h1)–(h3) with `h k : Finset (Fin n)`, one set of cities per plane; `Admissible X` is `∃ h, IsParityWitness X h`, decidable through `witnessCandidates`."
-strengthen = """
-**What replaces the PPP.** A PPP fixes the multiset of landings and leaves the schedule to a greedy.
-The note fixes, in addition, *which plane lands where*, and characterises the partitions that some
-schedule realises without waiting (Theorem 4.1) and that every plan can be reduced to (Theorem 4.7).
-"""
 
 [[node]]
 section = "admissibility"
@@ -178,20 +161,13 @@ covers = "Leg counting along each route: `#departures from C_I + #arrivals at C_
 [[node]]
 section = "every-setting"
 label = "Lemma 3.3"
-leaves = ["ZenoFront.PlaneFeasible.exists_segments", "ZenoFront.roleW_landingRecs_le"]
-covers = "Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (c) is `roleW_landingRecs_le` on routes without central flights. Part (b), under (AΔ), is not formalized."
+leaves = ["ZenoFront.PlaneFeasible.exists_segments", "ZenoFront.segment_bound", "ZenoFront.roleW_landingRecs_le"]
+covers = "Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (b) under (S) and (AΔ) is `segment_bound` (`F(γ) ≥ 2 d_x`); part (c) is `roleW_landingRecs_le` on routes without central flights."
 
 [[node]]
 section = "every-setting"
 label = "Lemma 3.4"
 lean = ["ZenoFront.Feasible.exists_relaxation", "ZenoFront.relaxCost_oneplane_le_totalCost"]
-paper = ["evocop-a1-prop"]
-strengthen = """
-**What survives of the papers' Proposition.** The papers' "Pareto-optimal plans use exactly $2t-p$
-central cities" needs (A1) and is true only in the sense of the front (Corollary 4.8). Lemma 3.2 keeps
-its lower-bound half with **no assumption at all**: every plan lands at least $2t-p$ times, and
-Lemma 3.4 turns that into a cost bound $L$ valid for any central flights.
-"""
 
 [[section]]
 id = "symmetric"
@@ -209,14 +185,7 @@ note, not in Lean.
 section = "symmetric"
 label = "Theorem 4.1"
 lean = ["ZenoFront.Admissible.exists_plan"]
-paper = ["evocop-construction"]
 covers = "The plan is built on a rooted link forest (`LTree.routes`): each plane drops off its children's passengers, crosses its free landings, then picks up its parent's passenger."
-strengthen = """
-**The papers' construction, made precise.** The papers' rule (westward parts of P3 early, eastward
-parts late) is right, but it is applied to whatever the greedy produced. The link forest guarantees
-that every plane picks up **at most once**, which is exactly what makes the no-waiting timing
-argument go through.
-"""
 
 [[node]]
 section = "symmetric"
@@ -247,22 +216,13 @@ lean = ["ZenoFront.Admissible.addPlane"]
 [[node]]
 section = "symmetric"
 label = "Theorem 4.7"
-lean = ["ZenoFront.Feasible.exists_admissible"]
-covers = "The Lean proof does Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan: a central leg counts as passing through `C_G`, and under (A1) it lasts at least the weights of its two endpoints."
+lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime", "ZenoFront.Feasible.exists_admissible"]
+covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, obtained through the proof of Theorem 4.10, which covers (A1). `Feasible.exists_admissible` is the first proof, in makespan form (`2 δ(X_k) ≤ M`): Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan."
 
 [[node]]
 section = "symmetric"
 label = "Corollary 4.8"
 lean = ["ZenoFront.minimal_achievable_iff_multisetPoints"]
-paper = ["arxiv-prop1"]
-strengthen = """
-**Proposition I, corrected.** Both papers state that Pareto-optimal *plans* use exactly $2t-p$
-landings. That is false as stated (with zero costs a plan with more landings can be Pareto-optimal;
-see the remark below the corollary), and the papers' proofs do not establish the reduction. What
-holds, and is now machine-checked, is the **front** statement: the front is the Pareto set of
-$(c(X), M(X))$ over multisets $X$ of $2t-p$ landings, where $M(X)$ is the least makespan of an
-**admissible** partition of $X$.
-"""
 
 [[node]]
 section = "symmetric"
@@ -272,25 +232,21 @@ lean = ["ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.FeasibleAn
 [[node]]
 section = "symmetric"
 label = "Theorem 4.10"
-paper = ["arxiv-pairing"]
-strengthen = """
-**The arXiv pairing argument, repaired** (§4.6 of the note). The paper's "Figure 4" case has two
-flaws. Moving both halves of a pairing to $C^\\star$ costs $2c_{C^\\star}$, which can exceed
-$c_i + c_j$, so "each city in $\\phi_0$ appears in $\\phi$" does not give a lower cost; and
-per-pattern durations ignore the synchronisation of the new pairs. The note's proof pays for each
-moved end with a landing in its new city, and takes dominance from Theorem 4.1, whose plans are
-rebuilt from the partition. Earlier revisions of the note stated this converse as Conjecture 4.10.
-"""
+lean = ["ZenoFront.Feasible.exists_admissible_ATri"]
+leaves = ["ZenoFront.exists_admissible_of_blocks"]
+covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
 
 [[node]]
 section = "symmetric"
 label = "Lemma 4.11"
-leaves = ["ZenoFront.Admissible.exists_shrink"]
-covers = "`Admissible.exists_shrink` proves the iterated form: an admissible grouping shrinks to any size $s \\ge p$ with $s \\equiv p \\pmod 2$, each group a sub-multiset of the old one. Lemma 4.11 is its case $s = |X| - 2$; that case is not stated on its own in Lean."
+lean = ["ZenoFront.Admissible.exists_remove_two"]
+covers = "`Admissible.exists_remove_two` is the lemma; it is the case $s = |X| - 2$ of `Admissible.exists_shrink`, which shrinks an admissible grouping to any size $s \\ge p$ with $s \\equiv p \\pmod 2$."
 
 [[node]]
 section = "symmetric"
 label = "Corollary 4.12"
+leaves = ["ZenoFront.minimal_achievable_iff_multisetPoints_ATri", "ZenoFront.minimal_achievable_iff_anywhere_of_ATri", "ZenoFront.minimal_achievable_iff_minCost_ATri", "ZenoFront.solveFront_isParetoFront_ATri", "ZenoFront.Cert.forestGapBound_le_ATri", "ZenoFront.Cert.check_sound_ATri"]
+covers = "Under (S) and (AΔ), Lean proves Corollary 4.8 (`minimal_achievable_iff_multisetPoints_ATri`), Theorem 4.9 (`minimal_achievable_iff_anywhere_of_ATri`), Proposition 7.1 (`minimal_achievable_iff_minCost_ATri`), the verified solver and the soundness of `forest` gaps and of the checker. The front statements of Propositions 7.8 and 7.9 are not stated in Lean, so the corollary as a whole keeps the note's status."
 
 [[node]]
 section = "symmetric"
@@ -299,11 +255,12 @@ note_status = "P (computed)"
 
 [[section]]
 id = "greedy"
-title = "Why the papers' greedy is not exact"
+title = "Greedy scheduling is not exact"
 intro = """
-Both papers schedule each fixed multiset of landings (a PPP) greedily and claim the result is the
-optimal makespan of that PPP. Their own words are in the grey boxes; §5 of the note gives the
-counterexamples, and the smallest one is checked by the Lean kernel.
+A natural heuristic fixes the multiset of landings and schedules it greedily, longest flights first
+onto the least-loaded plane. §5 of the note shows that this misses front points; the smallest
+counterexample's front is checked by the Lean kernel. Deciding the least makespan of a multiset is
+strongly NP-complete (Theorem 8.1), so no polynomial rule of this kind is exact unless P = NP.
 """
 
 [[node]]
@@ -311,25 +268,16 @@ section = "greedy"
 label = "§5"
 title = "The greedy counterexample"
 leaves = ["ZenoFront.Examples.lptCounterexample_front"]
-paper = ["evocop-algorithm1", "evocop-optimality"]
 note_status = "P"
-covers = "`lptCounterexample_front` is the exact front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`, for every table of central flights, checked by `decide +kernel` (no compiled code is trusted). It contains `(260, 60)`. That the 2016 greedy misses this point is the hand computation of the note (52/68 instead of 60/60) and the recorded output of the 2016 solver; it is not a Lean statement."
-strengthen = """
-**What fails.** "The above algorithm gives the optimal distribution of the set of times into $p$" is
-false: longest-first onto the least-loaded plane is a heuristic (LPT), not an exact partition, and the
-landings of a PPP must in addition be split so that the partition is *admissible*. Deciding whether a
-multiset of landings can be flown within a makespan is strongly NP-complete (Theorem 8.1), so no
-polynomial per-PPP rule can be exact unless P = NP. The no-waiting construction itself is correct
-(Theorem 4.1).
-"""
+covers = "`lptCounterexample_front` is the exact front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`, for every table of central flights, checked by `decide +kernel` (no compiled code is trusted). It contains `(260, 60)`. That the greedy schedule misses this point is the hand computation of the note (52/68 instead of 60/60); it is not a Lean statement."
 
 [[section]]
 id = "nonsymmetric"
 title = "Non-symmetric case"
 intro = """
-Different durations to the two hubs (§6). Waiting can now be harmful, which refutes the assumption
-implicit in the arXiv paper's non-symmetric proof, and the front is characterised instead by
-*schedulable domination* (Theorem 6.9), machine-checked for every plan.
+Different durations to the two hubs (§6). Waiting can now be harmful (Proposition 6.5), so role
+loads alone do not give the front. It is characterised instead by *schedulable domination*
+(Theorem 6.9), machine-checked for every plan.
 """
 
 [[node]]
@@ -356,14 +304,7 @@ label = "Corollary 6.4"
 section = "nonsymmetric"
 label = "Conjecture 6.5"
 title = "Conjecture 6.5 (no harmful waiting), refuted"
-paper = ["arxiv-waiting"]
 note_status = "refuted"
-strengthen = """
-**What fails.** The non-symmetric proof assumes that ordering the patterns "that could lead to a
-waiting time" first keeps the makespan at the role loads. Proposition 6.5 below is a counterexample:
-the waiting it forces is not removable by any order or matching, and the role-load front is strictly
-below the true front.
-"""
 
 [[node]]
 section = "nonsymmetric"
@@ -380,12 +321,24 @@ covers = "The lower-bound direction (the DP is at most the cost of every balance
 [[node]]
 section = "nonsymmetric"
 label = "Conjecture 6.7"
-paper = ["arxiv-babb"]
-strengthen = """
-**The arXiv virtual-city construction.** It encodes the shuttle triples, but it is sound only if a
-drop-off or pick-up at a virtual city is used together with its shuttle, and its equation (4) should
-read $d^{\\bar B}_k = 2\\bar d_j$. Lemma 6.2's bound stays valid with shuttle triples.
-"""
+note_status = "refuted"
+
+[[node]]
+section = "nonsymmetric"
+label = "Definition 6.17"
+
+[[node]]
+section = "nonsymmetric"
+label = "Proposition 6.7"
+note_status = "P"
+
+[[node]]
+section = "nonsymmetric"
+label = "Proposition 6.18"
+
+[[node]]
+section = "nonsymmetric"
+label = "Lemma 6.19"
 
 [[node]]
 section = "nonsymmetric"
@@ -404,6 +357,41 @@ section = "nonsymmetric"
 label = "Corollary 6.10"
 leaves = ["ZenoFront.Cert2.check_sound_EO"]
 covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement."
+
+[[section]]
+id = "general-graphs"
+title = "General flight graphs"
+intro = """
+An instance on any flight graph can be reduced to a clique instance, one central city per path
+(§6.6 of the note). The reduction does not keep the front in general: Example 6.11 is a
+counterexample. Propositions 6.12–6.16 say what the reduction does give, where it is exact, and how
+to compute the graph's front directly.
+"""
+
+[[node]]
+section = "general-graphs"
+label = "Example 6.11"
+note_status = "refuted"
+
+[[node]]
+section = "general-graphs"
+label = "Proposition 6.12"
+
+[[node]]
+section = "general-graphs"
+label = "Proposition 6.13"
+
+[[node]]
+section = "general-graphs"
+label = "Proposition 6.14"
+
+[[node]]
+section = "general-graphs"
+label = "Proposition 6.15"
+
+[[node]]
+section = "general-graphs"
+label = "Proposition 6.16"
 
 [[section]]
 id = "algorithm"
@@ -486,8 +474,8 @@ covers = "This is a Lean result with no single counterpart in the note: it assem
 id = "complexity"
 title = "Complexity"
 intro = """
-§8 explains why no fast per-PPP rule can be exact, and why the dynamic programs are
-pseudo-polynomial. None of it is formalized.
+§8 explains why no fast rule that schedules a fixed multiset of landings can be exact, and why the
+dynamic programs are pseudo-polynomial. None of it is formalized.
 """
 
 [[node]]
@@ -543,7 +531,7 @@ id = "linear"
 title = "The linear family (default generator)"
 intro = """
 The generator's default instances have costs affine in durations. §10 gives their front in closed
-form, which is why the published benchmark fronts are probably right despite the greedy.
+form, valid whatever the central flights.
 """
 
 [[node]]

@@ -10,7 +10,7 @@ registry `claims.toml` with [claimgraph](https://github.com/hotherio/claimgraph)
 
 * `claimgraph-viewer.html`: the interactive viewer (end-state graph and commit replay);
 * `history-timeline.html`: the compact SVG timeline of the same replay;
-* `claimgraph.json`: the graph and the replay frames, as compact JSON;
+* (the viewer embeds the graph and the replay frames; no separate JSON is published);
 
 and `site/_history-table.md` (the knowledge-commit log) and `site/_graph-stats.md` (the counts
 quoted on the pages).
@@ -51,6 +51,55 @@ def is_knowledge(commit) -> bool:
         return bool(commit.type) and profile_of(commit.type) != "conventional"
     except (KeyError, ValueError):
         return False
+
+
+def hide_paper_claims(graph) -> set[str]:
+    """Drop from the site's view the claims of the earlier papers (`paper-*` in claims.toml) and
+    the refutation nodes whose only purpose is to disprove them. Effective statuses are computed
+    before, so the theory's own claims keep theirs. Returns the hidden node ids."""
+    hidden = {nid for nid in graph.nodes if nid.startswith("paper-")}
+    disproves: dict[str, set[str]] = {}
+    for e in graph.edges:
+        if e.relation == "Disproves":
+            disproves.setdefault(e.source, set()).add(e.target)
+    hidden |= {src for src, targets in disproves.items() if targets <= hidden}
+    graph.nodes = {k: v for k, v in graph.nodes.items() if k not in hidden}
+    graph.edges = [e for e in graph.edges if e.source not in hidden and e.target not in hidden]
+    return hidden
+
+
+def _mentions(value, hidden: set[str]) -> bool:
+    if isinstance(value, str):
+        # node ids, "claim:<id>" references, and replay edges written "source|Relation|target"
+        parts = value.split("|") if value.count("|") == 2 else [value]
+        return any(p.removeprefix("claim:").removeprefix("conjecture:") in hidden for p in parts)
+    if isinstance(value, dict):
+        return any(_mentions(v, hidden) for v in value.values())
+    if isinstance(value, (list, tuple)):
+        return any(_mentions(v, hidden) for v in value)
+    return False
+
+
+def frame_is_hidden(frame: dict, hidden: set[str]) -> bool:
+    """A replay step whose focus is only hidden claims (a refutation of a paper's claim)."""
+    focus = frame.get("focus")
+    items = focus if isinstance(focus, (list, tuple)) else ([focus] if focus else [])
+    return bool(items) and all(_mentions(f, hidden) for f in items)
+
+
+def strip_frame(frame: dict, hidden: set[str]) -> dict:
+    """Remove the hidden nodes from one replay step."""
+    out = dict(frame)
+    if isinstance(out.get("present"), list):
+        out["present"] = [p for p in out["present"] if not _mentions(p, hidden)]
+    if isinstance(out.get("edges"), list):
+        out["edges"] = [e for e in out["edges"] if not _mentions(e, hidden)]
+    if isinstance(out.get("state"), dict):
+        out["state"] = {k: v for k, v in out["state"].items() if not _mentions(k, hidden)}
+    focus = out.get("focus")
+    if isinstance(focus, list):
+        out["focus"] = [f for f in focus if not _mentions(f, hidden)]
+    return out
 
 
 def cell(text: str) -> str:
@@ -127,11 +176,15 @@ def main() -> None:
     dated = [d for d in history if is_knowledge(d.commit)]
     graph = cg.compute(cg.build_graph([d.commit for d in dated], registry))
     frames = build_timeline(dated, registry)
+    hidden = hide_paper_claims(graph)
+    frames = [strip_frame(fr, hidden) for fr in frames if not frame_is_hidden(fr, hidden)]
+    for k, fr in enumerate(frames):
+        fr["i"] = k
     payload = to_dict(graph, timeline=frames)
 
     OUT.mkdir(exist_ok=True)
-    (OUT / "claimgraph.json").write_text(
-        json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    # The viewer embeds the payload; a separate JSON copy would double the size of docs/.
+    (OUT / "claimgraph.json").unlink(missing_ok=True)
     (OUT / "claimgraph-viewer.html").write_text(
         export_html.render(payload, shape="page", title=TITLE), encoding="utf-8")
     (OUT / "history-timeline.html").write_text(

@@ -3,13 +3,11 @@ title: "Generator"
 subtitle: "The families -C/-D/-E/-W, the scale options, and the instances they build"
 ---
 
-Without `-d`, `zeno` builds the instance with the generating functions of the 2016 solvers, from
-the options `-n -t -p -C -D -E -W -r -j -k -l -m -x -y`
+Without `-d`, `zeno` builds the instance with a family of generating functions, from the options `-n -t -p -C -D -E -W -r -j -k -l -m -x -y`
 ([command line](../solver/cli.qmd#instance-options)). Every option means what its name says:
 `-C` sets the **costs**, `-D` the **durations**, `-E` the **$C_I$-side** and `-W` the
 **$C_G$-side** durations. The construction is `legacy::buildInstance`
-(`src/zeno/legacy_input.cpp`). The 2016 solvers read the same options differently; see
-[2016 and paper instances](#paper).
+(`src/zeno/legacy_input.cpp`).
 
 ## Generating functions
 
@@ -23,8 +21,8 @@ the options `-n -t -p -C -D -E -W -r -j -k -l -m -x -y`
 | 4 | $2^k$ | `pow2` |
 | 5 | $5\lfloor k/2 \rfloor + 0.1\,(k \bmod 2)$ | `staircase`, the "(5/2)$i$" family |
 
-Any other code falls back to the identity, as in 2016. The argument $k$ is truncated to an unsigned
-integer before $f$ is applied, as the 2016 functions took `unsigned`.
+Any other code falls back to the identity. The argument $k$ is truncated to an unsigned integer
+before $f$ is applied.
 
 ## Construction
 
@@ -58,42 +56,6 @@ These are the outputs of `zeno generate` (durations, then costs; 3 lines when no
 Zero values are allowed and do occur: $\ln 1 = 0$, so the log family has a city of duration or
 cost 0.
 
-## 2016 and paper instances {#paper}
-
-The 2016 solvers, and the papers' instances, used the same generating functions, then exchanged
-the duration and cost vectors (and reversed the $C_G$-side durations) whenever the first duration
-exceeded the second. Their generator computes durations on decreasing arguments, so for an
-increasing function this always happened, unless truncation made the first two durations equal.
-`zeno` does not do this. To rebuild a 2016 instance, translate its options:
-
-| 2016 / paper | `zeno` |
-|---|---|
-| `-C a -D b` | `-C b -D a`, and `-j -k` exchanged with `-l -m` |
-| `-C c -E a -W b` | `-C a -E c -W b` |
-| `-d FILE` with $d_1 > d_2$ | a file with the lines exchanged: costs, then durations (3 lines: costs, the $C_G$-side line reversed, the $C_I$-side line) |
-
-`-n -t -p -r -x -y` are unchanged. Translated options build the 2016 instance with its cities in
-the reverse order, which leaves the front unchanged; a translated data file builds it exactly. Two
-cases need care:
-
-- **No swap in 2016.** If the 2016 run did not swap, keep its options as they are. To tell, run
-  `zeno generate` with the 2016 options: the 2016 solver swapped exactly when the first duration it
-  prints exceeds the second. For example `-n 10 -D 1` (with `-r 1`) starts $d = (2, 2, \dots)$, so
-  the 2016 solver did not swap it, while `-n 10 -D 1 -r 100` starts $d = (230, 219, \dots)$ and was
-  swapped.
-- **Non-symmetric scales.** `zeno` scales both duration sides with `-l -m`. The `-E`/`-W`
-  translation is exact when the 2016 instance had the same `-j -k` as `-l -m`, in particular at the
-  defaults. Otherwise write the 2016 instance as a data file.
-
-With these rules, a 2016 instance whose two duration functions coincided after the swap, such as
-`-C 3 -E 1 -W 3`, was in fact symmetric; its translation `-C 1 -E 3 -W 3` is symmetric too.
-
-The committed suites are written in the current meaning. When the swap was removed, two benchmark
-instances (`families/log-linear` and `families/sqrt-linear`) and six golden instances were
-rewritten this way, and every front stayed the same. The golden names keep their 2016 flags: the
-golden `n3t5p2-C1D4r10` runs `-n 3 -t 5 -p 2 -r 10 -C 4 -D 1` (header of
-`tests/golden/instances.txt`).
-
 ## The families in the suites
 
 The `families` suite runs every family on $n = 10$, $t = 8$, $p = 3$
@@ -101,8 +63,8 @@ The `families` suite runs every family on $n = 10$, $t = 8$, $p = 3$
 (`-C 2 -D 2 -r 100`), `pow2` (`-C 4 -D 4`), `staircase` (`-C 5 -D 5 -r 10`), and the mixed
 `log-linear` (logarithmic durations and linear costs, `-C 3 -D 1 -r 100`) and `sqrt-linear`
 (`-C 3 -D 2 -r 100`). The default family is the only one with a closed-form front
-([known fronts](known-fronts.qmd)). The others need the general algorithm, and on them the 2016
-greedy can miss points.
+([known fronts](known-fronts.qmd)). The others need the general algorithm, and on them a greedy
+schedule of the landings can miss points.
 
 Every instance the generator builds without `-E`/`-W` is symmetric, and every PDDL problem `zeno`
 writes from it satisfies (A1), so its front is exact.

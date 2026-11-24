@@ -1,147 +1,823 @@
 ---
 title: "Algorithm"
-subtitle: "Bracket, link-forest DP, breakpoint search, and the non-symmetric pipeline"
+subtitle: "How zeno computes an exact Pareto front, step by step, on one small instance"
+css: ../styles/algorithm.css
 ---
 
-This page summarises how `zeno` computes a front. The proofs are in the
-[theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md) (§7 for
-the symmetric algorithm, §6.5 for the non-symmetric one), and each step links to its node of the
-[blueprint](../proofs.qmd).
+This page explains how `zeno` computes the Pareto front of a MultiZenoTravel instance, and why the
+front it prints is exact. It can be read on its own: every symbol is defined here, and every claim
+cites the result that proves it. A citation links to the entry of the [blueprint](../proofs.qmd)
+that states and proves the result; the badge after it says how much of it Lean checks
+(*machine-checked*, *parts in Lean*, *Lean definition*, or *informal* when the proof is on paper
+only). The proofs themselves are in the
+[theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md). For
+context, see the [problem page](../problem.qmd), which introduces the same example, and the
+[paper section](../paper/index.qmd).
 
-## The reformulation
+The page follows one instance from start to finish. Every number quoted for it, and every value
+in the figures, is recomputed from the definitions by `site/gen_algorithm.py` and checked against
+`zeno` ([how](#reproduce)).
 
-A plan lands at least $s = 2t - p$ times in central cities
-([Lemma 3.2](../proofs.qmd#node-lemma-3-2)). Under (S) and (A1), the front is reached by plans
-with exactly $s$ landings, split among the planes as an **admissible partition**
-([Corollary 4.8](../proofs.qmd#node-corollary-4-8)): a partition $X_1, \dots, X_p$ of a multiset
-$X$ of cities with a parity matrix, that is, in every connected component of the plane–city graph,
-an even number of planes land an even number of times
-([Definition 2.2](../proofs.qmd#node-definition-2-2),
-[Lemma 2.4](../proofs.qmd#node-lemma-2-4)). An admissible partition is flown with no waiting, in
-makespan $2\max_k \delta(X_k)$ where $\delta$ sums the durations
-([Theorem 4.1](../proofs.qmd#node-theorem-4-1)), and no plan does better
-([Theorem 4.7](../proofs.qmd#node-theorem-4-7)).
+## The setting {#setting}
 
-With integer durations divided by their gcd $g$, let
-$$E(T) = \min\{c(X) : |X| = s,\ X_1,\dots,X_p \text{ admissible},\ \delta(X_k) \le T\ \forall k\}.$$
-$E$ is non-increasing, and the front is the set of its breakpoints, $(E(T), 2gT)$ wherever
-$E(T) < E(T-1)$ ([Proposition 7.1](../proofs.qmd#node-proposition-7-1)). Only the levels
-$T_{\rm lo} = d_{\min}\kappa \le T \le T_{\rm hi} = d_{\rm cheap}\kappa$ matter, with
-$\kappa = \lceil s/p \rceil$ ([Proposition 7.10](../proofs.qmd#node-proposition-7-10)): below,
-there is no plan; above, $E$ is the cheapest cost $s\,c_{\min}$.
+**Instances and plans.** An instance has two hubs, $C_I$, where every plane and passenger starts,
+and $C_G$, where they must all end, and $n$ central cities $1, \dots, n$
+{{< node "§1.1" >}}. A flight between $C_I$ and city $i$ lasts $d_i$, a flight between city $i$
+and $C_G$ lasts $\bar d_i$, and no flight joins the two hubs. Central cities may also be joined by
+flights of their own. Landing in city $i$ costs $c_i \ge 0$; landing in a hub is free. There are
+$p$ planes and $t \ge p$ passengers, and a plane carries at most one passenger at a time. A plan
+gives every plane a timed route and every passenger a journey. Its *cost* is the sum of its
+landing costs, and its *makespan* is the time at which the last plane reaches $C_G$
+{{< node "§1.2" >}}.
 
-## Symmetric pipeline
+**The front.** A point $(C, M)$ *weakly dominates* $(C', M')$ if $C \le C'$ and $M \le M'$. The
+Pareto front $\mathcal F$ is the set of (cost, makespan) points of feasible plans that no other
+such point weakly dominates {{< node "§1.5" >}}. `zeno` prints it as `cost makespan` lines.
 
-1. **Reduce.** Divide the durations by their gcd, merge equal cities and drop dominated ones
-   ($d_{i'} \le d_i$ and $c_{i'} \le c_i$), which changes neither $E$ nor the front
-   ([Proposition 7.9](../proofs.qmd#node-proposition-7-9)). The kept cities form a staircase:
-   durations strictly increasing, costs strictly decreasing (`reduce`, `zeno/reduce.hpp`).
-2. **One-plane table.** $G[m][T]$, the cheapest $m$ landings whose durations sum to at most $T$
-   ([Lemma 7.2](../proofs.qmd#node-lemma-7-2)). It is stored densely when small, otherwise as one
-   Pareto staircase of (load, cost) per $m$, so that memory does not depend on the magnitude of the
-   durations (`OnePlaneTable`).
-3. **Bracket each level.** Three knapsacks over planes and landings combine *gadgets*:
-   - $L(T)$: single planes of any size, no admissibility. It is a lower bound on the cost of
-     every plan of makespan at most $2T$, whatever the central flights (lemma R,
-     [Lemma 3.4](../proofs.qmd#node-lemma-3-4));
-   - $U(T)$: single planes of odd size, and *pairs*, two planes of even size linked at a city;
-   - $U_3(T)$: in addition, *chains* of three planes.
+**Assumptions** {{< node "§1.4" >}}. Most of this page assumes
 
-   $L \le E \le U_3 \le U$ ([Proposition 7.3](../proofs.qmd#node-proposition-7-3)). $E = U$ when
-   useful link trees have at most two planes, $q_{\max} = \min(p, t-p+1) \le 2$, and $E = U_3$ when
-   $q_{\max} \le 3$ ([Proposition 7.4](../proofs.qmd#node-proposition-7-4)). A level is *settled*
-   when the bracket closes.
-4. **Exact DP on the open levels.** On the levels where $L < U_3$, the **link-forest DP** computes
-   $E(T)$ exactly ([Theorem 7.5](../proofs.qmd#node-theorem-7-5)). A partition is admissible iff
-   it has a *link forest* ([Lemma 2.6](../proofs.qmd#node-lemma-2-6)): a forest on the planes
-   whose edges carry city labels, each edge $\{u, v\}$ labelled $i$ using one landing in $i$ of
-   both $X_u$ and $X_v$, such that every plane keeps an odd number of *free landings*
-   ([Definition (link forest)](../proofs.qmd#node-definition-link-forest)). In the plan, a link
-   at $i$ is a passenger dropped off in $i$ by one plane and picked up by the other. Trees have at most $q_{\max}$ planes
-   ([Corollary 2.7](../proofs.qmd#node-corollary-2-7)). The DP roots every tree and combines child
-   subtrees as Pareto staircases over $(\tau, \text{cost})$, $\tau$ being the part of a plane's load
-   taken by its child edges, so its work depends on the staircase sizes and not on $T$
-   (`ForestProgram`, `zeno/forest.hpp`). Because $E$ is non-increasing, equal values at both ends
-   of an interval fix it on the whole interval (`monotone` in `--stats`).
-5. **Find the breakpoints.** `--levels sweep` evaluates every level; `--levels search` splits every
-   interval $(a, b)$ with $E(a) > E(b)$ at up to `threads` evenly spaced levels evaluated in
-   parallel. Pieces with equal ends are constant, so with $r$ breakpoints it evaluates
-   $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels (`breakpoints`, `zeno/breakpoints.hpp`). The default,
-   `auto`, sweeps up to $2^{12}$ levels and searches beyond, which is why the time grows with the
-   logarithm of the level range.
-6. **Plans.** For each point, the partition is rebuilt from the exact method's choices, a link
-   forest computed from it, and the plan of [Theorem 4.1](../proofs.qmd#node-theorem-4-1) built.
-   Every plane first drops off one passenger per child edge ($C_I \to b \to C_I$), then flies its
-   free landings as alternating crossings, then picks up the passenger its parent dropped
-   ($C_G \to a \to C_G$). Every plan is re-simulated by `checkPlan`, which shares no code with the
-   builder.
-7. **Certificate.** Each gap gets `relaxed` when $L$ already reaches the cost at the level below
-   the next point, `forest` otherwise ([certificate format](certificates.qmd)).
+- (S), symmetry: $d_i = \bar d_i$ for every city, so a flight between city $i$ and either hub
+  lasts $d_i$;
+- and either (A1): every central flight between $i$ and $j$ lasts at least $d_i + d_j$, so it is
+  never faster than going through a hub; or (AΔ): the flight durations satisfy the triangle
+  inequality.
 
-Why the 2016 solvers were wrong: they fixed the multiset of landings (a PPP) and scheduled it
-greedily, longest first onto the least-loaded plane. That is a heuristic, and deciding whether a
-fixed multiset can be flown within a makespan is strongly NP-complete
-([§5](../proofs.qmd#node-s5), [Theorem 8.1](../proofs.qmd#node-theorem-8-1)). The link-forest
-DP does not fix the multiset. Its cost is pseudo-polynomial
-([Corollary 8.3](../proofs.qmd#node-corollary-8-3)).
+Instances with $d \ne \bar d$ have their own pipeline, described [at the end](#nonsymmetric).
 
-## Non-symmetric pipeline {#nonsymmetric}
+### Notation {#notation}
 
-When the durations to $C_I$ ($d$) and to $C_G$ ($\bar d$) differ, a landing's weight depends on its
-role: a **crossing** $C_I \to i \to C_G$ or back weighs $d_i + \bar d_i$, a **drop-off**
-$C_I \to i \to C_I$ weighs $2d_i$, a **pick-up** $C_G \to i \to C_G$ weighs $2\bar d_i$. A *role
-configuration* assigns roles per plane, each plane flying an odd number of crossings, with drop-offs
-and pick-ups balanced city by city ([Definition 4.2](../proofs.qmd#node-definition-4-2)). A
-pick-up may have to wait for its drop-off, and that waiting can be harmful: the role loads alone do
-not give the front ([Proposition 6.5](../proofs.qmd#node-proposition-6-5)). So `zeno` computes a
-**certified bracket** (`solveBracket`, `zeno/ns.hpp`):
+::: {.alg-notation}
 
-1. **Upper points.** Plans built from link forests in which every plane picks up at most once (or,
-   by time reversal, drops off at most once), and from the cheapest balanced role configurations
-   found in the gaps, all scheduled and simulated with their waiting. Every printed point is a real
-   plan.
-2. **Lower bounds per gap,** for every plan of makespan below the next point:
-   - `relaxed`: lemma R with weight $\min(2d_i, 2\bar d_i)$ per landing. No assumption on central
-     flights;
-   - `roles`: the role relaxation (each plane an odd number $\ge 1$ of crossings, all loads adding
-     up to the crossing weight of the landings);
-   - `lagrangian`: a Lagrangian relaxation of the per-city balance, with one multiplier per city;
-   - `balanced`: the exact program over balanced role configurations, a DP over planes on the
-     imbalance vector ([Proposition 6.6](../proofs.qmd#node-proposition-6-6)), exponential in
-     $t - p$ and stopped at the `roleStates` and `roleWork` limits;
-   - `search`: the exhaustive search over role configurations of cost below the gap's cost, each
-     with every drop-off order and drop-off-to-pick-up matching, the closed form of the template
-     schedule ([Lemma 6.3](../proofs.qmd#node-lemma-6-3)) giving its makespan. It stops at the
-     `searchWork` limit. It is the only kind that closes gaps opened by harmful waiting.
+| Symbol | Meaning |
+|---|---|
+| $s = 2t - p$ | the least number of landings in central cities of a feasible plan ([step 1](#reduction)) |
+| $\kappa = \lceil s/p \rceil$ | the size of the largest group when $s$ landings are spread over $p$ planes as evenly as possible |
+| $X$ | a multiset of central cities: the landings. $X(i)$ is the multiplicity of city $i$, $\lvert X \rvert$ the size |
+| $c(X)$, $\delta(X)$ | $\sum_{i \in X} c_i$ and $\sum_{i \in X} d_i$, counted with multiplicity |
+| $\ell(X) = 2\delta(X)$ | the *load*: the flight time of a plane that serves each landing of $X$ by its own round trip from a hub |
+| $X_1, \dots, X_p$ | a *partition* of $X$: one group per plane, with $X_1 + \dots + X_p = X$ |
+| even plane | a plane whose group has an even number of landings |
+| $g$ | the gcd of the durations; durations are divided by it |
+| $T$ | a *level*: an integer bound on every $\delta(X_k)$, hence on every load, $2gT$ in the original units |
+| $E(T)$ | the least cost of an admissible partition within level $T$ ([step 4](#levels)) |
+| $L(T)$, $U(T)$, $U_3(T)$ | a lower bound and two upper bounds on $E(T)$ ([step 7](#bracket)) |
+| $G[m][\tau]$ | the least cost of $m$ landings whose durations sum to at most $\tau$ ([step 6](#one-plane)) |
+| $\hat m = s - p + 1$ | the largest group that can occur, every group being non-empty |
+| $q_{\max} = \min(p,\ t - p + 1)$ | the most planes a useful link tree has ([step 3](#link-forests)) |
+| $w = \min(p - 1,\ t - p)$ | the most cities a parity matrix needs to touch ([step 9](#sigma-dp)) |
+| $T_{\rm lo}$, $T_{\rm hi}$ | the first level with a plan, and the first level at the cheapest cost ([step 4](#levels)) |
 
-   `roles`, `lagrangian` and `balanced` need (A1-NS) through
-   [Theorem 6.1](../proofs.qmd#node-theorem-6-1): every plan is weakly dominated by a role
-   configuration with the same cost and loads at most its makespan. `search` needs (A1-NS) through
-   [Theorem 6.9](../proofs.qmd#node-theorem-6-9), *schedulable domination*: every plan is
-   dominated by a role configuration whose template schedule is no later. Theorem 6.9 holds for
-   every plan, also on instances with a city of $d = \bar d = 0$, so no event-order assumption is
-   needed.
-3. **Report.** The front is exact when the fastest makespan is certified and every gap is closed.
+:::
+
+$s$, $\kappa$, $c$, $\delta$ and $\ell$ are the notation of the theory note {{< node "Notation" >}}.
+
+### The worked example {#example}
+
+The instance of the [problem page](../problem.qmd)
+([`site/problem/example.dat`](https://github.com/aquemy/ZenoSolver/blob/master/site/problem/example.dat))
+has $n = 3$ cities, $t = 3$ passengers and $p = 2$ planes:
+
+| city $i$ | 1 | 2 | 3 |
+|---|---:|---:|---:|
+| duration $d_i = \bar d_i$ | 2 | 3 | 5 |
+| landing cost $c_i$ | 9 | 6 | 1 |
+
+City 1 is fast and expensive, city 3 slow and cheap. So $s = 2 \cdot 3 - 2 = 4$ landings,
+$\kappa = 2$ and $g = 1$. The instance has no central flight table, and the default central flights
+of `zeno` satisfy (A1). Its front, as `zeno -n 3 -t 3 -p 2 -d site/problem/example.dat` prints it:
+
+| makespan | 8 | 10 | 12 | 14 | 16 | 20 |
+|---|---:|---:|---:|---:|---:|---:|
+| cost | 36 | 30 | 24 | 20 | 14 | 4 |
+
+The rest of the page derives this list. Part one says what is computed; part two says how.
+
+## What is computed {#what}
+
+### Step 1. From plans to landing multisets {#reduction}
+
+**Idea.** A plan is a timed object, with routes, journeys and waiting, but its point on the front
+depends on two numbers only. The first step replaces plans by a finite, untimed object: the
+multiset of central cities the planes land in, split among the planes. Under (S), a landing in
+city $i$ served by its own round trip from a hub ($C_I \to i \to C_G$, $C_G \to i \to C_I$,
+$C_I \to i \to C_I$ or $C_G \to i \to C_G$) takes exactly $2d_i$ {{< node "Lemma 3.3" >}}. If
+every landing is flown this way, plane $k$ flies for $\ell(X_k) = 2\delta(X_k)$, and the question
+becomes which landings to make and how to split them.
+
+**Results.**
+
+1. *Counting.* Every feasible plan lands at least $s = 2t - p$ times in central cities
+   {{< node "Lemma 3.2" >}}. Every passenger needs a flight out of $C_I$ and a flight into $C_G$.
+   Cut each route at its visits to the hubs: each piece, a *segment*, lands in a central city, and
+   a plane leaves $C_I$ one time more than it returns there. Counting the arrivals in the hubs
+   gives at least $(t - p) + t$ segments.
+2. *Achievability.* For every multiset $X$ with $|X| = s$ and every *admissible* partition
+   $X_1, \dots, X_p$ of it ([step 2](#admissible)), there is a feasible plan whose central
+   landings are exactly $X$, hence of cost $c(X)$, that uses no central flight, in which plane $k$
+   flies for $\ell(X_k)$, and whose makespan is $\max_k \ell(X_k)$ {{< node "Theorem 4.1" >}}.
+   [Step 11](#plans) shows the construction.
+3. *Converse.* Under (S) and (A1), every feasible plan with cost $C$ and makespan $M$ is matched by
+   an admissible partition of some $X$ with $|X| = s$, $c(X) \le C$ and $\ell(X_k) \le M$ for
+   every plane {{< node "Theorem 4.7" >}}. The same holds under (S) and (AΔ)
+   {{< node "Theorem 4.10" >}}.
+4. *Together.* Let $M(X)$ be the least $\max_k \ell(X_k)$ over the admissible partitions of $X$,
+   or $\infty$ if there is none. Under (S) and (A1),
+   $$\mathcal F = \mathrm{Min}\,\mathcal X, \qquad \mathcal X = \{(c(X), M(X)) : |X| = s,\ M(X) < \infty\},$$
+   where $\mathrm{Min}$ keeps the points that no other point of the set weakly dominates, and
+   every front point is attained by a plan with exactly $s$ central landings
+   {{< node "Corollary 4.8" >}}. The same holds under (S) and (AΔ) {{< node "Corollary 4.12" >}}.
+
+Some condition on the central flights is needed: with fast central flights that satisfy neither
+(A1) nor (AΔ), a plan can beat every point of $\mathcal X$ {{< node "Example 4.13" >}}.
+
+**In the example.** $s = 4$. The multiset $\{3, 3, 3, 3\}$ split as $\{3, 3\} \mid \{3, 3\}$ costs
+$4$, each plane has $\delta = 10$, and the makespan is $20$: the point $(4, 20)$. The multiset
+$\{1, 1, 1, 1\}$ split as $\{1, 1\} \mid \{1, 1\}$ costs $36$ with makespan $8$: the point
+$(36, 8)$. The four other points come from multisets in between.
+
+**In the code.** `solveFront`
+([`src/zeno/solve.cpp`](https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/solve.cpp))
+takes symmetric instances and sends the others to `solveBracket` ([below](#nonsymmetric)).
+`checkFlights`
+([`include/zeno/flights.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/flights.hpp))
+decides (A1), (AΔ) and (A1-NS) in exact integer arithmetic. With a central flight table that
+satisfies neither (A1) nor (AΔ), `zeno` still prints achieved points but warns that the front may
+not be exact.
+
+### Step 2. Admissible partitions {#admissible}
+
+**Idea.** Not every split of $X$ among the planes can be flown with loads $\ell(X_k)$. In the plans
+of step 1, every landing is a round trip from a hub of one of four kinds: a *crossing*
+$C_I \to i \to C_G$ carrying a passenger, or its empty return $C_G \to i \to C_I$; a *drop-off*
+$C_I \to i \to C_I$, which leaves a passenger in city $i$; and a *pick-up* $C_G \to i \to C_G$,
+which collects one there. A plane starts in $C_I$ and ends in $C_G$, so it flies an odd number of
+crossings, counting both directions {{< node "Lemma 2.1" >}}. Every drop-off in city $i$ is
+matched by a pick-up in city $i$ {{< node "Definition 4.2" >}}. So a plane with an even number of
+landings must take part in a hand-off, and hand-offs pair up city by city. The parity matrix
+records exactly this: $h_{k,i}$ is the parity of the number of drop-offs and pick-ups of plane $k$
+in city $i$ {{< node "Lemma 4.5" >}}.
+
+**Definition** {{< node "Definition 2.2" >}}. A *parity matrix* for a partition
+$X_1, \dots, X_p$ is a 0/1 matrix $h$ with one row per plane and one column per city such that
+
+- (h1) $h_{k,i} = 1$ only if plane $k$ lands in city $i$, that is $X_k(i) \ge 1$;
+- (h2) row $k$ has $|X_k| + 1$ ones modulo 2: an odd number for an even plane, an even number for
+  an odd plane;
+- (h3) every column has an even number of ones.
+
+The partition is *admissible* if it has a parity matrix.
+
+**Equivalent forms.**
+
+- Counting with multiplicities changes nothing: integer entries $0 \le \tilde h_{k,i} \le X_k(i)$
+  with the same two parity conditions exist iff a parity matrix does {{< node "Lemma 2.3" >}}.
+  This is the form a link forest produces ([step 3](#link-forests)).
+- *Component form.* Let $H$ be the bipartite graph on planes and cities with an edge between plane
+  $k$ and city $i$ whenever $X_k(i) \ge 1$. The partition is admissible iff every connected
+  component of $H$ contains an even number of even planes {{< node "Lemma 2.4" >}}. This is the
+  quickest test by hand.
+- Every row has at most $|X_k| - 1$ ones {{< node "Lemma 2.5" >}}: each plane keeps at least one
+  landing outside the hand-offs, and an admissible partition has no empty group.
+- A sufficient condition: if the groups are non-empty, their sizes add up to $p$ modulo 2, and
+  some city belongs to every even group, the partition is admissible
+  {{< node "Lemma 2.9" >}}.
+
+**In the example** (@fig-admissible). The multiset $\{2, 2, 3, 3\}$ split as
+$\{2, 3\} \mid \{2, 3\}$: both planes are even, so each row needs an odd number of ones, and
+marking city 2 in both rows gives the column sums $0, 2, 0$. The split is admissible. It costs
+$14$, both planes have $\delta = 8$, and the makespan is $16$: the front point $(14, 16)$. The
+split $\{1, 3\} \mid \{2, 2\}$ of $\{1, 2, 2, 3\}$ is not: plane 2 is even and lands only in city
+2, so its row must mark city 2; plane 1 is even and lands in cities 1 and 3, so its row marks
+exactly one of them; column 2 then holds a single one. The graph $H$ shows it at a glance: plane 2
+and city 2 form a component with one even plane. This split is not a candidate in Corollary 4.8,
+whatever its cost (22) and loads.
+
+::: {#fig-admissible}
+::: {.alg-ink}
+[![](../algorithm/fig-admissible.svg){fig-alt="Two splits of four landings between two planes. Left, groups {2, 3} and {2, 3}: the parity matrix marks city 2 in both rows, every column is even, and the graph H is connected with two even planes. Right, groups {1, 3} and {2, 2}: column 2 is forced to hold a single one, and in H plane 2 and city 2 form a component with one even plane."}](../algorithm/fig-admissible.svg)
+:::
+
+An admissible and a non-admissible split for the worked example, with the parity matrix of
+Definition 2.2 and the graph $H$ of Lemma 2.4. Cities keep their colours in every diagram of this
+page. Click to open the full-size drawing.
+:::
+
+**In the code.** `zeno` never enumerates parity matrices. Its dynamic programs only build
+partitions that carry a link forest ([step 3](#link-forests)), which are admissible by
+construction. Admissibility is still decidable by enumerating $h$ on the supports of the groups
+{{< node "Definition 2.2" >}}; `gen_algorithm.py` does so over every partition of the example to
+check the figures of this page.
+
+### Step 3. Link forests {#link-forests}
+
+**Idea.** A parity matrix says which landings take part in hand-offs, not who hands off to whom. A
+link forest says it. Draw an edge between planes $u$ and $v$, labelled with city $i$, for each
+passenger that one of them drops off in city $i$ and the other picks up there. Each edge uses one
+landing in $i$ of both planes. The other landings of a plane are its *free landings*, flown as
+crossings.
+
+**Definition** {{< node "Definition (link forest)" >}}. A *link forest* for $X_1, \dots, X_p$ is a
+forest $\Lambda$ on the planes whose edges carry city labels, such that
+
+- (F1) for every plane $u$ and city $i$, at most $X_u(i)$ edges at $u$ are labelled $i$;
+- (F2) $r_u = |X_u| - \deg_\Lambda(u)$, the number of free landings of $u$, is odd.
+
+**Results.**
+
+- A partition is admissible iff it has a link forest, and then it has one with at most one edge of
+  each label at each plane {{< node "Lemma 2.6" >}}. In one direction, counting the edges of each
+  label at each plane gives the integer form of Lemma 2.3. In the other, the forest is built from a
+  parity matrix whose ones lie on a spanning forest of $H$.
+- With $|X| = s$, a link forest has at most $t - p$ edges, so each of its trees has at most
+  $q_{\max} = \min(p, t - p + 1)$ planes {{< node "Corollary 2.7" >}}. Every plane keeps at least
+  one free landing, so the degrees add up to at most $s - p = 2(t - p)$.
+
+Forests matter for two reasons. They can be built tree by tree, from the leaves up, by dynamic
+programming ([step 8](#forest-dp)). And in the plan built from a forest, each plane picks up at
+most once, from its parent, which is what keeps waiting harmless ([step 11](#plans)).
+
+**In the example** (@fig-link-tree). $t - p = 1$, so there is at most one link, and
+$q_{\max} = 2$: every tree is a single plane or a pair. For the point $(14, 16)$, one edge
+labelled city 2 joins plane 1 to plane 2. Each plane keeps one free landing, in city 3:
+$r_u = 2 - 1 = 1$, which is odd. In the plan, plane 1 drops passenger 1 in city 2 and plane 2
+collects it.
+
+::: {#fig-link-tree}
+::: {.alg-ink}
+[![](../algorithm/fig-link-tree.svg){fig-alt="Left: a tree with plane 1 as root and plane 2 as its child, joined by an edge labelled city 2; each plane holds a landing in city 2 for the link and a free landing in city 3. Right: the plan on a time axis from 0 to 16. Plane 1 drops passenger 1 in city 2 from 0 to 6, then crosses through city 3 with passenger 2 until 16. Plane 2 crosses through city 3 with passenger 3 from 0 to 10, then picks up passenger 1 in city 2 from 10 to 16. Passenger 1 waits in city 2 from time 3 to time 13."}](../algorithm/fig-link-tree.svg)
+:::
+
+The link forest of the point $(14, 16)$ and the plan built from it. Left: the tree; its edge uses
+one landing in city 2 of each plane (F1), and each plane keeps one free landing (F2). Right: the
+plan of Theorem 4.1 on a time axis, as `zeno --plans` prints it ([step 11](#plans)).
+:::
+
+**In the code.** `LinkForest` and `ForestPlane`
+([`include/zeno/forest.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/forest.hpp))
+store, for each plane, its *filler* (the odd number of free landings), its parent, and the label of
+the edge to it. The group of a plane is its filler, plus its parent's label, plus one landing per
+child edge.
+
+### Step 4. The level function $E(T)$ and its breakpoints {#levels}
+
+**Idea.** Corollary 4.8 still asks for the Pareto set of a search with two objectives. Turn it
+into a family of searches with one: fix a budget $T$ for every plane, and ask for the cheapest
+admissible way to fit in it. As the budget grows, the least cost can only drop, and each drop is a
+front point.
+
+**Definition.** Durations are integers, divided by their gcd $g$ (rational durations are scaled to
+integers first). For an integer level $T \ge 0$,
+$$E(T) = \min\{c(X) : |X| = s,\ X_1, \dots, X_p \text{ admissible},\ \delta(X_k) \le T \text{ for every } k\},$$
+with $\min \emptyset = \infty$. A larger $T$ allows more partitions, so $E$ is non-increasing.
+
+**Results.**
+
+- Under (S) and (A1), the front is the set of *breakpoints* of $E$
+  {{< node "Proposition 7.1" >}}:
+  $$\mathcal F = \{(E(T),\ 2gT) : E(T) < E(T - 1)\}, \qquad E(-1) = \infty.$$
+  Under (S) and (AΔ) as well {{< node "Corollary 4.12" >}}.
+- Only a bounded range of levels matters {{< node "Proposition 7.10" >}}. Let $d_{\min}$ be the
+  smallest duration, $c_{\min}$ the smallest cost, and $d_{\rm cheap}$ the smallest duration among
+  the cities of cost $c_{\min}$. Then $E(T) < \infty$ iff $T \ge T_{\rm lo} = d_{\min}\kappa$, and
+  $E(T) = s\,c_{\min}$ iff $T \ge T_{\rm hi} = d_{\rm cheap}\kappa$. In the original units, every
+  plan has makespan at least $2d_{\min}\kappa$, which some plan attains, and the cheapest point of
+  the front is $(s\,c_{\min},\ 2d_{\rm cheap}\kappa)$. Both hold under (S), whatever the central
+  flights. The cost of the fastest point has no closed form: it is $E(T_{\rm lo})$.
+
+**In the example** (@fig-staircase). $T_{\rm lo} = 2 \cdot 2 = 4$ and
+$T_{\rm hi} = 5 \cdot 2 = 10$: seven levels. On $T = 4, \dots, 10$, $E$ takes the values 36, 30,
+24, 20, 14, 14 and 4. It drops at every level but $T = 9$, where the cheapest groups within the
+budget are still $\{2, 3\} \mid \{2, 3\}$: no plan of makespan 18 is cheaper than the plan of
+makespan 16. Six breakpoints, six front points.
+
+::: {#fig-staircase}
+```{=html}
+<div data-figure>
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-line"></i>E(T)</span>
+    <span><i class="alg-key alg-key-dot"></i>breakpoint: front point (E(T), 2gT)</span>
+    <span><i class="alg-key alg-key-hollow"></i>no drop: no new point</span>
+  </div>
+  <div id="alg-staircase" class="alg-plot"></div>
+</div>
+```
+
+$E(T)$ for the worked example. Each filled dot is a breakpoint, labelled with its front point;
+the hollow dot at $T = 9$ is a level where $E$ does not drop. Below $T_{\rm lo}$ no partition
+fits; from $T_{\rm hi}$ on, $E$ is the cheapest cost $s\,c_{\min} = 4$. Hover over a level, or
+focus it with the keyboard, for its cheapest admissible groups.
+:::
+
+<details>
+<summary>Table view: the levels of the worked example</summary>
+
+{{< include ../algorithm/_levels-example.md >}}
+
+</details>
+
+**In the code.** `ReducedInstance::lowestLevel()` and `highestLevel()`
+([`include/zeno/reduce.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/reduce.hpp))
+give $T_{\rm lo}$ and $T_{\rm hi}$, and `makespanPerLevel` is $2g$. Once every level is settled,
+`extract()` in `solve.cpp` emits a front point wherever $E$ drops, and checks that $E$ never
+rises.
+
+## How zeno computes it {#how}
+
+@fig-pipeline is the map of the symmetric solver, `solveFront`. The left column runs once per
+instance. The panel on the right settles one level: it tries the cheap bounds first, and the exact
+program only when they disagree.
+
+::: {#fig-pipeline}
+::: {.alg-ink}
+[![](../algorithm/fig-pipeline.svg){fig-alt="Flowchart. Instance; if not symmetric, the non-symmetric bracket. Otherwise: reduce (gcd, dominated cities), levels and one-plane table, settle every level, breakpoints, plans, certificate. Settling one level: compute L and U; if L equals U the level is settled; else if q_max is at most 2, E equals U; else compute U3; if L equals U3 or q_max is at most 3, E equals U3; else run the link-forest DP."}](../algorithm/fig-pipeline.svg)
+:::
+
+The orchestration of `solveFront`
+([`src/zeno/solve.cpp`](https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/solve.cpp)),
+following §7.7 of the theory note. The branch that settles a level is what `zeno --stats` counts:
+`bracket`, `pairs`, `chains`, `exact`, and `monotone` for the levels that bisection settles
+([step 8](#forest-dp)).
+:::
+
+### Step 5. Reduce the instance {#reduce}
+
+**Idea.** A city that is no faster and no cheaper than another is never needed: replacing each of
+its landings by a landing in the other city keeps the partition admissible (merge the two columns
+of the parity matrix) and raises neither the cost nor a load.
+
+**Result** {{< node "Proposition 7.9" >}}. If $d_{i'} \le d_i$ and $c_{i'} \le c_i$ for two cities
+$i \ne i'$, removing city $i$ leaves $E(T)$ and $L(T)$ unchanged at every level, and under (S) and
+(A1) it leaves the front unchanged. Applied repeatedly, keeping one city per class of equal
+$(d, c)$, the cities that remain form a *staircase*: durations strictly increasing, costs strictly
+decreasing.
+
+**In the example.** $2 < 3 < 5$ and $9 > 6 > 1$: the cities already form a staircase, and $g = 1$.
+Nothing changes.
+
+**In the code.** `reduce`
+([`src/zeno/reduce.cpp`](https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/reduce.cpp))
+merges equal cities, drops dominated ones, divides the durations by $g$, and computes the level
+range. `zeno --stats` prints the result, here `levels 4..10 (x1, 7 levels), cities 3, max tree 2`.
+
+### Step 6. The one-plane table {#one-plane}
+
+**Idea.** Every bound and every exact method below keeps asking one question: what is the
+cheapest way for a single plane to make $m$ landings within a budget $\tau$? It is a knapsack with
+exactly $m$ items, in which each city can be used any number of times, and one table answers it
+for all $m$ and $\tau$ at once.
+
+**Result** {{< node "Lemma 7.2" >}}. Let $G[0][\tau] = 0$ for $\tau \ge 0$,
+$G[m][\tau] = \infty$ for $\tau < 0$, and
+$$G[m][\tau] = \min_{i:\ d_i \le \tau} \big(c_i + G[m-1][\tau - d_i]\big).$$
+Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities whose durations sum to at most
+$\tau$, and it is non-increasing in $\tau$.
+
+**In the example** (@fig-table). $m$ runs up to $\hat m = 3$ and $\tau$ up to $T_{\rm hi} = 10$.
+For instance $G[2][8] = 7$: one landing in city 2 and one in city 3, of durations
+$3 + 5 = 8$. Replay the fill to see each cell computed from a cell of the row above.
+
+::: {#fig-table}
+```{=html}
+<div data-figure>
+  <div class="alg-controls" id="alg-table-controls">
+    <button type="button">Fill the table step by step</button>
+  </div>
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-hollow"></i>the cell computed</span>
+    <span><i class="alg-key alg-key-hollow" style="border-color: var(--zs-series-2)"></i>the cell of row m − 1 it extends</span>
+    <span><i class="alg-key alg-key-dot"></i>staircase point: G[m][·] drops</span>
+  </div>
+  <div id="alg-table"></div>
+</div>
+```
+
+The one-plane table $G[m][\tau]$ of the worked example: rows $m$, columns $\tau$. Hover over a
+cell, or focus it, to see the cell of row $m - 1$ it extends (orange outline) and a cheapest group.
+A dot marks the cells where $G[m][\cdot]$ drops, the only cells the staircase layout stores.
+:::
+
+<details>
+<summary>Table view: $G[m][\tau]$</summary>
+
+{{< include ../algorithm/_table-g.md >}}
+
+</details>
+
+**In the code.** `OnePlaneTable`
+([`include/zeno/one_plane.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/one_plane.hpp))
+has two layouts. The dense one stores every cell and takes $O(n\,\hat m\,T_{\rm hi})$ time to
+build; `zeno` uses it up to $2^{22}$ cells. Beyond, it stores for each $m$ only the Pareto points
+(load, cost) where $G[m][\cdot]$ drops, the dotted cells of the figure, so that memory does not
+depend on the magnitude of the durations; a lookup is then a binary search.
+
+### Step 7. The bracket {#bracket}
+
+**Idea.** Before solving a level exactly, sandwich $E(T)$ between a cheap lower bound and cheap
+upper bounds, $L \le E \le U_3 \le U$. All three are knapsacks that combine small *gadgets* (a few
+planes with their groups) filled with $G$-optimal landings. Where the lower bound meets an upper
+bound, the level is settled.
+
+**The bounds.** A knapsack over planes and landings combines gadgets, with
+$\mathrm{For}[0][0] = 0$ and
+$$\mathrm{For}[P][J] = \min\big(\mathrm{For}[P - q][J - j] + \text{cost}\big)$$
+over the gadgets of $q$ planes, $j$ landings and that cost; the bound is $\mathrm{For}[p][s]$.
+
+- $L(T)$: one plane with any number $m \in [1, \hat m]$ of landings, at cost $G[m][T]$.
+  Admissibility is ignored, so this is a relaxation. It bounds more than $E$: under (S) alone,
+  whatever the central flights, every feasible plan of makespan $M$ costs at least
+  $L(\lfloor M/2g \rfloor)$ {{< node "Lemma 3.4" >}}.
+- $U(T)$: one plane with an odd number $m$ of landings, at cost $G[m][T]$; or a *pair*: two planes
+  of even sizes $a$ and $b$ linked at a city $i$, at cost
+  $$2c_i + G[a-1][T - d_i] + G[b-1][T - d_i].$$
+- $U_3(T)$: the gadgets of $U$, and a *chain*: three planes of sizes $a$ (even), $b$ (odd, at least
+  3) and $b'$ (even), the first two linked at $i$ and the last two at $j$, at cost
+  $$2c_i + 2c_j + G[a-1][T-d_i] + G[b-2][T-d_i-d_j] + G[b'-1][T-d_j].$$
+
+**Results.**
+
+- $L(T) \le E(T) \le U_3(T) \le U(T)$ {{< node "Proposition 7.3" >}}. Each gadget of $U$ and
+  $U_3$ is a link tree with one, two or three planes that satisfies (F1) and (F2), so its groups
+  are admissible by Lemma 2.6.
+- The upper bounds are exact when useful trees are small: $E = U$ if $q_{\max} \le 2$, that is
+  $p \le 2$ or $t \le p + 1$, and $E = U_3$ if $q_{\max} \le 3$ {{< node "Proposition 7.4" >}}.
+  By Corollary 2.7 the trees of an optimal forest then have at most two or three planes, and such
+  trees are a vertex, an edge or a path: exactly the gadgets.
+
+**In the example** (@fig-bracket). $q_{\max} = 2$, so $E = U$ at every level. Moreover $L = U$ at
+every level: all seven levels are closed by the bracket, and `zeno --stats` reports
+`settled: bracket 7, pairs 0, chains 0, monotone 0, exact 0`. This is no accident of the numbers.
+With two planes and four landings, the relaxation either splits them $1 + 3$, two odd planes,
+which is always admissible since no component of $H$ then holds an even plane
+{{< node "Lemma 2.4" >}}; or $2 + 2$, where the cheapest choice is the same $G$-optimal pair
+twice: the two groups share a city, which makes them admissible {{< node "Lemma 2.9" >}}.
+
+The *contrast instance* of the figure shows what an open level looks like: three cities with
+$d = (3, 5, 7)$ and $c = (10, 5, 1)$, $t = 4$ passengers and $p = 2$ planes
+([`contrast.dat`](../algorithm/contrast.dat)), so $s = 6$ and the levels run from 9 to 21. At
+$T = 12$, the cheapest relaxed split is $\{2, 3\} \mid \{1, 1, 1, 1\}$, of cost 46: two even
+planes that share no city, so each component of $H$ holds one even plane, and the split is not
+admissible (Lemma 2.4). The cheapest admissible split, $\{1, 1, 2\} \mid \{1, 1, 2\}$, costs
+$50 = U(12)$. Levels 12 and 14 stay open, and `zeno --stats` reports
+`settled: bracket 11, pairs 2`: both are settled by $U$, exact since $q_{\max} = 2$.
+
+::: {#fig-bracket}
+```{=html}
+<div data-figure>
+  <div class="alg-controls" role="group" aria-label="Instance">
+    <button type="button" data-instance="example" aria-pressed="true">Worked example</button>
+    <button type="button" data-instance="contrast" aria-pressed="false">Contrast instance</button>
+  </div>
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-L"></i>L(T), relaxation</span>
+    <span><i class="alg-key alg-key-U"></i>U(T), pairs bound</span>
+    <span><i class="alg-key alg-key-dot"></i>E(T)</span>
+    <span><i class="alg-key alg-key-band"></i>open level: L &lt; U</span>
+  </div>
+  <div id="alg-bracket" class="alg-plot"></div>
+  <p class="alg-status"><span data-note></span> <code data-stats></code></p>
+</div>
+```
+
+The bracket per level. For each level $T$, the aqua tick is $L(T)$, the orange tick $U(T)$ and
+the blue dot $E(T)$. On a closed level the three coincide; a shaded level is open. Switch between
+the worked example, where every level closes, and the contrast instance, where two levels stay
+open. Hover over a level for the groups behind each value.
+:::
+
+<details>
+<summary>Table view: the levels of the contrast instance</summary>
+
+{{< include ../algorithm/_levels-contrast.md >}}
+
+</details>
+
+**In the code.** `relaxedCost` computes $L$, and `forestCost(r, G, T, q)` runs the link-forest
+program of [step 8](#forest-dp) restricted to trees of at most $q$ planes
+([`src/zeno/forest.cpp`](https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/forest.cpp)):
+with $q = 2$ and $q = 3$ it ranges over the same trees as the gadgets of $U$ and $U_3$. In sweep
+mode, `bracket()` computes $L$ and $U$ on every level in parallel, and `chains()` adds $U_3$ on the
+levels left open when $q_{\max} \ge 3$. Every value is checked to lie inside its bracket.
+
+### Step 8. The link-forest DP {#forest-dp}
+
+**Idea.** When $q_{\max} \ge 4$ and $L < U_3$ at a level, `zeno` computes $E(T)$ exactly. By
+Lemma 2.6 and Corollary 2.7, $E(T)$ is the least cost of $p$ groups with $s$ landings in all, each
+within $T$, that carry a link forest whose trees have at most $q_{\max}$ planes. Root every tree
+at a plane. The group of a plane is then its free landings (an odd number $r$), plus one landing
+per child edge, plus one for the edge to its parent. The program builds such trees from the leaves
+up, attaching to each plane the subtrees that hang from it.
+
+**Tables**, for one level $T$:
+
+- $\mathrm{Ch}_q[\tau][j]$: the least cost of a multiset of *child items*. An item is a link label
+  $b$, with one landing in $b$ in the parent's group, and the subtree hanging from that link. The
+  labels' durations sum to $\tau$, the subtrees have $q$ planes in all, and $j$ counts the
+  landings;
+- $\mathrm{Sub}_a[q][j]$: the least cost of a subtree with $q$ planes and $j$ landings whose root
+  holds one landing in $a$ for the link to its parent;
+- $\mathrm{Root}[q][j]$: the least cost of a tree with $q$ planes and $j$ landings;
+- $\mathrm{For}[P][J]$: the least cost of a forest on $P$ planes with $J$ landings.
+
+For $q = 1, \dots, q_{\max}$ in order, with $r$ odd and $\tau \in [0, T]$,
+$$\mathrm{Sub}_a[q][j] = \min_{\tau,\ j' + 1 + r = j} \big(c_a + \mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - d_a - \tau]\big),$$
+$$\mathrm{Root}[q][j] = \min_{\tau,\ j' + r = j} \big(\mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - \tau]\big),$$
+$$\mathrm{Ch}_q[\tau][j] = \min_{b,\ 1 \le q' \le q,\ j'} \big(\mathrm{Ch}_{q-q'}[\tau - d_b][j - 1 - j'] + c_b + \mathrm{Sub}_b[q'][j']\big),$$
+with $\mathrm{Ch}_0[0][0] = 0$, and finally, with $\mathrm{For}[0][0] = 0$,
+$$\mathrm{For}[P][J] = \min_{q \le \min(P, q_{\max}),\ j} \big(\mathrm{For}[P - q][J - j] + \mathrm{Root}[q][j]\big).$$
+
+**Result** {{< node "Theorem 7.5" >}}. $\mathrm{For}[p][s] = E(T)$. Given $G$, the program takes
+$O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ time per level.
+
+**In the example**, at $T = 8$. With $q_{\max} = 2$, a tree is a single plane or a pair.
+
+- A single plane with one or three landings: $\mathrm{Root}[1][1] = G[1][8] = 1$ and
+  $\mathrm{Root}[1][3] = G[3][8] = 21$.
+- A leaf hanging from a link at city 2, with one free landing within $8 - d_2 = 5$:
+  $\mathrm{Sub}_2[1][2] = c_2 + G[1][5] = 7$.
+- The parent's side of that link: $\mathrm{Ch}_1[3][3] = c_2 + \mathrm{Sub}_2[1][2] = 13$.
+- The pair, rooted at a plane with one free landing within $8 - 3 = 5$:
+  $$\mathrm{Root}[2][4] = \mathrm{Ch}_1[3][3] + G[1][5] = 13 + 1 = 14.$$
+- The forest, a pair or two single planes:
+  $$\mathrm{For}[2][4] = \min\big(\mathrm{Root}[2][4],\ \mathrm{Root}[1][1] + \mathrm{Root}[1][3]\big) = \min(14, 22) = 14 = E(8).$$
+
+The pair is the tree of @fig-link-tree. A link at city 3 with free landings in city 2 gives the
+same groups and the same cost.
+
+**In the code.** `ForestProgram`
+([`include/zeno/forest.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/forest.hpp),
+[`src/zeno/forest.cpp`](https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/forest.cpp)).
+Instead of dense arrays over $\tau$, it keeps the child items of a plane as Pareto staircases over
+$(\tau, \text{cost})$, so its work depends on the sizes of these staircases, not on the magnitude
+of $T$. `reconstruct()` returns an optimal `LinkForest`, which [step 11](#plans) turns into a plan.
+In sweep mode the exact program runs only where the bracket and monotonicity leave a level open.
+Since $E$ is non-increasing, a level between two settled levels $a < b$ has
+$E(b) \le E \le E(a)$, which tightens its bracket, and equal values at both ends settle every level
+between them (`monotone` in `--stats`). `bisect()` evaluates up to `threads` evenly spaced open
+levels exactly, and recurses on the pieces.
+
+### Step 9. The σ-DP {#sigma-dp}
+
+**Idea.** A second exact method works with parity matrices directly. Process the planes one at a
+time, choosing for each its number of landings and its row of the parity matrix, and remember only
+the set $\sigma$ of cities whose column has an odd number of ones so far. At the end, $\sigma$ must
+be empty, which is (h3). Some parity matrix touches few cities, so $\sigma$ stays small.
+
+**Results.**
+
+- For an admissible partition with $|X| = s$, some parity matrix touches at most
+  $w = \min(p - 1, t - p)$ cities, and its rows have at most $\min(|X_k| - 1, w)$ ones
+  {{< node "Lemma 2.8" >}}.
+- The *σ-graph* at level $T$ has nodes $(k, j, \sigma)$: $k$ planes processed, $j$ landings used,
+  and $\sigma$ a set of at most $w$ cities. An arc gives plane $k + 1$ a size $m$ and a row $\eta$
+  with $|\eta| \equiv m + 1 \pmod 2$, $|\eta| \le \min(m - 1, w)$ and $|\sigma \triangle \eta| \le w$;
+  it leads to $(k + 1, j + m, \sigma \triangle \eta)$ and weighs
+  $c(\eta) + G[m - |\eta|][T - \delta(\eta)]$. The shortest path from $(0, 0, \emptyset)$ to
+  $(p, s, \emptyset)$ weighs $E(T)$ {{< node "Theorem 7.6" >}}. It takes $O(p\,s\,\hat m\,N_w)$
+  time per level, where $N_w$ bounds the pairs of sets an arc can join: polynomial in $n$ for
+  fixed $w$.
+- A variant carries Pareto sets of points $(c(X),\ \max_k \delta(X_k))$ along the arcs instead of
+  one level at a time, and yields the whole front in one pass {{< node "Proposition 7.8" >}}.
+
+**In the example**, $w = 1$. At $T = 8$, plane 1 takes $m = 2$ landings with the row
+$\eta = \{2\}$: an arc of weight $c_2 + G[1][8 - 3] = 7$ from $(0, 0, \emptyset)$ to
+$(1, 2, \{2\})$. Plane 2 takes the same option, $\sigma$ becomes
+$\{2\} \triangle \{2\} = \emptyset$, and the path ends at $(2, 4, \emptyset)$ with weight
+$14 = E(8)$.
+
+**In the code.** The C++ solver uses the link-forest DP. The σ-DP belongs to the Lean tools:
+{{< node "Verified solver" text="the verified solver zeno-front" >}} and the Lean checker compute
+$E$ with it, or with the link-forest DP when `useTreeDP` estimates that cheaper
+([Lean tools](lean.qmd)).
+
+### Step 10. Finding the breakpoints {#breakpoints}
+
+**Idea.** Proposition 7.1 needs $E$ only where it drops. Since $E$ is non-increasing, an interval
+of levels whose two ends have equal values is constant and holds no breakpoint, so a search can
+skip it whole.
+
+**The search** `breakpoints`
+([`include/zeno/breakpoints.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/breakpoints.hpp)).
+It starts from $E(T_{\rm lo})$ and the closed form $E(T_{\rm hi}) = s\,c_{\min}$. Every open
+interval $(a, b)$ with $E(a) > E(b)$ is split at up to `threads` evenly spaced levels, evaluated in
+parallel; pieces with equal ends are dropped, and a piece $(a, a + 1)$ has its breakpoint at
+$a + 1$. With $r$ breakpoints this evaluates $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels. Each
+level is evaluated by the cascade of @fig-pipeline: $L$ and $U$, then $U_3$, then the exact
+program, each only if the previous ones do not settle it.
+
+`--levels sweep` brackets every level and runs the exact program only where needed
+([step 8](#forest-dp)); `--levels search` runs the search above; the default, `auto`, sweeps up to
+$2^{12}$ levels and searches beyond, so on wide level ranges the number of levels evaluated grows
+with the logarithm of the range.
+
+**In the example.** Seven levels: `auto` sweeps them. With `--levels search --threads 1`, `zeno`
+evaluates $T = 4$, then $7$, then $5$ and $8$, then $6$ and $9$; $T = 10$ is the closed form. On so
+few levels the search saves nothing. It pays off on ranges of thousands of levels with few
+breakpoints.
+
+### Step 11. Plans {#plans}
+
+**Construction** {{< node "Theorem 4.1" >}}. Take a link forest of the partition and root each
+tree. Every plane flies, in this order:
+
+1. its *drop-offs*, $C_I \to b \to C_I$, one per child edge labelled $b$, each leaving a new
+   passenger in city $b$, from time 0;
+2. its free landings as alternating crossings: $C_I \to x \to C_G$ carrying a new passenger, then
+   $C_G \to x \to C_I$ empty, and so on, ending in $C_G$; there is an odd number of them by (F2);
+3. if it has a parent edge labelled $a$, its *pick-up* $C_G \to a \to C_G$, leaving city $a$ once
+   the passenger its parent dropped there has arrived.
+
+No drop-off and no crossing ever waits. A plane picks up at most once, from its parent, whose
+drop-offs come first; the timing argument of the theorem shows that each pick-up ends by the
+larger load of the two planes. So every plane flies exactly $\ell(X_k)$ and the makespan is
+$\max_k \ell(X_k)$. A forest with $N$ edges hands off $N$ passengers, and the crossings carry the
+other $t - N$.
+
+**In the example.** The plan of $(14, 16)$, as `zeno --plans` prints it; a leg reads
+`from->to[depart,arrive]`, followed by the passenger it carries:
+
+```text
+plane 1: CI->c2[0,3]p1 c2->CI[3,6] CI->c3[6,11]p2 c3->CG[11,16]p2
+plane 2: CI->c3[0,5]p3 c3->CG[5,10]p3 CG->c2[10,13] c2->CG[13,16]p1
+```
+
+Plane 1 is the root: it drops passenger 1 in city 2 and returns, then crosses through city 3 with
+passenger 2. Plane 2 crosses through city 3 with passenger 3, flies empty from $C_G$ to city 2,
+and brings back passenger 1, who has waited there since time 3. Both planes finish at
+$16 = 2 \cdot 8$ (@fig-link-tree).
+
+<details>
+<summary>The full output of `zeno --plans --stats` for the worked example</summary>
+
+{{< include ../algorithm/_run.md >}}
+
+</details>
+
+**In the code.** For each front point, `FrontSolver::plans` (`solve.cpp`) takes the level
+$T = M/2g$, reruns `ForestProgram` with trees of at most 2, then 3, then $q_{\max}$ planes, and
+keeps the first whose value equals the point's cost. `reconstruct()` gives its link forest, and
+`buildPlan`
+([`include/zeno/plan.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/plan.hpp))
+the plan of Theorem 4.1. `checkPlan` then re-simulates every plan against the model, sharing no
+code with `buildPlan`; a plan whose cost or makespan differs from its point stops the solver.
+
+### Step 12. Certificates {#certificates}
+
+**Idea.** A front can be checked without trusting the solver that found it. A certificate lists
+the points, a plan for each, and, for each gap between consecutive points, the name of a lower
+bound that the checker recomputes.
+
+**Result** {{< node "Theorem 9.1" >}}. Let $(C_1, M_1), \dots, (C_r, M_r)$ have increasing
+makespans and decreasing costs. The list is the front if
+
+1. every listed plan is feasible, with cost $C_i$ and makespan $M_i$: the checker simulates it;
+2. no plan is faster than $M_1$: the checker verifies $M_1 = 2d_{\min}\kappa$
+   {{< node "Proposition 7.10" >}};
+3. for every $i < r$, every plan of makespan below $M_{i+1}$ costs at least $C_i$: a lower bound
+   at the level $T^\star_i = \lfloor \lfloor (M_{i+1} - 1)/2 \rfloor / g \rfloor$ reaches $C_i$
+   (for a front point, $T^\star_i = T_{i+1} - 1$);
+4. no plan is cheaper than $C_r$: the checker verifies $C_r = s\,c_{\min}$, since every plan lands
+   at least $s$ times {{< node "Lemma 3.2" >}}.
+
+Obligation 3 names one of two bounds:
+
+- `relaxed`: $L(T^\star_i) \ge C_i$. Sound under (S) alone, whatever the central flights
+  {{< node "Lemma 3.4" >}};
+- `forest`: $E(T^\star_i) \ge C_i$, recomputed with the link-forest DP. Sound under (S) and (A1)
+  {{< node "Theorem 4.7" >}}, or (S) and (AΔ) {{< node "Theorem 4.10" >}}.
+
+`zeno` writes `relaxed` whenever $L$ reaches the cost, so a certificate whose gaps are all
+`relaxed` holds for every table of central flights.
+
+**In the example.** All five gaps are `relaxed`:
+
+{{< include ../algorithm/_gaps-example.md >}}
+
+The contrast instance needs `forest` exactly at its two open levels, $T^\star = 12$ and $14$:
+
+{{< include ../algorithm/_gaps-contrast.md >}}
+
+**In the code.** `makeCertificate` and `symmetricGaps`
+([`include/zeno/certificate.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/certificate.hpp)).
+`zeno check FILE` is the reference checker; the Lean checker `zeno-check` is proved sound
+([Lean tools](lean.qmd)). The file format is on the [certificates](certificates.qmd) page.
+
+## Non-symmetric instances {#nonsymmetric}
+
+When $d \ne \bar d$, the duration of a landing depends on how it is flown, and step 1 no longer
+gives the front. `zeno` then computes a *certified bracket* instead (`solveBracket`,
+[`include/zeno/ns.hpp`](https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/ns.hpp)).
+
+**Roles.** A landing in city $i$ is flown as a *crossing* $C_I \to i \to C_G$ or back, which lasts
+$d_i + \bar d_i$; as a *drop-off* $C_I \to i \to C_I$, which lasts $2d_i$; or as a *pick-up*
+$C_G \to i \to C_G$, which lasts $2\bar d_i$. A *role configuration* gives every plane its
+drop-offs, pick-ups and crossings, with an odd number of crossings per plane and, city by city, as
+many drop-offs as pick-ups. The *role load* $\lambda_k$ of plane $k$ sums the durations of its
+roles {{< node "Definition 4.2" >}}.
+
+**What carries over, and what does not.**
+
+- Under (A1-NS), central flights at least as long as $\min(d_i + d_j,\ \bar d_i + \bar d_j)$,
+  every plan is weakly dominated by a role configuration with the same number of passengers, no
+  larger cost, and role loads at most its makespan {{< node "Theorem 6.1" >}}. So the least cost
+  of a role configuration within a load bound is a lower bound.
+- A configuration need not fly within its largest role load: a pick-up can reach a city before the
+  passenger it collects has been dropped there, and wait. That waiting can be harmful. On an
+  instance with two cities, the cheapest role configuration with loads at most 73 costs 14, while
+  no plan of makespan at most 73 costs less than 18 {{< node "Proposition 6.5" >}}. Role loads
+  alone do not give the front.
+- For fixed orders of the drop-offs and pick-ups and a fixed matching of drop-offs to pick-ups,
+  the *template* schedule (drop-offs first, then crossings, then pick-ups, each waiting for its
+  passenger) is optimal, and its makespan has a closed form {{< node "Lemma 6.3" >}}. If every
+  plane picks up at most once, or every plane drops off at most once, the template finishes within
+  the largest role load, provided that no hub leg of a city is longer than the detour through
+  another city and the other hub, (AΔ-path) {{< node "Corollary 6.4" >}}.
+- Under (A1-NS), every plan is dominated by a role configuration whose template finishes no later,
+  without any assumption on the order of events {{< node "Theorem 6.9" >}}. Hence the front is
+  the Pareto set of (cost, least template makespan) over role configurations
+  {{< node "Corollary 6.10" >}}.
+
+**The bracket.**
+
+1. *Upper points.* Plans built from link forests in which every plane picks up at most once, or,
+   by time reversal, drops off at most once, and from the cheapest balanced role configurations
+   found inside gaps. All are scheduled and simulated with their waiting, so every printed point is
+   a real plan.
+2. *Lower bounds per gap*, for every plan of makespan below the next point:
+   - `relaxed`: the relaxation of {{< node "Lemma 3.4" text="Lemma 3.4" >}} with each landing
+     weighted $\min(2d_i, 2\bar d_i)$, which needs no assumption on central flights;
+   - `roles`: the role relaxation, in which each plane flies an odd number of crossings and the
+     loads add up to the crossing weight of the landings (Theorem 6.1, so (A1-NS));
+   - `lagrangian`: a Lagrangian relaxation of the per-city balance, with one multiplier per city
+     (A1-NS);
+   - `balanced`: the exact program over balanced role configurations, a shortest path over the
+     planes on the vector of per-city imbalances {{< node "Proposition 6.6" >}}. It is
+     exponential in $t - p$ and stops at the `roleStates` and `roleWork` limits;
+   - `search`: the exhaustive search over the role configurations cheaper than the gap's cost,
+     each with every drop-off order and matching, the closed form of Lemma 6.3 giving its
+     makespan. It rests on Theorem 6.9 and Corollary 6.10, stops at `searchWork`, and is the only
+     kind that closes gaps opened by harmful waiting.
+3. *Report.* The front is exact when the fastest makespan is certified and every gap is closed.
    Otherwise `zeno` lists each open gap with its proved lower bound and the reason it stays open,
    rather than print a front it cannot prove ([command line](cli.qmd#front)). The refinement of
    open gaps stops after `refineSeconds`.
 
-On 1,800 random tiny non-symmetric instances checked against the brute-force oracle, every bracket
-closes and equals the oracle's front (`README.md`).
+On 1,800 random tiny non-symmetric instances checked against a brute-force oracle, every bracket
+closes and equals the oracle's front
+([`README.md`](https://github.com/aquemy/ZenoSolver/blob/master/README.md)).
 
-## Complexity
+## Complexity {#complexity}
 
-From §8 of the note, with $\hat m = s - p + 1$ (the largest group) and $q_{\max} = \min(p, t-p+1)$:
+From §8 of the theory note, with $\hat m = s - p + 1$, $q_{\max} = \min(p, t - p + 1)$,
+$w = \min(p - 1, t - p)$ and $N_w$ as in [step 9](#sigma-dp):
 
 | Step | Time |
 |---|---|
 | One-plane table $G$, all levels | $O(n\,\hat m\,T_{\rm hi})$ |
 | $L$ and $U$, per level | $O(p\,s^2 + n\,\hat m^2)$ |
 | $U_3$ chains, per level | $O(n^2\,\hat m\,s + p\,s^2)$ |
-| Link-forest DP, per level | $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ |
+| Link-forest DP, per level ({{< node "Theorem 7.5" badge="false" >}}) | $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ |
+| σ-DP, per level ({{< node "Theorem 7.6" badge="false" >}}) | $O(p\,s\,\hat m\,N_w)$ |
 | Plan for one point | $O(s + n + p)$, up to union–find |
 
-These are the bounds of the dense algorithm. The staircase representations make the table and
+**How hard the problem is.**
+
+- Deciding whether a *fixed* multiset $X$ has an admissible partition with every
+  $\delta(X_k) \le T$, that is $M(X) \le 2T$, is strongly NP-complete
+  {{< node "Theorem 8.1" >}}, by a reduction from 3-Partition. So a method that fixes the multiset
+  first and then schedules it, for instance greedily with the longest landing first onto the
+  least-loaded plane, cannot be exact in general unless P = NP, and that greedy does miss front
+  points {{< node "§5" text="(§5)" >}}. The link-forest DP never fixes the multiset: it chooses the
+  landings and their split together.
+- With two planes the decision stays NP-complete; for every fixed $p$ it takes time polynomial in
+  $n$, $s$ and $T$, so it is weakly NP-complete {{< node "Proposition 8.2" >}}.
+- $E(T)$, and under (S) and (A1) the front, are computable in pseudo-polynomial time
+  (Theorem 7.5), so computing the front is not strongly NP-hard unless P = NP
+  {{< node "Corollary 8.3" >}}. Whether deciding $E(T) \le C$ is NP-hard, with $t$ written in
+  unary, is open.
+
+The bounds of the table are those of the dense algorithm. The staircase layouts make the table and
 the forest DP independent of the magnitude of the durations in practice, and the breakpoint search
-evaluates $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels instead of all of them. Measured scaling is on
-the [results](../results.qmd) and [size guidance](../instances/sizing.qmd) pages.
+evaluates $O(r \log(T_{\rm hi} - T_{\rm lo}))$ levels instead of all of them. Measured scaling is
+on the [results](../results.qmd) and [size guidance](../instances/sizing.qmd) pages.
+
+## Reproducing this page {#reproduce}
+
+With `build/release/zeno` built ([installation](install.qmd)), from the repository root:
+
+```sh
+python3 site/gen_algorithm.py
+```
+
+The script needs nothing else. For the worked example and the contrast instance, it recomputes
+from their definitions the table $G$, and at every level $L$, $U$, $U_3$, and $E$ three ways: by
+the link-forest DP, by the σ-DP, and by brute force over every partition of every multiset of $s$
+landings, with the parity matrix of Definition 2.2 deciding admissibility. It checks that these
+agree with one another and with `zeno`: the breakpoints of $E$ are the front `zeno` prints, the
+levels the bracket closes are those `--stats` counts, the gap kinds are those of the certificate
+`zeno` writes, and every number this page quotes still holds. It then writes the data of the
+figures and the tables into `site/algorithm/`. The three drawings are hand-made SVG files in the
+same directory.
+
+```{=html}
+<script src="../js/algorithm.js"></script>
+```

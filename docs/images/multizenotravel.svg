@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MultiZenoTravel, drawn for the example instance of the Problem page (site/problem/example.dat:
+     d = (2, 3, 5), c = (9, 6, 1), t = 3, p = 2). House style: aq:ink-diagrams. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1490 920" width="1490" height="920" role="img" aria-labelledby="mzt-title mzt-desc">
+<title id="mzt-title">MultiZenoTravel</title>
+<desc id="mzt-desc">Passengers and planes start in the hub C_I. Each central city i is joined to C_I by a flight of duration d_i and to the hub C_G by a flight of duration d-bar_i; landing in city i costs c_i. Central cities may be joined to each other, but such flights are never faster than through a hub, and no flight joins C_I and C_G. A plane carries one passenger at a time; every passenger and every plane must end in C_G.</desc>
+<defs>
+    <style type="text/css"><![CDATA[
+      /* THEME: clean — deterministic system monospace. NO network @import.
+         Never add an @import here (and never write &amp; inside CDATA — the literal
+         &amp; breaks the URL, the font silently fails, and the render becomes
+         non-deterministic). For the retro VT323 look, copy assets/scaffold-retro.svg
+         instead — it embeds the font as base64 (also zero-network). adv ≈ 0.60em. */
+      text          { fill: #111111; font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .mono         { font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .title        { font-size: 40px; font-weight: 500; }
+      .section-label{ font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* INPUTS / OUTPUTS / zone tags */
+      .layer-tag    { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* tag above a band / layer / boundary */
+      .layer-label  { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }
+      .zone-label   { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* under a zone-band cell */
+      .box-h        { font-size: 28px; }                                       /* box heading */
+      .box-s        { font-size: 17px; fill: #6b7280; }                        /* box subtext, gray */
+      .box-v        { font-size: 18px; fill: #475569; }                        /* box value, slate */
+      .center-h     { font-size: 32px; fill: #ffffff; }                        /* heading on a genuinely DARK fill */
+      .center-s     { font-size: 18px; fill: #ffffff; }                        /* subtext on a dark fill */
+      .arrow-label  { font-size: 20px; fill: #6b7280; font-style: italic; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }  /* verb on a connector; white halo */
+      .caption      { font-size: 22px; fill: #111111; }                        /* one-line takeaway, bottom-center */
+      .id-big       { font-size: 76px; letter-spacing: 4px; }                  /* hero identifier (anatomy) */
+      .id-uuid      { font-size: 32px; letter-spacing: 1px; fill: #475569; }
+      .segment-label{ font-size: 20px; letter-spacing: 2px; }                  /* anatomy segment label */
+      .range        { font-size: 38px; }                                       /* big number in a zone band */
+      .signal-code  { font-size: 28px; }                                       /* legend code */
+      .signal-name  { font-size: 18px; fill: #475569; }                        /* legend name / gloss */
+      .hub-h        { font-size: 40px; }
+      .hub-sub      { font-size: 26px; }
+      .legend       { font-size: 17px; fill: #6b7280; }
+    ]]></style>
+
+    <!-- Watercolor wash — feTurbulence + feDisplacementMap + blur. Put on COLORED FILL rects / shapes. -->
+    <filter id="wash-a" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="3" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" scale="16"/>
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <filter id="wash-b" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="9"/>
+      <feDisplacementMap in="SourceGraphic" scale="14"/>
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="wash-c" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="14"/>
+      <feDisplacementMap in="SourceGraphic" scale="18"/>
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <!-- Ink wobble — turbulence + small displacement, NO blur. Put on STROKES of 2-D shapes. -->
+    <filter id="ink-a" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+    <filter id="ink-b" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="13"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.8"/>
+    </filter>
+    <filter id="ink-c" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="21"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+  </defs>
+<rect x="0" y="0" width="1490" height="920" fill="#ffffff"/>
+<text x="745" y="52" text-anchor="middle" class="title">MultiZenoTravel</text>
+<path d="M 560 70 Q 650 67 745 70 Q 840 73 930 69" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round" filter="url(#ink-a)"/>
+<text x="745" y="112" text-anchor="middle" class="mono section-label">THE EXAMPLE · 3 CENTRAL CITIES · 3 PASSENGERS · 2 PLANES</text>
+<rect x="70" y="240" width="300" height="352" fill="#abc1d2" opacity="0.5" filter="url(#wash-a)"/>
+<rect x="78" y="248" width="284" height="336" fill="none" stroke="#111111" stroke-width="1.5" filter="url(#ink-b)"/>
+<rect x="1120" y="240" width="300" height="352" fill="#e4d4ba" opacity="0.55" filter="url(#wash-c)"/>
+<rect x="1128" y="248" width="284" height="336" fill="none" stroke="#111111" stroke-width="1.5" filter="url(#ink-a)"/>
+<text x="220" y="300" text-anchor="middle" class="mono hub-h">C<tspan dy="9" class="hub-sub">I</tspan></text>
+<text x="220" y="338" text-anchor="middle" class="mono box-s">start, at time 0</text>
+<text x="1270" y="300" text-anchor="middle" class="mono hub-h">C<tspan dy="9" class="hub-sub">G</tspan></text>
+<text x="1270" y="338" text-anchor="middle" class="mono box-s">goal</text>
+<g transform="translate(162 392)" opacity="1.0">
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="#8d9aab" opacity="0.55" filter="url(#wash-b)"/>
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-a)"/>
+<circle cx="12" cy="0" r="2.6" fill="#111111"/>
+</g>
+<g transform="translate(278 392)" opacity="1.0">
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="#8d9aab" opacity="0.55" filter="url(#wash-a)"/>
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-c)"/>
+<circle cx="12" cy="0" r="2.6" fill="#111111"/>
+</g>
+<text x="220" y="448" text-anchor="middle" class="mono box-v">2 planes, 1 seat each</text>
+<g transform="translate(160 506)" opacity="1.0">
+<circle cx="0" cy="-21" r="12" fill="#abc1d2" opacity="0.85" filter="url(#wash-b)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#abc1d2" opacity="0.85" filter="url(#wash-b)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-a)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-a)"/>
+</g>
+<g transform="translate(220 506)" opacity="1.0">
+<circle cx="0" cy="-21" r="12" fill="#8fbcb1" opacity="0.8" filter="url(#wash-c)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#8fbcb1" opacity="0.8" filter="url(#wash-c)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-b)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-b)"/>
+</g>
+<g transform="translate(280 506)" opacity="1.0">
+<circle cx="0" cy="-21" r="12" fill="#d3a3ad" opacity="0.8" filter="url(#wash-a)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#d3a3ad" opacity="0.8" filter="url(#wash-a)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-c)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-c)"/>
+</g>
+<text x="220" y="552" text-anchor="middle" class="mono box-v">3 passengers</text>
+<g transform="translate(1212 392)" opacity="0.4">
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="#8d9aab" opacity="0.55" filter="url(#wash-c)"/>
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-b)"/>
+<circle cx="12" cy="0" r="2.6" fill="#111111"/>
+</g>
+<g transform="translate(1328 392)" opacity="0.4">
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="#8d9aab" opacity="0.55" filter="url(#wash-b)"/>
+<path d="M -30 0 C -30 -4 -24 -5 -18 -5 L 22 -5 C 30 -5 36 -2 38 0 C 36 2 30 5 22 5 L -18 5 C -24 5 -30 4 -30 0 Z M 6 -5 L -6 -28 L -13 -28 L -8 -5 Z M 6 5 L -6 28 L -13 28 L -8 5 Z M -20 -5 L -27 -15 L -32 -15 L -28 -5 Z M -20 5 L -27 15 L -32 15 L -28 5 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-a)"/>
+<circle cx="12" cy="0" r="2.6" fill="#111111"/>
+</g>
+<text x="1270" y="448" text-anchor="middle" class="mono box-v">every plane ends here</text>
+<g transform="translate(1210 506)" opacity="0.4">
+<circle cx="0" cy="-21" r="12" fill="#abc1d2" opacity="0.85" filter="url(#wash-a)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#abc1d2" opacity="0.85" filter="url(#wash-a)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-c)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-c)"/>
+</g>
+<g transform="translate(1270 506)" opacity="0.4">
+<circle cx="0" cy="-21" r="12" fill="#8fbcb1" opacity="0.8" filter="url(#wash-b)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#8fbcb1" opacity="0.8" filter="url(#wash-b)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-a)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-a)"/>
+</g>
+<g transform="translate(1330 506)" opacity="0.4">
+<circle cx="0" cy="-21" r="12" fill="#d3a3ad" opacity="0.8" filter="url(#wash-c)"/>
+<path d="M -17 14 C -17 -3 -8 -7 0 -7 C 8 -7 17 -3 17 14 Z" fill="#d3a3ad" opacity="0.8" filter="url(#wash-c)"/>
+<path d="M -9 -21 A 9 9 0 1 0 9 -21 A 9 9 0 1 0 -9 -21 Z" fill="none" stroke="#111111" stroke-width="1.4" filter="url(#ink-b)"/>
+<path d="M -14 12 C -14 -1 -7 -5 0 -5 C 7 -5 14 -1 14 12 Z" fill="none" stroke="#111111" stroke-width="1.4" stroke-linejoin="round" filter="url(#ink-b)"/>
+</g>
+<text x="1270" y="552" text-anchor="middle" class="mono box-v">and every passenger</text>
+<rect x="595" y="136" width="300" height="128" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
+<rect x="603" y="144" width="284" height="112" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+<text x="745" y="196" text-anchor="middle" class="mono box-h">city 1</text>
+<text x="745" y="226" text-anchor="middle" class="mono box-s">landing cost c₁ = 9</text>
+<rect x="595" y="351" width="300" height="128" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+<rect x="603" y="359" width="284" height="112" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+<text x="745" y="411" text-anchor="middle" class="mono box-h">city 2</text>
+<text x="745" y="441" text-anchor="middle" class="mono box-s">landing cost c₂ = 6</text>
+<rect x="595" y="566" width="300" height="128" fill="#d2cabb" opacity="0.5" filter="url(#wash-a)"/>
+<rect x="603" y="574" width="284" height="112" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-b)"/>
+<text x="745" y="626" text-anchor="middle" class="mono box-h">city 3</text>
+<text x="745" y="656" text-anchor="middle" class="mono box-s">landing cost c₃ = 1</text>
+<path d="M 362 330 C 452 330 513 200 603 200" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" filter="url(#ink-a)"/>
+<text x="540" y="180" text-anchor="middle" class="mono arrow-label">d₁ = 2</text>
+<path d="M 887 200 C 977 200 1038 330 1128 330" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" filter="url(#ink-b)"/>
+<text x="950" y="180" text-anchor="middle" class="mono arrow-label">d̄₁ = 2</text>
+<path d="M 362.0 415.0 L 402.2 414.6 L 442.3 414.2 L 482.5 415.4 L 522.7 414.0 L 562.8 415.1 L 603.0 415.0" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="540" y="395" text-anchor="middle" class="mono arrow-label">d₂ = 3</text>
+<path d="M 887.0 415.0 L 927.2 414.7 L 967.3 413.9 L 1007.5 415.0 L 1047.7 413.9 L 1087.8 414.8 L 1128.0 415.0" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="950" y="395" text-anchor="middle" class="mono arrow-label">d̄₂ = 3</text>
+<path d="M 362 500 C 452 500 513 630 603 630" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" filter="url(#ink-c)"/>
+<text x="540" y="670" text-anchor="middle" class="mono arrow-label">d₃ = 5</text>
+<path d="M 887 630 C 977 630 1038 500 1128 500" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" filter="url(#ink-a)"/>
+<text x="950" y="670" text-anchor="middle" class="mono arrow-label">d̄₃ = 5</text>
+<path d="M 745.0 262.0 L 745.9 284.8 L 745.8 307.5 L 745.2 330.2 L 745.0 353.0" fill="none" stroke="#111111" stroke-width="1.4" stroke-dasharray="7 7" stroke-linecap="round"/>
+<text x="762" y="315" class="mono arrow-label">central flight</text>
+<path d="M 745.0 477.0 L 744.3 499.8 L 745.8 522.5 L 745.6 545.2 L 745.0 568.0" fill="none" stroke="#111111" stroke-width="1.4" stroke-dasharray="7 7" stroke-linecap="round"/>
+<text x="762" y="530" class="mono arrow-label">central flight</text>
+<path d="M 220.0 600.0 L 219.7 650.7 L 218.8 701.3 L 220.0 752.0 L 265.7 752.2 L 311.3 751.7 L 357.0 753.2 L 402.6 750.8 L 448.3 752.9 L 493.9 751.5 L 539.6 751.1 L 585.2 751.0 L 630.9 751.5 L 676.5 752.8 L 722.2 751.2 L 767.8 752.2 L 813.5 752.4 L 859.1 751.7 L 904.8 752.1 L 950.4 750.9 L 996.1 750.9 L 1041.7 751.2 L 1087.4 752.5 L 1133.0 751.8 L 1178.7 751.5 L 1224.3 752.2 L 1270.0 752.0 L 1269.9 701.3 L 1269.5 650.7 L 1270.0 600.0" fill="none" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="7 8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 731 738 L 759 766 M 759 738 L 731 766" fill="none" stroke="#9c3a34" stroke-width="3" stroke-linecap="round" filter="url(#ink-b)"/>
+<text x="745" y="800" text-anchor="middle" class="mono arrow-label">no flight joins C<tspan dy="5" font-size="15">I</tspan><tspan dy="-5"> and C</tspan><tspan dy="5" font-size="15">G</tspan></text>
+<text x="745" y="842" text-anchor="middle" class="mono legend">dashed: central flights exist, but are never faster than through a hub</text>
+<text x="745" y="888" text-anchor="middle" class="caption">every landing in a central city pays its cost; the makespan is the last arrival in C<tspan dy="5" font-size="16">G</tspan></text>
+</svg>

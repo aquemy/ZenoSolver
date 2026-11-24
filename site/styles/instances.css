@@ -1,0 +1,173 @@
+/* The instance catalogue: small multiples of fronts (js/catalogue.js, js/fronts.js).
+   Colours are the tokens of tokens.css, so light and dark switch together. */
+
+.zs-cat {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin: 0.75rem 0 2rem;
+}
+.zs-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--zs-surface);
+  border: 1px solid var(--zs-rule);
+  border-radius: 6px;
+  padding: 10px 12px 8px;
+}
+.zs-card.wide {
+  grid-column: span 2;
+}
+@media (max-width: 560px) {
+  .zs-card.wide {
+    grid-column: auto;
+  }
+}
+.zs-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+main h3.zs-card-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--bs-font-monospace, monospace);
+  color: var(--zs-ink);
+  overflow-wrap: anywhere;
+}
+main .zs-card code.zs-card-args, dialog.zs-dialog div code.zs-card-args {
+  display: block;
+  margin: 3px 0 2px;
+  font-size: 0.75rem;
+  color: var(--zs-ink-2);
+  background: none;
+  padding: 0;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+/* An option and its value stay on one line, unless they alone are wider than the card. */
+.zs-card-args span {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.zs-card-meta {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  color: var(--zs-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.zs-card-plot {
+  margin-top: 4px;
+}
+.zs-card-foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.zs-card-note {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  color: var(--zs-ink-2);
+}
+.zs-card-zeno {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 0.75rem;
+  color: var(--zs-ink-2);
+}
+.zs-card-zeno summary {
+  cursor: pointer;
+}
+.zs-card-zeno p {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.zs-card-open, .zs-dialog-close {
+  flex: none;
+  margin-left: auto;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--zs-ink-2);
+  background: none;
+  border: 1px solid var(--zs-rule);
+  border-radius: 4px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+.zs-card-open:hover, .zs-dialog-close:hover {
+  color: var(--zs-ink);
+  border-color: var(--zs-ink-3);
+}
+.zs-card-open:focus-visible, .zs-dialog-close:focus-visible {
+  outline: 2px solid var(--zs-series-1);
+  outline-offset: 1px;
+}
+
+.zs-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0 6px;
+  border-radius: 3px;
+  border: 1px solid var(--zs-ink-3);
+  color: var(--zs-ink-2);
+  vertical-align: middle;
+  font-family: var(--bs-body-font-family, sans-serif);
+}
+.zs-badge.exact {
+  border-color: var(--zs-series-3);
+}
+
+/* The enlarged front. */
+.zs-dialog {
+  width: min(880px, 94vw);
+  max-height: 92vh;
+  overflow: auto;
+  color: var(--zs-ink);
+  background: var(--zs-surface);
+  border: 1px solid var(--zs-rule);
+  border-radius: 8px;
+  padding: 14px 18px 16px;
+}
+.zs-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.zs-dialog-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.zs-dialog-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-family: var(--bs-font-monospace, monospace);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border: 0;
+  padding: 0;
+}
+.zs-dialog .zs-card-args {
+  font-size: 0.85rem;
+  margin: 6px 0 2px;
+}
+.zs-dialog .zs-card-meta {
+  font-size: 0.85rem;
+}
+.zs-dialog-notes .zs-card-note, .zs-dialog-notes .zs-card-zeno {
+  font-size: 0.82rem;
+  margin-top: 6px;
+}
+.zs-cat-error {
+  color: var(--zs-ink-2);
+  font-style: italic;
+}

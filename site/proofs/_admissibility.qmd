@@ -2,13 +2,13 @@
 
 The combinatorial core (§2 of the note). A partition of the landings among the planes can be flown
 without waiting exactly when it is *admissible*, a parity condition that is a $\mathcal T$-join of the
-plane-city incidence graph. Neither paper has this notion: it is what replaces their per-PPP greedy.
+plane-city incidence graph. It is what makes the front computable without fixing a schedule.
 
 ### Lemma 2.1 {#node-lemma-2-1}
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.1.** On every route from $C_I$ to $C_G$, $\#A - \#\bar A = 1$.
@@ -37,7 +37,7 @@ theorem cntA_eq (h : PlaneFeasible N legs) :
     cntA (fun _ => true) (landingRecs legs) = cntAbar (fun _ => true) (landingRecs legs) + 1 := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 373–380](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Converse.lean#L373-L380){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 373–380](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Converse.lean#L373-L380){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -45,30 +45,7 @@ theorem cntA_eq (h : PlaneFeasible N legs) :
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.from-paper}
-**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.2–2.3, HAL preprint hal-01109777v1, pp. 4–5).
-
-> **PPPs and Admissible PPPs**: According to the above proposition, a Possibly Pareto-optimal Plan
-> (PPP) is defined by 2 tuples, namely $e \in [0, n]^t$ for cities involved in eastbound flights, and
-> $w \in [0, n]^{t-p}$ for westbound flights. Nevertheless, $e$ and $w$ do not hold any information
-> about which plane will land in a particular city. This is the reason why there exists many feasible
-> schedules, i.e., schedules that actually are feasible plans for $p$ planes using the corresponding
-> $4t-2p$ edges. […]
->
-> **Makespan of a PPP**: The makespan of a PPP is thus that of the shortest schedule that uses its
-> $4t - 2p$ edges in a feasible way. […]
->
-> **Flight patterns** Clearly, within a PPP, all possible plane moves can be categorized into only 3
-> patterns:\
-> **P1**: plane leaves $C_I$ (non empty), flies eastward to city $C_i$, and goes on to $C_G$.\
-> **P2**: plane leaves $C_G$ (empty), flies westward to city $C_i$, and goes on to $C_G$.\
-> **P3**: two planes are involved here; first plane leaves $C_I$ (with a passenger), flies to city
-> $C_i$, and goes back empty to $C_I$; second plane leaves $C_G$ empty, flies to $C_i$, and flies back
-> with the passenger to $C_G$. Note that there can be some delay between the drop-off of the person at
-> the central city, and the arrival of the second plane.
-:::
-
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Definition 2.2 (admissible partition).** Let $X_1,\dots,X_p$ be a partition of $X$. A *parity matrix* for
@@ -103,7 +80,7 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   col : ∀ i, Even #{k | i ∈ h k}
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
 
 **Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
 
@@ -113,21 +90,15 @@ the component condition by Lemma 2.4). -/
 def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
 
-:::
-
-::: {.strengthen}
-**What replaces the PPP.** A PPP fixes the multiset of landings and leaves the schedule to a greedy.
-The note fixes, in addition, *which plane lands where*, and characterises the partitions that some
-schedule realises without waiting (Theorem 4.1) and that every plan can be reduced to (Theorem 4.7).
 :::
 
 ### Lemma 2.3 (integer form) {#node-lemma-2-3}
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.3 (integer form) [A′].** A partition is admissible if and only if some
@@ -152,7 +123,7 @@ for every $k$, and $\sum_k \tilde h_{k,i} \equiv 0$ for every $i$.
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.4 (component form).** Let $H$ be the bipartite graph on planes and cities with an edge $\{k,i\}$
@@ -197,7 +168,7 @@ non-root. At a root, $\epsilon(v) = 0$ by assumption, so $\deg_J(v) = \sum_u \ep
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.5.** For every parity matrix and every plane $k$, $h_k \le |X_k| - 1$.
@@ -222,7 +193,7 @@ theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
     (h k).card + 1 ≤ (X k).card := …
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 100–108](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Admissible.lean#L100-L108){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Admissible.lean`, lines 100–108](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L100-L108){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -230,7 +201,7 @@ theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
 
 **Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Definition (link forest).** A *link forest* for $X_1,\dots,X_p$ is a forest $\Lambda$ on the planes
@@ -265,7 +236,7 @@ inductive LTree (n : ℕ) : Type where
   | node (free : Multiset (Fin n)) (kids : LKids n)
 ```
 
-[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
+[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
 
 :::
 
@@ -273,7 +244,7 @@ inductive LTree (n : ℕ) : Type where
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.3](#node-lemma-2-3), [2.4](#node-lemma-2-4)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.6 (link forest) [LF].** A partition is admissible if and only if it has a link forest. An
@@ -341,7 +312,7 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
     Admissible X ↔ ∃ F : List (LTree n), (∀ t ∈ F, t.WF) ∧ forestGroups F = univ.val.map X := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -349,7 +320,7 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** $\lvert X\rvert = s$ · **Uses** [2.6](#node-lemma-2-6)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Corollary 2.7.** If $|X| = s$, every link forest has at most $t - p$ edges, and each of its trees has at
@@ -373,7 +344,7 @@ A tree with $q$ planes has $q - 1$ edges, so $q - 1 \le t - p$. $\square$
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** $\lvert X\rvert = s$ · **Uses** [2.5](#node-lemma-2-5)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.8 (few touched cities) [B′].** Let $X_1,\dots,X_p$ be admissible with $|X| = s$.
@@ -427,7 +398,7 @@ theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Fin
     (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …
 ```
 
-[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.IsParityWitness.card_touched_le_of_minimal` [machine-checked]{.badge .ok}
 
@@ -439,7 +410,7 @@ theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
     (touched h).card ≤ p - 1 := …
 ```
 
-[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
 
@@ -451,7 +422,7 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
     ∃ h, IsParityWitness X h ∧ (touched h).card ≤ min (I.p - 1) (I.t - I.p) := …
 ```
 
-[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -459,7 +430,7 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.4](#node-lemma-2-4)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §2).
 
 **Lemma 2.9 (shared city).** Let $X_1,\dots,X_p$ be non-empty groups with $\sum_k |X_k| \equiv p \pmod 2$.

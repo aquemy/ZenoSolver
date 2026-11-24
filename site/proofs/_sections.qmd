@@ -10,6 +10,8 @@
 
 {{< include proofs/_nonsymmetric.qmd >}}
 
+{{< include proofs/_general-graphs.qmd >}}
+
 {{< include proofs/_algorithm.qmd >}}
 
 {{< include proofs/_complexity.qmd >}}
