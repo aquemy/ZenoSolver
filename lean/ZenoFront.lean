@@ -33,6 +33,8 @@ public import ZenoFront.Converse
 public import ZenoFront.Bridge
 public import ZenoFront.Achievability
 public import ZenoFront.TriSegments
+public import ZenoFront.TriCore
+public import ZenoFront.ConverseTri
 public import ZenoFront.Breakpoints
 public import ZenoFront.MinCost
 public import ZenoFront.TreeExact
