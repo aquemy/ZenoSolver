@@ -20,6 +20,9 @@ enum class GapProof : std::uint8_t
                ///< (assumption A1-NS)
     Lagrangian, ///< Lagrangian relaxation of the per-city balance (lagrangianRoles): needs
                 ///< Theorem 6.1 (assumption A1-NS)
+    Search,    ///< exhaustive search over role configurations with exact schedules
+               ///< (searchGap, Corollary 6.10): needs A1-NS, and event-ordered plans
+               ///< (all PDDL plans) when some city has d = dbar = 0
     Balanced,  ///< the cheapest balanced role configuration (BalancedRoles): needs
                ///< Theorem 6.1 (assumption A1-NS)
 };
@@ -48,8 +51,11 @@ struct BracketResult
     /// or the heuristic scheduler missed one). Empty for closed gaps.
     enum class OpenReason : std::uint8_t { None, Incomplete, Unscheduled };
     std::vector<OpenReason> openReason;
+    bool zeroDurationCity = false;       ///< some city has d = dbar = 0 (see GapProof::Search)
     [[nodiscard]] bool exact() const;
-    /// Assumptions the closed gaps rely on ("A1-NS" when a Roles or Balanced bound is used).
+    /// Assumptions the closed gaps rely on: "A1-NS" for every bound but lemma R,
+    /// "EO" (event-ordered plans) for a search proof on an instance with a city
+    /// where d = dbar = 0.
     [[nodiscard]] std::vector<std::string> assumptions() const;
     SolveStats stats;
 };

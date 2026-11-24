@@ -3,6 +3,7 @@
 #include <zeno/types.hpp>
 
 #include <span>
+#include <utility>
 #include <vector>
 
 namespace zeno
@@ -46,6 +47,10 @@ public:
     [[nodiscard]] bool dense() const noexcept { return dense_; }
     /// Entries stored (cells, or staircase points).
     [[nodiscard]] std::size_t size() const noexcept;
+
+    /// The Pareto points (load, cost) of m-multisets with load <= maxLevel: the
+    /// levels where G[m][.] drops, by increasing load and decreasing cost.
+    [[nodiscard]] std::vector<std::pair<Time, Cost>> paretoPoints(int m, Time maxLevel) const;
 
     /// A multiset realising G[m][T], as m city indices. Requires a finite value.
     [[nodiscard]] std::vector<int> witness(int m, Time level) const;

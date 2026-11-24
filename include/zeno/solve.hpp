@@ -29,6 +29,7 @@ struct SolveOptions
     std::size_t roleStates = 2'000'000;
     std::size_t roleWork = 50'000'000;
     double refineSeconds = 30;
+    std::size_t searchWork = 20'000'000; ///< work limit of the exact gap search per gap
 };
 
 /// How the value E(T) of a level was established.

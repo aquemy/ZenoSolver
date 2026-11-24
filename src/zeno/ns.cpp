@@ -5,6 +5,7 @@
 #include <zeno/one_plane.hpp>
 #include <zeno/parallel.hpp>
 #include <zeno/reduce.hpp>
+#include <zeno/ns_search.hpp>
 #include <zeno/roles.hpp>
 
 #include <algorithm>
@@ -14,6 +15,7 @@
 #include <limits>
 #include <map>
 #include <optional>
+#include <set>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -46,10 +48,16 @@ bool BracketResult::exact() const
 
 std::vector<std::string> BracketResult::assumptions() const
 {
-    const auto needsA1 = [](GapProof g) { return g == GapProof::Roles || g == GapProof::Lagrangian || g == GapProof::Balanced; };
+    const auto needsA1 = [](GapProof g) { return g != GapProof::Open && g != GapProof::Relaxed; };
+    std::vector<std::string> out;
     if(needsA1(fastestProof) || std::ranges::any_of(gapProof, needsA1))
-        return {"A1-NS"};
-    return {};
+        out.push_back("A1-NS");
+    // A search proof covers event-ordered plans (all PDDL plans), and every
+    // plan unless some city has d = dbar = 0 (Theorem 6.9).
+    const auto search = [](GapProof g) { return g == GapProof::Search; };
+    if(zeroDurationCity && (search(fastestProof) || std::ranges::any_of(gapProof, search)))
+        out.push_back("EO");
+    return out;
 }
 
 BracketResult solveBracket(const Instance& instance, const SolveOptions& options)
@@ -69,6 +77,8 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
     const int Q = r.maxTree();
 
     BracketResult result;
+    for(int i = 0; i < instance.n(); ++i)
+        result.zeroDurationCity = result.zeroDurationCity || (instance.d[static_cast<std::size_t>(i)] == 0 && instance.dbar[static_cast<std::size_t>(i)] == 0);
     auto& stats = result.stats;
     stats.lowestLevel = lo;
     stats.highestLevel = hi;
@@ -180,10 +190,45 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
         std::optional<std::pair<FrontPoint, Plan>> scheduled;
     };
     std::map<Time, Balanced> cache;
+    std::set<std::pair<Cost, Time>> searched, closedBySearch; // gaps by (cost of the left point, makespan of the right one)
     const auto balancedAt = [&](Time T) -> const Balanced& {
         return cache.at(T);
     };
-    const auto refineUntil = std::chrono::steady_clock::now() + std::chrono::duration<double>(options.refineSeconds);
+    const auto refineUntil = std::chrono::steady_clock::now() +
+                             std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(options.refineSeconds));
+    // After the gaps are recomputed, proofs already established for a gap's
+    // level (cached bounds) or for its two ends (searches) apply again.
+    const auto reapply = [&] {
+        result.gapMultipliers.resize(result.gapProof.size());
+        for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+        {
+            if(result.gapProof[i] != GapProof::Open)
+                continue;
+            if(closedBySearch.contains({result.upper[i].cost, result.upper[i + 1].makespan}))
+            {
+                result.gapProof[i] = GapProof::Search;
+                result.gapLower[i] = std::max(result.gapLower[i], result.upper[i].cost);
+                continue;
+            }
+            const auto it = cache.find(gapLevel(i));
+            if(it == cache.end())
+                continue;
+            const Balanced& b = it->second;
+            if(b.lagrange > std::numeric_limits<Cost>::min())
+                result.gapLower[i] = std::max(result.gapLower[i], b.lagrange);
+            if(b.lagrange >= result.upper[i].cost)
+            {
+                result.gapProof[i] = GapProof::Lagrangian;
+                result.gapMultipliers[i] = b.multipliers;
+            }
+            else if(b.complete)
+            {
+                result.gapLower[i] = std::max(result.gapLower[i], b.value);
+                if(b.value >= result.upper[i].cost)
+                    result.gapProof[i] = GapProof::Balanced;
+            }
+        }
+    };
     for(int round = 0; round < 64 && std::chrono::steady_clock::now() < refineUntil; ++round)
     {
         std::vector<Time> wanted;
@@ -278,10 +323,62 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
             else
                 offer(b, result.upper[i + 1].makespan);
         }
+        // Last resort, when the bounds found no new point: the exact search over
+        // role configurations (Corollary 6.10), gap by gap.
+        if(!added)
+        {
+            std::vector<std::pair<std::size_t, Time>> todo; // (gap index or npos for the fastest point, level)
+            constexpr std::size_t fastest = static_cast<std::size_t>(-1);
+            if(result.fastestLower < result.upper.front().makespan)
+                todo.emplace_back(fastest, (result.upper.front().makespan - 1) / r.makespanPerLevel);
+            for(std::size_t i = 0; i < result.gapProof.size(); ++i)
+                if(result.gapProof[i] == GapProof::Open && !searched.contains({result.upper[i].cost, result.upper[i + 1].makespan}))
+                    todo.emplace_back(i, gapLevel(i));
+            std::vector<GapSearch> outcomes(todo.size());
+            parallelFor(todo.size(), threads, [&](std::size_t k) {
+                if(std::chrono::steady_clock::now() >= refineUntil)
+                {
+                    outcomes[k].outcome = GapSearch::Outcome::Incomplete;
+                    return;
+                }
+                const auto [i, T] = todo[k];
+                const Cost below = i == fastest ? kInfCost : result.upper[i].cost;
+                const Time makespanBelow = i == fastest ? result.upper.front().makespan : result.upper[i + 1].makespan;
+                outcomes[k] = searchGap(instance, r, Gfill, roles, T, below, makespanBelow, options.searchWork, refineUntil);
+            });
+            for(std::size_t k = 0; k < todo.size(); ++k)
+            {
+                const auto i = todo[k].first;
+                const GapSearch& g = outcomes[k];
+                if(i != fastest)
+                    searched.insert({result.upper[i].cost, result.upper[i + 1].makespan});
+                if(g.outcome == GapSearch::Outcome::Found && std::ranges::none_of(candidates, [&](const auto& c) { return c.first == g.found->first; }))
+                {
+                    candidates.push_back(*g.found);
+                    added = true;
+                }
+                else if(g.outcome == GapSearch::Outcome::Closed)
+                {
+                    if(i == fastest)
+                    {
+                        result.fastestLower = result.upper.front().makespan;
+                        result.fastestProof = GapProof::Search;
+                    }
+                    else
+                    {
+                        result.gapProof[i] = GapProof::Search;
+                        result.gapLower[i] = std::max(result.gapLower[i], result.upper[i].cost);
+                        closedBySearch.insert({result.upper[i].cost, result.upper[i + 1].makespan});
+                    }
+                }
+            }
+            stats.exactCalls += todo.size();
+        }
         if(!added)
             break;
         rebuildUpper();
         boundGaps();
+        reapply();
         // Gaps closed by the balanced bound in an earlier round stay closed
         // when they are unchanged: the cache answers them at once next round.
     }

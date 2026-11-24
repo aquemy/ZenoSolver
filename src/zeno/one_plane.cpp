@@ -91,6 +91,30 @@ Cost OnePlaneTable::stairLookup(int m, Time level) const noexcept
     return i < 0 ? kInfCost : stairs_[static_cast<std::size_t>(m)][static_cast<std::size_t>(i)].cost;
 }
 
+std::vector<std::pair<Time, Cost>> OnePlaneTable::paretoPoints(int m, Time maxLevel) const
+{
+    std::vector<std::pair<Time, Cost>> points;
+    maxLevel = std::min(maxLevel, maxLevel_);
+    if(!dense_)
+    {
+        for(const Stair& st : stairs_[static_cast<std::size_t>(m)])
+            if(st.load <= maxLevel)
+                points.emplace_back(st.load, st.cost);
+        return points;
+    }
+    Cost last = kInfCost;
+    for(Time level = 0; level <= maxLevel; ++level)
+    {
+        const Cost v = (*this)(m, level);
+        if(v < last)
+        {
+            points.emplace_back(level, v);
+            last = v;
+        }
+    }
+    return points;
+}
+
 std::size_t OnePlaneTable::size() const noexcept
 {
     if(dense_)

@@ -42,7 +42,7 @@ The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishe
 **Non-symmetric instances.**
 
 - Fronts are exact wherever the certified bracket closes. The lower bounds rest on Theorem 6.1, which needs central flights to be useless (A1-NS).
-- Waiting can be genuinely harmful (Proposition 6.5 refutes the papers' no-waiting assumption). On such instances `zeno` reports the open gaps and their lower bounds instead of a front it cannot prove.
+- Waiting can be genuinely harmful (Proposition 6.5 refutes the papers' no-waiting assumption). The note proves *schedulable domination* (Theorem 6.9): every plan is dominated by a role configuration whose template schedule is no later. So an exhaustive search over role configurations with exact schedules closes such gaps (proof kind `search`). Where that search exceeds its limits, `zeno` reports the open gaps and their lower bounds instead of a front it cannot prove.
 
 # Requirements
 

@@ -2,6 +2,7 @@
 
 #include <zeno/forest.hpp>
 #include <zeno/ns.hpp>
+#include <zeno/ns_search.hpp>
 #include <zeno/roles.hpp>
 #include <zeno/one_plane.hpp>
 #include <zeno/reduce.hpp>
@@ -26,7 +27,8 @@ class LevelBounds
 {
 public:
     LevelBounds(const Instance& instance, Time maxMakespan)
-        : r(reduce(instance))
+        : instance_(instance)
+        , r(reduce(instance))
         , maxLevel_(std::max<Time>(level(maxMakespan), 0))
         , low_(r.low, r.c, r.maxGroup(), maxLevel_)
         , fill_(r.fill, r.c, r.maxGroup(), maxLevel_)
@@ -61,6 +63,19 @@ public:
         return program.value();
     }
 
+    /// The exhaustive search closes the region: no configuration of cost <
+    /// costBelow finishes before makespanBelow. Nothing when it gives up.
+    std::optional<bool> search(Time T, Cost costBelow, Time makespanBelow) const
+    {
+        if(T < 0)
+            return true;
+        const GapSearch g = searchGap(instance_, r, fill_, roles_, checked(T), costBelow, makespanBelow);
+        if(g.outcome == GapSearch::Outcome::Incomplete)
+            return std::nullopt;
+        return g.outcome == GapSearch::Outcome::Closed;
+    }
+
+    const Instance& instance_;
     const ReducedInstance r;
 
 private:
@@ -84,6 +99,7 @@ const char* kindName(GapBound kind)
         case GapBound::Roles: return "roles";
         case GapBound::Lagrangian: return "lagrangian";
         case GapBound::Balanced: return "balanced";
+        case GapBound::Search: return "search";
         case GapBound::Closed: return "closed";
     }
     return "?";
@@ -91,7 +107,7 @@ const char* kindName(GapBound kind)
 
 std::optional<GapBound> kindFromName(const std::string& name)
 {
-    for(GapBound k : {GapBound::Relaxed, GapBound::Forest, GapBound::Roles, GapBound::Lagrangian, GapBound::Balanced, GapBound::Closed})
+    for(GapBound k : {GapBound::Relaxed, GapBound::Forest, GapBound::Roles, GapBound::Lagrangian, GapBound::Balanced, GapBound::Search, GapBound::Closed})
         if(name == kindName(k))
             return k;
     return std::nullopt;
@@ -220,6 +236,7 @@ Certificate makeBracketCertificate(const Instance& instance, const BracketResult
             case GapProof::Roles: needsA1 = true; return GapBound::Roles;
             case GapProof::Lagrangian: needsA1 = true; return GapBound::Lagrangian;
             case GapProof::Balanced: needsA1 = true; return GapBound::Balanced;
+            case GapProof::Search: needsA1 = true; return GapBound::Search;
             case GapProof::Open: break;
         }
         throw std::logic_error("makeBracketCertificate: open gap in an exact bracket");
@@ -241,6 +258,9 @@ Certificate makeBracketCertificate(const Instance& instance, const BracketResult
         cert.assumptions.push_back("S");
     if(needsA1)
         cert.assumptions.push_back("A1-NS");
+    for(const auto& a : result.assumptions())
+        if(a == "EO")
+            cert.assumptions.push_back("EO");
     return cert;
 }
 
@@ -452,6 +472,20 @@ CertificateCheck checkCertificate(const Certificate& cert)
 
     const LevelBounds bounds(in, f.back().makespan);
     bool usedA1 = false, usedA1NS = false;
+    bool zeroDurationCity = false;
+    for(int i = 0; i < in.n(); ++i)
+        zeroDurationCity = zeroDurationCity || (in.d[at(i)] == 0 && in.dbar[at(i)] == 0);
+    // The search proof (Corollary 6.10) needs A1-NS, and EO (event-ordered
+    // plans) when some city has d = dbar = 0.
+    const auto searchAllowed = [&](std::string& why) {
+        if(!assumed("A1-NS") || (zeroDurationCity && !assumed("EO")))
+        {
+            why = zeroDurationCity ? "the search bound needs assumptions A1-NS and EO" : "the search bound needs assumption A1-NS";
+            return false;
+        }
+        usedA1NS = true;
+        return true;
+    };
     // A lower bound of the given kind at level T, or a reason it cannot be used.
     const auto boundAt = [&](GapBound kind, Time T, Cost target, const std::vector<Cost>& mu, std::string& why) -> std::optional<Cost> {
         switch(kind)
@@ -465,6 +499,7 @@ CertificateCheck checkCertificate(const Certificate& cert)
                 }
                 usedA1 = true;
                 return bounds.forest(T);
+            case GapBound::Search: break; // handled by the callers
             case GapBound::Roles:
             case GapBound::Lagrangian:
             case GapBound::Balanced:
@@ -498,6 +533,20 @@ CertificateCheck checkCertificate(const Certificate& cert)
         else if(f.front().makespan != 2 * dmin * segments)
             fail("the fastest point's makespan is not 2 * d_min * ceil(s / p) = " + std::to_string(2 * dmin * segments));
     }
+    else if(cert.fastest == GapBound::Search)
+    {
+        std::string why;
+        if(searchAllowed(why))
+        {
+            const auto closed = bounds.search(bounds.level(f.front().makespan), kInfCost, f.front().makespan);
+            if(!closed)
+                fail("fastest point: the search gave up");
+            else if(!*closed)
+                fail("fastest point: the search finds a faster plan");
+        }
+        else
+            fail("fastest point: " + why);
+    }
     else
     {
         std::string why;
@@ -519,6 +568,16 @@ CertificateCheck checkCertificate(const Certificate& cert)
             fail("gap " + std::to_string(i + 1) + ": one multiplier per city is required");
             continue;
         }
+        if(cert.gaps[i] == GapBound::Search)
+        {
+            if(!searchAllowed(why))
+                fail("gap " + std::to_string(i + 1) + ": " + why);
+            else if(const auto closed = bounds.search(bounds.level(f[i + 1].makespan), f[i].cost, f[i + 1].makespan); !closed)
+                fail("gap " + std::to_string(i + 1) + ": the search gave up");
+            else if(!*closed)
+                fail("gap " + std::to_string(i + 1) + ": the search finds a cheaper plan inside the gap");
+            continue;
+        }
         const auto bound = boundAt(cert.gaps[i], bounds.level(f[i + 1].makespan), f[i].cost, mu, why);
         if(!bound)
             fail("gap " + std::to_string(i + 1) + ": " + why);
@@ -532,6 +591,8 @@ CertificateCheck checkCertificate(const Certificate& cert)
         report.relied.push_back("A1");
     if(usedA1NS)
         report.relied.push_back("A1-NS");
+    if(usedA1NS && zeroDurationCity && assumed("EO"))
+        report.relied.push_back("EO");
     report.ok = report.errors.empty();
     return report;
 }
