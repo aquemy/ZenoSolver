@@ -256,7 +256,8 @@ created   = "2026-11-24"
 [claims.lem-4-11]
 kind      = "lemma"
 statement = "Lemma 4.11 (shrinking): an admissible partition X_1..X_p with |X| ≥ p + 2 stays admissible after removing two landings, each new group a sub-multiset of the old one."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible.exists_remove_two"
 paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
