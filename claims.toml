@@ -399,6 +399,13 @@ status    = "math.proved-informal"
 paper     = "Prop 6.18 (a)–(c), doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 
+[claims.claim-6-18-d]
+kind      = "claim"
+statement = "Proposition 6.18(d): for n = 3, d = (7, 1, 3), d̄ = (2, 6, 6), c = (4, 7, 4), d_12 = 7, d_13 = 5, d_23 = 3, t = 7, p = 3, the point (73, 29) of the front (exhaustive search) is reached by no plan whose central flights all lie in crossings, so it needs central flights in segments of another type; the plan found uses a pick-up segment C_G → 3 → 1 → 3 → C_G. The class claim rests on the flow model restricted to segment classes, whose exactness has no written proof."
+status    = "math.conjectured"
+paper     = "Prop 6.18(d), doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
 [claims.lem-6-19]
 kind      = "lemma"
 statement = "Lemma 6.19 (cut bound): with Φ the least flight time of a sequence of flights from C_I to C_G, every feasible plan has Σ_k F_k ≥ (2t − p)Φ, hence makespan at least (2t − p)Φ/p; under (AΔ), Φ = min_x (d_x + d̄_x)."
