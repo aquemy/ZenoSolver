@@ -104,19 +104,30 @@ def reasons2 (C : Cert2) : Array String := Id.run do
     let Tmax := C.maxLevel scale
     let wArr := Array.ofFn (n := C.n) fun i => C.weight i / scale
     let wS : Fin C.n → ℕ := fun i => wArr.getD i 0
+    let gR := C.rolesScale
+    let dArr := Array.ofFn (n := C.n) fun i => C.d i / gR
+    let dbArr := Array.ofFn (n := C.n) fun i => C.dbar i / gR
     let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
+      (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+    let a1ns := C.assumptions.contains "A1-NS"
     if !C.fastestOK bound then
       errs := errs.push (match C.fastest with
         | .closed => "fastest point: the closed form needs symmetric durations and makespan \
             2 * d_min * ceil(s / p)"
         | .relaxed => "fastest point: the relaxed bound does not rule out faster plans"
+        | .roles => if a1ns then "fastest point: the roles bound does not rule out faster plans"
+            else "fastest point: the roles bound needs assumption A1-NS"
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
-      | .relaxed =>
-        let b := bound .relaxed y.2
-        if !decide ((x.1 : WithTop ℕ) ≤ b) then
-          errs := errs.push s!"gap {i + 1}: the relaxed bound {showBound b} is below the cost {x.1}"
+      | .relaxed | .roles =>
+        if g == .roles && !a1ns then
+          errs := errs.push s!"gap {i + 1}: the roles bound needs assumption A1-NS"
+        else
+          let b := bound g y.2
+          if !decide ((x.1 : WithTop ℕ) ≤ b) then
+            errs := errs.push s!"gap {i + 1}: the {g.name} bound {showBound b} is below the \
+              cost {x.1}"
       | k => errs := errs.push s!"gap {i + 1}: the {k.name} bound is not verified by the Lean \
           checker"
   return errs
@@ -132,9 +143,13 @@ def main (args : List String) : IO UInt32 := do
     return 1
   | .ok (.v2 C) =>
     if C.check then
+      let roles := (C.gaps.filter (· = .roles)).length
+      let scope := if C.assumptions.contains "A1-NS" then
+          s!"{roles} roles gap(s), the others relaxed: for every central flight table \
+            satisfying A1-NS"
+        else "all gaps relaxed: for every central flight table"
       IO.println s!"accepted: the {C.front.length} points are the Pareto front (version 2, \
-        fastest {C.fastest.name}, all gaps relaxed: for every central flight table; \
-        ZenoFront.Cert2.check_sound)"
+        fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound)"
       return 0
     IO.println s!"rejected: {(reasons2 C).getD 0 "an obligation fails"}"
     return 1

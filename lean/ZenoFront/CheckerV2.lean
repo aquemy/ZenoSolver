@@ -5,6 +5,7 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Checker
+public import ZenoFront.RoleBound
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -14,12 +15,18 @@ durations to `C_I` (`d`) and to `C_G` (`d̄`) may differ. Levels are full loads 
 `g` of the weights, and a line `fastest <kind>` names the bound that rules out plans faster than
 the first point.
 
-This file verifies the kinds that need **no assumption**: `relaxed` gaps, and `fastest relaxed`
-(or `fastest closed` for symmetric durations, as in v1). The bound is Lemma R with the weight
-`2 min(d_i, d̄_i)` per landing (`Feasible.exists_relaxation_emin`): a segment starts and ends with
-hub flights, each lasting at least `min(d, d̄)` of its city. The other v2 kinds (`roles`,
-`lagrangian`, `balanced`, `search`) are parsed but given no bound, so a certificate that uses one
-is rejected.
+This file verifies:
+
+* `relaxed` (gaps and fastest point), with **no assumption**: Lemma R with the weight
+  `2 min(d_i, d̄_i)` per landing (`Feasible.exists_relaxation_emin`); a segment starts and ends
+  with hub flights, each lasting at least `min(d, d̄)` of its city;
+* `roles` (gaps and fastest point), under (A1-NS), which the certificate must list: Theorem 6.1
+  (`Feasible.exists_roleConfig_ns`) and the role relaxation (`rolesBoundAt_le_totalCost`), at
+  levels `⌊(M − 1)/g⌋` for the gcd `g` of all durations;
+* `fastest closed` for symmetric durations, as in v1.
+
+The other v2 kinds (`lagrangian`, `balanced`, `search`, `forest`) are parsed but given no bound,
+so a certificate that uses one is rejected.
 
 ## Main results
 
@@ -110,9 +117,27 @@ def lastOK : Bool :=
 def relaxedWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (M : ℕ) : WithTop ℕ :=
   relaxedBoundAt C.p C.s Tmax table ((M - 1) / scale)
 
+/-- The highest level of the certificate, for the scale `g`. -/
+def maxLevel (scale : ℕ) : ℕ := (C.front.map fun x => (x.2 - 1) / scale).foldr max 0
+
+/-- The scale of the role bounds: the gcd of all durations `d` and `d̄`. -/
+def rolesScale : ℕ := durationScale fun i => Nat.gcd (C.d i) (C.dbar i)
+
+/-- The `roles` bound below a point of makespan `M`, on durations scaled by `g = rolesScale`
+(`dR`, `dbR`), at level `⌊(M − 1)/g⌋`; `0` (no bound) unless assumption `A1-NS` is listed. -/
+def rolesWith (dR dbR : Fin C.n → ℕ) : ℕ → WithTop ℕ :=
+  if C.assumptions.contains "A1-NS" then
+    let TmaxR := C.maxLevel C.rolesScale
+    let L := roleLayers dR dbR C.c TmaxR C.s
+    let F := oneplaneTable (fillW dR dbR) C.c (C.p * TmaxR) C.s
+    fun M => rolesBoundAt C.p C.s TmaxR L F ((M - 1) / C.rolesScale)
+  else fun _ => 0
+
 /-- The bound named by a kind; `0` (no bound) for the kinds this checker does not verify. -/
-def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) : Kind2 → ℕ → WithTop ℕ
+def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ) :
+    Kind2 → ℕ → WithTop ℕ
   | .relaxed => C.relaxedWith scale Tmax table
+  | .roles => rolesB
   | _ => fun _ => 0
 
 /-- Obligation 2: nothing is faster than the first point. `closed` is v1's closed form
@@ -125,10 +150,8 @@ def fastestOK (bound : Kind2 → ℕ → WithTop ℕ) : Bool :=
     match C.fastest with
     | .closed => C.symmetric && decide (x.2 = 2 * minOf C.d * ((C.s + C.p - 1) / C.p))
     | .relaxed => decide (bound .relaxed x.2 = ⊤)
+    | .roles => decide (bound .roles x.2 = ⊤)
     | _ => false
-
-/-- The highest level of the certificate, for the scale `g`. -/
-def maxLevel (scale : ℕ) : ℕ := (C.front.map fun x => (x.2 - 1) / scale).foldr max 0
 
 /-- Obligations 2 and 3, with the scale, the top level and the one-plane table computed once. -/
 def boundsCheck : Bool :=
@@ -136,21 +159,34 @@ def boundsCheck : Bool :=
   let Tmax := C.maxLevel scale
   let wArr := Array.ofFn (n := C.n) fun i => C.weight i / scale
   let wS : Fin C.n → ℕ := fun i => wArr.getD i 0
+  let gR := C.rolesScale
+  let dArr := Array.ofFn (n := C.n) fun i => C.d i / gR
+  let dbArr := Array.ofFn (n := C.n) fun i => C.dbar i / gR
   let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
+    (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
   C.fastestOK bound && gapsOK bound C.front C.gaps
 
 /-- The bounds of the checker, as specified. -/
 def bound : Kind2 → ℕ → WithTop ℕ :=
   C.boundWith (durationScale C.weight) (C.maxLevel (durationScale C.weight))
     (oneplaneTable (scaledDurations C.weight) C.c (C.maxLevel (durationScale C.weight)) C.s)
+    (C.rolesWith (fun i => C.d i / C.rolesScale) (fun i => C.dbar i / C.rolesScale))
 
 theorem boundsCheck_eq : C.boundsCheck = (C.fastestOK C.bound && gapsOK C.bound C.front C.gaps) := by
   have hwS : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
       C.weight i / durationScale C.weight).getD i 0) = scaledDurations C.weight := by
     funext i
     simp [Array.getD_eq_getD_getElem?, scaledDurations]
+  have hd : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
+      C.d i / C.rolesScale).getD i 0) = fun i => C.d i / C.rolesScale := by
+    funext i
+    simp [Array.getD_eq_getD_getElem?]
+  have hdb : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
+      C.dbar i / C.rolesScale).getD i 0) = fun i => C.dbar i / C.rolesScale := by
+    funext i
+    simp [Array.getD_eq_getD_getElem?]
   simp only [boundsCheck]
-  rw [hwS]
+  rw [hwS, hd, hdb]
   rfl
 
 /-- **The v2 checker.** -/
@@ -177,11 +213,52 @@ theorem relaxedWith_le {dc : Fin C.n → Fin C.n → ℕ} (hpt : C.p ≤ C.t) (T
   have := hload k
   omega
 
+theorem load_eq_mul_of_dvd {f : Fin C.n → ℕ} {g : ℕ} (hg : ∀ i, g ∣ f i)
+    (Y : Multiset (Fin C.n)) : load f Y = g * load (fun i => f i / g) Y := by
+  simp only [load]
+  rw [← Multiset.sum_map_mul_left]
+  congr 1
+  exact Multiset.map_congr rfl fun i _ => (Nat.mul_div_cancel' (hg i)).symm
+
+theorem rolesScale_dvd_d (i : Fin C.n) : C.rolesScale ∣ C.d i :=
+  (durationScale_dvd _ i).trans (Nat.gcd_dvd_left _ _)
+
+theorem rolesScale_dvd_dbar (i : Fin C.n) : C.rolesScale ∣ C.dbar i :=
+  (durationScale_dvd _ i).trans (Nat.gcd_dvd_right _ _)
+
+/-- **The `roles` bound is a lower bound** under (A1-NS): a feasible plan with makespan below `M`
+costs at least the bound at the level of `M`. -/
+theorem rolesWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
+    (C.network dc).A1NS) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.rolesWith (fun i => C.d i / C.rolesScale) (fun i => C.dbar i / C.rolesScale) M ≤
+      (planCost C.c P : WithTop ℕ) := by
+  unfold rolesWith
+  split_ifs with hlist
+  · obtain ⟨cfg, hsize, hcost, hload⟩ := hP.exists_roleConfig_ns (hA hlist) C.c hpt
+    refine (rolesBoundAt_le_totalCost _ _ C.c dc cfg hsize fun k => ?_).trans
+      (WithTop.coe_le_coe.mpr hcost)
+    have hg : 0 < C.rolesScale := durationScale_pos _
+    have hk := hload k
+    have e : cfg.roleLoad (C.network dc) k = C.rolesScale *
+        cfg.roleLoad ⟨fun i => C.d i / C.rolesScale, fun i => C.dbar i / C.rolesScale, dc⟩ k := by
+      unfold RoleConfig.roleLoad
+      simp only [network]
+      rw [C.load_eq_mul_of_dvd C.rolesScale_dvd_d, C.load_eq_mul_of_dvd C.rolesScale_dvd_dbar,
+        C.load_eq_mul_of_dvd C.rolesScale_dvd_d (Y := cfg.cross k),
+        C.load_eq_mul_of_dvd C.rolesScale_dvd_dbar (Y := cfg.cross k)]
+      ring
+    rw [Nat.le_div_iff_mul_le hg, mul_comm, ← e]
+    omega
+  · exact zero_le
+
 /-- **Soundness of the v2 checker.** If `check` accepts a certificate, its points are exactly the
-Pareto front of the instance, for **every** table `dc` of central flight durations: the bounds it
-verifies (`relaxed`, `fastest relaxed`, `fastest closed`) need no assumption, and (S) only for
-`fastest closed`, where the checker tests it. -/
-theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ) :
+Pareto front of the instance, for every table `dc` of central flight durations that satisfies
+(A1-NS) if the certificate lists it, and for **every** table otherwise. The `relaxed` bounds
+need no assumption, the `roles` bounds (A1-NS), and `fastest closed` (S), which the checker
+tests. -/
+theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) :
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := by
   simp only [check, Bool.and_eq_true] at h
   obtain ⟨⟨⟨⟨hhead, hmono⟩, hplans⟩, hlast⟩, hbounds⟩ := h
@@ -196,6 +273,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ) :
     intro g P hP M hM
     cases g with
     | relaxed => exact C.relaxedWith_le hpt _ hP hM
+    | roles => exact C.rolesWith_le hA hpt hP hM
     | _ => exact bot_le
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · -- 1. Every point is achieved by its plan.
@@ -223,6 +301,14 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ) :
         have := hbound .relaxed hP x.2 hlt
         rw [hfast] at this
         exact absurd this (by simp)
+      | roles =>
+        rw [hk] at hfast
+        simp only [decide_eq_true_eq] at hfast
+        by_contra hlt
+        push Not at hlt
+        have := hbound .roles hP x.2 hlt
+        rw [hfast] at this
+        exact absurd this (by simp)
       | _ => rw [hk] at hfast; simp at hfast
     · simp only [lastOK] at hlast
       rw [Option.mem_def] at hx
@@ -235,10 +321,22 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ) :
     · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
     · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
 
+/-- **Soundness under (A1-NS).** -/
+theorem check_sound_A1NS (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).A1NS) : IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
+  C.check_sound h dc fun _ => hA
+
+/-- **Soundness without assumption**, when the certificate does not list (A1-NS). -/
+theorem check_sound_of_not_A1NS (h : C.check = true)
+    (hno : C.assumptions.contains "A1-NS" = false) (dc : Fin C.n → Fin C.n → ℕ) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
+  C.check_sound h dc fun h' => absurd (hno ▸ h') (by decide)
+
 /-- **Soundness, minimal-elements form.** -/
-theorem check_sound_minimal (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ) (x : ℕ × ℕ) :
+theorem check_sound_minimal (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) (x : ℕ × ℕ) :
     x ∈ C.front ↔ Minimal (· ∈ achievable (C.network dc) C.c C.t C.p) x :=
-  (C.check_sound h dc).mem_iff_minimal x
+  (C.check_sound h dc hA).mem_iff_minimal x
 
 end Cert2
 
