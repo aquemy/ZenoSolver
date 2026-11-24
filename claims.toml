@@ -555,3 +555,13 @@ created   = "2026-11-23"
 # `refutes` those its evidence contradicts, `code` and `results` locate it. `status` uses the science
 # vocabulary: sci.supported (the evidence agrees with the claims tested; for a search, no
 # counterexample in the sample, which is not a proof) and sci.measured (a measurement).
+
+[claims.exp-e1-achievability]
+kind      = "experiment"
+statement = "E1 (achievability): every plan `zeno --plans` prints for a front point is feasible under an independent simulator and reaches exactly that point: 12,068 points on 550 symmetric instances (random data and generator families) and 723 on 200 non-symmetric ones, 0 mismatches."
+status    = "sci.supported"
+tests     = ["thm-4-1"]
+code      = "experiments/E1_achievability/run.py"
+results   = "experiments/results/E1_achievability"
+paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
+created   = "2026-11-24"
