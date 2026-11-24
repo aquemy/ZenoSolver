@@ -1294,7 +1294,8 @@ $t = 7$, $p = 3$. A plan of cost 73 has makespan 29, and $(73, 29)$ is a point o
 makespan at most 28 costs at most 77, and none of makespan at most 29 costs less than 73. The plan flies the
 pick-up segment $C_G \to 3 \to 1 \to 3 \to C_G$, which carries one passenger from 3 to 1 and then another
 from 3 to $C_G$. No plan whose central flights all lie in segments of type $A$, however many central
-landings they make, has makespan 29. So this front needs central flights in segments other than crossings;
+landings they make, has makespan 29 (flow model only, see the status below). So this front needs central
+flights in segments other than crossings;
 whether pick-up segments are needed, rather than drop-off or return segments, was not tested.
 
 *Status.* Computed with `checks/segclass_truth.cpp` (exhaustive search over plans of a segment class) and
