@@ -53,6 +53,56 @@ def Visit.isA (v : Visit n t K) : Bool := v.1.leg.src.isCI && !v.2.leg.dst.isCI
 /-- A crossing `Ā`: entered from `C_G`, left towards `C_I`. -/
 def Visit.isAbar (v : Visit n t K) : Bool := !v.1.leg.src.isCI && v.2.leg.dst.isCI
 
+/-- The local facts of a visit: it flies from a hub into a central city and out of it to a hub,
+the exit after the entry. -/
+structure LocOK (N : Network n) (v : Visit n t K) : Prop where
+  hub : v.1.leg.src.isHub = true
+  flies₁ : Flies N v.1.leg
+  flies₂ : Flies N v.2.leg
+  city : ∃ x, v.1.leg.dst = .city x ∧ v.2.leg.src = .city x
+  wait : v.1.leg.arr ≤ v.2.leg.dep
+  exit : v.2.leg.dst.isHub = true
+
+/-- What Steps 3–6 need of the visits of every plane, in the order of the configuration: the
+local facts; a drop-off (`C_I → x → C_I`) enters `x` after the flight time of the visits before
+it; a pick-up (`C_G → x → C_G`) is followed by the visits after it by `M`; the flight time is at
+most `M`; and `#A = #Ā + 1`. A route satisfies them (`VRoute.planesOK`). -/
+structure PlanesOK (N : Network n) (M : ℕ) (R : Fin p → List (Visit n t K)) : Prop where
+  loc : ∀ k, ∀ v ∈ R k, LocOK N v
+  pre : ∀ k (m : ℕ) (hm : m < (R k).length), (R k)[m].1.leg.src = .ci →
+    (R k)[m].2.leg.dst = .ci → (((R k).take m).map Visit.w).sum ≤ (R k)[m].1.leg.dep
+  suf : ∀ k (m : ℕ) (hm : m < (R k).length), (R k)[m].1.leg.src = .cg →
+    (R k)[m].2.leg.dst = .cg → (R k)[m].2.leg.arr + (((R k).drop (m + 1)).map Visit.w).sum ≤ M
+  load : ∀ k, ((R k).map Visit.w).sum ≤ M
+  par : ∀ k, (R k).countP Visit.isA = (R k).countP Visit.isAbar + 1
+
+/-- The two flights of every passenger, without keys: `ℓα π : C_I → x` and `ℓβ π : x → C_G`,
+both carrying `π`. -/
+structure PaxEnds (ℓα ℓβ : Fin t → KLeg n t K) : Prop where
+  paxα : ∀ π, (ℓα π).leg.pax = some π
+  paxβ : ∀ π, (ℓβ π).leg.pax = some π
+  srcα : ∀ π, (ℓα π).leg.src = .ci
+  dstβ : ∀ π, (ℓβ π).leg.dst = .cg
+  city : ∀ π, ∃ x, (ℓα π).leg.dst = .city x ∧ (ℓβ π).leg.src = .city x
+
+theorem PaxEnds.injα {ℓα ℓβ : Fin t → KLeg n t K} (h : PaxEnds ℓα ℓβ) {π π' : Fin t}
+    (he : ℓα π = ℓα π') : π = π' := by
+  have := h.paxα π
+  rw [he, h.paxα π'] at this
+  exact (Option.some_injective _ this).symm
+
+theorem PaxEnds.injβ {ℓα ℓβ : Fin t → KLeg n t K} (h : PaxEnds ℓα ℓβ) {π π' : Fin t}
+    (he : ℓβ π = ℓβ π') : π = π' := by
+  have := h.paxβ π
+  rw [he, h.paxβ π'] at this
+  exact (Option.some_injective _ this).symm
+
+theorem Loc.eq_ci_of_isCI {l : Loc n} (h : l.isCI = true) : l = .ci := by
+  cases l <;> simp_all
+
+theorem Loc.eq_cg_of_isHub {l : Loc n} (h : l.isHub = true) (h' : l.isCI = false) : l = .cg := by
+  cases l <;> simp_all
+
 /-! ### Along one route -/
 
 section Route
@@ -155,6 +205,27 @@ theorem VRoute.countP_isA {L : List (Visit n t K)} (h : VRoute N L) :
   have := h.1.countP_isA
   rw [h.2] at this
   simpa [vStart] using this
+
+theorem VOK.loc {s : VState n K} {v : Visit n t K} (h : VOK N s v) : LocOK N v :=
+  ⟨h.hub, h.flies₁, h.flies₂, h.city, h.wait, h.exit⟩
+
+omit [LinearOrder K] in
+theorem PaxData.ends {R : Fin p → List (Visit n t K)} {ℓα ℓβ : Fin t → KLeg n t K}
+    [LinearOrder K] (h : PaxData R ℓα ℓβ) : PaxEnds ℓα ℓβ :=
+  ⟨h.paxα, h.paxβ, h.srcα, h.dstβ, h.city⟩
+
+/-- Routes satisfy what Steps 3–6 need, for any bound on the arrivals. -/
+theorem VRoute.planesOK {R : Fin p → List (Visit n t K)} (hR : ∀ k, VRoute N (R k)) {M : ℕ}
+    (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) : PlanesOK N M R := by
+  have hexit : ∀ k, ∀ v ∈ R k, v.2.leg.arr ≤ M := fun k v hv =>
+    hM _ (mem_allK.mpr ⟨k, v, hv, Or.inr rfl⟩)
+  refine ⟨fun k v hv => ?_, fun k m hm _ _ => ?_, fun k m hm _ _ => ?_,
+    fun k => (hR k).1.sum_w_le (hexit k), fun k => (hR k).countP_isA⟩
+  · obtain ⟨s, hs⟩ := (hR k).1.exists_vok v hv
+    exact hs.loc
+  · have := (hR k).1.time_le_dep m hm
+    simpa [vStart] using this
+  · exact (hR k).1.arr_add_le (hexit k) m hm
 
 end Route
 
@@ -442,23 +513,22 @@ end Build
 
 section Bounds
 
-variable [LinearOrder K] {N : Network n} {R : Fin p → List (Visit n t K)}
-  (hR : ∀ k, VRoute N (R k)) (x₀ : Fin n)
+variable {N : Network n} {R : Fin p → List (Visit n t K)}
+  (hloc : ∀ k, ∀ v ∈ R k, LocOK N v) (x₀ : Fin n)
 
-include hR
+include hloc
 
-theorem Node.exists_vok (x : Node R) : ∃ s, VOK N s x.vis :=
-  (hR x.1).1.exists_vok _ (List.getElem_mem _)
+theorem Node.loc (x : Node R) : LocOK N x.vis := hloc x.1 _ (List.getElem_mem _)
 
 theorem Node.dst_eq (x : Node R) : x.vis.1.leg.dst = .city (x.city x₀) := by
-  obtain ⟨s, hs⟩ := x.exists_vok hR
+  have hs := x.loc hloc
   obtain ⟨y, hy, -⟩ := hs.city
   simp [Node.city, hy]
 
 theorem Node.entry_arr (x : Node R) : x.vis.1.leg.arr =
     x.vis.1.leg.dep + (if x.eI then N.d (x.city x₀) else N.dbar (x.city x₀)) := by
-  obtain ⟨s, hs⟩ := x.exists_vok hR
-  have hx := x.dst_eq hR x₀
+  have hs := x.loc hloc
+  have hx := x.dst_eq hloc x₀
   obtain ⟨τ, hd, ha⟩ := hs.flies₁
   have hub := hs.hub
   unfold Node.eI
@@ -467,8 +537,8 @@ theorem Node.entry_arr (x : Node R) : x.vis.1.leg.arr =
 
 theorem Node.exit_arr (x : Node R) : x.vis.2.leg.arr =
     x.vis.2.leg.dep + (if x.xI then N.d (x.city x₀) else N.dbar (x.city x₀)) := by
-  obtain ⟨s, hs⟩ := x.exists_vok hR
-  have hx := x.dst_eq hR x₀
+  have hs := x.loc hloc
+  have hx := x.dst_eq hloc x₀
   obtain ⟨y, hy₁, hy₂⟩ := hs.city
   rw [hx] at hy₁
   cases Loc.city.inj hy₁
@@ -481,17 +551,17 @@ theorem Node.exit_arr (x : Node R) : x.vis.2.leg.arr =
 theorem Node.w_eq (x : Node R) : x.vis.w =
     (if x.eI then N.d (x.city x₀) else N.dbar (x.city x₀)) +
       (if x.xI then N.d (x.city x₀) else N.dbar (x.city x₀)) := by
-  have h₁ := x.entry_arr hR x₀
-  have h₂ := x.exit_arr hR x₀
+  have h₁ := x.entry_arr hloc x₀
+  have h₂ := x.exit_arr hloc x₀
   unfold Visit.w
   omega
 
-omit hR in
+omit hloc in
 /-- The `A` and `Ā` visits of plane `k`. -/
 def crossNodes (R : Fin p → List (Visit n t K)) (k : Fin p) : List (Node R) :=
   (planeNodes R k).filter fun x => x.eI != x.xI
 
-omit hR in
+omit hloc in
 /-- The cities of the `A` and `Ā` visits of plane `k`: the crossings to choose from. -/
 def crossCities (R : Fin p → List (Visit n t K)) (k : Fin p) : Multiset (Fin n) :=
   ((crossNodes R k).map (Node.city x₀) : List (Fin n))
@@ -501,19 +571,19 @@ variable {Λ : Finset (Node R × Node R)}
 
 include hty
 
-omit [LinearOrder K] hR in
+omit hloc in
 theorem isDrop_types {x : Node R} (h : isDrop Λ x = true) : x.eI = true ∧ x.xI = true := by
   simp only [isDrop, decide_eq_true_eq] at h
   obtain ⟨z, hz, rfl⟩ := h
   exact ⟨(hty z hz).1, (hty z hz).2.1⟩
 
-omit [LinearOrder K] hR in
+omit hloc in
 theorem isPick_types {x : Node R} (h : isPick Λ x = true) : x.eI = false ∧ x.xI = false := by
   simp only [isPick, decide_eq_true_eq] at h
   obtain ⟨z, hz, rfl⟩ := h
   exact ⟨(hty z hz).2.2.1, (hty z hz).2.2.2⟩
 
-omit [LinearOrder K] hR in
+omit hloc in
 theorem exclusive (x : Node R) :
     (isDrop Λ x = true → isPick Λ x = false ∧ (x.eI != x.xI) = false) ∧
       (isPick Λ x = true → (x.eI != x.xI) = false) := by
@@ -534,12 +604,12 @@ theorem sum_legs_landCost (c : Fin n → ℕ) : ∀ L : List (Node R),
       (L.map fun x => c (x.city x₀)).sum
   | [] => rfl
   | x :: L => by
-    obtain ⟨s, hs⟩ := x.exists_vok hR
+    have hs := x.loc hloc
     have ih := sum_legs_landCost c L
     simp only [List.map_cons, legsOf_cons, List.sum_cons] at ih ⊢
     rw [ih]
     have h₁ : landCost c x.vis.1.leg = c (x.city x₀) := by
-      simp [landCost, x.dst_eq hR x₀]
+      simp [landCost, x.dst_eq hloc x₀]
     have h₂ : landCost c x.vis.2.leg = 0 := by
       have := hs.exit
       unfold landCost
@@ -551,7 +621,7 @@ omit hty in
 theorem allK_landCost (c : Fin n → ℕ) :
     ((allK R).map fun ℓ => landCost c ℓ.leg).sum =
       ∑ k, ((planeNodes R k).map fun x => c (x.city x₀)).sum := by
-  rw [← Finset.sum_congr rfl fun k _ => sum_legs_landCost hR x₀ c (planeNodes R k)]
+  rw [← Finset.sum_congr rfl fun k _ => sum_legs_landCost hloc x₀ c (planeNodes R k)]
   simp only [planeNodes_map_vis]
   exact map_sum (Multiset.sumAddMonoidHom.comp (Multiset.mapAddMonoidHom
     fun ℓ : KLeg n t K => landCost c ℓ.leg)) (fun k => (legsOf (R k) : Multiset _)) univ
@@ -560,7 +630,7 @@ theorem allK_landCost (c : Fin n → ℕ) :
 theorem toSched_cost_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤ crossCities x₀ R k)
     (c : Fin n → ℕ) :
     (toSched Λ x₀ Cr).cost c ≤ ((allK R).map fun ℓ => landCost c ℓ.leg).sum := by
-  rw [allK_landCost hR x₀ c]
+  rw [allK_landCost hloc x₀ c]
   refine Finset.sum_le_sum fun k _ => ?_
   simp only [toSched, List.map_map]
   have h₁ : ZenoFront.cost c (Cr k) ≤
@@ -577,12 +647,9 @@ theorem toSched_cost_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
 arrival times: role loads are at most the flight times, and each link's term is at most
 `a(B) + (M − e(B̄)) ≤ M`. -/
 theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤ crossCities x₀ R k)
-    (hΛ : LinksOK Λ x₀) (htime : ∀ z ∈ Λ, z.1.a ≤ z.2.e) {M : ℕ}
-    (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) :
+    (hΛ : LinksOK Λ x₀) (htime : ∀ z ∈ Λ, z.1.a ≤ z.2.e) {M : ℕ} (hP : PlanesOK N M R) :
     (toSched Λ x₀ Cr).tmpl N.d N.dbar ≤ M := by
-  have hexit : ∀ k, ∀ v ∈ R k, v.2.leg.arr ≤ M := fun k v hv =>
-    hM _ (mem_allK.mpr ⟨k, v, hv, Or.inr rfl⟩)
-  have hw := fun x : Node R => x.w_eq hR x₀
+  have hw := fun x : Node R => x.w_eq hloc x₀
   -- A selection along a route weighs at most the visits it is taken from.
   have hsel : ∀ (q : Node R → Bool) (f : Node R → ℕ) (L : List (Node R)),
       (∀ x ∈ L, q x = true → f x ≤ x.vis.w) →
@@ -596,7 +663,7 @@ theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
     (Finset.sup_le fun v _ => Finset.sup_le fun l _ => ?_)
   · -- The role load of plane `k`.
     have htot : ((planeNodes R k).map fun x => x.vis.w).sum ≤ M := by
-      have := (hR k).1.sum_w_le (hexit k)
+      have := hP.load k
       rwa [← planeNodes_map_vis (R := R) k, List.map_map] at this
     have h₃ := sum_filter_three_le (isDrop Λ) (isPick Λ) (fun x : Node R => x.eI != x.xI)
       (fun x => x.vis.w) (planeNodes R k) fun x _ => exclusive hty x
@@ -644,8 +711,8 @@ theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
     -- `Pre_u(j) + d_x ≤ a(B)`.
     have hpre : (toSched Λ x₀ Cr).pre N.d x.1 (dpos Λ x) + N.d (y.city x₀) ≤ x.a := by
       have h₁ : (toSched Λ x₀ Cr).pre N.d x.1 (dpos Λ x) ≤ x.vis.1.leg.dep := by
-        have h₂ := (hR x.1).1.time_le_dep x.2 x.2.isLt
-        simp only [vStart, zero_add] at h₂
+        obtain ⟨hxe', hxx'⟩ := isDrop_types hty hdrop
+        have h₂ := hP.pre x.1 x.2 x.2.isLt (Loc.eq_ci_of_isCI hxe') (Loc.eq_ci_of_isCI hxx')
         refine le_trans ?_ h₂
         simp only [Sched.pre, toSched, ← List.map_take, take_dropNodes_dpos Λ hdrop,
           List.map_map, ← List.sum_map_mul_left]
@@ -655,7 +722,7 @@ theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
         rw [Function.comp_apply, hw z, h₁, h₂]
         simp only [ite_true]
         omega
-      have h₃ := x.entry_arr hR x₀
+      have h₃ := x.entry_arr hloc x₀
       have hc : x.city x₀ = y.city x₀ := hΛ.city _ hmem
       simp only [hxe, ↓reduceIte, hc] at h₃
       unfold Node.a
@@ -671,8 +738,11 @@ theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
         rw [Function.comp_apply, hw z, h₁, h₂]
         simp only [Bool.false_eq_true, ite_false]
         omega
-      have h₂ := (hR y.1).1.arr_add_le (hexit y.1) y.2 y.2.isLt
-      have h₃ := y.exit_arr hR x₀
+      have hs := y.loc hloc
+      obtain ⟨hye', hyx'⟩ := isPick_types hty hpick
+      have h₂ := hP.suf y.1 y.2 y.2.isLt (Loc.eq_cg_of_isHub hs.hub hye')
+        (Loc.eq_cg_of_isHub hs.exit hyx')
+      have h₃ := y.exit_arr hloc x₀
       simp only [hyx, Bool.false_eq_true, ↓reduceIte] at h₃
       unfold Node.e
       change y.vis.2.leg.arr + _ ≤ M at h₂
@@ -686,11 +756,11 @@ end Bounds
 
 section Steps
 
-variable [LinearOrder K] {N : Network n} {R : Fin p → List (Visit n t K)}
+variable {N : Network n} {R : Fin p → List (Visit n t K)}
 
-theorem card_crossNodes (hR : ∀ k, VRoute N (R k)) (k : Fin p) :
-    (crossNodes R k).length = 2 * (R k).countP Visit.isAbar + 1 := by
-  have h₁ := (hR k).countP_isA
+theorem card_crossNodes (hpar : ∀ k, (R k).countP Visit.isA = (R k).countP Visit.isAbar + 1)
+    (k : Fin p) : (crossNodes R k).length = 2 * (R k).countP Visit.isAbar + 1 := by
+  have h₁ := hpar k
   have h₂ : (crossNodes R k).length = (R k).countP Visit.isA + (R k).countP Visit.isAbar := by
     rw [crossNodes, ← List.countP_eq_length_filter, ← planeNodes_map_vis (R := R) k,
       List.countP_map, List.countP_map]
@@ -707,20 +777,21 @@ theorem card_crossNodes (hR : ∀ k, VRoute N (R k)) (k : Fin p) :
       omega
   omega
 
-/-- **Steps 3–6 of Theorem 6.9.** Take routes of visits in which every passenger's hand-off is
-ordered in time (as Step 2 leaves them), with arrivals at most `M`, and `p ≤ t`. Then some valid
-scheduled configuration has `2t − p` landings, cost at most the landing cost of the legs, and
-closed form at most `M`. -/
-theorem exists_sched (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg n t K}
-    (hpax : PaxData R ℓα ℓβ)
+/-- **Steps 3–6 of Theorem 6.9**, on any visits of the planes with what the steps need
+(`PlanesOK`). Take visits in which every passenger's hand-off is ordered in time (as Step 2 leaves
+them), and `p ≤ t`. Then some valid scheduled configuration has `2t − p` landings, cost at most
+the landing cost of the legs, and closed form at most `M`. -/
+theorem exists_sched_of {M : ℕ} (hP : PlanesOK N M R) {ℓα ℓβ : Fin t → KLeg n t K}
+    (hpax : PaxEnds ℓα ℓβ)
     (hord : ∀ π, ∃ (u : Fin p) (i : Fin (R u).length) (v : Fin p) (j : Fin (R v).length),
       (R u)[i].1 = ℓα π ∧ (R v)[j].2 = ℓβ π ∧
       ((⟨u, i⟩ : (k : Fin p) × Fin (R k).length) ≠ ⟨v, j⟩ →
         (R u)[i].2.leg.dep ≤ (R v)[j].1.leg.arr))
-    {M : ℕ} (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) (hpt : p ≤ t) (x₀ : Fin n) (c : Fin n → ℕ) :
+    (hpt : p ≤ t) (x₀ : Fin n) (c : Fin n → ℕ) :
     ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧
       S.cost c ≤ ((allK R).map fun ℓ => landCost c ℓ.leg).sum ∧ S.tmpl N.d N.dbar ≤ M := by
   classical
+  have hR := hP.loc
   choose u i v j hi hj hle using hord
   set src : Fin t → Node R := fun π => ⟨u π, i π⟩ with hsrc
   set dst : Fin t → Node R := fun π => ⟨v π, j π⟩ with hdst
@@ -739,7 +810,7 @@ theorem exists_sched (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg 
     obtain ⟨π, -, rfl⟩ := Finset.mem_image.mp hz
     exact ⟨π, rfl⟩
   obtain ⟨Λ₀, hΛ₀, hΛ₀₁, hΛ₀₂, hcount⟩ := exists_links Node.eI Node.xI (Node.city x₀) Node.a
-    Node.e (fun x => by obtain ⟨s, hs⟩ := x.exists_vok hR; exact hs.wait) univ E
+    Node.e (fun x => (x.loc hR).wait) univ E
     (fun _ _ => ⟨mem_univ _, mem_univ _⟩)
     (fun z hz z' hz' h => by
       obtain ⟨π, rfl⟩ := hmemE z hz
@@ -757,8 +828,7 @@ theorem exists_sched (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg 
       · simp [Node.xI, hdstβ π, hpax.dstβ π]
       · have h₁ := (src π).dst_eq hR x₀
         rw [hsrcα π, hx₁] at h₁
-        obtain ⟨s, hs⟩ := (dst π).exists_vok hR
-        obtain ⟨y, hy₁, hy₂⟩ := hs.city
+        obtain ⟨y, hy₁, hy₂⟩ := ((dst π).loc hR).city
         rw [hdstβ π, hx₂] at hy₂
         have h₂ := (dst π).dst_eq hR x₀
         rw [hy₁, ← hy₂] at h₂
@@ -771,14 +841,14 @@ theorem exists_sched (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg 
       Finset.filter_congr fun w _ => by simp [Node.eI, Node.xI, Visit.isA]
     rw [this, card_filter_node]
     have h : ∀ k, ((planeNodes R k).filter fun w => w.vis.isA).length = a k + 1 := fun k => by
-      rw [← List.countP_eq_length_filter, ← (hR k).countP_isA, ← planeNodes_map_vis (R := R) k,
+      rw [← List.countP_eq_length_filter, ← hP.par k, ← planeNodes_map_vis (R := R) k,
         List.countP_map]
       rfl
     simp only [h, Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, Fintype.card_fin,
       smul_eq_mul, mul_one]
   rw [hEcard, hA] at hcount
   have hcross : ∀ k, (crossCities x₀ R k).card = 2 * a k + 1 := fun k => by
-    simp [crossCities, card_crossNodes hR k, ha]
+    simp [crossCities, card_crossNodes hP.par k, ha]
   have hLinks : ∀ Λ ⊆ Λ₀, LinksOK Λ x₀ ∧
       (∀ z ∈ Λ, z.1.eI = true ∧ z.1.xI = true ∧ z.2.eI = false ∧ z.2.xI = false) ∧
       ∀ z ∈ Λ, z.1.a ≤ z.2.e := fun Λ hΛ =>
@@ -828,7 +898,20 @@ theorem exists_sched (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg 
   obtain ⟨Λ, hΛ, Cr, hCr, hodd, hsize⟩ := hshrink
   obtain ⟨hok, hty, htime⟩ := hLinks Λ hΛ
   exact ⟨toSched Λ x₀ Cr, toSched_valid Λ x₀ hok hodd, (toSched_size Λ x₀ hok).trans hsize,
-    toSched_cost_le hR x₀ hty hCr c, toSched_tmpl_le hR x₀ hty hCr hok htime hM⟩
+    toSched_cost_le hR x₀ hty hCr c, toSched_tmpl_le hR x₀ hty hCr hok htime hP⟩
+
+/-- **Steps 3–6 of Theorem 6.9**, on routes of visits: some valid scheduled configuration has
+`2t − p` landings, cost at most the landing cost of the legs, and closed form at most `M`. -/
+theorem exists_sched [LinearOrder K] (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg n t K}
+    (hpax : PaxData R ℓα ℓβ)
+    (hord : ∀ π, ∃ (u : Fin p) (i : Fin (R u).length) (v : Fin p) (j : Fin (R v).length),
+      (R u)[i].1 = ℓα π ∧ (R v)[j].2 = ℓβ π ∧
+      ((⟨u, i⟩ : (k : Fin p) × Fin (R k).length) ≠ ⟨v, j⟩ →
+        (R u)[i].2.leg.dep ≤ (R v)[j].1.leg.arr))
+    {M : ℕ} (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) (hpt : p ≤ t) (x₀ : Fin n) (c : Fin n → ℕ) :
+    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧
+      S.cost c ≤ ((allK R).map fun ℓ => landCost c ℓ.leg).sum ∧ S.tmpl N.d N.dbar ≤ M :=
+  exists_sched_of (VRoute.planesOK hR hM) hpax.ends hord hpt x₀ c
 
 end Steps
 
