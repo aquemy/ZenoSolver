@@ -199,6 +199,14 @@
   overflow-x: auto;
 }
 
+/* A display equation wider than the column scrolls inside its own box, not the page. */
+mjx-container[display="true"],
+.math.display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
 /* Contents list of the chapters. */
 .chapters dt {
   margin-top: 0.6em;
