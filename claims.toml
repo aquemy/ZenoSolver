@@ -595,3 +595,14 @@ code      = "experiments/E4_nonsymmetric_front/run.py"
 results   = "experiments/results/E4_nonsymmetric_front"
 paper     = "Thm 6.1, Thm 6.9 and Cor 6.10, doc/theory/exact-front.md §6"
 created   = "2026-11-24"
+
+[claims.exp-e5-harmful-waiting]
+kind      = "experiment"
+statement = "E5 (harmful waiting): on the instance of Proposition 6.5 the front with waiting ignored contains (14, 72) and (30, 50), while zeno, zenoOracle, config_front and simple_plans with exact waiting give the note's front, whose cheapest point within makespan 73 costs 18. Harmful waiting appears in 58 of 2.4 million random role configurations and changes the front of 9 of 150 instances shaped like Prop 6.5 (0 of 150 uniform)."
+status    = "sci.supported"
+tests     = ["prop-6-5"]
+refutes   = ["paper-no-harmful-waiting"]
+code      = "experiments/E5_harmful_waiting/run.py"
+results   = "experiments/results/E5_harmful_waiting"
+paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
+created   = "2026-11-24"
