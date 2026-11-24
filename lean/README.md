@@ -150,6 +150,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
 | `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
+| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)) | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -341,6 +342,18 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   (**Corollary 4.8**): under (S) and (A1), the front is `Min 𝒳`, with `𝒳` the points
   `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition.
   `minimal_achievableAnywhere_iff_admissiblePoints` is the same for planes ending anywhere.
+
+**(AΔ) and the segment bound (`TriSegments.lean`)**
+
+* `Network.ATri` (**(AΔ)**, §1.4): `dur(a, b) ≤ dur(a, x) + dur(x, b)` whenever the three flights
+  exist and `a ≠ b` (the note has no flight `i → i`; the Lean network's `dc i i` is left free).
+  `Network.ATriHub`: its triangles through a hub, `d_j ≤ d_i + dc i j` and
+  `d_i ≤ dc i j + d_j`. Both (AΔ) (`Network.ATri.hub`) and (A1) (`Network.A1.hub`) imply it.
+* `segment_bound` (**the segment bound**, Lemma 3.3(b) under (S)): under (S) and `ATriHub`, a
+  segment (a route from a hub whose only hub arrival is its last leg) flies at least `2 d_x` for
+  every central city `x` it lands in.
+* `PlaneFeasible.exists_segments_tri`: a feasible plane's route is the concatenation of its
+  segments, one per hub arrival, each landing at least once and satisfying the segment bound.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
@@ -654,6 +667,12 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Step 1, cleaning, DS, SH and PAR, done directly on the routes
       (`Feasible.exists_admissible`).
 - [x] Front theorem X3 for `forest` gaps (`Cert.check_sound`, `Cert.check_sound_A1`).
+
+**P3′, Theorem 4.10 (converse under (S) + (AΔ)).**
+
+- [x] (AΔ) and the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`).
+- [ ] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3.
+- [ ] Corollary 4.12: the fronts, Theorem 4.9 and `forest` gaps under (AΔ).
 
 **P4.**
 
