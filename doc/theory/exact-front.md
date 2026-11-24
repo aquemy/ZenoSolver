@@ -1325,7 +1325,7 @@ Lemma 6.2 miss it: in 6.18(a) they allow makespan 14, dropping every linked pass
 picking it up in city 2. Lemma 6.19 is a lower bound for every plan, next to $L_{\rm NS}$, but it bounds
 makespans only, not costs.
 
-What remains of §6 without (A1-NS): $L_{\rm NS}$ and Lemma 6.19 are lower bounds, and plans built from role
+What remains for clique instances without (A1-NS): $L_{\rm NS}$ and Lemma 6.19 are lower bounds, and plans built from role
 configurations and from the segments above are upper bounds. The flow model of §11 computes the front
 exactly on small instances. A combinatorial description of the front is open. The searches of §11 show where
 the difficulty lies. Shuttles never improved a front: wherever the exhaustive search compared them, plans
