@@ -1,0 +1,39 @@
+# claims.toml: the CKC claim registry for ZenoSolver.
+#
+# One entry per claim of the theory note doc/theory/exact-front.md, plus the two claims of the
+# papers it corrects. The slug (table key) is what commit footers reference as `claim:<slug>` or
+# `conjecture:<slug>`. `status` is a CACHE of the effective status computed from the commit graph
+# (`claimgraph status . --claims claims.toml`); regenerate it, do not treat it as the source of
+# truth. The commits are the record: a status changes only by a new commit.
+#
+# Slugs: `<kind>-<number with dots as dashes>`, with the kind read from the note's own label:
+#   def  Definition    lem   Lemma        thm  Theorem       prop  Proposition
+#   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
+# so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
+# counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
+# claims are paper-greedy-optimal and paper-no-harmful-waiting. Experiments are exp-<id>, in the
+# Experiments section at the end of this file.
+#
+# Fields:
+#   kind          definition, lemma, theorem, proposition, corollary, conjecture or claim
+#   statement     one or two sentences. For a kernel-checked claim whose Lean statement is narrower
+#                 than the note's, it ends with the "Lean form".
+#   status        cache of the effective status (legend below)
+#   lean          the Lean declarations whose kernel proof is the claim (math.machine-checked)
+#   lean_partial  Lean declarations that prove only part of a claim recorded as a written proof
+#   paper         the locus in the note (or in the papers)
+#   created       the date the note first stated the claim
+#
+# Sources: the note doc/theory/exact-front.md; A. Quemy, M. Schoenauer, "True Pareto Fronts for
+# Multi-Objective AI Planning Instances", EvoCOP 2015, LNCS 9026 (hal-01109777); A. Quemy,
+# M. Schoenauer, J. Dreo, arXiv:2304.14659 (2023). The papers' errors: doc/erratum.md.
+#
+# Status legend (axis 2, epistemic):
+#   math.machine-checked  clean Lean kernel proof (Axioms: only propext, Classical.choice, Quot.sound)
+#   math.proved-informal  complete written proof in the note (P), not a complete Lean proof
+#   math.conjectured      open (O) or only sketched (S) in the note
+#   math.disproved        refuted by a counterexample
+
+# ===========================================================================
+# Experiments
+# ===========================================================================
