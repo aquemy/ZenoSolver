@@ -17,7 +17,8 @@ It has three parts:
   The soundness theorem `Cert.check_sound` says that if `check` accepts, the listed points are
   exactly the Pareto front of the instance. The front is over *every* feasible plan: with any
   central flights when all gaps are `relaxed`, and with any central flights satisfying (A1)
-  otherwise (format v1 plans fly none of them).
+  (`Cert.check_sound_A1`) or (AΔ) (`Cert.check_sound_ATri`) otherwise (format v1 plans fly none
+  of them).
 
 Section [TODO](#todo) lists the rest.
 
@@ -153,6 +154,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
 | `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
 | `ZenoFront/ConverseTri.lean` | Theorem 4.10 (converse under (S) and (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_ATri` |
+| `ZenoFront/FrontTri.lean` | Corollary 4.12: Theorem 4.9 under (AΔ) (cutting routes after their last chain leg), Corollary 4.8, Proposition 7.1, the solver and the checker's soundness under (AΔ) | `cutTri`, `FeasibleAnywhere.exists_admissible_ATri`, `minimal_achievable_iff_anywhere_of_ATri`, `minimal_achievable_iff_multisetPoints_ATri`, `solveFront_isParetoFront_ATri`, `Cert.check_sound_ATri` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -401,6 +403,35 @@ it.
   admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane, and
   `c(X) ≤ C`. `Feasible.exists_admissible_hub`: the same under `ATriHub`.
   `Feasible.exists_admissible_ATri_makespan`: the shape of `Feasible.exists_admissible`.
+
+**Corollary 4.12, the fronts under (AΔ) (`FrontTri.lean`)**
+
+Theorem 4.1 needs no assumption on central flights, so every front statement of (A1) holds under
+(AΔ) with Theorem 4.10 in place of Theorem 4.7.
+
+* `FeasibleAnywhere.exists_admissible_ATri` (**Theorem 4.9, converse direction**): under (S) and
+  (AΔ), with `p ≤ t`, every plan whose planes may end anywhere gives an admissible partition with
+  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` and `c(X) ≤ C`. Every route is cut after its last leg on a
+  passenger's chain, and an empty flight `b → C_G` is appended when that leg lands in `b`
+  (`cutTri`). The rest of the chain from `b` lasts at least `d̄_b` (`ToGoal.arr_add_d_le`, the
+  second use of (AΔ)), so the flight arrives by `M′`. Theorem 4.10 from chains then applies to
+  the planes that are not idle, and AP to the idle ones.
+* `minimal_achievable_iff_anywhere_of_ATri` (**Theorem 4.9**): under (S) and (AΔ), the two fronts
+  are equal on every instance.
+* `minimal_achievable_iff_admissiblePoints_ATri`, `minimal_achievable_iff_multisetPoints_ATri`
+  (**Corollary 4.8**), and `minimal_achievableAnywhere_iff_admissiblePoints_ATri`.
+* `minimal_achievable_iff_minCost_ATri` (**Proposition 7.1**, integer levels): `(C, M)` is on the
+  front iff `M = 2T`, `E(T) = C` and `E(T') > C` for every `T' < T`.
+* `solveFront_isParetoFront_ATri`: under (S) and (AΔ), with `1 ≤ p ≤ t`, `solveFront` is the
+  Pareto front of the feasible plans.
+* `Cert.forestGapBound_le_ATri` (**obligation 3**, `forest`, under (AΔ)): a feasible plan with
+  makespan below `M` costs at least the forest bound at the gap level of `M`.
+* `Cert.check_sound_ATri` (**soundness under (AΔ)**): `C.check = true` implies
+  `IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front` for every `dc` satisfying (AΔ),
+  whatever the gap kinds. A feasible plan gives an admissible partition (Theorem 4.10), which a
+  listed point dominates (`Cert.exists_le_of_admissible`). Also `Cert.check_sound_minimal_ATri`,
+  `Cert.check_sound_anywhere_ATri` (planes ending anywhere), `Cert.check_sound_rat_ATri`
+  (rational times) and `Cert.minimal_achievable_iff_anywhere_ATri`.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
@@ -663,7 +694,8 @@ it.
     `Cert.check_sound_anywhere` lets them end anywhere, with the last arrival as makespan (PDDL
     without plane goals), for every `dc` satisfying (A1) (bridge B3).
   * With `forest` gaps, the theorem assumes (A1) on `dc` (`dc i j ≥ d i + d j`, including
-    `i = j`). Every PDDL file the generator emits satisfies it.
+    `i = j`). Every PDDL file the generator emits satisfies it. `Cert.check_sound_ATri` assumes
+    (AΔ) instead (`dur(a, b) ≤ dur(a, x) + dur(x, b)` for `a ≠ b`).
   * Version 2: with `roles` or `lagrangian` bounds, which need `A1-NS` listed,
     `Cert2.check_sound` assumes (A1-NS) on `dc` (`dc i j ≥ min(d_i + d_j, d̄_i + d̄_j)`).
     Otherwise it holds for every `dc`. Plans must end in `C_G` here: bridge B3 is done for format v1 only.
@@ -721,7 +753,13 @@ needed for soundness: the plan of every listed point is checked by simulation.
       (`Admissible.exists_remove_two`).
 - [x] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3, with `ℓ(X_k) ≤ F_k`
       (`Feasible.exists_admissible_ATri`).
-- [ ] Corollary 4.12: the fronts, Theorem 4.9 and `forest` gaps under (AΔ).
+- [x] Corollary 4.12, fronts: Corollary 4.8, Theorem 4.9, Proposition 7.1 and the solver under
+      (AΔ) (`minimal_achievable_iff_multisetPoints_ATri`, `minimal_achievable_iff_anywhere_of_ATri`,
+      `minimal_achievable_iff_minCost_ATri`, `solveFront_isParetoFront_ATri`).
+- [x] Corollary 4.12, `forest` gaps: the checker is sound for every `dc` satisfying (AΔ)
+      (`Cert.check_sound_ATri`).
+- [ ] Corollary 4.12, the front statements of Propositions 7.8 and 7.9 (not formalised under
+      (A1) either).
 
 **P4.**
 
