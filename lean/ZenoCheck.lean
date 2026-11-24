@@ -119,6 +119,9 @@ def reasons2 (C : Cert2) : Array String := Id.run do
         | .roles | .balanced => if a1ns then
               s!"fastest point: the {C.fastest.name} bound does not rule out faster plans"
             else s!"fastest point: the {C.fastest.name} bound needs assumption A1-NS"
+        | .search => s!"fastest point: the search bound is not verified by the Lean checker \
+            (its exhaustive search {if (C.searchData ⊤ (C.front.headD (0, 0)).2).closed
+              then "closes it" else "finds a faster schedule"}; Theorem 6.9 is not formalised)"
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
@@ -130,6 +133,9 @@ def reasons2 (C : Cert2) : Array String := Id.run do
           if !decide ((x.1 : WithTop ℕ) ≤ b) then
             errs := errs.push s!"gap {i + 1}: the {g.name} bound {showBound b} is below the \
               cost {x.1}"
+      | .search => errs := errs.push s!"gap {i + 1}: the search bound is not verified by the Lean \
+          checker (its exhaustive search {if (C.searchData x.1 y.2).closed then "closes the gap"
+            else "finds a cheaper schedule"}; Theorem 6.9 is not formalised)"
       | k => errs := errs.push s!"gap {i + 1}: the {k.name} bound is not verified by the Lean \
           checker"
   return errs
