@@ -345,6 +345,14 @@ created   = "2026-11-24"
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
 
+[claims.prop-7-1]
+kind      = "proposition"
+statement = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g. Lean form: (C, 2T) is a minimal admissible point iff E(T) = C and E(T') > C for every T' < T, joined to the plans' front by Corollary 4.8 (minimal_achievable_iff_admissiblePoints); makespans are not rescaled by g."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_admissiblePoints_iff"
+paper     = "Prop 7.1, doc/theory/exact-front.md §7.1"
+created   = "2026-11-23"
+
 [claims.lem-7-2]
 kind      = "lemma"
 statement = "Lemma 7.2: the one-plane table satisfies G[m][τ] = min{c(Y) : |Y| = m, δ(Y) ≤ τ} (∞ if there is none), and G is non-increasing in τ. Lean form: the least cost when an m-multiset with δ ≤ τ exists, with oneplane_eq_top_iff for the ∞ case; the monotonicity in τ is not stated."
