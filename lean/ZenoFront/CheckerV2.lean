@@ -6,6 +6,7 @@ module
 
 public import ZenoFront.Checker
 public import ZenoFront.BalancedBound
+public import ZenoFront.SearchGap
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -178,6 +179,13 @@ def balWith (dR dbR : Fin C.n → ℕ) : ℕ → WithTop ℕ :=
     let F := oneplaneTable (fillW dR dbR) C.c (C.p * TmaxR) C.s
     fun M => if (M - 1) / C.rolesScale ≤ TmaxR then (C.balData dR dbR F M).value C.p else 0
   else fun _ => 0
+
+/-- The exhaustive search of a `search` gap (or of `fastest search`, with no cost bound) below a
+point of makespan `M`, on the representatives' scaled durations. `SearchData.closed_sound`
+proves its enumeration complete; the checker does not use it until Theorem 6.9
+(`SchedulableDomination`) is proved, so `search` gaps are still rejected. -/
+def searchData (cost : WithTop ℕ) (M : ℕ) : SearchData C.n :=
+  ⟨C.dR, C.dbR, C.c, C.p, C.s, (M - 1) / C.rolesScale, cost⟩
 
 /-- The bound named by a kind; `0` (no bound) for the kinds this checker does not verify. -/
 def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ)

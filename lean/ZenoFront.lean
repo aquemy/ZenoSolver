@@ -16,6 +16,7 @@ public import ZenoFront.NonSymmetric
 public import ZenoFront.RoleBound
 public import ZenoFront.LagrangianBound
 public import ZenoFront.BalancedBound
+public import ZenoFront.SearchGap
 public import ZenoFront.Parse
 public import ZenoFront.Examples
 public import ZenoFront.Shrink
