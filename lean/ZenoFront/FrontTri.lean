@@ -11,7 +11,8 @@ public import ZenoFront.Solver
 /-!
 # The fronts under (S) and (AΔ) (Corollary 4.12)
 
-**Corollary 4.12.** Under (S) and (AΔ), Corollary 4.8, Theorem 4.9 and Proposition 7.1 hold. Every statement here is the (A1) one with Theorem 4.10
+**Corollary 4.12.** Under (S) and (AΔ), Corollary 4.8, Theorem 4.9 and Proposition 7.1 hold, and
+`forest` gaps are sound. Every statement here is the (A1) one with Theorem 4.10
 (`Feasible.exists_admissible_ATri`) in place of Theorem 4.7; Theorem 4.1 needs no assumption on
 central flights.
 
@@ -25,6 +26,10 @@ central flights.
 * **Fronts**: `minimal_achievable_iff_multisetPoints_ATri` (Corollary 4.8),
   `minimal_achievable_iff_anywhere_of_ATri` (Theorem 4.9), `minimal_achievable_iff_minCost_ATri`
   (Proposition 7.1), `solveFront_isParetoFront_ATri` (the solver).
+* **Checker**: `Cert.forestGapBound_le_ATri` (obligation 3 for `forest` gaps) and
+  `Cert.check_sound_ATri`: if `check` accepts, the listed points are the Pareto front for every
+  table of central flights satisfying (AΔ). Also for planes ending anywhere
+  (`Cert.check_sound_anywhere_ATri`) and rational times (`Cert.check_sound_rat_ATri`).
 -/
 
 @[expose] public section
@@ -489,5 +494,121 @@ theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : 
     exact (scanFront_pairwise _ 0 _ ⊤).2.imp fun {a b} hab =>
       ⟨fun hle => absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2),
         fun hle => absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)⟩
+
+/-! ### The checker under (AΔ) -/
+
+namespace Cert
+
+variable (C : Cert)
+
+/-- The forest gap bound is sound under (AΔ): a feasible plan with makespan below `M` costs at
+least `forestGapBound M`. This is where Theorem 4.10 is used. -/
+theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
+    (hA : (C.network dc).ATri) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := by
+  unfold forestGapBound
+  split_ifs
+  · obtain ⟨X, hX, hsize, hload, hcost⟩ :=
+      hP.exists_admissible_ATri_makespan (c := C.c) hS hA hpt
+    refine (forestBoundAt_le_totalCost (scaledDurations C.d) C.c hp hpt hX hsize fun k => ?_).trans
+      (WithTop.coe_le_coe.mpr hcost)
+    apply load_scaled_le_of_load_le
+    have := hload k
+    change 2 * load C.d (X k) ≤ planMakespan P at this
+    rw [Nat.le_div_iff_mul_le Nat.two_pos]
+    omega
+  · exact bot_le
+
+/-- **Soundness of the checker under (AΔ).** If `check` accepts a certificate, its points are
+exactly the Pareto front of the instance for every table `dc` of central flight durations that
+satisfies (AΔ), whatever the gap kinds. -/
+theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := by
+  obtain ⟨-, hpt, hsym⟩ := C.check_header h
+  have hS : (C.network dc).dbar = (C.network dc).d := hsym
+  have h' := h
+  simp only [check, Bool.and_eq_true] at h'
+  obtain ⟨⟨⟨⟨⟨-, hmono⟩, hplans⟩, -⟩, -⟩, -⟩ := h'
+  simp only [plansOK, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at hplans
+  refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
+  · -- Every point is achieved by its plan.
+    obtain ⟨P, hPx⟩ := exists_mem_zip_of_mem hplans.1 hx
+    obtain ⟨⟨hok, hcost⟩, hmk⟩ := hplans.2 _ hPx
+    exact ⟨P, planOK_feasible dc hok, Prod.ext hcost hmk⟩
+  · -- Every feasible plan is weakly dominated: Theorem 4.10, then the obligations.
+    obtain ⟨P, hP, rfl⟩ := hy
+    obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_ATri_makespan hS hA C.c hpt
+    exact C.exists_le_of_admissible h hX hsize hload hcost
+  · -- The points are pairwise incomparable.
+    refine (pairwise_of_strictlyMonotone hmono).imp fun {a b} hab => ⟨fun hle => ?_, fun hle => ?_⟩
+    · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
+    · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
+
+/-- **Soundness under (AΔ), minimal-elements form.** If `check` accepts, a pair is listed iff it
+is a minimal (cost, makespan) pair of a feasible plan, for every table satisfying (AΔ). -/
+theorem check_sound_minimal_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) (x : ℕ × ℕ) :
+    x ∈ C.front ↔ Minimal (· ∈ achievable (C.network dc) C.c C.t C.p) x :=
+  (C.check_sound_ATri h dc hA).mem_iff_minimal x
+
+/-- **Soundness for planes ending anywhere, under (AΔ).** If `check` accepts, the listed points
+are exactly the Pareto front of the plans whose planes may end anywhere, for every table of
+central flight durations satisfying (AΔ). -/
+theorem check_sound_anywhere_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievableAnywhere (C.network dc) C.c C.t C.p) C.front := by
+  have hF := C.check_sound_ATri h dc hA
+  obtain ⟨-, hpt, hsym⟩ := C.check_header h
+  have hS : (C.network dc).dbar = (C.network dc).d := hsym
+  refine ⟨fun x hx => achievable_subset_achievableAnywhere _ _ _ _ (hF.achieved x hx),
+    fun y hy => ?_, hF.antichain⟩
+  obtain ⟨P, hP, rfl⟩ := hy
+  obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_ATri hS hA C.c hpt
+  exact C.exists_le_of_admissible h hX hsize hload hcost
+
+/-- **Soundness against rational times, under (AΔ).** If `check` accepts, the listed points are
+exactly the Pareto front of the feasible plans with rational times, for every table satisfying
+(AΔ). -/
+theorem check_sound_rat_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievableQ (C.network dc) C.c C.t C.p)
+      (C.front.map fun x => (x.1, (x.2 : ℚ))) := by
+  have H := C.check_sound_ATri h dc hA
+  refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
+  · obtain ⟨x', hx', rfl⟩ := List.mem_map.mp hx
+    obtain ⟨P, hP, hPx⟩ := H.achieved x' hx'
+    obtain ⟨hQ, hcost, hmk⟩ := hP.toRat C.c
+    refine ⟨ofPlan P, hQ, ?_⟩
+    rw [hcost, hmk, ← hPx]
+  · obtain ⟨P, hP, rfl⟩ := hy
+    obtain ⟨x, hx, hle⟩ := H.dominates _ ⟨floorPlan P, hP.floor, rfl⟩
+    refine ⟨(x.1, (x.2 : ℚ)), List.mem_map.mpr ⟨x, hx, rfl⟩, Prod.le_def.mpr ⟨?_, ?_⟩⟩
+    · have := (Prod.le_def.mp hle).1
+      rw [qPlanCost_eq] at this
+      exact this
+    · have := (Prod.le_def.mp hle).2
+      exact (Nat.cast_le.mpr this).trans (planMakespan_floor_le hP)
+  · refine (List.pairwise_map.mpr ?_)
+    refine H.antichain.imp fun {a b} hab => ⟨fun hle => hab.1 ?_, fun hle => hab.2 ?_⟩
+    · obtain ⟨h₁, h₂⟩ := Prod.le_def.mp hle
+      simp only at h₁ h₂
+      exact Prod.le_def.mpr ⟨h₁, by exact_mod_cast h₂⟩
+    · obtain ⟨h₁, h₂⟩ := Prod.le_def.mp hle
+      simp only at h₁ h₂
+      exact Prod.le_def.mpr ⟨h₁, by exact_mod_cast h₂⟩
+
+/-- **Bridge B3 on certified instances, under (AΔ).** If `check` accepts, the feasible plans and
+the plans whose planes end anywhere have the same minimal (cost, makespan) pairs, the listed
+points, for every table of central flight durations satisfying (AΔ). -/
+theorem minimal_achievable_iff_anywhere_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable (C.network dc) C.c C.t C.p) x ↔
+      Minimal (· ∈ achievableAnywhere (C.network dc) C.c C.t C.p) x := by
+  rw [← (C.check_sound_ATri h dc hA).mem_iff_minimal,
+    ← (C.check_sound_anywhere_ATri h dc hA).mem_iff_minimal]
+
+end Cert
 
 end ZenoFront
