@@ -473,6 +473,17 @@ paper     = "Lemma 9.3, doc/theory/exact-front.md §9"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 10. The linear family
+# ===========================================================================
+
+[claims.thm-10-1]
+kind      = "theorem"
+statement = "Theorem 10.1 (linear family): under (S), with d_i = i and c_i = α − βi (β ≥ 0, α ≥ βn), L(T) = E(T) = αs − βΦ(T) for every T ≥ κ and ∞ below, with Φ(T) = (p − ρ) min(T, n q_0) + ρ min(T, n (q_0 + 1)), so the front is in closed form whatever the central flights."
+status    = "math.proved-informal"
+paper     = "Thm 10.1, doc/theory/exact-front.md §10"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
 
