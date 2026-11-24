@@ -850,8 +850,8 @@ of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never d
 and they increase at every step between two planes. A cycle therefore has no such step and stays on one
 route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
 
-**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS), and $t \ge p$ as everywhere (§1.1). Let a
-feasible plan have cost $C$ and makespan $M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
+**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS). Let a feasible plan have cost $C$ and makespan
+$M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
 orders of its drop-offs and pick-ups, and a link matching whose template has makespan at most $M$. Neither an
 event order, nor (AΔ), nor (AΔ-path) is needed.
 
@@ -936,7 +936,7 @@ $\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$: every leg of a
 before that route's last leg, which arrives by $M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
 with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
 
-*Step 6: shrink.* Lemma 4.4 ($t \ge p$) brings the passenger count to $t$, deleting two crossings of a plane
+*Step 6: shrink.* Lemma 4.4 ($t \ge p$, §1.1) brings the passenger count to $t$, deleting two crossings of a plane
 or a drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
 still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
 and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
