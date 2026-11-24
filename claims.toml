@@ -65,6 +65,14 @@ lean      = "ZenoFront.PlaneFeasible.cntA_eq"
 paper     = "Lemma 2.1, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.def-2-2]
+kind      = "definition"
+statement = "Definition 2.2 (admissible partition): a partition X_1..X_p is admissible if it has a parity matrix h ∈ {0,1}^{p×n} with h_{k,i} = 1 only where X_k(i) ≥ 1, every row sum ≡ |X_k| + 1 and every column sum even (mod 2). Lean form: Admissible X := ∃ h, IsParityWitness X h, with h k a set of cities of X_k (the ones of row k)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible"
+paper     = "Def 2.2, doc/theory/exact-front.md §2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
