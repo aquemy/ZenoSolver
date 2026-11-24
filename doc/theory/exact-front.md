@@ -11,6 +11,7 @@ is sufficient.
 
 *Numbering.* This revision renumbers the results of the first version: Theorem 4.3 is now 4.7, Lemma 4.4 is
 4.6, Corollary 4.5 is 4.8, Conjecture 4.6 is 4.10, Conjecture 6.2 is 6.5 and Conjecture 6.4 is 6.7.
+Conjecture 4.10 is now proved, as Theorem 4.10, and keeps its number.
 
 ## 0. Status
 
@@ -20,9 +21,9 @@ P: complete written proof in this note. S: argument given, not complete. O: open
 
 | | (S) and (A1) | (S) only | Non-symmetric |
 |---|---|---|---|
-| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4) | least makespans of role configurations under (A1-NS) (Thm 6.9); role loads (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
-| Front characterised by admissible partitions | P (Cor 4.8) | O (Conj 4.10) | by role configurations with least makespans under (A1-NS) (Cor 6.10), not by role loads (Prop 6.5); with shuttle triples O (Conj 6.7) |
-| Front computed exactly | P, pseudo-polynomial (§7) | wherever $L$ meets $E$ (§9) | under (A1-NS): bracket, then enumeration of configurations at gap levels (§6.5) |
+| Lower bound valid for every plan | $E$ (Thm 4.7) and $L$ | $L$ (Lemma 3.4); $E$ under (AΔ) (Thm 4.10); $E$ with shortest hub distances $d'$ (§4.6, remarks) | least makespans of role configurations under (A1-NS) (Thm 6.9); role loads (Thm 6.1); relaxed roles under (AΔ) (Lemma 6.2) |
+| Front characterised by admissible partitions | P (Cor 4.8) | P under (AΔ) (Cor 4.12); false in general without (AΔ) and (A1) (Ex 4.13) | by role configurations with least makespans under (A1-NS) (Cor 6.10), not by role loads (Prop 6.5); with shuttle triples O (Conj 6.7) |
+| Front computed exactly | P, pseudo-polynomial (§7) | under (AΔ) P, pseudo-polynomial (§7, Cor 4.12); otherwise wherever $L$ meets $E$ (§9) | under (A1-NS): bracket, then enumeration of configurations at gap levels (§6.5) |
 | Ends of the front in closed form | P (Prop 7.10) | P (Prop 7.10) | — |
 | Linear family (default generator) | P, closed form (Thm 10.1) | P, same front | — |
 | Per-PPP greedy of both papers is optimal | false (§5) | false | false |
@@ -57,7 +58,10 @@ every emitted benchmark.
 | 4.7 | Converse: every plan is dominated by an admissible partition | (S), (A1) | P | 3.1, 4.3–4.5 |
 | 4.8 | Front characterisation | (S), (A1) | P | 1.1, 4.1, 4.7 |
 | 4.9 | Planes ending anywhere give the same front [B3] | (S), (A1) | P | 1.1, 3.1, 4.1, 4.3–4.8 |
-| 4.10 | Converse without (A1) | (S), (AΔ) | O | — |
+| 4.10 | Converse without (A1): every plan is dominated by an admissible partition (formerly Conjecture 4.10) | (S), (AΔ) | P | 2.3, 2.4, 3.1, 3.2, 3.3, 4.11 |
+| 4.11 | Shrinking an admissible partition by two landings | — | P | 2.5 |
+| 4.12 | Cor 4.8, Thm 4.9, Props 7.1, 7.8, 7.9 (fronts) and `forest` gaps under (AΔ) | (S), (AΔ) | P | 1.1, 3.1, 3.3, 4.1, 4.6, 4.8, 4.9, 4.10, 7.1, 7.8, 7.9 |
+| 4.13 | Without (A1) and (AΔ), a plan can beat the front of admissible partitions (computed, simulated, two solvers) | (S) | P (computed) | 4.8 |
 | 6.1 | Converse to role configurations [N1] | (A1-NS) | P | 3.1, 4.3, 4.4 |
 | 6.2 | Relaxed role-load lower bound | (AΔ) | P | 2.1, 3.3, 4.4 |
 | 6.3 | Template schedule and closed-form makespan [N3] | — | P | 3.3 |
@@ -172,7 +176,8 @@ event-ordered. Conversely, an event-ordered plan of §1.2 with makespan $M$ yiel
 `total-time` at most $M + K\varepsilon$, where $K$ is its number of `fly`, `board` and `debark` actions:
 list the actions in the event order (each `board` just before its leg, each `debark` just after) and delay
 the $r$-th one by $r\varepsilon$. So the PDDL front tends to the front of event-ordered plans, which is
-$\mathcal F$ under (S) and (A1) (the plans of Theorem 4.1 are event-ordered, Lemma 6.8(c)) and under (A1-NS)
+$\mathcal F$ under (S) and (A1), and under (S) and (AΔ) (the plans of Theorem 4.1 are event-ordered, Lemma
+6.8(c); Corollaries 4.8 and 4.12), and under (A1-NS)
 (Corollary 6.10). The model's makespan is thus the PDDL makespan in the limit ε → 0, which is
 what ZenoSolver reports. Whether PDDL planners and VAL accept zero-duration actions is not checked here. This
 is argued, not formalised.
@@ -577,6 +582,8 @@ replaced, so the makespan is unchanged. After finitely many replacements the pla
 most $C$ and $\lambda_k \le F_k$. Lemma 4.4 ($t \ge p$) brings the count to $t$. Lemma 4.5 gives an
 admissible partition of a multiset of size $2t - p = s$ with $\ell(X_k) = \lambda_k \le F_k \le M$. $\square$
 
+Theorem 4.10 reaches the same conclusion under (AΔ) instead of (A1), by an argument that covers (A1) too.
+
 ### 4.4 Front characterisation
 
 **Corollary 4.8.** Assume (S) and (A1). Let
@@ -627,34 +634,201 @@ $\mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal X = \mathcal F$.
    of planes), gives a partition over all $p$ planes of size $s$, without increasing the cost or the largest
    load. $\square$
 
-### 4.6 What remains under (AΔ) only
+### 4.6 Converse under (AΔ)
 
-**Conjecture 4.10.** Theorem 4.7 holds under (S) and (AΔ), without (A1).
+Without (A1), Step 1 of Theorem 4.7 fails: splitting $a \to b$ through $C_G$ costs $d_a + d_b$, which can
+exceed $d_{ab}$. A segment with several landings can then pay for only one of them
+($2d_a + 2d_b \le F(\gamma)$ is false in general), while the hand-offs at its cities may involve different
+planes. Earlier revisions of this note stated the converse as a conjecture, and could only contract one
+passenger's chain of hand-offs at a time. The proof below does not follow passengers. It applies the counting
+lemma to the parts of the plan that share no city, and re-pairs the links that a segment cannot serve at
+once, moving their payments with them.
 
-Lemmas 4.3–4.5 need only a simple plan, so the conjecture is equivalent to **Step 1 without (A1)**: every
-feasible plan is weakly dominated, in (cost, makespan), by a simple feasible plan (if the conjecture holds,
-Theorem 4.1 provides one). Splitting $a \to b$ through $C_G$ now costs $d_a + d_b$, which can exceed
-$d_{ab}$. A segment can then only pay for one of its landings ($2d_a + 2d_b \le F(\gamma)$ is false in
-general), while the hand-offs at $a$ and at $b$ may involve different planes.
+**Theorem 4.10 (converse without (A1)).** Assume (S) and (AΔ). For every feasible plan with cost $C$, makespan
+$M$ and flight times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ with
+$|X| = s$, $c(X) \le C$ and $\ell(X_k) \le F_k \le M$ for every $k$. More generally, for a feasible plan on
+any set $Q$ of planes with $t \ge |Q|$, the same holds with $|Q|$ in place of $p$: an admissible partition
+$(X_k)_{k \in Q}$ with $|X| = 2t - |Q|$.
 
-This is exactly the "Figure 4" case of the arXiv paper. Its pairing argument has two flaws:
+*Proof.* We write the proof for all $p$ planes. It uses $t \ge p$ only for Lemma 4.11, through
+$s \ge p$, so it holds word for word for any set $Q$ with $t \ge |Q|$. Clean the plan (Lemma 3.1); this keeps
+the routes. For a segment $\gamma$, let $R(\gamma)$ be the
+largest $d_x$ over its central landings $x$. By Lemma 3.3(b) and (S), $F(\gamma) \ge 2R(\gamma)$. Plane $k$
+has $\sigma_k \ge 1$ segments, and $\sigma = \sum_k \sigma_k \ge s$ (Lemma 3.2).
 
-* It concludes "lower cost" from set inclusion ("each city in $\phi_0$ appears in $\phi$"). But moving both
-  halves of a pairing to $C^\star = \arg\min(d_i, d_j)$ costs $2c_{C^\star}$, which can exceed $c_i + c_j$.
-* It concludes "dominates" from per-pattern durations, which ignores the synchronisation of the new pairs.
+A *selection* is a set of segments, at least one per plane, with for each chosen $\gamma$ a city $x(\gamma)$
+such that $d_{x(\gamma)} \le R(\gamma)$, and a central landing $\pi(\gamma)$ of the plan in $x(\gamma)$, with
+$\pi$ injective. Its groups $X_k = \{x(\gamma) : \gamma \text{ chosen, of plane } k\}$ satisfy
+$\ell(X_k) \le \sum_{\gamma \text{ chosen}} 2R(\gamma) \le \sum_{\gamma} F(\gamma) = F_k \le M$, the last
+sum running over all segments of $k$, and $c(X) = \sum_\gamma c(\pi(\gamma)) \le C$. We build a selection whose groups are
+admissible with $|X| \ge s$ and $|X| \equiv s \pmod 2$. Lemma 4.11 then removes landings two at a time, down
+to $|X| = s$, keeping the groups admissible and making them smaller.
 
-**Partial result (one chain).** Consider a passenger handed along segments $\gamma_0, \dots, \gamma_m$ at
-cities $x_1, \dots, x_m$. Let $x_{j^\star}$ minimise $d$. Give $\gamma_0$ and $\gamma_m$ the city $x_{j^\star}$,
-charged to the two landings at $x_{j^\star}$. For an intermediate $\gamma_j$, keep $x_j$ if $j < j^\star$ and
-$x_{j+1}$ otherwise. This is cost-injective, respects every segment's duration, and connects the two ends.
+*Step 1: sharing components.* Two planes *share* a central city if both land in it. Hubs do not count:
+every plane lands in $C_G$. Let $K$ be a connected component of the graph on planes whose edges join planes
+that share a central city. Let $q_K$ be its number of planes,
+$\sigma_K$ its number of segments, and $t_K$ the number of passengers whose journey uses a plane of $K$. A
+clean journey arrives in a hub only with its last flight. So two consecutive flights of a journey on
+different planes meet in a central city. The first plane lands there, and so does the second, whose route
+starts in $C_I$. Every journey therefore stays inside one component, $\sum_K t_K = t$, and $K$ with its
+passengers is a feasible plan. Lemma 3.2, whose proof does not use $t \ge p$, gives
+$\sigma_K \ge 2t_K - q_K$, even when $t_K < q_K$; write
+$\delta_K = \sigma_K - 2t_K + q_K \ge 0$, so that $\sum_K \delta_K = \sigma - s$. The number of planes of
+$K$ with $\sigma_k$ even has the parity of $q_K - \sigma_K$, hence of $\delta_K$. If $\delta_K$ is odd, some
+plane $\kappa_K$ of $K$ has $\sigma_{\kappa_K} \ge 2$; otherwise $\sigma_K = q_K$ and
+$\delta_K = 2(q_K - t_K)$ would be even. Let $\mathcal T$ be the set of planes with $\sigma_k$ even, with
+membership of $\kappa_K$ flipped for every $K$ with $\delta_K$ odd. Every component then contains an even
+number of planes of $\mathcal T$. Plane $\kappa_K$ will leave out one segment, so that $\mathcal T$ is the
+set of planes with an even number of chosen segments.
 
-What is missing is doing this simultaneously for all chains when segments are shared between chains. That is
-the proof obligation for Conjecture 4.10.
+*Step 2: links.* A *link* $(\gamma, \gamma', y)$ joins segments $\gamma, \gamma'$ of two different planes
+at a city $y$ with $d_y \le \min(R(\gamma), R(\gamma'))$. Its *ends* are $(\gamma, y)$ and $(\gamma', y)$.
+Each end will carry a *payment*, a central landing in $y$, and no landing will pay for two ends. The *degree*
+of a plane is the number of ends at its segments. Take a spanning forest of the sharing graph, and in it the
+$\mathcal T$-join $J$ built as in the proof of Lemma 2.4(b): the edge from a vertex to its parent is in $J$
+iff the vertex's subtree contains an odd number of planes of $\mathcal T$. Every tree has an even number of
+them, so in $J$ the planes of $\mathcal T$ have odd degree and the others even degree. For each edge
+$\{u, w\}$ of $J$, pick a central city that $u$ and $w$ share, and segments of $u$ and of $w$ that land in it, and
+make a link there. While a segment $\gamma$ has two ends at one city $y$, in links $(\gamma, \gamma_1, y)$ and
+$(\gamma, \gamma_2, y)$, replace them by $(\gamma_1, \gamma_2, y)$, or delete both if $\gamma_1$ and
+$\gamma_2$ belong to the same plane. This keeps every plane's degree mod 2 and lowers the number of links.
+At this point every end is at a city in which its segment lands, and no segment has two ends at one city.
+Pay each end with a landing of its own segment in its city. Later steps move ends to cities their segment
+does not visit. Only the payments and the bound by $R$ are tracked from now on.
 
-*Without the conjecture.* Under (S) alone, Lemma 3.4 and Theorem 4.1 bracket the least cost $C^\star(M)$ of a
-plan with makespan at most $M$: $L(\lfloor M/2\rfloor) \le C^\star(M) \le E(\lfloor M/2\rfloor)$, with $E$
-from §7. Where the bracket closes at the levels §9 needs, the front is certified without the conjecture.
-It closes at every level on the linear family (Theorem 10.1). Evidence for the conjecture: §11.
+*Re-pairing.* Let a segment $\gamma$ have ends in the links $\lambda_1 = (\gamma, \gamma_1, y_1)$ and
+$\lambda_2 = (\gamma, \gamma_2, y_2)$, with $d_{y_1} \le d_{y_2}$. *Re-pairing* them replaces both links by
+$(\gamma_1, \gamma_2, y_1)$. In it, $\gamma_1$ keeps its payment from $\lambda_1$, and $\gamma_2$ receives
+the payment of $\gamma$ in $\lambda_1$. The payments of $\gamma$ and $\gamma_2$ in $\lambda_2$ are released.
+If $\gamma_1$ and $\gamma_2$ belong to the same plane, both links are deleted instead and all their payments
+released. A re-pairing keeps the following properties:
+
+* every end is within $R$, as $d_{y_1} \le d_{y_2} \le R(\gamma_2)$;
+* payments are in the right city and exclusive;
+* every plane's degree mod 2: the plane of $\gamma$ loses two ends, and the planes of $\gamma_1$ and
+  $\gamma_2$ keep one end each, or their common plane loses two;
+* no segment gains an end.
+
+It also lowers the number of links.
+
+*Step 3: one end per segment.* For every segment $\gamma$ fix one of its landings $z(\gamma)$ in a city of
+duration $R(\gamma)$. While some segment $\gamma$ has $r \ge 2$ ends, sort them by the duration of their
+city, putting last the end paid by $z(\gamma)$ if there is one. This is possible, because every end of
+$\gamma$ is within $R(\gamma)$. Then re-pair the first end with the second, the third with the fourth, and so
+on. Afterwards $\gamma$ has at most one end, and never gains another. The loop ends because the number of
+links decreases.
+
+*Claim: no landing $z(\gamma)$ ever pays for an end of another segment.* Payments are only ever moved from
+one end to another, or released, and a released landing never pays an end again. So a landing of $\gamma$ can
+pay for another segment only if $\gamma$ hands it over, which happens only when $\gamma$ is the middle
+segment of a re-pairing. That happens only when $\gamma$ itself is processed, which is at most once, and only
+for its ends at odd positions. If $z(\gamma)$ pays an end of $\gamma$, that end is at position $r$: for $r$
+even its payment is released, and for $r$ odd it is not re-paired.
+
+*Step 4: the left-out segments.* For each $K$ with $\delta_K$ odd, consider $\kappa = \kappa_K$. If $\kappa$
+has a segment without an end, leave it out. Otherwise two segments $\gamma, \gamma'$ of $\kappa$ have one end
+each, in links $(\gamma, \gamma_1, y)$ and $(\gamma', \gamma_2, y')$ with $d_y \le d_{y'}$. Replace both by
+$(\gamma_1, \gamma_2, y)$, or delete both if $\gamma_1$ and $\gamma_2$ belong to the same plane. Here
+$\gamma_1$ keeps its payment and $\gamma_2$ receives the payment of $\gamma$; the payments of $\gamma'$ and of
+$\gamma_2$ at $y'$ are released. The four properties hold as for a re-pairing, with $\kappa$ losing two ends.
+Leave out $\gamma$: its landing may now pay for $\gamma_2$, but $\gamma$ will not be chosen. The segment
+$\gamma'$ has no end left and handed nothing over. So the claim still holds for every segment that is not
+left out.
+
+*Step 5: the selection.* Choose all segments that are not left out. A chosen segment with an end takes the
+city of its end and the end's payment. One without an end takes the city of $z(\gamma)$ and $z(\gamma)$,
+which by the claim pays for no end. This $\pi$ is injective, and every city is within $R$. Plane $k$ has
+$m_k = \sigma_k$ chosen segments, or $\sigma_k - 1$ if $k$ is some $\kappa_K$. So $m_k \ge 1$, and $m_k$ is
+even exactly when $k \in \mathcal T$. Let $\tilde h_{k,y}$ be the number of chosen segments of $k$ with an
+end at $y$. Then $\tilde h_{k,y} \le X_k(y)$. The row sum $\sum_y \tilde h_{k,y}$ is the degree of $k$,
+which is odd iff $k \in \mathcal T$; hence it is $\equiv m_k + 1 = |X_k| + 1$. The column sum
+$\sum_k \tilde h_{k,y}$ is twice the number of links at $y$. By Lemma 2.3 the groups are admissible. Their
+size is $\sigma - \#\{K : \delta_K \text{ odd}\}$, which is at least $\sigma - \sum_K \delta_K = s$ and has
+the parity of $s$. $\square$
+
+**Lemma 4.11 (shrinking).** Let $X_1,\dots,X_p$ be admissible with $|X| \ge p + 2$. Two landings can be
+removed from the groups so that the partition stays admissible, each new group a sub-multiset of the old one.
+
+*Proof.* Take a parity matrix $h$. By Lemma 2.5, $f_k = |X_k| - h_k$ is odd. If some $f_k \ge 3$, remove two
+of the $f_k$ copies in $X_k$ beyond one copy of each city of $\eta_k$: (h1)–(h3) still hold and
+$|X_k| - 2 \ge h_k + 1 \ge 1$. Otherwise every $f_k = 1$, so $\sum_k h_k = |X| - p \ge 2$. Some city $i$ has
+$h_{u,i} = h_{v,i} = 1$ for planes $u \ne v$, as its column is even and non-zero. Remove $i$ from $X_u$ and
+from $X_v$ and set $h_{u,i} = h_{v,i} = 0$, as in case (b) of Lemma 4.6. Then (h1) holds; (h2) holds, as row
+sums and sizes both drop by one; (h3) holds, as column $i$ drops by 2; and
+$|X_u| - 1 = h_u \ge 1$. $\square$
+
+*Remarks.*
+
+* The proof of Theorem 4.10 uses (AΔ) only through $F(\gamma) \ge 2d_x$ for every central city $x$ of a
+  segment $\gamma$. Corollary 4.12 uses (AΔ) once more, for Theorem 4.9: the rest of a journey from a
+  central city $b$ lasts at least $\bar d_b$.
+  Under (S) and (A1) this holds too: a segment visiting $x_1,\dots,x_m$ lasts at least
+  $d_{x_1} + \sum_j (d_{x_j} + d_{x_{j+1}}) + d_{x_m} = 2\sum_j d_{x_j}$. So the proof is also a second
+  proof of Theorem 4.7, without Step 1 and without Lemmas 4.3–4.5. More generally, it suffices that no
+  sequence of flights from a central city to a hub is shorter than its hub leg.
+* Under (S) alone, let $d'_x$ be the shortest flight time from $x$ to a hub. It is the same for both hubs,
+  as swapping $C_I$ and $C_G$ preserves all durations. Then $F(\gamma) \ge 2d'_x$ for every central city $x$
+  of $\gamma$, and the proof, unchanged with $d'$ in place of $d$, gives an admissible partition with
+  $|X| = s$, $c(X) \le C$ and $2\sum_{x \in X_k} d'_x \le F_k$. So $E$ computed with the durations $d'$ is a
+  lower bound under (S) alone, next to $L$. Under (AΔ) or (A1), $d' = d$. Example 4.13 shows that $d$
+  itself does not give a lower bound in general.
+* No timing is used: only the flight times $F(\gamma)$, the landings, and which planes share which cities.
+  Zero durations are allowed. The re-pairing at one segment is the "one chain" contraction of the first
+  version (moving an end to the smaller duration, paid by a landing of the middle segment). Step 3 performs it
+  for all chains at once, by moving payments together with ends and keeping $z(\gamma)$ for $\gamma$ itself.
+* This is the "Figure 4" case of the arXiv paper. Its pairing argument has two flaws. First, it concludes
+  "lower cost" from set inclusion ("each city in $\phi_0$ appears in $\phi$"). But moving both halves of a
+  pairing to $C^\star = \arg\min(d_i, d_j)$ costs $2c_{C^\star}$, which can exceed $c_i + c_j$. Here each
+  moved end is paid by a landing in its new city. Second, it concludes "dominates" from per-pattern
+  durations, which ignores the synchronisation of the new pairs. Here dominance comes from Theorem 4.1, whose
+  plans are rebuilt from the partition.
+
+**Corollary 4.12.** Under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1, the front statements of
+Propositions 7.8 and 7.9 hold, and `forest` gaps (§9) are sound.
+
+*Proof.* Corollary 4.8 uses Theorem 4.7 only through its conclusion, which Theorem 4.10 provides; Lemma 1.1 and
+Theorem 4.1 need no assumption on central flights. Propositions 7.1 and 7.8 and the `forest` kind rest on
+Corollary 4.8 and on the groups of Theorem 4.7, which Theorem 4.10 replaces.
+For Proposition 7.9, the instance without city $i$ still satisfies (S) and (AΔ).
+
+For Theorem 4.9, change items 1–3 of its proof. Clean the plan, and delete from every route the flights after
+its last flight that carries a passenger. Journeys are unchanged. A route that is not empty now ends with a
+flight carrying a passenger $\pi$. This flight does not arrive in $C_I$ (Lemma 3.1). Suppose it arrives in a
+central city $b$, at time $a$. The rest of $\pi$'s journey goes from $b$ to $C_G$, leaving $b$ no earlier
+than $a$, and by (AΔ), as in Lemma 3.3(b), its flights last at least $\bar d_b$. So $\pi$ reaches $C_G$ at
+some time in $[a + \bar d_b, M']$. Append to the route an empty flight $b \to C_G$ departing at $a$; it
+arrives by $M'$. Appending empty flights changes no journey, so this can be done for all such routes at once.
+The routes that are not empty now end in $C_G$, with $1 \le q \le p \le t$ such planes, and every flight time
+is at most $M'$. Theorem 4.10, in its form for a set $Q$ of planes with $t \ge |Q|$, applied to these $q$
+planes, gives an admissible partition over them of a multiset of size $2t - q$, with cost at most $C$ and loads at
+most $M'$. Item 4 is unchanged. $\square$
+
+**Example 4.13 (the hypothesis matters).** Take durations $d = (2, 3, 9, 11)$, costs $c = (50, 44, 17, 0)$,
+$t = 6$ and $p = 3$, so $s = 9$. Take central flights $d_{12} = 1$, $d_{13} = 5$, $d_{14} = 6$, $d_{23} = 3$,
+$d_{24} = 6$ and $d_{34} = 1$. They satisfy neither (A1) nor (AΔ): for instance $d_4 = 11 > d_{34} + d_3$.
+The front of admissible partitions has the consecutive points $(264, 34)$ and $(228, 40)$, with
+$E(19) = 264$. The following plan has makespan 39 and cost $260 = L(19)$:
+
+* plane 1: $C_I \to 1 \to C_G$ carrying a passenger, then $C_G \to 4 \to C_G$, which picks up at 4, at time
+  15, the passenger dropped there by plane 3. Then $C_G \to 2 \to C_I$, and $C_I \to 2 \to C_G$ carrying a
+  passenger, ending at time 38 ($F_1 = 38$; the plan printed by `flowplan.py ex413` waits one unit at $C_I$
+  and ends at 39, which changes nothing);
+* plane 2: $C_I \to 2 \to C_G$ carrying a passenger, $C_G \to 2 \to C_I$, then $C_I \to 4 \to C_G$ carrying
+  a passenger, ending at 34;
+* plane 3: $C_I \to 4 \to 3 \to C_I$, dropping its passenger at 4 at time 11 and coming back through 3 in
+  $1 + 9 < d_4$. Then $C_I \to 3 \to C_G$ carrying a passenger, ending at 39, which sets the makespan.
+
+Its landings are 1, 4, 2, 2 (plane 1), 2, 2, 4 (plane 2) and 4, 3, 3 (plane 3). Plane 3's first segment
+lasts $21 < 2d_4$, the inequality the proof needs. No point of $\mathcal X$ dominates $(260, 39)$, so
+Corollary 4.8 fails for this instance, and so does the conclusion of Theorem 4.10. The plan was found by the
+flow model of §11. It was simulated, re-solved with a second solver (least cost 264 for makespans up to 38,
+260 at 39), and checked against $E(19) = 264$ and $E(20) = 228$ from `zeno` and from the independent CP-SAT
+model (`checks/flowplan.py ex413`).
+
+Every PDDL problem the generator writes satisfies (A1). Corollary 4.12 extends the exact front to instances
+with fast central flights, as long as they obey the triangle inequality. Example 4.13 shows that some such
+condition is needed. Evidence, including a search over plans with central flights that preceded the proof:
+§11.
 
 ## 5. Why the per-PPP greedy of both papers is not exact
 
@@ -1200,7 +1374,8 @@ $\mathrm{Opt}(m, \eta) = \mathrm{Min}\{(c(\eta) + G[m - |\eta|][\tau],\ \delta(\
 Combine along paths with $(c, \tau) \otimes (c', \tau') = (c + c', \max(\tau, \tau'))$, and keep at each node
 the $\mathrm{Min}$ over its incoming arcs. The set obtained at $(p, s, \emptyset)$ is
 $\mathrm{Min}\{(c(X), \max_k \delta(X_k)) : |X| = s,\ X_1,\dots,X_p \text{ admissible},\ \max_k \delta(X_k) \le T_{\rm hi}\}$.
-Under (S) and (A1) its points $(c, \tau)$ are the front points $(c, 2\tau)$.
+Under (S) and (A1), or (S) and (AΔ) (Corollary 4.12), its points $(c, \tau)$ are the front points
+$(c, 2\tau)$.
 
 *Proof.* $\otimes$ is monotone. $\mathrm{Opt}(m, \eta)$ is the $\mathrm{Min}$ of the points
 $(c(\eta) + c(R), \delta(\eta) + \delta(R))$ over all $R$ of size $m - |\eta|$ within the budget: each such
@@ -1208,7 +1383,8 @@ point is weakly dominated by the term with $\tau = \delta(R)$, and each term is 
 a $G$-optimal $R$. By Lemma 7.7 and induction over the layers, each node holds the $\mathrm{Min}$ of the
 points of all paths reaching it, with arbitrary fillers. By both directions of Theorem 7.6 (with any filler
 in place of the $G$-optimal one, and the restriction $w$ being independent of the level), these are exactly
-the points of admissible partitions with $|X| = s$. The front statement is Corollary 4.8, and every front point
+the points of admissible partitions with $|X| = s$. The front statement is Corollary 4.8 (Corollary 4.12 under
+(AΔ)), and every front point
 has $\tau \le T_{\rm hi}$ (Proposition 7.10). $\square$
 
 Combining sets is no better than sweeping the levels in the worst case. It helps when durations are large and
@@ -1242,7 +1418,7 @@ least $M_1$.
 iff $T \ge T_{\rm hi} := d_{\rm cheap}\kappa$. The same holds for $L$.
 
 No assumption on central flights is needed, and zero durations and ties are covered. The cost of the first
-point is not in closed form; under (A1) it is $E(T_{\rm lo})$.
+point is not in closed form; under (A1) or (AΔ) it is $E(T_{\rm lo})$ (Proposition 7.1, Corollary 4.12).
 
 *Proof.* Pigeonhole: $p$ non-empty groups of total size $s$ include one of size at least $\kappa$.
 
@@ -1354,10 +1530,10 @@ Lemma 1.1, $\mathcal F$ is its $\mathrm{Min}$. That is the whole list, which is 
 coordinates. $\square$
 
 **The level of obligation 3.** Durations are multiples of $g$. Take a plan with makespan $M < M_{i+1}$, where
-$M_{i+1}$ is an integer. The groups $Y_k$ of Lemma 3.4, or $X_k$ of Theorem 4.7, satisfy
+$M_{i+1}$ is an integer. The groups $Y_k$ of Lemma 3.4, or $X_k$ of Theorem 4.7 or 4.10, satisfy
 $2\delta(Y_k) \le M < M_{i+1}$. Writing $\delta(Y_k) = gx$ with $x$ an integer, $2gx \le M_{i+1} - 1$, so
-$x \le T^\star_i$. As $L$ and $E$ are non-increasing, the plan costs at least $L(T^\star_i)$, and under (A1) at
-least $E(T^\star_i)$. For a front point $M_{i+1} = 2gT_{i+1}$, so $T^\star_i = T_{i+1} - 1$.
+$x \le T^\star_i$. As $L$ and $E$ are non-increasing, the plan costs at least $L(T^\star_i)$, and under (A1) or
+(AΔ) at least $E(T^\star_i)$. For a front point $M_{i+1} = 2gT_{i+1}$, so $T^\star_i = T_{i+1} - 1$.
 
 **Obligations 2 and 4** are Proposition 7.10(a) and Lemma 3.2. They need only (S).
 
@@ -1367,7 +1543,8 @@ least $E(T^\star_i)$. For a front point $M_{i+1} = 2gT_{i+1}$, so $T^\star_i = T
   whatever the central flights. A certificate whose gaps are all `relaxed` therefore certifies the front
   without (A1).
 * `forest`: the checker recomputes $E(T^\star_i)$ with its own link-forest DP (Theorem 7.5, trees of at most
-  $q_{\max}$ planes). This is sound under (S) and (A1) by Theorem 4.7.
+  $q_{\max}$ planes). This is sound under (S) and (A1) by Theorem 4.7, and under (S) and (AΔ) by Theorem 4.10.
+  The current checkers (`zeno check` and the Lean checker) accept it only under (A1).
 
 Two further kinds are proved sound here and can be added to the format. `gadget` recomputes $U$ when
 $q_{\max} \le 2$, or $U_3$ when $q_{\max} \le 3$ (Proposition 7.4). `sigma-potential` is a sparse dual
@@ -1409,8 +1586,8 @@ cause a rejection. The same holds if the checker rebuilds plans from partitions 
 construction.
 
 **What a checker trusts.** For `relaxed` certificates: Lemmas 3.2–3.4 and Proposition 7.10. For `forest`, in
-addition: Theorem 4.7 (hence (A1), which the checker verifies on the instance), Lemma 2.6, Corollary 2.7 and
-Theorem 7.5. For `gadget` and `sigma-potential`: Propositions 7.3–7.4, Theorem 7.6, Lemma 2.8 and Lemmas
+addition: Theorem 4.7 (hence (A1), which the checker verifies on the instance), or Theorem 4.10 (hence (AΔ),
+which a checker could verify instead), Lemma 2.6, Corollary 2.7 and Theorem 7.5. For `gadget` and `sigma-potential`: Propositions 7.3–7.4, Theorem 7.6, Lemma 2.8 and Lemmas
 9.2–9.3. If the checker applies the dominance reduction, also Proposition 7.9.
 
 *Measured.* On 400 random instances, all but 15 of 5,277 gaps (on 14 instances) close with `relaxed`, so
@@ -1494,7 +1671,12 @@ All checks compare against exhaustive searches written independently of the solv
 | Linear family closed form (Thm 10.1) vs link-forest DP | 336 instances, 5,844 levels; $L = U = E$ on 245 more instances (3,157 levels); offset progressions: $L < E$ on 4 of 5,904 levels |
 | Papers' greedy on the linear family | 115 / 115 fronts equal |
 | C++ solver (branch `feat/exact-front-solver`) | 27 / 27 golden fronts; every level of 300 random instances ($n \le 5$, $t \le 9$, $p \le 6$, $s \le 12$) equal to an independent enumeration oracle, the unrestricted-tree DP equal to the $q_{\max}$-restricted one |
-| Conjecture 4.10, targeted (`checks/conj410_search.py`): random instances with $n \le 3$, $p \le 3$, $t \le 6$ whose certificate has a gap with $L < E$, all plans with the shortest central flights the triangle inequality allows | 34,000 instances, 72 with such a gap, 0 plans inside a gap cheaper than $E$ |
+| Theorem 4.10, first targeted search, when it was Conjecture 4.10 (`checks/conj410_search.py`): random instances with $n \le 3$, $p \le 3$, $t \le 6$ whose certificate has a gap with $L < E$, all plans with the shortest central flights the triangle inequality allows | 34,000 instances, 72 with such a gap, 0 plans inside a gap cheaper than $E$ |
+| Flow model of all plans (`checks/flowplan.py`: integer plane and passenger flows over time, any central table, plans decoded and re-simulated) vs `truth` | 250 / 250 fronts equal ($n \le 3$, $t \le 4$, $p \le 3$; no, useless and shortest central flights) |
+| Theorem 4.10 at the front level (`checks/thm410_search.py`). Every `forest` gap of `zeno`'s certificate, i.e. every gap with $L < E$. At each, the flow model gives the least cost of all plans with the tightest table (AΔ) allows, $d_{ij} = \lvert d_i - d_j\rvert$, which lies below every (AΔ) table, so the check covers them all. This checks the front-level consequence $C \ge E(\lfloor M/2\rfloor)$ only, not the per-plane bound $\ell(X_k) \le F_k$. Durations are distinct and at least 1, so every central flight exists and lasts at least 1; `flowplan.py` reads a table entry of 0 as "no flight". Families: uniform, anti-correlated costs, one cheap slow city among fast dear ones, clusters of close durations, offset progressions; $3 \le p \le 6$, $n \le 6$, $t \le 12$, durations $\le 20$ | 24,000 instances, 1,120 with a `forest` gap, 1,492 gaps. 1,491 solved exactly (one hit the 300 s limit), 0 plans cheaper than $E$ |
+| Theorem 4.10, per plane: independent review of PR #60 (searches not in the repository) | Untimed search over plans of up to 8 legs: 2,620 (AΔ) tables that violate (A1), zero durations included, $n \le 4$, $p \le 3$, 145.5 million route tuples, 0 violations of $\ell(X_k) \le F_k$ with $c(X) \le C$; on tables outside (AΔ) it flags 24 of 590, so it is not vacuous. Timed integer program on 190 instances: 157 proved free of counterexamples, 33 hit the time limit, 0 counterexamples. Example 4.13 confirmed independently ($E(19) = 264$, $L(19) = 260$, plan of cost 260 and makespan 39) |
+| Same, central tables drawn below the (AΔ) minimum (`below`; Example 4.13) | 6,000 instances, 370 `forest` gaps, 4 beaten by a plan. Example 4.13 itself: simulated, re-solved with CP-SAT, $E$ from `zeno` and `cpsat_check.py` (`flowplan.py ex413`) |
+| Construction of Theorem 4.10 (`checks/thm410_construct.py`), every step and invariant asserted, on plans drawn by the flow model: $p \le 6$, $t \le 9$, $n \le 5$, random (AΔ) or tightest tables, random makespan bounds, random arc weights that favour central flights, T-joins extended by random closed walks | 5,000 / 5,000 admissible, cost $\le C$, loads $\le F_k$. 2,379 plans with central flights; 968 needed re-pairing at a segment; 99 left out a segment for parity, 13 of them through Step 4's re-pairing |
 | `zeno` against an independent CP-SAT model of $E(T)$ (`checks/cpsat_check.py`): every front point $(C, M)$ has $E(M/2) = C$ and the level below the next point still costs $C$ | 554 points ($n \le 8$, $t \le 16$, $p \le 6$, durations $\le 40$) and 3,008 points ($n \le 10$, $t \le 24$, $p \le 8$, durations $\le 60$), 0 mismatches |
 | Harmful waiting (Prop 6.5), `checks/waiting_search.cpp`: exhaustive orders and matchings on random balanced configurations with a plane picking up twice and one dropping off twice, (AΔ-path) | Random crossing phases: 0 of 112,500 (p ≤ 4, ≤ 4 links, durations ≤ 12) and 0 of 192,270 (≤ 5 links, ≤ 15). One shortest crossing per plane: 6 of 189,964 (p ≤ 4, ≤ 5 links, ≤ 20), 5 of 190,040 (p ≤ 5, ≤ 6 links, ≤ 30), 1 of 71,538 (p ≤ 3, ≤ 6 links, ≤ 40) wait harmfully. On the instance of Prop 6.5 the bracket of `zeno` equals the oracle's front and leaves the two waiting gaps open |
 | Construction of Theorem 6.9 (`checks/sd_construct_check.py`) on random simple plans with clean journeys: any hand-offs (swaps, within one plane), random waits, positive durations | 104,452 / 104,452. Exchanges keep routes, event order, cost and makespan and lower the hand-offs; afterwards no hand-off overlaps, no chain cycles, chains are monotone in time; the configuration has count $\ge t$, cost $\le C$, loads $\le$ flight times, template $\le M$. In one run of 86,943 plans, 53,022 needed exchanges and 20,872 had chains through swaps. Without the exchanges, 3,091 of 26,168 plans break the chain monotonicity and 2,882 have cycles |
@@ -1509,17 +1691,25 @@ allows any flight, including central ones, and needs durations of at least 1. Th
 in `doc/theory/checks` (`treedp.cpp`, `theorychecks.cpp` with `theorychecks_sweep.py` and
 `theorychecks_anti.py`, `ds_check.py`, `ns_sched_check.py`, `truth.cpp` with `truth_checks.py`,
 `linear_sweep.py`, `linear_closed_form.py`, `linear_greedy.py`, `achievability_check.py`, `waiting_search.cpp`,
-`config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`); its
-README says how to build and run them.
+`config_front.cpp`, `simple_plans.cpp` with `sd_checks.py`, `sd_construct_check.py`, `sd_full_check.py`,
+`flowplan.py`, `thm410_search.py`, `thm410_construct.py`); its README says how to build and run them. The
+flow model replaces the exhaustive search where `truth` is too slow (about a minute per front at $t = 5$). On
+the gaps of the searches above, up to $t = 12$, it typically finishes within seconds.
 
 ## 12. Next steps
 
 1. Lean blueprint from this note, starting with the combinatorial core (Definition 2.2, Lemmas 2.3–2.9 and
    4.4–4.6, Theorems 7.5–7.6, Lemmas 9.2–9.3). Then plan semantics, Lemmas 3.1–3.4 and the `relaxed`
    checker, which already certifies 386 of 400 random fronts and the whole linear family without
-   Theorem 4.7. Then Theorem 4.7.
-2. Conjecture 4.10: search only where $L < E$; a proof needs simultaneous chain contraction for shared
-   segments (§4.6).
+   Theorem 4.7. Then Theorem 4.7. Theorem 4.10 and Lemma 4.11 are a candidate next target. Their proof
+   covers (A1) as well (§4.6, remarks). It needs only Lemmas 2.3, 3.1–3.3, sharing components and
+   re-pairing, and none of Step 1 or Lemmas 4.3–4.5.
+2. Theorem 4.10 in the tools. `zeno` marks the front exact, and `zeno check` and the Lean checker accept
+   `forest` gaps, only under (A1). Corollary 4.12 makes (AΔ) enough. This needs changes in `src/` and
+   `lean/`: the regime check of §7.7 and an `assume` value for (AΔ) in the certificate format. Under (S)
+   with central flights that satisfy neither (A1) nor (AΔ), the front of admissible partitions can be
+   beaten (Example 4.13). $L$, and $E$ computed with the shortest hub distances $d'$, remain lower bounds
+   (Lemma 3.4; §4.6, remarks). The exact front there is open.
 3. Non-symmetric gaps: Theorem 6.9 (schedulable domination) makes the enumeration of §6.5, item 2, sound,
    so `zeno` can close the gaps that harmful waiting leaves open. What remains is its cost: the number of
    configurations below the achieved cost at a gap's level, and the search over orders and matchings, which
