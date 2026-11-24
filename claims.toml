@@ -241,10 +241,17 @@ created   = "2026-11-23"
 
 [claims.conj-4-10]
 kind      = "conjecture"
-statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan."
-status    = "math.conjectured"
+statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan. Proved as Theorem 4.10 (thm-4-10)."
+status    = "math.proved-informal"
 paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
 created   = "2026-11-23"
+
+[claims.thm-4-10]
+kind      = "theorem"
+statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|."
+status    = "math.proved-informal"
+paper     = "Thm 4.10, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
 
 [claims.lem-4-11]
 kind      = "lemma"
