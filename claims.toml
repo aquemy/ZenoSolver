@@ -60,12 +60,12 @@ created   = "2026-11-23"
 # ===========================================================================
 
 [claims.lem-2-1]
-kind      = "lemma"
-statement = "Lemma 2.1: on every route from C_I to C_G, the number of segments of type A (C_I to C_G) exceeds the number of type Ā (C_G to C_I) by one. Lean form: counts the landing records of a feasible plane by the hub they are entered from and left towards (#A = #Ā + 1), the reading of Step 1 of Theorem 4.7 in which a central leg passes through C_G; VChain.countP_isA is the same count on visits."
-status    = "math.machine-checked"
-lean      = "ZenoFront.PlaneFeasible.cntA_eq"
-paper     = "Lemma 2.1, doc/theory/exact-front.md §2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 2.1: on every route from C_I to C_G, the number of segments of type A (C_I to C_G) exceeds the number of type Ā (C_G to C_I) by one."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.PlaneFeasible.cntA_eq"
+paper        = "Lemma 2.1, doc/theory/exact-front.md §2"
+created      = "2026-11-23"
 
 [claims.def-2-2]
 kind      = "definition"
