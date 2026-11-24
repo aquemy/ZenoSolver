@@ -344,7 +344,7 @@ created      = "2026-11-23"
 [claims.conj-6-7]
 kind      = "conjecture"
 statement = "Conjecture 6.7 (extended Proposition I): under (AΔ), the front equals the front of role configurations extended with shuttle triples, each adding exactly one landing, with exact makespans."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "Conj 6.7, doc/theory/exact-front.md §6.4"
 created   = "2026-11-23"
 
