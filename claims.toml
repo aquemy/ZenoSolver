@@ -268,6 +268,13 @@ lean      = "ZenoFront.Feasible.exists_roleConfig_ns"
 paper     = "Thm 6.1, doc/theory/exact-front.md §6.1"
 created   = "2026-11-23"
 
+[claims.lem-6-2]
+kind      = "lemma"
+statement = "Lemma 6.2 (relaxed role loads): under (AΔ), every feasible plan with cost C and makespan M gives drop-off, pick-up and crossing multisets with |Cr_k| odd, balanced in total only, passenger count t, cost at most C and λ_k ≤ F_k ≤ M, so L_NS(T) bounds every plan of makespan at most T, shuttle triples included."
+status    = "math.proved-informal"
+paper     = "Lemma 6.2, doc/theory/exact-front.md §6.1"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
