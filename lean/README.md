@@ -152,6 +152,8 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
 | `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
 | `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, event-ordered plans, the exhaustive `search` and the completeness of its enumeration (layer 1 of `search`) | `Sched`, `Sched.tmpl`, `EventOrdered`, `SchedulableDomination`, `SearchData.closed`, `SearchData.closed_sound` |
+| `ZenoFront/Exchange.lean` | Theorem 6.9, Step 2: routes of visits with event keys, exchanging futures while a hand-off overlaps | `KLeg`, `Visit`, `VRoute`, `PaxData`, `exchange_step`, `exists_ordered_handoffs` |
+| `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -626,9 +628,11 @@ needed for soundness: the plan of every listed point is checked by simulation.
       bound values.
 - [x] `search`, layer 1: the exhaustive search and the completeness of its enumeration
       (`SearchData.closed_sound`). It closes both `search` gaps of the Proposition 6.5 instance.
-- [ ] `search`, layer 2: Theorem 6.9 (`SchedulableDomination`, stated). With it,
-      `SearchData.closed_sound` closes `search` gaps, after mapping configurations to
-      representatives as for `roles`. Until then `check` rejects `search`. Lemma 6.3's
-      optimality is not needed for soundness: Theorem 6.9 bounds the closed form directly.
+- [ ] `search`, layer 2: Theorem 6.9 (`SchedulableDomination`, stated). Steps 2–4 are proved
+      on routes of visits: the exchanges (`exists_ordered_handoffs`) and the link count
+      (`exists_links`). With the theorem, `SearchData.closed_sound` closes `search` gaps, after
+      mapping configurations to representatives as for `roles`. Until then `check` rejects
+      `search`. Lemma 6.3's optimality is not needed for soundness: Theorem 6.9 bounds the closed
+      form directly.
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
       is proved.
