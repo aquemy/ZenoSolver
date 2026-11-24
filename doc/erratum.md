@@ -54,7 +54,7 @@ Both papers present ZenoSolver as computing the *true* Pareto front (total cost,
 - Example: d = (1, 3), d̄ = (3, 1), central flight of duration 2, t = 3, p = 2 (note, Proposition 6.7).
   - A plan of makespan 8 flies C_I → 2 → 1 → C_G: it leaves a passenger in city 2 and takes another from city 1.
   - Every plan whose central flights lie in shuttles needs makespan 10: a plane with a shuttle also makes two crossings.
-- Segments with a single central flight do not suffice either: some fronts need a plane that shuttles between two cities four or six times within one segment (note, Proposition 6.18). No exact combinatorial method is known for this case; the note's flow model computes such fronts on small instances.
+- Segments with a single central flight do not suffice either: some fronts need a plane that lands four or six times in central cities within one segment (note, Proposition 6.18). No exact combinatorial method is known for this case; the note's flow model and exhaustive searches compute such fronts on small instances.
 
 **Bookkeeping errors in the 2016 code** (fixed in 2026, PRs #3 and #4 of the repository):
 
