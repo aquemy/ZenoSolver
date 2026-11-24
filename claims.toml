@@ -452,6 +452,13 @@ status    = "math.proved-informal"
 paper     = "Prop 6.15, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
+[claims.prop-6-16]
+kind      = "proposition"
+statement = "Proposition 6.16 (time-expanded flows): with integer durations at least 1, the least cost of integer flows of p plane units and t passenger units through the time-expanded network up to time M is the least cost R(M) of a feasible plan of U with makespan at most M, and F_U = {(R(M), M) : 0 ≤ M ≤ M*, R(M) < R(M − 1)}."
+status    = "math.proved-informal"
+paper     = "Prop 6.16, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
