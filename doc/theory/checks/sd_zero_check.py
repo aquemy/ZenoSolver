@@ -2,8 +2,12 @@
 d_x = dbar_x = 0 (the open case at the end of §6.2 of doc/theory/exact-front.md).
 
 Random simple plans with clean journeys (after Step 1 every plan is one, whatever its event order)
-on instances with zero-duration cities, many legs at the same instant, and passengers matched to a
-leg C_I -> x and a later leg x -> C_G at random. Most of them are not event-ordered. Journeys
+on instances with zero-duration cities, and passengers matched to a leg C_I -> x and a later leg
+x -> C_G. The generator is biased towards the cities of d = dbar = 0 (so that many legs share an
+instant) and towards zero-time hand-offs between planes; in half of the plans with two planes
+and a city of d = dbar = 0, every plane starts with zero-time crossings at that city and two
+passengers are handed across in opposite directions, a cycle of dependencies. The run reports
+how many plans are not event-ordered. Journeys
 follow the note's semantics (two legs of one plane in route order) or, with `loose`, only time
 (the Lean model's `Feasible`).
 
@@ -64,14 +68,30 @@ def dur(inst, a, b):
 
 def gen_plan(rng, inst, loose):
     """simple plan: legs id -> [frm, to, dep, arr]; routes alternate hub -> city -> hub"""
-    n = inst[0]
+    n, d, db, c = inst
+    zero = [i for i in range(n) if d[i] == 0 and db[i] == 0]
     p = rng.randint(1, MAXP)
     legs, routes, lid = {}, [], 0
+    # with probability 1/2, every plane starts with zero-time crossings at one city of
+    # d = dbar = 0 (C_I -> z -> C_G -> z2 -> C_I, at time 0), where cycles are injected below
+    burst = bool(zero) and p >= 2 and rng.random() < 0.5
+    z0 = rng.choice(zero) if zero else None
+    heads = []   # per plane: (entry, exit) legs of its zero-time crossings C_I -> z0 -> C_G
     for k in range(p):
         cur, T, r = I, 0, []
+        hk = []
+        if burst:
+            for _ in range(rng.randint(2, 3)):
+                legs[lid] = [I, z0, 0, 0]; legs[lid + 1] = [z0, G, 0, 0]
+                hk.append((lid, lid + 1)); r += [lid, lid + 1]; lid += 2
+                z2 = rng.choice(zero)
+                legs[lid] = [G, z2, 0, 0]; legs[lid + 1] = [z2, I, 0, 0]
+                r += [lid, lid + 1]; lid += 2
+        heads.append(hk)
         nseg = rng.randint(1, MAXSEG)
         for sgi in range(nseg):
-            x = rng.randrange(n)
+            # biased towards the cities of d = dbar = 0, so that many legs share an instant
+            x = rng.choice(zero) if zero and rng.random() < 0.6 else rng.randrange(n)
             w = 0 if rng.random() < 0.8 else rng.randint(1, 2)
             e = T + w; a = e + dur(inst, cur, x)
             legs[lid] = [cur, x, e, a]; r.append(lid); lid += 1
@@ -83,9 +103,15 @@ def gen_plan(rng, inst, loose):
             cur, T = h, a2
         routes.append(r)
     pos = {l: (k, i) for k, r in enumerate(routes) for i, l in enumerate(r)}
-    alphas = [l for l in legs if legs[l][0] == I]
+    used_b, used_a, journeys = set(), set(), []
+    if burst:
+        # a cycle: A rides v's later crossing in and u's earlier one out, B the converse
+        u, v = rng.sample(range(p), 2)
+        for (src, dst) in ((v, u), (u, v)):
+            al, be = heads[src][1][0], heads[dst][0][1]
+            journeys.append([al, be]); used_a.add(al); used_b.add(be)
+    alphas = [l for l in legs if legs[l][0] == I and l not in used_a]
     rng.shuffle(alphas)
-    used_b, journeys = set(), []
     for al in alphas:
         if rng.random() < 0.15: continue
         x, T = legs[al][1], legs[al][3]
@@ -94,7 +120,9 @@ def gen_plan(rng, inst, loose):
         if not loose:
             cand = [b for b in cand if not (pos[b][0] == pos[al][0] and pos[b][1] < pos[al][1])]
         if not cand: continue
-        b = rng.choice(cand)
+        # biased towards zero-time hand-offs between planes, which make cycles
+        zt = [b for b in cand if legs[b][2] == T and pos[b][0] != pos[al][0]]
+        b = rng.choice(zt) if zt and rng.random() < 0.75 else rng.choice(cand)
         used_b.add(b); journeys.append([al, b])
     return p, legs, routes, journeys
 

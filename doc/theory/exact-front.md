@@ -45,7 +45,7 @@ every emitted benchmark.
 | 2.7 | At most $t-p$ links; trees of at most $q_{\max} = \min(p, t-p+1)$ planes | $\lvert X\rvert = s$ | P | 2.6 |
 | 2.8 | Some parity matrix touches at most $\min(p-1, t-p)$ cities [B′] | $\lvert X\rvert = s$ | P | 2.5 |
 | 2.9 | A city shared by all even groups makes a partition admissible | — | P | 2.4 |
-| 3.1 | Cleaning, in event order | — | P | — |
+| 3.1 | Cleaning, in sequence order | — | P | — |
 | 3.2 | At least $s = 2t-p$ segments and central landings [counting] | — | P | — |
 | 3.3 | Segment durations | (S) or (AΔ) | P | — |
 | 3.4 | Every plan $(C, M)$ has $C \ge L(\lfloor M/2\rfloor)$ [R] | (S) | P | 3.2, 3.3 |
@@ -128,7 +128,7 @@ Boarding and debarking are instantaneous: a passenger changing planes debarks wh
 boards when the next one departs, and the only constraint is the time inequality of item 2. Several planes
 may be in a city at once.
 
-*Event order.* "First" and "last" refer to positions in a journey or in a route. With zero durations
+*Sequence order.* "First" and "last" refer to positions in a journey or in a route. With zero durations
 several events can share a time; the sequences fix their order, and every argument below reads them this
 way.
 
@@ -850,8 +850,8 @@ of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never d
 and they increase at every step between two planes. A cycle therefore has no such step and stays on one
 route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
 
-**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS). Let a feasible plan have cost $C$ and makespan
-$M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
+**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS), and $t \ge p$ as everywhere (§1.1). Let a
+feasible plan have cost $C$ and makespan $M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
 orders of its drop-offs and pick-ups, and a link matching whose template has makespan at most $M$. Neither an
 event order, nor (AΔ), nor (AΔ-path) is needed.
 
@@ -863,9 +863,9 @@ $x$, let $a(\gamma)$ be the time its first leg arrives in $x$ and $e(\gamma)$ th
 so $a(\gamma) \le e(\gamma)$. From here on only the routes and the pairs $(\alpha_\pi, \beta_\pi)$ matter:
 the moves below keep the routes valid, but need not keep a plan in the sense of item 2 of §1.2.
 
-*Step 2: rewiring.* Next to the routes, keep a set of *loops*: closed walks whose legs all depart and arrive at
-one time $\tau$, so last $0$, and alternate between hubs and central cities, so that a loop is made of
-segments too. A passenger is *carried through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one segment,
+*Step 2: rewiring.* Next to the routes, keep a set of *loops*, empty at first: closed walks whose legs all
+depart and arrive at one time $\tau$, so last $0$, and alternate between hubs and central cities, so that a
+loop is made of segments too. A passenger is *carried through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one segment,
 of a route or of a loop. Otherwise it is a *hand-off*, from the segment $\gamma$ of $\alpha_\pi$ to the segment
 $\gamma'$ of $\beta_\pi$, both at its city $x$. While one of these moves applies, apply it.
 
@@ -891,10 +891,11 @@ Every move keeps the legs, so the cost, and every route's last leg or exchanges 
 It keeps the routes valid and the loops closed walks at one time, and it carries one more passenger through.
 It carries none less: the only segments it breaks are $\gamma$ and $\gamma'$, and a segment carrying another
 passenger through holds both of that passenger's legs, so it is neither. So the moves
-stop. Then every hand-off from $\gamma$ to $\gamma'$ has $e(\gamma) \le a(\gamma')$:
+stop, after at most $t$ of them. Then every hand-off from $\gamma$ to $\gamma'$ has $e(\gamma) \le a(\gamma')$:
 
 * between the routes of two planes, the exchange does not apply, so $e(\gamma) < a(\gamma')$;
-* on one route, the cut does not apply, so $\gamma'$ comes after $\gamma$;
+* on one route, the cut does not apply, so $\gamma'$ comes after $\gamma$, and $e(\gamma) \le a(\gamma')$
+  along the route;
 * between a loop and a route, the splice does not apply;
 * between two loops, at times $\tau$ and $\tau'$: $e(\gamma) = \tau$ is when $\alpha_\pi$ arrives and
   $a(\gamma') = \tau'$ when $\beta_\pi$ departs.
@@ -916,9 +917,11 @@ holds link by link. A passenger carried through rides an $A$, which carries no a
 is an arrow of exactly one path or cycle. A cycle of $k$ arrows consists of $k$ $A$ segments. A path with $m$
 arrows contributes its $m - 1$ inner $A$ segments, one more for each end that is an $A$, and one link if it
 runs from a $B$ to a $\bar B$: at least $m$ in every case. So the passenger count, the number of links plus
-the number of $A$ segments, is at least $t$. The selected segments are distinct segments of the plan, so the
+the number of $A$ segments, is at least $t$. Distinct segments have distinct first legs, each a leg of the plan
+of step 1 landing at the segment's city, so the selected segments are distinct landings of that plan and the
 cost is at most $C$. A route segment is simple and lasts its role duration (Lemma 3.3(c)); a loop segment has
-role duration $0$, since its legs last $0$. So $\lambda_k \le F_k \le M$.
+role duration $0$, since its legs last $0$. So $\lambda_k \le F_k \le M$, where $F_k$ is the flight time of
+the rewired route of plane $k$: it is valid, starts at time $\ge 0$ and ends by $M$.
 
 *Step 5: the closed form.* The closed form $M_{\rm tmpl}$ of Lemma 6.3 makes sense for any configuration,
 orders and matching. Order the drop-offs of each plane with those of its loops first, then those of its route
@@ -928,12 +931,13 @@ at $x$. If $\gamma$ is on the route, $u$ flies its earlier route drop-offs befor
 drop-offs weigh $0$, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$; if $\gamma$ is in a loop,
 $\mathrm{Pre}_u(j) = d_x = 0$. If $\gamma'$ is on the route, $v$ flies $\bar d_x$ to $C_G$ after
 $e(\gamma')$ and then its later route pick-ups, all by time $M$, and the loop pick-ups weigh $0$, so
-$e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop, $\bar d_x = \mathrm{Suf}_v(l) = 0$
-and $e(\gamma') \le M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
+$e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop at time $\tau$,
+$\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$: every leg of a loop was a leg of a route
+before that route's last leg, which arrives by $M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
 with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
 
-*Step 6: shrink.* Lemma 4.4 brings the passenger count to $t$, deleting two crossings of a plane or a
-drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
+*Step 6: shrink.* Lemma 4.4 ($t \ge p$) brings the passenger count to $t$, deleting two crossings of a plane
+or a drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
 still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
 and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
 $M_{\rm tmpl}$ stays at most $M$. The configuration now has passenger count $t$, and by Lemma 6.3 its
@@ -1495,7 +1499,7 @@ All checks compare against exhaustive searches written independently of the solv
 | Harmful waiting (Prop 6.5), `checks/waiting_search.cpp`: exhaustive orders and matchings on random balanced configurations with a plane picking up twice and one dropping off twice, (AΔ-path) | Random crossing phases: 0 of 112,500 (p ≤ 4, ≤ 4 links, durations ≤ 12) and 0 of 192,270 (≤ 5 links, ≤ 15). One shortest crossing per plane: 6 of 189,964 (p ≤ 4, ≤ 5 links, ≤ 20), 5 of 190,040 (p ≤ 5, ≤ 6 links, ≤ 30), 1 of 71,538 (p ≤ 3, ≤ 6 links, ≤ 40) wait harmfully. On the instance of Prop 6.5 the bracket of `zeno` equals the oracle's front and leaves the two waiting gaps open |
 | Construction of Theorem 6.9 (`checks/sd_construct_check.py`) on random simple plans with clean journeys: any hand-offs (swaps, within one plane), random waits, positive durations | 104,452 / 104,452. Exchanges keep routes, event order, cost and makespan and lower the hand-offs; afterwards no hand-off overlaps, no chain cycles, chains are monotone in time; the configuration has count $\ge t$, cost $\le C$, loads $\le$ flight times, template $\le M$. In one run of 86,943 plans, 53,022 needed exchanges and 20,872 had chains through swaps. Without the exchanges, 3,091 of 26,168 plans break the chain monotonicity and 2,882 have cycles |
 | Full pipeline of Lemma 6.8 and Theorem 6.9 (`checks/sd_full_check.py`): plans with central flights under (A1-NS), journeys of several legs, random event orders with ties, zero durations with probability 0 to 0.9; the plan re-validated after every step, the template simulated as a plan | 21,331 / 21,331 event-ordered plans (3,047 with exchanges, 2,572 with links). 220 plans that are not event-ordered: all event-ordered after Step 1, and passing. On instances without a city with $d_x = \bar d_x = 0$: 36 / 36 event-ordered after Step 1 (Lemma 6.8(b)) |
-| Theorem 6.9 without an event order (`checks/sd_zero_check.py`): random simple plans with clean journeys on instances with cities of $d_x = \bar d_x = 0$, many legs at one instant, journeys in the note's semantics (`strict`) or by time only (`loose`), $p \le 5$, up to 9 segments per plane; exchanges, cuts and splices, every step re-validated, the template simulated as an event-ordered plan | `strict`: 564,780 / 564,780 plans (564 not event-ordered; 4,401 with cuts, 157 with splices). `loose`: 565,066 / 565,066 (40,902 not event-ordered; 42,760 with cuts, 1,239 with splices). Every move carries one more passenger through; afterwards every hand-off has $e \le a$, the count is $\ge t$, the cost $\le C$ and the template $\le M$ |
+| Theorem 6.9 without an event order (`checks/sd_zero_check.py`): random simple plans with clean journeys on instances with cities of $d_x = \bar d_x = 0$, journeys in the note's semantics (`strict`) or by time only (`loose`), $p \le 5$, up to 9 segments per plane. The generator favours zero-duration cities and zero-time hand-offs between planes, and injects a two-passenger cycle in half of the plans with two planes. Exchanges, cuts and splices, every step re-validated, the template simulated as an event-ordered plan | `strict`: 578,383 / 578,383 plans, 215,881 of them not event-ordered (220,689 with cuts, 8,433 with splices). `loose`: 578,583 / 578,583, 245,924 not event-ordered (249,487 with cuts, 10,740 with splices). Every move carries one more passenger through; afterwards every hand-off has $e \le a$, the count is $\ge t$, the cost $\le C$ and the template $\le M$ |
 | Schedulable domination, fronts (`checks/sd_checks.py`): configuration schedules (`config_front`, exact waiting) vs all simple plans (`simple_plans`: any hand-offs, exact waiting), no central flights | Exactly $s$ landings: 400 / 400 equal ($n \le 3$, $p \le 4$, $t \le 7$, durations $\le 20$; 200 shaped like Prop 6.5, of which waiting changes the front on 11). Up to $s + 2$ landings: 118 / 118 ($s \le 8$; 2 timeouts; waiting changes 7 fronts) |
 | Same vs all plans (`truth`), central flights none or (A1-NS) | 513 / 513 tiny instances ($n \le 2$, $t \le 5$, $p \le 3$, durations $\le 6$; waiting changes none of these fronts). Instance of Prop 6.5 (937 million states, costs up to 60): equal. Four instances on which waiting changes the front, for example $d = (2, 17)$, $\bar d = (3, 10)$, $c = (3, 1)$, $t = 5$, $p = 3$, where (13, 45) without waiting becomes (13, 47), or $d = (1, 16)$, $\bar d = (1, 8)$, $c = (5, 0)$, $t = 6$, $p = 4$, where waiting removes (15, 34): equal |
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
