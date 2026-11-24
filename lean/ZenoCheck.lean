@@ -109,18 +109,20 @@ def reasons2 (C : Cert2) : Array String := Id.run do
     let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
       (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
       (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+      (C.balWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     let a1ns := C.assumptions.contains "A1-NS"
     if !C.fastestOK bound then
       errs := errs.push (match C.fastest with
         | .closed => "fastest point: the closed form needs symmetric durations and makespan \
             2 * d_min * ceil(s / p)"
         | .relaxed => "fastest point: the relaxed bound does not rule out faster plans"
-        | .roles => if a1ns then "fastest point: the roles bound does not rule out faster plans"
-            else "fastest point: the roles bound needs assumption A1-NS"
+        | .roles | .balanced => if a1ns then
+              s!"fastest point: the {C.fastest.name} bound does not rule out faster plans"
+            else s!"fastest point: the {C.fastest.name} bound needs assumption A1-NS"
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
-      | .relaxed | .roles | .lagrangian _ =>
+      | .relaxed | .roles | .lagrangian _ | .balanced =>
         if g != .relaxed && !a1ns then
           errs := errs.push s!"gap {i + 1}: the {g.name} bound needs assumption A1-NS"
         else
@@ -145,9 +147,10 @@ def main (args : List String) : IO UInt32 := do
     if C.check then
       let roles := (C.gaps.filter (· = .roles)).length
       let lag := (C.gaps.filter fun g => g.name == "lagrangian").length
+      let bal := (C.gaps.filter (· = .balanced)).length
       let scope := if C.assumptions.contains "A1-NS" then
-          s!"{roles} roles and {lag} lagrangian gap(s), the others relaxed: for every central \
-            flight table satisfying A1-NS"
+          s!"{roles} roles, {lag} lagrangian and {bal} balanced gap(s), the others relaxed: for \
+            every central flight table satisfying A1-NS"
         else "all gaps relaxed: for every central flight table"
       IO.println s!"accepted: the {C.front.length} points are the Pareto front (version 2, \
         fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound)"

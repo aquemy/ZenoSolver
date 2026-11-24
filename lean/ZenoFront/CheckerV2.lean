@@ -5,7 +5,7 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Checker
-public import ZenoFront.LagrangianBound
+public import ZenoFront.BalancedBound
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -25,10 +25,12 @@ This file verifies:
   levels `⌊(M − 1)/g⌋` for the gcd `g` of all durations;
 * `lagrangian μ` gaps, under (A1-NS): the decoupled per-plane bound at the listed multipliers
   (`LagData.value_le_totalCost`), over the representatives of the cities (`domRep3`);
+* `balanced` (gaps and fastest point), under (A1-NS): the exact program over balanced role
+  configurations (`BalData.value_le_totalCost`), rerun at the gap's level;
 * `fastest closed` for symmetric durations, as in v1.
 
-The other v2 kinds (`balanced`, `search`, `forest`) are parsed but given no bound, so a
-certificate that uses one is rejected.
+The other v2 kinds (`search`, `forest`) are parsed but given no bound, so a certificate that uses
+one is rejected.
 
 ## Main results
 
@@ -162,12 +164,28 @@ def lagWith (dR dbR : Fin C.n → ℕ) (mu : List ℤ) (M : ℕ) : WithTop ℕ :
   if C.assumptions.contains "A1-NS" then toNatTop ((C.lagData dR dbR mu M).value C.p C.s)
   else 0
 
+/-- The `balanced` program at the level of `M`, on scaled durations `dR`, `dbR`, with the crossing
+table `F` (columns `0, …, p · TmaxR`). -/
+def balData (dR dbR : Fin C.n → ℕ) (F : Array (Array (WithTop ℕ))) (M : ℕ) : BalData C.n :=
+  ⟨fun i => 2 * dR i, fun i => 2 * dbR i, C.c, fun r τ => (F.getD r #[]).getD τ ⊤,
+    (M - 1) / C.rolesScale, C.t - C.p, C.s⟩
+
+/-- The `balanced` bound below a point of makespan `M`; `0` (no bound) unless assumption `A1-NS`
+is listed, or above the highest level. -/
+def balWith (dR dbR : Fin C.n → ℕ) : ℕ → WithTop ℕ :=
+  if C.assumptions.contains "A1-NS" then
+    let TmaxR := C.maxLevel C.rolesScale
+    let F := oneplaneTable (fillW dR dbR) C.c (C.p * TmaxR) C.s
+    fun M => if (M - 1) / C.rolesScale ≤ TmaxR then (C.balData dR dbR F M).value C.p else 0
+  else fun _ => 0
+
 /-- The bound named by a kind; `0` (no bound) for the kinds this checker does not verify. -/
 def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ)
-    (lagB : List ℤ → ℕ → WithTop ℕ) : Kind2 → ℕ → WithTop ℕ
+    (lagB : List ℤ → ℕ → WithTop ℕ) (balB : ℕ → WithTop ℕ) : Kind2 → ℕ → WithTop ℕ
   | .relaxed => C.relaxedWith scale Tmax table
   | .roles => rolesB
   | .lagrangian mu => lagB mu
+  | .balanced => balB
   | _ => fun _ => 0
 
 /-- Obligation 2: nothing is faster than the first point. `closed` is v1's closed form
@@ -181,6 +199,7 @@ def fastestOK (bound : Kind2 → ℕ → WithTop ℕ) : Bool :=
     | .closed => C.symmetric && decide (x.2 = 2 * minOf C.d * ((C.s + C.p - 1) / C.p))
     | .relaxed => decide (bound .relaxed x.2 = ⊤)
     | .roles => decide (bound .roles x.2 = ⊤)
+    | .balanced => decide (bound .balanced x.2 = ⊤)
     | _ => false
 
 /-- Obligations 2 and 3, with the scale, the top level and the one-plane table computed once. -/
@@ -194,13 +213,14 @@ def boundsCheck : Bool :=
   let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
     (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+    (C.balWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
   C.fastestOK bound && gapsOK bound C.front C.gaps
 
 /-- The bounds of the checker, as specified. -/
 def bound : Kind2 → ℕ → WithTop ℕ :=
   C.boundWith (durationScale C.weight) (C.maxLevel (durationScale C.weight))
     (oneplaneTable (scaledDurations C.weight) C.c (C.maxLevel (durationScale C.weight)) C.s)
-    (C.rolesWith C.dR C.dbR) (C.lagWith C.dR C.dbR)
+    (C.rolesWith C.dR C.dbR) (C.lagWith C.dR C.dbR) (C.balWith C.dR C.dbR)
 
 theorem boundsCheck_eq : C.boundsCheck = (C.fastestOK C.bound && gapsOK C.bound C.front C.gaps) := by
   have hwS : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
@@ -340,6 +360,27 @@ theorem lagWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contai
     exact (toNatTop_le hv).trans (WithTop.coe_le_coe.mpr hcost)
   · exact zero_le
 
+/-- **The `balanced` bound is a lower bound** under (A1-NS). -/
+theorem balWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
+    (C.network dc).A1NS) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.balWith C.dR C.dbR M ≤ (planCost C.c P : WithTop ℕ) := by
+  unfold balWith
+  split_ifs with hlist
+  · dsimp only
+    split_ifs with hT
+    · obtain ⟨cfg, hsize, hcost, -, hload⟩ := C.exists_repConfig (hA hlist) hpt hP hM
+      have hTmax : C.maxLevel C.rolesScale ≤ C.p * C.maxLevel C.rolesScale :=
+        Nat.le_mul_of_pos_left _ hp
+      refine ((C.balData C.dR C.dbR _ M).value_le_totalCost C.dR C.dbR dc rfl rfl
+        (by simp only [balData, s]; omega) (fun r τ Y hY hr hτ hYl => ?_) cfg hsize hload).trans
+        (WithTop.coe_le_coe.mpr hcost)
+      simp only [balData] at hr hτ ⊢
+      rw [oneplaneTable_getD (fillW C.dR C.dbR) C.c hr (by omega)]
+      exact oneplane_le_cost hY hYl
+    · exact zero_le
+  · exact zero_le
+
 /-- **Soundness of the v2 checker.** If `check` accepts a certificate, its points are exactly the
 Pareto front of the instance, for every table `dc` of central flight durations that satisfies
 (A1-NS) if the certificate lists it, and for **every** table otherwise. The `relaxed` bounds
@@ -363,6 +404,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     | relaxed => exact C.relaxedWith_le hpt _ hP hM
     | roles => exact C.rolesWith_le hA hpt hP hM
     | lagrangian mu => exact C.lagWith_le hA hpt mu hP hM
+    | balanced => exact C.balWith_le hA hp hpt hP hM
     | _ => exact bot_le
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · -- 1. Every point is achieved by its plan.
@@ -396,6 +438,14 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
         by_contra hlt
         push Not at hlt
         have := hbound .roles hP x.2 hlt
+        rw [hfast] at this
+        exact absurd this (by simp)
+      | balanced =>
+        rw [hk] at hfast
+        simp only [decide_eq_true_eq] at hfast
+        by_contra hlt
+        push Not at hlt
+        have := hbound .balanced hP x.2 hlt
         rw [hfast] at this
         exact absurd this (by simp)
       | _ => rw [hk] at hfast; simp at hfast
