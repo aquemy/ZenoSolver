@@ -399,6 +399,13 @@ status    = "math.proved-informal"
 paper     = "Prop 6.18, doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 
+[claims.lem-6-19]
+kind      = "lemma"
+statement = "Lemma 6.19 (cut bound): with Φ the least flight time of a sequence of flights from C_I to C_G, every feasible plan has Σ_k F_k ≥ (2t − p)Φ, hence makespan at least (2t − p)Φ/p; under (AΔ), Φ = min_x (d_x + d̄_x)."
+status    = "math.proved-informal"
+paper     = "Lemma 6.19, doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
