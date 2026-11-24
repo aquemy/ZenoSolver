@@ -151,9 +151,11 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
 | `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
-| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, event-ordered plans, the exhaustive `search` and the completeness of its enumeration (layer 1 of `search`) | `Sched`, `Sched.tmpl`, `EventOrdered`, `SchedulableDomination`, `SearchData.closed`, `SearchData.closed_sound` |
+| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, event-ordered plans, the exhaustive `search` and the completeness of its enumeration | `Sched`, `Sched.tmpl`, `EventOrdered`, `SchedulableDomination`, `SearchData.closed`, `SearchData.closed_sound` |
 | `ZenoFront/Exchange.lean` | Theorem 6.9, Step 2: routes of visits with event keys, exchanging futures while a hand-off overlaps | `KLeg`, `Visit`, `VRoute`, `PaxData`, `exchange_step`, `exists_ordered_handoffs` |
 | `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
+| `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched` |
+| `ZenoFront/Domination.lean` | Theorem 6.9: Step 1 and the event keys (event-ordered, or no city with `d = d̄ = 0`); the counterexample for `p > t` | `exists_transfer_pw`, `nzKeys`, `eoKeys`, `schedulableDomination`, `not_schedulableDomination` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -444,6 +446,14 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   * fastest point: `closed`, `relaxed`, `roles` and `balanced`.
 
   It rejects `search` and `forest`.
+* `schedulableDomination` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible plan
+  that is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid
+  scheduled configuration with `2t − p` landings, cost at most the plan's and closed form at most
+  its makespan. Step 1 splits central flights (`Feasible.split`) and gives the legs keys
+  `(departure, ·, ·)` that increase along routes and along every passenger's two flights;
+  Step 2 exchanges futures (`exists_ordered_handoffs`); Steps 3–6 select links along the
+  hand-offs (`exists_links`), bound the closed form and shrink (`exists_sched`).
+  `not_schedulableDomination`: without `p ≤ t` the statement fails (`t = 0`, `p = 1`).
 * `BalData.value_le_totalCost` (**`balanced`**): the program of `BalancedRoles` (a DP over the
   planes, on states made of the imbalance vector and the landings so far) is at most the cost of
   every balanced configuration with `s` landings and role loads `≤ T`. A drop-off and a pick-up
@@ -628,11 +638,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
       bound values.
 - [x] `search`, layer 1: the exhaustive search and the completeness of its enumeration
       (`SearchData.closed_sound`). It closes both `search` gaps of the Proposition 6.5 instance.
-- [ ] `search`, layer 2: Theorem 6.9 (`SchedulableDomination`, stated). Steps 2–4 are proved
-      on routes of visits: the exchanges (`exists_ordered_handoffs`) and the link count
-      (`exists_links`). With the theorem, `SearchData.closed_sound` closes `search` gaps, after
-      mapping configurations to representatives as for `roles`. Until then `check` rejects
-      `search`. Lemma 6.3's optimality is not needed for soundness: Theorem 6.9 bounds the closed
-      form directly.
+- [x] Theorem 6.9 (`schedulableDomination`, for `p ≤ t`; `not_schedulableDomination`: the
+      statement fails for `t < p`). Lemma 6.3's optimality is not needed for soundness:
+      Theorem 6.9 bounds the closed form directly.
+- [ ] `search` in the v2 checker: map configurations to representatives as for `roles`, then
+      `SearchData.closed_sound` closes `search` gaps. Until then `check` rejects `search`.
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
       is proved.

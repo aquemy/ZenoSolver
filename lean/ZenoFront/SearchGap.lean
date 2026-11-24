@@ -8,12 +8,12 @@ public import ZenoFront.BalancedBound
 public import Mathlib.Data.Multiset.Sort
 
 /-!
-# The `search` kind of format v2: the exhaustive search (layer 1)
+# The `search` kind of format v2: the exhaustive search
 
 A `search` gap of a certificate claims that no role configuration of cost below `C_i` has a
 schedule finishing before `M_{i+1}` (`searchGap` and `exactSchedule` in
 `src/zeno/ns_search.cpp`). By Theorem 6.9 (schedulable domination) of the theory note this rules
-out every event-ordered plan. This file is the first layer of that argument:
+out every event-ordered plan. This file has the search and its statement:
 
 * `Sched`: a *scheduled configuration*. Per plane it has an ordered list of drop-offs, an ordered
   list of pick-ups and a multiset of crossings, and a *matching* `mate` from pick-up slots
@@ -27,9 +27,9 @@ out every event-ordered plan. This file is the first layer of that argument:
   closed, every valid scheduled configuration with `s` landings and cost below the bound has
   `tmpl > T`.
 
-`EventOrdered` is the predicate on plans of the note (§1.2). Theorem 6.9, with the statement
-`SchedulableDomination`, is the next layer. Until it is proved, the checker keeps rejecting
-`search`.
+`EventOrdered` is the predicate on plans of the note (§1.2). Theorem 6.9 has the statement
+`SchedulableDomination`; it is proved for `p ≤ t` in `Domination.lean`
+(`schedulableDomination`). The checker does not use it yet, so it keeps rejecting `search`.
 -/
 
 @[expose] public section
@@ -116,8 +116,9 @@ def EventOrdered (P : Plan n t p) : Prop :=
 /-- **Theorem 6.9 (schedulable domination), statement.** Under (A1-NS), every feasible plan that
 is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid scheduled
 configuration with the plan's number of landings `2t − p`, cost at most the plan's, and closed
-form at most its makespan. This is the next layer; the checker does not use it until it is
-proved. -/
+form at most its makespan. It holds for `p ≤ t`, the model's assumption
+(`schedulableDomination`), and fails for `t < p`, where no valid configuration has `2t − p`
+landings (`not_schedulableDomination`). -/
 def SchedulableDomination (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Prop :=
   N.A1NS → ∀ P : Plan n t p, Feasible N P → (EventOrdered P ∨ ∀ x, ¬ (N.d x = 0 ∧ N.dbar x = 0)) →
     ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
