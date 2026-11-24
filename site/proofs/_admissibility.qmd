@@ -37,7 +37,7 @@ theorem cntA_eq (h : PlaneFeasible N legs) :
     cntA (fun _ => true) (landingRecs legs) = cntAbar (fun _ => true) (landingRecs legs) + 1 := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 373–380](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Converse.lean#L373-L380){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 373–380](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Converse.lean#L373-L380){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -80,7 +80,7 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   col : ∀ i, Even #{k | i ∈ h k}
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
 
 **Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
 
@@ -90,7 +90,7 @@ the component condition by Lemma 2.4). -/
 def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
 
 :::
 
@@ -193,7 +193,7 @@ theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
     (h k).card + 1 ≤ (X k).card := …
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 100–108](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Admissible.lean#L100-L108){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Admissible.lean`, lines 100–108](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Admissible.lean#L100-L108){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -236,7 +236,7 @@ inductive LTree (n : ℕ) : Type where
   | node (free : Multiset (Fin n)) (kids : LKids n)
 ```
 
-[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
+[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
 
 :::
 
@@ -312,7 +312,7 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
     Admissible X ↔ ∃ F : List (LTree n), (∀ t ∈ F, t.WF) ∧ forestGroups F = univ.val.map X := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -398,7 +398,7 @@ theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Fin
     (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …
 ```
 
-[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.IsParityWitness.card_touched_le_of_minimal` [machine-checked]{.badge .ok}
 
@@ -410,7 +410,7 @@ theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
     (touched h).card ≤ p - 1 := …
 ```
 
-[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
 
@@ -422,7 +422,7 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
     ∃ h, IsParityWitness X h ∧ (touched h).card ≤ min (I.p - 1) (I.t - I.p) := …
 ```
 
-[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
 
 :::
 

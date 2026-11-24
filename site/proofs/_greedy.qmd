@@ -37,6 +37,6 @@ theorem lptCounterexample_front (dc : Fin 2 → Fin 2 → ℕ) :
       [(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)] := …
 ```
 
-[`lean/ZenoFront/Examples.lean`, lines 96–103](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Examples.lean#L96-L103){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Examples.lean`, lines 96–103](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Examples.lean#L96-L103){.lean-src} (statement only; the proof is elided)
 
 :::

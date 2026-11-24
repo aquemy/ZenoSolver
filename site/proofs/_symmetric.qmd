@@ -99,7 +99,7 @@ theorem Admissible.exists_plan {N : Network n} (hS : N.dbar = N.d) {p : ℕ} (hp
       planCost c P = totalCost c X ∧ planMakespan P = 2 * maxLoad N.d X := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -148,7 +148,7 @@ structure RoleConfig (n p : ℕ) where
   sum_drop_eq_sum_pick : ∑ k, drop k = ∑ k, pick k
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
+[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
 
 :::
 
@@ -278,7 +278,7 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       2 * t - p ≤ size cfg.groups := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -321,7 +321,7 @@ theorem RoleConfig.exists_shrink {s : ℕ} (hps : p ≤ s) : ∀ (N : ℕ) (cfg 
   …
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
 
@@ -334,7 +334,7 @@ theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} 
     ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
 ```
 
-[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -374,7 +374,7 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness
   …
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
 
@@ -383,7 +383,7 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness
 theorem admissible_groups : Admissible R.groups := …
 ```
 
-[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -452,7 +452,7 @@ theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤
       totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
 ```
 
-[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -526,7 +526,7 @@ theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = 
       totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/ConverseTri.lean`, lines 631–637](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/ConverseTri.lean#L631-L637){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`ee385d0`](https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/ConverseTri.lean`, lines 631–637](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/ConverseTri.lean#L631-L637){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`ee385d0`](https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 **Lean** `ZenoFront.Feasible.exists_admissible` [machine-checked]{.badge .ok}
 
@@ -540,7 +540,7 @@ theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -582,7 +582,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -666,7 +666,7 @@ theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
 
@@ -681,7 +681,7 @@ theorem FeasibleAnywhere.exists_admissible {N : Network n} (hS : N.dbar = N.d) (
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -909,7 +909,7 @@ theorem Feasible.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d) (hA 
       totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/ConverseTri.lean`, lines 612–618](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/ConverseTri.lean#L612-L618){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`e1ee5c4`](https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/ConverseTri.lean`, lines 612–618](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/ConverseTri.lean#L612-L618){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`e1ee5c4`](https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 **Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
 
@@ -927,7 +927,7 @@ theorem exists_admissible_of_blocks {n p : ℕ} (d : Fin n → ℕ)
       ∑ k, X k ≤ ∑ k, ((blocks k).flatten : Multiset (Fin n)) := …
 ```
 
-[`lean/ZenoFront/TriCore.lean`, lines 754–843](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/TriCore.lean#L754-L843){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`3f228fc`](https://github.com/aquemy/ZenoSolver/commit/3f228fc64911a105dde0d51ca76c7a8f1d64cace) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/TriCore.lean`, lines 754–843](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/TriCore.lean#L754-L843){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`3f228fc`](https://github.com/aquemy/ZenoSolver/commit/3f228fc64911a105dde0d51ca76c7a8f1d64cace) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 :::
 
@@ -1022,7 +1022,7 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
     ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y + 2 = size X := …
 ```
 
-[`lean/ZenoFront/TriSegments.lean`, lines 293–301](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/TriSegments.lean#L293-L301){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`1b86268`](https://github.com/aquemy/ZenoSolver/commit/1b86268184e1fb562a4e5eb4c76c41b94907c61c) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/TriSegments.lean`, lines 293–301](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/TriSegments.lean#L293-L301){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`1b86268`](https://github.com/aquemy/ZenoSolver/commit/1b86268184e1fb562a4e5eb4c76c41b94907c61c) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 :::
 
@@ -1089,7 +1089,7 @@ theorem minimal_achievable_iff_multisetPoints_ATri {N : Network n} (hS : N.dbar 
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 437–442](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L437-L442){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 437–442](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L437-L442){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.minimal_achievable_iff_anywhere_of_ATri` [machine-checked]{.badge .ok}
 
@@ -1101,7 +1101,7 @@ theorem minimal_achievable_iff_anywhere_of_ATri {N : Network n} (hS : N.dbar = N
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 413–422](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L413-L422){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 413–422](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L413-L422){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.minimal_achievable_iff_minCost_ATri` [machine-checked]{.badge .ok}
 
@@ -1114,7 +1114,7 @@ theorem minimal_achievable_iff_minCost_ATri {N : Network n} (hS : N.dbar = N.d) 
         ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 453–460](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L453-L460){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 453–460](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L453-L460){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.solveFront_isParetoFront_ATri` [machine-checked]{.badge .ok}
 
@@ -1126,7 +1126,7 @@ theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : 
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 462–496](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L462-L496){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 462–496](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L462-L496){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.Cert.forestGapBound_le_ATri` [machine-checked]{.badge .ok}
 
@@ -1139,7 +1139,7 @@ theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar =
     C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 504–521](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L504-L521){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 504–521](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L504-L521){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.Cert.check_sound_ATri` [machine-checked]{.badge .ok}
 
@@ -1150,7 +1150,7 @@ theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 525–547](https://github.com/aquemy/ZenoSolver/blob/d010a31144bb83976ab2e96c83db13216b41d5c1/lean/ZenoFront/FrontTri.lean#L525-L547){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/FrontTri.lean`, lines 525–547](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/FrontTri.lean#L525-L547){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 :::
 

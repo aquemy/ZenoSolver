@@ -33,5 +33,5 @@ plane 2: CI->c1[0,2]p3 c1->CG[2,4]p3 CG->c1[4,6] c1->CG[6,8]p1
 levels 4..10 (x1, 7 levels), cities 3, max tree 2
 settled: bracket 7, pairs 0, chains 0, monotone 0, exact 0
 work: 17 states, 266 relaxations
-seconds: table 1.625e-06, bracket 6.4125e-05, chains 0, exact 0, plans 6.2458e-05
+seconds: table 9.625e-06, bracket 6.1583e-05, chains 0, exact 0, plans 5.0875e-05
 ```
