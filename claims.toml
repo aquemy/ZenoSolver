@@ -296,6 +296,14 @@ status    = "math.proved-informal"
 paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
+[claims.prop-6-6]
+kind         = "proposition"
+statement    = "Proposition 6.6 (imbalance-vector DP) [N5]: the DP over planes with states (k, j, v), v the imbalance vector restricted to ‖v‖₁ ≤ t − p, has shortest path from (0, 0, 0) to (p, s, 0) of weight E_NS(T), the least cost of a role configuration with role loads at most T."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.BalData.value_le_totalCost"
+paper        = "Prop 6.6, doc/theory/exact-front.md §6.3"
+created      = "2026-11-23"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
