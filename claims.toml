@@ -383,12 +383,12 @@ created   = "2026-11-24"
 # ===========================================================================
 
 [claims.prop-7-1]
-kind      = "proposition"
-statement = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g. Lean form: (C, 2T) is a minimal admissible point iff E(T) = C and E(T') > C for every T' < T, joined to the plans' front by Corollary 4.8 (minimal_achievable_iff_admissiblePoints); makespans are not rescaled by g."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_admissiblePoints_iff"
-paper     = "Prop 7.1, doc/theory/exact-front.md §7.1"
-created   = "2026-11-23"
+kind         = "proposition"
+statement    = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.minimal_admissiblePoints_iff"
+paper        = "Prop 7.1, doc/theory/exact-front.md §7.1"
+created      = "2026-11-23"
 
 [claims.lem-7-2]
 kind      = "lemma"
