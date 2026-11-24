@@ -334,6 +334,13 @@ lean_partial = "ZenoFront.Cert2.check_sound_EO"
 paper        = "Cor 6.10, doc/theory/exact-front.md §6.2"
 created      = "2026-11-24"
 
+[claims.claim-6-2-end]
+kind      = "claim"
+statement = "End of section 6.2: under (A1-NS), on instances with a city with d_x = d̄_x = 0, plans that are not event-ordered never beat the front of Corollary 6.10."
+status    = "math.proved-informal"
+paper     = "end of §6.2, doc/theory/exact-front.md"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
