@@ -59,8 +59,9 @@ struct PlanCheck
 /// no code with buildPlan: every plane starts in C_I at time >= 0, chains its
 /// legs (each leg leaves where the previous one arrived, no earlier, and
 /// lasts the flight's duration) and ends in C_G; there is no C_I - C_G
-/// flight, and central-to-central flights are rejected (they are never
-/// needed under assumption A1); every passenger 0..t-1 starts in C_I, rides
+/// flight, and central-to-central flights are rejected (the front never needs
+/// them under (S) with (A1) or (AΔ), Corollaries 4.8 and 4.12, nor under
+/// (A1-NS), Corollary 6.10); every passenger 0..t-1 starts in C_I, rides
 /// a time-ordered chain of legs and ends in C_G; a leg carries at most one
 /// passenger. Cost = sum of the landing costs, makespan = last arrival.
 [[nodiscard]] PlanCheck checkPlan(const Instance& instance, const Plan& plan);

@@ -2,8 +2,10 @@
 
 #include <zeno/instance.hpp>
 #include <zeno/legacy_input.hpp>
+#include <zeno/metric.hpp>
 
 #include <iosfwd>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -12,31 +14,41 @@ namespace zeno
 /// PDDL problem for the domain pddl/multi-zeno-travel.pddl. city0 is C_I,
 /// city1..cityN the central cities, city(N+1) is C_G; every person and every
 /// plane starts in C_I and must end in C_G. Flights C_I <-> i last d_i,
-/// C_G <-> i last dbar_i, and i <-> j last max(d_i, dbar_i) + max(d_j,
-/// dbar_j) + 100, which is never faster than through a hub (assumption A1).
-/// When `front` is given, it is appended as "; makespan cost" comments.
+/// C_G <-> i last dbar_i, and i <-> j last Instance::centralFlight(i, j): the
+/// instance's table, or by default max(d_i, dbar_i) + max(d_j, dbar_j) + 100,
+/// which is never faster than through a hub (assumption A1). When `front` is
+/// given, it is appended as "; makespan cost" comments.
 void writePddlProblem(std::ostream& out, const Instance& instance, const Front* front = nullptr);
 
 /// "zeno<n>n<t>t<p>pMulti.pddl", the 2016 default name.
 [[nodiscard]] std::string defaultPddlName(const Instance& instance);
 
 /// Data file read by -d: durations then costs (symmetric), or C_I-side
-/// durations, C_G-side durations, costs.
+/// durations, C_G-side durations, costs; then, if the instance has a
+/// central-flight table, the line "central" and its n rows.
 void writeDataFile(std::ostream& out, const Instance& instance);
 
 namespace cli
 {
-/// Instance options of the command line (2016 syntax), parsed out of `args`.
+/// Instance options of the command line (2016 syntax, and --metric), parsed
+/// out of `args`.
 struct InstanceArguments
 {
     legacy::Options options;
-    std::vector<std::string> rest; ///< tokens that are not instance options, in order
+    std::optional<metric::Options> metric; ///< --metric and its options
+    std::vector<std::string> rest;         ///< tokens that are not instance options, in order
 };
 
-/// Consumes -n -t -p -d -C -D -E -W -r -j -k -l -m -x -y and their values,
-/// and drops -F (kept for compatibility). Throws std::invalid_argument on a
-/// missing or malformed value.
+/// Consumes -n -t -p -d -C -D -E -W -r -j -k -l -m -x -y, --metric --seed
+/// --hubs --coords --random-costs and their values, and drops -F (kept for
+/// compatibility). Throws std::invalid_argument on a missing or malformed
+/// value, on a metric option without --metric, and on --metric with an option
+/// that sets durations (-d -D -E -W -l -m).
 [[nodiscard]] InstanceArguments parseInstanceArguments(const std::vector<std::string>& args);
+
+/// The instance the options describe: metric::buildInstance with --metric,
+/// legacy::buildInstance otherwise.
+[[nodiscard]] Instance buildInstance(const InstanceArguments& arguments);
 
 /// Help text for those options.
 [[nodiscard]] const char* instanceOptionsHelp();

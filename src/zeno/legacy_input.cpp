@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <functional>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -37,27 +38,60 @@ double callUnsigned(const std::function<double(double)>& f, double argument)
     return f(static_cast<double>(static_cast<unsigned>(argument)));
 }
 
-std::vector<std::vector<double>> readRows(const std::string& path, int n)
+struct DataFile
 {
-    std::vector<std::vector<double>> rows;
+    std::vector<std::vector<double>> rows;                 ///< durations and costs
+    std::optional<std::vector<std::vector<double>>> table; ///< after the line "central"
+};
+
+DataFile readDataFile(const std::string& path, int n)
+{
+    DataFile data;
     std::ifstream file(path);
     if(!file)
         throw std::runtime_error("cannot open the data file: " + path);
     for(std::string line; std::getline(file, line);)
     {
         std::istringstream in(line);
-        std::vector<double> row;
+        std::vector<std::string> tokens;
         for(std::string token; in >> token;)
-            row.push_back(std::stoi(token));
-        if(row.empty())
+            tokens.push_back(token);
+        if(tokens.empty())
             continue;
+        if(tokens.front() == "central")
+        {
+            if(data.table || tokens.size() != 1)
+                throw std::runtime_error("the data file is not valid: 'central' must appear once, alone on its line");
+            data.table.emplace();
+            continue;
+        }
+        std::vector<double> row;
+        for(const auto& token : tokens)
+            row.push_back(std::stoi(token));
         if(static_cast<int>(row.size()) != n)
             throw std::runtime_error("the data file is not valid: every line needs n = " + std::to_string(n) + " values");
-        rows.push_back(std::move(row));
+        (data.table ? *data.table : data.rows).push_back(std::move(row));
     }
-    return rows;
+    if(data.table && static_cast<int>(data.table->size()) != n)
+        throw std::runtime_error("the data file is not valid: the central-flight table needs n = " + std::to_string(n) + " rows");
+    return data;
+}
+
+double truncated(double adjust, double value)
+{
+    // The 2016 conversion to integers truncates toward zero (a cast to int).
+    return static_cast<double>(static_cast<int>(adjust * value));
 }
 } // namespace
+
+std::vector<Cost> generatedCosts(const Options& o, double adjust)
+{
+    const auto f = generator(o.costFunction);
+    std::vector<Cost> c;
+    for(int i = 1; i <= o.n; ++i)
+        c.push_back(static_cast<Cost>(truncated(adjust, o.x * callUnsigned(f, o.scaleC * static_cast<double>(i) + o.transC) + o.y)));
+    return c;
+}
 
 Instance buildInstance(const Options& o)
 {
@@ -66,10 +100,13 @@ Instance buildInstance(const Options& o)
     const auto n = static_cast<std::size_t>(o.n);
     std::vector<double> c(n, 1), d(n, 1), de(n, 1);
     bool symmetric = false;
+    std::optional<std::vector<std::vector<double>>> table;
 
     if(o.dataFile)
     {
-        const auto rows = readRows(*o.dataFile, o.n);
+        auto data = readDataFile(*o.dataFile, o.n);
+        const auto& rows = data.rows;
+        table = std::move(data.table);
         if(rows.size() == 2)
         {
             d = de = rows[0];
@@ -83,7 +120,8 @@ Instance buildInstance(const Options& o)
             c = rows[2];
         }
         else
-            throw std::runtime_error("the data file is not valid: expected 2 lines (durations, costs) or 3 lines (west durations, east durations, costs)");
+            throw std::runtime_error("the data file is not valid: expected 2 lines (durations, costs) or 3 lines (west durations, east durations, costs)"
+                                     ", then optionally the line 'central' and the central-flight table");
     }
     else
     {
@@ -110,10 +148,9 @@ Instance buildInstance(const Options& o)
             reversed(de, h);
     }
 
-    // The 2016 conversion to integers truncates toward zero (a cast to int).
     for(auto* v : {&c, &d, &de})
         for(auto& value : *v)
-            value = static_cast<double>(static_cast<int>(o.adjust * value));
+            value = truncated(o.adjust, value);
 
     if(symmetric)
         de = d;
@@ -126,6 +163,17 @@ Instance buildInstance(const Options& o)
         instance.d.push_back(static_cast<Time>(d[i]));
         instance.dbar.push_back(static_cast<Time>(de[i]));
         instance.c.push_back(static_cast<Cost>(c[i]));
+    }
+    if(table)
+    {
+        FlightTable central;
+        for(const auto& row : *table)
+        {
+            central.emplace_back();
+            for(double value : row)
+                central.back().push_back(static_cast<Time>(truncated(o.adjust, value)));
+        }
+        instance.central = std::move(central);
     }
     instance.validate();
     return instance;

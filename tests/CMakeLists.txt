@@ -95,3 +95,13 @@ foreach(line ${ZS_GOLDEN_LINES})
                 -P ${ZS_GOLDEN_DIR}/checkCertificate.cmake)
     set_tests_properties(golden/certificate/${name} PROPERTIES LABELS "golden;certificate" TIMEOUT 300)
 endforeach()
+
+# A metric instance (--metric) end to end: its table satisfies (AΔ) but not
+# (A1), and a gap needs the forest bound, which `zeno check` accepts relying on
+# A1|AD (Theorem 4.10). It is too large for the golden oracle.
+add_test(NAME metric/certificate
+    COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:zeno> "-DARGS=-n|5|-t|7|-p|4|--metric|plane|--seed|5|-r|0.3|--random-costs|0,60"
+            -DCERT=${CMAKE_CURRENT_BINARY_DIR}/certificates/metric-plane-s5.cert
+            -P ${ZS_GOLDEN_DIR}/checkCertificate.cmake)
+set_tests_properties(metric/certificate PROPERTIES LABELS "certificate" TIMEOUT 300
+    PASS_REGULAR_EXPRESSION "certificate accepted, assuming S A1\\|AD")

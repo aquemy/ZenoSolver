@@ -14,7 +14,8 @@ namespace zeno
 enum class GapBound
 {
     Relaxed,    ///< recompute L at the level (lemma R; no assumption on central flights)
-    Forest,     ///< recompute E with the link-forest DP (symmetric; needs A1)
+    Forest,     ///< recompute E with the link-forest DP (symmetric; needs (A1) or (AΔ):
+                ///< Theorems 4.7 and 4.10, Corollary 4.12)
     Roles,      ///< v2: recompute the role relaxation (needs A1-NS)
     Lagrangian, ///< v2: evaluate the Lagrangian bound at the listed multipliers (needs A1-NS)
     Balanced,   ///< v2: rerun the exact balanced role program (needs A1-NS)
@@ -31,7 +32,7 @@ struct Certificate
 {
     int version = 1;
     Instance instance;
-    std::vector<std::string> assumptions; ///< e.g. "S", "A1", "A1-NS"
+    std::vector<std::string> assumptions; ///< e.g. "S", "A1" (or "A1|AD"), "A1-NS"
     Front front;                          ///< by increasing makespan
     std::vector<Plan> plans;              ///< plans[i] realises front[i]
     std::vector<GapBound> gaps;           ///< gaps[i] for the gap between points i and i + 1
@@ -39,14 +40,30 @@ struct Certificate
     GapBound fastest = GapBound::Closed;  ///< v2: the bound below the fastest point
 };
 
-/// The certificate of a solved front (requires SolveOptions::plans). A gap
-/// gets `relaxed` when L already reaches the cost, `forest` otherwise.
+/// What `forest` gaps rely on: the central flights satisfy (A1) or the
+/// triangle inequality (AΔ). By Theorem 4.7 (under (A1)) and Theorem 4.10 with
+/// Corollary 4.12 (under (AΔ)), E is then a lower bound for every plan.
+/// checkCertificate reports this token, and accepts it in a certificate as a
+/// synonym of "A1", the token that certificates list for forest gaps: the Lean
+/// checker reads "A1", and is proved sound under (A1) (Cert.check_sound_A1)
+/// and under (AΔ) (Cert.check_sound_ATri).
+inline constexpr const char* kA1OrTriangle = "A1|AD";
+
+/// The gap kinds of a symmetric front: `relaxed` when L already reaches the
+/// cost of the gap (sound whatever the central flights), `forest` otherwise.
+[[nodiscard]] std::vector<GapBound> symmetricGaps(const Instance& instance, const Front& front);
+
+/// The certificate of a solved front (requires SolveOptions::plans), with
+/// the gaps of symmetricGaps. When a gap is `forest`, it lists "A1" if the
+/// central flights satisfy (A1) or (AΔ), as the default and metric tables do,
+/// and throws std::invalid_argument if they satisfy neither (Example 4.13).
 [[nodiscard]] Certificate makeCertificate(const Instance& instance, const SolveResult& result);
 
 struct BracketResult;
 /// Version 2 certificate of an exact non-symmetric bracket (requires
 /// BracketResult::exact() and SolveOptions::plans); throws
-/// std::invalid_argument otherwise.
+/// std::invalid_argument otherwise, and when a gap needs (A1-NS) that the
+/// central flights violate.
 [[nodiscard]] Certificate makeBracketCertificate(const Instance& instance, const BracketResult& result);
 
 void writeCertificate(std::ostream& out, const Certificate& certificate);

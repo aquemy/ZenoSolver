@@ -6,8 +6,9 @@ Exact Pareto fronts (total cost, makespan) of MultiZenoTravel planning instances
     zeno -n 50 -t 30 -p 5            # 50 central cities, 30 passengers, 5 planes
     zeno -n 10 -t 8 -p 3 -C 2 -D 2 -r 100 --stats
     zeno -n 2 -t 5 -p 2 -d durations-and-costs.dat
+    zeno -n 8 -t 6 -p 3 --metric sphere --seed 4 -r 0.01   # random cities on the Earth, units of 100 km
 
-`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. For instances with symmetric durations, which includes every instance the generator emits, the front is exact. For non-symmetric instances (`-E`/`-W`, or 3-line data files) `zeno` prints points achieved by simulated plans and reports on stderr which gaps between them a lower bound certifies, and whether the whole front is therefore exact.
+`zeno` prints the front as `cost makespan` lines by increasing cost. It takes the instance options of the 2016 solvers (`zeno --help`) and builds the same instances, so their fronts can be compared. For instances with symmetric durations, the front is exact when the central flights satisfy (A1), no faster than through a hub, or the triangle inequality (AΔ) (Theorem 4.10 and Corollary 4.12 of the theory note). Every instance of the 2016 generator satisfies (A1), and every metric instance (`--metric`, below) with `--hubs same` satisfies (AΔ). For a data file with a central-flight table, `zeno` reports on stderr which holds, or warns that the front may not be exact if neither does (Example 4.13). For non-symmetric instances (`-E`/`-W`, 3-line data files, or `--metric --hubs apart`) `zeno` prints points achieved by simulated plans and reports on stderr which gaps between them a lower bound certifies, and whether the whole front is therefore exact.
 
 How it works (`doc/theory/exact-front.md`): the front is the set of breakpoints of E(T), the cheapest admissible partition of the 2t − p landings into p groups whose durations each sum to at most T. `zeno` brackets E between a relaxation L and the pairs and chains bounds U and U3 on every level, and runs the exact link-forest dynamic program only on the levels that the bracket and the monotonicity of E leave open. The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) scheduled each PPP greedily, which is not optimal; they were removed (last in commit 84ca92a), and their timings are kept in `bench/baselines/legacy` for comparison.
 
@@ -37,21 +38,21 @@ The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishe
   - Theorem 4.1 (`Admissible.exists_plan`): every admissible partition is flown by a plan with exactly its cost and makespan.
   - Theorem 4.7 (under A1) and Theorem 4.10 (under AΔ, `Feasible.exists_admissible_ATri`): every plan is dominated by an admissible partition, with each plane's load at most its flight time.
 
-  The same front holds when planes may end anywhere (Theorem 4.9, `minimal_achievable_iff_anywhere_of_A1`).
+  The same front holds when planes may end anywhere (Theorem 4.9, `minimal_achievable_iff_anywhere_of_A1`, and `minimal_achievable_iff_anywhere_of_ATri` under AΔ). Without both (A1) and (AΔ), a plan can beat the front of admissible partitions (Example 4.13).
 - The algorithm is also in Lean. `lake exe zeno-front FILE` computes the front of a symmetric instance without any certificate. Its theorem `solveFront_isParetoFront` states that, under (S) and (A1), the output is exactly the Pareto front of all feasible plans; `solveFront_isParetoFront_ATri` states the same under (S) and (AΔ).
   - It runs the link-forest DP or the σ-DP at each level, both proved equal to E(T) (`treeBoundAt_eq_minCost`, `sigmaBoundAt_eq_minCost`), and finds the breakpoints by bisection.
   - It finishes all 66 benchmark-suite instances (40 ms median, 10 s at most for n = 100, t = 60, p = 10; 17 s in total), always with the same front as `zeno front`. Where the relaxation L meets the pairs bound U₂, it settles a level without the exact DP, with a proof (`minCost_eq_of_bracket`). CI compares the two on the golden, quick and five regime instances.
 - Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and by the Lean-verified checker in `lean/` (`lake exe zeno-check FILE`).
 - The Lean soundness theorem (`Cert.check_sound`, and `Cert.check_sound_rat` for rational times) states: if the checker accepts, the listed points are exactly the Pareto front among all feasible plans.
   - When every gap is closed by the relaxation L, this holds for any central-flight durations. That covers 386 of 400 random fronts and every front of the default generator.
-  - When some gap uses the forest bound, it holds whenever central flights are no faster than through a hub (A1), via the converse theorem (Theorem 4.7), and whenever they obey the triangle inequality (AΔ), via Theorem 4.10 (`Cert.check_sound_ATri`). Both are proved in Lean.
+  - When some gap uses the forest bound, it holds whenever central flights are no faster than through a hub (A1), via the converse theorem (Theorem 4.7), and whenever they obey the triangle inequality (AΔ), via Theorem 4.10 (`Cert.check_sound_ATri`). Both are proved in Lean. Such certificates list the assumption `A1`, the token both checkers read for forest gaps; `zeno check` reports `A1|AD`, i.e. (A1) or (AΔ), and also accepts that token (`doc/certificate-format.md`).
   - It also holds for the PDDL semantics, in which planes may end anywhere (`Cert.check_sound_anywhere`, Theorem 4.9).
 - For non-symmetric instances (version 2), `Cert2.check_sound` states the same for the proof kinds `relaxed` (no assumption), `roles`, `lagrangian` and `balanced` (all three under A1-NS, through Theorem 6.1, proved in Lean), and `search` (under A1-NS, through Theorem 6.9, proved in Lean). Theorem 6.9 holds for every plan, also with a city of d = d̄ = 0 (`schedulableDomination_all`), so neither checker needs an assumption EO (`zeno` no longer writes it); with EO the Lean checker also checks that the listed plans are event-ordered (`Cert2.check_sound_EO`). The Lean checker accepts all 150 certificates of a random non-symmetric test set, and agrees with `zeno check` on every verdict. It accepts the Proposition 6.5 instance, whose two gaps only the `search` kind closes.
 - CI writes certificates for the golden and random instances with `zeno` and checks them with both checkers. The compiled Lean checker verifies the certificates of all 66 benchmark-suite instances in 4.9 s in total (2.1 s for n = 100, t = 60, p = 10).
 
 **Non-symmetric instances.**
 
-- Fronts are exact wherever the certified bracket closes. The lower bounds rest on Theorem 6.1, which needs central flights to be useless (A1-NS).
+- Fronts are exact wherever the certified bracket closes. The lower bounds rest on Theorem 6.1, which needs central flights to be useless (A1-NS). When a central-flight table violates (A1-NS), as `--metric --hubs apart` tables with short central flights do, only lemma R counts: `zeno` reports the other gaps as unproved and writes no certificate that needs (A1-NS). Whether (AΔ) suffices for non-symmetric instances is open (Conjecture 6.7).
 - Waiting can be genuinely harmful (Proposition 6.5 refutes the papers' no-waiting assumption). The note proves *schedulable domination* (Theorem 6.9): every plan is dominated by a role configuration whose template schedule is no later. So an exhaustive search over role configurations with exact schedules closes such gaps (proof kind `search`). Where that search exceeds its limits, `zeno` reports the open gaps and their lower bounds instead of a front it cannot prove.
 
 # Requirements
@@ -117,12 +118,45 @@ Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once
     zeno pddl [instance options] [-O FILE] [--no-front]
     zeno generate [instance options] [-O FILE]
 
-- `front` (the default) prints the front; `--plans` adds a plan for every point, checked by simulation; `--certificate` writes a certificate (`doc/certificate-format.md`): version 1 for symmetric instances, version 2 for exact non-symmetric brackets.
+- `front` (the default) prints the front; `--plans` adds a plan for every point, checked by simulation; `--certificate` writes a certificate (`doc/certificate-format.md`): version 1 for symmetric instances, version 2 for exact non-symmetric brackets. With a central-flight table (`--metric`, or a data file with a `central` block), stderr says whether it satisfies (A1) or (AΔ), so that the front is exact (Corollary 4.8, or Theorem 4.10 and Corollary 4.12). If it satisfies neither, stderr warns that the front may not be exact (Example 4.13) and lists the gaps that the relaxation L does not certify.
 - Non-symmetric instances get a certified bracket (`zeno/ns.hpp`). Upper points come from link forests in which every plane picks up at most once, or drops off at most once, and from the cheapest balanced role configurations found in the gaps, all scheduled and simulated with their waiting. Lower bounds: lemma R (no assumption), then, under assumption A1-NS (Theorem 6.1), a role relaxation, a Lagrangian relaxation of the per-city balance, and the exact balanced role program (`zeno/roles.hpp`, exponential in t − p, with state, work and time limits in `SolveOptions`). On 1,800 random tiny instances checked against the brute-force oracle every bracket is exact; on larger ones the open gaps are listed with their lower bounds and the reason they stay open.
-- `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
+- `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1|AD`: central flights satisfy (A1) or (AΔ), needed by `forest` gaps, by Theorem 4.7 or Theorem 4.10 and Corollary 4.12; `A1-NS`: the non-symmetric bounds). For `forest` gaps, `zeno --certificate` lists the token `A1`, which both checkers read and are proved sound for under (A1) or (AΔ), as long as the central flights satisfy one of them. `zeno check` also accepts the spelled-out synonym `A1|AD`.
 - `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 
-Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Each option means what it says (`-C` costs, `-D` durations, `-E` C_I-side and `-W` C_G-side durations), and data files are read as written, so `zeno generate` output reads back as the same instance. The 2016 solvers instead swapped the duration and cost vectors, and reversed the C_G-side durations, whenever the first duration exceeded the second, which their generator always produced. So a 2016 or paper instance `-C a -D b` is `-C b -D a` here (and `-j`/`-k` with `-l`/`-m`), and `-C c -E a -W b` is `-C a -E c -W b`, up to the order of the cities, which does not change the front. The benchmark suites and golden instances are written in the current meaning; the golden names keep the 2016 flags.
+Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Each option means what it says (`-C` costs, `-D` durations, `-E` C_I-side and `-W` C_G-side durations), and data files are read as written, so `zeno generate` output reads back as the same instance. The 2016 solvers instead swapped the duration and cost vectors, and reversed the C_G-side durations, whenever the first duration exceeded the second, which their generator always produced. So a 2016 or paper instance `-C a -D b` is `-C b -D a` here (and `-j`/`-k` with `-l`/`-m`), and `-C c -E a -W b` is `-C a -E c -W b`, up to the order of the cities, which does not change the front. There are two exceptions:
+
+- The 2016 code swapped only when the first duration exceeded the second. When truncation ties them, the 2016 flags already mean the same as here and must not be translated: `-n 10 -D 1 -r 1` starts with d = (2, 2, …). Running `zeno generate` on both forms shows which case applies.
+- zeno scales both duration sides of `-E`/`-W` with `-l`/`-m`. So the `-E`/`-W` translation is exact only when the 2016 instance had the same `-j`/`-k` as `-l`/`-m` (the defaults qualify). Otherwise, write the 2016 instance as a data file.
+
+The benchmark suites and golden instances are written in the current meaning; the golden names keep the 2016 flags.
+
+Data files (`-d`, written by `zeno generate`) hold the durations, then the costs (2 lines), or the C_I-side durations, the C_G-side durations and the costs (3 lines), with n values per line. An optional block follows: a line `central`, then n lines of n central-flight durations, symmetric with a zero diagonal. `-r` multiplies it like the other values. Without the block, a central flight i–j lasts max(d_i, dbar_i) + max(d_j, dbar_j) + 100, which satisfies (A1).
+
+    2 3 9 11
+    50 44 17 0
+    central
+    0 1 5 6
+    1 0 3 6
+    5 3 0 1
+    6 6 1 0
+
+# Metric instances
+
+`--metric plane|sphere` builds an instance whose cities are points and whose flights last the distance between their ends: a real central-flight table, with fast central flights.
+
+    zeno generate -n 6 -t 5 -p 3 --metric plane --seed 7 -r 0.2
+    zeno -n 3 -t 4 -p 2 --metric sphere --coords airports.csv -r 0.01 --random-costs 1,20
+    zeno pddl -n 10 -t 8 -p 3 --metric sphere --seed 1 -r 0.01 --random-costs 1,50
+
+- `--metric plane`: C_I and the central cities are uniform random points in the square [0, 100]²; `--metric sphere`: uniform random points on a sphere of radius 6371 km, with great-circle (haversine) distances in km.
+- `--seed S` (default 1) seeds the points and `--random-costs` (a `std::mt19937_64` read without the standard distributions, so a seed gives the same points on every platform).
+- `--hubs same` (default): C_G is the same point as C_I, so d = dbar exactly and (S) holds. `--hubs apart`: C_G is one more random point, and the instance is non-symmetric (the same seed keeps C_I and the cities).
+- `--coords FILE` reads the points instead: one `x,y` (plane) or `lat,lon` in degrees (sphere) per line, separated by commas or spaces, optionally after a label (`CDG,49.0097,2.5479`); `#` lines are comments. The first point is the hub (C_I, then C_G with `--hubs apart`), the others the n central cities, so `-n` must match the file.
+- Durations: every distance is multiplied by `-r` (which may be fractional, e.g. `-r 0.01` for units of 100 km) and rounded to the nearest integer. Rounding can break the triangle inequality, so every duration is then replaced by its shortest path over the flights (every pair of points but C_I–C_G). The table therefore satisfies (AΔ) exactly, and no duration exceeds its rounded distance. With `--hubs same` the front is exact by Theorem 4.10 and Corollary 4.12, although (A1) fails.
+- Costs come from `-C -j -k -x -y` as for the 2016 generator, truncated but not scaled by `-r`, or with `--random-costs LO,HI` they are uniform random integers in [LO, HI].
+- `-d`, `-D`, `-E`, `-W`, `-l` and `-m` do not apply. `zeno generate` writes the table as the `central` block, `zeno pddl` writes it as the central `timeTerre` values, and `zeno -d` reads it back.
+
+The certificate of a metric instance with `--hubs same` lists `A1` for its `forest` gaps, like any other. `zeno check` accepts it, relying on `A1|AD`. The Lean checker accepts it too, and `Cert.check_sound_ATri` proves it sound for every central-flight table that satisfies (AΔ), metric tables included.
 
 # PDDL
 
@@ -131,9 +165,9 @@ Costs and durations are integers. Generated values are multiplied by `-r` and tr
 - `city0` is the initial city C_I, `city1`…`cityN` are the central cities, `city(N+1)` is the goal city C_G.
 - Every person and every plane starts in C_I, and must end in C_G.
 - `fly` takes `timeTerre` time units; landing in a city adds its `citythreat` to the total cost (0 for C_I and C_G).
-- C_I–i flights last d_i, i–C_G flights last dbar_i (equal to d_i for symmetric instances). A flight between two central cities i and j lasts max(d_i, dbar_i) + max(d_j, dbar_j) + 100, so it is never faster than going through C_I or C_G.
+- C_I–i flights last d_i, i–C_G flights last dbar_i (equal to d_i for symmetric instances). A flight between two central cities i and j lasts as the instance's central-flight table says (`--metric`, or the `central` block of a data file). Without a table, it lasts max(d_i, dbar_i) + max(d_j, dbar_j) + 100, so it is never faster than going through C_I or C_G (A1).
 - A plane carries one person at a time. `board` and `debark` are instantaneous: with the ε-separation of PDDL 2.1 a planner's makespan exceeds ZenoSolver's by at most ε per action on the critical path.
-- The trailing comments list the durations, the costs and, for symmetric instances, the Pareto front (makespan, cost).
+- The trailing comments list the durations, the costs, the central-flight table if there is one and, for symmetric instances, the Pareto front (makespan, cost). The front is left out, with a warning, when the table satisfies neither (A1) nor (AΔ) and the relaxation L does not certify every gap.
 
 # References
 

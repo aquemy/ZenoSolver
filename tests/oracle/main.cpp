@@ -4,13 +4,13 @@
 /// a tiny instance as "cost makespan" lines.
 ///
 /// Accepts the instance options of zeno and builds the instance
-/// with the same code (zeno::legacy::buildInstance), so both see
+/// with the same code (zeno::cli::buildInstance), so both see
 /// identical data. The oracle itself (bruteForce.hpp) shares no
-/// code with the solver.
+/// code with the solver. It flies no central flights, so it
+/// ignores the central-flight table of the instance.
 ////////////////////////////////////////////////////////////
 
 #include <zeno/io.hpp>
-#include <zeno/legacy_input.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
         const auto parsed = zeno::cli::parseInstanceArguments(std::vector<std::string>(argv + 1, argv + argc));
         if(!parsed.rest.empty())
             throw std::invalid_argument("unknown option " + parsed.rest.front());
-        const zeno::Instance data = zeno::legacy::buildInstance(parsed.options);
+        const zeno::Instance data = zeno::cli::buildInstance(parsed);
         oracle::Instance in;
         in.travelers = static_cast<unsigned>(data.t);
         in.planes = static_cast<unsigned>(data.p);
