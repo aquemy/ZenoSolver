@@ -384,6 +384,14 @@ lean      = "ZenoFront.treeBoundAt_eq_minCost"
 paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
 created   = "2026-11-23"
 
+[claims.thm-7-6]
+kind      = "theorem"
+statement = "Theorem 7.6 (σ-DP) [Claim C]: the shortest path from (0, 0, ∅) to (p, s, ∅) in the σ-graph has weight E(T). Lean form: the memoised σ-DP (sigmaBoundAt) equals E(T) for 1 ≤ p ≤ t and T ≤ Tmax."
+status    = "math.machine-checked"
+lean      = "ZenoFront.sigmaBoundAt_eq_minCost"
+paper     = "Thm 7.6, doc/theory/exact-front.md §7.5"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
