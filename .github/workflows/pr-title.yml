@@ -4,19 +4,32 @@ on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   conventional-commits:
     name: Conventional Commits
     runs-on: ubuntu-24.04
     steps:
+      # Only .ckc.toml is needed: it selects the CKC profiles whose types ckc-lint accepts.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: /.ckc.toml
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
       - name: Check the title
         env:
           TITLE: ${{ github.event.pull_request.title }}
+          # ckc-lint (hotherio/ckc-tools), pinned to a commit of main. Bump it deliberately.
+          CKC_TOOLS: git+https://github.com/hotherio/ckc-tools@6fd23483209e5717b9767679d8807e5c34edc423
         run: |
-          pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9._/-]+\))?!?: .+'
-          if ! printf '%s' "$TITLE" | grep -Eq "$pattern"; then
-            echo "::error::The pull request title must follow Conventional Commits, e.g. 'fix: keep the best plan'. Got: $TITLE"
+          # ckc-lint accepts every Conventional Commit and every Conventional Knowledge Commit
+          # header, with `~` and `!`: 'fix: keep the best plan', 'formalize(lean): ...', 'refute!: ...'.
+          if ! uvx --from "$CKC_TOOLS" ckc-lint --message "$TITLE"; then
+            echo "::error::The pull request title must be a Conventional Commit or a Conventional Knowledge Commit, e.g. 'fix: keep the best plan' or 'formalize(lean): prove Lemma 2.6'. Got: $TITLE"
             exit 1
           fi

@@ -1,0 +1,7 @@
+# Conventional Knowledge Commits configuration.
+# This repository holds mathematics (the theory note doc/theory/exact-front.md and its Lean 4
+# formalisation in lean/) and empirical work (benchmarks, oracle cross-checks, experiments).
+# Both profiles are active: `proof` governs the claims of the note and their Lean proofs,
+# `science` governs the experiment and result commits.
+# Spec: https://conventional-knowledge-commits.org/
+profiles = ["proof", "science"]
