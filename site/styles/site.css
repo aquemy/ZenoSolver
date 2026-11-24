@@ -57,3 +57,9 @@ main pre, main pre code {
 dl dt code {
   font-weight: 600;
 }
+
+/* Dark mode: inline code on the page surface rather than darkly's light chip. */
+body.quarto-dark :not(pre) > code {
+  background-color: var(--zs-surface-2);
+  color: var(--zs-ink);
+}
