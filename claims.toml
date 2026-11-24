@@ -422,6 +422,17 @@ paper        = "Prop 7.10, doc/theory/exact-front.md §7.6"
 created      = "2026-11-23"
 
 # ===========================================================================
+# 8. Complexity
+# ===========================================================================
+
+[claims.thm-8-1]
+kind      = "theorem"
+statement = "Theorem 8.1: deciding M(X) ≤ 2T, with d, X, p and T as input, is strongly NP-complete."
+status    = "math.proved-informal"
+paper     = "Thm 8.1, doc/theory/exact-front.md §8"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
 
