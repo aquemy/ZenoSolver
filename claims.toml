@@ -277,7 +277,7 @@ created   = "2026-11-24"
 [claims.claim-converse-s-only]
 kind      = "conjecture"
 statement = "The converse under (S) alone: without (A1) or (AΔ), every feasible plan is dominated by an admissible partition, as in Theorem 4.10, so Corollary 4.8 holds under (S) alone."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "status summary (§0, the (S)-only case), doc/theory/exact-front.md; refuted by Ex 4.13 (§4.6)"
 created   = "2026-11-23"
 
