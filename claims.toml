@@ -1,6 +1,6 @@
 # claims.toml: the CKC claim registry for ZenoSolver.
 #
-# One entry per claim of the theory note doc/theory/exact-front.md, plus the two claims of the
+# One entry per claim of the theory note doc/theory/exact-front.md, plus the claims of the
 # papers it corrects. The slug (table key) is what commit footers reference as `claim:<slug>` or
 # `conjecture:<slug>`. `status` is a CACHE of the effective status computed from the commit graph
 # (`claimgraph status . --claims claims.toml`); regenerate it, do not treat it as the source of
@@ -11,7 +11,8 @@
 #   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
 # so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
 # counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
-# claims are paper-greedy-optimal and paper-no-harmful-waiting. A statement the note does not
+# claims are paper-greedy-optimal, paper-no-harmful-waiting and
+# paper-general-graph-reduction. A statement the note does not
 # number gets a descriptive slug: claim-converse-s-only, the converse under (S) alone. Experiments
 # are exp-<id>, in the Experiments section at the end of this file.
 #
@@ -603,6 +604,13 @@ statement = "Assumption of arXiv:2304.14659, Conjecture 6.5 of the note: under (
 status    = "math.disproved"
 paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
+
+[claims.paper-general-graph-reduction]
+kind      = "conjecture"
+statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
+status    = "math.conjectured"
+paper     = "arXiv:2304.14659 §2.4; Ex 6.11, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
 
 # ===========================================================================
 # Experiments
