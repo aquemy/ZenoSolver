@@ -439,6 +439,13 @@ status    = "math.proved-informal"
 paper     = "Prop 8.2, doc/theory/exact-front.md §8"
 created   = "2026-11-23"
 
+[claims.cor-8-3]
+kind      = "corollary"
+statement = "Corollary 8.3: E(T), and under (S) and (A1) the front, are computable in pseudo-polynomial time, so computing the front is not strongly NP-hard unless P = NP."
+status    = "math.proved-informal"
+paper     = "Cor 8.3, doc/theory/exact-front.md §8"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
