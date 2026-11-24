@@ -246,6 +246,13 @@ status    = "math.conjectured"
 paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
 created   = "2026-11-23"
 
+[claims.lem-4-11]
+kind      = "lemma"
+statement = "Lemma 4.11 (shrinking): an admissible partition X_1..X_p with |X| ≥ p + 2 stays admissible after removing two landings, each new group a sub-multiset of the old one."
+status    = "math.proved-informal"
+paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 5. The per-PPP greedy of both papers is not exact
 # ===========================================================================
