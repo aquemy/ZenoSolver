@@ -585,3 +585,13 @@ code      = "experiments/E3_forest_dp/run.py"
 results   = "experiments/results/E3_forest_dp"
 paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
 created   = "2026-11-24"
+
+[claims.exp-e4-nonsymmetric-front]
+kind      = "experiment"
+statement = "E4 (non-symmetric front): the front of role-configuration schedules with exact waiting (config_front) equals the front of all plans (truth, central flights none or useless) in 1,190 comparisons and of all simple plans with up to s + 1 landings in 800, including 400 instances shaped like Prop 6.5; zeno closed its bracket on all 1,990 and matched, using the roles, lagrangian, balanced and search bounds."
+status    = "sci.supported"
+tests     = ["thm-6-1", "thm-6-9", "cor-6-10"]
+code      = "experiments/E4_nonsymmetric_front/run.py"
+results   = "experiments/results/E4_nonsymmetric_front"
+paper     = "Thm 6.1, Thm 6.9 and Cor 6.10, doc/theory/exact-front.md §6"
+created   = "2026-11-24"
