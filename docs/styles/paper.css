@@ -29,7 +29,8 @@
   font-size: 0.95em;
 }
 
-/* The authors, as on arXiv:2304.14659v1, under the revision line of the opening page. */
+/* The authors and their affiliations (the co-authors' as on arXiv:2304.14659v1), under the
+   revision line of the opening page. */
 .paper-authors {
   margin: 0.4em 0 0.8em 0;
 }
