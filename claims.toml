@@ -189,6 +189,14 @@ lean_partial = "ZenoFront.Feasible.exists_roleConfig_records"
 paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2"
 created      = "2026-11-23"
 
+[claims.lem-4-4]
+kind      = "lemma"
+statement = "Lemma 4.4 (shrinking) [SH]: a role configuration on Q with t(cfg) > t ≥ |Q| shrinks, by deleting landings, to one with passenger count exactly t whose cost, role loads and groups are no larger. Lean form: stated by landing count (s + 2N landings down to s ≥ p) with every role multiset shrinking, so cost, role loads and groups do not grow; Admissible.exists_shrink is the partition form used by Theorem 4.7."
+status    = "math.machine-checked"
+lean      = "ZenoFront.RoleConfig.exists_shrink, ZenoFront.Admissible.exists_shrink"
+paper     = "Lemma 4.4, doc/theory/exact-front.md §4.2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
