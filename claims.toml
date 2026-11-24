@@ -118,6 +118,13 @@ lean      = "ZenoFront.Admissible.exists_card_touched_le, ZenoFront.IsParityWitn
 paper     = "Lemma 2.8, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.lem-2-9]
+kind      = "lemma"
+statement = "Lemma 2.9 (shared city): non-empty groups with Σ_k |X_k| ≡ p (mod 2) form an admissible partition if some city belongs to every even group, in particular if all groups share a city or all even groups are equal."
+status    = "math.proved-informal"
+paper     = "Lemma 2.9, doc/theory/exact-front.md §2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
