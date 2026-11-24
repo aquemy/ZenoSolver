@@ -1,6 +1,6 @@
 # claims.toml: the CKC claim registry for ZenoSolver.
 #
-# One entry per claim of the theory note doc/theory/exact-front.md, plus the two claims of the
+# One entry per claim of the theory note doc/theory/exact-front.md, plus the claims of the
 # papers it corrects. The slug (table key) is what commit footers reference as `claim:<slug>` or
 # `conjecture:<slug>`. `status` is a CACHE of the effective status computed from the commit graph
 # (`claimgraph status . --claims claims.toml`); regenerate it, do not treat it as the source of
@@ -11,7 +11,8 @@
 #   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
 # so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
 # counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
-# claims are paper-greedy-optimal and paper-no-harmful-waiting. A statement the note does not
+# claims are paper-greedy-optimal, paper-no-harmful-waiting and
+# paper-general-graph-reduction. A statement the note does not
 # number gets a descriptive slug: claim-converse-s-only, the converse under (S) alone. Experiments
 # are exp-<id>, in the Experiments section at the end of this file.
 #
@@ -216,12 +217,12 @@ paper     = "Lemma 4.6, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.thm-4-7]
-kind         = "theorem"
-statement    = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.exists_admissible"
-paper        = "Thm 4.7, doc/theory/exact-front.md §4.3"
-created      = "2026-11-23"
+kind      = "theorem"
+statement = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M. Lean form: (A1) as Network.A1, F_k as durSum (P k)."
+status    = "math.proved-informal"
+lean      = "ZenoFront.Feasible.exists_admissible_A1_flightTime"
+paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
+created   = "2026-11-23"
 
 [claims.cor-4-8]
 kind      = "corollary"
@@ -248,24 +249,27 @@ created   = "2026-11-23"
 
 [claims.thm-4-10]
 kind      = "theorem"
-statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|."
+statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|. Lean form: (AΔ) as Network.ATri, F_k as durSum (P k), any p ≤ t for the form on a set of planes."
 status    = "math.proved-informal"
+lean      = "ZenoFront.Feasible.exists_admissible_ATri"
 paper     = "Thm 4.10, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
 [claims.lem-4-11]
 kind      = "lemma"
 statement = "Lemma 4.11 (shrinking): an admissible partition X_1..X_p with |X| ≥ p + 2 stays admissible after removing two landings, each new group a sub-multiset of the old one."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible.exists_remove_two"
 paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
 [claims.cor-4-12]
-kind      = "corollary"
-statement = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
-status    = "math.proved-informal"
-paper     = "Cor 4.12, doc/theory/exact-front.md §4.6"
-created   = "2026-11-24"
+kind         = "corollary"
+statement    = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.minimal_achievable_iff_multisetPoints_ATri, ZenoFront.minimal_achievable_iff_anywhere_of_ATri, ZenoFront.minimal_achievable_iff_minCost_ATri, ZenoFront.solveFront_isParetoFront_ATri, ZenoFront.Cert.check_sound_ATri, ZenoFront.Cert.forestGapBound_le_ATri"
+paper        = "Cor 4.12, doc/theory/exact-front.md §4.6"
+created      = "2026-11-24"
 
 [claims.claim-4-13]
 kind      = "claim"
@@ -411,6 +415,48 @@ kind      = "lemma"
 statement = "Lemma 6.19 (cut bound): with Φ the least flight time of a sequence of flights from C_I to C_G, every feasible plan has Σ_k F_k ≥ (2t − p)Φ, hence makespan at least (2t − p)Φ/p; under (AΔ), Φ = min_x (d_x + d̄_x)."
 status    = "math.proved-informal"
 paper     = "Lemma 6.19, doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
+[claims.claim-6-11]
+kind      = "claim"
+statement = "Example 6.11 (the reduction misses the front): for the path C_I–a–b–C_G with durations 1, 2, 1, c_a = c_b = 1, t = 3 and p = 2, the reduced instance f(U) has the front {(8, 10)} while U has the front {(8, 8)}."
+status    = "math.proved-informal"
+paper     = "Ex 6.11, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
+[claims.prop-6-12]
+kind      = "proposition"
+statement = "Proposition 6.12 (the reduced front is attained): for every role configuration of the reduced clique instance f(U) with passenger count t, every order of its drop-offs and pick-ups and every link matching, the flight graph U has a feasible plan with the configuration's cost and the makespan M_tmpl of its template, so F_{f(U)} ⊆ A_U; no assumption on U is needed."
+status    = "math.proved-informal"
+paper     = "Prop 6.12, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
+[claims.prop-6-13]
+kind      = "proposition"
+statement = "Proposition 6.13 (same least cost): when U has no edge C_I–C_G and κ* is the least ω of a path from C_I to C_G, every plan of U costs at least sκ*, the cheapest point (sκ*, M*) of F_{f(U)} costs exactly that, so U and f(U) have the same least cost and F_U = Min{(C, M) ∈ A_U : M ≤ M*}."
+status    = "math.proved-informal"
+paper     = "Prop 6.13, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
+[claims.prop-6-14]
+kind      = "proposition"
+statement = "Proposition 6.14 (dominated cities, Pareto paths): in a clique instance without central flights, removing a city v dominated by another (c, d and d̄ all no larger) keeps the front; in particular f(U) keeps its front restricted to pairs of non-dominated paths."
+status    = "math.proved-informal"
+paper     = "Prop 6.14, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
+[claims.prop-6-15]
+kind      = "proposition"
+statement = "Proposition 6.15 (where the reduction is exact): F_U = F_{f(U)} when (a) U is a clique instance satisfying (A1-NS), (b) p = 1, or (c) t = p."
+status    = "math.proved-informal"
+paper     = "Prop 6.15, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
+[claims.prop-6-16]
+kind      = "proposition"
+statement = "Proposition 6.16 (time-expanded flows): with integer durations at least 1, the least cost of integer flows of p plane units and t passenger units through the time-expanded network up to time M is the least cost R(M) of a feasible plan of U with makespan at most M, and F_U = {(R(M), M) : 0 ≤ M ≤ M*, R(M) < R(M − 1)}."
+status    = "math.proved-informal"
+paper     = "Prop 6.16, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
 # ===========================================================================
@@ -579,6 +625,13 @@ statement = "Assumption of arXiv:2304.14659, Conjecture 6.5 of the note: under (
 status    = "math.disproved"
 paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
+
+[claims.paper-general-graph-reduction]
+kind      = "conjecture"
+statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
+status    = "math.disproved"
+paper     = "arXiv:2304.14659 §2.4; Ex 6.11, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
 
 # ===========================================================================
 # Experiments
