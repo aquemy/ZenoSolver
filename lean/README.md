@@ -115,10 +115,14 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   * a missing point on `tree12`, rejected by the tree DP with the C++ checker's bound (5230);
   * a truncated file;
   * version 2: `roles` gaps without `A1-NS`, `S` listed for non-symmetric durations, a missing
-    point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak.
+    point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak,
+    and the Proposition 6.5 instance without its point (14, 74), where the search finds a
+    cheaper schedule.
 
 The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
-`roles` and `lagrangian` bounds). The C++ checker agrees with every verdict.
+`roles`, `lagrangian`, `balanced` and `search` bounds; `v2-search-prop65.cert` is the
+Proposition 6.5 instance, whose two `search` gaps close harmful waiting). The C++ checker agrees
+with every verdict.
 
 ## Contents
 
@@ -156,6 +160,7 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
 | `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched` |
 | `ZenoFront/Domination.lean` | Theorem 6.9: Step 1 and the event keys (event-ordered, or no city with `d = d̄ = 0`); the counterexample for `p > t` | `exists_transfer_pw`, `nzKeys`, `eoKeys`, `schedulableDomination`, `not_schedulableDomination` |
+| `ZenoFront/SchedMap.lean` | Scheduled configurations on representatives, rescaled | `Sched.map`, `Sched.tmpl_map_le`, `Sched.mul_tmpl_map_le` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -442,10 +447,11 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   are exactly the Pareto front. This holds for every table of central flights satisfying
   (A1-NS) when the certificate lists it (`Cert2.check_sound_A1NS`), and for every table
   otherwise (`Cert2.check_sound_of_not_A1NS`). The kinds it verifies:
-  * gaps: `relaxed`, `roles`, `lagrangian` and `balanced`;
-  * fastest point: `closed`, `relaxed`, `roles` and `balanced`.
+  * gaps: `relaxed`, `roles`, `lagrangian`, `balanced` and `search`;
+  * fastest point: `closed`, `relaxed`, `roles`, `balanced` and `search`.
 
-  It rejects `search` and `forest`.
+  It rejects `forest`, and `search` when some city has `d = d̄ = 0` (Theorem 6.9 then covers only
+  event-ordered plans).
 * `schedulableDomination` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible plan
   that is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid
   scheduled configuration with `2t − p` landings, cost at most the plan's and closed form at most
@@ -454,6 +460,10 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   Step 2 exchanges futures (`exists_ordered_handoffs`); Steps 3–6 select links along the
   hand-offs (`exists_links`), bound the closed form and shrink (`exists_sched`).
   `not_schedulableDomination`: without `p ≤ t` the statement fails (`t = 0`, `p = 1`).
+* `Cert2.searchWith_le` (**`search`**): Theorem 6.9, the configuration mapped to representatives
+  (`Sched.map`, `Sched.mul_tmpl_map_le`), and the completeness of the search
+  (`SearchData.closed_sound`): a closed search below `M` with cost bound `C'` rules out every
+  feasible plan faster than `M` and cheaper than `C'`.
 * `BalData.value_le_totalCost` (**`balanced`**): the program of `BalancedRoles` (a DP over the
   planes, on states made of the imbalance vector and the landings so far) is at most the cost of
   every balanced configuration with `s` landings and role loads `≤ T`. A drop-off and a pick-up
@@ -641,7 +651,9 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Theorem 6.9 (`schedulableDomination`, for `p ≤ t`; `not_schedulableDomination`: the
       statement fails for `t < p`). Lemma 6.3's optimality is not needed for soundness:
       Theorem 6.9 bounds the closed form directly.
-- [ ] `search` in the v2 checker: map configurations to representatives as for `roles`, then
-      `SearchData.closed_sound` closes `search` gaps. Until then `check` rejects `search`.
+- [x] `search` gaps and `fastest search` in `Cert2.check_sound`, when no city has `d = d̄ = 0`
+      (`Cert2.searchWith_le`).
+- [ ] `search` for instances with a city of `d = d̄ = 0`: soundness over event-ordered plans
+      only (assumption `EO`), which needs its own statement of the front.
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
       is proved.

@@ -7,6 +7,8 @@ module
 public import ZenoFront.Checker
 public import ZenoFront.BalancedBound
 public import ZenoFront.SearchGap
+public import ZenoFront.SchedMap
+public import ZenoFront.Domination
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -28,10 +30,15 @@ This file verifies:
   (`LagData.value_le_totalCost`), over the representatives of the cities (`domRep3`);
 * `balanced` (gaps and fastest point), under (A1-NS): the exact program over balanced role
   configurations (`BalData.value_le_totalCost`), rerun at the gap's level;
+* `search` (gaps and fastest point), under (A1-NS) and when no city has `d = d̄ = 0`: the
+  exhaustive search over scheduled configurations of cost below the previous point's
+  (`SearchData.closed_sound`), on the representatives, at the gap's level. Theorem 6.9
+  (`schedulableDomination`) turns every feasible plan into such a configuration;
 * `fastest closed` for symmetric durations, as in v1.
 
-The other v2 kinds (`search`, `forest`) are parsed but given no bound, so a certificate that uses
-one is rejected.
+The other v2 kind (`forest`) is parsed but given no bound, so a certificate that uses it is
+rejected. A `search` bound in a certificate with a city of `d = d̄ = 0` is not verified (its
+plans need not be event-ordered), and is rejected too.
 
 ## Main results
 
@@ -180,20 +187,40 @@ def balWith (dR dbR : Fin C.n → ℕ) : ℕ → WithTop ℕ :=
     fun M => if (M - 1) / C.rolesScale ≤ TmaxR then (C.balData dR dbR F M).value C.p else 0
   else fun _ => 0
 
+/-- Whether no city has `d = d̄ = 0`. Then every feasible plan is covered by Theorem 6.9. -/
+def noZeroCity : Bool := decide (∀ i, ¬ (C.d i = 0 ∧ C.dbar i = 0))
+
+/-- The cost of the last point faster than `M` (`⊤` if there is none): a `search` gap below the
+point of makespan `M` rules out plans cheaper than it. -/
+def prevCost (M : ℕ) : WithTop ℕ :=
+  ((C.front.filter fun x => x.2 < M).getLast?.map fun x => (x.1 : WithTop ℕ)).getD ⊤
+
+/-- The exhaustive search below a point of makespan `M`, for plans of cost below `cost`, on the
+scaled durations `dR`, `dbR` of the representatives. -/
+def searchDataWith (dR dbR : Fin C.n → ℕ) (cost : WithTop ℕ) (M : ℕ) : SearchData C.n :=
+  ⟨dR, dbR, C.c, C.p, C.s, (M - 1) / C.rolesScale, cost⟩
+
 /-- The exhaustive search of a `search` gap (or of `fastest search`, with no cost bound) below a
-point of makespan `M`, on the representatives' scaled durations. `SearchData.closed_sound`
-proves its enumeration complete; the checker does not use it until Theorem 6.9
-(`SchedulableDomination`) is proved, so `search` gaps are still rejected. -/
-def searchData (cost : WithTop ℕ) (M : ℕ) : SearchData C.n :=
-  ⟨C.dR, C.dbR, C.c, C.p, C.s, (M - 1) / C.rolesScale, cost⟩
+point of makespan `M`, on the representatives' scaled durations. -/
+def searchData (cost : WithTop ℕ) (M : ℕ) : SearchData C.n := C.searchDataWith C.dR C.dbR cost M
+
+/-- The `search` bound below a point of makespan `M`: the previous point's cost if the search
+finds no configuration cheaper than it with a schedule faster than `M`; `0` (no bound) unless
+assumption `A1-NS` is listed and no city has `d = d̄ = 0`. -/
+def searchWith (dR dbR : Fin C.n → ℕ) (M : ℕ) : WithTop ℕ :=
+  if C.assumptions.contains "A1-NS" && C.noZeroCity then
+    if (C.searchDataWith dR dbR (C.prevCost M) M).closed then C.prevCost M else 0
+  else 0
 
 /-- The bound named by a kind; `0` (no bound) for the kinds this checker does not verify. -/
 def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ)
-    (lagB : List ℤ → ℕ → WithTop ℕ) (balB : ℕ → WithTop ℕ) : Kind2 → ℕ → WithTop ℕ
+    (lagB : List ℤ → ℕ → WithTop ℕ) (balB : ℕ → WithTop ℕ) (searchB : ℕ → WithTop ℕ) :
+    Kind2 → ℕ → WithTop ℕ
   | .relaxed => C.relaxedWith scale Tmax table
   | .roles => rolesB
   | .lagrangian mu => lagB mu
   | .balanced => balB
+  | .search => searchB
   | _ => fun _ => 0
 
 /-- Obligation 2: nothing is faster than the first point. `closed` is v1's closed form
@@ -208,6 +235,7 @@ def fastestOK (bound : Kind2 → ℕ → WithTop ℕ) : Bool :=
     | .relaxed => decide (bound .relaxed x.2 = ⊤)
     | .roles => decide (bound .roles x.2 = ⊤)
     | .balanced => decide (bound .balanced x.2 = ⊤)
+    | .search => decide (bound .search x.2 = ⊤)
     | _ => false
 
 /-- Obligations 2 and 3, with the scale, the top level and the one-plane table computed once. -/
@@ -222,6 +250,7 @@ def boundsCheck : Bool :=
     (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     (C.balWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+    (C.searchWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
   C.fastestOK bound && gapsOK bound C.front C.gaps
 
 /-- The bounds of the checker, as specified. -/
@@ -229,6 +258,7 @@ def bound : Kind2 → ℕ → WithTop ℕ :=
   C.boundWith (durationScale C.weight) (C.maxLevel (durationScale C.weight))
     (oneplaneTable (scaledDurations C.weight) C.c (C.maxLevel (durationScale C.weight)) C.s)
     (C.rolesWith C.dR C.dbR) (C.lagWith C.dR C.dbR) (C.balWith C.dR C.dbR)
+    (C.searchWith C.dR C.dbR)
 
 theorem boundsCheck_eq : C.boundsCheck = (C.fastestOK C.bound && gapsOK C.bound C.front C.gaps) := by
   have hwS : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
@@ -389,6 +419,53 @@ theorem balWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contai
     · exact zero_le
   · exact zero_le
 
+theorem noZeroCity_spec (h : C.noZeroCity = true) : ∀ i, ¬ (C.d i = 0 ∧ C.dbar i = 0) := by
+  simpa [noZeroCity] using h
+
+/-- **The `search` bound is a lower bound** under (A1-NS), when no city has `d = d̄ = 0`: if the
+search below `M` finds no configuration cheaper than `C'` (the previous point's cost) with a
+schedule faster than `M`, every feasible plan with makespan below `M` costs at least `C'`.
+Theorem 6.9 turns the plan into a valid scheduled configuration with `s` landings, cost at most
+the plan's and closed form at most its makespan; on the representatives, in units of
+`rolesScale`, its closed form is at most the level of `M`, which the search rules out. -/
+theorem searchWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
+    (C.network dc).A1NS) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.searchWith C.dR C.dbR M ≤ (planCost C.c P : WithTop ℕ) := by
+  unfold searchWith
+  split_ifs with hlist hclosed
+  · rw [Bool.and_eq_true] at hlist
+    obtain ⟨hlistA, hnz⟩ := hlist
+    by_contra hlt
+    push Not at hlt
+    obtain ⟨S, hS, hsize, hcost, htmpl⟩ := schedulableDomination C.c hpt (hA hlistA) P hP
+      (Or.inr (C.noZeroCity_spec hnz))
+    set rep := domRep3 C.d C.dbar C.c with hrep
+    have hreple := domRep3_le C.d C.dbar C.c
+    have hS' := hS.map rep
+    have hcost' : ((S.map rep).cost C.c : WithTop ℕ) < (C.searchDataWith C.dR C.dbR
+        (C.prevCost M) M).C :=
+      lt_of_le_of_lt (WithTop.coe_le_coe.mpr ((S.cost_map_le C.c fun i => (hreple i).2.2).trans
+        hcost)) hlt
+    have hlo := SearchData.closed_sound _ hclosed (S.map rep) hS' (Sched.size_map.trans hsize)
+      hcost'
+    have hscale : C.rolesScale * (S.map rep).tmpl C.dR C.dbR ≤ (S.map rep).tmpl C.d C.dbar :=
+      Sched.mul_tmpl_map_le C.rolesScale_pos (fun i => C.d_eq_mul (domRep3_mem _ _ _ i))
+        (fun i => C.dbar_eq_mul (domRep3_mem _ _ _ i))
+    have hmap := S.tmpl_map_le (rep := rep) C.d C.dbar (fun i => (hreple i).1)
+      (fun i => (hreple i).2.1)
+    have htmpl' : S.tmpl C.d C.dbar < M := lt_of_le_of_lt htmpl hM
+    simp only [searchDataWith] at hlo
+    have h₁ : C.rolesScale * (S.map rep).tmpl C.dR C.dbR ≤ M - 1 := by
+      change S.tmpl (C.network dc).d (C.network dc).dbar < M at htmpl'
+      simp only [network] at htmpl'
+      omega
+    have h₂ : (S.map rep).tmpl C.dR C.dbR ≤ (M - 1) / C.rolesScale :=
+      (Nat.le_div_iff_mul_le C.rolesScale_pos).mpr (by rw [mul_comm]; exact h₁)
+    omega
+  · exact zero_le
+  · exact zero_le
+
 /-- **Soundness of the v2 checker.** If `check` accepts a certificate, its points are exactly the
 Pareto front of the instance, for every table `dc` of central flight durations that satisfies
 (A1-NS) if the certificate lists it, and for **every** table otherwise. The `relaxed` bounds
@@ -413,6 +490,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     | roles => exact C.rolesWith_le hA hpt hP hM
     | lagrangian mu => exact C.lagWith_le hA hpt mu hP hM
     | balanced => exact C.balWith_le hA hp hpt hP hM
+    | search => exact C.searchWith_le hA hpt hP hM
     | _ => exact bot_le
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · -- 1. Every point is achieved by its plan.
@@ -454,6 +532,14 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
         by_contra hlt
         push Not at hlt
         have := hbound .balanced hP x.2 hlt
+        rw [hfast] at this
+        exact absurd this (by simp)
+      | search =>
+        rw [hk] at hfast
+        simp only [decide_eq_true_eq] at hfast
+        by_contra hlt
+        push Not at hlt
+        have := hbound .search hP x.2 hlt
         rw [hfast] at this
         exact absurd this (by simp)
       | _ => rw [hk] at hfast; simp at hfast

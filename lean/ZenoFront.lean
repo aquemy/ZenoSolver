@@ -21,6 +21,7 @@ public import ZenoFront.Exchange
 public import ZenoFront.LinkCount
 public import ZenoFront.SchedBuild
 public import ZenoFront.Domination
+public import ZenoFront.SchedMap
 public import ZenoFront.Parse
 public import ZenoFront.Examples
 public import ZenoFront.Shrink
