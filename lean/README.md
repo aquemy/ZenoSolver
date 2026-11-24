@@ -32,6 +32,8 @@ lake build --wfail        # build ZenoFront; warnings, including `sorry`, are er
 lake env lean scripts/CheckAxioms.lean   # axiom audit
 lake build zeno-check     # the compiled checker (first build compiles Mathlib's C code, ~1.5 min)
 lake exe zeno-check FILE  # check a certificate
+lake build zeno-front     # the verified solver
+lake exe zeno-front FILE  # the front of the instance in FILE's header (a certificate)
 bash test/run.sh          # check the test certificates against their expected verdicts
 ```
 
@@ -45,6 +47,14 @@ It solves every golden instance (`tests/golden/instances.txt`) and the random in
 `lean/test/instances/` with the C++ solver, writes their certificates, and requires both
 `zeno check` and `zeno-check` to accept every one. Five of the random instances have a `forest`
 gap.
+
+The verified solver against the C++ one: on the golden instances and the quick suite
+(`bench/instances/quick.txt`), the front of `zeno-front` must equal that of `zeno front`.
+
+```sh
+bash lean/test/front.sh build/release/zeno lean/.lake/build/bin/zeno-front "$(mktemp -d)" \
+  "tests/golden/instances.txt|tests/golden/data" "bench/instances/quick.txt|bench/instances/data"
+```
 
 The axiom audit fails if any declaration of a `ZenoFront` module uses an axiom other than
 `propext`, `Classical.choice` and `Quot.sound`. It rejects `sorryAx` and `native_decide`.
@@ -71,6 +81,9 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   3.9 MB, 240,000 legs), takes 2.3 s and 135 MiB. Before this phase's changes the same
   certificates took 478 s, 295 s of them for `r5`.
 * The end-to-end run, 35 certificates: about 1.3 s, solver included.
+* The solver `zeno-front` (`zeno-front.json`), on the 27 golden instances and the 5 of the quick
+  suite: 24 ms at the median, 0.18 s at most (`multiples`). It scans every level up to
+  `(2t − p) · d_max`, so wide level ranges are slow: `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` takes 41 s.
 * **Many non-dominated cities.** The σ-DP is exponential in the number of cities that survive
   the dominance merge, and the tree DP is pseudo-polynomial in the level `T`. The checker runs
   whichever `useTreeDP` estimates cheaper. Every suite certificate keeps the σ-DP. Three
@@ -118,6 +131,7 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
 | `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
+| `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
@@ -302,6 +316,23 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   (**Corollary 4.8**): under (S) and (A1), the front is `Min 𝒳`, with `𝒳` the points
   `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition.
   `minimal_achievableAnywhere_iff_admissiblePoints` is the same for planes ending anywhere.
+
+**The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
+
+* `minCost` (`E(T)`), `minCost_antitone`, `minCost_attained`: the least cost of an admissible
+  partition of `2t − p` landings with loads `≤ T` is non-increasing in `T`, and attained when
+  finite.
+* `sigmaBoundAt_eq_minCost` (**the σ-DP is exact**): with `1 ≤ p ≤ t` and `T ≤ Tmax`, the
+  checker's σ-DP is `E(T)`. Every finite value is the cost of the groups the DP chooses
+  (`sigmaDP_attained`), whose witness sets form a parity witness. No link forest is needed.
+* `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and
+  `E(T') > C` for every `T' < T`. `breakpoint_le`: then `T ≤ (2t − p) · d_max`.
+* `solveFront_isParetoFront` (**the solver is correct**): under (S) and (A1), with `1 ≤ p ≤ t`,
+  `solveFront` is the Pareto front of the feasible plans (`IsParetoFront`). It scans the levels
+  `0, …, (2t − p) · d_max` and keeps `(E(T), 2T)` where `E` drops. `mem_solveFront_iff`: its
+  points are exactly the minimal admissible points. `lake exe zeno-front FILE` prints it by
+  increasing cost, as `zeno front` does. CI requires the two to agree on the golden instances
+  and the quick suite (`test/front.sh`).
 
 **Forest bound (`AdmissibleBound.lean`)**
 
@@ -532,8 +563,9 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] AP (add a plane, Lemma 4.6; `Admissible.addPlane`, `Admissible.addPlanes`).
 - [x] The σ-DP as a lower bound on `E(T)` (`sigmaBoundAt_le_totalCost`).
 - [x] The σ-DP's state bound `|σ| ≤ min(p − 1, t − p)` from Claim B′ (`smallSubsetList`).
-- [ ] The σ-DP's other direction (`DP ≥ E`, so the DP is exact). Not needed for soundness.
-- [ ] `E(T)` as a definition and its monotonicity; pairs upper bound `U(T)` with `L ≤ E ≤ U`.
+- [x] The σ-DP's other direction (`DP ≥ E`, so the DP is exact; `sigmaBoundAt_eq_minCost`).
+- [x] `E(T)` as a definition and its monotonicity (`minCost`, `minCost_antitone`).
+- [ ] Pairs upper bound `U(T)` with `L ≤ E ≤ U`.
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
       every arc bound `E(T)` from below (sparse certificates).
 - [ ] Executable admissibility check (union–find on the plane–city graph) proved equal to
