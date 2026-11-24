@@ -229,6 +229,14 @@ lean      = "ZenoFront.minimal_achievable_iff_multisetPoints"
 paper     = "Cor 4.8, doc/theory/exact-front.md §4.4"
 created   = "2026-11-23"
 
+[claims.thm-4-9]
+kind      = "theorem"
+statement = "Theorem 4.9 (bridge) [B3]: under (S) and (A1), the front of the variant in which planes may end anywhere and the makespan is the last arrival equals the front F. Lean form: an explicit p ≤ t."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_achievable_iff_anywhere_of_A1"
+paper     = "Thm 4.9, doc/theory/exact-front.md §4.5"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
