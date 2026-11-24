@@ -213,6 +213,14 @@ lean      = "ZenoFront.Admissible.addPlane_of_size"
 paper     = "Lemma 4.6, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
+[claims.thm-4-7]
+kind      = "theorem"
+statement = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M. Lean form: integer data, (S) as d̄ = d, (A1) as Network.A1, an explicit p ≤ t, and 2δ(X_k) ≤ M in place of ℓ(X_k) ≤ F_k."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Feasible.exists_admissible"
+paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
