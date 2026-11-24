@@ -33,6 +33,21 @@ Both papers present ZenoSolver as computing the *true* Pareto front (total cost,
   - Cause: a plane that must pick up three passengers in city 2 reaches it at time 17, but the first passenger is only dropped there at time 19. The wait shifts all three pick-ups.
 - The front computed from role loads is therefore only a lower bound. The exhaustive oracle confirms the true front.
 
+**The reduction of general flight graphs does not keep the front.**
+
+- arXiv:2304.14659 §2.4 reduces an arbitrary flight graph to the clique model, with one virtual city for each central vertex i and pair of paths I → i and i → G. It claims that the two instances have the same front.
+- They do not. Take the path I – a – b – G with durations 1, 2, 1, landing costs 1 and 1, t = 3 passengers and p = 2 planes (note, Example 6.11).
+  - The reduced instance has the front {(8, 10)}; the graph has the front {(8, 8)}.
+  - In the plan of makespan 8, one plane flies I → a → b → a → b → G. In this single trip between hubs it drops a passenger at b, flies back to a and picks up another passenger there.
+  - The reduced instance has no flights between its virtual cities (the paper sets their durations to infinity), and going through a hub instead takes twice as long, so it cannot express that trip. Relaying passengers is not the issue: in the plan of makespan 8, every passenger changes planes at most once.
+  - Giving the reduced instance its central flights back does not repair it: the per-segment costs no longer add up, and the plan of makespan 8 comes out at cost 10.
+  - With three planes and four passengers on the same path with unit durations, the fronts are {(10, 7)} reduced and {(10, 5)} true.
+- On random tiny graphs (paths, parallel spokes, cycles and random connected graphs with at most four central vertices, four passengers and three planes), the fronts differ on 342 of 4,000 instances, 22% of instances with p ≥ 2 and t > p.
+- What still holds (note, Propositions 6.12–6.16):
+  - every point of the reduced front is attained by a plan of the graph, and both fronts have the same least cost;
+  - the reduction is exact when every central vertex is joined to both hubs and central flights are no faster than through a hub, with one plane, or with as many planes as passengers;
+  - with integer durations, the exact front of a graph can be computed with a time-expanded integer flow model, level by level.
+
 **Bookkeeping errors in the 2016 code** (fixed in 2026, PRs #3 and #4 of the repository):
 
 - the extraction of the Pareto front;
@@ -74,5 +89,6 @@ The repository's solver `zeno` (2026) computes the exact front.
 
 ## 4. Not checked
 
-- The arXiv paper's reduction of general flight graphs to the clique model.
 - Fronts that third-party papers report as computed by ZenoSolver.
+
+The arXiv paper's reduction of general flight graphs to the clique model, listed here before, has been checked since. It does not keep the front (§1); see the note, §6.6.
