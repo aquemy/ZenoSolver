@@ -30,7 +30,10 @@
 | [Theorem 4.7 (converse)](#node-theorem-4-7) | [machine-checked]{.badge .ok} | [proof in the note]{.badge .informal} |
 | [Corollary 4.8](#node-corollary-4-8) | [machine-checked]{.badge .ok} | [proof in the note]{.badge .informal} |
 | [Theorem 4.9 (bridge)](#node-theorem-4-9) | [machine-checked]{.badge .ok} | [proof in the note]{.badge .informal} |
-| [Conjecture 4.10](#node-conjecture-4-10) | [informal]{.badge .informal} | [open problem]{.badge .open} |
+| [Theorem 4.10 (converse without (A1))](#node-theorem-4-10) | [informal]{.badge .informal} | [proof in the note]{.badge .informal} |
+| [Lemma 4.11 (shrinking)](#node-lemma-4-11) | [informal]{.badge .informal} (parts in Lean) | [proof in the note]{.badge .informal} |
+| [Corollary 4.12](#node-corollary-4-12) | [informal]{.badge .informal} | [proof in the note]{.badge .informal} |
+| [Example 4.13 (the hypothesis matters)](#node-example-4-13) | [informal]{.badge .informal} | [computed]{.badge .informal} |
 | [The greedy counterexample](#node-s5) | [informal]{.badge .informal} (parts in Lean) | [proof in the note]{.badge .informal} |
 | [Theorem 6.1 (converse to role configurations)](#node-theorem-6-1) | [machine-checked]{.badge .ok} | [proof in the note]{.badge .informal} |
 | [Lemma 6.2 (relaxed role loads)](#node-lemma-6-2) | [informal]{.badge .informal} | [proof in the note]{.badge .informal} |

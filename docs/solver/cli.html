@@ -221,9 +221,32 @@ window.Quarto = {
   </li>  
     </ul>
   </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Theory</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-theory">    
+        <li>
+    <a class="dropdown-item" href="../proofs.html">
+ <span class="dropdown-text">Blueprint</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../claimgraph.html">
+ <span class="dropdown-text">Claim graph</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../history.html">
+ <span class="dropdown-text">History</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../blueprint.pdf">
+ <span class="dropdown-text">Blueprint (PDF)</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
-    <a class="nav-link" href="../proofs.html"> 
-<span class="menu-text">Blueprint</span></a>
+    <a class="nav-link" href="../experiments.html"> 
+<span class="menu-text">Experiments</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../results.html"> 
@@ -452,7 +475,7 @@ The 2016 swap
 6 6
 8 4</code></pre>
 <p>One <code>cost makespan</code> line per front point, by increasing cost (so by decreasing makespan). Costs and durations are integers, and so is every makespan.</p>
-<p><strong>Symmetric instances</strong> (durations to <span class="math inline">\(C_I\)</span> and to <span class="math inline">\(C_G\)</span> equal, every generated instance without <code>-E</code>/<code>-W</code>): the front is exact. A <code>zeno</code> instance has no central-to-central flights; the front is that of the model in which they exist but are no faster than through a hub, assumption (A1), as in every PDDL file <code>zeno</code> writes (<a href="../proofs.html#node-corollary-4-8">Corollary 4.8</a> with <a href="../proofs.html#node-proposition-7-1">Proposition 7.1</a>). When every gap of the front is closed by the relaxation <span class="math inline">\(L\)</span>, the same front holds for central flights of any duration; the certificate then lists only <code>relaxed</code> gaps.</p>
+<p><strong>Symmetric instances</strong> (durations to <span class="math inline">\(C_I\)</span> and to <span class="math inline">\(C_G\)</span> equal, every generated instance without <code>-E</code>/<code>-W</code>): the front is exact. A <code>zeno</code> instance has no central-to-central flights; the front is that of the model in which they exist but are no faster than through a hub, assumption (A1), as in every PDDL file <code>zeno</code> writes (<a href="../proofs.html#node-corollary-4-8">Corollary 4.8</a> with <a href="../proofs.html#node-proposition-7-1">Proposition 7.1</a>). The note proves that the same front holds for central flights that are faster but obey the triangle inequality (AΔ) (<a href="../proofs.html#node-corollary-4-12">Corollary 4.12</a>, not yet in Lean); with central flights that violate both, it can differ (<a href="../proofs.html#node-example-4-13">Example 4.13</a>). When every gap of the front is closed by the relaxation <span class="math inline">\(L\)</span>, the same front holds for central flights of any duration; the certificate then lists only <code>relaxed</code> gaps.</p>
 <p><strong>Non-symmetric instances</strong> (<code>-E</code>/<code>-W</code>, or a 3-line data file with different lines): <code>zeno</code> computes a certified bracket (<a href="../solver/algorithm.html#nonsymmetric">algorithm</a>). Stdout lists the points achieved by simulated plans, and stderr reports which gaps between them a lower bound closes:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> <span class="at">-n</span> 4 <span class="at">-t</span> 3 <span class="at">-p</span> 2 <span class="at">-E</span> 3 <span class="at">-W</span> 2 <span class="at">-r</span> 10 <span class="op">&gt;</span> front.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre class="text"><code>non-symmetric instance: 12 achieved points; fastest makespan certified; 11 of 11 gaps certified; the front is exact, assuming A1-NS</code></pre>

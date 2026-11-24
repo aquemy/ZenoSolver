@@ -28,10 +28,13 @@ integers. The assumptions ([§1.4](../proofs.qmd#node-s1-4)) are
 - **(A1)**, under (S): central flights are no faster than through a hub, $d_{ij} \ge d_i + d_j$.
   Every PDDL problem `zeno` writes satisfies it (central flights last
   $\max(d_i, \bar d_i) + \max(d_j, \bar d_j) + 100$);
-- **(A1-NS)**, the non-symmetric version: $d_{ij} \ge \min(d_i + d_j, \bar d_i + \bar d_j)$.
+- **(A1-NS)**, the non-symmetric version: $d_{ij} \ge \min(d_i + d_j, \bar d_i + \bar d_j)$;
+- **(AΔ)**, the triangle inequality on the flights that exist:
+  $\mathrm{dur}(a, b) \le \mathrm{dur}(a, x) + \mathrm{dur}(x, b)$.
 
-The front `zeno` prints is exact for symmetric instances under (A1). For non-symmetric ones it is
-exact wherever the certified bracket closes, under (A1-NS) when a bound needs it
+The front `zeno` prints is exact for symmetric instances under (A1), and by the note's
+[Corollary 4.12](../proofs.qmd#node-corollary-4-12) under (AΔ) as well. For non-symmetric ones it
+is exact wherever the certified bracket closes, under (A1-NS) when a bound needs it
 ([command line](../solver/cli.qmd#front)).
 
 ## Data files {#data-files}

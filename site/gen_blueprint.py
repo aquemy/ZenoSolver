@@ -49,7 +49,7 @@ FULL_LISTING_LINES = 60  # definitions up to this length are listed whole
 HEADING = re.compile(r"^(#{1,6})\s+(?:(\d+(?:\.\d+)*)\.?\s+)?(.*)$")
 OPENER = re.compile(r"^\*\*([^*]+?)\*\*")
 PROOF_START = re.compile(r"^\*(Proof|Status)\b")
-STATEMENT_KIND = re.compile(r"^(Lemma|Theorem|Corollary|Proposition|Conjecture|Statement|Notation)\b")
+STATEMENT_KIND = re.compile(r"^(Lemma|Theorem|Corollary|Proposition|Conjecture|Statement|Notation|Example)\b")
 SQUARE = r"\square"
 
 
@@ -263,14 +263,25 @@ def query_lean(names: list[str]) -> dict:
 
 
 def git_ref() -> str:
-    """The commit to link the listings to: HEAD when lean/ has no uncommitted change."""
-    try:
-        clean = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", "lean"], cwd=ROOT).returncode == 0
-        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
+    """The commit to link the listings to. It must exist on GitHub, so prefer origin/master when
+    lean/ is identical there; else HEAD when lean/ has no uncommitted change; else `master`."""
+    def rev(ref: str) -> str:
+        return subprocess.run(["git", "rev-parse", ref], cwd=ROOT, capture_output=True,
                               text=True, check=True).stdout.strip()
-        return head if clean else "master"
-    except (OSError, subprocess.CalledProcessError):
-        return "master"
+
+    def same_lean(ref: str) -> bool:
+        return subprocess.run(["git", "diff", "--quiet", ref, "--", "lean"], cwd=ROOT).returncode == 0
+
+    try:
+        for ref in ("origin/master", "HEAD"):
+            try:
+                if same_lean(ref):
+                    return rev(ref)
+            except subprocess.CalledProcessError:
+                continue
+    except OSError:
+        pass
+    return "master"
 
 
 OPEN = "([{⟨⦃⟪⁅"

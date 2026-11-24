@@ -1,0 +1,26 @@
+---
+title: "History"
+subtitle: "The knowledge commits that built the claim graph"
+toc: false
+---
+
+The [claim graph](claimgraph.qmd) is the end state of a sequence of knowledge commits. Each one
+states, adds a dependency to, proves, formalizes or refutes a claim. The timeline below replays them
+in order, as a compact SVG figure. Drag the slider to see each claim's status as of every commit.
+
+<iframe src="graph/history-timeline.html" title="Claim graph history timeline" loading="lazy"
+        style="width:100%;height:560px;border:1px solid var(--bs-border-color,#dee2e6);border-radius:6px">
+</iframe>
+
+[Open the timeline on its own page](graph/history-timeline.html)
+
+## Knowledge-commit log
+
+The knowledge commits, oldest first. *Claims touched* lists the claims (by their `claims.toml`
+slug) or the Lean declarations each commit asserted, closed or refuted. Plain feature, fix and
+documentation commits carry no claim and are not listed; the full history is on
+[GitHub](https://github.com/aquemy/ZenoSolver/commits/master).
+
+::: {.history-log}
+{{< include _history-table.md >}}
+:::

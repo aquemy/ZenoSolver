@@ -73,10 +73,13 @@ plan). An exhaustive search over role configurations with exact schedules is the
 ### The pairing argument without (A1) is incomplete {#f4}
 
 Without (A1), the arXiv pairing argument concludes "lower cost" from a set inclusion and
-"dominates" from per-pattern durations; both steps fail
-([Conjecture 4.10](proofs.qmd#node-conjecture-4-10), open). Without (A1) the front is still
-certified wherever the relaxation $L$ meets the achieved cost, which covers every front of the
-default generator ([Theorem 10.1](proofs.qmd#node-theorem-10-1)).
+"dominates" from per-pattern durations; both steps fail. The note proves the converse it was meant
+to establish under the triangle inequality (AΔ) instead
+([Theorem 4.10](proofs.qmd#node-theorem-4-10), formerly Conjecture 4.10, a written proof not yet
+in Lean). The front characterisation then holds under (AΔ) too
+([Corollary 4.12](proofs.qmd#node-corollary-4-12)). Some hypothesis is needed: with central
+flights that violate both (A1) and (AΔ), a plan can beat every admissible partition
+([Example 4.13](proofs.qmd#node-example-4-13)).
 
 ### What still holds {#holds}
 
@@ -104,4 +107,6 @@ The compiled tools add trust in the Lean compiler and in an unverified parser
 Built with [Quarto](https://quarto.org) from `site/` into `docs/`
 ([how](solver/install.qmd#this-website)). The blueprint pages are generated from
 `site/blueprint.toml`, the theory note and the Lean sources by `site/gen_blueprint.py`; the tables
-from the committed baselines by `site/gen_pages.py`. The paper excerpts are in `site/paper/`.
+from the committed baselines by `site/gen_pages.py`; the claim graph and the history from the
+knowledge commits and `claims.toml` by `site/gen_graph.py`. The paper excerpts are in
+`site/paper/`.

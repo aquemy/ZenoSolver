@@ -45,7 +45,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -76,7 +76,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
 
 :::
 

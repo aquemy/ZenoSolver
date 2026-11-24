@@ -1,0 +1,46 @@
+---
+title: "Claim graph"
+subtitle: "Every claim of the theory note, what it rests on, and how its status was reached"
+toc: false
+---
+
+Every result of the [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
+is a **claim** in the registry `claims.toml`, and every change to its status is a
+[Conventional Knowledge Commit](https://conventional-knowledge-commits.org/): a commit whose type
+(`proof`, `formalize`, `conjecture`, `refute`, `lit`, …) and footers (`Status:`, `Depends-On:`,
+`Closes:`, `Disproves:`) record what it asserts and what it rests on
+([`CONTRIBUTING.md`](https://github.com/aquemy/ZenoSolver/blob/master/CONTRIBUTING.md)). The graph
+below is rebuilt from those commits when the site is built.
+
+{{< include _graph-stats.md >}}
+
+A node's colour is its **effective status**: the weakest of its own status and of everything it
+depends on, so an open or refuted claim colours every result that rests on it. Click a node to trace
+its dependencies; press **Play**, or drag the slider, to replay the knowledge commits in order.
+
+<iframe src="graph/claimgraph-viewer.html" title="Claim graph viewer" loading="lazy"
+        style="width:100%;height:820px;border:1px solid var(--bs-border-color,#dee2e6);border-radius:6px">
+</iframe>
+
+[Open the viewer on its own page](graph/claimgraph-viewer.html) ·
+[the graph as JSON](graph/claimgraph.json) · [the commit history](history.qmd)
+
+The statuses are those of the ledger:
+
+- **machine-checked**: a clean Lean kernel proof (axioms among `propext`, `Classical.choice` and
+  `Quot.sound`), recorded by a `formalize` commit that closes the claim with its declaration;
+- **proved informally**: a complete written proof in the note;
+- **conjectured**: open, or only sketched, in the note;
+- **disproved**: refuted by a counterexample, like the papers' claims that their per-PPP greedy
+  is optimal and that waiting is never harmful.
+
+{{< include _graph-divergence.md >}}
+
+## How it is built
+
+`site/gen_graph.py` reads the history with [claimgraph](https://github.com/hotherio/claimgraph)
+and keeps only the knowledge commits, those whose type belongs to a CKC profile. The other commits
+(features, fixes, documentation) would add a node per scope and a replay step each, with no claim
+status to show, so the graph and its replay are compacted to the knowledge commits. The registry
+`claims.toml` gives each claim its statement and Lean declarations.
+`claimgraph status . --claims claims.toml` prints the same statuses from the command line.

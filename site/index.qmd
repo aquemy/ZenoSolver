@@ -79,6 +79,9 @@ the Lean development.
   [instances with known fronts](instances/known-fronts.qmd), [size guidance](instances/sizing.qmd).
 - [**Blueprint:**](proofs.qmd) every statement of the theory note, with the papers' versions, the
   Lean declarations and a status badge from `#print axioms`. Also as a [PDF](blueprint.pdf).
+- [**Claim graph**](claimgraph.qmd) and [**history**](history.qmd): the claims, their
+  dependencies and statuses, rebuilt from the knowledge commits, and the replay of those commits.
+- [**Experiments:**](experiments.qmd) the experiment campaign (in preparation).
 - [**Results:**](results.qmd) timings and fronts on every suite instance, computed from the
   committed baselines.
 - [**About:**](about.qmd) the papers, attribution, and what the note corrects.
