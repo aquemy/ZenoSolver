@@ -606,3 +606,13 @@ code      = "experiments/E5_harmful_waiting/run.py"
 results   = "experiments/results/E5_harmful_waiting"
 paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-24"
+
+[claims.exp-e6-conj410-search]
+kind      = "experiment"
+statement = "E6 (converse without (A1), targeted search): of 100,000 random tiny symmetric instances, 231 have a certificate gap where L < E; with the shortest central flights the triangle inequality allows, the exhaustive search over all plans finds no plan cheaper than E in any of the 255 gaps (0 counterexamples). A search, not a proof; it stands independently of the proof of Theorem 4.10 (formerly Conjecture 4.10)."
+status    = "sci.supported"
+tests     = ["thm-4-10"]
+code      = "experiments/E6_conj410_search/run.py"
+results   = "experiments/results/E6_conj410_search"
+paper     = "Thm 4.10 (formerly Conj 4.10), doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
