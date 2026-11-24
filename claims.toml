@@ -103,6 +103,13 @@ lean      = "ZenoFront.admissible_iff_exists_linkForest"
 paper     = "Lemma 2.6, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.cor-2-7]
+kind      = "corollary"
+statement = "Corollary 2.7: if |X| = s, every link forest has at most t − p edges, and each of its trees has at most q_max = min(p, t − p + 1) planes."
+status    = "math.proved-informal"
+paper     = "Cor 2.7, doc/theory/exact-front.md §2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
