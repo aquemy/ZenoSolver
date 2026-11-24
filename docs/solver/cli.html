@@ -347,7 +347,7 @@ pddl      write the instance as a PDDL problem for pddl/multi-zeno-travel.pddl,
           zeno&lt;n&gt;n&lt;t&gt;t&lt;p&gt;pMulti.pddl)
 generate  write the instance as a data file for -d (default: standard output)
 
-Instance (same meaning as for the 2016 zenoSolver):
+Instance (the options of the 2016 zenoSolver, without its swap; see below):
   -n N        central cities (default 3)
   -t N        passengers (default 3)
   -p N        planes (default 2), 1 &lt;= p &lt;= t
@@ -356,12 +356,17 @@ Instance (same meaning as for the 2016 zenoSolver):
   -C K -D K   generator of costs / durations: 1 log, 2 sqrt, 3 identity (default),
               4 power of two, 5 staircase
   -E K -W K   non-symmetric durations: -E generates the C_I-side durations,
-              -W the C_G-side ones (as the 2016 code does)
+              -W the C_G-side ones
   -r R        multiply before truncating to integers (default 1)
   -j -k       cost generator scale / translation
   -l -m       duration generator scale / translation
   -x -y       output scale / translation of both generators
   -F          accepted for compatibility (the front is always printed)
+
+Each option means what it says, and data files are read as written. The 2016
+solvers swapped durations and costs whenever the first duration exceeded the
+second, which their generator always did: a 2016 or paper instance
+"-C a -D b" is "-C b -D a" here, and "-C c -E a -W b" is "-C a -E c -W b".
 
 Solver (front):
   --threads N          worker threads (default: all cores)
@@ -376,7 +381,7 @@ Solver (front):
 <p>Exit codes: 0 on success; 1 on an error (the message on stderr starts with <code>zeno:</code>); 2 when <code>zeno check</code> rejects a certificate.</p>
 <section id="instance-options" class="level2">
 <h2 class="anchored" data-anchor-id="instance-options">Instance options</h2>
-<p>All four commands but <code>check</code> build an instance from the same options, those of the 2016 <code>zenoSolver</code>, and build the same instance from them, quirks included. The <a href="../instances/generator.html">generator page</a> gives the formulas, and the <a href="../instances/model.html">model page</a> the data file formats.</p>
+<p>All four commands but <code>check</code> build an instance from the same options. They are the options of the 2016 <code>zenoSolver</code>, and each means what its name says: <code>-C</code> the costs, <code>-D</code> the durations, <code>-E</code> and <code>-W</code> the two duration sides; data files are read as written. The <a href="../instances/generator.html">generator page</a> gives the formulas and the translation of 2016 and paper instances, whose options read differently, and the <a href="../instances/model.html">model page</a> the data file formats.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -454,19 +459,6 @@ Solver (front):
 </tbody>
 </table>
 <p><code>-n</code>, <code>-t</code>, <code>-p</code>, <code>-C</code>, <code>-D</code>, <code>-E</code>, <code>-W</code> and <code>-r</code> take integers; <code>-j</code>, <code>-k</code>, <code>-l</code>, <code>-m</code>, <code>-x</code> and <code>-y</code> take decimal numbers.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-The 2016 swap
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>After building the vectors, if <span class="math inline">\(n &gt; 1\)</span> and the first duration exceeds the second, the durations and the costs are <strong>exchanged</strong> (and the C<sub>G</sub>-side durations reversed), as the 2016 code did. This always happens with the default generator, and to any data file whose first duration is the larger. <code>front</code> prints a note on stderr when it happens to a data file. See <a href="../instances/model.html#swap">the swap trap</a>.</p>
-</div>
-</div>
 </section>
 <section id="front" class="level2">
 <h2 class="anchored" data-anchor-id="front"><code>front</code>: the Pareto front</h2>
@@ -499,9 +491,9 @@ After the front, print a plan for every point, each checked by simulation (<code
 </dd>
 </dl>
 <pre class="text"><code># cost 6, makespan 6
-plane 1: CI-&gt;c1[0,1]p1 c1-&gt;CI[1,2] CI-&gt;c2[2,4]p2 c2-&gt;CG[4,6]p2
-plane 2: CI-&gt;c2[0,2]p3 c2-&gt;CG[2,4]p3 CG-&gt;c1[4,5] c1-&gt;CG[5,6]p1</code></pre>
-<p>Here plane 1 drops passenger 1 in city 1 and returns empty, and plane 2 picks that passenger up on its way back to <span class="math inline">\(C_G\)</span>.</p>
+plane 1: CI-&gt;c2[0,1]p1 c2-&gt;CI[1,2] CI-&gt;c1[2,4]p2 c1-&gt;CG[4,6]p2
+plane 2: CI-&gt;c1[0,2]p3 c1-&gt;CG[2,4]p3 CG-&gt;c2[4,5] c2-&gt;CG[5,6]p1</code></pre>
+<p>Here plane 1 drops passenger 1 in city 2 and returns empty, and plane 2 picks that passenger up on its way back to <span class="math inline">\(C_G\)</span>.</p>
 <dl>
 <dt><code>--certificate FILE</code></dt>
 <dd>
@@ -542,10 +534,9 @@ seconds: table 4.084e-06, bracket 3.9708e-05, chains 0, exact 0, plans 6.6083e-0
 <section id="generate" class="level2">
 <h2 class="anchored" data-anchor-id="generate"><code>generate</code>: write a data file</h2>
 <div class="sourceCode" id="cb13"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> generate <span class="at">-n</span> 4 <span class="at">-t</span> 3 <span class="at">-p</span> 2 <span class="at">-C</span> 2 <span class="at">-D</span> 2 <span class="at">-r</span> 10</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre class="text"><code>10 14 17 20
-20 17 14 10</code></pre>
-<p>Writes the instance that the options describe as a data file for <code>-d</code>: durations then costs for a symmetric instance, or C<sub>I</sub>-side durations, C<sub>G</sub>-side durations, costs otherwise. Without <code>-O FILE</code> it writes to standard output. <code>-t</code> and <code>-p</code> are validated but not written.</p>
-<p>The output is the instance <em>after</em> the 2016 swap. Reading it back with <code>-d</code> gives the same instance only if its first duration does not exceed its second; otherwise the swap applies again. A data file <code>5 3</code> / <code>9 1</code> is solved as durations <code>9 1</code> and costs <code>5 3</code>, <code>generate</code> writes it that way, and reading that back gives <code>5 3</code> / <code>9 1</code> again. Order the cities by increasing duration (<a href="../instances/model.html#swap">the swap trap</a>).</p>
+<pre class="text"><code>20 17 14 10
+10 14 17 20</code></pre>
+<p>Writes the instance that the options describe as a data file for <code>-d</code>: durations then costs for a symmetric instance, or C<sub>I</sub>-side durations, C<sub>G</sub>-side durations, costs otherwise. Without <code>-O FILE</code> it writes to standard output. <code>-t</code> and <code>-p</code> are validated but not written. Reading the output back with <code>-d</code> gives the same instance.</p>
 </section>
 <section id="limits" class="level2">
 <h2 class="anchored" data-anchor-id="limits">Limits of the non-symmetric bracket</h2>

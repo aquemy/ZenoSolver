@@ -40,8 +40,8 @@
 | `sqrt` | `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` | 81 |
 | `pow2` | `-n 10 -t 8 -p 3 -C 4 -D 4` | 46 |
 | `staircase` | `-n 10 -t 8 -p 3 -C 5 -D 5 -r 10` | 133 |
-| `log-linear` | `-n 10 -t 8 -p 3 -C 1 -D 3 -r 100` | 46 |
-| `sqrt-linear` | `-n 10 -t 8 -p 3 -C 2 -D 3 -r 100` | 75 |
+| `log-linear` | `-n 10 -t 8 -p 3 -r 100 -C 3 -D 1` | 46 |
+| `sqrt-linear` | `-n 10 -t 8 -p 3 -r 100 -C 3 -D 2` | 75 |
 
 ### `adversarial` {#suite-adversarial}
 

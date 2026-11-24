@@ -27,7 +27,7 @@ zeno pddl [instance options] [-O FILE] [--no-front]
 ```
 
 The default file name is `zeno<n>n<t>t<p>pMulti.pddl`. A complete example, for $n = 2$, $t = 2$,
-$p = 1$ (durations $(1, 2)$, costs $(2, 1)$ after the [swap](model.qmd#swap)):
+$p = 1$ (durations $(2, 1)$, costs $(1, 2)$):
 
 {{< include _pddl-problem.md >}}
 

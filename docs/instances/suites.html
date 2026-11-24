@@ -399,7 +399,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>The tables below list every instance with the size of its front, from <code>zeno</code>’s baseline (<code>bench/baselines/zeno/apple-m4-max/zeno.json</code>). The timings of every solver on them are on the <a href="../results.html">results page</a>. The <code>regimes</code> header describes the generator before the <a href="../instances/model.html#swap">2016 swap</a>; the instances solved have <span class="math inline">\(d_i = i\)</span> and <span class="math inline">\(c_i = n + 1 - i\)</span>.</p>
+<p>The tables below list every instance with the size of its front, from <code>zeno</code>’s baseline (<code>bench/baselines/zeno/apple-m4-max/zeno.json</code>). The timings of every solver on them are on the <a href="../results.html">results page</a>. The suites are written in the current meaning of the options: <code>families/log-linear</code> and <code>families/sqrt-linear</code> were rewritten when the 2016 swap was removed (<a href="../instances/generator.html#paper">2016 and paper instances</a>). They build the same instances as before up to the order of the cities, so their fronts, and the baselines recorded before the change, still apply.</p>
 <section id="suite-quick" class="level3">
 <h3 class="anchored" data-anchor-id="suite-quick"><code>quick</code></h3>
 <table class="caption-top table">
@@ -575,12 +575,12 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td><code>log-linear</code></td>
-<td><code>-n 10 -t 8 -p 3 -C 1 -D 3 -r 100</code></td>
+<td><code>-n 10 -t 8 -p 3 -r 100 -C 3 -D 1</code></td>
 <td style="text-align: right;">46</td>
 </tr>
 <tr class="odd">
 <td><code>sqrt-linear</code></td>
-<td><code>-n 10 -t 8 -p 3 -C 2 -D 3 -r 100</code></td>
+<td><code>-n 10 -t 8 -p 3 -r 100 -C 3 -D 2</code></td>
 <td style="text-align: right;">75</td>
 </tr>
 </tbody>
@@ -985,27 +985,27 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><code>n3t3p1-C4D3</code></td>
-<td><code>-n 3 -t 3 -p 1 -C 4 -D 3</code></td>
+<td><code>-n 3 -t 3 -p 1 -C 3 -D 4</code></td>
 <td style="text-align: right;">11</td>
 </tr>
 <tr class="even">
 <td><code>n3t4p2-C2D3r10</code></td>
-<td><code>-n 3 -t 4 -p 2 -C 2 -D 3 -r 10</code></td>
+<td><code>-n 3 -t 4 -p 2 -r 10 -C 3 -D 2</code></td>
 <td style="text-align: right;">7</td>
 </tr>
 <tr class="odd">
 <td><code>n4t3p2-C3D5r10</code></td>
-<td><code>-n 4 -t 3 -p 2 -C 3 -D 5 -r 10</code></td>
+<td><code>-n 4 -t 3 -p 2 -r 10 -C 5 -D 3</code></td>
 <td style="text-align: right;">7</td>
 </tr>
 <tr class="even">
 <td><code>n4t4p2-C4D3</code></td>
-<td><code>-n 4 -t 4 -p 2 -C 4 -D 3</code></td>
+<td><code>-n 4 -t 4 -p 2 -C 3 -D 4</code></td>
 <td style="text-align: right;">10</td>
 </tr>
 <tr class="odd">
 <td><code>n4t5p3-C5D2r10</code></td>
-<td><code>-n 4 -t 5 -p 3 -C 5 -D 2 -r 10</code></td>
+<td><code>-n 4 -t 5 -p 3 -r 10 -C 2 -D 5</code></td>
 <td style="text-align: right;">18</td>
 </tr>
 <tr class="even">
@@ -1015,7 +1015,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><code>n3t5p2-C1D4r10</code></td>
-<td><code>-n 3 -t 5 -p 2 -C 1 -D 4 -r 10</code></td>
+<td><code>-n 3 -t 5 -p 2 -r 10 -C 4 -D 1</code></td>
 <td style="text-align: right;">13</td>
 </tr>
 <tr class="even">
@@ -1050,7 +1050,7 @@ window.Quarto = {
 <li></li>
 </ol></li>
 <li><code>nodup-best-plan</code> and <code>trailing-newline</code>: <span class="math inline">\(d = (1, 9)\)</span>, <span class="math inline">\(c = (4, 1)\)</span>, <span class="math inline">\(t = 5\)</span>, <span class="math inline">\(p = 3\)</span>, read from a file without and with a trailing blank line. The 2016 <code>zenoSolver_noDuplicate</code> kept the last plan of a PPP instead of the best one, and the blank line used to change the instance.</li>
-<li>The first sixteen use the default generator, including the <span class="math inline">\(n = t\)</span> instances of Table 1 of the EvoCOP 2015 paper (front sizes 5, 10, 17); the next seven use other families and scales.</li>
+<li>The first sixteen use the default generator, including the <span class="math inline">\(n = t\)</span> instances of Table 1 of the EvoCOP 2015 paper (front sizes 5, 10, 17); the next seven use other families and scales. Their names keep the 2016 generator flags, and their arguments are written in the current meaning: <code>n3t5p2-C1D4r10</code> runs <code>-n 3 -t 5 -p 2 -r 10 -C 4 -D 1</code> (<a href="../instances/generator.html#paper">2016 and paper instances</a>). Six of them were rewritten this way when the 2016 swap was removed, and their golden fronts did not change.</li>
 </ul>
 </section>
 <section id="lean-test-sets" class="level2">

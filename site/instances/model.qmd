@@ -1,6 +1,6 @@
 ---
 title: "Model and data files"
-subtitle: "What an instance is, the 2-line and 3-line data files, and the 2016 swap"
+subtitle: "What an instance is, and the 2-line and 3-line data files"
 ---
 
 ## The model
@@ -77,52 +77,12 @@ Reading rules (`src/zeno/legacy_input.cpp`):
 - every value is then multiplied by `-r` (default 1) and truncated toward zero, as for generated
   instances, and negative values are rejected.
 
-`zeno generate` writes the current instance in this format ([command line](../solver/cli.qmd#generate)).
+A data file is read **as written**: the first line holds durations and the last line costs, in any
+order of the cities, and the order of the cities does not change the front. `zeno generate` writes
+an instance in this format ([command line](../solver/cli.qmd#generate)), so its output reads back
+as the same instance.
 
-## The 2016 swap {#swap}
-
-::: {.callout-warning}
-After reading or generating the vectors, if $n > 1$ and **the first duration exceeds the second**,
-$d_1 > d_2$, `zeno` **exchanges the durations and the costs**, and reverses the $C_G$-side
-durations. The 2016 code assumed increasing durations and did this, and `zeno` keeps it so that
-both build the same instance from the same options.
-:::
-
-The rule, from `legacy::buildInstance`:
-
-```cpp
-if(n > 1 && d[0] > d[1])
-{
-    std::swap(d, c);           // durations <-> costs
-    std::ranges::reverse(de);  // C_G-side durations reversed
-}
-if(symmetric)
-    de = d;
-```
-
-Consequences:
-
-- **2-line file.** A file `5 3` / `1 2` is solved as durations $(1, 2)$ and costs $(5, 3)$.
-  `zeno front` prints a note on stderr when this happens to a data file:
-
-  ```text
-  zeno: note: the first duration exceeds the second, so the duration and cost lines of FILE were swapped, as the 2016 solvers did (order the cities to avoid it)
-  ```
-
-  `zeno pddl` and `zeno generate` apply the same swap without the note.
-- **3-line file.** The swap is worse: $d$ and $c$ are exchanged and $\bar d$ is reversed, so
-  each city gets another city's $C_G$-side duration. The file `5 3` / `7 8` / `1 2` becomes
-  $d = (1, 2)$, $\bar d = (8, 7)$, $c = (5, 3)$.
-- **The generator.** It computes durations on decreasing arguments, so for an increasing
-  generating function the first duration is the largest and the swap fires. Then `-C` sets the
-  *durations* and `-D` the *costs* ([generator](generator.qmd)). This is why the default instances
-  have $d_i = i$ and $c_i = n + 1 - i$.
-- **Ties.** After truncation the first two durations may be equal, and then nothing is swapped.
-  `-n 10 -D 1` (log, `-r 1`) gives $d = (2, 2, 2, 1, 1, 1, 1, 1, 0, 0)$ and $c = (1, \dots, 10)$,
-  whereas `-n 10 -D 1 -r 100` swaps and gives $d = (100, 200, \dots, 1000)$. The meaning of `-C`
-  and `-D` thus depends on `-r`.
-- **Round trips.** `zeno generate` writes the instance after the swap. If that instance still has
-  $d_1 > d_2$, reading the file back swaps it again.
-
-**To avoid the trap, order the cities by duration** so that $d_1 \le d_2$ (any order of the
-others is fine), and check the instance with `zeno generate ... -d FILE` before solving it.
+The 2016 solvers read a data file differently when its first duration exceeded its second: they
+exchanged the duration and cost lines, and reversed the $C_G$-side durations. To reproduce a 2016
+result from such a file, write it with the lines in the order the 2016 solver used them
+([2016 and paper instances](generator.qmd#paper)).

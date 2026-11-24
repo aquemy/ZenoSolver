@@ -378,11 +378,9 @@ window.Quarto = {
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>costFunction <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>durationFunction <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
 <span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    o<span class="op">.</span>adjust <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> swapped <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>Instance generated <span class="op">=</span> zeno<span class="op">::</span>legacy<span class="op">::</span>buildInstance<span class="op">(</span>o<span class="op">,</span> <span class="op">&amp;</span>swapped<span class="op">);</span></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> zeno<span class="op">::</span>solveFront<span class="op">(</span>generated<span class="op">).</span>front<span class="op">.</span>size<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">" points"</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;&lt;</span> <span class="op">(</span>swapped <span class="op">?</span> <span class="st">" (durations and costs swapped)"</span> <span class="op">:</span> <span class="st">""</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> zeno<span class="op">::</span>Instance generated <span class="op">=</span> zeno<span class="op">::</span>legacy<span class="op">::</span>buildInstance<span class="op">(</span>o<span class="op">);</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> zeno<span class="op">::</span>solveFront<span class="op">(</span>generated<span class="op">).</span>front<span class="op">.</span>size<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">" points</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre class="text"><code>320 48
 280 56
 260 60
@@ -391,7 +389,7 @@ window.Quarto = {
 160 80
 accepted
 9 points, exact, assuming A1-NS
-81 points (durations and costs swapped)</code></pre>
+81 points</code></pre>
 <p><code>zeno</code> prints fronts by increasing <em>cost</em>; the library’s <code>Front</code> is sorted by increasing <em>makespan</em>.</p>
 </section>
 <section id="types" class="level2">
@@ -554,9 +552,9 @@ The reference checker: <code>ok</code>, every failed obligation in <code>errors<
 <section id="instances-and-files-zenolegacy_input.hpp-zenoio.hpp" class="level3">
 <h3 class="anchored" data-anchor-id="instances-and-files-zenolegacy_input.hpp-zenoio.hpp">Instances and files: <code>zeno/legacy_input.hpp</code>, <code>zeno/io.hpp</code></h3>
 <dl>
-<dt><code>legacy::Options</code>, <code>legacy::buildInstance(options, &amp;swapped)</code></dt>
+<dt><code>legacy::Options</code>, <code>legacy::buildInstance(options)</code></dt>
 <dd>
-The instance options of the 2016 solvers and the 2016 construction, quirks included: values multiplied by <code>adjust</code> (<code>-r</code>) and truncated toward zero, and the swap of durations and costs when <code>d[0] &gt; d[1]</code>; <code>swapped</code> reports whether it happened. Unlike the 2016 code it accepts <span class="math inline">\(t = p\)</span>. Formulas on the <a href="../instances/generator.html">generator page</a>.
+The instance options of the 2016 solvers and their generating functions: values multiplied by <code>adjust</code> (<code>-r</code>) and truncated toward zero, as in 2016. Each option means what it says (<code>costFunction</code> the costs, <code>durationFunction</code> the durations, <code>eastFunction</code> and <code>westFunction</code> the <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_G\)</span> sides), and data files are read as written; the 2016 swap of durations and costs is not applied. Unlike the 2016 code it accepts <span class="math inline">\(t = p\)</span>. Formulas, and the translation of 2016 instances, on the <a href="../instances/generator.html">generator page</a>.
 </dd>
 <dt><code>writePddlProblem(out, instance, front = nullptr)</code>, <code>defaultPddlName(instance)</code></dt>
 <dd>

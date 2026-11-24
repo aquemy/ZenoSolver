@@ -10,22 +10,22 @@ $ zeno pddl -n 2 -t 2 -p 1 -O example.pddl
             city0 city1 city2 city3 - city)
   (:init (= (total-cost) 0)
          (= (citythreat city0) 0)
-         (= (citythreat city1) 2)
-         (= (citythreat city2) 1)
+         (= (citythreat city1) 1)
+         (= (citythreat city2) 2)
          (= (citythreat city3) 0)
          
 ; city1
-         (= (timeTerre city0 city1) 1)
-         (= (timeTerre city1 city0) 1)
-         (= (timeTerre city3 city1) 1)
-         (= (timeTerre city1 city3) 1)
+         (= (timeTerre city0 city1) 2)
+         (= (timeTerre city1 city0) 2)
+         (= (timeTerre city3 city1) 2)
+         (= (timeTerre city1 city3) 2)
          (= (timeTerre city1 city2) 103)
          
 ; city2
-         (= (timeTerre city0 city2) 2)
-         (= (timeTerre city2 city0) 2)
-         (= (timeTerre city3 city2) 2)
-         (= (timeTerre city2 city3) 2)
+         (= (timeTerre city0 city2) 1)
+         (= (timeTerre city2 city0) 1)
+         (= (timeTerre city3 city2) 1)
+         (= (timeTerre city2 city3) 1)
          (= (timeTerre city2 city1) 103)
          
 ; plane init
@@ -45,9 +45,9 @@ $ zeno pddl -n 2 -t 2 -p 1 -O example.pddl
   (:metric (and (minimize (total-time)) (minimize (total-cost)))))
 
 ; Durations : 
-; 1 2 
-; Costs : 
 ; 2 1 
+; Costs : 
+; 1 2 
 ; Pareto points : Makespan - Cost
 ; 6 6
 ; 8 5

@@ -381,7 +381,7 @@ window.Quarto = {
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>
 <div class="sourceCode" id="cb2"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zeno</span> pddl [instance options] [-O FILE] <span class="pp">[--</span><span class="ss">no</span><span class="pp">-</span><span class="ss">front</span><span class="pp">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The default file name is <code>zeno&lt;n&gt;n&lt;t&gt;t&lt;p&gt;pMulti.pddl</code>. A complete example, for <span class="math inline">\(n = 2\)</span>, <span class="math inline">\(t = 2\)</span>, <span class="math inline">\(p = 1\)</span> (durations <span class="math inline">\((1, 2)\)</span>, costs <span class="math inline">\((2, 1)\)</span> after the <a href="../instances/model.html#swap">swap</a>):</p>
+<p>The default file name is <code>zeno&lt;n&gt;n&lt;t&gt;t&lt;p&gt;pMulti.pddl</code>. A complete example, for <span class="math inline">\(n = 2\)</span>, <span class="math inline">\(t = 2\)</span>, <span class="math inline">\(p = 1\)</span> (durations <span class="math inline">\((2, 1)\)</span>, costs <span class="math inline">\((1, 2)\)</span>):</p>
 <pre class="text"><code>$ zeno pddl -n 2 -t 2 -p 1 -O example.pddl</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode lisp code-with-copy"><code class="sourceCode commonlisp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(define (problem MULTIZENO-A)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  (:domain  multi-zeno-travel)</span>
@@ -390,22 +390,22 @@ window.Quarto = {
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            city0 city1 city2 city3 <span class="op">-</span> city)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  (:init (<span class="op">=</span> (total-cost) <span class="dv">0</span>)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city0) <span class="dv">0</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city1) <span class="dv">2</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city2) <span class="dv">1</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city1) <span class="dv">1</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city2) <span class="dv">2</span>)</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (citythreat city3) <span class="dv">0</span>)</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>         </span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">; city1</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city0 city1) <span class="dv">1</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city1 city0) <span class="dv">1</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city3 city1) <span class="dv">1</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city1 city3) <span class="dv">1</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city0 city1) <span class="dv">2</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city1 city0) <span class="dv">2</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city3 city1) <span class="dv">2</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city1 city3) <span class="dv">2</span>)</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city1 city2) <span class="dv">103</span>)</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>         </span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">; city2</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city0 city2) <span class="dv">2</span>)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city2 city0) <span class="dv">2</span>)</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city3 city2) <span class="dv">2</span>)</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city2 city3) <span class="dv">2</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city0 city2) <span class="dv">1</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city2 city0) <span class="dv">1</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city3 city2) <span class="dv">1</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city2 city3) <span class="dv">1</span>)</span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>         (<span class="op">=</span> (timeTerre city2 city1) <span class="dv">103</span>)</span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>         </span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">; plane init</span></span>
@@ -425,9 +425,9 @@ window.Quarto = {
 <span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  (:metric (<span class="kw">and</span> (minimize (total-time)) (minimize (total-cost)))))</span>
 <span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co">; Durations : </span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">; 1 2 </span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">; 2 1 </span></span>
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="co">; Costs : </span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="co">; 2 1 </span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="co">; 1 2 </span></span>
 <span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co">; Pareto points : Makespan - Cost</span></span>
 <span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="co">; 6 6</span></span>
 <span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="co">; 8 5</span></span>
