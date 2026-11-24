@@ -311,6 +311,13 @@ status    = "math.conjectured"
 paper     = "Conj 6.7, doc/theory/exact-front.md §6.4"
 created   = "2026-11-23"
 
+[claims.lem-6-8]
+kind      = "lemma"
+statement = "Lemma 6.8 (event order): (a) a plan is event-ordered iff its next-leg relation has no cycle; (b) in a simple plan with clean journeys, a cycle passes through a central city with d_x = d̄_x = 0; (c) templates of role configurations and the plans of Theorem 4.1 are event-ordered."
+status    = "math.proved-informal"
+paper     = "Lemma 6.8, doc/theory/exact-front.md §6.2"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
