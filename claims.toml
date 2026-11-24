@@ -399,6 +399,13 @@ status    = "math.proved-informal"
 paper     = "Lemma 7.7, doc/theory/exact-front.md §7.5"
 created   = "2026-11-23"
 
+[claims.prop-7-8]
+kind      = "proposition"
+statement = "Proposition 7.8 (Pareto-set variant) [PS]: with the σ-graph's arc weights replaced by finite Pareto sets of (cost, load) options combined by (c + c', max(τ, τ')), the set at (p, s, ∅) is the Pareto set of (c(X), max_k δ(X_k)) over admissible partitions with |X| = s and loads at most T_hi, the front points under (S) and (A1)."
+status    = "math.proved-informal"
+paper     = "Prop 7.8, doc/theory/exact-front.md §7.5"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
