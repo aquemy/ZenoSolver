@@ -162,5 +162,17 @@ paper     = "Lemma 3.4, doc/theory/exact-front.md §3"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 4. Symmetric case
+# ===========================================================================
+
+[claims.thm-4-1]
+kind      = "theorem"
+statement = "Theorem 4.1 (achievability): under (S), every admissible partition X_1..X_p of a multiset X with |X| = s is flown by a feasible plan whose central landings are exactly X (cost c(X)) and whose makespan is max_k ℓ(X_k), using no central flight. Lean form: an explicit p ≤ t; the landings equal X up to relabelling the planes; that plane k flies for ℓ(X_k) and picks up at most one passenger holds for the construction (LTree.routes) but is not in the statement."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible.exists_plan"
+paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Experiments
 # ===========================================================================
