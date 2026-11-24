@@ -151,6 +151,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
 | `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
+| `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -356,6 +357,28 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   segments, one per hub arrival, each landing at least once and satisfying the segment bound.
 * `Admissible.exists_remove_two` (**Lemma 4.11**): an admissible partition with `|X| ≥ p + 2`
   stays admissible after removing two landings, each group a sub-multiset of the old one.
+
+**Theorem 4.10, Steps 2–5 (`TriCore.lean`)**
+
+The data: landings in cities and in blocks (segments), blocks in planes, and in each block a
+landing `z γ` of largest duration `R(γ)`. An end of a block is recorded by the landing that pays
+it.
+
+* `TriCore.exists_tjoin` (**Step 2, links**): if every class of planes connected by shared cities
+  has an even number of planes of `T`, some edge vector of the plane–city graph (over `ZMod 2`) has
+  odd degree exactly at `T` and even degree at every city. It is a sum of paths
+  (`TriCore.exists_path`).
+* `TriCore.Inv.step` (**Step 3, re-pairing**): a block `γ` with two ends `e₁, e₂`, `d(e₁) ≤ d(e₂)`,
+  `e₁ ≠ z γ`, and another end `e₃` at `e₂`'s city: delete `e₂, e₃` and move `e₁` to `e₃`'s block (or
+  delete `e₂, e₃` if they are both `γ`'s). Every end stays within `R`, every city keeps an even
+  number of ends, every plane its number of ends mod 2, and no `z γ` pays another block's end (the
+  note's claim). `TriCore.Inv.exists_final`: until every block has at most one end.
+* `TriCore.exists_selection` (**Step 5, Lemma 2.3**): a block takes its end's city and landing, or
+  `z γ`; the landings are distinct, and the cities with an odd number of ends at a plane form a
+  parity witness.
+* `exists_admissible_of_blocks`: the same with blocks as lists of cities. If every class has an
+  even number of planes with an even number of blocks, some admissible partition has one city per
+  block, `δ(X_k) ≤ Σ_γ max_{x ∈ γ} d_x`, and landings at most the blocks' landings.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
