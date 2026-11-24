@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2026-11-24T06:37:55+01:00",
+    "date": "2026-11-24T07:27:04+01:00",
     "host_name": "apple-m4-max",
     "executable": "zeno-front",
     "num_cpus": 16,
@@ -21,12 +21,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.525541881099343,
-      "cpu_time": 23.525541881099343,
+      "real_time": 24.002250051125884,
+      "cpu_time": 24.002250051125884,
       "time_unit": "ms",
       "certificate_bytes": 1486,
       "verdict": "accepted",
-      "peak_rss_mib": 42.4375
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/n2t2p1",
@@ -38,12 +38,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.913958014920354,
-      "cpu_time": 21.913958014920354,
+      "real_time": 23.65574985742569,
+      "cpu_time": 23.65574985742569,
       "time_unit": "ms",
       "certificate_bytes": 459,
       "verdict": "accepted",
-      "peak_rss_mib": 42.390625
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n2t3p1",
@@ -55,12 +55,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.912417141720653,
-      "cpu_time": 21.912417141720653,
+      "real_time": 22.192042088136077,
+      "cpu_time": 22.192042088136077,
       "time_unit": "ms",
       "certificate_bytes": 928,
       "verdict": "accepted",
-      "peak_rss_mib": 42.453125
+      "peak_rss_mib": 42.625
     },
     {
       "name": "golden/n2t3p2",
@@ -72,12 +72,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.933708805590868,
-      "cpu_time": 21.933708805590868,
+      "real_time": 23.73758307658136,
+      "cpu_time": 23.73758307658136,
       "time_unit": "ms",
       "certificate_bytes": 450,
       "verdict": "accepted",
-      "peak_rss_mib": 42.40625
+      "peak_rss_mib": 42.5625
     },
     {
       "name": "golden/n3t2p1",
@@ -89,12 +89,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.89574996009469,
-      "cpu_time": 21.89574996009469,
+      "real_time": 24.044791935011744,
+      "cpu_time": 24.044791935011744,
       "time_unit": "ms",
       "certificate_bytes": 758,
       "verdict": "accepted",
-      "peak_rss_mib": 42.390625
+      "peak_rss_mib": 43.390625
     },
     {
       "name": "golden/n3t3p1-C4D3",
@@ -106,12 +106,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.969833876937628,
-      "cpu_time": 21.969833876937628,
+      "real_time": 23.659209022298455,
+      "cpu_time": 23.659209022298455,
       "time_unit": "ms",
       "certificate_bytes": 1732,
       "verdict": "accepted",
-      "peak_rss_mib": 42.375
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/n3t3p1",
@@ -123,12 +123,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 22.016541101038456,
-      "cpu_time": 22.016541101038456,
+      "real_time": 23.616082966327667,
+      "cpu_time": 23.616082966327667,
       "time_unit": "ms",
       "certificate_bytes": 1662,
       "verdict": "accepted",
-      "peak_rss_mib": 42.4375
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/n3t3p2",
@@ -140,12 +140,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.9482087995857,
-      "cpu_time": 21.9482087995857,
+      "real_time": 22.25958416238427,
+      "cpu_time": 22.25958416238427,
       "time_unit": "ms",
       "certificate_bytes": 710,
       "verdict": "accepted",
-      "peak_rss_mib": 42.453125
+      "peak_rss_mib": 42.65625
     },
     {
       "name": "golden/n3t4p2-C2D3r10",
@@ -157,12 +157,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.451208136975765,
-      "cpu_time": 23.451208136975765,
+      "real_time": 23.611166048794985,
+      "cpu_time": 23.611166048794985,
       "time_unit": "ms",
       "certificate_bytes": 1413,
       "verdict": "accepted",
-      "peak_rss_mib": 42.359375
+      "peak_rss_mib": 42.59375
     },
     {
       "name": "golden/n3t4p2",
@@ -174,12 +174,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.06116698309779,
-      "cpu_time": 23.06116698309779,
+      "real_time": 23.6247091088444,
+      "cpu_time": 23.6247091088444,
       "time_unit": "ms",
       "certificate_bytes": 1268,
       "verdict": "accepted",
-      "peak_rss_mib": 42.453125
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n3t4p3",
@@ -191,12 +191,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.401999846100807,
-      "cpu_time": 23.401999846100807,
+      "real_time": 22.15362503193319,
+      "cpu_time": 22.15362503193319,
       "time_unit": "ms",
       "certificate_bytes": 860,
       "verdict": "accepted",
-      "peak_rss_mib": 42.453125
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n3t5p2-C1D4r10",
@@ -208,12 +208,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.349791998043656,
-      "cpu_time": 23.349791998043656,
+      "real_time": 23.5944171436131,
+      "cpu_time": 23.5944171436131,
       "time_unit": "ms",
       "certificate_bytes": 3014,
       "verdict": "accepted",
-      "peak_rss_mib": 42.5
+      "peak_rss_mib": 42.75
     },
     {
       "name": "golden/n3t5p2",
@@ -225,12 +225,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.964165847748518,
-      "cpu_time": 21.964165847748518,
+      "real_time": 23.17258412949741,
+      "cpu_time": 23.17258412949741,
       "time_unit": "ms",
       "certificate_bytes": 2019,
       "verdict": "accepted",
-      "peak_rss_mib": 42.640625
+      "peak_rss_mib": 42.71875
     },
     {
       "name": "golden/n3t5p3",
@@ -242,12 +242,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.903499960899353,
-      "cpu_time": 21.903499960899353,
+      "real_time": 23.581957910209894,
+      "cpu_time": 23.581957910209894,
       "time_unit": "ms",
       "certificate_bytes": 1475,
       "verdict": "accepted",
-      "peak_rss_mib": 42.4375
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/n4t3p2-C3D5r10",
@@ -259,12 +259,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.915124962106347,
-      "cpu_time": 21.915124962106347,
+      "real_time": 23.552166996523738,
+      "cpu_time": 23.552166996523738,
       "time_unit": "ms",
       "certificate_bytes": 1105,
       "verdict": "accepted",
-      "peak_rss_mib": 42.453125
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n4t3p2",
@@ -276,12 +276,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.944040898233652,
-      "cpu_time": 21.944040898233652,
+      "real_time": 22.092333994805813,
+      "cpu_time": 22.092333994805813,
       "time_unit": "ms",
       "certificate_bytes": 980,
       "verdict": "accepted",
-      "peak_rss_mib": 42.59375
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n4t4p2-C4D3",
@@ -293,12 +293,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.4844998922199,
-      "cpu_time": 23.4844998922199,
+      "real_time": 23.56545883230865,
+      "cpu_time": 23.56545883230865,
       "time_unit": "ms",
       "certificate_bytes": 1885,
       "verdict": "accepted",
-      "peak_rss_mib": 42.703125
+      "peak_rss_mib": 42.625
     },
     {
       "name": "golden/n4t4p2",
@@ -310,12 +310,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.45274994149804,
-      "cpu_time": 23.45274994149804,
+      "real_time": 23.626209003850818,
+      "cpu_time": 23.626209003850818,
       "time_unit": "ms",
       "certificate_bytes": 1805,
       "verdict": "accepted",
-      "peak_rss_mib": 42.375
+      "peak_rss_mib": 42.6875
     },
     {
       "name": "golden/n4t4p3",
@@ -327,12 +327,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.966000087559223,
-      "cpu_time": 21.966000087559223,
+      "real_time": 22.056000074371696,
+      "cpu_time": 22.056000074371696,
       "time_unit": "ms",
       "certificate_bytes": 1190,
       "verdict": "accepted",
-      "peak_rss_mib": 42.40625
+      "peak_rss_mib": 42.640625
     },
     {
       "name": "golden/n4t5p3-C5D2r10",
@@ -344,12 +344,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 33.94237509928644,
-      "cpu_time": 33.94237509928644,
+      "real_time": 32.64412493444979,
+      "cpu_time": 32.64412493444979,
       "time_unit": "ms",
       "certificate_bytes": 4238,
       "verdict": "accepted",
-      "peak_rss_mib": 42.625
+      "peak_rss_mib": 42.859375
     },
     {
       "name": "golden/n5t4p2",
@@ -361,12 +361,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.91662508994341,
-      "cpu_time": 21.91662508994341,
+      "real_time": 23.49083311855793,
+      "cpu_time": 23.49083311855793,
       "time_unit": "ms",
       "certificate_bytes": 2344,
       "verdict": "accepted",
-      "peak_rss_mib": 42.515625
+      "peak_rss_mib": 42.703125
     },
     {
       "name": "golden/n5t4p3-C4D5",
@@ -378,12 +378,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.939707919955254,
-      "cpu_time": 21.939707919955254,
+      "real_time": 22.113708779215813,
+      "cpu_time": 22.113708779215813,
       "time_unit": "ms",
       "certificate_bytes": 928,
       "verdict": "accepted",
-      "peak_rss_mib": 42.421875
+      "peak_rss_mib": 42.65625
     },
     {
       "name": "golden/n5t4p3",
@@ -395,12 +395,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.94591681472957,
-      "cpu_time": 21.94591681472957,
+      "real_time": 22.088125115260482,
+      "cpu_time": 22.088125115260482,
       "time_unit": "ms",
       "certificate_bytes": 1534,
       "verdict": "accepted",
-      "peak_rss_mib": 42.421875
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/n5t5p2",
@@ -412,12 +412,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.475625086575747,
-      "cpu_time": 23.475625086575747,
+      "real_time": 23.652000119909644,
+      "cpu_time": 23.652000119909644,
       "time_unit": "ms",
       "certificate_bytes": 3828,
       "verdict": "accepted",
-      "peak_rss_mib": 42.515625
+      "peak_rss_mib": 42.78125
     },
     {
       "name": "golden/nodup-best-plan",
@@ -429,12 +429,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.121875012293458,
-      "cpu_time": 23.121875012293458,
+      "real_time": 23.63991690799594,
+      "cpu_time": 23.63991690799594,
       "time_unit": "ms",
       "certificate_bytes": 1309,
       "verdict": "accepted",
-      "peak_rss_mib": 42.421875
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "golden/p3-first-counterexample",
@@ -446,12 +446,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 22.042916854843497,
-      "cpu_time": 22.042916854843497,
+      "real_time": 22.15166692622006,
+      "cpu_time": 22.15166692622006,
       "time_unit": "ms",
       "certificate_bytes": 1089,
       "verdict": "accepted",
-      "peak_rss_mib": 42.4375
+      "peak_rss_mib": 42.59375
     },
     {
       "name": "golden/trailing-newline",
@@ -463,12 +463,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.87449997290969,
-      "cpu_time": 21.87449997290969,
+      "real_time": 23.63008400425315,
+      "cpu_time": 23.63008400425315,
       "time_unit": "ms",
       "certificate_bytes": 1309,
       "verdict": "accepted",
-      "peak_rss_mib": 42.421875
+      "peak_rss_mib": 42.671875
     },
     {
       "name": "quick/lpt-counterexample",
@@ -480,12 +480,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 21.918625105172396,
-      "cpu_time": 21.918625105172396,
+      "real_time": 23.572833044454455,
+      "cpu_time": 23.572833044454455,
       "time_unit": "ms",
       "certificate_bytes": 1486,
       "verdict": "accepted",
-      "peak_rss_mib": 42.4375
+      "peak_rss_mib": 42.6875
     },
     {
       "name": "quick/multiples",
@@ -497,12 +497,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 68.10300005599856,
-      "cpu_time": 68.10300005599856,
+      "real_time": 58.29562502913177,
+      "cpu_time": 58.29562502913177,
       "time_unit": "ms",
       "certificate_bytes": 4283,
       "verdict": "accepted",
-      "peak_rss_mib": 42.59375
+      "peak_rss_mib": 42.859375
     },
     {
       "name": "quick/n10t4p2",
@@ -514,12 +514,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 24.948792066425085,
-      "cpu_time": 24.948792066425085,
+      "real_time": 25.21620807237923,
+      "cpu_time": 25.21620807237923,
       "time_unit": "ms",
       "certificate_bytes": 5368,
       "verdict": "accepted",
-      "peak_rss_mib": 42.75
+      "peak_rss_mib": 42.796875
     },
     {
       "name": "quick/n5t5p2",
@@ -531,12 +531,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 23.40170810930431,
-      "cpu_time": 23.40170810930431,
+      "real_time": 23.745000129565597,
+      "cpu_time": 23.745000129565597,
       "time_unit": "ms",
       "certificate_bytes": 3828,
       "verdict": "accepted",
-      "peak_rss_mib": 42.515625
+      "peak_rss_mib": 42.6875
     },
     {
       "name": "quick/n6t5p3",
@@ -548,12 +548,12 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 3,
-      "real_time": 33.99049979634583,
-      "cpu_time": 33.99049979634583,
+      "real_time": 28.153708204627037,
+      "cpu_time": 28.153708204627037,
       "time_unit": "ms",
       "certificate_bytes": 3419,
       "verdict": "accepted",
-      "peak_rss_mib": 42.546875
+      "peak_rss_mib": 42.8125
     }
   ]
 }

@@ -84,12 +84,14 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   certificates took 478 s, 295 s of them for `r5`.
 * The end-to-end run, 35 certificates: about 1.3 s, solver included.
 * The solver `zeno-front` (`zeno-front.json`), on the 27 golden instances and the 5 of the quick
-  suite: 22 ms at the median, 68 ms at most (`multiples`). It finds the breakpoints by splitting
+  suite: 24 ms at the median, 58 ms at most (`multiples`). It finds the breakpoints by splitting
   intervals: `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` takes 3.9 s (41 s when it scanned every level).
-  On the benchmark suite (`zeno-front-suite.json`, 60 s per instance, 52 of the 66 instances run),
-  46 finish, 0.41 s at the median and 50 s at most, all with `zeno front`'s front. The 6 others
-  (`n ≥ 24` with `min(p − 1, t − p) ≥ 2`) time out: the σ-DP's subset table has
-  `Σ_{k ≤ w} C(n′, k)` entries for `n′` non-dominated cities, and the time grows as its square.
+  On the benchmark suite (`zeno-front-suite.json`, 60 s per instance), 63 of the 66 instances
+  finish, 0.39 s at the median and 55 s at most (`scaling-distinct/k24`), all with
+  `zeno front`'s front. At each level the solver runs the link-forest DP or the σ-DP, whichever
+  `useTreeDP` estimates cheaper: `scaling-n/n80` (`n = 80`) takes 10 s. The tree DP costs
+  about `p² · T · s² · n′` per level, so `regimes/r4` (`n = 50`, `t = 30`), `r5` (`n = 100`,
+  `t = 60`) and `scaling-n/n160` still take more than 60 s.
 * **Many non-dominated cities.** The σ-DP is exponential in the number of cities that survive
   the dominance merge, and the tree DP is pseudo-polynomial in the level `T`. The checker runs
   whichever `useTreeDP` estimates cheaper. Every suite certificate keeps the σ-DP. Three
@@ -142,6 +144,8 @@ agrees with every verdict.
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
 | `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
+| `ZenoFront/MinCost.lean` | `E(T)`, the least cost of an admissible partition with loads `≤ T` | `minCost`, `minCost_antitone`, `minCost_attained` |
+| `ZenoFront/TreeExact.lean` | Lemma 2.6 "if" and the iff; the link-forest DP is exact | `admissible_iff_exists_linkForest`, `admissible_forestPartition`, `treeBoundAt_eq_minCost` |
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
 | `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
@@ -343,13 +347,21 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
 * `sigmaBoundAt_eq_minCost` (**the σ-DP is exact**): with `1 ≤ p ≤ t` and `T ≤ Tmax`, the
   checker's σ-DP is `E(T)`. Every finite value is the cost of the groups the DP chooses
   (`sigmaDP_attained`), whose witness sets form a parity witness. No link forest is needed.
+* `treeBoundAt_eq_minCost` (**the tree DP is exact**): with `1 ≤ p` and `T ≤ Tmax`, the
+  link-forest DP is `E(T)`. Every finite entry of `Ch`, `Sub`, `Root` and `For` is attained by
+  child items, a subtree, a tree or a forest (`TreeData.attained_ch_sub`, `attained_for`), and a
+  forest's groups are admissible (`admissible_forestPartition`).
+* `admissible_iff_exists_linkForest` (**Lemma 2.6**): a grouping is admissible iff its groups are
+  those of a forest of rooted link trees satisfying (F2). The witness of a plane is the set of
+  cities with an odd number of links there (`isParityWitness_of_links`).
 * `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and
   `E(T') > C` for every `T' < T`. `breakpoint_le`: then `T ≤ (2t − p) · d_max`.
 * `solveFront_isParetoFront` (**the solver is correct**): under (S) and (A1), with `1 ≤ p ≤ t`,
   `solveFront` is the Pareto front of the feasible plans (`IsParetoFront`). It finds the levels
   where `E` drops by splitting intervals between `d_min · ⌈s/p⌉` (`minCost_eq_top_of_lt`) and
   `(2t − p) · d_max` (`breakpoints`), which lists the same points as the scan of every level
-  (`solveFront_eq`, `breakpoints_eq_scanFront`). `mem_solveFront_iff`: its points are exactly the
+  (`solveFront_eq`, `breakpoints_eq_scanFront`). At each level it runs the tree DP or the σ-DP,
+  whichever `useTreeDP` estimates cheaper. `mem_solveFront_iff`: its points are exactly the
   minimal admissible points. `lake exe zeno-front FILE` prints it by increasing cost, as
   `zeno front` does. CI requires the two to agree on the golden instances, the quick suite and
   three regimes (`test/front.sh`).
@@ -393,7 +405,7 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   the links leave.
 * `TreeData.value_le_totalCost`, `treeBoundAt_le_totalCost` (**Theorem 7.5, `For ≤ E`**): the
   tree DP is at most the cost of every admissible partition into `p` groups of total size `s`
-  with loads `≤ T`. The converse (`For ≥ E`) is not needed.
+  with loads `≤ T`. The converse (`For ≥ E`) is in `TreeExact.lean` (`treeBoundAt_eq_minCost`).
 * `forestBoundAt_le_totalCost`: the bound the checker computes (tree DP or σ-DP, chosen by
   `useTreeDP`) is such a lower bound.
 
@@ -645,8 +657,8 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Theorem 4.1: links, schedule with drop-offs first and at most one pick-up per plane,
       makespan = largest load (`Admissible.exists_plan`), and Corollary 4.8. Not needed by the
       checker.
-- [x] Link-forest lemma (2.6, only if; `Admissible.exists_linkForest`) and the tree DP
-      (Theorem 7.5) as a lower bound (`treeBoundAt_le_totalCost`).
+- [x] Link-forest lemma (2.6, both directions; `admissible_iff_exists_linkForest`) and the
+      tree DP (Theorem 7.5), exact (`treeBoundAt_le_totalCost`, `treeBoundAt_eq_minCost`).
 - [ ] Pareto staircases over `τ` in the tree DP, as in `src/zeno/forest.cpp`. The dense tables
       take seconds when many cities survive the merge (table above); the C++ checker takes
       milliseconds.
