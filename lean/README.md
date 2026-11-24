@@ -118,6 +118,7 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
 | `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
+| `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -284,8 +285,23 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   variant, for every `dc` satisfying (A1). So the two fronts are equal on every certified
   instance (`Cert.minimal_achievable_iff_anywhere`).
 * `minimal_achievable_iff_anywhere`: on every instance, the two fronts are equal under (S), (A1)
-  and Theorem 4.1. Theorem 4.1 is not formalised, so it is a hypothesis
-  (`AdmissibleAchievable`).
+  and Theorem 4.1, taken as a hypothesis (`AdmissibleAchievable`). `Achievability.lean` proves
+  it (`minimal_achievable_iff_anywhere_of_A1`).
+
+**Achievability (`Achievability.lean`)**
+
+* `Admissible.exists_plan` (**Theorem 4.1**): under (S), with `p ≤ t`, every admissible
+  partition of `2t − p` landings is achieved by a feasible plan. Its planes land exactly at the
+  groups (up to relabelling the planes), so it costs `c(X)`, and its makespan is
+  `max_k 2 δ(X_k)`. On a rooted link forest, each plane drops off its children's passengers,
+  crosses its free landings, then picks up its parent's passenger (`LTree.routes`).
+* `admissibleAchievable`: Theorem 4.1 as `AdmissibleAchievable`.
+* `minimal_achievable_iff_anywhere_of_A1` (**Theorem 4.9**): under (S) and (A1), the two fronts
+  are equal on every instance.
+* `minimal_achievable_iff_admissiblePoints`, `minimal_achievable_iff_multisetPoints`
+  (**Corollary 4.8**): under (S) and (A1), the front is `Min 𝒳`, with `𝒳` the points
+  `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition.
+  `minimal_achievableAnywhere_iff_admissiblePoints` is the same for planes ending anywhere.
 
 **Forest bound (`AdmissibleBound.lean`)**
 
@@ -547,10 +563,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Checker performance at suite scale: the 66 suite certificates in 5.7 s (478 s before).
 - [x] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
       front under (S) + (A1) (`FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere`).
-      On instances without a certificate, the front equality also needs Theorem 4.1
-      (`minimal_achievable_iff_anywhere` takes it as a hypothesis).
-- [ ] Theorem 4.1: forest `T`-join, links, schedule with drop-offs first and at most one
-      pick-up per plane, makespan = largest load. Not needed by the checker.
+      On every instance, with Theorem 4.1: `minimal_achievable_iff_anywhere_of_A1`.
+- [x] Theorem 4.1: links, schedule with drop-offs first and at most one pick-up per plane,
+      makespan = largest load (`Admissible.exists_plan`), and Corollary 4.8. Not needed by the
+      checker.
 - [x] Link-forest lemma (2.6, only if; `Admissible.exists_linkForest`) and the tree DP
       (Theorem 7.5) as a lower bound (`treeBoundAt_le_totalCost`).
 - [ ] Pareto staircases over `τ` in the tree DP, as in `src/zeno/forest.cpp`. The dense tables

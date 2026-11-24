@@ -23,6 +23,7 @@ public import ZenoFront.Shrink
 public import ZenoFront.AddPlane
 public import ZenoFront.Converse
 public import ZenoFront.Bridge
+public import ZenoFront.Achievability
 public import ZenoFront.AdmissibleBound
 public import ZenoFront.LinkForest
 public import ZenoFront.TreeBound
