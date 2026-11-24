@@ -35,5 +35,17 @@
 #   math.disproved        refuted by a counterexample
 
 # ===========================================================================
+# 1. Model
+# ===========================================================================
+
+[claims.lem-1-1]
+kind      = "lemma"
+statement = "Lemma 1.1 (dominating subset): if S' ⊆ S ⊆ K² with S' finite and every point of S weakly dominated by a point of S', then Min S = Min S', and every point of S is weakly dominated by a point of Min S. Lean form: Min S = Min S' in any partial order, without finiteness; the second clause, domination by a point of Min S, is not part of the Lean statement."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_iff_of_subset_of_dominated"
+paper     = "Lemma 1.1, doc/theory/exact-front.md §1.5"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Experiments
 # ===========================================================================
