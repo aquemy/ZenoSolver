@@ -126,5 +126,17 @@ paper     = "Lemma 2.9, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 3. Lemmas valid in every setting
+# ===========================================================================
+
+[claims.lem-3-1]
+kind         = "lemma"
+statement    = "Lemma 3.1 (cleaning): every plan can be changed, keeping all routes (so cost, makespan and flight times), so that every journey is clean: its first flight is its only departure from C_I and its last flight its only arrival in C_G."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.exists_transfer"
+paper        = "Lemma 3.1, doc/theory/exact-front.md §3"
+created      = "2026-11-23"
+
+# ===========================================================================
 # Experiments
 # ===========================================================================
