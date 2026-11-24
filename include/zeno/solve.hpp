@@ -69,8 +69,11 @@ struct SolveResult
     SolveStats stats;
 };
 
-/// Exact Pareto front of a symmetric instance (assumption A1 on central
-/// flights, which every generated instance satisfies). Throws
+/// Pareto front of a symmetric instance. It is exact when the central flights
+/// satisfy (A1) (Corollary 4.8), as the default table does, or the triangle
+/// inequality (AΔ) (Theorem 4.10, Corollary 4.12), as metric tables do
+/// (checkFlights, zeno/flights.hpp); otherwise its points are achieved, and the
+/// gaps that L does not certify may hide cheaper plans (Example 4.13). Throws
 /// std::invalid_argument for invalid or non-symmetric instances; the latter go
 /// to solveBracket (zeno/ns.hpp).
 [[nodiscard]] SolveResult solveFront(const Instance& instance, const SolveOptions& options = {});

@@ -4,6 +4,7 @@
 // which shares no code with the library: every landing multiset, every
 // admissible partition.
 #include <zeno/certificate.hpp>
+#include <zeno/flights.hpp>
 #include <zeno/forest.hpp>
 #include <zeno/ns.hpp>
 #include <zeno/roles.hpp>
@@ -19,6 +20,7 @@
 #include <functional>
 #include <iostream>
 #include <numeric>
+#include <optional>
 #include <random>
 #include <sstream>
 #include <string>
@@ -586,6 +588,207 @@ void testHarmfulWaiting()
     check(bySearch == 2, "harmful waiting: exactly the two waiting gaps need the search");
 }
 
+zeno::FlightTable table(int n, const std::function<zeno::Time(int, int)>& flight)
+{
+    zeno::FlightTable t(static_cast<std::size_t>(n), std::vector<zeno::Time>(static_cast<std::size_t>(n), 0));
+    for(int i = 0; i < n; ++i)
+        for(int j = 0; j < n; ++j)
+            if(i != j)
+                t[static_cast<std::size_t>(i)][static_cast<std::size_t>(j)] = flight(i, j);
+    return t;
+}
+
+// Example 4.13 of the theory note: central flights that satisfy neither (A1)
+// nor (AΔ), on which a plan beats the front of admissible partitions.
+zeno::Instance example413()
+{
+    zeno::Instance in;
+    in.d = {2, 3, 9, 11};
+    in.dbar = in.d;
+    in.c = {50, 44, 17, 0};
+    in.t = 6;
+    in.p = 3;
+    in.central = zeno::FlightTable{{0, 1, 5, 6}, {1, 0, 3, 6}, {5, 3, 0, 1}, {6, 6, 1, 0}};
+    return in;
+}
+
+// The assumption detector on hand-made tables.
+void testFlights()
+{
+    zeno::Instance in;
+    in.d = {2, 3, 5};
+    in.dbar = in.d;
+    in.c = {4, 2, 1};
+    in.t = 3;
+    in.p = 2;
+    const auto d = [&](int i) { return in.d[static_cast<std::size_t>(i)]; };
+    const auto flights = [&](std::optional<zeno::FlightTable> t) {
+        zeno::Instance x = in;
+        x.central = std::move(t);
+        x.validate();
+        return zeno::checkFlights(x);
+    };
+    auto f = flights(std::nullopt);
+    check(f.a1 && !f.triangle && f.a1ns && f.exactSymmetric(), "default table: (A1) and (A1-NS), not (AΔ)");
+    f = flights(table(3, [&](int i, int j) { return d(i) + d(j) + 1; }));
+    check(f.a1 && !f.triangle && f.a1ns, "slow central flights: (A1) only");
+    f = flights(table(3, [&](int i, int j) { return d(i) + d(j); }));
+    check(f.a1 && f.triangle, "central flights as long as through a hub: (A1) and (AΔ)");
+    f = flights(table(3, [&](int i, int j) { return std::abs(d(i) - d(j)); }));
+    check(!f.a1 && f.triangle && !f.a1ns && f.exactSymmetric(), "tightest table: (AΔ), not (A1)");
+    f = flights(table(3, [&](int i, int j) { return std::abs(d(i) - d(j)) + ((i + j) % 2); }));
+    check(!f.a1 && f.triangle, "a table between the tightest and the hub sums: (AΔ)");
+    f = flights(table(3, [&](int i, int j) { return d(i) + d(j) + (i + j == 1 ? -1 : 1); }));
+    check(!f.a1 && !f.triangle && f.exactSymmetric() == false, "one flight below the hub sum, others above: neither");
+
+    // (AΔ) fails through a central triangle only: hub triangles hold.
+    zeno::Instance flat = in;
+    flat.d = flat.dbar = {5, 5, 5};
+    flat.central = zeno::FlightTable{{0, 1, 1}, {1, 0, 3}, {1, 3, 0}};
+    check(!zeno::checkFlights(flat).triangle, "(AΔ) checks central triangles");
+    // and through a C_G triangle only.
+    zeno::Instance ns = in;
+    ns.d = {1, 10};
+    ns.dbar = {10, 1};
+    ns.c = {1, 1};
+    ns.central = zeno::FlightTable{{0, 9}, {9, 0}};
+    f = zeno::checkFlights(ns);
+    check(f.triangle && !f.a1 && !f.a1ns, "non-symmetric (AΔ) table: not (A1-NS)");
+    ns.dbar = {12, 1};
+    check(!zeno::checkFlights(ns).triangle, "(AΔ) checks the C_G side");
+    ns.central = zeno::FlightTable{{0, 11}, {11, 0}};
+    f = zeno::checkFlights(ns);
+    check(f.a1ns && f.triangle, "(A1-NS) and (AΔ) table");
+    ns.central = zeno::FlightTable{{0, 12}, {12, 0}};
+    f = zeno::checkFlights(ns);
+    check(f.a1ns && !f.triangle, "(A1-NS) table, not (AΔ)");
+
+    const auto example = example413();
+    f = zeno::checkFlights(example);
+    check(!f.a1 && !f.triangle && !f.exactSymmetric(), "Example 4.13: neither (A1) nor (AΔ)");
+    zeno::Instance one = in;
+    one.d = one.dbar = {3};
+    one.c = {1};
+    one.central = zeno::FlightTable{{0}};
+    f = zeno::checkFlights(one);
+    check(f.a1 && f.triangle && f.a1ns, "one central city: no central flight, every assumption holds");
+
+    // Instance::validate checks the table's shape.
+    const auto invalid = [&](zeno::FlightTable t, const std::string& what) {
+        zeno::Instance x = in;
+        x.central = std::move(t);
+        bool threw = false;
+        try
+        {
+            x.validate();
+        }
+        catch(const std::invalid_argument&)
+        {
+            threw = true;
+        }
+        check(threw, "invalid table rejected: " + what);
+    };
+    invalid({{0, 1}, {1, 0}}, "wrong size");
+    invalid({{0, 1, 2}, {1, 0, 3}, {2, 4, 0}}, "not symmetric");
+    invalid({{1, 1, 2}, {1, 0, 3}, {2, 3, 0}}, "non-zero diagonal");
+    invalid({{0, -1, 2}, {-1, 0, 3}, {2, 3, 0}}, "negative");
+}
+
+// Certificates under (A1) or (AΔ): `forest` gaps list A1 (the token the Lean
+// checker reads) for (A1) and (AΔ) tables, A1|AD is accepted as a synonym, and
+// no certificate with a forest gap is written under neither.
+void testFlightCertificates()
+{
+    zeno::Instance in = example413();
+    in.central.reset();
+    zeno::SolveOptions options;
+    options.plans = true;
+    const auto result = zeno::solveFront(in, options);
+    const auto gaps = zeno::symmetricGaps(in, result.front);
+    const auto has = [](const zeno::Certificate& c, const std::string& a) { return std::ranges::find(c.assumptions, a) != c.assumptions.end(); };
+    check(std::ranges::count(gaps, zeno::GapBound::Forest) >= 1, "Example 4.13 has a forest gap");
+    bool gap3440 = false;
+    for(std::size_t i = 0; i + 1 < result.front.size(); ++i)
+        gap3440 = gap3440 || (result.front[i].cost == 264 && result.front[i].makespan == 34 && result.front[i + 1].makespan == 40 && gaps[i] == zeno::GapBound::Forest);
+    check(gap3440, "Example 4.13: the gap between (264, 34) and (228, 40) needs the forest bound");
+
+    // The default table satisfies (A1): the token A1, which the Lean checker reads.
+    zeno::Certificate cert = zeno::makeCertificate(in, result);
+    check(has(cert, "A1") && !has(cert, zeno::kA1OrTriangle), "(A1) instance: the certificate lists A1");
+    auto report = zeno::checkCertificate(cert);
+    check(report.ok && std::ranges::find(report.relied, std::string(zeno::kA1OrTriangle)) != report.relied.end(), "A1 certificate accepted, relying on A1|AD");
+
+    // An (AΔ) table, not (A1): the same token A1, which the Lean checker accepts
+    // under (AΔ) too (Cert.check_sound_ATri).
+    zeno::Instance tight = in;
+    tight.central = table(in.n(), [&](int i, int j) { return std::abs(in.d[static_cast<std::size_t>(i)] - in.d[static_cast<std::size_t>(j)]); });
+    check(!zeno::checkFlights(tight).a1 && zeno::checkFlights(tight).triangle, "the tightest table satisfies (AΔ), not (A1)");
+    cert = zeno::makeCertificate(tight, result);
+    check(cert.assumptions == std::vector<std::string>{"S", "A1"}, "(AΔ) instance: the certificate lists A1");
+    report = zeno::checkCertificate(cert);
+    check(report.ok && report.relied == std::vector<std::string>{"S", zeno::kA1OrTriangle}, "(AΔ) certificate accepted, relying on A1|AD");
+
+    // The token A1|AD in a certificate: written, read back and accepted.
+    cert.assumptions = {"S", zeno::kA1OrTriangle};
+    std::stringstream text;
+    zeno::writeCertificate(text, cert);
+    check(text.str().find("assume S A1|AD\n") != std::string::npos, "the token is written as A1|AD");
+    const zeno::Certificate back = zeno::readCertificate(text);
+    report = zeno::checkCertificate(back);
+    check(report.ok && report.relied == std::vector<std::string>{"S", zeno::kA1OrTriangle}, "A1|AD certificate accepted");
+    zeno::Certificate bad = back;
+    bad.assumptions = {"S"};
+    check(!zeno::checkCertificate(bad).ok, "a forest gap without A1 or A1|AD is rejected");
+    bad.assumptions = {"S", "AD"};
+    check(!zeno::checkCertificate(bad).ok, "an unknown token does not stand for A1|AD");
+
+    // Example 4.13's table: no certificate with a forest gap.
+    bool threw = false;
+    try
+    {
+        (void)zeno::makeCertificate(example413(), result);
+    }
+    catch(const std::invalid_argument&)
+    {
+        threw = true;
+    }
+    check(threw, "no certificate with forest gaps when neither (A1) nor (AΔ) holds");
+
+    // Relaxed-only certificates need neither, whatever the table.
+    zeno::Instance relaxedOnly;
+    relaxedOnly.d = relaxedOnly.dbar = {6, 10};
+    relaxedOnly.c = {40, 20};
+    relaxedOnly.t = 5;
+    relaxedOnly.p = 2;
+    relaxedOnly.central = zeno::FlightTable{{0, 1}, {1, 0}}; // fails (AΔ): 10 > 6 + 1
+    check(!zeno::checkFlights(relaxedOnly).exactSymmetric(), "the relaxed-only instance satisfies neither");
+    const auto relaxedResult = zeno::solveFront(relaxedOnly, options);
+    cert = zeno::makeCertificate(relaxedOnly, relaxedResult);
+    check(cert.assumptions == std::vector<std::string>{"S"} && zeno::checkCertificate(cert).ok, "relaxed gaps need no assumption on central flights");
+
+    // Non-symmetric: a bound needing (A1-NS) refuses tables that violate it.
+    zeno::Instance ns;
+    ns.d = {3, 19};
+    ns.dbar = {3, 11};
+    ns.c = {5, 1};
+    ns.t = 7;
+    ns.p = 4;
+    const auto bracket = zeno::solveBracket(ns, options);
+    check(bracket.exact() && !bracket.assumptions().empty(), "Proposition 6.5: an exact bracket that needs A1-NS");
+    ns.central = zeno::FlightTable{{0, 5}, {5, 0}};
+    check(!zeno::checkFlights(ns).a1ns, "a short central flight violates (A1-NS)");
+    threw = false;
+    try
+    {
+        (void)zeno::makeBracketCertificate(ns, bracket);
+    }
+    catch(const std::invalid_argument&)
+    {
+        threw = true;
+    }
+    check(threw, "no v2 certificate needing A1-NS when the table violates it");
+}
+
 void testRejects()
 {
     zeno::Instance in;
@@ -641,6 +844,8 @@ int main(int argc, char** argv)
     testMetamorphic(rng, trials, sizes);
     testBracketCertificates(rng, trials / 4);
     testHarmfulWaiting();
+    testFlights();
+    testFlightCertificates();
     testRejects();
     if(failures == 0)
         std::cout << "ut-zeno-core: all checks passed\n";

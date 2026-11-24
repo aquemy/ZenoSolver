@@ -1,5 +1,6 @@
 #include <zeno/certificate.hpp>
 
+#include <zeno/flights.hpp>
 #include <zeno/forest.hpp>
 #include <zeno/ns.hpp>
 #include <zeno/ns_search.hpp>
@@ -193,6 +194,20 @@ private:
 };
 } // namespace
 
+std::vector<GapBound> symmetricGaps(const Instance& instance, const Front& front)
+{
+    std::vector<GapBound> gaps;
+    if(front.size() < 2)
+        return gaps;
+    const LevelBounds bounds(instance, front.back().makespan);
+    for(std::size_t i = 0; i + 1 < front.size(); ++i)
+    {
+        const Time T = bounds.level(front[i + 1].makespan);
+        gaps.push_back(bounds.relaxed(T) >= front[i].cost ? GapBound::Relaxed : GapBound::Forest);
+    }
+    return gaps;
+}
+
 Certificate makeCertificate(const Instance& instance, const SolveResult& result)
 {
     if(result.plans.size() != result.front.size())
@@ -201,18 +216,18 @@ Certificate makeCertificate(const Instance& instance, const SolveResult& result)
     cert.instance = instance;
     cert.front = result.front;
     cert.plans = result.plans;
-    const LevelBounds bounds(instance, result.front.empty() ? 0 : result.front.back().makespan);
-    bool needsA1 = false;
-    for(std::size_t i = 0; i + 1 < cert.front.size(); ++i)
-    {
-        const Time T = bounds.level(cert.front[i + 1].makespan);
-        const bool relaxedEnough = bounds.relaxed(T) >= cert.front[i].cost;
-        cert.gaps.push_back(relaxedEnough ? GapBound::Relaxed : GapBound::Forest);
-        needsA1 = needsA1 || !relaxedEnough;
-    }
+    cert.gaps = symmetricGaps(instance, result.front);
     cert.assumptions = {"S"};
-    if(needsA1)
+    if(std::ranges::find(cert.gaps, GapBound::Forest) != cert.gaps.end())
+    {
+        // Theorem 4.7 under (A1), Theorem 4.10 and Corollary 4.12 under (AΔ). The
+        // Lean checker reads the token "A1" for forest gaps, and its soundness
+        // covers both (Cert.check_sound_A1, Cert.check_sound_ATri).
+        if(!checkFlights(instance).exactSymmetric())
+            throw std::invalid_argument("no certificate: some gaps need the forest bound, which needs central flights that satisfy (A1) or (AΔ) "
+                                        "(Theorems 4.7 and 4.10), and these satisfy neither (Example 4.13)");
         cert.assumptions.push_back("A1");
+    }
     return cert;
 }
 
@@ -254,6 +269,8 @@ Certificate makeBracketCertificate(const Instance& instance, const BracketResult
         cert.multipliers.push_back(std::move(mu));
     }
     cert.fastest = kind(result.fastestProof);
+    if(needsA1 && !checkFlights(instance).a1ns)
+        throw std::invalid_argument("no certificate: some bounds need (A1-NS) (Theorem 6.1), which the central flights violate");
     if(instance.symmetric())
         cert.assumptions.push_back("S");
     if(needsA1)
@@ -490,9 +507,12 @@ CertificateCheck checkCertificate(const Certificate& cert)
         {
             case GapBound::Relaxed: return bounds.relaxed(T);
             case GapBound::Forest:
-                if(!in.symmetric() || !assumed("A1"))
+                // Sound under (S) and (A1) (Theorem 4.7) or (S) and (AΔ) (Theorem 4.10,
+                // Corollary 4.12). Certificates list "A1" (read by the Lean checker
+                // too); "A1|AD" spells out the same scope and is accepted as well.
+                if(!in.symmetric() || (!assumed("A1") && !assumed(kA1OrTriangle)))
                 {
-                    why = "the forest bound needs symmetric durations and assumption A1";
+                    why = std::string("the forest bound needs symmetric durations and assumption ") + kA1OrTriangle + " (or A1)";
                     return std::nullopt;
                 }
                 usedA1 = true;
@@ -586,7 +606,7 @@ CertificateCheck checkCertificate(const Certificate& cert)
     if(in.symmetric())
         report.relied.push_back("S");
     if(usedA1)
-        report.relied.push_back("A1");
+        report.relied.push_back(kA1OrTriangle);
     if(usedA1NS)
         report.relied.push_back("A1-NS");
     report.ok = report.errors.empty();

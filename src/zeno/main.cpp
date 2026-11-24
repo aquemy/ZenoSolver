@@ -6,10 +6,10 @@
 //   zeno generate [instance options] [-O FILE]
 //
 // The instance options are those of the 2016 solvers and build the same
-// instances (zeno --help).
+// instances, plus metric instances (--metric; zeno --help).
 #include <zeno/certificate.hpp>
+#include <zeno/flights.hpp>
 #include <zeno/io.hpp>
-#include <zeno/legacy_input.hpp>
 #include <zeno/ns.hpp>
 #include <zeno/solve.hpp>
 
@@ -32,10 +32,18 @@ constexpr std::string_view kUsage = R"(usage: zeno [front] [instance options] [s
 
 front     Pareto front (cost, makespan) as "cost makespan" lines by
           increasing cost (the default command). Exact for symmetric
-          instances. For non-symmetric ones: achieved points (simulated
-          plans) and, on stderr, which gaps a lower bound certifies
+          instances whose central flights satisfy (A1) or the triangle
+          inequality (AΔ) (Theorem 4.10, Corollary 4.12; in Lean,
+          solveFront_isParetoFront_ATri): the default table satisfies (A1),
+          --metric tables (AΔ). With a central-flight table,
+          stderr says which holds, or warns that the front may not be exact
+          (Example 4.13). For non-symmetric instances: achieved points
+          (simulated plans) and, on stderr, which gaps a lower bound
+          certifies
 check     verify a front certificate (doc/certificate-format.md) and print
-          the assumptions it relied on
+          the assumptions it relied on (S; A1|AD: central flights satisfy
+          (A1) or (AΔ), as for the Lean checker, Cert.check_sound_A1 and
+          Cert.check_sound_ATri; A1-NS)
 pddl      write the instance as a PDDL problem for pddl/multi-zeno-travel.pddl,
           with its front as comments unless --no-front (default file
           zeno<n>n<t>t<p>pMulti.pddl)
@@ -134,6 +142,53 @@ std::ofstream openOutput(const std::string& path)
     return out;
 }
 
+// Symmetric instances with a central-flight table: which assumption makes the
+// front exact, or a warning when neither (A1) nor (AΔ) holds.
+void reportFlights(const zeno::Instance& instance, const zeno::Front& front)
+{
+    if(!instance.central)
+        return; // the default table satisfies (A1)
+    const zeno::FlightAssumptions flights = zeno::checkFlights(instance);
+    if(flights.a1)
+    {
+        std::cerr << "central flights satisfy (A1)" << (flights.triangle ? " and (AΔ)" : "") << ": the front is exact (Theorem 4.7, Corollary 4.8)\n";
+        return;
+    }
+    if(flights.triangle)
+    {
+        std::cerr << "central flights satisfy (AΔ), not (A1): the front is exact (Theorem 4.10, Corollary 4.12)\n";
+        return;
+    }
+    const auto gaps = zeno::symmetricGaps(instance, front);
+    const auto unproved = static_cast<std::size_t>(std::ranges::count(gaps, zeno::GapBound::Forest));
+    if(unproved == 0)
+    {
+        std::cerr << "central flights satisfy neither (A1) nor (AΔ), but the relaxation L certifies every gap (Lemma 3.4): the front is exact\n";
+        return;
+    }
+    std::cerr << "warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.13). Every point is achieved "
+              << "without central flights, and the relaxation L (Lemma 3.4) certifies " << gaps.size() - unproved << " of " << gaps.size()
+              << " gaps; the others need (A1) or (AΔ):\n";
+    for(std::size_t i = 0; i < gaps.size(); ++i)
+        if(gaps[i] == zeno::GapBound::Forest)
+            std::cerr << "  unproved gap between makespans " << front[i].makespan << " and " << front[i + 1].makespan << ": a plan with makespan < "
+                      << front[i + 1].makespan << " may cost less than " << front[i].cost << "\n";
+}
+
+const char* proofName(zeno::GapProof proof)
+{
+    switch(proof)
+    {
+        case zeno::GapProof::Open: return "open";
+        case zeno::GapProof::Relaxed: return "relaxed";
+        case zeno::GapProof::Roles: return "roles";
+        case zeno::GapProof::Lagrangian: return "lagrangian";
+        case zeno::GapProof::Search: return "search";
+        case zeno::GapProof::Balanced: return "balanced";
+    }
+    return "?";
+}
+
 // Non-symmetric instances: the certified bracket of zeno::solveBracket.
 int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool plans, const std::optional<std::string>& certificate, bool stats)
 {
@@ -148,15 +203,28 @@ int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool 
         shown.plans = result.plans;
         printPlans(shown, instance.n());
     }
+    // Every bound but lemma R needs (A1-NS) (Theorem 6.1), which a central-flight
+    // table may violate; whether (AΔ) is enough instead is open (Conjecture 6.7).
+    const bool a1ns = zeno::checkFlights(instance).a1ns;
+    const auto proved = [&](zeno::GapProof proof) { return proof == zeno::GapProof::Relaxed || (a1ns && proof != zeno::GapProof::Open); };
+    if(instance.central)
+        std::cerr << (a1ns ? "central flights satisfy (A1-NS)\n"
+                           : "warning: central flights violate (A1-NS), which every bound but lemma R needs (Theorem 6.1), so only lemma R "
+                             "counts below (whether (AΔ) suffices is open: Conjecture 6.7)\n");
     std::size_t closed = 0;
     for(auto proof : result.gapProof)
-        closed += proof != zeno::GapProof::Open;
+        closed += proved(proof);
+    const bool fastestReached = result.fastestLower == result.upper.front().makespan;
+    const bool fastest = fastestReached && proved(result.fastestProof);
+    const bool exact = fastest && closed == result.gapProof.size();
     std::cerr << "non-symmetric instance: " << result.upper.size() << " achieved points; fastest makespan "
-              << (result.fastestLower == result.upper.front().makespan ? "certified" : "not certified (bound " + std::to_string(result.fastestLower) + ")")
+              << (fastest           ? "certified"
+                  : fastestReached ? "not certified (its bound needs (A1-NS))"
+                                   : "not certified (bound " + std::to_string(result.fastestLower) + ")")
               << "; " << closed << " of " << result.gapProof.size() << " gaps certified; "
-              << (result.exact() ? "the front is exact" : "the front is a bracket");
+              << (exact ? "the front is exact" : "the front is a bracket");
     const auto assumptions = result.assumptions();
-    if(!assumptions.empty())
+    if(exact && !assumptions.empty())
     {
         std::cerr << ", assuming";
         for(const auto& a : assumptions)
@@ -164,10 +232,13 @@ int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool 
     }
     std::cerr << "\n";
     for(std::size_t i = 0; i < result.gapProof.size(); ++i)
-        if(result.gapProof[i] == zeno::GapProof::Open)
+        if(result.gapProof[i] != zeno::GapProof::Open && !proved(result.gapProof[i]))
+            std::cerr << "  unproved gap between makespans " << result.upper[i].makespan << " and " << result.upper[i + 1].makespan
+                      << ": closed by the " << proofName(result.gapProof[i]) << " bound, which needs (A1-NS)\n";
+        else if(result.gapProof[i] == zeno::GapProof::Open)
             std::cerr << "  open gap between makespans " << result.upper[i].makespan << " and " << result.upper[i + 1].makespan
                       << ": a plan with makespan < " << result.upper[i + 1].makespan << " costs at least " << result.gapLower[i]
-                      << " (achieved: " << result.upper[i].cost << "; "
+                      << (a1ns ? "" : " if (A1-NS) held") << " (achieved: " << result.upper[i].cost << "; "
                       << (result.openReason[i] == zeno::BracketResult::OpenReason::Unscheduled
                               ? "a cheaper balanced configuration exists, no schedule found within the gap"
                               : "the exact balanced program gave up")
@@ -206,7 +277,7 @@ int runFront(const std::vector<std::string>& args)
     rejectLeftovers(rest);
     options.plans = plans || certificate.has_value();
 
-    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    const zeno::Instance instance = zeno::cli::buildInstance(parsed);
     if(!instance.symmetric())
         return runBracket(instance, options, plans, certificate, stats);
     const zeno::SolveResult result = zeno::solveFront(instance, options);
@@ -214,6 +285,7 @@ int runFront(const std::vector<std::string>& args)
         std::cout << point.cost << " " << point.makespan << "\n";
     if(plans)
         printPlans(result, instance.n());
+    reportFlights(instance, result.front);
     if(certificate)
     {
         auto out = openOutput(*certificate);
@@ -243,6 +315,9 @@ int runCheck(const std::vector<std::string>& args)
     for(const auto& a : report.relied)
         std::cout << " " << a;
     std::cout << "\n";
+    if(std::ranges::find(report.relied, std::string(zeno::kA1OrTriangle)) != report.relied.end())
+        std::cout << zeno::kA1OrTriangle << ": the forest gaps hold when the central flights satisfy (A1) (Theorem 4.7) or (AΔ) "
+                  << "(Theorem 4.10, Corollary 4.12); the Lean checker is proved sound under both (Cert.check_sound_A1, Cert.check_sound_ATri)\n";
     return 0;
 }
 
@@ -252,15 +327,21 @@ int runPddl(const std::vector<std::string>& args)
     const auto file = takeValue(parsed.rest, "-O");
     const bool noFront = takeFlag(parsed.rest, "--no-front");
     rejectLeftovers(parsed.rest);
-    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    const zeno::Instance instance = zeno::cli::buildInstance(parsed);
     auto out = openOutput(file.value_or(zeno::defaultPddlName(instance)));
     if(!noFront && instance.symmetric())
     {
         const zeno::Front front = zeno::solveFront(instance).front;
-        zeno::writePddlProblem(out, instance, &front);
+        // Without (A1) or (AΔ), the front is exact only if L certifies every gap.
+        if(zeno::checkFlights(instance).exactSymmetric() || std::ranges::count(zeno::symmetricGaps(instance, front), zeno::GapBound::Forest) == 0)
+        {
+            zeno::writePddlProblem(out, instance, &front);
+            return 0;
+        }
+        std::cerr << "zeno: warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.13); "
+                     "it is not written\n";
     }
-    else
-        zeno::writePddlProblem(out, instance);
+    zeno::writePddlProblem(out, instance);
     return 0;
 }
 
@@ -269,7 +350,7 @@ int runGenerate(const std::vector<std::string>& args)
     auto parsed = zeno::cli::parseInstanceArguments(args);
     const auto file = takeValue(parsed.rest, "-O");
     rejectLeftovers(parsed.rest);
-    const zeno::Instance instance = zeno::legacy::buildInstance(parsed.options);
+    const zeno::Instance instance = zeno::cli::buildInstance(parsed);
     if(!file)
     {
         zeno::writeDataFile(std::cout, instance);

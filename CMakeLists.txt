@@ -78,10 +78,12 @@ endif()
 # zeno command-line tool.
 add_library(zeno_core STATIC
     src/zeno/certificate.cpp
+    src/zeno/flights.cpp
     src/zeno/forest.cpp
     src/zeno/instance.cpp
     src/zeno/io.cpp
     src/zeno/legacy_input.cpp
+    src/zeno/metric.cpp
     src/zeno/ns.cpp
     src/zeno/ns_search.cpp
     src/zeno/one_plane.cpp
