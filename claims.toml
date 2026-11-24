@@ -153,6 +153,14 @@ lean_partial = "ZenoFront.PlaneFeasible.exists_segments, ZenoFront.roleW_landing
 paper        = "Lemma 3.3, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
+[claims.lem-3-4]
+kind      = "lemma"
+statement = "Lemma 3.4 (relaxation) [R]: under (S), every feasible plan with cost C and makespan M has non-empty multisets Y_1..Y_p with Σ_k |Y_k| = s, c(Y) ≤ C and ℓ(Y_k) ≤ F_k ≤ M, hence C ≥ L(⌊M/2⌋) with integer durations; no assumption on central flights is needed. Lean form: integer data, (S) as d̄ = d, an explicit p ≤ t, and 2δ(Y_k) ≤ M in place of ℓ(Y_k) ≤ F_k; relaxCost_oneplane_le_totalCost is the bound by L."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Feasible.exists_relaxation, ZenoFront.relaxCost_oneplane_le_totalCost"
+paper     = "Lemma 3.4, doc/theory/exact-front.md §3"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
