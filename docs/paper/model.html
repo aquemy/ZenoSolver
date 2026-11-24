@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>MultiZenoTravel problems – ZenoSolver</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../paper/front.html" rel="next">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/provenance.css">
+<link rel="stylesheet" href="../styles/site.css">
+<link rel="stylesheet" href="../styles/paper.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ZenoSolver</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../problem.html"> 
+<span class="menu-text">Problem</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../paper/index.html"> 
+<span class="menu-text">Paper</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../instances/index.html"> 
+<span class="menu-text">Instances</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../solver/install.html"> 
+<span class="menu-text">Solver</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Theory</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-theory">    
+        <li>
+    <a class="dropdown-item" href="../proofs.html">
+ <span class="dropdown-text">Blueprint</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../claimgraph.html">
+ <span class="dropdown-text">Claim graph</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../history.html">
+ <span class="dropdown-text">History</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../blueprint.pdf">
+ <span class="dropdown-text">Blueprint (PDF)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/aquemy/ZenoSolver"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../paper/model.html">MultiZenoTravel problems</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/model.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">MultiZenoTravel problems</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/front.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Symmetric MultiZenoTravel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/nonsymmetric.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Non-symmetric and general MultiZenoTravel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/algorithm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pareto Optimal Plans</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Experiments</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/application.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Application: OpenFlights Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../paper/conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conclusion and Perspectives</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-instances" id="toc-sec-instances" class="nav-link active" data-scroll-target="#sec-instances">Instances</a></li>
+  <li><a href="#sec-plans" id="toc-sec-plans" class="nav-link" data-scroll-target="#sec-plans">Plans</a></li>
+  <li><a href="#sec-fronts" id="toc-sec-fronts" class="nav-link" data-scroll-target="#sec-fronts">Pareto fronts</a></li>
+  <li><a href="#sec-assumptions" id="toc-sec-assumptions" class="nav-link" data-scroll-target="#sec-assumptions">Assumptions</a></li>
+  <li><a href="#sec-patterns" id="toc-sec-patterns" class="nav-link" data-scroll-target="#sec-patterns">Patterns</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">MultiZenoTravel problems</h1>
+<p class="subtitle lead">Instances, plans, Pareto fronts, assumptions and patterns</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this Section, we introduce three versions of the MultiZenoTravel problem: the symmetric clique MultiZenoTravel, the non-symmetric clique MultiZenoTravel and the general MultiZenoTravel. We then make precise what a plan is, together with its cost and its makespan, and the assumptions on durations used in the rest of the paper. Plans are defined flight by flight, with explicit departure times, so that waiting, passengers changing planes, empty flights and flights between central cities are part of the problem and not excluded by assumption. The characterization of the Pareto-optimal plans comes next: for the <a href="../paper/front.html">symmetric clique problem</a> first, then for the <a href="../paper/nonsymmetric.html">non-symmetric and general problems</a>.</p>
+<section id="sec-instances" class="level2">
+<h2 class="anchored" data-anchor-id="sec-instances">Instances</h2>
+<p>Let us introduce some notations related to the planning problem briefly presented in the introduction: a non-symmetric clique MultiZenoTravel instance (<a href="../paper/index.html#fig-instance">schematic view</a>) is defined by the following elements (<a href="../proofs.html#node-s1-1">§1.1</a> <span class="badge ok">Lean definition</span>):</p>
+<ul>
+<li><span class="math inline">\(n\)</span> central cities, organized as a clique in which every node is connected to <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_G\)</span>, respectively the initial city and the goal city.</li>
+<li><span class="math inline">\(c \in (\mathbb R^+)^n\)</span>, where <span class="math inline">\(c_i\)</span> is the cost for landing in <span class="math inline">\(C_i\)</span>.</li>
+<li><span class="math inline">\(D \in (\mathbb R^+)^{n \times n}\)</span>, where <span class="math inline">\(d_{ij}\)</span> is the flying time between <span class="math inline">\(C_i\)</span> and <span class="math inline">\(C_j\)</span>.</li>
+<li><span class="math inline">\(d \in (\mathbb R^+)^n\)</span>, where <span class="math inline">\(d_i\)</span> is the flying time between <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_i\)</span>.</li>
+<li><span class="math inline">\(\bar d \in (\mathbb R^+)^n\)</span>, where <span class="math inline">\(\bar d_i\)</span> is the flying time between <span class="math inline">\(C_i\)</span> and <span class="math inline">\(C_G\)</span>.</li>
+<li><span class="math inline">\(p\)</span> planes, initially in <span class="math inline">\(C_I\)</span>, that have a capacity of a unique person.</li>
+<li><span class="math inline">\(t\)</span> persons, initially in <span class="math inline">\(C_I\)</span>.</li>
+</ul>
+<p>The goal of MultiZenoTravel is to carry all <span class="math inline">\(t\)</span> persons, initially in <span class="math inline">\(C_I\)</span>, to <span class="math inline">\(C_G\)</span> using <span class="math inline">\(p\)</span> planes, minimizing both the makespan and the cost of the plan.</p>
+<p>Flights are undirected: each one has a single duration, used in both directions, and there is no flight between <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_G\)</span>. We write <span class="math inline">\(\mathrm{dur}(a, b)\)</span> for the duration of the flight between <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>; a flight between central cities may also be missing. Landing in <span class="math inline">\(C_I\)</span> or <span class="math inline">\(C_G\)</span> is free. Without loss of generality, all triples <span class="math inline">\((d_i, \bar d_i, c_i)\)</span> are assumed to be pairwise distinct. Otherwise, the 2 cities can be “merged” and the resulting <span class="math inline">\(n-1\)</span> cities problem is equivalent to the original <span class="math inline">\(n\)</span> cities problem, as there exist no city capacity constraints. Finally, we only consider cases where <span class="math inline">\(t \ge p\)</span>, as the problem is otherwise trivial.</p>
+<p>An instance of the symmetric clique MultiZenoTravel problem is an instance such that <span class="math inline">\(d = \bar d\)</span>. A general MultiZenoTravel instance is an instance such that the <span class="math inline">\(n\)</span> central cities are organized as an arbitrary graph; it is defined in the <a href="../paper/nonsymmetric.html#sec-graphs">general section</a>.</p>
+<p>Throughout the paper, we illustrate the definitions on the symmetric instance with <span class="math inline">\(n = 3\)</span> cities, <span class="math inline">\(t = 3\)</span> passengers and <span class="math inline">\(p = 2\)</span> planes, durations <span class="math inline">\(d = (2, 3, 5)\)</span>, costs <span class="math inline">\(c = (9, 6, 1)\)</span> and no flight between central cities (the file <a href="https://github.com/aquemy/ZenoSolver/blob/master/site/problem/example.dat"><code>site/problem/example.dat</code></a>, also used on the <a href="../problem.html">Problem</a> page). Its Pareto front, as (cost, makespan), is <span class="math display">\[(4, 20),\ (14, 16),\ (20, 14),\ (24, 12),\ (30, 10),\ (36, 8).\]</span></p>
+<div id="fig-plan" class="plan-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-plan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="math display">\[
+\begin{array}{lllllll}
+p_1: &amp; C_I &amp; \overset{t_1}{\to} C_2 &amp; \to C_I &amp; \overset{t_2}{\to} C_3 &amp; \overset{t_2}{\to} C_G &amp; \\
+p_2: &amp; C_I &amp; \overset{t_3}{\to} C_3 &amp; \overset{t_3}{\to} C_G &amp; \to C_2 &amp; \overset{t_1}{\to} C_G &amp;
+\end{array}
+\]</span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Example of an admissible plan to transport 3 travelers via 2 planes, on the instance above. This representation indicates the successive actions for each plane. We noted by <span class="math inline">\(\overset{t_i}{\to}\)</span> a flight with a traveler.
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-plan" class="quarto-xref">Figure&nbsp;1</a> illustrates an admissible solution, of cost 14 and makespan 16. Note that the makespan for a plan is not necessarily the largest sum of the flights’ duration as some planes might have to wait for others. This would be the case for <span class="math inline">\(p_2\)</span> waiting for <span class="math inline">\(t_1\)</span> in <span class="math inline">\(C_2\)</span>, had it reached <span class="math inline">\(C_2\)</span> before <span class="math inline">\(p_1\)</span> dropped <span class="math inline">\(t_1\)</span> there.</p>
+</section>
+<section id="sec-plans" class="level2">
+<h2 class="anchored" data-anchor-id="sec-plans">Plans</h2>
+<p>To reason about all plans, including those that wait, hand passengers over or fly between central cities, we fix their semantics (<a href="../proofs.html#node-s1-2">§1.2</a> <span class="badge ok">Lean definition</span>). A plan on a set <span class="math inline">\(Q\)</span> of planes (all <span class="math inline">\(p\)</span> planes unless stated otherwise) consists of</p>
+<ol type="1">
+<li>for every plane <span class="math inline">\(k \in Q\)</span>, a <em>route</em>: a sequence of <em>legs</em> <span class="math inline">\((k, 1), \dots, (k, \nu_k)\)</span>. Leg <span class="math inline">\((k, j)\)</span> flies an existing flight from <span class="math inline">\(v_{k,j-1}\)</span> to <span class="math inline">\(v_{k,j}\)</span> and departs at time <span class="math inline">\(e_{k,j}\)</span>, with <span class="math inline">\(v_{k,0} = C_I\)</span>, <span class="math inline">\(e_{k,1} \ge 0\)</span>, and <span class="math inline">\(e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})\)</span>;</li>
+<li>for every passenger, a <em>journey</em>: a non-empty sequence of legs whose first leg departs from <span class="math inline">\(C_I\)</span> and whose last leg arrives in <span class="math inline">\(C_G\)</span>. Each leg departs from the city where the previous one arrives, no earlier than that arrival, and, if both legs belong to the same plane, at a later position of its route;</li>
+<li><em>capacity</em>: the journeys are pairwise disjoint, and none repeats a leg.</li>
+</ol>
+<p>The plan is <em>feasible</em> if every route ends in <span class="math inline">\(C_G\)</span>. Its <em>cost</em> <span class="math inline">\(C\)</span> is the sum of the landing costs of all legs, with or without a passenger, and its <em>makespan</em> <span class="math inline">\(M = \max_k a_{k,\nu_k}\)</span> is the time at which the last plane reaches <span class="math inline">\(C_G\)</span> for the last time. <span class="math inline">\(\mathcal A\)</span> is the set of pairs <span class="math inline">\((C, M)\)</span> of feasible plans. The <em>flight time</em> <span class="math inline">\(F_k\)</span> of plane <span class="math inline">\(k\)</span> is the sum of the durations of its legs; its flights are sequential, so <span class="math inline">\(F_k \le M\)</span>.</p>
+<p>Waiting is implicit: a plane or a passenger may depart later than it arrived. Boarding and deplaning take no time, several planes may be in a city at once, and a passenger may change planes in any city, any number of times. In <a href="#fig-plan" class="quarto-xref">Figure&nbsp;1</a>, <span class="math inline">\(t_1\)</span> changes planes once, in <span class="math inline">\(C_2\)</span>.</p>
+<p>Journeys may contain detours that serve nothing, and they can be removed:</p>
+<div class="statement">
+<p><a href="../proofs.html#node-lemma-3-1">Lemma 3.1</a> <span class="badge informal">informal, parts in Lean</span> <strong>Cleaning.</strong> Every plan can be changed, keeping all routes (hence its cost, makespan and flight times), so that every journey is <em>clean</em>: its first flight is its only flight departing from <span class="math inline">\(C_I\)</span>, and its last flight is its only flight arriving in <span class="math inline">\(C_G\)</span>.</p>
+</div>
+<div class="sketch">
+<p><em>Sketch.</em> Cut each journey down to the part from its last departure from <span class="math inline">\(C_I\)</span> to the first later arrival in <span class="math inline">\(C_G\)</span>; this is still a journey, and capacity only gets looser (<a href="../proofs.html#node-lemma-3-1">full proof</a>).</p>
+</div>
+<p>A plan is <em>event-ordered</em> if its legs admit a total order that extends every route and every journey and along which departure times do not decrease. With positive durations every plan is event-ordered. With zero durations, a passenger can ride a later leg of one plane and then an earlier leg of another at the same instant, in a cycle that no execution in time realises; such plans never improve the front (<a href="../proofs.html#node-corollary-6-10">Corollary 6.10</a> <span class="badge informal">informal, parts in Lean</span>).</p>
+<p>Requiring planes to finish in <span class="math inline">\(C_G\)</span> does not change the front: if planes may end anywhere, with the makespan taken as the last arrival of any leg, the Pareto front is the same under the assumptions of the next section (<a href="../proofs.html#node-theorem-4-9">Theorem 4.9</a> <span class="badge ok">machine-checked</span>). All the planes may thus be assumed to finish their respective sequence in <span class="math inline">\(C_G\)</span>.</p>
+<p>ZenoSolver outputs each instance as a PDDL file<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> for the domain <a href="https://github.com/aquemy/ZenoSolver/blob/master/pddl/multi-zeno-travel.pddl"><code>pddl/multi-zeno-travel.pddl</code></a>: a durative <code>fly</code> action that adds the landing cost to <code>total-cost</code>, instantaneous <code>board</code> and <code>debark</code> actions, and a predicate <code>libre</code> that enforces capacity one. Under <span class="math inline">\(\varepsilon\)</span>-separation, PDDL plans and event-ordered plans correspond, with the same cost and makespans equal in the limit <span class="math inline">\(\varepsilon \to 0\)</span> (<a href="../proofs.html#node-statement-1-2">Statement 1.2</a> <span class="badge informal">informal</span>); this correspondence is argued but not formalised. The <a href="../instances/index.html">Instances</a> section describes the generator and the files.</p>
+</section>
+<section id="sec-fronts" class="level2">
+<h2 class="anchored" data-anchor-id="sec-fronts">Pareto fronts</h2>
+<p>For points <span class="math inline">\(y, z\)</span> of the plane (cost, makespan), <span class="math inline">\(y \preceq z\)</span> if <span class="math inline">\(y \le z\)</span> in both coordinates. For a set <span class="math inline">\(\mathcal S\)</span> of points, <span class="math inline">\(\mathrm{Min}\,\mathcal S\)</span> is the set of <span class="math inline">\(z \in \mathcal S\)</span> weakly dominated by no other point of <span class="math inline">\(\mathcal S\)</span>, and the <em>Pareto front</em> of an instance is <span class="math inline">\(\mathcal F = \mathrm{Min}\,\mathcal A\)</span> (<a href="../proofs.html#node-s1-5">§1.5</a> <span class="badge ok">Lean definition</span>). We look for the front and for one plan per front point.</p>
+<p>Every characterization of the front in this paper has two halves: a finite set of points that plans attain, and a proof that every plan is weakly dominated by one of them. The following lemma turns them into an equality of fronts.</p>
+<div class="statement">
+<p><a href="../proofs.html#node-lemma-1-1">Lemma 1.1</a> <span class="badge informal">informal, parts in Lean</span> <strong>Dominating subset.</strong> Let <span class="math inline">\(\mathcal S' \subseteq \mathcal S\)</span> with <span class="math inline">\(\mathcal S'\)</span> finite and every point of <span class="math inline">\(\mathcal S\)</span> weakly dominated by a point of <span class="math inline">\(\mathcal S'\)</span>. Then <span class="math inline">\(\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'\)</span>, and every point of <span class="math inline">\(\mathcal S\)</span> is weakly dominated by a point of <span class="math inline">\(\mathrm{Min}\,\mathcal S\)</span>.</p>
+</div>
+</section>
+<section id="sec-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="sec-assumptions">Assumptions</h2>
+<p>The results of this paper use the following assumptions (<a href="../proofs.html#node-s1-4">§1.4</a> <span class="badge ok">Lean definition</span>), each one only where stated. The first two are the triangular inequality and the symmetry assumption:</p>
+<p><strong>Assumption</strong>: <span class="math inline">\(\forall (a, b, x),\ \mathrm{dur}(a, x) + \mathrm{dur}(x, b) \ge \mathrm{dur}(a, b)\)</span> whenever the three flights exist <span class="math inline">\(\hfill\)</span> (AΔ)</p>
+<p><strong>Assumption</strong> (Symmetry): <span class="math inline">\(\forall i \in [1, n],\ d_i = \bar d_i\)</span> <span class="math inline">\(\hfill\)</span> (S)</p>
+<p>The assumption of [<a href="../paper/index.html#ref-QS15">QS15</a>], in a non-strict form, and its non-symmetric counterpart state that flights between central cities are useless, that is, never faster than a detour through <span class="math inline">\(C_I\)</span> or <span class="math inline">\(C_G\)</span>:</p>
+<p><strong>Assumption</strong>: under (S), <span class="math inline">\(\forall (i, j),\ d_{ij} \ge d_i + d_j\)</span> for every existing flight <span class="math inline">\(\hfill\)</span> (A1)</p>
+<p><strong>Assumption</strong>: <span class="math inline">\(\forall (i, j),\ d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)\)</span> for every existing flight <span class="math inline">\(\hfill\)</span> (A1-NS)</p>
+<p>Finally, a weak form of the triangular inequality through the hubs is used for waiting:</p>
+<p><strong>Assumption</strong>: <span class="math inline">\(\forall (i, z),\ \bar d_i \le d_i + d_z + \bar d_z\)</span> and <span class="math inline">\(d_i \le \bar d_i + \bar d_z + d_z\)</span> <span class="math inline">\(\hfill\)</span> (AΔ-path)</p>
+<ol start="19" type="A">
+<li>implies (AΔ-path), and so does (AΔ) whenever the flight between <span class="math inline">\(i\)</span> and <span class="math inline">\(z\)</span> exists. Under (S), (A1) and (AΔ) hold together only when <span class="math inline">\(d_{ij} = d_i + d_j\)</span>: the first allows flights between central cities longer than the detour through a hub, and the second allows them as short as <span class="math inline">\(|d_i - d_j|\)</span>. Every PDDL problem the generator writes is symmetric, and gives a flight between central cities the duration <span class="math inline">\(d_i + d_j + 100\)</span>, so it satisfies (A1).</li>
+</ol>
+<p><strong>Notation.</strong> We write <span class="math inline">\(s = 2t - p\)</span>, so that <span class="math inline">\(s \ge p\)</span> and <span class="math inline">\(s \equiv p \pmod 2\)</span>, and <span class="math inline">\(\kappa = \lceil s/p \rceil\)</span> (<a href="../proofs.html#node-notation">Notation</a> <span class="badge informal">informal</span>). For a multiset <span class="math inline">\(Y\)</span> of central cities, <span class="math inline">\(Y(i)\)</span> is the multiplicity of <span class="math inline">\(i\)</span>, <span class="math inline">\(|Y|\)</span> its size, <span class="math inline">\(c(Y) = \sum_{w \in Y} c_w\)</span> its cost, and <span class="math inline">\(\delta(Y) = \sum_{w \in Y} d_w\)</span> and <span class="math inline">\(\bar\delta(Y) = \sum_{w \in Y} \bar d_w\)</span> its durations; under (S), its <em>load</em> is <span class="math inline">\(\ell(Y) = 2\delta(Y)\)</span>. A <em>partition</em> of <span class="math inline">\(X\)</span> over the planes is a family of groups <span class="math inline">\(X_1, \dots, X_p\)</span> with <span class="math inline">\(X_1 + \dots + X_p = X\)</span>, group <span class="math inline">\(X_k\)</span> being the cities in which plane <span class="math inline">\(k\)</span> lands.</p>
+</section>
+<section id="sec-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="sec-patterns">Patterns</h2>
+<p>Cut the sequence of a plane at every visit to <span class="math inline">\(C_I\)</span> or <span class="math inline">\(C_G\)</span>. Each piece, from one of them to the next, is a <em>pattern</em> (a <em>segment</em> in the <a href="../proofs.html">blueprint</a>). As there is no flight between <span class="math inline">\(C_I\)</span> and <span class="math inline">\(C_G\)</span>, every pattern lands in at least one central city. Depending on the cities it starts and ends in, a pattern is of one of four types, denoted by <span class="math inline">\(A\)</span>, <span class="math inline">\(\bar A\)</span>, <span class="math inline">\(B\)</span> and <span class="math inline">\(\bar B\)</span> (<a href="#fig-patterns" class="quarto-xref">Figure&nbsp;2</a>). A pattern that lands in exactly one central city, of <em>multiplicity</em> 0, consists of two flights; we call it <em>simple</em>. We denote by <span class="math inline">\(|X|\)</span> the number of the patterns <span class="math inline">\(X \in \{A, \bar A, B, \bar B\}\)</span> in a given plan, and by <span class="math inline">\(F(\gamma)\)</span> the flight time of a pattern <span class="math inline">\(\gamma\)</span>.</p>
+<div id="fig-patterns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<svg class="zs-segments" viewbox="0 0 640 112" role="img" aria-label="The four patterns A, A-bar, B and B-bar" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="zs-seg-arrow" viewbox="0 0 10 10" refx="9" refy="5" markerunits="userSpaceOnUse" markerwidth="8" markerheight="8" orient="auto"><path class="arrowhead" d="M0,1 L10,5 L0,9 z"></path></marker></defs>
+<path class="seg" d="M 39 36 L 66 36" marker-end="url(#zs-seg-arrow)"></path>
+<path class="seg" d="M 93 36 L 120 36" marker-end="url(#zs-seg-arrow)"></path>
+<circle class="node hub" cx="26" cy="36" r="12"></circle>
+<text class="node-lbl" x="26" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="80" cy="36" r="12"></circle>
+<text class="node-lbl" x="80" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="134" cy="36" r="12"></circle>
+<text class="node-lbl" x="134" y="40" text-anchor="middle">G</text>
+<text class="type" x="80" y="86" text-anchor="middle">A</text>
+<text x="80" y="104" text-anchor="middle">I → x → G</text>
+<path class="seg" d="M 281 36 L 254 36" marker-end="url(#zs-seg-arrow)"></path>
+<path class="seg" d="M 227 36 L 200 36" marker-end="url(#zs-seg-arrow)"></path>
+<circle class="node hub" cx="186" cy="36" r="12"></circle>
+<text class="node-lbl" x="186" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="240" cy="36" r="12"></circle>
+<text class="node-lbl" x="240" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="294" cy="36" r="12"></circle>
+<text class="node-lbl" x="294" y="40" text-anchor="middle">G</text>
+<text class="type" x="240" y="86" text-anchor="middle">Ā</text>
+<text x="240" y="104" text-anchor="middle">G → x → I</text>
+<path class="seg" d="M 355 27 Q 373.0 8 390 27" marker-end="url(#zs-seg-arrow)"></path>
+<path class="seg" d="M 391 45 Q 373.0 64 356 45" marker-end="url(#zs-seg-arrow)"></path>
+<circle class="node hub" cx="346" cy="36" r="12"></circle>
+<text class="node-lbl" x="346" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="400" cy="36" r="12"></circle>
+<text class="node-lbl" x="400" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="454" cy="36" r="12"></circle>
+<text class="node-lbl" x="454" y="40" text-anchor="middle">G</text>
+<text class="type" x="400" y="86" text-anchor="middle">B</text>
+<text x="400" y="104" text-anchor="middle">I → x → I</text>
+<path class="seg" d="M 605 27 Q 587.0 8 570 27" marker-end="url(#zs-seg-arrow)"></path>
+<path class="seg" d="M 569 45 Q 587.0 64 604 45" marker-end="url(#zs-seg-arrow)"></path>
+<circle class="node hub" cx="506" cy="36" r="12"></circle>
+<text class="node-lbl" x="506" y="40" text-anchor="middle">I</text>
+<circle class="node" cx="560" cy="36" r="12"></circle>
+<text class="node-lbl" x="560" y="40" text-anchor="middle">x</text>
+<circle class="node hub" cx="614" cy="36" r="12"></circle>
+<text class="node-lbl" x="614" y="40" text-anchor="middle">G</text>
+<text class="type" x="560" y="86" text-anchor="middle">B̄</text>
+<text x="560" y="104" text-anchor="middle">G → x → G</text>
+</svg>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: The simple patterns <span class="math inline">\(A\)</span>, <span class="math inline">\(\bar A\)</span>, <span class="math inline">\(B\)</span> and <span class="math inline">\(\bar B\)</span>, with <span class="math inline">\(I = C_I\)</span> and <span class="math inline">\(G = C_G\)</span>. In the plans built in this paper, a pattern <span class="math inline">\(A\)</span> carries a passenger from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span>, a pattern <span class="math inline">\(\bar A\)</span> flies back empty, a pattern <span class="math inline">\(B\)</span> leaves a passenger in <span class="math inline">\(x\)</span> and a pattern <span class="math inline">\(\bar B\)</span> takes one from <span class="math inline">\(x\)</span> to <span class="math inline">\(C_G\)</span>. Patterns of larger multiplicity have the same four types.
+</figcaption>
+</figure>
+</div>
+<p>In <a href="#fig-plan" class="quarto-xref">Figure&nbsp;1</a>, <span class="math inline">\(p_1\)</span> performs a <span class="math inline">\(B\)</span> in <span class="math inline">\(C_2\)</span> and an <span class="math inline">\(A\)</span> in <span class="math inline">\(C_3\)</span>, and <span class="math inline">\(p_2\)</span> an <span class="math inline">\(A\)</span> in <span class="math inline">\(C_3\)</span> and a <span class="math inline">\(\bar B\)</span> in <span class="math inline">\(C_2\)</span>. Only the patterns <span class="math inline">\(A\)</span> and <span class="math inline">\(\bar A\)</span> change from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span> or back, and a plane goes from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span>, so its patterns of these two types alternate <span class="math inline">\(A, \bar A, \dots, A\)</span> (<a href="../proofs.html#node-lemma-2-1">Lemma 2.1</a> <span class="badge informal">informal, parts in Lean</span>). We deduce the following property on the cardinal of each pattern in any feasible plan.</p>
+<p><strong>Property II</strong>: In every feasible plan,</p>
+<ol type="1">
+<li><span class="math inline">\(|A| + |B| \ge t\)</span>;</li>
+<li><span class="math inline">\(|A| + |\bar B| \ge t\)</span>;</li>
+<li><span class="math inline">\(|A| = |\bar A| + p\)</span>.</li>
+</ol>
+<p><strong>Proof</strong>: The patterns <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> are the only ones that start with a flight from <span class="math inline">\(C_I\)</span>, and the first flights of the journeys are distinct flights from <span class="math inline">\(C_I\)</span>, so a feasible plan has at least <span class="math inline">\(t\)</span> of those patterns. Apply the same reasoning to <span class="math inline">\(C_G\)</span> with <span class="math inline">\(A\)</span> and <span class="math inline">\(\bar B\)</span>, whose last flight arrives in <span class="math inline">\(C_G\)</span>, to prove the second point. The third point is Lemma 2.1, summed over the <span class="math inline">\(p\)</span> planes. <span class="math inline">\(\square\)</span></p>
+<p><strong>Corollary II</strong>: A feasible plan performs at least <span class="math inline">\(2t - p\)</span> patterns, hence lands at least <span class="math inline">\(2t - p\)</span> times in central cities (<a href="../proofs.html#node-lemma-3-2">Lemma 3.2</a> <span class="badge ok">machine-checked</span>).</p>
+<p><strong>Proof</strong>: By Property II, the number of patterns is <span class="math inline">\(|A| + |\bar A| + |B| + |\bar B| = (|A| + |B|) + (|A| + |\bar B|) - p \ge 2t - p\)</span>, and each pattern lands in a central city. <span class="math inline">\(\square\)</span></p>
+<p>With fewer planes than passengers, some planes have to come back to <span class="math inline">\(C_I\)</span>, and every return costs a landing. In <a href="#fig-plan" class="quarto-xref">Figure&nbsp;1</a> the bound is reached: the plan lands <span class="math inline">\(2t - p = 4\)</span> times. The <a href="../paper/front.html">next section</a> shows that, in the symmetric case, the Pareto front is always reached by such plans, and which lists of <span class="math inline">\(2t - p\)</span> cities can be flown, and how fast.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Planning Domain Definition Language [<a href="../paper/index.html#ref-FL03">FL03</a>], almost universally used in AI Planning to describe domains and instances.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/quemy\.info\/ZenoSolver\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../paper/front.html" class="pagination-link" aria-label="Symmetric MultiZenoTravel">
+        <span class="nav-page-text">Symmetric MultiZenoTravel</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ZenoSolver, its theory note and the Lean formalization: Alexandre Quemy.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
