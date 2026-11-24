@@ -204,13 +204,14 @@ int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool 
         printPlans(shown, instance.n());
     }
     // Every bound but lemma R needs (A1-NS) (Theorem 6.1), which a central-flight
-    // table may violate; whether (AΔ) is enough instead is open (Conjecture 6.7).
+    // table may violate. (AΔ) alone is not enough: short central flights can beat
+    // every role configuration (Proposition 6.7 of the theory note).
     const bool a1ns = zeno::checkFlights(instance).a1ns;
     const auto proved = [&](zeno::GapProof proof) { return proof == zeno::GapProof::Relaxed || (a1ns && proof != zeno::GapProof::Open); };
     if(instance.central)
         std::cerr << (a1ns ? "central flights satisfy (A1-NS)\n"
                            : "warning: central flights violate (A1-NS), which every bound but lemma R needs (Theorem 6.1), so only lemma R "
-                             "counts below (whether (AΔ) suffices is open: Conjecture 6.7)\n");
+                             "counts below (under (AΔ) alone, short central flights can beat role configurations: Proposition 6.7)\n");
     std::size_t closed = 0;
     for(auto proof : result.gapProof)
         closed += proved(proof);
