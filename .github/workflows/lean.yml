@@ -39,7 +39,8 @@ jobs:
 
       - name: Reject sorry and admit in the sources
         run: |
-          if grep -rnwE 'sorry|admit' lean/ZenoFront lean/ZenoFront.lean lean/ZenoCheck.lean; then
+          if grep -rnwE 'sorry|admit' lean/ZenoFront lean/ZenoFront.lean lean/ZenoCheck.lean \
+              lean/ZenoFrontMain.lean; then
             echo "::error::sorry or admit found in ZenoFront"
             exit 1
           fi
@@ -86,3 +87,14 @@ jobs:
 
       - name: End to end, C++ certificates checked by Lean
         run: bash lean/test/e2e.sh build/release/zeno lean/.lake/build/bin/zeno-check
+
+      # The verified solver (ZenoFront.solveFront_isParetoFront): on the golden instances and the
+      # quick suite, its front must equal `zeno front`'s.
+      - name: Build zeno-front
+        working-directory: lean
+        run: lake build zeno-front
+
+      - name: Verified solver against zeno front
+        run: |
+          bash lean/test/front.sh build/release/zeno lean/.lake/build/bin/zeno-front "$(mktemp -d)" \
+            "tests/golden/instances.txt|tests/golden/data" "bench/instances/quick.txt|bench/instances/data"

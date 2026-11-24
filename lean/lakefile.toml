@@ -18,3 +18,7 @@ name = "ZenoFront"
 [[lean_exe]]
 name = "zeno-check"
 root = "ZenoCheck"
+
+[[lean_exe]]
+name = "zeno-front"
+root = "ZenoFrontMain"
