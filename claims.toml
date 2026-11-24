@@ -646,3 +646,14 @@ code      = "experiments/E9_linear_family/run.py"
 results   = "experiments/results/E9_linear_family"
 paper     = "Thm 10.1, doc/theory/exact-front.md §10"
 created   = "2026-11-24"
+
+[claims.exp-e10-greedy-density]
+kind      = "experiment"
+statement = "E10 (greedy exactness density): the papers' per-PPP greedy (EvoCOP 2015 Alg. 1, reimplemented and validated: it misses (260, 60) on exactly the two golden instances where the 2016 solver failed) returns the exact front on 2,274 of 2,772 random and generator instances with n ≤ 8, t ≤ 10, p ≤ 6 (82.0%, 95% Wilson [80.6%, 83.4%]) and finds 93.9% of their front points; every miss has p ≥ 2 and t − p ≥ 3. On the linear family it is exact on 924 of 924 (95% Wilson [99.6%, 100%]): evidence for Conjecture 10.2, not a proof."
+status    = "sci.supported"
+tests     = ["paper-greedy-optimal", "claim-5", "conj-10-2"]
+refutes   = ["paper-greedy-optimal"]
+code      = "experiments/E10_greedy_density/run.py"
+results   = "experiments/results/E10_greedy_density"
+paper     = "§5 and Conj 10.2, doc/theory/exact-front.md; EvoCOP 2015 Alg. 1"
+created   = "2026-11-24"
