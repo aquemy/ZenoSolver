@@ -5,7 +5,7 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Checker
-public import ZenoFront.RoleBound
+public import ZenoFront.LagrangianBound
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -23,10 +23,12 @@ This file verifies:
 * `roles` (gaps and fastest point), under (A1-NS), which the certificate must list: Theorem 6.1
   (`Feasible.exists_roleConfig_ns`) and the role relaxation (`rolesBoundAt_le_totalCost`), at
   levels `⌊(M − 1)/g⌋` for the gcd `g` of all durations;
+* `lagrangian μ` gaps, under (A1-NS): the decoupled per-plane bound at the listed multipliers
+  (`LagData.value_le_totalCost`), over the representatives of the cities (`domRep3`);
 * `fastest closed` for symmetric durations, as in v1.
 
-The other v2 kinds (`lagrangian`, `balanced`, `search`, `forest`) are parsed but given no bound,
-so a certificate that uses one is rejected.
+The other v2 kinds (`balanced`, `search`, `forest`) are parsed but given no bound, so a
+certificate that uses one is rejected.
 
 ## Main results
 
@@ -120,8 +122,23 @@ def relaxedWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (M : �
 /-- The highest level of the certificate, for the scale `g`. -/
 def maxLevel (scale : ℕ) : ℕ := (C.front.map fun x => (x.2 - 1) / scale).foldr max 0
 
-/-- The scale of the role bounds: the gcd of all durations `d` and `d̄`. -/
-def rolesScale : ℕ := durationScale fun i => Nat.gcd (C.d i) (C.dbar i)
+/-- The representatives of the cities (`domRep3`): among the cities the C++ reduction keeps. -/
+def reps3 : List (Fin C.n) := repList3 C.d C.dbar C.c
+
+/-- The scale of the role bounds: the gcd of the durations `d` and `d̄` of the representatives,
+as in the C++ checker. -/
+def rolesScale : ℕ :=
+  durationScale fun i => if i ∈ C.reps3 then Nat.gcd (C.d i) (C.dbar i) else 0
+
+/-- A weight above every budget of the role tables, for the cities that are not
+representatives: they never fit. -/
+def bigW : ℕ := C.p * C.maxLevel C.rolesScale + 1
+
+/-- The scaled `d` of a representative, `bigW` for the other cities. -/
+def dR (i : Fin C.n) : ℕ := if i ∈ C.reps3 then C.d i / C.rolesScale else C.bigW
+
+/-- The scaled `d̄` of a representative, `bigW` for the other cities. -/
+def dbR (i : Fin C.n) : ℕ := if i ∈ C.reps3 then C.dbar i / C.rolesScale else C.bigW
 
 /-- The `roles` bound below a point of makespan `M`, on durations scaled by `g = rolesScale`
 (`dR`, `dbR`), at level `⌊(M − 1)/g⌋`; `0` (no bound) unless assumption `A1-NS` is listed. -/
@@ -133,11 +150,24 @@ def rolesWith (dR dbR : Fin C.n → ℕ) : ℕ → WithTop ℕ :=
     fun M => rolesBoundAt C.p C.s TmaxR L F ((M - 1) / C.rolesScale)
   else fun _ => 0
 
+/-- The Lagrangian data at the level of `M`, on scaled durations `dR`, `dbR`, for multipliers
+`mu` (one per city). -/
+def lagData (dR dbR : Fin C.n → ℕ) (mu : List ℤ) (M : ℕ) : LagData C.n :=
+  ⟨fillW dR dbR, fun i => 2 * dR i, fun i => 2 * dbR i, C.c, fun i => mu.getD i 0,
+    repList3 C.d C.dbar C.c, (M - 1) / C.rolesScale⟩
+
+/-- The `lagrangian` bound below a point of makespan `M`; `0` (no bound) unless assumption
+`A1-NS` is listed. -/
+def lagWith (dR dbR : Fin C.n → ℕ) (mu : List ℤ) (M : ℕ) : WithTop ℕ :=
+  if C.assumptions.contains "A1-NS" then toNatTop ((C.lagData dR dbR mu M).value C.p C.s)
+  else 0
+
 /-- The bound named by a kind; `0` (no bound) for the kinds this checker does not verify. -/
-def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ) :
-    Kind2 → ℕ → WithTop ℕ
+def boundWith (scale Tmax : ℕ) (table : Array (Array (WithTop ℕ))) (rolesB : ℕ → WithTop ℕ)
+    (lagB : List ℤ → ℕ → WithTop ℕ) : Kind2 → ℕ → WithTop ℕ
   | .relaxed => C.relaxedWith scale Tmax table
   | .roles => rolesB
+  | .lagrangian mu => lagB mu
   | _ => fun _ => 0
 
 /-- Obligation 2: nothing is faster than the first point. `closed` is v1's closed form
@@ -159,30 +189,28 @@ def boundsCheck : Bool :=
   let Tmax := C.maxLevel scale
   let wArr := Array.ofFn (n := C.n) fun i => C.weight i / scale
   let wS : Fin C.n → ℕ := fun i => wArr.getD i 0
-  let gR := C.rolesScale
-  let dArr := Array.ofFn (n := C.n) fun i => C.d i / gR
-  let dbArr := Array.ofFn (n := C.n) fun i => C.dbar i / gR
+  let dArr := Array.ofFn (n := C.n) C.dR
+  let dbArr := Array.ofFn (n := C.n) C.dbR
   let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
     (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+    (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
   C.fastestOK bound && gapsOK bound C.front C.gaps
 
 /-- The bounds of the checker, as specified. -/
 def bound : Kind2 → ℕ → WithTop ℕ :=
   C.boundWith (durationScale C.weight) (C.maxLevel (durationScale C.weight))
     (oneplaneTable (scaledDurations C.weight) C.c (C.maxLevel (durationScale C.weight)) C.s)
-    (C.rolesWith (fun i => C.d i / C.rolesScale) (fun i => C.dbar i / C.rolesScale))
+    (C.rolesWith C.dR C.dbR) (C.lagWith C.dR C.dbR)
 
 theorem boundsCheck_eq : C.boundsCheck = (C.fastestOK C.bound && gapsOK C.bound C.front C.gaps) := by
   have hwS : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
       C.weight i / durationScale C.weight).getD i 0) = scaledDurations C.weight := by
     funext i
     simp [Array.getD_eq_getD_getElem?, scaledDurations]
-  have hd : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
-      C.d i / C.rolesScale).getD i 0) = fun i => C.d i / C.rolesScale := by
+  have hd : (fun i : Fin C.n => (Array.ofFn (n := C.n) C.dR).getD i 0) = C.dR := by
     funext i
     simp [Array.getD_eq_getD_getElem?]
-  have hdb : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i =>
-      C.dbar i / C.rolesScale).getD i 0) = fun i => C.dbar i / C.rolesScale := by
+  have hdb : (fun i : Fin C.n => (Array.ofFn (n := C.n) C.dbR).getD i 0) = C.dbR := by
     funext i
     simp [Array.getD_eq_getD_getElem?]
   simp only [boundsCheck]
@@ -213,43 +241,103 @@ theorem relaxedWith_le {dc : Fin C.n → Fin C.n → ℕ} (hpt : C.p ≤ C.t) (T
   have := hload k
   omega
 
-theorem load_eq_mul_of_dvd {f : Fin C.n → ℕ} {g : ℕ} (hg : ∀ i, g ∣ f i)
-    (Y : Multiset (Fin C.n)) : load f Y = g * load (fun i => f i / g) Y := by
+theorem load_eq_mul_of_mem {f f' : Fin C.n → ℕ} {g : ℕ} {Y : Multiset (Fin C.n)}
+    (h : ∀ i ∈ Y, f i = g * f' i) : load f Y = g * load f' Y := by
   simp only [load]
   rw [← Multiset.sum_map_mul_left]
   congr 1
-  exact Multiset.map_congr rfl fun i _ => (Nat.mul_div_cancel' (hg i)).symm
+  exact Multiset.map_congr rfl h
 
-theorem rolesScale_dvd_d (i : Fin C.n) : C.rolesScale ∣ C.d i :=
-  (durationScale_dvd _ i).trans (Nat.gcd_dvd_left _ _)
+theorem rolesScale_pos : 0 < C.rolesScale := durationScale_pos _
 
-theorem rolesScale_dvd_dbar (i : Fin C.n) : C.rolesScale ∣ C.dbar i :=
-  (durationScale_dvd _ i).trans (Nat.gcd_dvd_right _ _)
+theorem rolesScale_dvd_gcd {i : Fin C.n} (hi : i ∈ C.reps3) :
+    C.rolesScale ∣ Nat.gcd (C.d i) (C.dbar i) := by
+  have := durationScale_dvd (fun i => if i ∈ C.reps3 then Nat.gcd (C.d i) (C.dbar i) else 0) i
+  simp only [hi, ite_true] at this
+  exact this
+
+theorem d_eq_mul {i : Fin C.n} (hi : i ∈ C.reps3) : C.d i = C.rolesScale * C.dR i := by
+  rw [dR, ite_eq_left hi, Nat.mul_div_cancel' ((C.rolesScale_dvd_gcd hi).trans (Nat.gcd_dvd_left _ _))]
+
+theorem dbar_eq_mul {i : Fin C.n} (hi : i ∈ C.reps3) : C.dbar i = C.rolesScale * C.dbR i := by
+  rw [dbR, ite_eq_left hi,
+    Nat.mul_div_cancel' ((C.rolesScale_dvd_gcd hi).trans (Nat.gcd_dvd_right _ _))]
+
+/-- The role load in units of `rolesScale`, for a configuration on representatives. -/
+theorem roleLoad_scaled {dc : Fin C.n → Fin C.n → ℕ} (cfg : RoleConfig C.n C.p)
+    (hcfg : ∀ k, ∀ i ∈ cfg.groups k, i ∈ C.reps3) (k : Fin C.p) :
+    cfg.roleLoad (C.network dc) k = C.rolesScale * cfg.roleLoad ⟨C.dR, C.dbR, dc⟩ k := by
+  have hmem : ∀ i ∈ cfg.drop k + cfg.pick k + cfg.cross k, i ∈ C.reps3 := hcfg k
+  unfold RoleConfig.roleLoad
+  simp only [network]
+  rw [C.load_eq_mul_of_mem (f' := C.dR) (g := C.rolesScale) (Y := cfg.drop k)
+      fun i hi => C.d_eq_mul (hmem i (by simp [hi])),
+    C.load_eq_mul_of_mem (f' := C.dbR) (g := C.rolesScale) (Y := cfg.pick k)
+      fun i hi => C.dbar_eq_mul (hmem i (by simp [hi])),
+    C.load_eq_mul_of_mem (f' := C.dR) (g := C.rolesScale) (Y := cfg.cross k)
+      fun i hi => C.d_eq_mul (hmem i (by simp [hi])),
+    C.load_eq_mul_of_mem (f' := C.dbR) (g := C.rolesScale) (Y := cfg.cross k)
+      fun i hi => C.dbar_eq_mul (hmem i (by simp [hi]))]
+  ring
+
+/-- Theorem 6.1, then the configuration mapped to representatives, with role loads in units of
+`rolesScale` at most the level of `M`. -/
+theorem exists_repConfig {dc : Fin C.n → Fin C.n → ℕ} (hA : (C.network dc).A1NS)
+    (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p} (hP : Feasible (C.network dc) P) {M : ℕ}
+    (hM : planMakespan P < M) :
+    ∃ cfg : RoleConfig C.n C.p, size cfg.groups = C.s ∧
+      totalCost C.c cfg.groups ≤ planCost C.c P ∧
+      (∀ k, ∀ i ∈ cfg.groups k, i ∈ C.reps3) ∧
+      ∀ k, cfg.roleLoad ⟨C.dR, C.dbR, dc⟩ k ≤ (M - 1) / C.rolesScale := by
+  obtain ⟨cfg, hsize, hcost, hload⟩ := hP.exists_roleConfig_ns hA C.c hpt
+  have hrep := domRep3_le C.d C.dbar C.c
+  have hcfg : ∀ k, ∀ i ∈ (cfg.map (domRep3 C.d C.dbar C.c)).groups k, i ∈ C.reps3 :=
+    fun k i hi => by
+      obtain ⟨j, rfl⟩ := cfg.mem_map_groups _ hi
+      exact domRep3_mem C.d C.dbar C.c j
+  refine ⟨cfg.map (domRep3 C.d C.dbar C.c), by rw [RoleConfig.size_map, hsize]; rfl,
+    (cfg.totalCost_map_le C.c fun i => (hrep i).2.2).trans hcost, hcfg, fun k => ?_⟩
+  have h₁ := cfg.roleLoad_map_le (C.network dc) (rep := domRep3 C.d C.dbar C.c)
+    (fun i => (hrep i).1) (fun i => (hrep i).2.1) k
+  have e := C.roleLoad_scaled (dc := dc) _ hcfg k
+  rw [Nat.le_div_iff_mul_le C.rolesScale_pos, mul_comm]
+  have := hload k
+  omega
 
 /-- **The `roles` bound is a lower bound** under (A1-NS): a feasible plan with makespan below `M`
 costs at least the bound at the level of `M`. -/
 theorem rolesWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
     (C.network dc).A1NS) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
     (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
-    C.rolesWith (fun i => C.d i / C.rolesScale) (fun i => C.dbar i / C.rolesScale) M ≤
-      (planCost C.c P : WithTop ℕ) := by
+    C.rolesWith C.dR C.dbR M ≤ (planCost C.c P : WithTop ℕ) := by
   unfold rolesWith
   split_ifs with hlist
-  · obtain ⟨cfg, hsize, hcost, hload⟩ := hP.exists_roleConfig_ns (hA hlist) C.c hpt
-    refine (rolesBoundAt_le_totalCost _ _ C.c dc cfg hsize fun k => ?_).trans
+  · obtain ⟨cfg, hsize, hcost, -, hload⟩ := C.exists_repConfig (hA hlist) hpt hP hM
+    exact (rolesBoundAt_le_totalCost _ _ C.c dc cfg hsize hload).trans
       (WithTop.coe_le_coe.mpr hcost)
-    have hg : 0 < C.rolesScale := durationScale_pos _
-    have hk := hload k
-    have e : cfg.roleLoad (C.network dc) k = C.rolesScale *
-        cfg.roleLoad ⟨fun i => C.d i / C.rolesScale, fun i => C.dbar i / C.rolesScale, dc⟩ k := by
-      unfold RoleConfig.roleLoad
-      simp only [network]
-      rw [C.load_eq_mul_of_dvd C.rolesScale_dvd_d, C.load_eq_mul_of_dvd C.rolesScale_dvd_dbar,
-        C.load_eq_mul_of_dvd C.rolesScale_dvd_d (Y := cfg.cross k),
-        C.load_eq_mul_of_dvd C.rolesScale_dvd_dbar (Y := cfg.cross k)]
-      ring
-    rw [Nat.le_div_iff_mul_le hg, mul_comm, ← e]
-    omega
+  · exact zero_le
+
+/-- **The `lagrangian` bound is a lower bound** under (A1-NS), for every multiplier. -/
+theorem lagWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
+    (C.network dc).A1NS) (hpt : C.p ≤ C.t) (mu : List ℤ) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.lagWith C.dR C.dbR mu M ≤ (planCost C.c P : WithTop ℕ) := by
+  unfold lagWith
+  split_ifs with hlist
+  · obtain ⟨cfg, hsize, hcost, hcfg, hload⟩ := C.exists_repConfig (hA hlist) hpt hP hM
+    have hv := (C.lagData C.dR C.dbR mu M).value_le_totalCost cfg (fun k i hi => hcfg k i hi)
+      (fun k => by
+        have := hload k
+        simp only [lagData, RoleConfig.roleLoad] at this ⊢
+        have e₀ : load (fillW C.dR C.dbR) (cfg.cross k) =
+            load C.dR (cfg.cross k) + load C.dbR (cfg.cross k) := load_add_fun _ _ _
+        have e₁ : load (fun i => 2 * C.dR i) (cfg.drop k) = 2 * load C.dR (cfg.drop k) := by
+          simp only [load]; rw [Multiset.sum_map_mul_left]
+        have e₂ : load (fun i => 2 * C.dbR i) (cfg.pick k) = 2 * load C.dbR (cfg.pick k) := by
+          simp only [load]; rw [Multiset.sum_map_mul_left]
+        omega)
+    rw [hsize] at hv
+    exact (toNatTop_le hv).trans (WithTop.coe_le_coe.mpr hcost)
   · exact zero_le
 
 /-- **Soundness of the v2 checker.** If `check` accepts a certificate, its points are exactly the
@@ -274,6 +362,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     cases g with
     | relaxed => exact C.relaxedWith_le hpt _ hP hM
     | roles => exact C.rolesWith_le hA hpt hP hM
+    | lagrangian mu => exact C.lagWith_le hA hpt mu hP hM
     | _ => exact bot_le
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · -- 1. Every point is achieved by its plan.

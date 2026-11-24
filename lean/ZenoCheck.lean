@@ -104,11 +104,11 @@ def reasons2 (C : Cert2) : Array String := Id.run do
     let Tmax := C.maxLevel scale
     let wArr := Array.ofFn (n := C.n) fun i => C.weight i / scale
     let wS : Fin C.n → ℕ := fun i => wArr.getD i 0
-    let gR := C.rolesScale
-    let dArr := Array.ofFn (n := C.n) fun i => C.d i / gR
-    let dbArr := Array.ofFn (n := C.n) fun i => C.dbar i / gR
+    let dArr := Array.ofFn (n := C.n) C.dR
+    let dbArr := Array.ofFn (n := C.n) C.dbR
     let bound := C.boundWith scale Tmax (oneplaneTable wS C.c Tmax C.s)
       (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+      (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     let a1ns := C.assumptions.contains "A1-NS"
     if !C.fastestOK bound then
       errs := errs.push (match C.fastest with
@@ -120,9 +120,9 @@ def reasons2 (C : Cert2) : Array String := Id.run do
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
-      | .relaxed | .roles =>
-        if g == .roles && !a1ns then
-          errs := errs.push s!"gap {i + 1}: the roles bound needs assumption A1-NS"
+      | .relaxed | .roles | .lagrangian _ =>
+        if g != .relaxed && !a1ns then
+          errs := errs.push s!"gap {i + 1}: the {g.name} bound needs assumption A1-NS"
         else
           let b := bound g y.2
           if !decide ((x.1 : WithTop ℕ) ≤ b) then
@@ -144,9 +144,10 @@ def main (args : List String) : IO UInt32 := do
   | .ok (.v2 C) =>
     if C.check then
       let roles := (C.gaps.filter (· = .roles)).length
+      let lag := (C.gaps.filter fun g => g.name == "lagrangian").length
       let scope := if C.assumptions.contains "A1-NS" then
-          s!"{roles} roles gap(s), the others relaxed: for every central flight table \
-            satisfying A1-NS"
+          s!"{roles} roles and {lag} lagrangian gap(s), the others relaxed: for every central \
+            flight table satisfying A1-NS"
         else "all gaps relaxed: for every central flight table"
       IO.println s!"accepted: the {C.front.length} points are the Pareto front (version 2, \
         fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound)"
