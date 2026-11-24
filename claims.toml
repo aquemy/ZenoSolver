@@ -197,6 +197,14 @@ lean      = "ZenoFront.RoleConfig.exists_shrink, ZenoFront.Admissible.exists_shr
 paper     = "Lemma 4.4, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
+[claims.lem-4-5]
+kind      = "lemma"
+statement = "Lemma 4.5 (parity) [PAR]: for a role configuration on Q with passenger count t, the groups X_k = Dr_k + Pk_k + Cr_k form an admissible partition of a multiset of size 2t − |Q|, with the same cost. Lean form: admissibility of the groups, with the witness h_{k,i} = (Dr_k(i) + Pk_k(i)) mod 2 (RoleConfig.isParityWitness_witness); size and cost hold by definition."
+status    = "math.machine-checked"
+lean      = "ZenoFront.RoleConfig.admissible_groups"
+paper     = "Lemma 4.5, doc/theory/exact-front.md §4.2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
