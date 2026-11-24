@@ -40,7 +40,7 @@ The 2016 solvers finish 21 of the 66 suite instances within 30 s; `zeno` finishe
   The same front holds when planes may end anywhere (Theorem 4.9, `minimal_achievable_iff_anywhere_of_A1`).
 - The algorithm is also in Lean. `lake exe zeno-front FILE` computes the front of a symmetric instance without any certificate. Its theorem `solveFront_isParetoFront` states that, under (S) and (A1), the output is exactly the Pareto front of all feasible plans.
   - It runs the link-forest DP or the σ-DP at each level, both proved equal to E(T) (`treeBoundAt_eq_minCost`, `sigmaBoundAt_eq_minCost`), and finds the breakpoints by bisection.
-  - It finishes 63 of the 66 benchmark-suite instances within 60 s (0.39 s median), always with the same front as `zeno front`. CI compares the two on the golden, quick and three regime instances.
+  - It finishes all 66 benchmark-suite instances (40 ms median, 10 s at most for n = 100, t = 60, p = 10; 17 s in total), always with the same front as `zeno front`. Where the relaxation L meets the pairs bound U₂, it settles a level without the exact DP, with a proof (`minCost_eq_of_bracket`). CI compares the two on the golden, quick and five regime instances.
 - Each front can come with a certificate (`doc/certificate-format.md`), checked by `zeno check` and by the Lean-verified checker in `lean/` (`lake exe zeno-check FILE`).
 - The Lean soundness theorem (`Cert.check_sound`, and `Cert.check_sound_rat` for rational times) states: if the checker accepts, the listed points are exactly the Pareto front among all feasible plans.
   - When every gap is closed by the relaxation L, this holds for any central-flight durations. That covers 386 of 400 random fronts and every front of the default generator.
