@@ -423,6 +423,13 @@ status    = "math.proved-informal"
 paper     = "Prop 6.12, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
+[claims.prop-6-13]
+kind      = "proposition"
+statement = "Proposition 6.13 (same least cost): when U has no edge C_I–C_G and κ* is the least ω of a path from C_I to C_G, every plan of U costs at least sκ*, the cheapest point (sκ*, M*) of F_{f(U)} costs exactly that, so U and f(U) have the same least cost and F_U = Min{(C, M) ∈ A_U : M ≤ M*}."
+status    = "math.proved-informal"
+paper     = "Prop 6.13, doc/theory/exact-front.md §6.6"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
