@@ -35,6 +35,8 @@ far; leaving `w` for the last hub adds `d_w`.
 * `ZenoFront.PlaneFeasible.exists_segments_tri`: a feasible plane's route is the concatenation
   of its segments, one per hub arrival, each landing at least once and satisfying the segment
   bound.
+* `ZenoFront.Admissible.exists_remove_two`: **Lemma 4.11**, removing two landings from an
+  admissible partition with `|X| ≥ p + 2`.
 -/
 
 @[expose] public section
@@ -282,5 +284,20 @@ theorem PlaneFeasible.exists_segments_tri {N : Network n} (hS : N.dbar = N.d) (h
       ∀ γ ∈ segs, hubArrivals γ = 1 ∧ (∃ ℓ, γ.getLast? = some ℓ ∧ ℓ.dst.isHub = true) ∧
         landList γ ≠ [] ∧ ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ :=
   (exists_segs_aux hS hL legs .ci 0 h.route h.flies (by simp [h.ends])).1 rfl
+
+/-! ### Lemma 4.11 -/
+
+/-- **Lemma 4.11 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
+removing two landings, each new group a sub-multiset of the old one. This is SH
+(`Admissible.exists_shrink`) with `s = |X| − 2`, whose parity hypothesis holds by
+`IsParityWitness.size_mod_two`. -/
+theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
+    (h : p + 2 ≤ size X) :
+    ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y + 2 = size X := by
+  obtain ⟨w, hw⟩ := hX
+  have hmod := hw.size_mod_two
+  obtain ⟨Y, hY, hle, hsize⟩ :=
+    Admissible.exists_shrink ⟨w, hw⟩ (s := size X - 2) (by omega) (by omega) (by omega)
+  exact ⟨Y, hY, hle, by omega⟩
 
 end ZenoFront

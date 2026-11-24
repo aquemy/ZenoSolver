@@ -150,7 +150,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
 | `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
-| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)) | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri` |
+| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -354,6 +354,8 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   every central city `x` it lands in.
 * `PlaneFeasible.exists_segments_tri`: a feasible plane's route is the concatenation of its
   segments, one per hub arrival, each landing at least once and satisfying the segment bound.
+* `Admissible.exists_remove_two` (**Lemma 4.11**): an admissible partition with `|X| ≥ p + 2`
+  stays admissible after removing two landings, each group a sub-multiset of the old one.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
@@ -670,7 +672,8 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 **P3′, Theorem 4.10 (converse under (S) + (AΔ)).**
 
-- [x] (AΔ) and the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`).
+- [x] (AΔ), the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`) and Lemma 4.11
+      (`Admissible.exists_remove_two`).
 - [ ] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3.
 - [ ] Corollary 4.12: the fronts, Theorem 4.9 and `forest` gaps under (AΔ).
 
