@@ -110,6 +110,14 @@ status    = "math.proved-informal"
 paper     = "Cor 2.7, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.lem-2-8]
+kind      = "lemma"
+statement = "Lemma 2.8 (few touched cities) [B′]: for an admissible partition with |X| = s, (a) every parity matrix touches at most t − p cities, (b) one with the fewest entries 1 has an acyclic support and touches at most p − 1 cities, and (c) so some parity matrix touches at most min(p − 1, t − p) cities. Lean form: (c), (a) and the bound of (b) are the three declarations; the acyclic support of (b) appears as the linear independence of the edge vectors over ZMod 2 (IsParityWitness.exists_edgeCount_lt)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible.exists_card_touched_le, ZenoFront.IsParityWitness.card_touched_le, ZenoFront.IsParityWitness.card_touched_le_of_minimal"
+paper     = "Lemma 2.8, doc/theory/exact-front.md §2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
