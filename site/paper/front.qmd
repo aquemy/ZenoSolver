@@ -20,9 +20,12 @@ Set of any instance:
 
 ::: {.statement}
 **Proposition I**: Assume (S), and (AΔ) or (A1). Every point of the Pareto front is attained by a
-plan where exactly $2t - p$ (possibly identical) central cities are used by a plane
-({{< node "Corollary 4.8" >}}, {{< node "Corollary 4.12" >}}).
+plan where exactly $2t - p$ (possibly identical) central cities are used by a plane.
 :::
+
+Under (A1), Proposition I is {{< node "Theorem 4.7" >}} together with
+{{< node "Corollary 4.8" >}}; under (AΔ), it is {{< node "Theorem 4.10" >}}, from which
+{{< node "Corollary 4.12" >}} carries Corollary 4.8 over.
 
 By Corollary II, no plan uses fewer than $2t - p$ central cities, so Proposition I reduces the
 search to lists of $2t - p$ cities. It is a statement about the front: with landing costs of
@@ -360,8 +363,11 @@ Proposition 7.1, the front statements of Propositions 7.8 and 7.9 hold, and `for
 certificate are sound.
 :::
 
-This proves Proposition I under (AΔ). Theorem 4.10 is proved in writing but not yet formalised in
-Lean, as its badge shows. Independently of the proof, the experiment
+This proves Proposition I under (AΔ). Theorem 4.10 is machine-checked in Lean, as
+`Feasible.exists_admissible_ATri`, and so are three parts of Corollary 4.12 that follow from it:
+Corollary 4.8 under (AΔ) (`minimal_achievable_iff_multisetPoints_ATri`), and the correctness of
+the verified solver and of the certificate checker under (AΔ) (`solveFront_isParetoFront_ATri`,
+`Cert.check_sound_ATri`). Independently of the proof, the experiment
 [E6](experiments.qmd#sec-e6) searched the gaps where $L$ lies below the admissible optimum, on
 small instances with the shortest flights between central cities the triangular inequality
 allows, and found no plan cheaper than that optimum.

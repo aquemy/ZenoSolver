@@ -1,7 +1,7 @@
 ---
-order: 4
+order: 5
 title: "Pareto Optimal Plans"
-subtitle: "Computing the Pareto front exactly, its complexity, and the ZenoSolver with its certificates"
+subtitle: "Computing the Pareto front exactly, its complexity, and the ZenoSolver with its certificates and their verification"
 css: ../styles/paper.css
 ---
 
@@ -18,9 +18,10 @@ carries out each step.
 cities in $X$ is uniquely defined by $c(X) = \sum_{i \in X} c_i$.
 
 **Makespan of a list**: The makespan of a list is that of the shortest schedule that uses its
-cities in a feasible way. By Theorems 4.1 and 4.7, or 4.10, it is the least largest load
-$M(X) = \min \max_k \ell(X_k)$ over the admissible partitions of $X$, and such a schedule never
-waits.
+cities in a feasible way. Only the least largest load $M(X) = \min \max_k \ell(X_k)$ over the
+admissible partitions of $X$ matters: by Theorem 4.1 it is the makespan of a schedule that never
+waits, and by Corollary 4.8, under (A1) or (AΔ), the Pareto front is the Pareto set of the pairs
+$(c(X), M(X))$.
 
 The list $X$ does not hold any information about which plane will land in a particular city, and
 choosing the partition is the hard part.
@@ -222,10 +223,10 @@ non-symmetric instance, it brackets the front between lower bounds and achieved 
 the gaps by a search over role configurations, as described in the
 [non-symmetric section](nonsymmetric.qmd#sec-ns-front).
 
-The Lean development contains a solver of its own, `zeno-front`, assembled from Corollary 4.8,
-Proposition 7.1, both dynamic programs and the bracket, with a proof that its output is the
-Pareto front ({{< node "Verified solver" >}}). The experiment [E7](experiments.qmd#sec-e7)
-reports the performances of the C++ solver.
+With each front, ZenoSolver can write a certificate that a checker verifies without trusting it,
+and the Lean development contains a solver of its own, proved correct
+([Verification](#sec-verification)). The experiment [E7](experiments.qmd#sec-e7) and the
+[benchmark suites](experiments.qmd#sec-bench) report the performances of the C++ solver.
 
 ## Certificates {#sec-certificates}
 
@@ -263,9 +264,45 @@ Two further kinds are proved sound but are not part of the format: `gadget`, whi
 or $U_3$ where Proposition 7.4 makes them exact, and `sigma-potential`, a sparse dual certificate
 for the σ-DP built from {{< node "Lemma 9.2" >}} and {{< node "Lemma 9.3" >}}.
 
-Two checkers implement the obligations: `zeno check` in C++, and `zeno-check` in Lean, whose
-soundness is a theorem. For non-symmetric instances the format has a version 2, whose gap kinds
-rest on the results of the [non-symmetric section](nonsymmetric.qmd); the soundness of its Lean
-checker is also proved ({{< node "Version 2 checker" >}}). The
-[certificate format](../solver/certificates.qmd) page describes the files, and the experiment
-[E8](experiments.qmd#sec-e8) tests both checkers against thousands of corrupted certificates.
+For non-symmetric instances the format has a version 2, whose gap kinds rest on the results of
+the [non-symmetric section](nonsymmetric.qmd): `relaxed`, `roles`, `lagrangian`, `balanced`, and
+`search` for the gaps that waiting leaves open. The
+[certificate format](../solver/certificates.qmd) page describes the files.
+
+### Verification {#sec-verification}
+
+A certificate moves the trust from the solver to the checker, and the checker to a theorem.
+Two checkers implement the obligations: `zeno check`, in C++, and `zeno-check`, compiled from
+Lean. Both print the assumptions a certificate relied on, among (S), (A1) or (AΔ), and (A1-NS).
+
+**The Lean checker.** Its soundness is the theorem `Cert.check_sound`: if `Cert.check` accepts a
+certificate of format version 1, the listed points are exactly the Pareto front of the instance,
+over every feasible plan. It holds for any flights between central cities when all gaps are
+`relaxed` (`Cert.check_sound_relaxed`), for flights satisfying (A1) through Theorem 4.7
+(`Cert.check_sound_A1`), and for flights satisfying (AΔ) through Theorem 4.10
+(`Cert.check_sound_ATri`); variants cover rational times and planes ending anywhere
+(`Cert.check_sound_rat`, `Cert.check_sound_anywhere`). For version 2, `Cert2.check_sound` holds
+for every table of central flights satisfying (A1-NS) when the certificate lists that
+assumption, and for every table otherwise ({{< node "Version 2 checker" >}}). On the 66
+certificates the C++ solver writes for the benchmark suite, up to 3.9 MB and 240,000 legs, the
+compiled Lean checker accepts every one, in 33 ms at the median and 2.3 s at most.
+
+**The verified solver.** `zeno-front` is a solver of its own, written in Lean, with a proof that
+its output is the Pareto front ({{< node "Verified solver" >}}): `solveFront_isParetoFront` under
+(S) and (A1), and `solveFront_isParetoFront_ATri` under (S) and (AΔ), for $1 \le p \le t$. It
+finds the levels where $E$ drops by splitting intervals between $d_{\min}\kappa$ and
+$(2t - p)\,d_{\max}$, takes $L(T)$ wherever the bracket $L \le E \le U$ closes
+(`minCost_eq_of_bracket`), and otherwise runs the σ-DP or the
+link-forest program, whose exactness is `sigmaBoundAt_eq_minCost` (Theorem 7.6) and
+`treeBoundAt_eq_minCost` (Theorem 7.5). It solves the 66 instances of the benchmark suite, 0.04 s
+at the median and 10 s at most, and its fronts equal those of the C++ solver, which continuous
+integration checks on the golden instances.
+
+**What is trusted.** A machine-checked statement is a Lean theorem whose axioms are among
+`propext`, `Classical.choice` and `Quot.sound`, which an audit of every declaration reads when the
+site is built. The executables add the Lean compiler and the code that parses the files, which is
+not verified. The badges of this paper come from that audit. Among the results of the
+non-symmetric section, Theorems 6.1 and 6.9 are machine-checked as well; its examples and
+propositions, and those of the general section, are proved in the theory note or computed. The
+experiment [E8](experiments.qmd#sec-e8) tests
+both checkers against thousands of corrupted certificates.
