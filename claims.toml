@@ -221,6 +221,14 @@ lean      = "ZenoFront.Feasible.exists_admissible"
 paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
 created   = "2026-11-23"
 
+[claims.cor-4-8]
+kind      = "corollary"
+statement = "Corollary 4.8: under (S) and (A1), the front is Min {(c(X), M(X)) : |X| = s, M(X) < ∞}, with M(X) the least max_k ℓ(X_k) over admissible partitions of X, and every front point is attained by a plan with exactly s central landings. Lean form: the minimal points of the plans equal those of the multiset points (multisetPoints), with an explicit p ≤ t; the attainment is Theorem 4.1 and is not restated."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_achievable_iff_multisetPoints"
+paper     = "Cor 4.8, doc/theory/exact-front.md §4.4"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
