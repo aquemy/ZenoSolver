@@ -310,7 +310,7 @@ created   = "2026-11-23"
 [claims.paper-no-harmful-waiting]
 kind      = "conjecture"
 statement = "Assumption of arXiv:2304.14659, Conjecture 6.5 of the note: under (AΔ-path), every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
