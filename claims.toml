@@ -267,6 +267,13 @@ status    = "math.proved-informal"
 paper     = "Cor 4.12, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
+[claims.claim-4-13]
+kind      = "claim"
+statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 = L(19) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
+status    = "math.proved-informal"
+paper     = "Ex 4.13, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 5. The per-PPP greedy of both papers is not exact
 # ===========================================================================
