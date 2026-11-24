@@ -636,3 +636,13 @@ code      = "experiments/E8_certificates/run.py"
 results   = "experiments/results/E8_certificates"
 paper     = "Thm 9.1, doc/theory/exact-front.md §9"
 created   = "2026-11-24"
+
+[claims.exp-e9-linear-family]
+kind      = "experiment"
+statement = "E9 (linear family): on 303 generator instances (-C 3 -D 3) and 300 data files d_i = r0 i, c_i = α − βi (25 with β = 0), zeno's front equals the closed form of Theorem 10.1 point for point (92,550 points, fronts up to 1,939 points), no certificate needs the forest bound, and the note's sizes 1,090, 540 and 399 are reproduced."
+status    = "sci.supported"
+tests     = ["thm-10-1"]
+code      = "experiments/E9_linear_family/run.py"
+results   = "experiments/results/E9_linear_family"
+paper     = "Thm 10.1, doc/theory/exact-front.md §10"
+created   = "2026-11-24"

@@ -1,0 +1,46 @@
+{
+  "claim": "exp-e9-linear-family",
+  "criterion": "zeno's front equals the closed form of Theorem 10.1 point for point on every instance, every certificate closes its gaps with the relaxation alone (no forest gap), and the front sizes quoted in the note are reproduced",
+  "experiment": "E9_linear_family",
+  "explanation": "603 instances, 92,550 front points (up to 1939), all equal to the closed form; no certificate needed the forest bound, so these fronts hold without (A1). The note's sizes 1,090, 540 and 399 are reproduced.",
+  "figures": [
+    "E9_linear_family/linear_closed_form.png",
+    "E9_linear_family/linear_closed_form.svg"
+  ],
+  "hypothesis": "Theorem 10.1: on the linear family L = E at every level and the front is the closed form, exact under (S) alone.",
+  "metrics": {
+    "anchors": {
+      "n100t60p10": {
+        "note": 1090,
+        "zeno": 1090
+      },
+      "n200t3p2": {
+        "note": 399,
+        "zeno": 399
+      },
+      "n50t60p10": {
+        "note": 540,
+        "zeno": 540
+      }
+    },
+    "beta_zero_instances": 25,
+    "certificates_with_forest_gaps": 0,
+    "closed_form_checked": 603,
+    "differ": 0,
+    "differences": [],
+    "instances": 603,
+    "largest_front": 1939,
+    "not_in_family": 0,
+    "points_checked": 92550
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "affine": "300 data files d_i = r0 i (r0 in 1..7), c_i = alpha - beta i (beta in 0..6, 10% zero; alpha in [beta n, beta n + 40]), n in 2..30, p in 1..8, t in p..25",
+    "generator": "300 instances of -C 3 -D 3 with -r in {1,10}, n in 2..40, p in 1..10, t in p..30, plus the note's 3 anchors"
+  },
+  "tests": [
+    "thm-10-1"
+  ]
+}
