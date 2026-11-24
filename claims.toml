@@ -616,3 +616,13 @@ code      = "experiments/E6_conj410_search/run.py"
 results   = "experiments/results/E6_conj410_search"
 paper     = "Thm 4.10 (formerly Conj 4.10), doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
+
+[claims.exp-e7-scaling]
+kind      = "experiment"
+statement = "E7 (scaling): on the square-root family (n = 20, t = 12, p = 4, -r from 1 to 10,000, so 16 to 173,606 levels) zeno's time grows as levels^0.39, within the degree 2 of the pseudo-polynomial bound; every sweep in n, t and p finishes. On a frontier of 24 (n, t, p) points with a 60 s limit, 16 finish (up to n = 5000, t = 20, p = 4; n = 1000, t = 100, p = 10; n = 100, t = 500, p = 50) and 8 time out (among them n = t = 1000, p = 100). Measured on a shared host (load average 18.6-38.8 on 16 cores), so the times are upper bounds."
+status    = "sci.measured"
+tests     = ["cor-8-3"]
+code      = "experiments/E7_scaling/run.py"
+results   = "experiments/results/E7_scaling"
+paper     = "Thm 7.5 and Cor 8.3, doc/theory/exact-front.md §7.4 and §8"
+created   = "2026-11-24"
