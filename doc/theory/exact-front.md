@@ -1226,10 +1226,13 @@ The bounds were loose in the measurements (certified on 18–28% of instances), 
 ### 6.6 General graphs (arXiv §2.4)
 
 The arXiv paper extends the model to an arbitrary flight graph and reduces it to a clique instance with
-virtual cities. The reduction does not keep the front (Example 6.11): it misses plans that relay a passenger
-through several planes along a path. One direction survives. The reduced front is attained in the graph
-(Proposition 6.12) and has the right least cost (Proposition 6.13), and the reduction is exact on clique
-instances under (A1-NS), for one plane and for $t = p$ (Proposition 6.15).
+virtual cities. The reduction does not keep the front (Example 6.11), because it drops the edges between
+central vertices. Within one trip from hub to hub, a plane of the graph can drop a passenger at one central
+vertex, fly a central edge and pick another passenger up at the next. $f(U)$ has no central flights, and the
+detour through a hub is longer. This is the short-central-flight mechanism of §6.4. One direction survives.
+The reduced front is attained in the graph (Proposition 6.12) and has the right least cost (Proposition 6.13),
+and the reduction is exact on clique instances under (A1-NS), for one plane and for $t = p$
+(Proposition 6.15).
 
 **Model.** A *graph instance* $U$ is a connected undirected graph on the hubs $C_I$, $C_G$ and central
 vertices $1, \dots, n$, without an edge $C_I$–$C_G$. Every edge has a duration $\mathrm{dur}(a, b) \ge 0$,
@@ -1253,12 +1256,11 @@ because "every sub-path of a path in a Pareto-optimal plan is a non-dominated pa
 
 The claim needs two dominance maps, which Lemma 6.3 and Theorem 6.9 give for clique instances: every point
 of $\mathcal F_{f(U)}$ must be attained by a plan of $U$, and every plan of $U$ must be weakly dominated by a
-point of $\mathcal A_{f(U)}$. A bijection of plans is neither needed nor available. After cleaning, a journey
-of $f(U)$ is $C_I \to v \to C_G$ (Lemma 4.3(a)): it rides at most two planes and changes once, at a city. A
-plan of $U$ can hand a passenger off at an inner vertex of a path, relay it along three or more legs of
-different planes, and keep a plane between central vertices for several hand-offs. The first map exists
-(Proposition 6.12). The second does not (Example 6.11), and the paper gives no structure theorem that would
-provide it.
+point of $\mathcal A_{f(U)}$. A bijection of plans is neither needed nor available. A segment of $U$, from hub
+to hub, may visit several central vertices and hand passengers off at any of them. A segment of $f(U)$ visits
+one city, and since $f(U)$ has no central flights, its planes never fly from one city to another without
+passing through a hub. The first map exists (Proposition 6.12). The second does not (Example 6.11), and the
+paper gives no structure theorem that would provide it.
 
 **Example 6.11 (the reduction misses the front).** Let $U$ be the path $C_I$–$a$–$b$–$C_G$ with durations
 $1, 2, 1$ and $c_a = c_b = 1$, with $t = 3$ and $p = 2$. Then $f(U)$ has two cities,
@@ -1278,25 +1280,37 @@ $\mathrm{Min}\,\mathcal K = \{(8, 10)\}$.
 separates $C_I$ from $C_G$. Every passenger flies across it towards $C_G$ on some leg, and a leg carries at
 most one passenger, so the planes fly it towards $C_G$ at least $t = 3$ times. Each plane ends on the $C_G$
 side, so it flies the edge towards $C_G$ once more than towards $C_I$, and the planes fly it towards $C_I$ at
-least $t - p = 1$ time. They thus fly at least $4 \cdot (1 + 2 + 1) = 16$ in total, one of them at least 8. The following plan costs 8 and has makespan 8 (legs as
-from → to [departure, arrival]):
+least $t - p = 1$ time. They thus fly at least $4 \cdot (1 + 2 + 1) = 16$ in total, one of them at least 8.
+The following plan costs 8 and has makespan 8 (legs as from → to [departure, arrival]):
 
 * plane 1: $C_I \to a$ [0, 1], $a \to b$ [1, 3], $b \to a$ [3, 5], $a \to b$ [5, 7], $b \to C_G$ [7, 8];
 * plane 2: $C_I \to a$ [0, 1], $a \to C_I$ [1, 2], $C_I \to a$ [2, 3], $a \to b$ [3, 5], $b \to C_G$ [5, 6],
   $C_G \to b$ [6, 7], $b \to C_G$ [7, 8];
-* passenger 1 flies plane 1 to $a$, waits there until 5 and flies plane 1 on to $C_G$; passenger 2 flies plane
-  2 from $C_I$ at 2 to $C_G$; passenger 3 flies plane 2 to $a$, plane 1 from $a$ to $b$, waits at $b$ until 7
-  and flies plane 2 to $C_G$.
+* passenger 1 flies plane 2 from $C_I$ at 2 to $C_G$; passenger 2 flies plane 1 to $b$, arriving at 3, and
+  plane 2 from $b$ at 7; passenger 3 flies plane 2 to $a$, arriving at 1, and plane 1 from $a$ at 5 to $C_G$.
 
-Each plane lands twice in $a$ and twice in $b$. $\square$
+Each plane lands twice in $a$ and twice in $b$, and each passenger changes planes at most once. $\square$
 
-Passenger 3 is relayed along three legs of two planes, with hand-offs at $a$ and at $b$, and plane 1 shuttles
-between $a$ and $b$ without returning to a hub. The bound shows what $f(U)$ cannot do. Beyond one crossing per
-plane, the planes must fly one more round trip on each edge, $2 + 4 + 2$ in all. A link of $f(U)$ gives the
-round trip on $C_I$–$a$ to one plane and the two others to the other plane ($v_a$), or splits after $b$
-($v_b$). The plan above gives $a$–$b$ to plane 1 and the two outer edges to plane 2, $4 + 4$.
+The bound shows what $f(U)$ cannot do. Beyond one crossing per plane, the planes must fly one more round trip
+on each edge, $2 + 4 + 2$ in all. A link of $f(U)$ gives the round trip on $C_I$–$a$ to one plane and the two
+others to the other plane ($v_a$), or splits after $b$ ($v_b$). The plan above gives $a$–$b$ to plane 1 and
+the two outer edges to plane 2, $4 + 4$.
 
-No other choice of virtual cities repairs this. With walks instead of simple paths, or with
+Plane 1 does this in one segment, $C_I a b a b C_G$: it drops passenger 2 at $b$ at time 3, flies the central
+edge $b \to a$, and picks passenger 3 up at $a$ at time 5. That is what $f(U)$ lacks. Its cities have no
+central flights ($d_{ij} = \infty$), and through a hub a plane flies $\bar d_{v_b} + \bar d_{v_a} = 4$, or
+$d_{v_b} + d_{v_a} = 4$, between $v_b$ and $v_a$: twice the edge $a$–$b$. This is the short-central-flight
+mechanism of §6.4, and the reason Proposition 6.15(a) needs (A1-NS). Relaying passengers is not the issue:
+in the plan above, as in every plan of $f(U)$ after cleaning (Lemma 4.3(a)), each passenger changes planes at
+most once. The same routes also let passenger 3 be relayed along three legs of two planes, but that is not
+needed.
+
+Giving $f(U)$ its central flights back does not repair the reduction either. Add a central flight of
+duration 2 between $v_a$ and $v_b$. Plane 1's segment then becomes $C_I \to v_b \to v_a \to C_G$, but plane 2's
+drop-off at $v_a$ and pick-up at $v_b$ are no longer paired at one city, and $f$ charges each of them 2
+instead of 1 (Proposition 6.12, cost). The front of this instance is $\{(8, 10), (10, 8)\}$ (computed, §11).
+
+No reading of the paper's construction repairs the example. With walks instead of simple paths, or with
 $i \in \{C_I, C_G\}$, the only cities of cost 2 are $v_a$, $v_b$, $(C_I,\ C_I a b C_G)$ with
 $(d, \bar d) = (0, 4)$ and $(C_I a b C_G,\ C_G)$ with $(4, 0)$; every other city lands three times or more.
 A configuration of cost 8 uses only these cities, and its least makespan is still at least 10. With planes
@@ -1304,15 +1318,19 @@ ending anywhere (§1.2), the exhaustive searches give the same two fronts (§11)
 
 *Bucket brigade.* On the same path with durations $1, 1, 1$, $t = 4$ and $p = 3$, the same arguments give
 $\mathcal F_{f(U)} = \{(10, 7)\}$ and $\mathcal F_U = \{(10, 5)\}$. In a plan of makespan 5 each plane flies
-exactly one edge back and forth, a different edge per plane, and the plan of `checks/general_graph.py` relays
-one passenger through all three planes, one edge each.
+exactly one edge back and forth, a different edge per plane, so one route is $C_I a b a b C_G$, the segment of
+Example 6.11. With the routes $C_I a C_I a b C_G$, $C_I a b a b C_G$ and $C_I a b C_G b C_G$, the passengers can
+be assigned so that each changes planes at most once (`checks/general_graph.py`). The same routes also allow a
+relay through all three planes, one edge each, but it is not needed. With central flights back, $f(U)$ gives
+$\{(10, 7), (12, 5)\}$.
 
 *Inner points.* The reduction also misses points inside the front. Take the spokes $C_I$–1–2–$C_G$, with
 durations $1, 2, 3$, and $C_I$–3–4–$C_G$, with durations $1, 1, 1$, costs $c = (3, 4, 5, 5)$, $t = 3$ and
 $p = 2$. The exact front is $(40, 7), (37, 8), (34, 9), (31, 11), (28, 12)$, and $f(U)$ misses $(31, 11)$. The
-plan of that point relays a passenger along the first spoke as in Example 6.11 (computed, §11). On random tiny
-graphs the two fronts differ on 342 of 4,000 paths, spokes, cycles and random graphs, 22% of those with
-$p \ge 2$ and $t > p$, and on none of 1,000 clique instances under (A1-NS) (§11).
+plan the flow model finds for that point has the route $C_I\,1\,2\,1\,2\,C_G$, the segment of Example 6.11 on
+the first spoke (§11). On random tiny graphs the two fronts differ on 342 of 4,000 paths, spokes, cycles and
+random graphs, 22% of those with $p \ge 2$ and $t > p$, and on none of 1,000 clique instances under (A1-NS)
+(§11).
 
 **Proposition 6.12 (the reduced front is attained).** For every role configuration of $f(U)$ with passenger
 count $t$, every order of its drop-offs and pick-ups and every link matching, $U$ has a feasible plan with the
@@ -1369,8 +1387,9 @@ point dominates no point with makespan at most $M^\star$. This gives the last cl
 **Proposition 6.14 (dominated cities, Pareto paths).** Let a clique instance without central flights have
 cities $v \ne v'$ with $c_{v'} \le c_v$, $d_{v'} \le d_v$ and $\bar d_{v'} \le \bar d_v$. Removing $v$ does not
 change the front. In particular, $f(U)$ keeps its front when restricted to the pairs $(w, e)$ in which $w$ is
-non-dominated in $(\omega, \varphi)$ among the paths from $C_I$ to $i$, and $e$ among the paths from $i$ to
-$C_G$.
+non-dominated among the simple paths from $C_I$ to $i$, and $e$ among those from $i$ to $C_G$. Here a path is
+*non-dominated* if no other path between the same vertices has $(\omega, \varphi)$ componentwise at most its
+own and different from it: it is Pareto-minimal, and paths with equal $(\omega, \varphi)$ are all kept.
 
 *Proof.* Both instances satisfy (A1-NS), so by Corollary 6.10 their fronts are $\mathrm{Min}\,\mathcal K'$ and
 $\mathrm{Min}\,\mathcal K$, with $\mathcal K' \subseteq \mathcal K$ for the smaller instance. In a role
@@ -1383,10 +1402,10 @@ $\mathrm{Min}\,\mathcal K = \mathrm{Min}\,\mathcal K'$. If $w'$ dominates $w$, b
 $(w', e)$ dominates $(w, e)$ in this sense, and likewise for $e$; every city is dominated by one whose two
 paths are non-dominated, so the other cities can be removed one at a time. $\square$
 
-The paper justifies this restriction by its sub-path claim, which is not needed and is false for plans of $U$.
-On a path graph with $t > p$, some edge is flown towards $C_I$, as in Example 6.11, and the plane that does so
-flies it towards $C_G$ later. Its route then contains a closed sub-walk, of positive duration when the edges
-have positive durations, which staying put dominates. Every plan of the front of Example 6.11 is of this kind.
+The paper justifies this restriction by its sub-path claim, which is not needed. Read with "path in a plan"
+meaning a plane's route (the journeys of Example 6.11 are simple paths, so they do not refute it), the claim
+is false for plans of $U$. Plane 1's route in Example 6.11 contains the sub-path $a\,b\,a\,b$, with
+$(\omega, \varphi) = (3, 6)$, which the path $a\,b$, with $(1, 2)$, dominates.
 
 **Proposition 6.15 (where the reduction is exact).** $\mathcal F_U = \mathcal F_{f(U)}$ in each of these cases:
 
@@ -1435,8 +1454,8 @@ $\mathcal F_U = \{(R(M), M) : 0 \le M \le M^\star,\ R(M) < R(M - 1)\}$.
 *Proof.* A plan of makespan at most $M$ can be cleaned (Lemma 3.1) without changing its routes, and moved to
 integer times: durations are positive, so the plan is event-ordered (§1.2), and giving each leg, in that
 order, the earliest departure its route and its journey allow yields integer times, each no later than
-before. Each route, with waiting arcs between its legs and after its last one up to $(C_G, M)$, is a unit
-path. So is each journey, with waiting arcs in $C_I$ before its first leg, between its legs, and in $C_G$
+before. Each route, with waiting arcs in $C_I$ before its first leg, between its legs, and after its last one
+up to $(C_G, M)$, is a unit path. So is each journey, with waiting arcs in $C_I$ before its first leg, between its legs, and in $C_G$
 after its last. Journeys use distinct legs, so $z \le y$; a clean journey has no flight into $C_I$ and none out
 of $C_G$; and the cost is the plan's. Conversely, every arc moves forward in time, so $y$ decomposes into $p$ unit paths, the routes, and $z$
 into $t$ unit paths. On each flight arc, give the passenger units of $z$ distinct plane units among those of
@@ -1934,10 +1953,10 @@ All checks compare against exhaustive searches written independently of the solv
 | Schedulable domination, fronts (`checks/sd_checks.py`): configuration schedules (`config_front`, exact waiting) vs all simple plans (`simple_plans`: any hand-offs, exact waiting), no central flights | Exactly $s$ landings: 400 / 400 equal ($n \le 3$, $p \le 4$, $t \le 7$, durations $\le 20$; 200 shaped like Prop 6.5, of which waiting changes the front on 11). Up to $s + 2$ landings: 118 / 118 ($s \le 8$; 2 timeouts; waiting changes 7 fronts) |
 | Same vs all plans (`truth`), central flights none or (A1-NS) | 513 / 513 tiny instances ($n \le 2$, $t \le 5$, $p \le 3$, durations $\le 6$; waiting changes none of these fronts). Instance of Prop 6.5 (937 million states, costs up to 60): equal. Four instances on which waiting changes the front, for example $d = (2, 17)$, $\bar d = (3, 10)$, $c = (3, 1)$, $t = 5$, $p = 3$, where (13, 45) without waiting becomes (13, 47), or $d = (1, 16)$, $\bar d = (1, 8)$, $c = (5, 0)$, $t = 6$, $p = 4$, where waiting removes (15, 34): equal |
 | `relaxed` certificates (Lemma 3.4 alone) | 386 / 400 random fronts fully certified; 15 of 5,277 gaps (14 instances) need `forest` |
-| General graphs: Example 6.11, the bucket brigade and the inner point of §6.6 (`checks/general_graph.py example`) | Fronts of $f(U)$ by `zeno` (reported exact) and, for the first, by `graph_truth` on the star graph of its cities: $\{(8, 10)\}$, $\{(10, 7)\}$, and four points without $(31, 11)$. Exact fronts by `graph_truth` and by the flow model of Prop 6.16: $\{(8, 8)\}$, $\{(10, 5)\}$, and five points with $(31, 11)$. With planes ending anywhere, `graph_truth` gives the same two fronts for Example 6.11, $\{(8, 10)\}$ on the star graph and $\{(8, 8)\}$ on $U$. The relay plans of §6.6 and every flow plan simulated |
+| General graphs: Example 6.11, the bucket brigade and the inner point of §6.6 (`checks/general_graph.py example`) | Fronts of $f(U)$ by `zeno` (reported exact) and, for the first, by `graph_truth` on the star graph of its cities: $\{(8, 10)\}$, $\{(10, 7)\}$, and four points without $(31, 11)$. Exact fronts by `graph_truth` and by the flow model of Prop 6.16: $\{(8, 8)\}$, $\{(10, 5)\}$, and five points with $(31, 11)$. With planes ending anywhere, `graph_truth` gives the same two fronts for Example 6.11, $\{(8, 10)\}$ on the star graph and $\{(8, 8)\}$ on $U$. The plans of §6.6, in which each passenger changes planes at most once, simulated, as are relay assignments on the same routes and every flow plan. $f(U)$ with central flights back (duration the graph distance between the cities' vertices), by `graph_truth`: $\{(8, 10), (10, 8)\}$ and $\{(10, 7), (12, 5)\}$ |
 | `graph_truth` against `truth` on clique instances (`general_graph.py validate`) | 1,000 / 1,000 fronts equal ($n \le 3$, $t \le 4$, $p \le 3$, durations $\le 4$, symmetric or not, central flights none, a1 or tight). Without useful central flights, the front of $f(U)$ by `zeno` equals them on 693 / 693 (Prop 6.15(a)) |
 | `graph_truth` against the flow model of Prop 6.16 (`xflow`) | 300 / 300 fronts equal on random graphs of the six families below with $t \le 3$, both models up to the same time cap, every flow plan simulated |
-| The reduction against the exact front (`sweep`): random graphs with $n \le 4$, $t \le 4$, $p \le 3$, durations $\le 5$, costs $\le 6$ in six families (paths; parallel spokes of one or two central vertices; cycles through both hubs; random connected graphs; clique instances under (A1-NS); relay shapes, paths with a long inner edge or two parallel paths) | 6,000 instances, every front of $f(U)$ exact. Fronts differ on 177 of 1,000 paths, 89 spokes, 30 cycles, 46 random graphs, 0 clique instances and 227 relay shapes; among the instances with $p \ge 2$ and $t > p$, on 177 / 393, 89 / 389, 30 / 377, 46 / 384, 0 / 388 and 227 / 353. 85 of the differing fronts miss a point other than the cheapest one. Every reduced point attained and equal least costs on all 6,000 (Props 6.12, 6.13); the 4,104 instances with $p = 1$, $t = p$ or a clique instance under (A1-NS) have equal fronts (Prop 6.15) |
+| The reduction against the exact front (`sweep`): random graphs with $n \le 4$, $t \le 4$, $p \le 3$, durations $\le 5$, costs $\le 6$ in six families (paths; parallel spokes of one or two central vertices; cycles through both hubs; random connected graphs; clique instances under (A1-NS); targeted shapes, paths with a long inner edge or two parallel paths) | 6,000 instances, every front of $f(U)$ exact. Fronts differ on 177 of 1,000 paths, 89 spokes, 30 cycles, 46 random graphs, 0 clique instances and 227 targeted shapes; among the instances with $p \ge 2$ and $t > p$, on 177 / 393, 89 / 389, 30 / 377, 46 / 384, 0 / 388 and 227 / 353. 85 of the differing fronts miss a point other than the cheapest one. Every reduced point attained and equal least costs on all 6,000 (Props 6.12, 6.13); the 4,104 instances with $p = 1$, $t = p$ or a clique instance under (A1-NS) have equal fronts (Prop 6.15) |
 | Virtual cities (`general_graph.py subpath`) | All cities, Pareto paths only, and dominance pruning give the same front of $f(U)$ by `zeno` on 508 / 508 instances with at most 40 cities (Prop 6.14); `graph_truth` on the star graph of the pruned cities equals `zeno` on 505 / 505 with at most 4 cities |
 
 The exhaustive search over plans (`truth.cpp`) enforces that planes end in $C_G$ (`ANYWHERE=1` lifts this),
@@ -1975,10 +1994,11 @@ time cap of Proposition 6.13. `general_graph.py` has its own copy of the flow mo
 5. Conjecture 10.2, and the offset progressions.
 6. Statement 1.2: differential tests against VAL on emitted PDDL plans.
 7. Move the checkers of §11 into `tests/`.
-8. General graphs (§6.6): a characterisation of $\mathcal F_U$ like Corollary 6.10, where a link becomes a
-   chain of hand-offs along a path, possibly through several planes, with its own template; an exact
-   algorithm that does better than the integer flows of Proposition 6.16; and the graph classes beyond
-   Proposition 6.15 on which the reduction is exact (it fails on paths with two central vertices, so on trees).
+8. General graphs (§6.6): a characterisation of $\mathcal F_U$ like Corollary 6.10, with segments that fly
+   central edges between a drop-off and a pick-up, as plane 1 does in Example 6.11 (a graph analogue of the
+   shuttle triples of Conjecture 6.7), and costs charged by the walks actually flown; an exact algorithm that
+   does better than the integer flows of Proposition 6.16; and the graph classes beyond Proposition 6.15 on
+   which the reduction is exact (it fails on paths with two central vertices, so on trees).
 
 ## Appendix A. The normal-form proof of Theorem 4.7 (superseded)
 

@@ -19,11 +19,12 @@ to that of the reduced front's cheapest point, which is the time cap given to gr
 
 usage:
   python3 general_graph.py example <checks dir> <zeno>
-      three instances of §6.6. Example 6.11: both fronts (also with planes ending anywhere), the relay plan
-      simulated, the reduced front also by graph_truth on the star graph of the virtual cities. The bucket
-      brigade (path with unit durations, t = 4, p = 3): both fronts, the three-plane relay simulated. The inner
-      point (two spokes): both fronts, the reduced one missing (31, 11). With highspy, the flow model as a
-      second oracle on all three, every flow plan simulated
+      three instances of §6.6. Example 6.11: both fronts (also with planes ending anywhere), the reduced front
+      also by graph_truth on the star graph of the virtual cities, the note's plan simulated (one plane flies
+      I a b a b G; every passenger changes planes at most once) and a relay assignment on the same routes, and
+      the front of f(U) with its central flights back. The bucket brigade (path with unit durations, t = 4,
+      p = 3): the same. The inner point (two spokes): both fronts, the reduced one missing (31, 11). With
+      highspy, the flow model as a second oracle on all three, every flow plan simulated
   python3 general_graph.py validate <checks dir> <zeno> <trials> <seed>
       graph_truth on clique instances against bin/truth (central flights none, a1, tight) and, without
       central flights, against zeno on the reduced instance
@@ -135,7 +136,7 @@ def parse_front(out):
 
 def zeno_front(zeno, cities, t, p):
     """Front of the clique instance with these cities and no central flights; (front, exact)."""
-    cities = sorted((d, db, cc) for d, db, cc in cities)  # d[0] <= d[1]: the reader swaps otherwise
+    cities = sorted((d, db, cc) for d, db, cc in cities)  # by C_I-side duration, as the other check scripts do
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "r.dat")
         with open(path, "w") as f:
@@ -164,6 +165,30 @@ def star(cities):
         edges[(0, k)] = d
         edges[(k, m + 1)] = db
     return m, edges, [cc for _d, _db, cc in cities]
+
+
+def with_central(n, edges, cities):
+    """The star graph of the cities (d, dbar, c, w, e) plus, between cities at distinct vertices i and i',
+    a central flight lasting the distance from i to i' in the graph: f(U) with its central flights back."""
+    adj = neighbours(n, edges)
+
+    def dist(src):
+        best, todo = {src: 0}, [src]
+        while todo:  # Bellman-Ford style relaxation; the graphs are tiny
+            u = todo.pop()
+            for v, d in adj[u]:
+                if best[u] + d < best.get(v, 1 << 30):
+                    best[v] = best[u] + d
+                    todo.append(v)
+        return best
+    m, star_edges, costs = star([x[:3] for x in cities])
+    for a in range(m):
+        da = dist(cities[a][3][-1])
+        for b in range(a + 1, m):
+            i2 = cities[b][3][-1]
+            if i2 != cities[a][3][-1]:
+                star_edges[(a + 1, b + 1)] = da[i2]
+    return m, star_edges, costs
 
 
 def dominated_by(a, front):
@@ -340,32 +365,52 @@ def show_plan(n, routes, journeys):
 
 # ---------------------------------------------------------------- the counterexample
 
-# Line I - a - b - G with durations 1, 2, 1 and costs 1, 1; t = 3, p = 2 (Example 6.11).
+# Line I - a - b - G with durations 1, 2, 1 and costs 1, 1; t = 3, p = 2 (Example 6.11). Plane 1 flies
+# I a b a b G: one segment that drops a passenger at b, flies the central edge b -> a and picks another up
+# at a, which f(U), without central flights, cannot do.
 EX = dict(n=2, edges={(0, 1): 1, (1, 2): 2, (2, 3): 1}, c=[1, 1], t=3, p=2)
-# The relay plan: passenger 3 rides plane 2 from I to a, plane 1 from a to b, plane 2 from b to G.
 EX_ROUTES = [
     [(0, 1, 0, 1), (1, 2, 1, 3), (2, 1, 3, 5), (1, 2, 5, 7), (2, 3, 7, 8)],
     [(0, 1, 0, 1), (1, 0, 1, 2), (0, 1, 2, 3), (1, 2, 3, 5), (2, 3, 5, 6), (3, 2, 6, 7), (2, 3, 7, 8)],
 ]
+# The note's witness: every passenger changes planes at most once.
 EX_JOURNEYS = [
+    [(1, 2), (1, 3), (1, 4)],
+    [(0, 0), (0, 1), (1, 6)],
+    [(1, 0), (0, 3), (0, 4)],
+]
+# The same routes with a relay: passenger 3 rides plane 2 from I to a, plane 1 from a to b, plane 2 to G.
+EX_JOURNEYS_RELAY = [
     [(0, 0), (0, 3), (0, 4)],
     [(1, 2), (1, 3), (1, 4)],
     [(1, 0), (0, 1), (1, 6)],
 ]
-# Bucket brigade: the same line with durations 1, 1, 1, t = 4, p = 3; passenger 4 rides plane 1 from I to
-# a, plane 2 from a to b and plane 3 from b to G.
+# Bucket brigade: the same line with durations 1, 1, 1, t = 4, p = 3. Plane 2 flies I a b a b G.
 BRIG = dict(n=2, edges={(0, 1): 1, (1, 2): 1, (2, 3): 1}, c=[1, 1], t=4, p=3)
 BRIG_ROUTES = [
     [(0, 1, 0, 1), (1, 0, 1, 2), (0, 1, 2, 3), (1, 2, 3, 4), (2, 3, 4, 5)],
     [(0, 1, 0, 1), (1, 2, 1, 2), (2, 1, 2, 3), (1, 2, 3, 4), (2, 3, 4, 5)],
     [(0, 1, 0, 1), (1, 2, 1, 2), (2, 3, 2, 3), (3, 2, 3, 4), (2, 3, 4, 5)],
 ]
+# At most one change per passenger.
 BRIG_JOURNEYS = [
+    [(2, 0), (2, 1), (2, 2)],
+    [(1, 0), (1, 1), (2, 4)],
+    [(0, 0), (1, 3), (1, 4)],
+    [(0, 2), (0, 3), (0, 4)],
+]
+# A relay through all three planes: passenger 4 rides plane 1 to a, plane 2 to b and plane 3 to G.
+BRIG_JOURNEYS_RELAY = [
     [(0, 2), (0, 3), (0, 4)],
     [(1, 0), (1, 3), (1, 4)],
     [(2, 0), (2, 1), (2, 2)],
     [(0, 0), (1, 1), (2, 4)],
 ]
+
+
+def changes(journeys):
+    """Largest number of plane changes of a passenger."""
+    return max(sum(1 for k in range(1, len(j)) if j[k][0] != j[k - 1][0]) for j in journeys)
 # An inner point: spokes I-1-2-G (durations 1, 2, 3) and I-3-4-G (1, 1, 1); the reduced front misses (31, 11).
 INNER = dict(n=4, edges={(0, 1): 1, (1, 2): 2, (2, 5): 3, (0, 3): 1, (3, 4): 1, (4, 5): 1}, c=[3, 4, 5, 5], t=3, p=2)
 
@@ -393,8 +438,13 @@ def example(checks, zeno):
     print("  planes ending anywhere:", graph_front(checks, m, se, sc, t, p, 30, anywhere=True))
     print("exact front of the graph by graph_truth (time cap 30):", graph_front(checks, n, edges, c, t, p, 30))
     print("  planes ending anywhere:", graph_front(checks, n, edges, c, t, p, 30, anywhere=True))
-    print("relay plan, simulated (cost, makespan):", simulate(n, edges, c, t, p, EX_ROUTES, EX_JOURNEYS))
+    print("plan of the note, simulated (cost, makespan):", simulate(n, edges, c, t, p, EX_ROUTES, EX_JOURNEYS),
+          " most changes per passenger:", changes(EX_JOURNEYS))
     show_plan(n, EX_ROUTES, EX_JOURNEYS)
+    print("same routes with a relay, simulated:", simulate(n, edges, c, t, p, EX_ROUTES, EX_JOURNEYS_RELAY),
+          " most changes per passenger:", changes(EX_JOURNEYS_RELAY))
+    m, se, sc = with_central(n, edges, cities)
+    print("f(U) with central flights back, by graph_truth:", graph_front(checks, m, se, sc, t, p, 30))
     if have_highspy():
         pts, plans = flow_front(n, edges, c, t, p, 12)
         print("exact front of the graph by the flow model (makespan <= 12), plans simulated:", pts)
@@ -406,11 +456,17 @@ def example(checks, zeno):
     b = BRIG
     n, edges, c, t, p = b["n"], b["edges"], b["c"], b["t"], b["p"]
     print("\nbucket brigade:", edge_arg(n, edges), " costs", c, f" t={t} p={p}")
-    red, exact = zeno_front(zeno, prune(reduce(n, edges, c)), t, p)
+    cities = reduce(n, edges, c)
+    red, exact = zeno_front(zeno, prune(cities), t, p)
     print("reduced front by zeno:", red, "exact" if exact else "BRACKET")
     print("exact front of the graph by graph_truth:", graph_front(checks, n, edges, c, t, p, 30))
-    print("brigade plan, simulated (cost, makespan):", simulate(n, edges, c, t, p, BRIG_ROUTES, BRIG_JOURNEYS))
+    print("plan of the note, simulated (cost, makespan):", simulate(n, edges, c, t, p, BRIG_ROUTES, BRIG_JOURNEYS),
+          " most changes per passenger:", changes(BRIG_JOURNEYS))
     show_plan(n, BRIG_ROUTES, BRIG_JOURNEYS)
+    print("same routes with a relay through three planes, simulated:",
+          simulate(n, edges, c, t, p, BRIG_ROUTES, BRIG_JOURNEYS_RELAY), " most changes per passenger:", changes(BRIG_JOURNEYS_RELAY))
+    m, se, sc = with_central(n, edges, cities)
+    print("f(U) with central flights back, by graph_truth:", graph_front(checks, m, se, sc, t, p, 30))
     if have_highspy():
         print("flow model (makespan <= 8):", flow_front(n, edges, c, t, p, 8)[0])
     q = INNER
