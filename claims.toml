@@ -216,12 +216,12 @@ paper     = "Lemma 4.6, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.thm-4-7]
-kind         = "theorem"
-statement    = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.exists_admissible"
-paper        = "Thm 4.7, doc/theory/exact-front.md §4.3"
-created      = "2026-11-23"
+kind      = "theorem"
+statement = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M. Lean form: (A1) as Network.A1, F_k as durSum (P k)."
+status    = "math.proved-informal"
+lean      = "ZenoFront.Feasible.exists_admissible_A1_flightTime"
+paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
+created   = "2026-11-23"
 
 [claims.cor-4-8]
 kind      = "corollary"
