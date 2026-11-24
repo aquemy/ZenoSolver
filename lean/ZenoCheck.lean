@@ -10,9 +10,8 @@ import ZenoFront.Parse
   the listed points of a v1 certificate are then the exact Pareto front of the instance: for every
   table of central flight durations if all gaps are `relaxed`, and for every table satisfying
   (A1) otherwise. By `ZenoFront.Cert2.check_sound`, those of a v2 certificate are the exact front
-  for every table, of every feasible plan, or of every event-ordered one when some city has
-  `d = d̄ = 0` and the certificate lists `EO` (`Cert2.check_sound_of_not_EO`,
-  `Cert2.check_sound_EO`);
+  of every feasible plan, for every table; when some city has `d = d̄ = 0` and the certificate
+  lists `EO`, also of every event-ordered one (`Cert2.check_sound_EO`);
 * `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails.
 
 Only the `accepted` verdict is backed by the theorem; the reasons are diagnostics recomputed
@@ -126,8 +125,6 @@ def reasons2 (C : Cert2) : Array String := Id.run do
               s!"fastest point: the {C.fastest.name} bound does not rule out faster plans"
             else s!"fastest point: the {C.fastest.name} bound needs assumption A1-NS"
         | .search => if !a1ns then "fastest point: the search bound needs assumption A1-NS"
-            else if !C.noZeroCity && !C.assumptions.contains "EO" then "fastest point: the \
-              search bound needs assumptions A1-NS and EO (a city has d = dbar = 0)"
             else "fastest point: the exhaustive search finds a faster schedule"
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
@@ -142,9 +139,6 @@ def reasons2 (C : Cert2) : Array String := Id.run do
               cost {x.1}"
       | .search =>
         if !a1ns then errs := errs.push s!"gap {i + 1}: the search bound needs assumption A1-NS"
-        else if !C.noZeroCity && !C.assumptions.contains "EO" then
-          errs := errs.push s!"gap {i + 1}: the search bound needs assumptions A1-NS and EO (a \
-            city has d = dbar = 0)"
         else if !decide ((x.1 : WithTop ℕ) ≤ bound .search y.2) then
           errs := errs.push s!"gap {i + 1}: the exhaustive search finds a schedule cheaper than \
             {x.1} and faster than {y.2}"
@@ -171,11 +165,11 @@ def main (args : List String) : IO UInt32 := do
           s!"{roles} roles, {lag} lagrangian, {bal} balanced and {srch} search gap(s), the others \
             relaxed: for every central flight table satisfying A1-NS"
         else "all gaps relaxed: for every central flight table"
-      let (plans, thm) := if C.eoOnly then
-          ("event-ordered plans (EO; a city has d = dbar = 0)", "ZenoFront.Cert2.check_sound_EO")
-        else ("all feasible plans", "ZenoFront.Cert2.check_sound_of_not_EO")
-      IO.println s!"accepted: the {C.front.length} points are the Pareto front of {plans} \
-        (version 2, fastest {C.fastest.name}, {scope}; {thm})"
+      let eo := if C.eoOnly then
+          ", and of the event-ordered ones (EO; ZenoFront.Cert2.check_sound_EO)"
+        else ""
+      IO.println s!"accepted: the {C.front.length} points are the Pareto front of all feasible \
+        plans (version 2, fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound){eo}"
       return 0
     IO.println s!"rejected: {(reasons2 C).getD 0 "an obligation fails"}"
     return 1

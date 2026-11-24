@@ -1,4 +1,6 @@
-# corrupted: search gaps on an instance with a city of d = dbar = 0, without assumption EO
+# search gaps on an instance with a city of d = dbar = 0, without assumption EO: Theorem 6.9
+# holds for every plan, so the Lean checker needs no event order (the C++ checker still asks
+# for EO and rejects this file)
 zeno-certificate 2
 instance 2 7 4
 d 0 19
