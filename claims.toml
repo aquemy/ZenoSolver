@@ -385,6 +385,13 @@ status    = "math.proved-informal"
 paper     = "Prop 6.7, doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 
+[claims.def-6-17]
+kind      = "definition"
+statement = "Definition 6.17: a shuttle triple at (x, y) is a drop-off at x, a shuttle C_G → x → y → C_I carrying the dropped passenger to y, and a pick-up at y; a split crossing at (x, y) is a segment C_I → x → y → C_G with an empty central flight, which acts as a drop-off at x and a pick-up at y."
+status    = "math.proved-informal"
+paper     = "Def 6.17, doc/theory/exact-front.md §6.4"
+created   = "2026-11-24"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
