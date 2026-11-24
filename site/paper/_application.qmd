@@ -1,9 +1,8 @@
----
-order: 7
-title: "Application: OpenFlights Data"
-subtitle: "The Pareto front of the transport between the two largest airports in the world"
-css: ../styles/paper.css
----
+## Application: OpenFlights Data {#sec-application}
+
+::: {.section-subtitle}
+The Pareto front of the transport between the two largest airports in the world
+:::
 
 To generate benchmarks with real data, we used the list of airports from the OpenFlights
 database[^openflights]. We selected as initial airport and goal airport, the largest and second
@@ -52,7 +51,7 @@ from ATL to PEK, so that ATL → ORD → PEK is as short as a direct flight, whi
 cheapest airport and the slowest.
 
 The instance is non-symmetric, since the initial and the goal cities are apart. Flights between
-two central airports raise the question of [the previous sections](nonsymmetric.qmd#sec-short):
+two central airports raise the question of [the previous sections](#sec-short):
 their spherical distances satisfy the triangular inequality (AΔ), but they are much shorter than
 a detour through ATL or PEK (SFO and SEA are 1,100 km apart, while the shortest detour between
 them, through ATL, is 6,900 km long), so (A1-NS) fails. We therefore study two versions of the
@@ -64,7 +63,7 @@ instance:
   over role configurations;
 * *direct flights*: every pair of airports is joined by a flight of their spherical distance.
 
-## The hub and spoke instance {#sec-hub}
+### The hub and spoke instance {#sec-hub}
 
 We solved the instance with $t = 6$ travelers and $p$ from 2 to 5 planes
 (@fig-airports). For $p = 3$, 4 and 5, ZenoSolver closes every gap of its bracket and the
@@ -551,7 +550,7 @@ ATL -> DXB -> PEK -> IAH -> PEK
 The plans were printed by `zeno --plans`, which checks each of them by simulation; makespans are
 in km.
 
-## The instance with direct flights {#sec-direct}
+### The instance with direct flights {#sec-direct}
 
 With direct flights between the central airports, the plans above remain feasible, and ZenoSolver
 finds the same achieved points. It certifies none of the gaps, however: (A1-NS) fails, and the
@@ -566,7 +565,7 @@ points is open. They may: the airports close to ATL are far from PEK and convers
 and $\bar d$ order the cities in opposite ways, which is the situation in which a flight between
 central cities can beat every plan of simple patterns ({{< node "Proposition 6.7" >}}).
 
-## Reproducing the instance {#sec-reproduce}
+### Reproducing the instance {#sec-reproduce}
 
 The data files are in
 [`site/paper/data/`](https://github.com/aquemy/ZenoSolver/tree/master/site/paper/data):

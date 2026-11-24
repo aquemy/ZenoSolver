@@ -1,9 +1,8 @@
----
-order: 2
-title: "MultiZenoTravel problems"
-subtitle: "Instances, plans, Pareto fronts, assumptions and patterns"
-css: ../styles/paper.css
----
+## MultiZenoTravel problems {#sec-model}
+
+::: {.section-subtitle}
+Instances, plans, Pareto fronts, assumptions and patterns
+:::
 
 In this Section, we introduce three versions of the MultiZenoTravel problem: the symmetric clique
 MultiZenoTravel, the non-symmetric clique MultiZenoTravel and the general MultiZenoTravel. We then
@@ -11,14 +10,14 @@ make precise what a plan is, together with its cost and its makespan, and the as
 durations used in the rest of the paper. Plans are defined flight by flight, with explicit
 departure times, so that waiting, passengers changing planes, empty flights and flights between
 central cities are part of the problem and not excluded by assumption. The characterization of the
-Pareto-optimal plans comes next: for the [symmetric clique problem](front.qmd) first, then for the
-[non-symmetric and general problems](nonsymmetric.qmd).
+Pareto-optimal plans comes next: for the [symmetric clique problem](#sec-front) first, then for the
+[non-symmetric and general problems](#sec-nonsymmetric).
 
-## Instances {#sec-instances}
+### Instances {#sec-instances}
 
 Let us introduce some notations related to the planning problem briefly presented in the
 introduction: a non-symmetric clique MultiZenoTravel instance
-([schematic view](index.qmd#fig-instance)) is defined by the following elements
+([schematic view](#fig-instance)) is defined by the following elements
 ({{< node "§1.1" >}}):
 
 * $n$ central cities, organized as a clique in which every node is connected to $C_I$ and $C_G$,
@@ -44,7 +43,7 @@ Finally, we only consider cases where $t \ge p$, as the problem is otherwise tri
 An instance of the symmetric clique MultiZenoTravel problem is an instance such that
 $d = \bar d$. A general MultiZenoTravel instance is an instance such that the $n$ central cities
 are organized as an arbitrary graph; it is defined in the
-[general section](nonsymmetric.qmd#sec-graphs).
+[general section](#sec-graphs).
 
 Throughout the paper, we illustrate the definitions on the symmetric instance with $n = 3$
 cities, $t = 3$ passengers and $p = 2$ planes, durations $d = (2, 3, 5)$, costs
@@ -72,7 +71,7 @@ for a plan is not necessarily the largest sum of the flights' duration as some p
 to wait for others. This would be the case for $p_2$ waiting for $t_1$ in $C_2$, had it reached
 $C_2$ before $p_1$ dropped $t_1$ there.
 
-## Plans {#sec-plans}
+### Plans {#sec-plans}
 
 To reason about all plans, including those that wait, hand passengers over or fly between
 central cities, we fix their semantics ({{< node "§1.2" >}}). A plan on a set $Q$ of planes (all
@@ -132,10 +131,10 @@ makespans equal in the limit $\varepsilon \to 0$ ({{< node "Statement 1.2" >}});
 correspondence is argued but not formalised. The [Instances](../instances/index.qmd) section
 describes the generator and the files.
 
-[^pddl]: Planning Domain Definition Language [[FL03](index.qmd#ref-FL03)], almost universally used
+[^pddl]: Planning Domain Definition Language [[FL03](#ref-FL03)], almost universally used
 in AI Planning to describe domains and instances.
 
-## Pareto fronts {#sec-fronts}
+### Pareto fronts {#sec-fronts}
 
 For points $y, z$ of the plane (cost, makespan), $y \preceq z$ if $y \le z$ in both coordinates.
 For a set $\mathcal S$ of points, $\mathrm{Min}\,\mathcal S$ is the set of $z \in \mathcal S$
@@ -154,7 +153,7 @@ $\mathcal S'$. Then $\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$, and 
 $\mathcal S$ is weakly dominated by a point of $\mathrm{Min}\,\mathcal S$.
 :::
 
-## Assumptions {#sec-assumptions}
+### Assumptions {#sec-assumptions}
 
 The results of this paper use the following assumptions ({{< node "§1.4" >}}), each one only
 where stated. The first two are the triangular inequality and the symmetry assumption:
@@ -164,7 +163,7 @@ whenever the three flights exist $\hfill$ (AΔ)
 
 **Assumption** (Symmetry): $\forall i \in [1, n],\ d_i = \bar d_i$ $\hfill$ (S)
 
-The assumption of [[QS15](index.qmd#ref-QS15)], in a non-strict form, and its non-symmetric
+The assumption of [[QS15](#ref-QS15)], in a non-strict form, and its non-symmetric
 counterpart state that flights between central cities are useless, that is, never faster than a
 detour through $C_I$ or $C_G$:
 
@@ -193,7 +192,7 @@ under (S), its *load* is $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over the p
 of groups $X_1, \dots, X_p$ with $X_1 + \dots + X_p = X$, group $X_k$ being the cities in which
 plane $k$ lands.
 
-## Patterns {#sec-patterns}
+### Patterns {#sec-patterns}
 
 Cut the sequence of a plane at every visit to $C_I$ or $C_G$. Each piece, from one of them to the
 next, is a *pattern* (a *segment* in the [blueprint](../proofs.qmd)). As there is no flight
@@ -285,5 +284,5 @@ pattern lands in a central city. $\square$
 
 With fewer planes than passengers, some planes have to come back to $C_I$, and every return costs
 a landing. In @fig-plan the bound is reached: the plan lands $2t - p = 4$ times. The
-[next section](front.qmd) shows that, in the symmetric case, the Pareto front is always reached
+[next section](#sec-front) shows that, in the symmetric case, the Pareto front is always reached
 by such plans, and which lists of $2t - p$ cities can be flown, and how fast.

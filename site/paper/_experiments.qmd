@@ -1,11 +1,8 @@
----
-order: 6
-title: "Experiments"
-subtitle: "Validation of the solver and of the theory, performances, and examples of instances"
-css: ../styles/paper.css
-aliases:
-  - ../experiments.html
----
+## Experiments {#sec-experiments}
+
+::: {.section-subtitle}
+Validation of the solver and of the theory, performances, and examples of instances
+:::
 
 We validate ZenoSolver and the statements of the previous sections in a campaign of ten
 experiments, in the directory
@@ -36,7 +33,7 @@ further checks behind individual statements.
 
 : The ten experiments. Every one passed its criterion. {#tbl-experiments}
 
-## E1: achievability {#sec-e1}
+### E1: achievability {#sec-e1}
 
 **Hypothesis.** Under (S), an admissible partition is flown by a plan whose makespan is its
 largest load ({{< node "Theorem 4.1" >}}), so every point of the front ZenoSolver computes is
@@ -55,7 +52,7 @@ simulator or missed its point. [Pass]{.verdict}
 
 ![E1. Left: front points replayed per family. Right: front size against the number of landings $2t - p$, for every instance.](figures/e1-achievability.svg){#fig-e1 .paper-fig}
 
-## E2: the symmetric front {#sec-e2}
+### E2: the symmetric front {#sec-e2}
 
 **Hypothesis.** Under (S) and (A1), every plan is weakly dominated by an admissible partition
 ({{< node "Theorem 4.7" >}}), so the Pareto front is the set of breakpoints of $E$
@@ -75,7 +72,7 @@ no plan with extra landings, hand-offs or flights between central cities does be
 
 ![E2. Instances compared, by number of landings $2t - p$, for each reference.](figures/e2-fronts_vs_exhaustive.svg){#fig-e2 .paper-fig}
 
-## E3: the link-forest dynamic program {#sec-e3}
+### E3: the link-forest dynamic program {#sec-e3}
 
 **Hypothesis.** The link-forest dynamic program returns $E(T)$ ({{< node "Theorem 7.5" >}}), at
 sizes where enumeration is out of reach.
@@ -94,7 +91,7 @@ not given by the relaxation. [Pass]{.verdict}
 
 ![E3. Left: front points per instance, against $2t - p$. Right: time of the Lean solver against the time of CP-SAT, per instance.](figures/e3-forest_dp_vs_cpsat.svg){#fig-e3 .paper-fig}
 
-## E4: the non-symmetric front {#sec-e4}
+### E4: the non-symmetric front {#sec-e4}
 
 **Hypothesis.** Under (A1-NS), every plan is weakly dominated by a role configuration whose
 template is no later ({{< node "Theorem 6.9" >}}), so the Pareto front is the Pareto set of
@@ -116,7 +113,7 @@ and `search` (37). [Pass]{.verdict}
 
 ![E4. Instances on which the role-configuration front and ZenoSolver's front equal the reference.](figures/e4-nonsymmetric_fronts.svg){#fig-e4 .paper-fig}
 
-## E5: harmful waiting {#sec-e5}
+### E5: harmful waiting {#sec-e5}
 
 **Hypothesis.** If waiting could always be avoided (Conjecture 6.5), the Pareto front would be the
 Pareto set of (cost, largest role load) over role configurations. {{< node "Proposition 6.5" >}}
@@ -139,7 +136,7 @@ instances shaped like Proposition 6.5 (95% interval 3.2% to 11.0%) and of none o
 
 ![E5. Left: the front of the instance of Proposition 6.5, with exact waiting (blue) and with waiting ignored (orange). Right: share of instances on which waiting changes the front.](figures/e5-harmful_waiting.svg){#fig-e5 .paper-fig}
 
-## E6: the converse without (A1), a targeted search {#sec-e6}
+### E6: the converse without (A1), a targeted search {#sec-e6}
 
 **Hypothesis.** Under (S) and (AΔ), every plan is still weakly dominated by an admissible partition
 ({{< node "Theorem 4.10" >}}). A plan can beat the admissible-partition front only in a gap where
@@ -158,7 +155,7 @@ written and machine-checked. [Pass]{.verdict}
 
 ![E6. Cheapest plan in each gap against $E$; a counterexample would lie in the shaded region below the diagonal.](figures/e6-conj410_gaps.svg){#fig-e6 .paper-fig}
 
-## E7: performances {#sec-e7}
+### E7: performances {#sec-e7}
 
 **Hypothesis.** The Pareto front is computable in pseudo-polynomial time
 ({{< node "Corollary 8.3" >}}): over the range of levels $[T_{\rm lo}, T_{\rm hi}]$, the
@@ -183,7 +180,7 @@ $q_{\max} = \min(p, t - p + 1)$ planes. [Pass]{.verdict}
 
 ![E7. Top: wall time against the number of levels on the duration sweep, and against each swept parameter. Bottom: the grid of $(n, t, p)$, against the instance size and against the work bound of Theorem 7.5, with timeouts marked.](figures/e7-scaling.svg){#fig-e7 .paper-fig}
 
-## Performances on the benchmark suites {#sec-bench}
+### Performances on the benchmark suites {#sec-bench}
 
 The repository also times ZenoSolver end to end on fixed suites of instances
 ([`bench/`](https://github.com/aquemy/ZenoSolver/blob/master/bench/README.md)): an Apple M4 Max
@@ -226,7 +223,7 @@ $p = 3$ (with `-r 100` for the logarithm and the square root), behave alike (@tb
 
 : The five regimes of the suite `regimes`, all of the linear family, and four families of the suite `families`. {#tbl-regimes}
 
-## E8: certificates {#sec-e8}
+### E8: certificates {#sec-e8}
 
 **Hypothesis.** A certificate whose four obligations hold lists exactly the Pareto front
 ({{< node "Theorem 9.1" >}}), so a sound checker never accepts a false front.
@@ -244,7 +241,7 @@ the two checkers never disagree. [Pass]{.verdict}
 
 ![E8. Mutants per kind, rejected by each checker, against the number that must be rejected.](figures/e8-certificate_mutants.svg){#fig-e8 .paper-fig}
 
-## E9: the linear family {#sec-e9}
+### E9: the linear family {#sec-e9}
 
 **Hypothesis.** On the linear family of the default generator, the Pareto front has the closed
 form of {{< node "Theorem 10.1" >}} (see [below](#sec-examples)), and $L = E$ at every level, so it
@@ -262,7 +259,7 @@ $p = 2$) are reproduced. [Pass]{.verdict}
 
 ![E9. Front size computed by ZenoSolver against the size $(n - 1)\kappa + 1$ predicted by Theorem 10.1.](figures/e9-linear_closed_form.svg){#fig-e9 .paper-fig}
 
-## E10: a natural greedy heuristic {#sec-e10}
+### E10: a natural greedy heuristic {#sec-e10}
 
 **Hypothesis.** A natural heuristic computes the makespan of each list of $2t - p$ cities
 greedily, giving the longest durations first to the plane with the smallest current duration, in
@@ -288,7 +285,7 @@ exact front. [Pass]{.verdict}
 
 ![E10. Share of instances on which the greedy is exact, by $t$ and $p$, by $n$, and by family; the linear family is in green.](figures/e10-greedy_curves.svg){#fig-e10b .paper-fig}
 
-## Examples of Instances {#sec-examples}
+### Examples of Instances {#sec-examples}
 
 In @fig-fronts, we display some examples of the variety of Pareto Fronts that it is possible to
 obtain by modifying the functions to generate $d$ and $c$, on symmetric instances with $n = 7$,

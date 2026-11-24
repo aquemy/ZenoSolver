@@ -53,3 +53,6 @@ __pycache__/
 /site/fonts/*.ttf
 !/docs/**
 !/site/graph/**
+# the redirects from the former paper pages to their section of the single page
+!/site/paper/*.html
+!/site/experiments.html

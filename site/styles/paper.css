@@ -172,6 +172,16 @@
 .zs-fronts .pt { fill: var(--zs-series-1); }
 .zs-fronts .pt.open { fill: var(--zs-series-2); }
 
+/* The line under the heading of each section (the subtitle of its former page). */
+.section-subtitle {
+  color: var(--zs-ink-2);
+  font-size: 1.05em;
+  margin: -0.5em 0 1em 0;
+}
+.section-subtitle > p {
+  margin-bottom: 0;
+}
+
 /* The line under the title of the opening page, and the reference list. */
 .revision-note {
   color: var(--zs-ink-2);
