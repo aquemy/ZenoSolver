@@ -79,19 +79,18 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   the median over 152 certificates, 0.2 s at most, and 2.3 s for `v2-balanced-e1w2.cert`
   (19 `balanced` gaps).
 * The 66 certificates the C++ solver writes for the benchmark suite (`bench/instances/*.txt`):
-  5.7 s in total, 33 ms at the median. The largest, `regimes/r5` (`n = 100`, `t = 60`, `p = 10`,
-  3.9 MB, 240,000 legs), takes 2.3 s and 135 MiB. Before this phase's changes the same
+  4.9 s in total, 26 ms at the median. The largest, `regimes/r5` (`n = 100`, `t = 60`, `p = 10`,
+  3.9 MB, 240,000 legs), takes 2.1 s and 136 MiB. Before this phase's changes the same
   certificates took 478 s, 295 s of them for `r5`.
 * The end-to-end run, 35 certificates: about 1.3 s, solver included.
 * The solver `zeno-front` (`zeno-front.json`), on the 27 golden instances and the 5 of the quick
-  suite: 24 ms at the median, 58 ms at most (`multiples`). It finds the breakpoints by splitting
-  intervals: `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` takes 3.9 s (41 s when it scanned every level).
-  On the benchmark suite (`zeno-front-suite.json`, 60 s per instance), 63 of the 66 instances
-  finish, 0.39 s at the median and 55 s at most (`scaling-distinct/k24`), all with
-  `zeno front`'s front. At each level the solver runs the link-forest DP or the σ-DP, whichever
-  `useTreeDP` estimates cheaper: `scaling-n/n80` (`n = 80`) takes 10 s. The tree DP costs
-  about `p² · T · s² · n′` per level, so `regimes/r4` (`n = 50`, `t = 30`), `r5` (`n = 100`,
-  `t = 60`) and `scaling-n/n160` still take more than 60 s.
+  suite: 24 ms at the median, 27 ms at most. It finds the breakpoints by splitting
+  intervals: `-n 10 -t 8 -p 3 -C 2 -D 2 -r 100` takes 0.16 s (41 s when it scanned every level).
+  On the benchmark suite (`zeno-front-suite.json`, 60 s per instance), all 66 instances finish,
+  0.04 s at the median and 10 s at most (`regimes/r5`, `n = 100`, `t = 60`, `p = 10`), all with
+  `zeno front`'s front: 17 s in total. As in the C++ solver, every level is first bracketed between
+  the relaxation `L(T)` and the pairs bound `U₂(T)`, and an exact DP runs only where they differ.
+  On the large regimes every level closes this way.
 * **Many non-dominated cities.** The σ-DP is exponential in the number of cities that survive
   the dominance merge, and the tree DP is pseudo-polynomial in the level `T`. The checker runs
   whichever `useTreeDP` estimates cheaper. Every suite certificate keeps the σ-DP. Three
@@ -146,6 +145,7 @@ agrees with every verdict.
 | `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
 | `ZenoFront/MinCost.lean` | `E(T)`, the least cost of an admissible partition with loads `≤ T` | `minCost`, `minCost_antitone`, `minCost_attained` |
 | `ZenoFront/TreeExact.lean` | Lemma 2.6 "if" and the iff; the link-forest DP is exact | `admissible_iff_exists_linkForest`, `admissible_forestPartition`, `treeBoundAt_eq_minCost` |
+| `ZenoFront/PairBound.lean` | The bracket `L(T) ≤ E(T) ≤ U₂(T)`: the pairs bound (forests of single planes and linked pairs), attained | `pairsBoundAt`, `minCost_le_pairsBoundAt`, `minCost_eq_of_bracket` |
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
 | `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
@@ -354,14 +354,18 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
 * `admissible_iff_exists_linkForest` (**Lemma 2.6**): a grouping is admissible iff its groups are
   those of a forest of rooted link trees satisfying (F2). The witness of a plane is the set of
   cities with an odd number of links there (`isParityWitness_of_links`).
+* `minCost_le_pairsBoundAt`, `relaxedBoundAt_le_minCost`, `minCost_eq_of_bracket` (**the
+  bracket**): `L(T) ≤ E(T) ≤ U₂(T)`, the pairs bound `U₂` being the cheapest forest of single
+  planes and linked pairs, attained by an admissible partition (`pairRows_attained`). Where the
+  two meet, both are `E(T)`.
 * `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and
   `E(T') > C` for every `T' < T`. `breakpoint_le`: then `T ≤ (2t − p) · d_max`.
 * `solveFront_isParetoFront` (**the solver is correct**): under (S) and (A1), with `1 ≤ p ≤ t`,
   `solveFront` is the Pareto front of the feasible plans (`IsParetoFront`). It finds the levels
   where `E` drops by splitting intervals between `d_min · ⌈s/p⌉` (`minCost_eq_top_of_lt`) and
   `(2t − p) · d_max` (`breakpoints`), which lists the same points as the scan of every level
-  (`solveFront_eq`, `breakpoints_eq_scanFront`). At each level it runs the tree DP or the σ-DP,
-  whichever `useTreeDP` estimates cheaper. `mem_solveFront_iff`: its points are exactly the
+  (`solveFront_eq`, `breakpoints_eq_scanFront`). At each level it takes `L(T)` if the bracket
+  closes, and otherwise runs the tree DP or the σ-DP, whichever `useTreeDP` estimates cheaper. `mem_solveFront_iff`: its points are exactly the
   minimal admissible points. `lake exe zeno-front FILE` prints it by increasing cost, as
   `zeno front` does. CI requires the two to agree on the golden instances, the quick suite and
   three regimes (`test/front.sh`).
@@ -623,7 +627,7 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] The σ-DP's state bound `|σ| ≤ min(p − 1, t − p)` from Claim B′ (`smallSubsetList`).
 - [x] The σ-DP's other direction (`DP ≥ E`, so the DP is exact; `sigmaBoundAt_eq_minCost`).
 - [x] `E(T)` as a definition and its monotonicity (`minCost`, `minCost_antitone`).
-- [ ] Pairs upper bound `U(T)` with `L ≤ E ≤ U`.
+- [x] Pairs upper bound `U₂(T)` with `L ≤ E ≤ U₂` (`minCost_eq_of_bracket`).
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
       every arc bound `E(T)` from below (sparse certificates).
 - [ ] Executable admissibility check (union–find on the plane–city graph) proved equal to
@@ -650,7 +654,7 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 **P4.**
 
-- [x] Checker performance at suite scale: the 66 suite certificates in 5.7 s (478 s before).
+- [x] Checker performance at suite scale: the 66 suite certificates in 4.9 s (478 s before).
 - [x] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
       front under (S) + (A1) (`FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere`).
       On every instance, with Theorem 4.1: `minimal_achievable_iff_anywhere_of_A1`.
