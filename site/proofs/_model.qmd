@@ -71,7 +71,7 @@ structure Network (n : ℕ) where
   dc : Fin n → Fin n → ℕ
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
 
 :::
 
@@ -135,7 +135,7 @@ there is at least one leg since $t \ge 1$. $\mathcal A'$ is the set of pairs $(C
 abbrev Plan (n t p : ℕ) := Fin p → List (Leg n t)
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
 
 **Lean** `ZenoFront.Feasible` [Lean definition]{.badge .ok}
 
@@ -148,7 +148,7 @@ structure Feasible (N : Network n) (P : Plan n t p) : Prop where
     finalLoc .ci route = .cg
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
 
 **Lean** `ZenoFront.achievable` [Lean definition]{.badge .ok}
 
@@ -158,7 +158,7 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
   {x | ∃ P : Plan n t p, Feasible N P ∧ (planCost c P, planMakespan P) = x}
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
 
 :::
 
@@ -185,7 +185,8 @@ event-ordered. Conversely, an event-ordered plan of §1.2 with makespan $M$ yiel
 `total-time` at most $M + K\varepsilon$, where $K$ is its number of `fly`, `board` and `debark` actions:
 list the actions in the event order (each `board` just before its leg, each `debark` just after) and delay
 the $r$-th one by $r\varepsilon$. So the PDDL front tends to the front of event-ordered plans, which is
-$\mathcal F$ under (S) and (A1) (the plans of Theorem 4.1 are event-ordered, Lemma 6.8(c)) and under (A1-NS)
+$\mathcal F$ under (S) and (A1), and under (S) and (AΔ) (the plans of Theorem 4.1 are event-ordered, Lemma
+6.8(c); Corollaries 4.8 and 4.12), and under (A1-NS)
 (Corollary 6.10). The model's makespan is thus the PDDL makespan in the limit ε → 0, which is
 what ZenoSolver reports. Whether PDDL planners and VAL accept zero-duration actions is not checked here. This
 is argued, not formalised.
@@ -248,7 +249,7 @@ Used only where stated.
 def Network.A1 (N : Network n) : Prop := ∀ i j, N.d i + N.d j ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 51–52](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Converse.lean#L51-L52){.lean-src}
+[`lean/ZenoFront/Converse.lean`, lines 51–52](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Converse.lean#L51-L52){.lean-src}
 
 **Lean** `ZenoFront.Network.A1NS` [Lean definition]{.badge .ok}
 
@@ -258,7 +259,7 @@ def Network.A1NS (N : Network n) : Prop :=
   ∀ i j, min (N.d i + N.d j) (N.dbar i + N.dbar j) ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
+[`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
 
 :::
 
@@ -287,7 +288,7 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
   antichain : F.Pairwise fun a b => ¬ a ≤ b ∧ ¬ b ≤ a
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
 
 :::
 
@@ -353,6 +354,6 @@ theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' 
     Minimal (· ∈ A) x ↔ Minimal (· ∈ A') x := …
 ```
 
-[`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
 
 :::

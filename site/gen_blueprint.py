@@ -49,7 +49,7 @@ FULL_LISTING_LINES = 60  # definitions up to this length are listed whole
 HEADING = re.compile(r"^(#{1,6})\s+(?:(\d+(?:\.\d+)*)\.?\s+)?(.*)$")
 OPENER = re.compile(r"^\*\*([^*]+?)\*\*")
 PROOF_START = re.compile(r"^\*(Proof|Status)\b")
-STATEMENT_KIND = re.compile(r"^(Lemma|Theorem|Corollary|Proposition|Conjecture|Statement|Notation)\b")
+STATEMENT_KIND = re.compile(r"^(Lemma|Theorem|Corollary|Proposition|Conjecture|Statement|Notation|Example)\b")
 SQUARE = r"\square"
 
 

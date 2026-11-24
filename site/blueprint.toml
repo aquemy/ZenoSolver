@@ -198,8 +198,11 @@ id = "symmetric"
 title = "Symmetric case: achievability, converse, front"
 intro = """
 The heart of the note (§4). Theorem 4.1 flies every admissible partition with no waiting;
-Theorem 4.7 reduces every plan to an admissible partition; together they characterise the front
-(Corollary 4.8). All three are machine-checked.
+Theorem 4.7 reduces every plan to an admissible partition under (A1); together they characterise
+the front (Corollary 4.8). All three are machine-checked. Theorem 4.10 proves the same converse
+under the triangle inequality (AΔ) instead of (A1), so the front characterisation also holds there
+(Corollary 4.12); Example 4.13 shows that some such hypothesis is needed. These are proved in the
+note, not in Lean.
 """
 
 [[node]]
@@ -268,14 +271,31 @@ lean = ["ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.FeasibleAn
 
 [[node]]
 section = "symmetric"
-label = "Conjecture 4.10"
+label = "Theorem 4.10"
 paper = ["arxiv-pairing"]
 strengthen = """
-**Where the arXiv pairing argument fails** (§4.6 of the note). Moving both halves of a pairing to
-$C^\\star$ costs $2c_{C^\\star}$, which can exceed $c_i + c_j$, so "each city in $\\phi_0$ appears in
-$\\phi$" does not give a lower cost; and per-pattern durations ignore the synchronisation of the new
-pairs. Without (A1) the front is still certified wherever the bracket $L \\le C^\\star \\le E$ closes.
+**The arXiv pairing argument, repaired** (§4.6 of the note). The paper's "Figure 4" case has two
+flaws. Moving both halves of a pairing to $C^\\star$ costs $2c_{C^\\star}$, which can exceed
+$c_i + c_j$, so "each city in $\\phi_0$ appears in $\\phi$" does not give a lower cost; and
+per-pattern durations ignore the synchronisation of the new pairs. The note's proof pays for each
+moved end with a landing in its new city, and takes dominance from Theorem 4.1, whose plans are
+rebuilt from the partition. Earlier revisions of the note stated this converse as Conjecture 4.10.
 """
+
+[[node]]
+section = "symmetric"
+label = "Lemma 4.11"
+leaves = ["ZenoFront.Admissible.exists_shrink"]
+covers = "`Admissible.exists_shrink` proves the iterated form: an admissible grouping shrinks to any size $s \\ge p$ with $s \\equiv p \\pmod 2$, each group a sub-multiset of the old one. Lemma 4.11 is its case $s = |X| - 2$; that case is not stated on its own in Lean."
+
+[[node]]
+section = "symmetric"
+label = "Corollary 4.12"
+
+[[node]]
+section = "symmetric"
+label = "Example 4.13"
+note_status = "P (computed)"
 
 [[section]]
 id = "greedy"

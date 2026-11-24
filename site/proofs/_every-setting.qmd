@@ -49,7 +49,7 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
   …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -109,7 +109,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
     2 * t ≤ ∑ k, hubArrivals (P k) + p := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -163,7 +163,7 @@ theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : F
       cost c Z ≤ landCostSum c legs := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
 
 *Part* `ZenoFront.roleW_landingRecs_le` [machine-checked]{.badge .ok}
 
@@ -176,7 +176,7 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
   …
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -256,7 +256,7 @@ theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin 
       (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.relaxCost_oneplane_le_totalCost` [machine-checked]{.badge .ok}
 
@@ -268,7 +268,7 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
     relaxCost (fun m => oneplane d c m T) p s ≤ (totalCost c Y : WithTop ℕ) := …
 ```
 
-[`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/196452591670d9733f1d2be27e3c07de775358e1/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
 
 :::
 

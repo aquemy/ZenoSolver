@@ -332,9 +332,10 @@ window.Quarto = {
 <ul>
 <li><strong>(S)</strong>, symmetry: <span class="math inline">\(d_i = \bar d_i\)</span> for every city. Every instance the generator builds without <code>-E</code>/<code>-W</code> is symmetric;</li>
 <li><strong>(A1)</strong>, under (S): central flights are no faster than through a hub, <span class="math inline">\(d_{ij} \ge d_i + d_j\)</span>. Every PDDL problem <code>zeno</code> writes satisfies it (central flights last <span class="math inline">\(\max(d_i, \bar d_i) + \max(d_j, \bar d_j) + 100\)</span>);</li>
-<li><strong>(A1-NS)</strong>, the non-symmetric version: <span class="math inline">\(d_{ij} \ge \min(d_i + d_j, \bar d_i + \bar d_j)\)</span>.</li>
+<li><strong>(A1-NS)</strong>, the non-symmetric version: <span class="math inline">\(d_{ij} \ge \min(d_i + d_j, \bar d_i + \bar d_j)\)</span>;</li>
+<li><strong>(AΔ)</strong>, the triangle inequality on the flights that exist: <span class="math inline">\(\mathrm{dur}(a, b) \le \mathrm{dur}(a, x) + \mathrm{dur}(x, b)\)</span>.</li>
 </ul>
-<p>The front <code>zeno</code> prints is exact for symmetric instances under (A1). For non-symmetric ones it is exact wherever the certified bracket closes, under (A1-NS) when a bound needs it (<a href="../solver/cli.html#front">command line</a>).</p>
+<p>The front <code>zeno</code> prints is exact for symmetric instances under (A1), and by the note’s <a href="../proofs.html#node-corollary-4-12">Corollary 4.12</a> under (AΔ) as well. For non-symmetric ones it is exact wherever the certified bracket closes, under (A1-NS) when a bound needs it (<a href="../solver/cli.html#front">command line</a>).</p>
 </section>
 <section id="data-files" class="level2">
 <h2 class="anchored" data-anchor-id="data-files">Data files</h2>

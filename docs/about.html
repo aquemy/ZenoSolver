@@ -336,7 +336,7 @@ window.Quarto = {
 </section>
 <section id="f4" class="level3">
 <h3 class="anchored" data-anchor-id="f4">The pairing argument without (A1) is incomplete</h3>
-<p>Without (A1), the arXiv pairing argument concludes “lower cost” from a set inclusion and “dominates” from per-pattern durations; both steps fail (<a href="./proofs.html#node-conjecture-4-10">Conjecture 4.10</a>, open). Without (A1) the front is still certified wherever the relaxation <span class="math inline">\(L\)</span> meets the achieved cost, which covers every front of the default generator (<a href="./proofs.html#node-theorem-10-1">Theorem 10.1</a>).</p>
+<p>Without (A1), the arXiv pairing argument concludes “lower cost” from a set inclusion and “dominates” from per-pattern durations; both steps fail. The note proves the converse it was meant to establish under the triangle inequality (AΔ) instead (<a href="./proofs.html#node-theorem-4-10">Theorem 4.10</a>, formerly Conjecture 4.10, a written proof not yet in Lean). The front characterisation then holds under (AΔ) too (<a href="./proofs.html#node-corollary-4-12">Corollary 4.12</a>). Some hypothesis is needed: with central flights that violate both (A1) and (AΔ), a plan can beat every admissible partition (<a href="./proofs.html#node-example-4-13">Example 4.13</a>).</p>
 </section>
 <section id="holds" class="level3">
 <h3 class="anchored" data-anchor-id="holds">What still holds</h3>
@@ -345,7 +345,7 @@ window.Quarto = {
 </section>
 <section id="honesty" class="level2">
 <h2 class="anchored" data-anchor-id="honesty">Honesty: what is proved, and how</h2>
-<p>The blueprint has <strong>63 nodes</strong>. <strong>21</strong> are machine-checked theorems and <strong>7</strong> are Lean definitions. <strong>13</strong> have formalised parts, and <strong>22</strong> are not in Lean. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>.</p>
+<p>The blueprint has <strong>66 nodes</strong>. <strong>21</strong> are machine-checked theorems and <strong>7</strong> are Lean definitions. <strong>14</strong> have formalised parts, and <strong>24</strong> are not in Lean. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>.</p>
 <p>The blueprint’s badges are computed when the site is built, from <code>collectAxioms</code> on the Lean declarations each node lists. A node is badged machine-checked only if the declarations that formalise its <strong>whole</strong> statement are axiom-clean theorems. Declarations covering only part of a statement are listed under it, with their own badges, and the node keeps the note’s status. The generator stops if a declaration is missing or a label is not found in the note.</p>
 <p>The compiled tools add trust in the Lean compiler and in an unverified parser (<a href="./solver/lean.html#trust">trust base</a>).</p>
 </section>
