@@ -263,11 +263,12 @@ paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
 [claims.cor-4-12]
-kind      = "corollary"
-statement = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
-status    = "math.proved-informal"
-paper     = "Cor 4.12, doc/theory/exact-front.md §4.6"
-created   = "2026-11-24"
+kind         = "corollary"
+statement    = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.minimal_achievable_iff_multisetPoints_ATri, ZenoFront.minimal_achievable_iff_anywhere_of_ATri, ZenoFront.minimal_achievable_iff_minCost_ATri, ZenoFront.solveFront_isParetoFront_ATri, ZenoFront.Cert.check_sound_ATri, ZenoFront.Cert.forestGapBound_le_ATri"
+paper        = "Cor 4.12, doc/theory/exact-front.md §4.6"
+created      = "2026-11-24"
 
 [claims.claim-4-13]
 kind      = "claim"
