@@ -221,9 +221,32 @@ window.Quarto = {
   </li>  
     </ul>
   </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Theory</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-theory">    
+        <li>
+    <a class="dropdown-item" href="./proofs.html">
+ <span class="dropdown-text">Blueprint</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./claimgraph.html">
+ <span class="dropdown-text">Claim graph</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./history.html">
+ <span class="dropdown-text">History</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./blueprint.pdf">
+ <span class="dropdown-text">Blueprint (PDF)</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
-    <a class="nav-link" href="./proofs.html"> 
-<span class="menu-text">Blueprint</span></a>
+    <a class="nav-link" href="./experiments.html"> 
+<span class="menu-text">Experiments</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./results.html"> 
@@ -384,6 +407,8 @@ window.Quarto = {
 <li><strong>Solver:</strong> <a href="./solver/install.html">installation</a>, <a href="./solver/cli.html">command line</a>, <a href="./solver/api.html">C++ library</a>, <a href="./solver/certificates.html">certificate format</a>, <a href="./solver/lean.html">Lean tools</a>, <a href="./solver/algorithm.html">algorithm</a>.</li>
 <li><strong>Instances:</strong> <a href="./instances/model.html">model and data files</a>, <a href="./instances/generator.html">generator</a>, <a href="./instances/pddl.html">PDDL</a>, <a href="./instances/suites.html">benchmark and golden suites</a>, <a href="./instances/known-fronts.html">instances with known fronts</a>, <a href="./instances/sizing.html">size guidance</a>.</li>
 <li><a href="./proofs.html"><strong>Blueprint:</strong></a> every statement of the theory note, with the papers’ versions, the Lean declarations and a status badge from <code>#print axioms</code>. Also as a <a href="blueprint.pdf">PDF</a>.</li>
+<li><a href="./claimgraph.html"><strong>Claim graph</strong></a> and <a href="./history.html"><strong>history</strong></a>: the claims, their dependencies and statuses, rebuilt from the knowledge commits, and the replay of those commits.</li>
+<li><a href="./experiments.html"><strong>Experiments:</strong></a> the experiment campaign (in preparation).</li>
 <li><a href="./results.html"><strong>Results:</strong></a> timings and fronts on every suite instance, computed from the committed baselines.</li>
 <li><a href="./about.html"><strong>About:</strong></a> the papers, attribution, and what the note corrects.</li>
 </ul>

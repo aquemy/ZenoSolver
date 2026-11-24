@@ -9,6 +9,15 @@ main table code {
   white-space: nowrap;
 }
 
+/* The knowledge-commit log: number, date and commit on one line each. */
+.history-log td:nth-child(-n+3) {
+  white-space: nowrap;
+}
+.history-log td:last-child code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* Long inline code (signatures, paths, commands) may break across lines outside tables. */
 main p code, main li code, main dt code, main dd code {
   white-space: pre-wrap;

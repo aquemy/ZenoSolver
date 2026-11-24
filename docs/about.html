@@ -186,9 +186,32 @@ window.Quarto = {
   </li>  
     </ul>
   </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Theory</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-theory">    
+        <li>
+    <a class="dropdown-item" href="./proofs.html">
+ <span class="dropdown-text">Blueprint</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./claimgraph.html">
+ <span class="dropdown-text">Claim graph</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./history.html">
+ <span class="dropdown-text">History</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./blueprint.pdf">
+ <span class="dropdown-text">Blueprint (PDF)</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
-    <a class="nav-link" href="./proofs.html"> 
-<span class="menu-text">Blueprint</span></a>
+    <a class="nav-link" href="./experiments.html"> 
+<span class="menu-text">Experiments</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./results.html"> 
@@ -328,7 +351,7 @@ window.Quarto = {
 </section>
 <section id="this-website" class="level2">
 <h2 class="anchored" data-anchor-id="this-website">This website</h2>
-<p>Built with <a href="https://quarto.org">Quarto</a> from <code>site/</code> into <code>docs/</code> (<a href="./solver/install.html#this-website">how</a>). The blueprint pages are generated from <code>site/blueprint.toml</code>, the theory note and the Lean sources by <code>site/gen_blueprint.py</code>; the tables from the committed baselines by <code>site/gen_pages.py</code>. The paper excerpts are in <code>site/paper/</code>.</p>
+<p>Built with <a href="https://quarto.org">Quarto</a> from <code>site/</code> into <code>docs/</code> (<a href="./solver/install.html#this-website">how</a>). The blueprint pages are generated from <code>site/blueprint.toml</code>, the theory note and the Lean sources by <code>site/gen_blueprint.py</code>; the tables from the committed baselines by <code>site/gen_pages.py</code>; the claim graph and the history from the knowledge commits and <code>claims.toml</code> by <code>site/gen_graph.py</code>. The paper excerpts are in <code>site/paper/</code>.</p>
 
 
 </section>

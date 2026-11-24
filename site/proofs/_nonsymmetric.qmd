@@ -47,7 +47,7 @@ theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n �
       totalCost c cfg.groups ≤ planCost c P ∧ ∀ k, cfg.roleLoad N k ≤ planMakespan P := …
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 474–517](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/NonSymmetric.lean#L474-L517){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/NonSymmetric.lean`, lines 474–517](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/NonSymmetric.lean#L474-L517){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -152,7 +152,7 @@ def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
 ```
 
-[`lean/ZenoFront/SearchGap.lean`, lines 90–92](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/SearchGap.lean#L90-L92){.lean-src}
+[`lean/ZenoFront/SearchGap.lean`, lines 90–92](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/SearchGap.lean#L90-L92){.lean-src}
 
 :::
 
@@ -450,7 +450,7 @@ theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
     D.value p ≤ (totalCost D.c cfg.groups : WithTop ℕ) := …
 ```
 
-[`lean/ZenoFront/BalancedBound.lean`, lines 466–578](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/BalancedBound.lean#L466-L578){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/BalancedBound.lean`, lines 466–578](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/BalancedBound.lean#L466-L578){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -584,7 +584,7 @@ def EventOrdered (P : Plan n t p) : Prop :=
       js.Pairwise fun x y => rank x < rank y
 ```
 
-[`lean/ZenoFront/SearchGap.lean`, lines 104–114](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/SearchGap.lean#L104-L114){.lean-src}
+[`lean/ZenoFront/SearchGap.lean`, lines 104–114](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/SearchGap.lean#L104-L114){.lean-src}
 
 *Part* `ZenoFront.EventOrdered.of_eoOK` [machine-checked]{.badge .ok}
 
@@ -593,7 +593,7 @@ def EventOrdered (P : Plan n t p) : Prop :=
 theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered P := …
 ```
 
-[`lean/ZenoFront/EventOrderCheck.lean`, lines 134–158](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/EventOrderCheck.lean#L134-L158){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/EventOrderCheck.lean`, lines 134–158](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/EventOrderCheck.lean#L134-L158){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -830,7 +830,7 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
       S.tmpl N.d N.dbar ≤ planMakespan P := …
 ```
 
-[`lean/ZenoFront/DominationAll.lean`, lines 345–473](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/DominationAll.lean#L345-L473){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/DominationAll.lean`, lines 345–473](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/DominationAll.lean#L345-L473){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -897,6 +897,6 @@ theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
     IsParetoFront (achievableEO (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/CheckerV2.lean`, lines 586–603](https://github.com/aquemy/ZenoSolver/blob/f8186577c0d0639e0659f4fb9debc62b9a5d35e1/lean/ZenoFront/CheckerV2.lean#L586-L603){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/CheckerV2.lean`, lines 586–603](https://github.com/aquemy/ZenoSolver/blob/8a99a77e43ddbbbbfa778f3f62695dfded682323/lean/ZenoFront/CheckerV2.lean#L586-L603){.lean-src} (statement only; the proof is elided)
 
 :::
