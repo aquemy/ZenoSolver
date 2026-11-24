@@ -369,6 +369,13 @@ lean_partial = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsB
 paper        = "Prop 7.3, doc/theory/exact-front.md §7.3"
 created      = "2026-11-23"
 
+[claims.prop-7-4]
+kind      = "proposition"
+statement = "Proposition 7.4: if q_max ≤ 2 (p ≤ 2 or t ≤ p + 1) then E = U, and if q_max ≤ 3 (p ≤ 3 or t ≤ p + 2) then E = U_3."
+status    = "math.proved-informal"
+paper     = "Prop 7.4, doc/theory/exact-front.md §7.3"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
