@@ -472,15 +472,13 @@ CertificateCheck checkCertificate(const Certificate& cert)
 
     const LevelBounds bounds(in, f.back().makespan);
     bool usedA1 = false, usedA1NS = false;
-    bool zeroDurationCity = false;
-    for(int i = 0; i < in.n(); ++i)
-        zeroDurationCity = zeroDurationCity || (in.d[at(i)] == 0 && in.dbar[at(i)] == 0);
-    // The search proof (Corollary 6.10) needs A1-NS, and EO (event-ordered
-    // plans) when some city has d = dbar = 0.
+    // The search proof (Corollary 6.10) needs A1-NS. Theorem 6.9 covers every
+    // plan, also with cities where d = dbar = 0; an `EO` assumption written by
+    // older versions is still read but no longer needed.
     const auto searchAllowed = [&](std::string& why) {
-        if(!assumed("A1-NS") || (zeroDurationCity && !assumed("EO")))
+        if(!assumed("A1-NS"))
         {
-            why = zeroDurationCity ? "the search bound needs assumptions A1-NS and EO" : "the search bound needs assumption A1-NS";
+            why = "the search bound needs assumption A1-NS";
             return false;
         }
         usedA1NS = true;
@@ -591,8 +589,6 @@ CertificateCheck checkCertificate(const Certificate& cert)
         report.relied.push_back("A1");
     if(usedA1NS)
         report.relied.push_back("A1-NS");
-    if(usedA1NS && zeroDurationCity && assumed("EO"))
-        report.relied.push_back("EO");
     report.ok = report.errors.empty();
     return report;
 }
