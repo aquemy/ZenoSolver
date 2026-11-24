@@ -10,7 +10,9 @@ import ZenoFront.Parse
   the listed points of a v1 certificate are then the exact Pareto front of the instance: for every
   table of central flight durations if all gaps are `relaxed`, and for every table satisfying
   (A1) otherwise. By `ZenoFront.Cert2.check_sound`, those of a v2 certificate are the exact front
-  for every table;
+  for every table, of every feasible plan, or of every event-ordered one when some city has
+  `d = d̄ = 0` and the certificate lists `EO` (`Cert2.check_sound_of_not_EO`,
+  `Cert2.check_sound_EO`);
 * `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails.
 
 Only the `accepted` verdict is backed by the theorem; the reasons are diagnostics recomputed
@@ -97,6 +99,9 @@ def reasons2 (C : Cert2) : Array String := Id.run do
   for ((P, x), i) in (C.plans.zip C.front).zipIdx do
     if let some why := planReason C.d C.dbar C.c i P x then
       errs := errs.push why
+    else if C.eoOnly && !eoOK P then
+      errs := errs.push s!"plan {i + 1} is not event-ordered by (departure, phase, plane, \
+        position), and the certificate lists EO"
   if !C.lastOK then
     errs := errs.push s!"the cheapest point's cost is not s * c_min = {C.s * minOf C.c}"
   if errs.isEmpty then
@@ -110,6 +115,7 @@ def reasons2 (C : Cert2) : Array String := Id.run do
       (C.rolesWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
       (C.lagWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
       (C.balWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
+      (C.searchWith (fun i => dArr.getD i 0) (fun i => dbArr.getD i 0))
     let a1ns := C.assumptions.contains "A1-NS"
     if !C.fastestOK bound then
       errs := errs.push (match C.fastest with
@@ -119,9 +125,10 @@ def reasons2 (C : Cert2) : Array String := Id.run do
         | .roles | .balanced => if a1ns then
               s!"fastest point: the {C.fastest.name} bound does not rule out faster plans"
             else s!"fastest point: the {C.fastest.name} bound needs assumption A1-NS"
-        | .search => s!"fastest point: the search bound is not verified by the Lean checker \
-            (its exhaustive search {if (C.searchData ⊤ (C.front.headD (0, 0)).2).closed
-              then "closes it" else "finds a faster schedule"}; Theorem 6.9 is not formalised)"
+        | .search => if !a1ns then "fastest point: the search bound needs assumption A1-NS"
+            else if !C.noZeroCity && !C.assumptions.contains "EO" then "fastest point: the \
+              search bound needs assumptions A1-NS and EO (a city has d = dbar = 0)"
+            else "fastest point: the exhaustive search finds a faster schedule"
         | k => s!"fastest point: the {k.name} bound is not verified by the Lean checker")
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
@@ -133,9 +140,14 @@ def reasons2 (C : Cert2) : Array String := Id.run do
           if !decide ((x.1 : WithTop ℕ) ≤ b) then
             errs := errs.push s!"gap {i + 1}: the {g.name} bound {showBound b} is below the \
               cost {x.1}"
-      | .search => errs := errs.push s!"gap {i + 1}: the search bound is not verified by the Lean \
-          checker (its exhaustive search {if (C.searchData x.1 y.2).closed then "closes the gap"
-            else "finds a cheaper schedule"}; Theorem 6.9 is not formalised)"
+      | .search =>
+        if !a1ns then errs := errs.push s!"gap {i + 1}: the search bound needs assumption A1-NS"
+        else if !C.noZeroCity && !C.assumptions.contains "EO" then
+          errs := errs.push s!"gap {i + 1}: the search bound needs assumptions A1-NS and EO (a \
+            city has d = dbar = 0)"
+        else if !decide ((x.1 : WithTop ℕ) ≤ bound .search y.2) then
+          errs := errs.push s!"gap {i + 1}: the exhaustive search finds a schedule cheaper than \
+            {x.1} and faster than {y.2}"
       | k => errs := errs.push s!"gap {i + 1}: the {k.name} bound is not verified by the Lean \
           checker"
   return errs
@@ -154,12 +166,16 @@ def main (args : List String) : IO UInt32 := do
       let roles := (C.gaps.filter (· = .roles)).length
       let lag := (C.gaps.filter fun g => g.name == "lagrangian").length
       let bal := (C.gaps.filter (· = .balanced)).length
+      let srch := (C.gaps.filter (· = .search)).length
       let scope := if C.assumptions.contains "A1-NS" then
-          s!"{roles} roles, {lag} lagrangian and {bal} balanced gap(s), the others relaxed: for \
-            every central flight table satisfying A1-NS"
+          s!"{roles} roles, {lag} lagrangian, {bal} balanced and {srch} search gap(s), the others \
+            relaxed: for every central flight table satisfying A1-NS"
         else "all gaps relaxed: for every central flight table"
-      IO.println s!"accepted: the {C.front.length} points are the Pareto front (version 2, \
-        fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound)"
+      let (plans, thm) := if C.eoOnly then
+          ("event-ordered plans (EO; a city has d = dbar = 0)", "ZenoFront.Cert2.check_sound_EO")
+        else ("all feasible plans", "ZenoFront.Cert2.check_sound_of_not_EO")
+      IO.println s!"accepted: the {C.front.length} points are the Pareto front of {plans} \
+        (version 2, fastest {C.fastest.name}, {scope}; {thm})"
       return 0
     IO.println s!"rejected: {(reasons2 C).getD 0 "an obligation fails"}"
     return 1

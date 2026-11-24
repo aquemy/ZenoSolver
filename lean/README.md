@@ -115,10 +115,15 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   * a missing point on `tree12`, rejected by the tree DP with the C++ checker's bound (5230);
   * a truncated file;
   * version 2: `roles` gaps without `A1-NS`, `S` listed for non-symmetric durations, a missing
-    point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak.
+    point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak,
+    the Proposition 6.5 instance without its point (14, 74), where the search finds a cheaper
+    schedule, and `search` gaps on an instance with a city of `d = d̄ = 0` without `EO`.
 
 The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
-`roles` and `lagrangian` bounds). The C++ checker agrees with every verdict.
+`roles`, `lagrangian`, `balanced` and `search` bounds; `v2-search-prop65.cert` is the
+Proposition 6.5 instance, whose two `search` gaps close harmful waiting, and
+`v2-search-eo.cert` an instance with a city of `d = d̄ = 0`, which lists `EO`). The C++ checker
+agrees with every verdict.
 
 ## Contents
 
@@ -156,6 +161,8 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
 | `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched` |
 | `ZenoFront/Domination.lean` | Theorem 6.9: Step 1 and the event keys (event-ordered, or no city with `d = d̄ = 0`); the counterexample for `p > t` | `exists_transfer_pw`, `nzKeys`, `eoKeys`, `schedulableDomination`, `not_schedulableDomination` |
+| `ZenoFront/SchedMap.lean` | Scheduled configurations on representatives, rescaled | `Sched.map`, `Sched.tmpl_map_le`, `Sched.mul_tmpl_map_le` |
+| `ZenoFront/EventOrderCheck.lean` | A computable test that a plan is event-ordered, and its soundness | `eoRank`, `eoOK`, `EventOrdered.of_eoOK` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -439,13 +446,23 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   hub and no more expensive. These are cities the C++ reduction keeps, and the level scale is
   their gcd, as in the C++ checker.
 * `Cert2.check_sound` (**soundness, format v2**): if `Cert2.check` accepts, the listed points
-  are exactly the Pareto front. This holds for every table of central flights satisfying
-  (A1-NS) when the certificate lists it (`Cert2.check_sound_A1NS`), and for every table
-  otherwise (`Cert2.check_sound_of_not_A1NS`). The kinds it verifies:
-  * gaps: `relaxed`, `roles`, `lagrangian` and `balanced`;
-  * fastest point: `closed`, `relaxed`, `roles` and `balanced`.
+  are exactly the Pareto front of the plans the certificate speaks of (`Cert2.scope`). This
+  holds for every table of central flights satisfying (A1-NS) when the certificate lists it
+  (`Cert2.check_sound_A1NS`), and for every table otherwise (`Cert2.check_sound_of_not_A1NS`).
+  The plans are:
+  * every feasible plan, when no city has `d = d̄ = 0` or the certificate does not list `EO`
+    (`Cert2.check_sound_of_not_EO`);
+  * every feasible event-ordered plan (`achievableEO`), when some city has `d = d̄ = 0` and the
+    certificate lists `EO` (`Cert2.check_sound_EO`). The checker then also tests that every
+    listed plan is event-ordered (`eoOK`, sound by `EventOrdered.of_eoOK`).
 
-  It rejects `search` and `forest`.
+  The kinds it verifies:
+  * gaps: `relaxed`, `roles`, `lagrangian`, `balanced` and `search`;
+  * fastest point: `closed`, `relaxed`, `roles`, `balanced` and `search`, and any first point
+    of makespan 0.
+
+  It rejects `forest`, and `search` when some city has `d = d̄ = 0` and the certificate does not
+  list `EO`.
 * `schedulableDomination` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible plan
   that is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid
   scheduled configuration with `2t − p` landings, cost at most the plan's and closed form at most
@@ -454,6 +471,14 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   Step 2 exchanges futures (`exists_ordered_handoffs`); Steps 3–6 select links along the
   hand-offs (`exists_links`), bound the closed form and shrink (`exists_sched`).
   `not_schedulableDomination`: without `p ≤ t` the statement fails (`t = 0`, `p = 1`).
+* `Cert2.searchWith_le` (**`search`**): Theorem 6.9, the configuration mapped to representatives
+  (`Sched.map`, `Sched.mul_tmpl_map_le`), and the completeness of the search
+  (`SearchData.closed_sound`): a closed search below `M` with cost bound `C'` rules out every
+  feasible plan faster than `M` and cheaper than `C'`, or every event-ordered one if some city
+  has `d = d̄ = 0`.
+* `eoOK`, `EventOrdered.of_eoOK`: a computable test that a plan is event-ordered, for the order
+  `(departure, phase, plane, position)` (phase: drop-off, crossing, pick-up), which the template
+  schedules of the C++ solver pass.
 * `BalData.value_le_totalCost` (**`balanced`**): the program of `BalancedRoles` (a DP over the
   planes, on states made of the imbalance vector and the landings so far) is at most the cost of
   every balanced configuration with `s` landings and role loads `≤ T`. A drop-off and a pick-up
@@ -641,7 +666,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Theorem 6.9 (`schedulableDomination`, for `p ≤ t`; `not_schedulableDomination`: the
       statement fails for `t < p`). Lemma 6.3's optimality is not needed for soundness:
       Theorem 6.9 bounds the closed form directly.
-- [ ] `search` in the v2 checker: map configurations to representatives as for `roles`, then
-      `SearchData.closed_sound` closes `search` gaps. Until then `check` rejects `search`.
+- [x] `search` gaps and `fastest search` in `Cert2.check_sound` (`Cert2.searchWith_le`): over
+      every feasible plan when no city has `d = d̄ = 0`, over event-ordered plans (`EO`,
+      `Cert2.check_sound_EO`) otherwise.
+- [ ] Plans that are not event-ordered on instances with a city of `d = d̄ = 0` (open in the
+      note, §6.2 end).
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
       is proved.

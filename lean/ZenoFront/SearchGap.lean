@@ -29,7 +29,7 @@ out every event-ordered plan. This file has the search and its statement:
 
 `EventOrdered` is the predicate on plans of the note (§1.2). Theorem 6.9 has the statement
 `SchedulableDomination`; it is proved for `p ≤ t` in `Domination.lean`
-(`schedulableDomination`). The checker does not use it yet, so it keeps rejecting `search`.
+(`schedulableDomination`), and the v2 checker uses it for `search` gaps (`Cert2.searchWith_le`).
 -/
 
 @[expose] public section
