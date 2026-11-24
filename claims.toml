@@ -298,12 +298,12 @@ created      = "2026-11-23"
 # ===========================================================================
 
 [claims.thm-6-1]
-kind      = "theorem"
-statement = "Theorem 6.1 (converse to role configurations) [N1]: under (A1-NS), every feasible plan with cost C and makespan M gives a role configuration on all p planes with passenger count t, cost at most C and λ_k ≤ F_k ≤ M; (AΔ) is not needed. Lean form: an explicit p ≤ t, the passenger count as 2t − p landings, and λ_k ≤ M in place of λ_k ≤ F_k."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_roleConfig_ns"
-paper     = "Thm 6.1, doc/theory/exact-front.md §6.1"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 6.1 (converse to role configurations) [N1]: under (A1-NS), every feasible plan with cost C and makespan M gives a role configuration on all p planes with passenger count t, cost at most C and λ_k ≤ F_k ≤ M; (AΔ) is not needed."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.exists_roleConfig_ns"
+paper        = "Thm 6.1, doc/theory/exact-front.md §6.1"
+created      = "2026-11-23"
 
 [claims.lem-6-2]
 kind      = "lemma"
