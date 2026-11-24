@@ -87,6 +87,14 @@ status    = "math.proved-informal"
 paper     = "Lemma 2.4, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.lem-2-5]
+kind      = "lemma"
+statement = "Lemma 2.5: for every parity matrix and every plane k, h_k ≤ |X_k| − 1."
+status    = "math.machine-checked"
+lean      = "ZenoFront.IsParityWitness.card_add_one_le"
+paper     = "Lemma 2.5, doc/theory/exact-front.md §2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
