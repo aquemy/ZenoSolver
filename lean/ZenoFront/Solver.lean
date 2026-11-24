@@ -7,6 +7,7 @@ module
 public import ZenoFront.Achievability
 public import ZenoFront.MinCost
 public import ZenoFront.TreeExact
+public import ZenoFront.PairBound
 public import ZenoFront.AdmissibleBound
 public import ZenoFront.Breakpoints
 
@@ -327,11 +328,12 @@ theorem useTreeDP_of_le (d c : Fin n → ℕ) (p t : ℕ) {T T' : ℕ} (hT : T �
 
 /-- **The solver.** The Pareto front of a symmetric instance (durations `d`, costs `c`, `t`
 passengers, `p` planes), by increasing makespan: the breakpoints of `E(T)`, found by splitting
-intervals (`breakpoints`) on the levels `d_min · ⌈s/p⌉, …, (2t − p) · d_max`. At every level `E`
-is computed by the link-forest DP or the σ-DP, whichever `useTreeDP` estimates cheaper (both
-are exact). The σ-DP's subsets and their symmetric differences are computed once, and only if
-some level uses it: the estimate prefers the tree DP on low levels (`useTreeDP_of_le`), so this
-is the case iff the σ-DP is preferred at `(2t − p) · d_max`. -/
+intervals (`breakpoints`) on the levels `d_min · ⌈s/p⌉, …, (2t − p) · d_max`. At every level, if
+the relaxation `L(T)` meets the pairs bound `U₂(T)`, that is `E(T)` (`minCost_eq_of_bracket`).
+Otherwise `E` is computed by the link-forest DP or the σ-DP, whichever `useTreeDP` estimates
+cheaper (both are exact). The σ-DP's subsets and their symmetric differences are computed once, and
+only if some level uses it: the estimate prefers the tree DP on low levels (`useTreeDP_of_le`), so
+this is the case iff the σ-DP is preferred at `(2t − p) · d_max`. -/
 def solveFront (d c : Fin n → ℕ) (t p : ℕ) : List (ℕ × ℕ) :=
   let s := 2 * t - p
   let Tmax := s * maxDur d
@@ -340,7 +342,10 @@ def solveFront (d c : Fin n → ℕ) (t p : ℕ) : List (ℕ × ℕ) :=
   let subs := if useTreeDP d c p t Tmax then []
     else smallSubsetList (domReps d c) (min (p - 1) (t - p))
   let xt := symmDiffTable subs
-  let E := fun T => if useTreeDP d c p t T then treeBoundAt d c p s Tmax table T
+  let E := fun T =>
+    let l := relaxedBoundAt p s Tmax table T
+    if l = pairsBoundAt d c p s Tmax table T then l
+    else if useTreeDP d c p t T then treeBoundAt d c p s Tmax table T
     else sigmaAt subs xt d c p s table T
   if Tlo ≤ Tmax then breakpoints E Tlo Tmax else []
 
@@ -350,7 +355,11 @@ theorem solveFront_eq (d c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p �
   unfold solveFront
   set Tmax := (2 * t - p) * maxDur d with hTmax
   set Tlo := minOf d * ((2 * t - p + p - 1) / p) with hTlo
-  set E := fun T => if useTreeDP d c p t T then
+  set E := fun T =>
+    if relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T =
+        pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T then
+      relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T
+    else if useTreeDP d c p t T then
       treeBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T
     else sigmaAt (if useTreeDP d c p t Tmax then []
         else smallSubsetList (domReps d c) (min (p - 1) (t - p)))
@@ -360,6 +369,11 @@ theorem solveFront_eq (d c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p �
   have hE : ∀ T ≤ Tmax, E T = minCost d c t p T := by
     intro T hT
     simp only [E]
+    by_cases hb : relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T =
+        pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T
+    · rw [ite_eq_left hb]
+      exact (minCost_eq_of_bracket d c hT hb).symm
+    rw [ite_eq_right hb]
     by_cases hT₁ : useTreeDP d c p t T = true
     · rw [ite_eq_left hT₁]
       exact treeBoundAt_eq_minCost d c hp hT
