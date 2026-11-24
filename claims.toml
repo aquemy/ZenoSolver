@@ -575,3 +575,13 @@ code      = "experiments/E2_symmetric_front/run.py"
 results   = "experiments/results/E2_symmetric_front"
 paper     = "Thm 4.7 and Cor 4.8, doc/theory/exact-front.md §4.3-4.4"
 created   = "2026-11-24"
+
+[claims.exp-e3-forest-dp]
+kind      = "experiment"
+statement = "E3 (link-forest DP): on 320 random instances up to n = 12, t = 28, p = 10, an independent CP-SAT model of E(T) agrees with zeno at 23,346 levels (every front level, the level below each next point, and infeasibility below the fastest point), and the Lean solver zeno-front returns the same front on all 320."
+status    = "sci.supported"
+tests     = ["thm-7-5"]
+code      = "experiments/E3_forest_dp/run.py"
+results   = "experiments/results/E3_forest_dp"
+paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
+created   = "2026-11-24"
