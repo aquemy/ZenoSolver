@@ -263,7 +263,7 @@ created      = "2026-11-23"
 [claims.paper-greedy-optimal]
 kind      = "conjecture"
 statement = "Claim of EvoCOP 2015 (Algorithm 1) and arXiv:2304.14659 (§3.2): for a fixed multiset of landings (a PPP), the greedy that gives the longest flights first to the least-loaded plane schedules it optimally, so the fronts ZenoSolver computes are the true Pareto fronts."
-status    = "math.conjectured"
+status    = "math.disproved"
 paper     = "EvoCOP 2015 Alg. 1; arXiv:2304.14659 §3.2; doc/theory/exact-front.md §5"
 created   = "2026-11-23"
 
