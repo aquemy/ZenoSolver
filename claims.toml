@@ -361,6 +361,14 @@ lean      = "ZenoFront.isLeast_oneplane"
 paper     = "Lemma 7.2, doc/theory/exact-front.md §7.2"
 created   = "2026-11-23"
 
+[claims.prop-7-3]
+kind         = "proposition"
+statement    = "Proposition 7.3: L(T) ≤ E(T) ≤ U_3(T) ≤ U(T), with L the relaxation and U_3, U the cheapest link forests of trees of at most three and two planes."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsBoundAt"
+paper        = "Prop 7.3, doc/theory/exact-front.md §7.3"
+created      = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
