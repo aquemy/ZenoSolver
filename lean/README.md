@@ -63,8 +63,9 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
 (`bench/baselines/lean/apple-m4-max/`):
 * The certificates of `test/certificates/`: about 24 ms at the median, 0.22 s at most
   (`tree12.cert`, whose two forest gaps use the tree DP).
-* Version 2 certificates of small random non-symmetric instances (`n ≤ 4`, `t ≤ 6`): 22 ms at
-  the median and 43 ms at most, over 152 certificates.
+* Version 2 certificates of small random non-symmetric instances (`n ≤ 4`, `t ≤ 6`): 23 ms at
+  the median over 152 certificates, 0.2 s at most, and 2.3 s for `v2-balanced-e1w2.cert`
+  (19 `balanced` gaps).
 * The 66 certificates the C++ solver writes for the benchmark suite (`bench/instances/*.txt`):
   5.7 s in total, 33 ms at the median. The largest, `regimes/r5` (`n = 100`, `t = 60`, `p = 10`,
   3.9 MB, 240,000 legs), takes 2.3 s and 135 MiB. Before this phase's changes the same
@@ -126,6 +127,7 @@ The `v2-*` certificates are version 2 certificates of non-symmetric instances (`
 | `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role weights of landing records, role shrinking (Lemma 4.4), Theorem 6.1 | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad`, `RoleConfig.exists_shrink`, `Feasible.exists_roleConfig_ns` |
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
+| `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -358,10 +360,16 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   are exactly the Pareto front. This holds for every table of central flights satisfying
   (A1-NS) when the certificate lists it (`Cert2.check_sound_A1NS`), and for every table
   otherwise (`Cert2.check_sound_of_not_A1NS`). The kinds it verifies:
-  * gaps: `relaxed`, `roles` and `lagrangian`;
-  * fastest point: `closed`, `relaxed` and `roles`.
+  * gaps: `relaxed`, `roles`, `lagrangian` and `balanced`;
+  * fastest point: `closed`, `relaxed`, `roles` and `balanced`.
 
-  It rejects `balanced`, `search` and `forest`.
+  It rejects `search` and `forest`.
+* `BalData.value_le_totalCost` (**`balanced`**): the program of `BalancedRoles` (a DP over the
+  planes, on states made of the imbalance vector and the landings so far) is at most the cost of
+  every balanced configuration with `s` landings and role loads `≤ T`. A drop-off and a pick-up
+  at the same city of one plane count as two crossings. Every plane's imbalance and every
+  prefix's then have norm at most `t − p` (`norm_delta_le`, `norm_prefix_le`), so the program's
+  restriction to such options and states loses nothing.
 
 **Rational times (`RationalPlans.lean`)**
 
@@ -537,10 +545,9 @@ needed for soundness: the plan of every listed point is checked by simulation.
       central flights (`Cert2.check_sound`).
 - [x] Role model with role loads; N1 (Theorem 6.1, `Feasible.exists_roleConfig_ns`); the
       `roles` and `lagrangian` bounds.
-- [ ] `balanced`: a lower-bound DP over balanced role configurations, such as the
-      imbalance-vector DP of Proposition 6.6 (states with `‖v‖₁ ≤ t − p`). On 150 random small
-      non-symmetric instances, the Lean checker accepts 100 certificates and rejects the other
-      50 only because they use `balanced`.
+- [x] `balanced` (`BalData.value_le_totalCost`). The Lean checker accepts all 150
+      certificates of random small non-symmetric instances, with the C++ checker's verdicts and
+      bound values.
 - [ ] `search`: Lemma 6.3 (the template schedule), Theorem 6.9 and Corollary 6.10, and an
       exhaustive search over role configurations with exact schedules.
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
