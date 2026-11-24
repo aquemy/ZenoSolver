@@ -626,3 +626,13 @@ code      = "experiments/E7_scaling/run.py"
 results   = "experiments/results/E7_scaling"
 paper     = "Thm 7.5 and Cor 8.3, doc/theory/exact-front.md §7.4 and §8"
 created   = "2026-11-24"
+
+[claims.exp-e8-certificates]
+kind      = "experiment"
+statement = "E8 (certificates): the C++ and Lean checkers give the expected verdict on all 41 corpus certificates and accept all 700 fresh ones (400 version 1, 300 version 2); of 4,056 mutants (dropped points, lowered costs or makespans, shifted legs, changed passengers, weakened gaps, dropped assumptions), 3,904 state a false front, fail the independent simulator or lack a needed assumption, and neither checker accepts any of them. The checkers never disagree."
+status    = "sci.supported"
+tests     = ["thm-9-1"]
+code      = "experiments/E8_certificates/run.py"
+results   = "experiments/results/E8_certificates"
+paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+created   = "2026-11-24"
