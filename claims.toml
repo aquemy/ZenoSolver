@@ -297,6 +297,18 @@ paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
 # ===========================================================================
+# 7. Exact algorithm (symmetric case)
+# ===========================================================================
+
+[claims.lem-7-2]
+kind      = "lemma"
+statement = "Lemma 7.2: the one-plane table satisfies G[m][τ] = min{c(Y) : |Y| = m, δ(Y) ≤ τ} (∞ if there is none), and G is non-increasing in τ. Lean form: the least cost when an m-multiset with δ ≤ τ exists, with oneplane_eq_top_iff for the ∞ case; the monotonicity in τ is not stated."
+status    = "math.machine-checked"
+lean      = "ZenoFront.isLeast_oneplane"
+paper     = "Lemma 7.2, doc/theory/exact-front.md §7.2"
+created   = "2026-11-23"
+
+# ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
 
