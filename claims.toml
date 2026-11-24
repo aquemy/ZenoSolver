@@ -248,8 +248,9 @@ created   = "2026-11-23"
 
 [claims.thm-4-10]
 kind      = "theorem"
-statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|."
+statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|. Lean form: (AΔ) as Network.ATri, F_k as durSum (P k), any p ≤ t for the form on a set of planes."
 status    = "math.proved-informal"
+lean      = "ZenoFront.Feasible.exists_admissible_ATri"
 paper     = "Thm 4.10, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
