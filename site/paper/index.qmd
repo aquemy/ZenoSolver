@@ -20,7 +20,7 @@ Revised and extended version of
 
 ^1^ Centre for Credible AI, Warsaw University of Technology (^\*^corresponding author) ·
 ^2^ Inria Saclay, Orsay, France ·
-^3^ Universite Paris-Saclay, Orsay, France ·
+^3^ Université Paris-Saclay, Orsay, France ·
 ^4^ Computational Systems Biomedicine laboratory, Department of Computational Biology, Institut
 Pasteur, Paris, France ·
 ^5^ Bioinformatics and Biostatistics hub, Université Paris Cité, Institut Pasteur, Paris, France

@@ -279,8 +279,12 @@ planes. $\square$
 $2t - p$ times in central cities ({{< node "Lemma 3.2" >}}).
 
 **Proof**: By Property II, the number of patterns is
-$|A| + |\bar A| + |B| + |\bar B| = (|A| + |B|) + (|A| + |\bar B|) - p \ge 2t - p$, and each
-pattern lands in a central city. $\square$
+$$\begin{aligned}
+&|A| + |\bar A| + |B| + |\bar B| \\
+&\quad = (|A| + |B|) + (|A| + |\bar B|) - p \\
+&\quad \ge 2t - p,
+\end{aligned}$$
+and each pattern lands in a central city. $\square$
 
 With fewer planes than passengers, some planes have to come back to $C_I$, and every return costs
 a landing. In @fig-plan the bound is reached: the plan lands $2t - p = 4$ times. The

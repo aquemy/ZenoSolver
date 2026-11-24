@@ -67,8 +67,8 @@ admissibility, so $L \le E$.
 
 ::: {.statement}
 {{< node "Proposition 7.1" >}} Under (S) and (A1),
-$\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$ with $E(-1) = \infty$, makespans in
-units of $g$.
+$$\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$$
+with $E(-1) = \infty$, makespans in units of $g$.
 :::
 
 The Pareto front is read off the levels where $E$ drops, and only a bounded range of levels
@@ -113,8 +113,8 @@ the front. The kept cities have increasing durations and decreasing costs.
 
 ::: {.statement}
 {{< node "Lemma 7.2" >}} Let $G[0][\tau] = 0$ for $\tau \ge 0$,
-$G[m][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m-1][\tau - d_i]\big)$, and $G[m][\tau] = \infty$
-for $\tau < 0$. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of total duration
+$$G[m][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m-1][\tau - d_i]\big),$$
+and $G[m][\tau] = \infty$ for $\tau < 0$. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of total duration
 at most $\tau$.
 :::
 
