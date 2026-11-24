@@ -11,13 +11,14 @@
 #   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
 # so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
 # counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
-# claims are paper-greedy-optimal and paper-no-harmful-waiting. Experiments are exp-<id>, in the
-# Experiments section at the end of this file.
+# claims are paper-greedy-optimal and paper-no-harmful-waiting. A statement the note does not
+# number gets a descriptive slug: claim-converse-s-only, the converse under (S) alone. Experiments
+# are exp-<id>, in the Experiments section at the end of this file.
 #
 # Fields:
 #   kind          definition, lemma, theorem, proposition, corollary, conjecture or claim
-#   statement     one or two sentences. For a kernel-checked claim whose Lean statement is narrower
-#                 than the note's, it ends with the "Lean form".
+#   statement     one or two sentences. For a kernel-checked claim it may end with the "Lean form":
+#                 how the Lean statement encodes the note's (natural-number data, (S) as d̄ = d, ...).
 #   status        cache of the effective status (legend below)
 #   lean          the Lean declarations whose kernel proof is the claim (math.machine-checked)
 #   lean_partial  Lean declarations that prove only part of a claim recorded as a written proof
@@ -30,7 +31,8 @@
 #
 # Status legend (axis 2, epistemic):
 #   math.machine-checked  clean Lean kernel proof (Axioms: only propext, Classical.choice, Quot.sound)
-#   math.proved-informal  complete written proof in the note (P), not a complete Lean proof
+#                         of every assertion of the statement, up to the Lean model's encoding
+#   math.proved-informal  complete written proof in the note (P); Lean may prove part (lean_partial)
 #   math.conjectured      open (O) or only sketched (S) in the note
 #   math.disproved        refuted by a counterexample
 
@@ -39,12 +41,12 @@
 # ===========================================================================
 
 [claims.lem-1-1]
-kind      = "lemma"
-statement = "Lemma 1.1 (dominating subset): if S' ⊆ S ⊆ K² with S' finite and every point of S weakly dominated by a point of S', then Min S = Min S', and every point of S is weakly dominated by a point of Min S. Lean form: Min S = Min S' in any partial order, without finiteness; the second clause, domination by a point of Min S, is not part of the Lean statement."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_iff_of_subset_of_dominated"
-paper     = "Lemma 1.1, doc/theory/exact-front.md §1.5"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 1.1 (dominating subset): if S' ⊆ S ⊆ K² with S' finite and every point of S weakly dominated by a point of S', then Min S = Min S', and every point of S is weakly dominated by a point of Min S."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.minimal_iff_of_subset_of_dominated"
+paper        = "Lemma 1.1, doc/theory/exact-front.md §1.5"
+created      = "2026-11-23"
 
 [claims.claim-1-2]
 kind      = "claim"
@@ -58,12 +60,12 @@ created   = "2026-11-23"
 # ===========================================================================
 
 [claims.lem-2-1]
-kind      = "lemma"
-statement = "Lemma 2.1: on every route from C_I to C_G, the number of segments of type A (C_I to C_G) exceeds the number of type Ā (C_G to C_I) by one. Lean form: counts the landing records of a feasible plane by the hub they are entered from and left towards (#A = #Ā + 1), the reading of Step 1 of Theorem 4.7 in which a central leg passes through C_G; VChain.countP_isA is the same count on visits."
-status    = "math.machine-checked"
-lean      = "ZenoFront.PlaneFeasible.cntA_eq"
-paper     = "Lemma 2.1, doc/theory/exact-front.md §2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 2.1: on every route from C_I to C_G, the number of segments of type A (C_I to C_G) exceeds the number of type Ā (C_G to C_I) by one."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.PlaneFeasible.cntA_eq"
+paper        = "Lemma 2.1, doc/theory/exact-front.md §2"
+created      = "2026-11-23"
 
 [claims.def-2-2]
 kind      = "definition"
@@ -96,12 +98,12 @@ paper     = "Lemma 2.5, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 [claims.lem-2-6]
-kind      = "lemma"
-statement = "Lemma 2.6 (link forest) [LF]: a partition is admissible iff it has a link forest, and an admissible partition has one with at most one edge of each label at each plane. Lean form: link forests are lists of rooted link trees satisfying (F2), whose groups equal the X_k as a multiset; the second clause (at most one edge of each label at each plane) is not formalised."
-status    = "math.machine-checked"
-lean      = "ZenoFront.admissible_iff_exists_linkForest"
-paper     = "Lemma 2.6, doc/theory/exact-front.md §2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 2.6 (link forest) [LF]: a partition is admissible iff it has a link forest, and an admissible partition has one with at most one edge of each label at each plane."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.admissible_iff_exists_linkForest"
+paper        = "Lemma 2.6, doc/theory/exact-front.md §2"
+created      = "2026-11-23"
 
 [claims.cor-2-7]
 kind      = "corollary"
@@ -111,12 +113,12 @@ paper     = "Cor 2.7, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 [claims.lem-2-8]
-kind      = "lemma"
-statement = "Lemma 2.8 (few touched cities) [B′]: for an admissible partition with |X| = s, (a) every parity matrix touches at most t − p cities, (b) one with the fewest entries 1 has an acyclic support and touches at most p − 1 cities, and (c) so some parity matrix touches at most min(p − 1, t − p) cities. Lean form: (c), (a) and the bound of (b) are the three declarations; the acyclic support of (b) appears as the linear independence of the edge vectors over ZMod 2 (IsParityWitness.exists_edgeCount_lt)."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Admissible.exists_card_touched_le, ZenoFront.IsParityWitness.card_touched_le, ZenoFront.IsParityWitness.card_touched_le_of_minimal"
-paper     = "Lemma 2.8, doc/theory/exact-front.md §2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 2.8 (few touched cities) [B′]: for an admissible partition with |X| = s, (a) every parity matrix touches at most t − p cities, (b) one with the fewest entries 1 has an acyclic support and touches at most p − 1 cities, and (c) so some parity matrix touches at most min(p − 1, t − p) cities."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Admissible.exists_card_touched_le, ZenoFront.IsParityWitness.card_touched_le, ZenoFront.IsParityWitness.card_touched_le_of_minimal"
+paper        = "Lemma 2.8, doc/theory/exact-front.md §2"
+created      = "2026-11-23"
 
 [claims.lem-2-9]
 kind      = "lemma"
@@ -138,12 +140,12 @@ paper        = "Lemma 3.1, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
 [claims.lem-3-2]
-kind      = "lemma"
-statement = "Lemma 3.2 (counting): a feasible plan has at least s = 2t − p segments, hence at least s landings in central cities. Lean form: 2t ≤ Σ_k (hub arrivals of plane k) + p, by counting legs, for any central flights; segments are counted as hub arrivals, and the consequence on landings is not stated separately."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.le_sum_hubArrivals"
-paper     = "Lemma 3.2, doc/theory/exact-front.md §3"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 3.2 (counting): a feasible plan has at least s = 2t − p segments, hence at least s landings in central cities."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.le_sum_hubArrivals"
+paper        = "Lemma 3.2, doc/theory/exact-front.md §3"
+created      = "2026-11-23"
 
 [claims.lem-3-3]
 kind         = "lemma"
@@ -154,24 +156,24 @@ paper        = "Lemma 3.3, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
 [claims.lem-3-4]
-kind      = "lemma"
-statement = "Lemma 3.4 (relaxation) [R]: under (S), every feasible plan with cost C and makespan M has non-empty multisets Y_1..Y_p with Σ_k |Y_k| = s, c(Y) ≤ C and ℓ(Y_k) ≤ F_k ≤ M, hence C ≥ L(⌊M/2⌋) with integer durations; no assumption on central flights is needed. Lean form: integer data, (S) as d̄ = d, an explicit p ≤ t, and 2δ(Y_k) ≤ M in place of ℓ(Y_k) ≤ F_k; relaxCost_oneplane_le_totalCost is the bound by L."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_relaxation, ZenoFront.relaxCost_oneplane_le_totalCost"
-paper     = "Lemma 3.4, doc/theory/exact-front.md §3"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 3.4 (relaxation) [R]: under (S), every feasible plan with cost C and makespan M has non-empty multisets Y_1..Y_p with Σ_k |Y_k| = s, c(Y) ≤ C and ℓ(Y_k) ≤ F_k ≤ M, hence C ≥ L(⌊M/2⌋) with integer durations; no assumption on central flights is needed."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.exists_relaxation, ZenoFront.relaxCost_oneplane_le_totalCost"
+paper        = "Lemma 3.4, doc/theory/exact-front.md §3"
+created      = "2026-11-23"
 
 # ===========================================================================
 # 4. Symmetric case
 # ===========================================================================
 
 [claims.thm-4-1]
-kind      = "theorem"
-statement = "Theorem 4.1 (achievability): under (S), every admissible partition X_1..X_p of a multiset X with |X| = s is flown by a feasible plan whose central landings are exactly X (cost c(X)) and whose makespan is max_k ℓ(X_k), using no central flight. Lean form: an explicit p ≤ t; the landings equal X up to relabelling the planes; that plane k flies for ℓ(X_k) and picks up at most one passenger holds for the construction (LTree.routes) but is not in the statement."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Admissible.exists_plan"
-paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 4.1 (achievability): under (S), every admissible partition X_1..X_p of a multiset X with |X| = s is flown by a feasible plan whose central landings are exactly X (cost c(X)) and whose makespan is max_k ℓ(X_k), using no central flight."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Admissible.exists_plan"
+paper        = "Thm 4.1, doc/theory/exact-front.md §4.1"
+created      = "2026-11-23"
 
 [claims.def-4-2]
 kind      = "definition"
@@ -214,16 +216,16 @@ paper     = "Lemma 4.6, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.thm-4-7]
-kind      = "theorem"
-statement = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M. Lean form: integer data, (S) as d̄ = d, (A1) as Network.A1, an explicit p ≤ t, and 2δ(X_k) ≤ M in place of ℓ(X_k) ≤ F_k."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_admissible"
-paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.exists_admissible"
+paper        = "Thm 4.7, doc/theory/exact-front.md §4.3"
+created      = "2026-11-23"
 
 [claims.cor-4-8]
 kind      = "corollary"
-statement = "Corollary 4.8: under (S) and (A1), the front is Min {(c(X), M(X)) : |X| = s, M(X) < ∞}, with M(X) the least max_k ℓ(X_k) over admissible partitions of X, and every front point is attained by a plan with exactly s central landings. Lean form: the minimal points of the plans equal those of the multiset points (multisetPoints), with an explicit p ≤ t; the attainment is Theorem 4.1 and is not restated."
+statement = "Corollary 4.8: under (S) and (A1), the front is Min {(c(X), M(X)) : |X| = s, M(X) < ∞}, with M(X) the least max_k ℓ(X_k) over admissible partitions of X, and every front point is attained by a plan with exactly s central landings. Lean form: the minimal points of the plans equal those of the multiset points (multisetPoints), with an explicit p ≤ t; the attainment by a plan with exactly s central landings is Admissible.exists_plan applied to an optimal partition."
 status    = "math.machine-checked"
 lean      = "ZenoFront.minimal_achievable_iff_multisetPoints"
 paper     = "Cor 4.8, doc/theory/exact-front.md §4.4"
@@ -239,9 +241,44 @@ created   = "2026-11-23"
 
 [claims.conj-4-10]
 kind      = "conjecture"
-statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan."
-status    = "math.conjectured"
+statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan. Proved as Theorem 4.10 (thm-4-10)."
+status    = "math.proved-informal"
 paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
+created   = "2026-11-23"
+
+[claims.thm-4-10]
+kind      = "theorem"
+statement = "Theorem 4.10 (converse without (A1)): under (S) and (AΔ), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M; more generally, a feasible plan on a set Q of planes with t ≥ |Q| gives an admissible partition (X_k)_{k ∈ Q} with |X| = 2t − |Q|."
+status    = "math.proved-informal"
+paper     = "Thm 4.10, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
+[claims.lem-4-11]
+kind      = "lemma"
+statement = "Lemma 4.11 (shrinking): an admissible partition X_1..X_p with |X| ≥ p + 2 stays admissible after removing two landings, each new group a sub-multiset of the old one."
+status    = "math.proved-informal"
+paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
+[claims.cor-4-12]
+kind      = "corollary"
+statement = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
+status    = "math.proved-informal"
+paper     = "Cor 4.12, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
+[claims.claim-4-13]
+kind      = "claim"
+statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 = L(19) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
+status    = "math.proved-informal"
+paper     = "Ex 4.13, doc/theory/exact-front.md §4.6"
+created   = "2026-11-24"
+
+[claims.claim-converse-s-only]
+kind      = "conjecture"
+statement = "The converse under (S) alone: without (A1) or (AΔ), every feasible plan is dominated by an admissible partition, as in Theorem 4.10, so Corollary 4.8 holds under (S) alone."
+status    = "math.disproved"
+paper     = "status summary (§0, the (S)-only case), doc/theory/exact-front.md; refuted by Ex 4.13 (§4.6)"
 created   = "2026-11-23"
 
 # ===========================================================================
@@ -261,12 +298,12 @@ created      = "2026-11-23"
 # ===========================================================================
 
 [claims.thm-6-1]
-kind      = "theorem"
-statement = "Theorem 6.1 (converse to role configurations) [N1]: under (A1-NS), every feasible plan with cost C and makespan M gives a role configuration on all p planes with passenger count t, cost at most C and λ_k ≤ F_k ≤ M; (AΔ) is not needed. Lean form: an explicit p ≤ t, the passenger count as 2t − p landings, and λ_k ≤ M in place of λ_k ≤ F_k."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_roleConfig_ns"
-paper     = "Thm 6.1, doc/theory/exact-front.md §6.1"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 6.1 (converse to role configurations) [N1]: under (A1-NS), every feasible plan with cost C and makespan M gives a role configuration on all p planes with passenger count t, cost at most C and λ_k ≤ F_k ≤ M; (AΔ) is not needed."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Feasible.exists_roleConfig_ns"
+paper        = "Thm 6.1, doc/theory/exact-front.md §6.1"
+created      = "2026-11-23"
 
 [claims.lem-6-2]
 kind      = "lemma"
@@ -319,12 +356,12 @@ paper     = "Lemma 6.8, doc/theory/exact-front.md §6.2"
 created   = "2026-11-24"
 
 [claims.thm-6-9]
-kind      = "theorem"
-statement = "Theorem 6.9 (schedulable domination) [SD]: under (A1-NS), every feasible plan with cost C and makespan M is dominated by a role configuration on all p planes with passenger count t and cost at most C, with orders and a link matching whose template has makespan at most M; no event order, (AΔ) or (AΔ-path) is needed. Lean form: an explicit p ≤ t, the note's standing assumption (not_schedulableDomination: it fails for t < p); the configuration is a valid scheduled configuration with 2t − p landings, and the bound is on its closed form Sched.tmpl, the formula of Lemma 6.3, not on a template schedule."
-status    = "math.machine-checked"
-lean      = "ZenoFront.schedulableDomination_all"
-paper     = "Thm 6.9, doc/theory/exact-front.md §6.2"
-created   = "2026-11-24"
+kind         = "theorem"
+statement    = "Theorem 6.9 (schedulable domination) [SD]: under (A1-NS), every feasible plan with cost C and makespan M is dominated by a role configuration on all p planes with passenger count t and cost at most C, with orders and a link matching whose template has makespan at most M; no event order, (AΔ) or (AΔ-path) is needed."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.schedulableDomination_all"
+paper        = "Thm 6.9, doc/theory/exact-front.md §6.2"
+created      = "2026-11-24"
 
 [claims.cor-6-10]
 kind         = "corollary"
@@ -346,20 +383,20 @@ created   = "2026-11-24"
 # ===========================================================================
 
 [claims.prop-7-1]
-kind      = "proposition"
-statement = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g. Lean form: (C, 2T) is a minimal admissible point iff E(T) = C and E(T') > C for every T' < T, joined to the plans' front by Corollary 4.8 (minimal_achievable_iff_admissiblePoints); makespans are not rescaled by g."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_admissiblePoints_iff"
-paper     = "Prop 7.1, doc/theory/exact-front.md §7.1"
-created   = "2026-11-23"
+kind         = "proposition"
+statement    = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.minimal_admissiblePoints_iff"
+paper        = "Prop 7.1, doc/theory/exact-front.md §7.1"
+created      = "2026-11-23"
 
 [claims.lem-7-2]
-kind      = "lemma"
-statement = "Lemma 7.2: the one-plane table satisfies G[m][τ] = min{c(Y) : |Y| = m, δ(Y) ≤ τ} (∞ if there is none), and G is non-increasing in τ. Lean form: the least cost when an m-multiset with δ ≤ τ exists, with oneplane_eq_top_iff for the ∞ case; the monotonicity in τ is not stated."
-status    = "math.machine-checked"
-lean      = "ZenoFront.isLeast_oneplane"
-paper     = "Lemma 7.2, doc/theory/exact-front.md §7.2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 7.2: the one-plane table satisfies G[m][τ] = min{c(Y) : |Y| = m, δ(Y) ≤ τ} (∞ if there is none), and G is non-increasing in τ."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.isLeast_oneplane"
+paper        = "Lemma 7.2, doc/theory/exact-front.md §7.2"
+created      = "2026-11-23"
 
 [claims.prop-7-3]
 kind         = "proposition"
@@ -377,20 +414,20 @@ paper     = "Prop 7.4, doc/theory/exact-front.md §7.3"
 created   = "2026-11-23"
 
 [claims.thm-7-5]
-kind      = "theorem"
-statement = "Theorem 7.5 (link-forest DP): For[p][s] = E(T), and given G the DP takes O(n q_max² s² T + p q_max s²) time and O(q_max s T + n q_max s + p s) memory per level. Lean form: the memoised DP (treeBoundAt) equals E(T) for 1 ≤ p and T ≤ Tmax; the complexity is not formalised."
-status    = "math.machine-checked"
-lean      = "ZenoFront.treeBoundAt_eq_minCost"
-paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 7.5 (link-forest DP): For[p][s] = E(T), and given G the DP takes O(n q_max² s² T + p q_max s²) time and O(q_max s T + n q_max s + p s) memory per level."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.treeBoundAt_eq_minCost"
+paper        = "Thm 7.5, doc/theory/exact-front.md §7.4"
+created      = "2026-11-23"
 
 [claims.thm-7-6]
-kind      = "theorem"
-statement = "Theorem 7.6 (σ-DP) [Claim C]: the shortest path from (0, 0, ∅) to (p, s, ∅) in the σ-graph has weight E(T). Lean form: the memoised σ-DP (sigmaBoundAt) equals E(T) for 1 ≤ p ≤ t and T ≤ Tmax."
-status    = "math.machine-checked"
-lean      = "ZenoFront.sigmaBoundAt_eq_minCost"
-paper     = "Thm 7.6, doc/theory/exact-front.md §7.5"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 7.6 (σ-DP) [Claim C]: the shortest path from (0, 0, ∅) to (p, s, ∅) in the σ-graph has weight E(T)."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.sigmaBoundAt_eq_minCost"
+paper        = "Thm 7.6, doc/theory/exact-front.md §7.5"
+created      = "2026-11-23"
 
 [claims.lem-7-7]
 kind      = "lemma"
@@ -451,12 +488,12 @@ created   = "2026-11-23"
 # ===========================================================================
 
 [claims.thm-9-1]
-kind      = "theorem"
-statement = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F. Lean form: Cert.check = true implies IsParetoFront for every table of central flights satisfying (A1), or for every table if all gaps are relaxed; the obligations are the checker's tests."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Cert.check_sound"
-paper     = "Thm 9.1, doc/theory/exact-front.md §9"
-created   = "2026-11-23"
+kind         = "theorem"
+statement    = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F."
+status       = "math.proved-informal"
+lean_partial = "ZenoFront.Cert.check_sound"
+paper        = "Thm 9.1, doc/theory/exact-front.md §9"
+created      = "2026-11-23"
 
 [claims.lem-9-2]
 kind      = "lemma"
