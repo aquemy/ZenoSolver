@@ -9,6 +9,9 @@ For each such gap between front points i and i+1, the exact flow model
 allowed by (AΔ), D_ij = |d_i - d_j| (durations are distinct, so D_ij >= 1), and
 makespan at most M_{i+1} - 1. Every plan whose central flights satisfy (AΔ) is
 still a plan, no later, with this table, so the comparison covers every table.
+This checks the front-level consequence C >= E(floor(M/2)) only, not the per-plane
+bound l(X_k) <= F_k of the theorem. flowplan.py reads a table entry of 0 as "no
+flight", so tables need durations >= 1 (distinct durations give that here).
 
 Families: uniform, anti (costs decreasing in duration), hub (one cheap slow city
 among fast dear ones), cluster (cities in groups of close durations, so central
