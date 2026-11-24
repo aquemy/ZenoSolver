@@ -1,0 +1,44 @@
+{
+  "claim": "exp-e2-symmetric-front",
+  "criterion": "zeno's front equals the front of the exhaustive search over all plans (central flights none or useless) and of the role-configuration oracle on every instance they finish",
+  "experiment": "E2_symmetric_front",
+  "explanation": "2000 comparisons against all plans and 1000 against the oracle; 0 differ. Agreement with the all-plans search is the direct test of the converse: no plan with extra landings, hand-offs or central flights is better.",
+  "figures": [
+    "E2_symmetric_front/fronts_vs_exhaustive.png",
+    "E2_symmetric_front/fronts_vs_exhaustive.svg"
+  ],
+  "hypothesis": "Under (S) and (A1) every plan is weakly dominated by an admissible partition (Thm 4.7), so the front is the Pareto set of (E(T), 2T) (Cor 4.8), the set zeno computes.",
+  "metrics": {
+    "mismatches": [],
+    "oracle_compared": 1000,
+    "oracle_error": 0,
+    "oracle_mismatch": 0,
+    "oracle_points": 6970,
+    "oracle_timeout": 0,
+    "truth-a1_compared": 1000,
+    "truth-a1_error": 0,
+    "truth-a1_mismatch": 0,
+    "truth-a1_points": 2059,
+    "truth-a1_timeout": 0,
+    "truth-none_compared": 1000,
+    "truth-none_error": 0,
+    "truth-none_mismatch": 0,
+    "truth-none_points": 2059,
+    "truth-none_timeout": 0
+  },
+  "passed": true,
+  "refutes": [],
+  "seed": 0,
+  "sizes": {
+    "oracle": "1000 instances; n<=5, p<=4, p<t<=6 (t<=5 when n>=4, the oracle needs t>p), d in [1,20], c in [0,30], half anti-correlated",
+    "timeouts_s": {
+      "oracle": 120,
+      "truth": 300
+    },
+    "truth": "1000 instances x 2 central regimes; n<=3, p<=3, t<=min(5,p+3), d in [1,6], c in [0,9]"
+  },
+  "tests": [
+    "thm-4-7",
+    "cor-4-8"
+  ]
+}

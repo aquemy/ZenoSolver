@@ -565,3 +565,13 @@ code      = "experiments/E1_achievability/run.py"
 results   = "experiments/results/E1_achievability"
 paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
 created   = "2026-11-24"
+
+[claims.exp-e2-symmetric-front]
+kind      = "experiment"
+statement = "E2 (symmetric front): zeno's front equals the front of the exhaustive search over all plans (truth.cpp; central flights absent or useless, so (A1) holds) on 1,000 tiny instances in each regime, and the front of every role-configuration schedule (zenoOracle) on 1,000 instances with n ≤ 5, t ≤ 6: 3,000 comparisons, 0 mismatches."
+status    = "sci.supported"
+tests     = ["thm-4-7", "cor-4-8"]
+code      = "experiments/E2_symmetric_front/run.py"
+results   = "experiments/results/E2_symmetric_front"
+paper     = "Thm 4.7 and Cor 4.8, doc/theory/exact-front.md §4.3-4.4"
+created   = "2026-11-24"
