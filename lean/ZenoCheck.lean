@@ -58,19 +58,23 @@ def reasons (C : Cert) : Array String := Id.run do
   if !C.lastOK then
     errs := errs.push s!"the cheapest point's cost is not s * c_min = {C.s * minOf C.c}"
   if errs.isEmpty then
-    let table := C.table
+    let scale := durationScale C.d
+    let Tmax := (C.front.map fun x => (x.2 - 1) / 2 / scale).foldr max 0
+    let dArr := Array.ofFn (n := C.n) fun i => C.d i / scale
+    let dS : Fin C.n → ℕ := fun i => dArr.getD i 0
+    let bound := C.boundWith scale Tmax dS (oneplaneTable dS C.c Tmax C.s)
     for (((x, y), g), i) in ((C.front.zip C.front.tail).zip C.gaps).zipIdx do
       match g with
       | .forest =>
         if !C.assumptions.contains "A1" then
           errs := errs.push s!"gap {i + 1} uses the forest bound, which needs assumption A1"
         else
-          let b := C.forestGapBound table y.2
+          let b := bound .forest y.2
           if !decide ((x.1 : WithTop ℕ) ≤ b) then
             errs := errs.push s!"gap {i + 1}: the forest bound {showBound b} is below the cost \
               {x.1}"
       | .relaxed =>
-        let b := C.gapBound table y.2
+        let b := bound .relaxed y.2
         if !decide ((x.1 : WithTop ℕ) ≤ b) then
           errs := errs.push s!"gap {i + 1}: the relaxed bound {showBound b} is below the cost {x.1}"
   return errs

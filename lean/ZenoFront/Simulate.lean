@@ -128,13 +128,20 @@ theorem follow_sound : ∀ (k : ℕ) (legs : List (Leg n t)) (x : Loc n) (τ : �
       exact ⟨ℓ :: route, (hperm.cons ℓ).trans (List.perm_cons_erase hmem).symm,
         ⟨hsrc, hdep, hroute⟩, hfin⟩
 
-/-- Passenger `π` reaches `C_G` along all its legs. -/
-def paxOK (P : Plan n t p) (π : Fin t) : Bool :=
-  decide (follow (paxLegs P π).length (paxLegs P π) .ci 0 = some .cg)
+/-- Passenger `π` reaches `C_G` along all its legs among `all` (the plan's legs). -/
+def paxOKIn (all : List (Leg n t)) (π : Fin t) : Bool :=
+  let legs := all.filter fun ℓ => decide (ℓ.pax = some π)
+  decide (follow legs.length legs .ci 0 = some .cg)
 
-/-- The plan is feasible (format v1): every plane, then every passenger. -/
+/-- Passenger `π` reaches `C_G` along all its legs. -/
+def paxOK (P : Plan n t p) (π : Fin t) : Bool := paxOKIn (allLegs P) π
+
+/-- The plan is feasible (format v1): every plane, then every passenger (the plan's legs are
+gathered once). -/
 def planOK (d dbar : Fin n → ℕ) (P : Plan n t p) : Bool :=
-  (List.finRange p).all (fun k => planeOK d dbar (P k)) && (List.finRange t).all (paxOK P)
+  (List.finRange p).all (fun k => planeOK d dbar (P k)) &&
+    (let all := allLegs P
+     (List.finRange t).all (paxOKIn all))
 
 /-- **The simulation is sound.** A plan the simulation accepts is feasible, whatever the
 central flight durations `dc`. -/
@@ -143,7 +150,7 @@ theorem planOK_feasible {d dbar : Fin n → ℕ} (dc : Fin n → Fin n → ℕ) 
   simp only [planOK, Bool.and_eq_true, List.all_eq_true, List.mem_finRange, true_implies] at h
   refine ⟨fun k => planeFeasible_of_planeOK dc (h.1 k), fun π => ?_⟩
   have := h.2 π
-  simp only [paxOK, decide_eq_true_eq] at this
+  simp only [paxOKIn, decide_eq_true_eq] at this
   exact follow_sound _ _ _ _ _ rfl this
 
 end ZenoFront

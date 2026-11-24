@@ -59,14 +59,28 @@ request that touches `lean/**` or the C++ solver, plus a `grep` for `sorry` and 
 Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
 verified function.
 
-Timings on an Apple-silicon laptop, for the compiled checker:
-* `relaxed-r101.cert`: about 0.1 s (62 KB, `n = 10`, `t = 14`, `p = 5`, 89 points, 88
-  `relaxed` gaps).
-* `forest-r25.cert`: about 0.16 s (38 KB, `n = 10`, `t = 18`, `p = 8`, 45 points, one `forest`
-  gap).
-* `forest-r155.cert`: about 1 s, the slowest sample. Its forest gap has a high level, and the
-  σ-DP runs over `s = 20` landings.
-* The end-to-end run, 34 certificates: about 1.7 s, solver included.
+Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
+(`bench/baselines/lean/apple-m4-max/`):
+* The certificates of `test/certificates/`: about 30 ms at the median, 0.28 s at most
+  (`tree12.cert`, whose two forest gaps use the tree DP).
+* The 66 certificates the C++ solver writes for the benchmark suite (`bench/instances/*.txt`):
+  5.7 s in total, 33 ms at the median. The largest, `regimes/r5` (`n = 100`, `t = 60`, `p = 10`,
+  3.9 MB, 240,000 legs), takes 2.3 s and 135 MiB. Before this phase's changes the same
+  certificates took 478 s, 295 s of them for `r5`.
+* The end-to-end run, 35 certificates: about 1.3 s, solver included.
+* **Many non-dominated cities.** The σ-DP is exponential in the number of cities that survive
+  the dominance merge, and the tree DP is pseudo-polynomial in the level `T`. The checker runs
+  whichever `useTreeDP` estimates cheaper. Every suite certificate keeps the σ-DP. Three
+  certificates of `zeno <args> -C 2 -D 2 -r 100` took more than 120 s with the σ-DP alone. With
+  the tree DP they take:
+
+  | `<args>` | cities after the merge | forest gaps | `zeno-check` |
+  |---|---|---|---|
+  | `-n 20 -t 12 -p 6` | 20 | 6 | 5 s |
+  | `-n 20 -t 16 -p 4` | 20 | 5 | 7 s |
+  | `-n 40 -t 20 -p 8` | 40 | 2 | 13 s |
+
+  The C++ checker, whose tree DP uses Pareto staircases over `τ`, takes 0.04 s at most.
 
 `test/certificates/` holds two groups:
 
@@ -76,6 +90,7 @@ Timings on an Apple-silicon laptop, for the compiled checker:
   * asymmetric durations, a missing `S`, non-monotone points;
   * a missing point closed by neither bound;
   * a `forest` gap relabelled `relaxed`, a `forest` gap without `A1`;
+  * a missing point on `tree12`, rejected by the tree DP with the C++ checker's bound (5230);
   * a truncated file.
 
 ## Contents
@@ -92,10 +107,14 @@ Timings on an Apple-silicon laptop, for the compiled checker:
 | `ZenoFront/PlanBounds.lean` | Counting, segments, trimming, Lemma R | `hubArrivals`, `ciDepartures`, `cgArrivals` |
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
+| `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
-| `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions (the `forest` gap bound), memoised, with dominance merging | `groupOption`, `sigmaDP`, `domRep`, `sigmaLayer`, `forestBoundAt` |
+| `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
+| `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
+| `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
+| `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat` |
 | `ZenoFront/Parse.lean` | Parser for the text format (untrusted) | `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -199,6 +218,16 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `IsParityWitness.size_mod_two`: an admissible grouping has `Σ_k |X_k| ≡ p (mod 2)`.
 * `Admissible.map`: relabelling the cities by any map keeps a grouping admissible.
 
+**Adding a plane (`AddPlane.lean`)**
+
+* `Admissible.addPlane`, `Admissible.addPlane_of_size` (**Lemma 4.6, AP**): an admissible
+  grouping of `q` planes with `2t − q` landings, `t ≥ q + 1`, gives an admissible grouping of
+  `q + 1` planes with `2t − q − 1` landings, no larger cost, and loads within every bound on the
+  old ones. One shrinking step removes two landings, and one of them becomes the new plane's
+  group.
+* `Admissible.addPlanes`: AP applied `m` times, from `q` to `q + m ≤ t` planes (step 4 of
+  bridge B3).
+
 **Converse (`Converse.lean`)**
 
 * `PlaneFeasible.two_mul_load_landings_le` (**Step 1**): under (S) and (A1), a plane's flight
@@ -229,12 +258,42 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   `c(H) + G[m − |H|][T − δ(H)]`.
 * `sigmaDP_le_totalCost`: the σ-DP over planes, with state the odd-degree city set `σ`, is at
   most the cost of every admissible grouping whose witness lies in `R`.
-* `domRep_le`, `sigmaDP_domReps_le_totalCost`: cities are merged into non-dominated
-  representatives (no slower, no more expensive). This keeps the bound valid and makes `R`
-  small: at most 4 cities on the samples.
+* `domRep_le`: cities are merged into non-dominated representatives (no slower, no more
+  expensive). This keeps the bound valid and makes the city set small: at most 4 cities on the
+  samples.
+* `mem_smallSubsetList`: the σ-DP's states are the subsets of the non-dominated cities of size
+  `≤ min(p − 1, t − p)`. Claim B′ (`Admissible.exists_card_touched_le`) gives every admissible
+  grouping a witness whose odd-degree sets all stay in that family.
 * `sigmaLayer_getD`, `sigmaValue_eq`: the memoised σ-DP agrees with `sigmaDP`.
-* `forestBoundAt_le_totalCost`: the forest bound the checker computes is at most the cost of
-  every admissible partition into `p` groups of total size `s` with loads `≤ T`.
+* `sigmaBoundAt_le_totalCost`: the σ-DP bound is at most the cost of every admissible partition
+  into `p` groups of total size `s` with loads `≤ T`.
+
+**Link forests (`LinkForest.lean`)**
+
+* `Admissible.exists_linkForest` (**Lemma 2.6, "only if"**): the groups of an admissible
+  grouping are, as a multiset, the groups of a list of rooted link trees in which every plane
+  keeps an odd number of free landings. The proof removes a leaf and recurses on the planes:
+  * a plane with an empty witness set is an isolated vertex;
+  * otherwise a witness with the fewest edges has a plane with exactly one city
+    (`IsParityWitness.exists_card_eq_one_of_minimal`, from the rank bound of
+    `MinimalWitness.lean`);
+  * that plane is hung back by a link (`attachForest`).
+
+**Tree DP (`TreeBound.lean`)**
+
+* `buildLayers_getD`: a table built layer by layer, each layer read from the earlier ones,
+  unfolds to its defining formula.
+* `TreeData.chM_le`, `subM_le`, `rootM_le`, `forM_le`: one step of each table `Ch`, `Sub`,
+  `Root`, `For` (§7.4).
+* `LKids.chM_le`, `LTree.subM_le`, `LTree.rootM_le`, `forM_le_forest`: by induction on the
+  rooted link trees, child items, subtrees, trees and forests cost at least their table entry.
+  The free landings of a plane, of odd size, cost at least the one-plane entry for the budget
+  the links leave.
+* `TreeData.value_le_totalCost`, `treeBoundAt_le_totalCost` (**Theorem 7.5, `For ≤ E`**): the
+  tree DP is at most the cost of every admissible partition into `p` groups of total size `s`
+  with loads `≤ T`. The converse (`For ≥ E`) is not needed.
+* `forestBoundAt_le_totalCost`: the bound the checker computes (tree DP or σ-DP, chosen by
+  `useTreeDP`) is such a lower bound.
 
 **Checker (`Simulate.lean`, `Checker.lean`, `Examples.lean`)**
 
@@ -259,6 +318,18 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
 * `Cert.check_sound_A1`, `Cert.check_sound_relaxed`: the two cases of `check_sound`.
 * `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`: equivalently, a pair is listed
   iff it is a minimal achievable (cost, makespan) pair.
+
+**Rational times (`RationalPlans.lean`)**
+
+* `QFeasible.floor`: a feasible plan with rational departure and arrival times, every time
+  rounded down, is a feasible plan with integer times. Durations are integers, so
+  `arr = dep + d` gives `⌊arr⌋ = ⌊dep⌋ + d`, and every `arrival ≤ next departure` survives.
+* `planMakespan_floor_le`, `qPlanCost_eq`: the rounded plan has the same cost and no larger
+  makespan. `Feasible.toRat`: an integer plan is a rational one, with the same cost and
+  makespan.
+* `Cert.check_sound_rat`: if `check` accepts, the listed points are exactly the Pareto front of
+  the (cost, makespan) pairs of the feasible plans **with rational times**, under the same
+  hypotheses on `dc` as `check_sound`.
 * `Examples.lptCounterexample_front`: checked by the kernel alone (`decide +kernel`, about
   1.5 s). For every `dc`, the Pareto front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` is
   `(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)`. This includes the point
@@ -336,10 +407,10 @@ The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the
   match between them and the intended mathematics. For the checker these are `Feasible`,
   `planCost`, `planMakespan`, `achievable` and `IsParetoFront`. The docstrings tie each
   definition to the note and the format.
-* **Plan semantics.** Times are natural numbers, as in format v1. The theorem therefore
-  quantifies over every plan with integer times. Rational times are **not covered**, although
-  the proof uses no integrality of waiting times: every bound comes from sums of integer
-  durations.
+* **Plan semantics.** The certificate's plans have natural-number times, as in format v1.
+  `Cert.check_sound` quantifies over every plan with integer times, and `Cert.check_sound_rat`
+  over every plan with rational times; the fronts coincide. Durations are the instance's
+  integers in both.
   * Plans may fly central–central legs of any duration `dc`, may wait anywhere and may hand
     passengers over anywhere.
   * Planes must end in `C_G`. This is the format's semantics, not PDDL's; see bridge B3 below.
@@ -363,14 +434,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] SH in partition form (`Admissible.exists_shrink`); the role-configuration form is not
       needed.
-- [ ] AP (add a plane, Lemma 4.6): an admissible `q`-grouping with `Σ|X_k| = 2t − q`, `t ≥ q + 1`
-      gives an admissible `(q + 1)`-grouping with one landing less, no larger cost or load.
-      Needed only for bridge B3.
-- [x] The σ-DP as a lower bound on `E(T)` (`forestBoundAt_le_totalCost`).
-- [ ] The σ-DP's other direction (`DP ≥ E`, so the DP is exact), and its state bound
-      `|σ| ≤ min(p − 1, t − p)` from Claim B′. Neither is needed for soundness. The bound would
-      only speed up instances with many non-dominated cities, which the checker does not prune
-      by.
+- [x] AP (add a plane, Lemma 4.6; `Admissible.addPlane`, `Admissible.addPlanes`).
+- [x] The σ-DP as a lower bound on `E(T)` (`sigmaBoundAt_le_totalCost`).
+- [x] The σ-DP's state bound `|σ| ≤ min(p − 1, t − p)` from Claim B′ (`smallSubsetList`).
+- [ ] The σ-DP's other direction (`DP ≥ E`, so the DP is exact). Not needed for soundness.
 - [ ] `E(T)` as a definition and its monotonicity; pairs upper bound `U(T)` with `L ≤ E ≤ U`.
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
       every arc bound `E(T)` from below (sparse certificates).
@@ -386,7 +453,7 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [x] Lemma R (`Feasible.exists_relaxation`), and `L` as a DP proved a lower bound.
 - [x] Primal checker (`planOK_feasible`) and the end-to-end checker, with a parser and
       `zeno-check`.
-- [ ] Rational (or any ordered-semiring) times.
+- [x] Rational times for the competitor plans (`Cert.check_sound_rat`).
 - [ ] Completeness of the simulation: the greedy passenger walk finds a route whenever the
       C++ one does. Only soundness is proved.
 
@@ -398,12 +465,23 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 **P4.**
 
+- [x] Checker performance at suite scale: the 66 suite certificates in 5.7 s (478 s before).
 - [ ] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
-      front under (S) + (A1). Needs AP.
+      front under (S) + (A1). AP (step 4) is done. Missing are steps 1–3 of Theorem 4.9 on the
+      routes, then `Feasible.exists_admissible` on the planes that are not idle:
+      * remove central flights and clean;
+      * cut every route after its last loaded leg;
+      * append `x → C_G` where a route ends after a passenger's first leg `C_I → x`.
+
+      The checker's soundness for that semantics would then follow as for
+      `Cert.check_sound_A1`.
 - [ ] Theorem 4.1: forest `T`-join, links, schedule with drop-offs first and at most one
       pick-up per plane, makespan = largest load. Not needed by the checker.
-- [ ] Link-forest lemma (2.6, 2.7) and the tree DP (Theorem 7.5). This would replace the σ-DP
-      by the C++ forest DP for instances with many non-dominated cities.
+- [x] Link-forest lemma (2.6, only if; `Admissible.exists_linkForest`) and the tree DP
+      (Theorem 7.5) as a lower bound (`treeBoundAt_le_totalCost`).
+- [ ] Pareto staircases over `τ` in the tree DP, as in `src/zeno/forest.cpp`. The dense tables
+      take seconds when many cities survive the merge (table above); the C++ checker takes
+      milliseconds.
 - [ ] Pareto-semiring DP (PS); closed-form ends of the front.
 
 **P5, non-symmetric.**

@@ -6,6 +6,7 @@ module
 
 public import ZenoFront.OnePlane
 public import ZenoFront.Shrink
+public import ZenoFront.MinimalWitness
 public import Mathlib.Data.List.GetD
 
 /-!
@@ -68,36 +69,52 @@ theorem groupOption_le_cost (d c : Fin n → ℕ) {X : Groups n p} {h : Fin p �
 
 /-! ### The DP over planes -/
 
-/-- The σ-DP: `sigmaDP R opt j u σ` is the cheapest way to give `j` planes `u` landings with
-witness sets `H ⊆ R` whose symmetric difference is `σ`, a plane with `m` landings and witness
-set `H` costing `opt m H`. -/
-def sigmaDP (R : Finset (Fin n)) (opt : ℕ → Finset (Fin n) → WithTop ℕ) :
+/-- The σ-DP over a family `S` of allowed sets: `sigmaDP S opt j u σ` is the cheapest way to give
+`j` planes `u` landings with witness sets in `S`, whose running symmetric differences stay in
+`S` and end at `σ`; a plane with `m` landings and witness set `H` costs `opt m H`. -/
+def sigmaDP (S : Finset (Finset (Fin n))) (opt : ℕ → Finset (Fin n) → WithTop ℕ) :
     ℕ → ℕ → Finset (Fin n) → WithTop ℕ
   | 0, u, σ => if u = 0 ∧ σ = ∅ then 0 else ⊤
   | j + 1, u, σ =>
-    (range u).inf fun m => R.powerset.inf fun H =>
-      sigmaDP R opt j (u - (m + 1)) (symmDiff σ H) + opt (m + 1) H
+    (range u).inf fun m => S.inf fun H =>
+      if symmDiff σ H ∈ S then sigmaDP S opt j (u - (m + 1)) (symmDiff σ H) + opt (m + 1) H
+      else ⊤
 
-/-- The DP is a lower bound, list form. -/
-theorem sigmaDP_le (R : Finset (Fin n)) (opt : ℕ → Finset (Fin n) → WithTop ℕ)
-    (c : Fin n → ℕ) : ∀ L : List (Multiset (Fin n) × Finset (Fin n)),
-      (∀ yh ∈ L, yh.2 ⊆ R ∧ 1 ≤ yh.1.card ∧ opt yh.1.card yh.2 ≤ cost c yh.1) →
-      sigmaDP R opt L.length (L.map fun yh => yh.1.card).sum
+theorem foldr_symmDiff_subset (Z : Finset (Fin n)) :
+    ∀ L : List (Multiset (Fin n) × Finset (Fin n)), (∀ yh ∈ L, yh.2 ⊆ Z) →
+      L.foldr (fun yh σ => symmDiff yh.2 σ) ∅ ⊆ Z
+  | [], _ => Finset.empty_subset _
+  | yh :: L, h => by
+    rw [List.foldr_cons]
+    intro i hi
+    rcases Finset.mem_symmDiff.mp hi with ⟨hi, -⟩ | ⟨hi, -⟩
+    · exact h yh List.mem_cons_self hi
+    · exact foldr_symmDiff_subset Z L (fun y hy => h y (List.mem_cons_of_mem _ hy)) hi
+
+/-- The DP is a lower bound, list form: if every witness set lies in `Z` and every subset of `Z`
+is allowed, the DP is at most the total cost. -/
+theorem sigmaDP_le (S : Finset (Finset (Fin n))) (opt : ℕ → Finset (Fin n) → WithTop ℕ)
+    (c : Fin n → ℕ) (Z : Finset (Fin n)) (hZ : ∀ H ⊆ Z, H ∈ S) :
+    ∀ L : List (Multiset (Fin n) × Finset (Fin n)),
+      (∀ yh ∈ L, yh.2 ⊆ Z ∧ 1 ≤ yh.1.card ∧ opt yh.1.card yh.2 ≤ cost c yh.1) →
+      sigmaDP S opt L.length (L.map fun yh => yh.1.card).sum
           (L.foldr (fun yh σ => symmDiff yh.2 σ) ∅) ≤
         ((L.map fun yh => cost c yh.1).sum : ℕ)
   | [], _ => by simp [sigmaDP]
   | ⟨Y, H⟩ :: L, h => by
-    obtain ⟨hHR, hY, hopt⟩ := h ⟨Y, H⟩ List.mem_cons_self
-    simp only at hHR hY hopt
-    have ih := sigmaDP_le R opt c L fun yh hyh => h yh (List.mem_cons_of_mem _ hyh)
+    obtain ⟨hHZ, hY, hopt⟩ := h ⟨Y, H⟩ List.mem_cons_self
+    simp only at hHZ hY hopt
+    have ih := sigmaDP_le S opt c Z hZ L fun yh hyh => h yh (List.mem_cons_of_mem _ hyh)
+    have hfold : L.foldr (fun yh σ => symmDiff yh.2 σ) ∅ ⊆ Z :=
+      foldr_symmDiff_subset Z L fun yh hyh => (h yh (List.mem_cons_of_mem _ hyh)).1
     simp only [List.length_cons, List.map_cons, List.sum_cons, List.foldr_cons, sigmaDP]
     have hm : Y.card - 1 ∈ range (Y.card + (L.map fun yh => yh.1.card).sum) := by
       rw [Finset.mem_range]; omega
     refine (Finset.inf_le hm).trans ?_
-    refine (Finset.inf_le (Finset.mem_powerset.mpr hHR)).trans ?_
+    refine (Finset.inf_le (hZ H hHZ)).trans ?_
     have h₁ : Y.card - 1 + 1 = Y.card := by omega
-    rw [h₁, Nat.add_sub_cancel_left, symmDiff_comm H, symmDiff_symmDiff_cancel_right, Nat.cast_add,
-      add_comm (cost c Y : WithTop ℕ)]
+    rw [h₁, Nat.add_sub_cancel_left, symmDiff_comm H, symmDiff_symmDiff_cancel_right,
+      ite_eq_left (hZ _ hfold), Nat.cast_add, add_comm (cost c Y : WithTop ℕ)]
     exact add_le_add ih hopt
 
 theorem mem_foldr_symmDiff (i : Fin n) : ∀ L : List (Finset (Fin n)),
@@ -116,13 +133,15 @@ theorem countP_finRange (f : Fin p → Bool) :
   | nil => rfl
   | cons a l ih => simp [List.countP_cons, ih, add_comm]
 
-/-- **The σ-DP is a lower bound**: for every admissible grouping whose cities lie in `R`, with
-`groupOption`-type plane costs, `sigmaDP R opt p (Σ_k |X_k|) ∅ ≤ Σ_k c(X_k)`. -/
-theorem sigmaDP_le_totalCost (R : Finset (Fin n)) (opt : ℕ → Finset (Fin n) → WithTop ℕ)
+/-- **The σ-DP is a lower bound**: for every admissible grouping with a witness inside `Z`, every
+subset of `Z` being allowed, and plane costs bounded by `opt`,
+`sigmaDP S opt p (Σ_k |X_k|) ∅ ≤ Σ_k c(X_k)`. -/
+theorem sigmaDP_le_totalCost (S : Finset (Finset (Fin n))) (opt : ℕ → Finset (Fin n) → WithTop ℕ)
     (c : Fin n → ℕ) {X : Groups n p} {h : Fin p → Finset (Fin n)} (hw : IsParityWitness X h)
-    (hR : ∀ k, h k ⊆ R) (hopt : ∀ k, opt (X k).card (h k) ≤ cost c (X k)) :
-    sigmaDP R opt p (size X) ∅ ≤ (totalCost c X : WithTop ℕ) := by
-  have := sigmaDP_le R opt c ((List.finRange p).map fun k => (X k, h k)) fun yh hyh => by
+    (Z : Finset (Fin n)) (hZ : ∀ H ⊆ Z, H ∈ S) (hR : ∀ k, h k ⊆ Z)
+    (hopt : ∀ k, opt (X k).card (h k) ≤ cost c (X k)) :
+    sigmaDP S opt p (size X) ∅ ≤ (totalCost c X : WithTop ℕ) := by
+  have := sigmaDP_le S opt c Z hZ ((List.finRange p).map fun k => (X k, h k)) fun yh hyh => by
     obtain ⟨k, -, rfl⟩ := List.mem_map.mp hyh
     exact ⟨hR k, (Admissible.card_pos ⟨h, hw⟩ k), hopt k⟩
   have hσ : ((List.finRange p).map fun k => (X k, h k)).foldr (fun yh σ => symmDiff yh.2 σ) ∅
@@ -139,6 +158,18 @@ theorem sigmaDP_le_totalCost (R : Finset (Fin n)) (opt : ℕ → Finset (Fin n) 
   simp only [List.length_map, List.length_finRange, List.map_map, hσ] at this
   rw [size, totalCost, Fin.sum_univ_def, Fin.sum_univ_def]
   exact this
+
+/-- `sigmaDP` only reads `opt` on group sizes `1, …, u`. -/
+theorem sigmaDP_congr (S : Finset (Finset (Fin n))) {opt opt' : ℕ → Finset (Fin n) → WithTop ℕ} :
+    ∀ (j u : ℕ) (σ : Finset (Fin n)), (∀ m H, 1 ≤ m → m ≤ u → opt m H = opt' m H) →
+      sigmaDP S opt j u σ = sigmaDP S opt' j u σ
+  | 0, _, _, _ => rfl
+  | j + 1, u, σ, h => by
+    simp only [sigmaDP]
+    refine Finset.inf_congr rfl fun m hm => Finset.inf_congr rfl fun H _ => ?_
+    rw [Finset.mem_range] at hm
+    rw [h (m + 1) H (by omega) (by omega),
+      sigmaDP_congr S j _ _ fun m' H' h₁ h₂ => h m' H' h₁ (by omega)]
 
 /-! ### Merging dominated cities -/
 
@@ -170,189 +201,190 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
 /-- The representatives. -/
 def domReps (d c : Fin n → ℕ) : Finset (Fin n) := univ.image (domRep d c)
 
-/-- **The merged bound is a lower bound** on the original grouping: merging every city into its
-representative keeps the grouping admissible and its cities in `domReps`, and lowers neither
-the cost nor the loads. -/
-theorem sigmaDP_domReps_le_totalCost (d c : Fin n → ℕ) {X : Groups n p} (hX : Admissible X)
-    {T : ℕ} (hT : ∀ k, load d (X k) ≤ T) :
-    sigmaDP (domReps d c) (groupOption d c (oneplane d c) T) p (size X) ∅ ≤
-      (totalCost c X : WithTop ℕ) := by
-  classical
-  set X' : Groups n p := fun k => (X k).map (domRep d c) with hX'
-  obtain ⟨h', hw'⟩ := hX.map (domRep d c)
-  have hsize : size X' = size X := by simp [size, hX']
-  have hload : ∀ k, load d (X' k) ≤ load d (X k) := fun k => by
-    simp only [hX', load, Multiset.map_map]
-    exact Multiset.sum_map_le_sum_map _ _ fun i _ => (domRep_le d c i).1
-  have hcost : totalCost c X' ≤ totalCost c X := Finset.sum_le_sum fun k _ => by
-    simp only [hX', cost, Multiset.map_map]
-    exact Multiset.sum_map_le_sum_map _ _ fun i _ => (domRep_le d c i).2
-  have hR : ∀ k, h' k ⊆ domReps d c := fun k i hi => by
-    have := hw'.subset k hi
-    simp only [Multiset.mem_toFinset, Multiset.mem_map] at this
-    obtain ⟨j, -, rfl⟩ := this
-    exact Finset.mem_image_of_mem _ (Finset.mem_univ j)
-  have := sigmaDP_le_totalCost (domReps d c) (groupOption d c (oneplane d c) T) c hw' hR
-    fun k => groupOption_le_cost d c hw' k ((hload k).trans (hT k))
-  rw [hsize] at this
-  exact this.trans (WithTop.coe_le_coe.mpr hcost)
+/-! ### Small subsets -/
 
-/-- `sigmaDP` only reads `opt` on group sizes `1, …, u`. -/
-theorem sigmaDP_congr (R : Finset (Fin n)) {opt opt' : ℕ → Finset (Fin n) → WithTop ℕ} :
-    ∀ (j u : ℕ) (σ : Finset (Fin n)), (∀ m H, 1 ≤ m → m ≤ u → opt m H = opt' m H) →
-      sigmaDP R opt j u σ = sigmaDP R opt' j u σ
-  | 0, _, _, _ => rfl
-  | j + 1, u, σ, h => by
-    simp only [sigmaDP]
-    refine Finset.inf_congr rfl fun m hm => Finset.inf_congr rfl fun H _ => ?_
-    rw [Finset.mem_range] at hm
-    rw [h (m + 1) H (by omega) (by omega),
-      sigmaDP_congr R j _ _ fun m' H' h₁ h₂ => h m' H' h₁ (by omega)]
+/-- The subsets of `R` with at most `w` elements, listed. -/
+def smallSubsetList (R : Finset (Fin n)) (w : ℕ) : List (Finset (Fin n)) :=
+  (List.range (w + 1)).flatMap fun k =>
+    (((List.finRange n).filter fun i => decide (i ∈ R)).sublistsLen k).map List.toFinset
+
+theorem mem_smallSubsetList {R H : Finset (Fin n)} {w : ℕ} :
+    H ∈ smallSubsetList R w ↔ H ⊆ R ∧ H.card ≤ w := by
+  classical
+  constructor
+  · intro h
+    obtain ⟨k, hk, hmem⟩ := List.mem_flatMap.mp h
+    obtain ⟨l, hl, rfl⟩ := List.mem_map.mp hmem
+    obtain ⟨hsub, hlen⟩ := List.mem_sublistsLen.mp hl
+    rw [List.mem_range] at hk
+    refine ⟨fun i hi => ?_, (List.toFinset_card_le l).trans (by omega)⟩
+    have := hsub.subset (List.mem_toFinset.mp hi)
+    simpa using this
+  · rintro ⟨hR, hw⟩
+    set l := ((List.finRange n).filter fun i => decide (i ∈ R)).filter fun i => decide (i ∈ H)
+    have hl : l.toFinset = H := by
+      ext i
+      simp only [l, List.mem_toFinset, List.mem_filter, List.mem_finRange, true_and,
+        decide_eq_true_eq]
+      exact ⟨fun h' => h'.2, fun h' => ⟨hR h', h'⟩⟩
+    have hnodup : l.Nodup := ((List.nodup_finRange n).filter _).filter _
+    have hlen : l.length = H.card := by rw [← hl, List.toFinset_card_of_nodup hnodup]
+    refine List.mem_flatMap.mpr ⟨H.card, List.mem_range.mpr (by omega), ?_⟩
+    exact List.mem_map.mpr ⟨l, List.mem_sublistsLen.mpr ⟨List.filter_sublist, hlen⟩, hl⟩
 
 /-! ### The memoised σ-DP -/
 
-/-- The subsets of `R`, listed. -/
-def subsetList (R : Finset (Fin n)) : List (Finset (Fin n)) :=
-  ((List.finRange n).filter fun i => decide (i ∈ R)).sublists.map List.toFinset
-
-theorem mem_subsetList {R H : Finset (Fin n)} : H ∈ subsetList R ↔ H ⊆ R := by
-  classical
-  constructor
-  · intro h
-    obtain ⟨l, hl, rfl⟩ := List.mem_map.mp h
-    intro i hi
-    have := (List.mem_sublists.mp hl).subset (List.mem_toFinset.mp hi)
-    simpa using this
-  · intro h
-    refine List.mem_map.mpr ⟨((List.finRange n).filter fun i => decide (i ∈ R)).filter
-      (fun i => decide (i ∈ H)), List.mem_sublists.mpr (List.filter_sublist), ?_⟩
-    ext i
-    simp only [List.mem_toFinset, List.mem_filter, List.mem_finRange, true_and,
-      decide_eq_true_eq]
-    exact ⟨fun h' => h'.2, fun h' => ⟨h h', h'⟩⟩
-
-theorem getD_subsetList_subset {R : Finset (Fin n)} (b : ℕ) :
-    (subsetList R).getD b ∅ ⊆ R := by
-  by_cases hb : b < (subsetList R).length
-  · rw [List.getD_eq_getElem _ _ hb]
-    exact mem_subsetList.mp (List.getElem_mem hb)
-  · rw [List.getD_eq_default _ _ (by omega)]
-    exact Finset.empty_subset _
-
-theorem image_subsetList (R : Finset (Fin n)) :
-    (range (subsetList R).length).image (fun b => (subsetList R).getD b ∅) = R.powerset := by
+theorem image_getD (subs : List (Finset (Fin n))) :
+    (range subs.length).image (fun b => subs.getD b ∅) = subs.toFinset := by
   ext H
-  simp only [Finset.mem_image, Finset.mem_range, Finset.mem_powerset]
+  simp only [Finset.mem_image, Finset.mem_range, List.mem_toFinset]
   constructor
-  · rintro ⟨b, -, rfl⟩
-    exact getD_subsetList_subset b
+  · rintro ⟨b, hb, rfl⟩
+    rw [List.getD_eq_getElem _ _ hb]
+    exact List.getElem_mem hb
   · intro h
-    obtain ⟨b, hb, hH⟩ := List.mem_iff_getElem.mp (mem_subsetList.mpr h)
+    obtain ⟨b, hb, hH⟩ := List.mem_iff_getElem.mp h
     exact ⟨b, hb, by rw [List.getD_eq_getElem _ _ hb, hH]⟩
 
-/-- `subsetList R` indexed: the position of a subset of `R`. -/
-theorem getD_idxOf_subsetList {R H : Finset (Fin n)} (h : H ⊆ R) :
-    (subsetList R).idxOf H < (subsetList R).length ∧
-      (subsetList R).getD ((subsetList R).idxOf H) ∅ = H := by
-  have hmem := mem_subsetList.mpr h
-  have hlt := List.idxOf_lt_length_iff.mpr hmem
-  exact ⟨hlt, by rw [List.getD_eq_getElem _ _ hlt, List.getElem_idxOf]⟩
+theorem inf_toFinset_eq (subs : List (Finset (Fin n))) (g : Finset (Fin n) → WithTop ℕ) :
+    subs.toFinset.inf g = (range subs.length).inf fun b => g (subs.getD b ∅) := by
+  rw [← image_getD subs, Finset.inf_image]
+  rfl
 
-variable (R : Finset (Fin n)) (opt : ℕ → Finset (Fin n) → WithTop ℕ) (s : ℕ)
+variable (subs : List (Finset (Fin n))) (opt : ℕ → Finset (Fin n) → WithTop ℕ) (s : ℕ)
 
-/-- The index of `subs[a] ∆ subs[b]`. -/
+/-- The index of `subs[a] ∆ subs[b]` in `subs` (`subs.length` if it is not listed). -/
 def symmDiffTable : Array (Array ℕ) :=
-  Array.ofFn (n := (subsetList R).length) fun a => Array.ofFn (n := (subsetList R).length) fun b =>
-    (subsetList R).idxOf (symmDiff ((subsetList R).getD a ∅) ((subsetList R).getD b ∅))
+  Array.ofFn (n := subs.length) fun a => Array.ofFn (n := subs.length) fun b =>
+    subs.idxOf (symmDiff (subs.getD a ∅) (subs.getD b ∅))
 
 /-- The plane options, for `m = 0, …, s`. -/
 def optTable : Array (Array (WithTop ℕ)) :=
-  Array.ofFn (n := s + 1) fun m => Array.ofFn (n := (subsetList R).length) fun b =>
-    opt m ((subsetList R).getD b ∅)
+  Array.ofFn (n := s + 1) fun m => Array.ofFn (n := subs.length) fun b => opt m (subs.getD b ∅)
 
-/-- Layer `j` of the memoised σ-DP: entry `[u][a]` is `sigmaDP R opt j u (subs[a])`. -/
-def sigmaLayer (xt : Array (Array ℕ)) (ot : Array (Array (WithTop ℕ))) : ℕ → Array (Array (WithTop ℕ))
-  | 0 => Array.ofFn (n := s + 1) fun u => Array.ofFn (n := (subsetList R).length) fun a =>
-      if (u : ℕ) = 0 ∧ (subsetList R).getD a ∅ = ∅ then 0 else ⊤
+/-- Layer `j` of the memoised σ-DP: entry `[u][a]` is `sigmaDP subs.toFinset opt j u (subs[a])`. -/
+def sigmaLayer (xt : Array (Array ℕ)) (ot : Array (Array (WithTop ℕ))) :
+    ℕ → Array (Array (WithTop ℕ))
+  | 0 => Array.ofFn (n := s + 1) fun u => Array.ofFn (n := subs.length) fun a =>
+      if (u : ℕ) = 0 ∧ subs.getD a ∅ = ∅ then 0 else ⊤
   | j + 1 =>
     let prev := sigmaLayer xt ot j
-    Array.ofFn (n := s + 1) fun u => Array.ofFn (n := (subsetList R).length) fun a =>
-      (range u).inf fun m => (range (subsetList R).length).inf fun b =>
-        ((prev.getD (u - (m + 1)) #[]).getD ((xt.getD a #[]).getD b 0) ⊤) +
-          (ot.getD (m + 1) #[]).getD b ⊤
+    Array.ofFn (n := s + 1) fun u => Array.ofFn (n := subs.length) fun a =>
+      minUpTo (fun m => minUpTo (fun b =>
+        if (xt.getD a #[]).getD b 0 < subs.length then
+          ((prev.getD (u - (m + 1)) #[]).getD ((xt.getD a #[]).getD b 0) ⊤) +
+            (ot.getD (m + 1) #[]).getD b ⊤
+        else ⊤) subs.length) u
 
-theorem symmDiffTable_getD {a b : ℕ} (ha : a < (subsetList R).length)
-    (hb : b < (subsetList R).length) :
-    ((symmDiffTable R).getD a #[]).getD b 0 =
-      (subsetList R).idxOf (symmDiff ((subsetList R).getD a ∅) ((subsetList R).getD b ∅)) := by
+theorem symmDiffTable_getD {a b : ℕ} (ha : a < subs.length) (hb : b < subs.length) :
+    ((symmDiffTable subs).getD a #[]).getD b 0 =
+      subs.idxOf (symmDiff (subs.getD a ∅) (subs.getD b ∅)) := by
   simp [symmDiffTable, Array.getD_eq_getD_getElem?, ha, hb]
 
-theorem optTable_getD {m b : ℕ} (hm : m ≤ s) (hb : b < (subsetList R).length) :
-    ((optTable R opt s).getD m #[]).getD b ⊤ = opt m ((subsetList R).getD b ∅) := by
+theorem optTable_getD {m b : ℕ} (hm : m ≤ s) (hb : b < subs.length) :
+    ((optTable subs opt s).getD m #[]).getD b ⊤ = opt m (subs.getD b ∅) := by
   simp [optTable, Array.getD_eq_getD_getElem?, show m < s + 1 by omega, hb]
 
 /-- **The memoised σ-DP agrees with `sigmaDP`.** -/
-theorem sigmaLayer_getD : ∀ (j : ℕ) {u a : ℕ}, u ≤ s → a < (subsetList R).length →
-    ((sigmaLayer R s (symmDiffTable R) (optTable R opt s) j).getD u #[]).getD a ⊤ =
-      sigmaDP R opt j u ((subsetList R).getD a ∅)
+theorem sigmaLayer_getD : ∀ (j : ℕ) {u a : ℕ}, u ≤ s → a < subs.length →
+    ((sigmaLayer subs s (symmDiffTable subs) (optTable subs opt s) j).getD u #[]).getD a ⊤ =
+      sigmaDP subs.toFinset opt j u (subs.getD a ∅)
   | 0, u, a, hu, ha => by
     simp [sigmaLayer, sigmaDP, Array.getD_eq_getD_getElem?, show u < s + 1 by omega, ha]
   | j + 1, u, a, hu, ha => by
     simp only [sigmaLayer, Array.getD_eq_getD_getElem?, Array.getElem?_ofFn,
-      show u < s + 1 by omega, ha, dite_true, Option.getD_some, sigmaDP]
+      show u < s + 1 by omega, ha, dite_true, Option.getD_some, sigmaDP, minUpTo_eq]
     refine Finset.inf_congr rfl fun m hm => ?_
     rw [Finset.mem_range] at hm
-    rw [← image_subsetList R, Finset.inf_image]
+    rw [inf_toFinset_eq subs]
     refine Finset.inf_congr rfl fun b hb => ?_
     rw [Finset.mem_range] at hb
-    have hsub : symmDiff ((subsetList R).getD a ∅) ((subsetList R).getD b ∅) ⊆ R :=
-      fun i hi => by
-        rcases Finset.mem_symmDiff.mp hi with ⟨h₁, -⟩ | ⟨h₁, -⟩
-        · exact getD_subsetList_subset a h₁
-        · exact getD_subsetList_subset b h₁
-    obtain ⟨hlt, hget⟩ := getD_idxOf_subsetList hsub
     simp only [← Array.getD_eq_getD_getElem?]
-    rw [symmDiffTable_getD R ha hb, sigmaLayer_getD j (by omega) hlt, hget,
-      optTable_getD R opt s (by omega) hb]
-    rfl
+    rw [symmDiffTable_getD subs ha hb]
+    by_cases hmem : symmDiff (subs.getD a ∅) (subs.getD b ∅) ∈ subs
+    · have hlt := List.idxOf_lt_length_iff.mpr hmem
+      have hget : subs.getD (subs.idxOf (symmDiff (subs.getD a ∅) (subs.getD b ∅))) ∅ =
+          symmDiff (subs.getD a ∅) (subs.getD b ∅) := by
+        rw [List.getD_eq_getElem _ _ hlt, List.getElem_idxOf]
+      rw [ite_eq_left hlt, ite_eq_left (List.mem_toFinset.mpr hmem), sigmaLayer_getD j (by omega) hlt, hget,
+        optTable_getD subs opt s (by omega) hb]
+    · rw [ite_eq_right (by rw [List.idxOf_eq_length hmem]; omega),
+        ite_eq_right (mt List.mem_toFinset.mp hmem)]
 
-/-- The σ-DP value: `sigmaDP R opt p s ∅`, computed by the memoised table. -/
+/-- The σ-DP value: `sigmaDP subs.toFinset opt p s ∅`, computed by the memoised table. -/
 def sigmaValue (p : ℕ) : WithTop ℕ :=
-  ((sigmaLayer R s (symmDiffTable R) (optTable R opt s) p).getD s #[]).getD
-    ((subsetList R).idxOf ∅) ⊤
+  ((sigmaLayer subs s (symmDiffTable subs) (optTable subs opt s) p).getD s #[]).getD
+    (subs.idxOf ∅) ⊤
 
-theorem sigmaValue_eq (p : ℕ) : sigmaValue R opt s p = sigmaDP R opt p s ∅ := by
-  obtain ⟨hlt, hget⟩ := getD_idxOf_subsetList (Finset.empty_subset R)
-  rw [sigmaValue, sigmaLayer_getD R opt s p le_rfl hlt, hget]
+theorem sigmaValue_eq (p : ℕ) (h : ∅ ∈ subs) :
+    sigmaValue subs opt s p = sigmaDP subs.toFinset opt p s ∅ := by
+  have hlt := List.idxOf_lt_length_iff.mpr h
+  have hget : subs.getD (subs.idxOf ∅) ∅ = ∅ := by
+    rw [List.getD_eq_getElem _ _ hlt, List.getElem_idxOf]
+  rw [sigmaValue, sigmaLayer_getD subs opt s p le_rfl hlt, hget]
 
 /-! ### The forest bound of the checker -/
 
-/-- The bound the checker uses for a `forest` gap at level `T`: the σ-DP over the non-dominated
-cities, with plane options read from the one-plane table `table` (columns `0, …, Tmax`); `0`
-(no bound) if `T > Tmax`. -/
-def forestBoundAt (d c : Fin n → ℕ) (p s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
+/-- The σ-DP bound for a `forest` gap at level `T`: the σ-DP over the subsets of at
+most `w = min(p − 1, t − p)` non-dominated cities (Claim B′), with plane options read from the
+one-plane table `table` (columns `0, …, Tmax`); `0` (no bound) if `T > Tmax`. -/
+def sigmaBoundAt (d c : Fin n → ℕ) (p t s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
     (T : ℕ) : WithTop ℕ :=
   if T ≤ Tmax then
-    sigmaValue (domReps d c) (groupOption d c (fun m τ => (table.getD m #[]).getD τ ⊤) T) s p
+    sigmaValue (smallSubsetList (domReps d c) (min (p - 1) (t - p)))
+      (groupOption d c (fun m τ => (table.getD m #[]).getD τ ⊤) T) s p
   else 0
 
-/-- **The forest bound is a lower bound**: at most the cost of every admissible grouping into
-`p` groups of total size `s` with loads at most `T`, for the table `oneplaneTable d c Tmax s`. -/
-theorem forestBoundAt_le_totalCost (d c : Fin n → ℕ) {s Tmax T : ℕ} {X : Groups n p}
-    (hX : Admissible X) (hsize : size X = s) (hT : ∀ k, load d (X k) ≤ T) :
-    forestBoundAt d c p s Tmax (oneplaneTable d c Tmax s) T ≤ (totalCost c X : WithTop ℕ) := by
-  unfold forestBoundAt
+/-- **The σ-DP bound is a lower bound**: at most the cost of every admissible grouping into
+`p ≤ t` groups of total size `s = 2t − p` with loads at most `T`, for the table
+`oneplaneTable d c Tmax s`. The proof merges dominated cities, then takes a witness touching at
+most `min(p − 1, t − p)` cities (Claim B′), so that every state of the DP is a small subset. -/
+theorem sigmaBoundAt_le_totalCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t)
+    {X : Groups n p} (hX : Admissible X) (hsize : size X = 2 * t - p)
+    (hT : ∀ k, load d (X k) ≤ T) :
+    sigmaBoundAt d c p t (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T ≤
+      (totalCost c X : WithTop ℕ) := by
+  classical
+  unfold sigmaBoundAt
   split_ifs with hTmax
-  · rw [sigmaValue_eq]
-    rw [sigmaDP_congr (domReps d c) (opt' := groupOption d c (oneplane d c) T) p s ∅
+  · set w := min (p - 1) (t - p)
+    set R := domReps d c
+    set subs := smallSubsetList R w
+    rw [sigmaValue_eq subs _ _ p (mem_smallSubsetList.mpr ⟨Finset.empty_subset _, Nat.zero_le _⟩)]
+    rw [sigmaDP_congr subs.toFinset (opt' := groupOption d c (oneplane d c) T) p (2 * t - p) ∅
       fun m H _ hm => by
         unfold groupOption
         split_ifs with hc
         · dsimp only
           rw [oneplaneTable_getD d c (by omega) (by omega)]
         · rfl]
-    rw [← hsize]
-    exact sigmaDP_domReps_le_totalCost d c hX hT
+    -- Merge every city into its representative.
+    set X' : Groups n p := fun k => (X k).map (domRep d c) with hX'
+    have hX'adm : Admissible X' := hX.map (domRep d c)
+    have hsize' : size X' = 2 * t - p := by rw [← hsize]; simp [size, hX']
+    have hload : ∀ k, load d (X' k) ≤ load d (X k) := fun k => by
+      simp only [hX', load, Multiset.map_map]
+      exact Multiset.sum_map_le_sum_map _ _ fun i _ => (domRep_le d c i).1
+    have hcost : totalCost c X' ≤ totalCost c X := Finset.sum_le_sum fun k _ => by
+      simp only [hX', cost, Multiset.map_map]
+      exact Multiset.sum_map_le_sum_map _ _ fun i _ => (domRep_le d c i).2
+    -- A witness of the merged grouping touching at most `w` cities (Claim B′).
+    let I : Instance := ⟨n, t, p, d, c, hp, hpt⟩
+    obtain ⟨h', hw', htouch⟩ := hX'adm.exists_card_touched_le I hsize'
+    have hZR : touched h' ⊆ R := fun i hi => by
+      obtain ⟨k, hk⟩ := mem_touched.mp hi
+      have := hw'.subset k hk
+      simp only [hX', Multiset.mem_toFinset, Multiset.mem_map] at this
+      obtain ⟨j, -, rfl⟩ := this
+      exact Finset.mem_image_of_mem _ (Finset.mem_univ j)
+    have hZ : ∀ H ⊆ touched h', H ∈ subs.toFinset := fun H hH => by
+      rw [List.mem_toFinset, mem_smallSubsetList]
+      exact ⟨hH.trans hZR, (Finset.card_le_card hH).trans htouch⟩
+    have := sigmaDP_le_totalCost subs.toFinset (groupOption d c (oneplane d c) T) c hw'
+      (touched h') hZ (fun k i hi => mem_touched_of_mem hi)
+      fun k => groupOption_le_cost d c hw' k ((hload k).trans (hT k))
+    rw [hsize'] at this
+    exact this.trans (WithTop.coe_le_coe.mpr hcost)
   · exact bot_le
 
 end ZenoFront

@@ -8,7 +8,7 @@ public import ZenoFront.PlanBounds
 public import ZenoFront.Relaxation
 public import ZenoFront.Simulate
 public import ZenoFront.Converse
-public import ZenoFront.AdmissibleBound
+public import ZenoFront.TreeBound
 
 /-!
 # A verified checker for front certificates (format v1)
@@ -51,14 +51,14 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
 
 /-- `F` is the Pareto front of `S` (for the product order on (cost, makespan)): its points are in
 `S`, weakly dominate every point of `S`, and are pairwise incomparable. -/
-structure IsParetoFront (S : Set (ℕ × ℕ)) (F : List (ℕ × ℕ)) : Prop where
+structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α) : Prop where
   achieved : ∀ x ∈ F, x ∈ S
   dominates : ∀ y ∈ S, ∃ x ∈ F, x ≤ y
   antichain : F.Pairwise fun a b => ¬ a ≤ b ∧ ¬ b ≤ a
 
 /-- A Pareto front lists exactly the minimal elements. -/
-theorem IsParetoFront.mem_iff_minimal {S : Set (ℕ × ℕ)} {F : List (ℕ × ℕ)}
-    (h : IsParetoFront S F) (x : ℕ × ℕ) : x ∈ F ↔ Minimal (· ∈ S) x := by
+theorem IsParetoFront.mem_iff_minimal {α : Type*} [PartialOrder α] {S : Set α} {F : List α}
+    (h : IsParetoFront S F) (x : α) : x ∈ F ↔ Minimal (· ∈ S) x := by
   constructor
   · intro hx
     refine ⟨h.achieved x hx, fun y hy hyx => ?_⟩
@@ -68,7 +68,7 @@ theorem IsParetoFront.mem_iff_minimal {S : Set (ℕ × ℕ)} {F : List (ℕ × �
     · subst heq
       exact hx'y
     · exfalso
-      have : Std.Symm fun a b : ℕ × ℕ => ¬ a ≤ b ∧ ¬ b ≤ a := ⟨fun _ _ h => ⟨h.2, h.1⟩⟩
+      have : Std.Symm fun a b : α => ¬ a ≤ b ∧ ¬ b ≤ a := ⟨fun _ _ h => ⟨h.2, h.1⟩⟩
       exact (h.antichain.forall hx' hx heq).1 hx'x
   · intro ⟨hx, hmin⟩
     obtain ⟨x', hx', hx'x⟩ := h.dominates x hx
@@ -265,7 +265,7 @@ def gapBound (table : Array (Array (WithTop ℕ))) (M : ℕ) : WithTop ℕ :=
 point of makespan `M`, read from `table`; `0` (no bound) unless assumption `A1` is listed. -/
 def forestGapBound (table : Array (Array (WithTop ℕ))) (M : ℕ) : WithTop ℕ :=
   if C.assumptions.contains "A1" then
-    forestBoundAt (scaledDurations C.d) C.c C.p C.s C.maxLevel table (C.gapLevel M)
+    forestBoundAt (scaledDurations C.d) C.c C.p C.t C.s C.maxLevel table (C.gapLevel M)
   else 0
 
 /-- The bound named by a gap. -/
@@ -273,12 +273,43 @@ def boundOf (table : Array (Array (WithTop ℕ))) : GapKind → ℕ → WithTop 
   | .relaxed => C.gapBound table
   | .forest => C.forestGapBound table
 
+/-- The bound named by a gap, from precomputed values: the scale of the durations, the highest
+level, the scaled durations and the one-plane table. `gapsCheck` computes them once; the result
+is `boundOf` (`boundOf_eq`). -/
+def boundWith (scale Tmax : ℕ) (dS : Fin C.n → ℕ) (table : Array (Array (WithTop ℕ))) :
+    GapKind → ℕ → WithTop ℕ
+  | .relaxed => fun M => relaxedBoundAt C.p C.s Tmax table ((M - 1) / 2 / scale)
+  | .forest => fun M =>
+    if C.assumptions.contains "A1" then
+      forestBoundAt dS C.c C.p C.t C.s Tmax table ((M - 1) / 2 / scale)
+    else 0
+
 /-- The one-plane table on scaled durations: rows `0, …, s`, columns `0, …, maxLevel`. -/
 def table : Array (Array (WithTop ℕ)) :=
   oneplaneTable (scaledDurations C.d) C.c C.maxLevel C.s
 
 /-- Obligation 3: at every gap, the named bound reaches the cost of the point above. -/
-def gapsCheck : Bool := gapsOK (C.boundOf C.table) C.front C.gaps
+def gapsCheck : Bool :=
+  let scale := durationScale C.d
+  let Tmax := (C.front.map fun x => (x.2 - 1) / 2 / scale).foldr max 0
+  let dArr := Array.ofFn (n := C.n) fun i => C.d i / scale
+  let dS : Fin C.n → ℕ := fun i => dArr.getD i 0
+  gapsOK (C.boundWith scale Tmax dS (oneplaneTable dS C.c Tmax C.s)) C.front C.gaps
+
+theorem boundOf_eq (table : Array (Array (WithTop ℕ))) :
+    C.boundOf table = C.boundWith (durationScale C.d) C.maxLevel (scaledDurations C.d) table := by
+  funext g M
+  cases g <;> rfl
+
+/-- `gapsCheck` is obligation 3 for the bounds `boundOf`. -/
+theorem gapsCheck_eq : C.gapsCheck = gapsOK (C.boundOf C.table) C.front C.gaps := by
+  have hdS : (fun i : Fin C.n => (Array.ofFn (n := C.n) fun i => C.d i / durationScale C.d).getD
+      i 0) = scaledDurations C.d := by
+    funext i
+    simp [Array.getD_eq_getD_getElem?, scaledDurations]
+  simp only [gapsCheck]
+  rw [hdS, boundOf_eq]
+  rfl
 
 /-- **The checker.** -/
 def check : Bool :=
@@ -301,13 +332,13 @@ theorem gapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d) (hpt 
 /-- The forest gap bound is sound under (A1): a feasible plan with makespan below `M` costs at
 least `forestGapBound M`. This is where the converse (Theorem 4.7) is used. -/
 theorem forestGapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
-    (hA1 : (C.network dc).A1) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hA1 : (C.network dc).A1) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
     (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
     C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := by
   unfold forestGapBound
   split_ifs
   · obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible (c := C.c) hS hA1 hpt
-    refine (forestBoundAt_le_totalCost (scaledDurations C.d) C.c hX hsize fun k => ?_).trans
+    refine (forestBoundAt_le_totalCost (scaledDurations C.d) C.c hp hpt hX hsize fun k => ?_).trans
       (WithTop.coe_le_coe.mpr hcost)
     apply load_scaled_le_of_load_le
     have := hload k
@@ -325,6 +356,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := by
   simp only [check, Bool.and_eq_true] at h
   obtain ⟨⟨⟨⟨⟨hhead, hmono⟩, hplans⟩, hfirst⟩, hlast⟩, hgaps⟩ := h
+  rw [gapsCheck_eq] at hgaps
   simp only [headerOK, Bool.and_eq_true, decide_eq_true_eq] at hhead
   obtain ⟨⟨⟨⟨-, hp⟩, hpt⟩, hsym⟩, -⟩ := hhead
   have hS : (C.network dc).dbar = (C.network dc).d := funext fun i => (hsym i).symm
@@ -343,7 +375,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
       | relaxed => exact C.gapBound_le hS' hpt hP hM
       | forest =>
         rcases hdc with hA1 | hrel
-        · exact C.forestGapBound_le hS' hA1 hpt hP hM
+        · exact C.forestGapBound_le hS' hA1 hp hpt hP hM
         · exact absurd (hrel _ hg) (by decide)
     · simp only [firstOK] at hfirst
       rw [Option.mem_def] at hx
