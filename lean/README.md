@@ -152,6 +152,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
 | `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
 | `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
+| `ZenoFront/ConverseTri.lean` | Theorem 4.10 (converse under (S) and (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_ATri` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
@@ -379,6 +380,23 @@ it.
 * `exists_admissible_of_blocks`: the same with blocks as lists of cities. If every class has an
   even number of planes with an even number of blocks, some admissible partition has one city per
   block, `δ(X_k) ≤ Σ_γ max_{x ∈ γ} d_x`, and landings at most the blocks' landings.
+
+**Theorem 4.10 (`ConverseTri.lean`)**
+
+* `Feasible.exists_chains`: every passenger rides a *chain* (`ToGoal`), its last departure from
+  `C_I` and its legs up to the next arrival in `C_G`, which meet in central cities. So a chain stays
+  in one class of planes connected by shared cities.
+* `exists_merge` (**Step 1**): counting (Lemma 3.2) in each class `K` gives `2 t_K ≤ σ_K + q_K`.
+  Merging two segments of one plane in each class with `σ_K + q_K` odd leaves an even number of
+  planes with an even number of blocks in every class, and at least `2t − p` blocks. A merged block
+  still flies at least `2 d_x` for each of its landings.
+* `exists_admissible_of_chains`: Theorem 4.10 for planes that end in `C_G` and passengers that
+  ride chains, with `2 δ(X_k) ≤ F_k` (`durSum`, the flight time).
+* `Feasible.exists_admissible_ATri` (**Theorem 4.10**): under (S) and (AΔ), with `p ≤ t` (a plan
+  on any number `p ≤ t` of planes, the note's set `Q` with `t ≥ |Q|`), every feasible plan gives an
+  admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane, and
+  `c(X) ≤ C`. `Feasible.exists_admissible_hub`: the same under `ATriHub`.
+  `Feasible.exists_admissible_ATri_makespan`: the shape of `Feasible.exists_admissible`.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
@@ -697,7 +715,8 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] (AΔ), the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`) and Lemma 4.11
       (`Admissible.exists_remove_two`).
-- [ ] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3.
+- [x] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3, with `ℓ(X_k) ≤ F_k`
+      (`Feasible.exists_admissible_ATri`).
 - [ ] Corollary 4.12: the fronts, Theorem 4.9 and `forest` gaps under (AΔ).
 
 **P4.**
