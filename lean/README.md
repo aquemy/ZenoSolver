@@ -299,8 +299,12 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `Feasible.exists_admissible` (**Theorem 4.7**): under (S) and (A1), with `p ≤ t`, every
   feasible plan with cost `C` and makespan `M` yields an admissible partition with
   `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M` for every plane, and `Σ_k c(X_k) ≤ C`.
+* `Feasible.exists_admissible_A1_flightTime` (`ConverseTri.lean`): Theorem 4.7 with the
+  per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, from Theorem 4.10, since (A1) implies the triangles through
+  a hub (`Network.A1.hub`).
 
-The proof does Step 1, cleaning, DS, SH and PAR of the note without changing the plan.
+The proof of `Feasible.exists_admissible` does Step 1, cleaning, DS, SH and PAR of the note
+without changing the plan.
 * **Step 1:** a central leg counts as passing through `C_G`, and under (A1) it lasts at least
   the weights of its two endpoints.
 * **Cleaning:** each passenger uses its last departure from `C_I` and the next leg.

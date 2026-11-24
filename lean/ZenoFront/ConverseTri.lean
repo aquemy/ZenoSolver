@@ -45,6 +45,8 @@ group has one city per block within the block's largest duration, so `2 δ(X_k) 
 * `ZenoFront.Feasible.exists_admissible_ATri`: **Theorem 4.10**, with `ℓ(X_k) ≤ F_k ≤ M`.
 * `ZenoFront.Feasible.exists_admissible_ATri_makespan`: the same in the shape of
   `Feasible.exists_admissible` (Theorem 4.7).
+* `ZenoFront.Feasible.exists_admissible_A1_flightTime`: Theorem 4.7 with the per-plane bound
+  `ℓ(X_k) ≤ F_k`, as a corollary.
 -/
 
 @[expose] public section
@@ -623,5 +625,15 @@ theorem Feasible.exists_admissible_ATri_makespan {N : Network n} (hS : N.dbar = 
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
   obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_ATri hS hA c hpt
   exact ⟨X, hX, hsize, fun k => (hload k).1.trans (hload k).2, hcost⟩
+
+/-- **Theorem 4.7 with the per-plane bound.** Under (S) and (A1), with `p ≤ t`, every feasible
+plan gives an admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) ≤ F_k ≤ M` for every
+plane and `c(X) ≤ C`: Theorem 4.10's proof covers (A1) (`Network.A1.hub`). -/
+theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = N.d)
+    (hA1 : N.A1) (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
+      totalCost c X ≤ planCost c P :=
+  hP.exists_admissible_hub hS hA1.hub c hpt
 
 end ZenoFront
