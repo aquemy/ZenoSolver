@@ -11,6 +11,7 @@ public import ZenoFront.PlanBounds
 public import ZenoFront.Relaxation
 public import ZenoFront.Simulate
 public import ZenoFront.Checker
+public import ZenoFront.CheckerV2
 public import ZenoFront.Parse
 public import ZenoFront.Examples
 public import ZenoFront.Shrink

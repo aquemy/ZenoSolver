@@ -4,12 +4,13 @@ Released under the license of the ZenoSolver repository.
 -/
 module
 
-public import ZenoFront.Checker
+public import ZenoFront.CheckerV2
 
 /-!
-# Parser for certificate format v1 (untrusted)
+# Parser for certificate formats v1 and v2 (untrusted)
 
-Reads the text format of `doc/certificate-format.md` into a `Cert`, mirroring `readCertificate`
+Reads the text format of `doc/certificate-format.md` into a `Cert` (v1) or a `Cert2` (v2),
+mirroring `readCertificate`
 in `src/zeno/certificate.cpp`: blank lines and lines starting with `#` are ignored, tokens are
 separated by white space, numbers are non-negative integers, plans, planes and gaps are listed
 in order, and nothing may follow `end`.
@@ -114,11 +115,52 @@ def gap (i : ℕ) : ParseM GapKind := do
   | "forest" => return .forest
   | other => throw s!"certificate, line {num}: unknown lower bound '{other}'"
 
+/-- A signed integer (a Lagrangian multiplier). -/
+def signedNumber (num : ℕ) (tok : String) : ParseM ℤ :=
+  match tok.toInt? with
+  | some v => pure v
+  | none => throw s!"certificate, line {num}: expected an integer, found '{tok}'"
+
+/-- A v2 kind without multipliers. -/
+def kind2 (num : ℕ) : String → ParseM Kind2
+  | "closed" => pure .closed
+  | "relaxed" => pure .relaxed
+  | "forest" => pure .forest
+  | "roles" => pure .roles
+  | "balanced" => pure .balanced
+  | "search" => pure .search
+  | other => throw s!"certificate, line {num}: unknown bound '{other}'"
+
+/-- One v2 gap: `i <kind>`, or `i lagrangian mu_1 … mu_n`. -/
+def gap2 (n : ℕ) (i : ℕ) : ParseM Kind2 := do
+  let (num, toks) ← nextLine "" none
+  if toks.length < 2 then
+    throw s!"certificate, line {num}: lower bounds must be listed as '<gap> <kind>'"
+  if (← number num (toks.getD 0 "")) != i + 1 then
+    throw s!"certificate, line {num}: lower bounds must be listed in order"
+  match toks.getD 1 "" with
+  | "lagrangian" =>
+    if toks.length != n + 2 then
+      throw s!"certificate, line {num}: a lagrangian bound lists one multiplier per city"
+    return .lagrangian (← (toks.drop 2).mapM (signedNumber num))
+  | name =>
+    if toks.length != 2 then
+      throw s!"certificate, line {num}: unexpected values after '{name}'"
+    match ← kind2 num name with
+    | .closed => throw s!"certificate, line {num}: unknown lower bound 'closed'"
+    | k => return k
+
+/-- A parsed certificate of either version. -/
+inductive AnyCert where
+  | v1 (C : Cert)
+  | v2 (C : Cert2)
+
 /-- A whole certificate. -/
-def cert : ParseM Cert := do
+def anyCert : ParseM AnyCert := do
   let (num, header) ← nextLine "zeno-certificate" (some 2)
-  if header.getD 1 "" != "1" then
-    throw s!"certificate, line {num}: unsupported version {header.getD 1 ""}"
+  let version := header.getD 1 ""
+  if version != "1" && version != "2" then
+    throw s!"certificate, line {num}: unsupported version {version}"
   let (num, head) ← nextLine "instance" (some 4)
   let n ← number num (head.getD 1 "")
   let t ← number num (head.getD 2 "")
@@ -132,23 +174,47 @@ def cert : ParseM Cert := do
   let front ← (List.range r).mapM fun _ => do
     let (num, toks) ← nextLine "" (some 2)
     return (← number num (toks.getD 0 ""), ← number num (toks.getD 1 ""))
+  let fastest ← if version == "2" then do
+      let (num, toks) ← nextLine "fastest" (some 2)
+      match ← kind2 num (toks.getD 1 "") with
+      | .forest => throw s!"certificate, line {num}: unknown fastest bound 'forest'"
+      | k => pure k
+    else pure .closed
   let plans ← (List.range r).mapM (plan n t p)
   let (num, gapHead) ← nextLine "lower-bounds" (some 2)
   let g ← number num (gapHead.getD 1 "")
-  let gaps ← (List.range g).mapM gap
-  let _ ← nextLine "end" (some 1)
-  if !(← get).isEmpty then throw "certificate: content after 'end'"
-  return { n, t, p
-           d := fun i => d.getD i.val 0
-           dbar := fun i => dbar.getD i.val 0
-           c := fun i => c.getD i.val 0
-           assumptions := assume.drop 1
-           front, plans, gaps }
+  if version == "1" then
+    let gaps ← (List.range g).mapM gap
+    let _ ← nextLine "end" (some 1)
+    if !(← get).isEmpty then throw "certificate: content after 'end'"
+    return .v1 { n, t, p
+                 d := fun i => d.getD i.val 0
+                 dbar := fun i => dbar.getD i.val 0
+                 c := fun i => c.getD i.val 0
+                 assumptions := assume.drop 1
+                 front, plans, gaps }
+  else
+    let gaps ← (List.range g).mapM (gap2 n)
+    let _ ← nextLine "end" (some 1)
+    if !(← get).isEmpty then throw "certificate: content after 'end'"
+    return .v2 { n, t, p
+                 d := fun i => d.getD i.val 0
+                 dbar := fun i => dbar.getD i.val 0
+                 c := fun i => c.getD i.val 0
+                 assumptions := assume.drop 1
+                 front, fastest, plans, gaps }
 
 end Parse
 
-/-- Parse a certificate from its text. -/
+/-- Parse a certificate of either version from its text. -/
+def parseAnyCert (text : String) : Except String Parse.AnyCert :=
+  (Parse.anyCert.run (Parse.tokenize text)).map Prod.fst
+
+/-- Parse a version 1 certificate from its text. -/
 def parseCert (text : String) : Except String Cert :=
-  (Parse.cert.run (Parse.tokenize text)).map Prod.fst
+  match parseAnyCert text with
+  | .ok (.v1 C) => .ok C
+  | .ok (.v2 _) => .error "certificate: version 2, expected version 1"
+  | .error e => .error e
 
 end ZenoFront

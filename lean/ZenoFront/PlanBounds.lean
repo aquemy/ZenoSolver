@@ -21,10 +21,11 @@ durations (S), `d̄ = d`.
   `C_I` on a leg and reaches `C_G` on a leg, and a leg carries one passenger, so summed over the
   planes, `#hub arrivals ≥ 2t − p = s`.
 * **Segments.** Cut a route at its hub arrivals: each piece (segment) lands at least once, and
-  under (S) it lasts at least `d_a + d_b ≥ 2 min(d_a, d_b)`, `a` and `b` being its first and last
-  landings. Keeping one landing per segment (the one with the smaller `d`) gives a multiset `Z_k`
-  per plane with `|Z_k| = #segments`, `2 δ(Z_k) ≤` flight time `≤` makespan, and
-  `c(Z_k) ≤` the plane's landing cost.
+  it lasts at least `e_a + e_b ≥ 2 min(e_a, e_b)`, `a` and `b` being its first and last landings
+  and `e = min(d, d̄)` (`Network.emin`): its first and last flights are hub flights. Keeping one
+  landing per segment (the one with the smaller `e`) gives a multiset `Z_k` per plane with
+  `|Z_k| = #segments`, `2 e(Z_k) ≤` flight time `≤` makespan, and `c(Z_k) ≤` the plane's
+  landing cost. Under (S), `e = d`.
 * **Lemma R** (`Feasible.exists_relaxation`). Trimming the `Z_k` gives `p` non-empty groups of
   total size exactly `s`, with `2 δ(Y_k) ≤ M` and `Σ c(Y_k) ≤ C`.
 
@@ -34,7 +35,9 @@ durations (S), `d̄ = d`.
 * `ZenoFront.Feasible.le_sum_hubArrivals`: `2t ≤ Σ_k #hub arrivals_k + p`.
 * `ZenoFront.PlaneFeasible.exists_segments`: one landing per segment.
 * `ZenoFront.exists_trim`: trimming groups to a given total size.
-* `ZenoFront.Feasible.exists_relaxation`: **Lemma R**.
+* `ZenoFront.Feasible.exists_relaxation_emin`: **Lemma R**, for any durations (the weight of a
+  landing is `2 min(d, d̄)`).
+* `ZenoFront.Feasible.exists_relaxation`: **Lemma R** under (S).
 -/
 
 @[expose] public section
@@ -180,19 +183,32 @@ theorem add_durSum_le_endTime : ∀ (legs : List (Leg n t)) (x : Loc n) (τ : �
     simp only [durSum, List.map_cons, List.sum_cons, endTime_cons] at ih ⊢
     omega
 
+/-- The shorter hub flight of city `i`: `min(d_i, d̄_i)`. Every flight between a hub and `i`
+lasts at least this long. -/
+def Network.emin (N : Network n) (i : Fin n) : ℕ := min (N.d i) (N.dbar i)
+
+theorem Network.emin_le_d (N : Network n) (i : Fin n) : N.emin i ≤ N.d i := min_le_left _ _
+
+theorem Network.emin_le_dbar (N : Network n) (i : Fin n) : N.emin i ≤ N.dbar i :=
+  min_le_right _ _
+
+theorem Network.emin_eq_of_sym {N : Network n} (hS : N.dbar = N.d) : N.emin = N.d := by
+  funext i
+  simp [Network.emin, hS]
+
 /-- **Segments.** Along a route ending at a hub, keep one landing per segment, the one of smaller
-duration among the segment's first and last landings. Under (S) this gives a multiset with one
+`min(d, d̄)` among the segment's first and last landings. This gives a multiset with one
 element per hub arrival, twice its load at most the flight time, and its cost at most the landing
 cost. The second part is the invariant in the middle of a segment: the current city is `w`, the
 segment's first landing was `f` (its incoming hub leg, `d f`, is already paid), and the landing
 costs of `f` and `w` are available. -/
-theorem exists_segments_aux (N : Network n) (hS : N.dbar = N.d) (c : Fin n → ℕ) :
+theorem exists_segments_aux (N : Network n) (c : Fin n → ℕ) :
     ∀ (legs : List (Leg n t)) (x : Loc n) (τ : ℕ), IsRoute x τ legs → (∀ ℓ ∈ legs, Flies N ℓ) →
       (finalLoc x legs).isHub = true →
       (x.isHub = true → ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧
-          2 * load N.d Z ≤ durSum legs ∧ cost c Z ≤ landCostSum c legs) ∧
+          2 * load N.emin Z ≤ durSum legs ∧ cost c Z ≤ landCostSum c legs) ∧
       (∀ w f : Fin n, x = .city w → ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧
-          2 * load N.d Z ≤ durSum legs + N.d f ∧
+          2 * load N.emin Z ≤ durSum legs + N.emin f ∧
           cost c Z ≤ landCostSum c legs + max (c f) (c w))
   | [], x, _, _, _, hend => by
     refine ⟨fun _ => ⟨0, by simp [hubArrivals], by simp, by simp⟩, fun w f hx => ?_⟩
@@ -205,7 +221,7 @@ theorem exists_segments_aux (N : Network n) (hS : N.dbar = N.d) (c : Fin n → �
     have hfl : Flies N ⟨src, dst, dep, arr, pax⟩ := hflies _ List.mem_cons_self
     obtain ⟨τ', hdur, harr⟩ := hfl
     simp only at hdur harr
-    have ih := exists_segments_aux N hS c rest dst arr hrest
+    have ih := exists_segments_aux N c rest dst arr hrest
       (fun m hm => hflies m (List.mem_cons_of_mem _ hm)) hend
     have hdur' : arr - dep = τ' := by omega
     simp only [hubArrivals, durSum, landCostSum, List.countP_cons, List.map_cons,
@@ -219,6 +235,7 @@ theorem exists_segments_aux (N : Network n) (hS : N.dbar = N.d) (c : Fin n → �
       | cg => simp [Network.duration] at hdur
       | city w' =>
         simp only [Network.duration, Option.some.injEq] at hdur
+        have he := N.emin_le_d w'
         obtain ⟨Z, hcard, hload, hcost⟩ := ih.2 w' w' rfl
         refine ⟨Z, by simp [hcard], by omega, ?_⟩
         simp only [landCost, max_self] at hcost ⊢
@@ -229,7 +246,8 @@ theorem exists_segments_aux (N : Network n) (hS : N.dbar = N.d) (c : Fin n → �
       | ci => simp [Network.duration] at hdur
       | cg => simp [Network.duration] at hdur
       | city w' =>
-        simp only [Network.duration, Option.some.injEq, hS] at hdur
+        simp only [Network.duration, Option.some.injEq] at hdur
+        have he := N.emin_le_dbar w'
         obtain ⟨Z, hcard, hload, hcost⟩ := ih.2 w' w' rfl
         refine ⟨Z, by simp [hcard], by omega, ?_⟩
         simp only [landCost, max_self] at hcost ⊢
@@ -246,15 +264,17 @@ theorem exists_segments_aux (N : Network n) (hS : N.dbar = N.d) (c : Fin n → �
         omega
       | ci =>
         simp only [Network.duration, Option.some.injEq] at hdur
+        have he := N.emin_le_d w
         obtain ⟨Z, hcard, hload, hcost⟩ := ih.1 rfl
-        refine ⟨(if N.d f ≤ N.d w then f else w) ::ₘ Z, by simp [hcard], ?_, ?_⟩
+        refine ⟨(if N.emin f ≤ N.emin w then f else w) ::ₘ Z, by simp [hcard], ?_, ?_⟩
         · split_ifs with hfw <;> simp only [load_cons] <;> omega
         · simp only [landCost] at hcost ⊢
           split_ifs with hfw <;> simp only [cost_cons] <;> omega
       | cg =>
-        simp only [Network.duration, Option.some.injEq, hS] at hdur
+        simp only [Network.duration, Option.some.injEq] at hdur
+        have he := N.emin_le_dbar w
         obtain ⟨Z, hcard, hload, hcost⟩ := ih.1 rfl
-        refine ⟨(if N.d f ≤ N.d w then f else w) ::ₘ Z, by simp [hcard], ?_, ?_⟩
+        refine ⟨(if N.emin f ≤ N.emin w then f else w) ::ₘ Z, by simp [hcard], ?_, ?_⟩
         · split_ifs with hfw <;> simp only [load_cons] <;> omega
         · simp only [landCost] at hcost ⊢
           split_ifs with hfw <;> simp only [cost_cons] <;> omega
@@ -263,15 +283,15 @@ theorem Flies.dep_le_arr {N : Network n} {ℓ : Leg n t} (h : Flies N ℓ) : ℓ
   obtain ⟨τ, -, h⟩ := h
   omega
 
-/-- **Segments of a plane.** Under (S), a feasible plane yields a multiset `Z` with one landing
-per segment (`|Z| = #hub arrivals`), `2 δ(Z) ≤` the plane's end time, and `c(Z) ≤` the plane's
-landing cost. -/
-theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+/-- **Segments of a plane.** A feasible plane yields a multiset `Z` with one landing per
+segment (`|Z| = #hub arrivals`), `2 δ(Z) ≤` the plane's end time for the durations
+`min(d, d̄)`, and `c(Z) ≤` the plane's landing cost. -/
+theorem PlaneFeasible.exists_segments_emin {N : Network n} (c : Fin n → ℕ)
     {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
-    ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.d Z ≤ endTime 0 legs ∧
+    ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.emin Z ≤ endTime 0 legs ∧
       cost c Z ≤ landCostSum c legs := by
   obtain ⟨Z, hcard, hload, hcost⟩ :=
-    (exists_segments_aux N hS c legs .ci 0 h.route h.flies (by simp [h.ends])).1 rfl
+    (exists_segments_aux N c legs .ci 0 h.route h.flies (by simp [h.ends])).1 rfl
   have := add_durSum_le_endTime legs .ci 0 h.route fun ℓ hℓ => (h.flies ℓ hℓ).dep_le_arr
   exact ⟨Z, hcard, by omega, hcost⟩
 
@@ -334,14 +354,15 @@ theorem exists_trim {α : Type*} [DecidableEq α] (s : ℕ) (hps : p ≤ s) :
 
 /-! ### Lemma R -/
 
-/-- **Lemma R** (relaxation). Under (S), whatever the central flights, a feasible plan with
-`1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size `s = 2t − p`, with
-`2 δ(Y_k) ≤` the makespan for every plane and total cost at most the plan's cost. -/
-theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+/-- **Lemma R** (relaxation), non-symmetric form. Whatever the durations and the central
+flights, a feasible plan with `1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size
+`s = 2t − p`, with `2 δ(Y_k) ≤` the makespan for the durations `min(d, d̄)`, and total cost at most
+the plan's cost. -/
+theorem Feasible.exists_relaxation_emin {N : Network n} (c : Fin n → ℕ)
     {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
     ∃ Y : Groups n p, (∀ k, 1 ≤ (Y k).card) ∧ size Y = 2 * t - p ∧
-      (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := by
-  choose Z hcard hload hcost using fun k => (hP.planes k).exists_segments hS c
+      (∀ k, 2 * load N.emin (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := by
+  choose Z hcard hload hcost using fun k => (hP.planes k).exists_segments_emin c
   have hpos : ∀ k, 1 ≤ (Z k).card := by
     intro k
     rw [hcard k]
@@ -364,5 +385,21 @@ theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin 
           Finset.sum_le_sum fun k _ => cost_mono c (hle k)
       _ ≤ ∑ k, landCostSum c (P k) := Finset.sum_le_sum fun k _ => hcost k
       _ = planCost c P := rfl
+
+/-- **Segments of a plane**, under (S): `2 δ(Z) ≤` the plane's end time. -/
+theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+    {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
+    ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.d Z ≤ endTime 0 legs ∧
+      cost c Z ≤ landCostSum c legs := by
+  simpa [Network.emin_eq_of_sym hS] using h.exists_segments_emin c
+
+/-- **Lemma R** (relaxation). Under (S), whatever the central flights, a feasible plan with
+`1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size `s = 2t − p`, with
+`2 δ(Y_k) ≤` the makespan for every plane and total cost at most the plan's cost. -/
+theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ Y : Groups n p, (∀ k, 1 ≤ (Y k).card) ∧ size Y = 2 * t - p ∧
+      (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := by
+  simpa [Network.emin_eq_of_sym hS] using hP.exists_relaxation_emin c hpt
 
 end ZenoFront
