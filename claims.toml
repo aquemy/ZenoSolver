@@ -11,13 +11,14 @@
 #   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
 # so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
 # counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
-# claims are paper-greedy-optimal and paper-no-harmful-waiting. Experiments are exp-<id>, in the
-# Experiments section at the end of this file.
+# claims are paper-greedy-optimal and paper-no-harmful-waiting. A statement the note does not
+# number gets a descriptive slug: claim-converse-s-only, the converse under (S) alone. Experiments
+# are exp-<id>, in the Experiments section at the end of this file.
 #
 # Fields:
 #   kind          definition, lemma, theorem, proposition, corollary, conjecture or claim
-#   statement     one or two sentences. For a kernel-checked claim whose Lean statement is narrower
-#                 than the note's, it ends with the "Lean form".
+#   statement     one or two sentences. For a kernel-checked claim it may end with the "Lean form":
+#                 how the Lean statement encodes the note's (natural-number data, (S) as d̄ = d, ...).
 #   status        cache of the effective status (legend below)
 #   lean          the Lean declarations whose kernel proof is the claim (math.machine-checked)
 #   lean_partial  Lean declarations that prove only part of a claim recorded as a written proof
@@ -30,7 +31,8 @@
 #
 # Status legend (axis 2, epistemic):
 #   math.machine-checked  clean Lean kernel proof (Axioms: only propext, Classical.choice, Quot.sound)
-#   math.proved-informal  complete written proof in the note (P), not a complete Lean proof
+#                         of every assertion of the statement, up to the Lean model's encoding
+#   math.proved-informal  complete written proof in the note (P); Lean may prove part (lean_partial)
 #   math.conjectured      open (O) or only sketched (S) in the note
 #   math.disproved        refuted by a counterexample
 

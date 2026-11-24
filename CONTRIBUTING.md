@@ -49,7 +49,8 @@ proofs and scientific findings. Spec: https://conventional-knowledge-commits.org
 the papers it corrects, and the experiments. Slugs are `<kind>-<number with dots as dashes>`,
 with the kind read from the note's own label: `def`, `lem`, `thm`, `prop`, `cor`, `conj`, or
 `claim` for a Statement or a statement located by its section. Theorem 4.7 is `thm-4-7` and the
-end of §6.2 is `claim-6-2-end`. Experiments are `exp-<id>`. The file's header gives the fields.
+end of §6.2 is `claim-6-2-end`. A statement the note does not number gets a descriptive slug, as
+`claim-converse-s-only`. Experiments are `exp-<id>`. The file's header gives the fields.
 
 How each kind of record is written here:
 
@@ -57,8 +58,12 @@ How each kind of record is written here:
   `Status: math.machine-checked`, `Axioms: <the literal #print axioms output>` and
   `Closes: claim:<slug>`. Its `Depends-On:` lists only claims that are themselves kernel-checked.
   Steps that the note proves in writing and the Lean proof does another way are named in the
-  body. When the Lean statement is narrower than the note's, the body and the `statement` of the
-  entry give the "Lean form".
+  body. A claim is kernel-checked only if its Lean declarations prove every assertion of the
+  note's statement, up to the Lean model's encoding: natural-number data and times, (S) as
+  d̄ = d, (A1) as `Network.A1`, the standing assumption p ≤ t, passenger counts as landing counts.
+  The body and the entry's `statement` give that encoding as the "Lean form". A missing clause, a
+  weaker bound or a different object (another graph, the makespan for a flight time) makes it a
+  written proof with `lean_partial`, however routine the gap looks.
 - **Written proof**: `proof(theory): ...` with `Claim-ID: <slug>` and
   `Status: math.proved-informal`. If Lean proves only part of it, the entry's `lean_partial`
   names those declarations.
@@ -69,6 +74,9 @@ How each kind of record is written here:
   read `BREAKING CHANGE` as a trailer, and then ignores the whole footer block.
 - **Experiment**: `experiment(<id>): ...` with a `sci.*` status, `Verified-By:` and
   `Closes: claim:exp-<id>`.
+- **Status correction**: `review(<scope>): ...` with `Claim-ID: <slug>` and the corrected
+  `Status:`, the body saying what was wrong. The statement itself is unchanged, so it takes no
+  `!`. A review that confirms a status carries no `Status:` footer.
 
 When a claim changes status, the same pull request updates the note, its entry in `claims.toml`
 (the `status` cache) and records the change in a new commit.
