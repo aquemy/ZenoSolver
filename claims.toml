@@ -237,6 +237,13 @@ lean      = "ZenoFront.minimal_achievable_iff_anywhere_of_A1"
 paper     = "Thm 4.9, doc/theory/exact-front.md §4.5"
 created   = "2026-11-23"
 
+[claims.conj-4-10]
+kind      = "conjecture"
+statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan."
+status    = "math.conjectured"
+paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Experiments
 # ===========================================================================
