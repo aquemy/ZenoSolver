@@ -376,6 +376,14 @@ status    = "math.proved-informal"
 paper     = "Prop 7.4, doc/theory/exact-front.md §7.3"
 created   = "2026-11-23"
 
+[claims.thm-7-5]
+kind      = "theorem"
+statement = "Theorem 7.5 (link-forest DP): For[p][s] = E(T), and given G the DP takes O(n q_max² s² T + p q_max s²) time and O(q_max s T + n q_max s + p s) memory per level. Lean form: the memoised DP (treeBoundAt) equals E(T) for 1 ≤ p and T ≤ Tmax; the complexity is not formalised."
+status    = "math.machine-checked"
+lean      = "ZenoFront.treeBoundAt_eq_minCost"
+paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
