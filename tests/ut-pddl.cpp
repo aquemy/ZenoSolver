@@ -3,6 +3,7 @@
 #include <zeno/io.hpp>
 #include <zeno/legacy_input.hpp>
 
+#include <algorithm>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -150,6 +151,81 @@ int main()
         const zeno::Instance back = zeno::legacy::buildInstance(options);
         std::filesystem::remove(path);
         check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, "data file round trip");
+    }
+
+    // Data files are read as written, even with decreasing durations; the
+    // 2016 swap (durations and costs trade places, C_G side reversed) only
+    // applies to them on request.
+    {
+        const auto path = std::filesystem::temp_directory_path() / "zeno-ut-swap.dat";
+        {
+            std::ofstream out(path);
+            out << "9 2 9 9\n8 7 8 3\n14 13 17 15\n";
+        }
+        zeno::legacy::Options options;
+        options.n = 4;
+        options.t = 4;
+        options.p = 2;
+        options.dataFile = path.string();
+        bool swapped = true;
+        const zeno::Instance literal = zeno::legacy::buildInstance(options, &swapped);
+        check(!swapped, "data file: no swap by default");
+        check(literal.d == std::vector<zeno::Time>{9, 2, 9, 9} && literal.dbar == std::vector<zeno::Time>{8, 7, 8, 3}
+                  && literal.c == std::vector<zeno::Cost>{14, 13, 17, 15},
+              "data file read as written");
+        options.legacySwap = true;
+        const zeno::Instance legacy = zeno::legacy::buildInstance(options, &swapped);
+        check(swapped, "data file: --legacy-swap swaps");
+        check(legacy.d == std::vector<zeno::Time>{14, 13, 17, 15} && legacy.dbar == std::vector<zeno::Time>{3, 8, 7, 8}
+                  && legacy.c == std::vector<zeno::Cost>{9, 2, 9, 9},
+              "data file: the 2016 swap");
+        std::filesystem::remove(path);
+    }
+
+    // Generated instances keep the 2016 meaning, and `zeno generate` output
+    // reads back as the same instance.
+    {
+        const auto roundTrip = [&](const zeno::legacy::Options& generated, const char* what) {
+            const zeno::Instance instance = zeno::legacy::buildInstance(generated);
+            const auto path = std::filesystem::temp_directory_path() / "zeno-ut-generate.dat";
+            {
+                std::ofstream out(path);
+                zeno::writeDataFile(out, instance);
+            }
+            zeno::legacy::Options read;
+            read.n = generated.n;
+            read.t = generated.t;
+            read.p = generated.p;
+            read.dataFile = path.string();
+            const zeno::Instance back = zeno::legacy::buildInstance(read);
+            std::filesystem::remove(path);
+            check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, what);
+            return instance;
+        };
+        zeno::legacy::Options sym;
+        sym.n = 5;
+        sym.t = 4;
+        sym.p = 2;
+        sym.costFunction = 2;
+        sym.durationFunction = 4;
+        sym.adjust = 10;
+        bool swapped = false;
+        const zeno::Instance generated = zeno::legacy::buildInstance(sym, &swapped);
+        check(swapped, "generated instance: the 2016 swap applies");
+        check(std::ranges::is_sorted(generated.d), "generated durations increase after the swap");
+        roundTrip(sym, "generate round trip (symmetric)");
+
+        zeno::legacy::Options ns = sym;
+        ns.costFunction = 3;
+        ns.eastFunction = 1;
+        ns.westFunction = 3;
+        ns.adjust = 100;
+        const zeno::Instance legacyNs = roundTrip(ns, "generate round trip (-E -W)");
+        check(legacyNs.symmetric(), "-E 1 -W 3 with the 2016 swap: -C (identity) sets the C_I side, as -W does");
+        ns.legacySwap = false;
+        const zeno::Instance intended = roundTrip(ns, "generate round trip (--no-legacy-swap)");
+        check(!intended.symmetric(), "--no-legacy-swap: -E sets the C_I side, -W the C_G side");
+        check(intended.c == std::vector<zeno::Cost>{100, 200, 300, 400, 500}, "--no-legacy-swap: -C sets the costs");
     }
 
     if(failures == 0)

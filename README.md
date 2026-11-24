@@ -122,7 +122,7 @@ Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once
 - `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
 - `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 
-Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Also as in 2016, when the first duration exceeds the second the duration and cost vectors are swapped (the 2016 code assumed increasing durations); `zeno` prints a note when this happens to a data file. Order the cities by duration to avoid it.
+Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Also as in 2016, generated instances go through a swap: when the first duration exceeds the second, the duration and cost vectors trade places and the C_G-side durations are reversed (the 2016 code assumed increasing durations). The generator writes decreasing durations, so this nearly always happens: `-C` sets the durations and `-D` (or `-E`) the costs, which is how the papers' instances are defined. `--no-legacy-swap` keeps every option for what its name says. Data files are read as written; `--legacy-swap` applies the 2016 swap to them too. `zeno generate` writes the instance as it was built, so its output reads back as the same instance.
 
 # PDDL
 

@@ -115,9 +115,10 @@ Instance buildInstance(const Options& o, bool* swapped)
         for(auto& value : *v)
             value = static_cast<double>(static_cast<int>(o.adjust * value));
 
+    const bool swap = o.legacySwap.value_or(!o.dataFile.has_value()) && n > 1 && d[0] > d[1];
     if(swapped)
-        *swapped = n > 1 && d[0] > d[1];
-    if(n > 1 && d[0] > d[1])
+        *swapped = swap;
+    if(swap)
     {
         std::swap(d, c);
         std::ranges::reverse(de);

@@ -143,6 +143,11 @@ InstanceArguments parseInstanceArguments(const std::vector<std::string>& args)
         static const std::vector<std::string> withValue{"-n", "-t", "-p", "-d", "-C", "-D", "-E", "-W", "-r", "-j", "-k", "-l", "-m", "-x", "-y"};
         if(flag == "-F")
             continue;
+        if(flag == "--legacy-swap" || flag == "--no-legacy-swap")
+        {
+            o.legacySwap = flag == "--legacy-swap";
+            continue;
+        }
         if(std::ranges::find(withValue, flag) == withValue.end())
         {
             parsed.rest.push_back(flag);
@@ -187,6 +192,13 @@ const char* instanceOptionsHelp()
   -l -m       duration generator scale / translation
   -x -y       output scale / translation of both generators
   -F          accepted for compatibility (the front is always printed)
+  --legacy-swap, --no-legacy-swap
+              the 2016 swap: when d[0] > d[1], durations and costs trade
+              places and C_G-side durations are reversed. It applies by
+              default to generated instances (the generator writes
+              decreasing durations, so -C sets the durations and -D, or -E,
+              the costs, as in the papers) and not to data files, which are
+              read as written
 )";
 }
 } // namespace cli

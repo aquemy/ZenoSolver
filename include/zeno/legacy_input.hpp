@@ -7,12 +7,16 @@
 
 namespace zeno::legacy
 {
-/// The instance options of the 2016 solvers (`zenoSolver -h`). Building an
-/// instance from them reproduces the 2016 construction exactly, quirks
-/// included, so that both solvers see the same data:
+/// The instance options of the 2016 solvers (`zenoSolver -h`). Building a
+/// generated instance from them reproduces the 2016 construction exactly,
+/// quirks included, so that the papers' instances keep their meaning:
 /// - values are multiplied by `adjust` (-r) and truncated toward zero;
 /// - if d[0] > d[1] after that, the duration and cost vectors are swapped and
 ///   the east durations reversed (the 2016 code assumed increasing durations).
+///   The generator writes durations in decreasing order, so this always
+///   happens unless truncation ties d[0] and d[1]: -C then sets the C_I-side
+///   durations and -D (or -E) the costs. Data files are read as written.
+///   `legacySwap` overrides both defaults.
 struct Options
 {
     int n = 3, t = 3, p = 2;
@@ -25,6 +29,9 @@ struct Options
     double scaleC = 1, transC = 0;       ///< -j, -k: c_i = x f(j i + k) + y
     double scaleD = 1, transD = 0;       ///< -l, -m: d_i = x g(l (n + 1 - i) + m) + y
     double x = 1, y = 0;                 ///< -x, -y
+    /// --legacy-swap / --no-legacy-swap; unset: the 2016 swap applies to
+    /// generated instances and not to data files.
+    std::optional<bool> legacySwap;
 };
 
 /// Builds the instance; throws std::invalid_argument or std::runtime_error.
