@@ -465,6 +465,13 @@ status    = "math.proved-informal"
 paper     = "Lemma 9.2, doc/theory/exact-front.md §9"
 created   = "2026-11-23"
 
+[claims.lem-9-3]
+kind      = "lemma"
+statement = "Lemma 9.3 (default potentials): the potentials V_0 built from the one-plane table (L_rest when σ = ∅, max over a ∈ σ of L^a otherwise) satisfy V_0(target) = 0 and V_0(u) ≤ wt(u, v) + V_0(v) on every arc of the σ-graph."
+status    = "math.proved-informal"
+paper     = "Lemma 9.3, doc/theory/exact-front.md §9"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
