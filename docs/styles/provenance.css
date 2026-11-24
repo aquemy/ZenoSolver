@@ -1,69 +1,7 @@
-/* Provenance styling: three boxed callouts that separate the original authors' work from ours.
-   The same three classes are mapped to tcolorbox environments in the PDF (filters/provenance.lua
-   + tex/provenance.tex), so HTML and PDF render the same visual convention. */
+/* Status badges (kernel-honest per-node status) and the source links under Lean listings. The same
+   badge classes are mapped to LaTeX macros for the PDF by filters/provenance.lua and
+   tex/provenance.tex. */
 
-.from-paper,
-.our-work,
-.strengthen {
-  padding: 0.7em 1.1em;
-  margin: 1.1em 0;
-  border-radius: 4px;
-  border-left-width: 5px;
-  border-left-style: solid;
-}
-
-/* From the original paper: a neutral grey "quotation" box, clearly the authors' words. */
-.from-paper {
-  background: #f4f4f5;
-  border-left-color: #71717a;
-}
-.from-paper > p:first-child,
-.from-paper .prov-title {
-  color: #3f3f46;
-  font-variant: small-caps;
-  letter-spacing: 0.02em;
-}
-.from-paper blockquote {
-  border-left: 2px solid #a1a1aa;
-  color: #27272a;
-  margin: 0.4em 0;
-}
-
-/* Our formalization: a blue box for the Lean + prose contribution. */
-.our-work {
-  background: #eff5fc;
-  border-left-color: #3b82c4;
-}
-.our-work > p:first-child,
-.our-work .prov-title {
-  color: #1d4e89;
-  font-variant: small-caps;
-  letter-spacing: 0.02em;
-}
-
-/* What we strengthen: a green box for corrections / discharged gaps (F1, F2, ...). */
-.strengthen {
-  background: #eefaf0;
-  border-left-color: #3aa34a;
-}
-.strengthen > p:first-child,
-.strengthen .prov-title {
-  color: #1e7a32;
-  font-variant: small-caps;
-  letter-spacing: 0.02em;
-}
-
-/* Side-by-side statement comparison (web only; the PDF stacks the two boxes). */
-.cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1em;
-}
-@media (max-width: 720px) {
-  .cols { grid-template-columns: 1fr; }
-}
-
-/* Status badges: kernel-honest per-node status. */
 .badge {
   display: inline-block;
   font-size: 0.78em;
@@ -75,9 +13,15 @@
 }
 .badge.ok        { background: #d6f0d9; color: #1e7a32; }   /* machine-checked */
 .badge.axiom     { background: #fdeccd; color: #92560a; }   /* axiomatised */
-.badge.open      { background: #f3d6d6; color: #962020; }   /* open (sorry) */
+.badge.open      { background: #f3d6d6; color: #962020; }   /* open (sorry, or an open problem) */
 .badge.informal  { background: #e6e6ea; color: #444; }      /* informal */
 .badge.refuted   { background: #ecdff4; color: #6b2a8c; }   /* refuted conjecture */
+
+body.quarto-dark .badge.ok       { background: #1f3d26; color: #8fd9a0; }
+body.quarto-dark .badge.axiom    { background: #4a3611; color: #f2c37a; }
+body.quarto-dark .badge.open     { background: #4a1f1f; color: #f0a0a0; }
+body.quarto-dark .badge.informal { background: #33332f; color: #d2d1c8; }
+body.quarto-dark .badge.refuted  { background: #3a2647; color: #d3b0ec; }
 
 /* GitHub source links under each Lean listing. */
 .lean-src {

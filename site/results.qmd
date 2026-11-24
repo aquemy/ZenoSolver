@@ -11,9 +11,8 @@ when the site is built (`site/gen_pages.py`). None is typed by hand.
 ## Correctness
 
 - **Golden fronts.** `zeno` reproduces all 27 fronts of the brute-force oracle
-  ([golden suite](instances/suites.qmd#golden)). Five of them are instances on which the 2016
-  solvers were still wrong after their bookkeeping fixes, because their greedy schedule is not
-  optimal ([§5](proofs.qmd#node-s5)).
+  ([golden suite](instances/suites.qmd#golden)), including instances on which a greedy schedule of
+  the landings is not optimal ([§5](proofs.qmd#node-s5)).
 - **Every level.** `ut-zeno-core` compares the value of every level, the bracket order
   $L \le E \le U_3 \le U$ and the front with an independent enumeration oracle on random instances.
 - **Non-symmetric.** On 1,800 tiny random non-symmetric instances, every bracket closes and equals
@@ -30,19 +29,14 @@ The 66 instances of [`bench/instances`](instances/suites.qmd#bench), with a time
 
 {{< include _results-summary.md >}}
 
-{{< include _results-speedup.md >}}
-
-The 2016 solvers (`zenoSolver`, `zenoSolver_naive`, `zenoSolver_noDuplicate`) were removed from
-the code; their baselines are kept for comparison, and commit `84ca92a` still builds them. Their
-fronts are those of the legacy greedy, wrong on some instances, so their front sizes are not a
-reference.
+Process start-up, about 3 ms, is the floor of every `zeno` timing. The fronts themselves are
+plotted on the [instances page](instances/index.qmd).
 
 ### Per instance
 
-Front size and `zeno` time from `zeno.json` (median of 3 runs, all cores); 2016 `zenoSolver`
-(median of 3, 30 s timeout); Lean `zeno-front` (one run, 60 s timeout, "differs" if its front is
-not `zeno front`'s); Lean `zeno-check` on the certificate `zeno` writes, and that certificate's
-size.
+Front size and `zeno` time from `zeno.json` (median of 3 runs, all cores); Lean `zeno-front` (one
+run, 60 s timeout, "differs" if its front is not `zeno front`'s); Lean `zeno-check` on the
+certificate `zeno` writes, and that certificate's size.
 
 {{< include _results-instances.md >}}
 

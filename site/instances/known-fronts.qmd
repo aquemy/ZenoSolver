@@ -43,7 +43,7 @@ The count matches the suite: the `regimes` instances have fronts of 399 ($n = 20
 $p = 2$), 540 ($n = 50$, $t = 30$, $p = 5$) and 1,090 points ($n = 100$, $t = 60$, $p = 10$), each
 $(n-1)\kappa + 1$.
 
-### Table 1 of EvoCOP 2015: `-n N -t N -p 2` {#table1}
+### The family `-n N -t N -p 2` {#table1}
 
 For $n = t = N$ and $p = 2$: $s = 2N - 2$, $\kappa = q_0 = N - 1$ and $\rho = 0$, so
 $\Phi(T) = 2T$ on the range and
@@ -51,8 +51,8 @@ $$\mathcal F = \{(2(N^2 - 1) - 2T,\ 2T) : N - 1 \le T \le N(N-1)\}.$$
 Every point has cost + makespan $= 2(N^2 - 1)$. The front runs from $(2N(N-1),\ 2(N-1))$, the
 fastest, to $(2(N-1),\ 2N(N-1))$, the cheapest, and has exactly
 $$(N-1)^2 + 1 \text{ points}.$$
-That is the front size of Table 1 of the EvoCOP 2015 paper, and `zeno` reproduces it for every
-$N$ up to 50 (2,402 points at $N = 50$). The `paper-table1` suite holds $N = 3, \dots, 10$:
+`zeno` reproduces it for every $N$ up to 50 (2,402 points at $N = 50$). The benchmark suite
+`paper-table1` holds $N = 3, \dots, 10$:
 
 {{< include _table1.md >}}
 
@@ -61,9 +61,9 @@ $N$ up to 50 (2,402 points at $N = 50$). The `paper-table1` suite holds $N = 3, 
 - **Offset progressions** $d_i = a + bi$ with $a > 0$: $G$ need not be convex and $L < E$ occurs.
   With $d = (5, 7, 9, 11)$, $c_i = 24 - 2d_i$, $t = 7$ and $p = 4$, $L(20) = 80 < E(20) = 84$.
 - **The other generator families** (log, sqrt, $2^i$, staircase) have no closed form. On them the
-  front needs the general algorithm, and the 2016 greedy can miss points. Whether that greedy is
-  exact on the linear family is open ([Conjecture 10.2](../proofs.qmd#node-conjecture-10-2)); it
-  agreed on 115 small instances.
+  front needs the general algorithm, and a greedy schedule of the landings can miss points.
+  Whether such a greedy is exact on the linear family is open
+  ([Conjecture 10.2](../proofs.qmd#node-conjecture-10-2)); it agreed on 115 small instances.
 
 ## The ends of every front {#ends}
 
@@ -81,7 +81,7 @@ Certificates rely on both (obligations 2 and 4 of the [format](../solver/certifi
 - **The 27 golden instances** ([suites](suites.qmd#golden)): fronts of the exhaustive oracle, in
   `tests/golden/fronts/`.
 - **The LPT counterexample**, $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$: six points, (160, 80),
-  (200, 72), (240, 64), (260, 60), (280, 56) and (320, 48). The 2016 greedy misses (260, 60). This
+  (200, 72), (240, 64), (260, 60), (280, 56) and (320, 48). A greedy schedule misses (260, 60). This
   front is proved in Lean by the kernel alone, for every table of central flights
   (`Examples.lptCounterexample_front`, [§5](../proofs.qmd#node-s5)).
 - **Proposition 6.5**, non-symmetric: $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$,

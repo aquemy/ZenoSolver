@@ -30,16 +30,22 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../instances/pddl.html" rel="next">
+<link href="../instances/model.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -99,11 +105,174 @@ window.Quarto = {
 };
 </script>
 
+<link rel="stylesheet" href="../styles/tokens.css">
 <link rel="stylesheet" href="../styles/provenance.css">
 <link rel="stylesheet" href="../styles/site.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -121,71 +290,21 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
-<span class="menu-text">Home</span></a>
+    <a class="nav-link" href="../problem.html"> 
+<span class="menu-text">Problem</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Solver</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
-        <li>
-    <a class="dropdown-item" href="../solver/install.html">
- <span class="dropdown-text">Installation and build</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="../paper/index.html"> 
+<span class="menu-text">Paper</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/cli.html">
- <span class="dropdown-text">Command line</span></a>
+  <li class="nav-item">
+    <a class="nav-link active" href="../instances/index.html" aria-current="page"> 
+<span class="menu-text">Instances</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/api.html">
- <span class="dropdown-text">C++ library</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="../solver/install.html"> 
+<span class="menu-text">Solver</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/certificates.html">
- <span class="dropdown-text">Certificate format</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/lean.html">
- <span class="dropdown-text">Lean tools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/algorithm.html">
- <span class="dropdown-text">Algorithm</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Instances</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
-        <li>
-    <a class="dropdown-item" href="../instances/model.html">
- <span class="dropdown-text">Model and data files</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/generator.html">
- <span class="dropdown-text">Generator</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/pddl.html">
- <span class="dropdown-text">PDDL</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/suites.html">
- <span class="dropdown-text">Benchmark and golden suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/known-fronts.html">
- <span class="dropdown-text">Instances with known fronts</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/sizing.html">
- <span class="dropdown-text">Size guidance</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Theory</span>
@@ -210,14 +329,6 @@ window.Quarto = {
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../experiments.html"> 
-<span class="menu-text">Experiments</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../results.html"> 
-<span class="menu-text">Results</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -228,26 +339,76 @@ window.Quarto = {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="../blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
-</i> 
-<span class="menu-text"></span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../instances/generator.html">Generator</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instances</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model and data files</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/generator.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Generator</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/pddl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PDDL</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/suites.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Benchmark and golden suites</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/known-fronts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instances with known fronts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../instances/sizing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Size guidance</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -257,13 +418,13 @@ window.Quarto = {
   <li><a href="#generating-functions" id="toc-generating-functions" class="nav-link active" data-scroll-target="#generating-functions">Generating functions</a></li>
   <li><a href="#construction" id="toc-construction" class="nav-link" data-scroll-target="#construction">Construction</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#paper" id="toc-paper" class="nav-link" data-scroll-target="#paper">2016 and paper instances</a></li>
   <li><a href="#the-families-in-the-suites" id="toc-the-families-in-the-suites" class="nav-link" data-scroll-target="#the-families-in-the-suites">The families in the suites</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
+
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -285,7 +446,7 @@ window.Quarto = {
 </header>
 
 
-<p>Without <code>-d</code>, <code>zeno</code> builds the instance with the generating functions of the 2016 solvers, from the options <code>-n -t -p -C -D -E -W -r -j -k -l -m -x -y</code> (<a href="../solver/cli.html#instance-options">command line</a>). Every option means what its name says: <code>-C</code> sets the <strong>costs</strong>, <code>-D</code> the <strong>durations</strong>, <code>-E</code> the <strong><span class="math inline">\(C_I\)</span>-side</strong> and <code>-W</code> the <strong><span class="math inline">\(C_G\)</span>-side</strong> durations. The construction is <code>legacy::buildInstance</code> (<code>src/zeno/legacy_input.cpp</code>). The 2016 solvers read the same options differently; see <a href="#paper">2016 and paper instances</a>.</p>
+<p>Without <code>-d</code>, <code>zeno</code> builds the instance with a family of generating functions, from the options <code>-n -t -p -C -D -E -W -r -j -k -l -m -x -y</code> (<a href="../solver/cli.html#instance-options">command line</a>). Every option means what its name says: <code>-C</code> sets the <strong>costs</strong>, <code>-D</code> the <strong>durations</strong>, <code>-E</code> the <strong><span class="math inline">\(C_I\)</span>-side</strong> and <code>-W</code> the <strong><span class="math inline">\(C_G\)</span>-side</strong> durations. The construction is <code>legacy::buildInstance</code> (<code>src/zeno/legacy_input.cpp</code>).</p>
 <section id="generating-functions" class="level2">
 <h2 class="anchored" data-anchor-id="generating-functions">Generating functions</h2>
 <p><code>-C</code>, <code>-D</code>, <code>-E</code> and <code>-W</code> each take a code:</p>
@@ -330,7 +491,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>Any other code falls back to the identity, as in 2016. The argument <span class="math inline">\(k\)</span> is truncated to an unsigned integer before <span class="math inline">\(f\)</span> is applied, as the 2016 functions took <code>unsigned</code>.</p>
+<p>Any other code falls back to the identity. The argument <span class="math inline">\(k\)</span> is truncated to an unsigned integer before <span class="math inline">\(f\)</span> is applied.</p>
 </section>
 <section id="construction" class="level2">
 <h2 class="anchored" data-anchor-id="construction">Construction</h2>
@@ -380,46 +541,9 @@ window.Quarto = {
 </table>
 <p>Zero values are allowed and do occur: <span class="math inline">\(\ln 1 = 0\)</span>, so the log family has a city of duration or cost 0.</p>
 </section>
-<section id="paper" class="level2">
-<h2 class="anchored" data-anchor-id="paper">2016 and paper instances</h2>
-<p>The 2016 solvers, and the papers’ instances, used the same generating functions, then exchanged the duration and cost vectors (and reversed the <span class="math inline">\(C_G\)</span>-side durations) whenever the first duration exceeded the second. Their generator computes durations on decreasing arguments, so for an increasing function this always happened, unless truncation made the first two durations equal. <code>zeno</code> does not do this. To rebuild a 2016 instance, translate its options:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>2016 / paper</th>
-<th><code>zeno</code></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>-C a -D b</code></td>
-<td><code>-C b -D a</code>, and <code>-j -k</code> exchanged with <code>-l -m</code></td>
-</tr>
-<tr class="even">
-<td><code>-C c -E a -W b</code></td>
-<td><code>-C a -E c -W b</code></td>
-</tr>
-<tr class="odd">
-<td><code>-d FILE</code> with <span class="math inline">\(d_1 &gt; d_2\)</span></td>
-<td>a file with the lines exchanged: costs, then durations (3 lines: costs, the <span class="math inline">\(C_G\)</span>-side line reversed, the <span class="math inline">\(C_I\)</span>-side line)</td>
-</tr>
-</tbody>
-</table>
-<p><code>-n -t -p -r -x -y</code> are unchanged. Translated options build the 2016 instance with its cities in the reverse order, which leaves the front unchanged; a translated data file builds it exactly. Two cases need care:</p>
-<ul>
-<li><strong>No swap in 2016.</strong> If the 2016 run did not swap, keep its options as they are. To tell, run <code>zeno generate</code> with the 2016 options: the 2016 solver swapped exactly when the first duration it prints exceeds the second. For example <code>-n 10 -D 1</code> (with <code>-r 1</code>) starts <span class="math inline">\(d = (2, 2, \dots)\)</span>, so the 2016 solver did not swap it, while <code>-n 10 -D 1 -r 100</code> starts <span class="math inline">\(d = (230, 219, \dots)\)</span> and was swapped.</li>
-<li><strong>Non-symmetric scales.</strong> <code>zeno</code> scales both duration sides with <code>-l -m</code>. The <code>-E</code>/<code>-W</code> translation is exact when the 2016 instance had the same <code>-j -k</code> as <code>-l -m</code>, in particular at the defaults. Otherwise write the 2016 instance as a data file.</li>
-</ul>
-<p>With these rules, a 2016 instance whose two duration functions coincided after the swap, such as <code>-C 3 -E 1 -W 3</code>, was in fact symmetric; its translation <code>-C 1 -E 3 -W 3</code> is symmetric too.</p>
-<p>The committed suites are written in the current meaning. When the swap was removed, two benchmark instances (<code>families/log-linear</code> and <code>families/sqrt-linear</code>) and six golden instances were rewritten this way, and every front stayed the same. The golden names keep their 2016 flags: the golden <code>n3t5p2-C1D4r10</code> runs <code>-n 3 -t 5 -p 2 -r 10 -C 4 -D 1</code> (header of <code>tests/golden/instances.txt</code>).</p>
-</section>
 <section id="the-families-in-the-suites" class="level2">
 <h2 class="anchored" data-anchor-id="the-families-in-the-suites">The families in the suites</h2>
-<p>The <code>families</code> suite runs every family on <span class="math inline">\(n = 10\)</span>, <span class="math inline">\(t = 8\)</span>, <span class="math inline">\(p = 3\)</span> (<a href="../instances/suites.html#suite-families">suites</a>): <code>linear</code> (<code>-C 3 -D 3</code>), <code>log</code> (<code>-C 1 -D 1 -r 100</code>), <code>sqrt</code> (<code>-C 2 -D 2 -r 100</code>), <code>pow2</code> (<code>-C 4 -D 4</code>), <code>staircase</code> (<code>-C 5 -D 5 -r 10</code>), and the mixed <code>log-linear</code> (logarithmic durations and linear costs, <code>-C 3 -D 1 -r 100</code>) and <code>sqrt-linear</code> (<code>-C 3 -D 2 -r 100</code>). The default family is the only one with a closed-form front (<a href="../instances/known-fronts.html">known fronts</a>). The others need the general algorithm, and on them the 2016 greedy can miss points.</p>
+<p>The <code>families</code> suite runs every family on <span class="math inline">\(n = 10\)</span>, <span class="math inline">\(t = 8\)</span>, <span class="math inline">\(p = 3\)</span> (<a href="../instances/suites.html#suite-families">suites</a>): <code>linear</code> (<code>-C 3 -D 3</code>), <code>log</code> (<code>-C 1 -D 1 -r 100</code>), <code>sqrt</code> (<code>-C 2 -D 2 -r 100</code>), <code>pow2</code> (<code>-C 4 -D 4</code>), <code>staircase</code> (<code>-C 5 -D 5 -r 10</code>), and the mixed <code>log-linear</code> (logarithmic durations and linear costs, <code>-C 3 -D 1 -r 100</code>) and <code>sqrt-linear</code> (<code>-C 3 -D 2 -r 100</code>). The default family is the only one with a closed-form front (<a href="../instances/known-fronts.html">known fronts</a>). The others need the general algorithm, and on them a greedy schedule of the landings can miss points.</p>
 <p>Every instance the generator builds without <code>-E</code>/<code>-W</code> is symmetric, and every PDDL problem <code>zeno</code> writes from it satisfies (A1), so its front is exact.</p>
 
 
@@ -428,6 +552,19 @@ window.Quarto = {
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -825,6 +962,18 @@ window.Quarto = {
     }
   });
   </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../instances/model.html" class="pagination-link" aria-label="Model and data files">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Model and data files</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../instances/pddl.html" class="pagination-link" aria-label="PDDL">
+        <span class="nav-page-text">PDDL</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -835,8 +984,8 @@ window.Quarto = {
       &nbsp;
     </div>
     <div class="nav-footer-right">
-<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
-</div>
+      &nbsp;
+    </div>
   </div>
 </footer>
 

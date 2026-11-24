@@ -1,93 +1,17 @@
 ---
 title: "About"
-subtitle: "The papers, attribution, and what the theory note corrects"
+subtitle: "The project, what is proved and how, and how this site is built"
 ---
 
-## The original papers
+## The project
 
-> Alexandre Quemy, Marc Schoenauer. *True Pareto Fronts for Multi-Objective AI Planning
-> Instances.* European Conference on Combinatorial Optimization, EvoCOP 2015, Copenhagen,
-> LNCS 9026, Springer, pp. 197–208, 2015. [hal-01109777](https://hal.science/hal-01109777).
-
-> Alexandre Quemy, Marc Schoenauer, Johann Dréo.
-> [arXiv:2304.14659](https://arxiv.org/abs/2304.14659), 2023. Extends the approach to
-> non-symmetric durations.
-
-> Alexandre Quemy, Marc Schoenauer, Vincent Vidal, Johann Dréo, Pierre Savéant. *Solving Large
-> MultiZenoTravel Benchmarks with Divide-and-Evolve.* Learning and Intelligent Optimization,
-> LION 9, Lille, LNCS 8994, Springer, pp. 262–267, 2015.
-> [hal-01109776](https://hal.science/hal-01109776).
-
-The model, the benchmark and the first ZenoSolver (2016) are those of these papers. Please cite
-them for MultiZenoTravel.
-
-## This project
-
-The current solver `zeno`, the theory note `doc/theory/exact-front.md`, the Lean 4 formalization in
-`lean/`, the certificate format and checkers, the benchmarks and this website are the work of
-**Alexandre Quemy**, in the repository
+ZenoSolver computes the exact Pareto fronts, cost against makespan, of MultiZenoTravel
+multi-objective planning instances, and proves them. It consists of the solver `zeno`, the theory
+note
+[`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md),
+the Lean 4 formalization in `lean/`, the certificate format and its two checkers, the benchmarks
+and the experiments. All are the work of **Alexandre Quemy**, in the repository
 [`aquemy/ZenoSolver`](https://github.com/aquemy/ZenoSolver).
-
-::: {.callout-important appearance="simple"}
-**Attribution and fair use.** Throughout the [blueprint](proofs.qmd), the papers' statements and
-proofs are reproduced **verbatim** in grey boxes marked *From the original paper*, with the paper,
-section and page, solely for scholarly comparison with the note and the formalization. That
-material remains its authors' and publishers'. The blue and green boxes hold this project's
-contribution.
-:::
-
-## What the note corrects
-
-The note's §5 and §6 and the draft erratum
-([`doc/erratum.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/erratum.md)) give the
-details. In short:
-
-### The per-PPP greedy is not optimal {#f1}
-
-Both papers fix a multiset of landings (a PPP) and schedule it greedily, longest flights first onto
-the least-loaded plane (EvoCOP 2015 Algorithm 1, arXiv §3.2), and claim the result is the optimal
-makespan of that PPP. It is not. On $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$ the 2016 solver
-misses the front point (260, 60) ([§5](proofs.qmd#node-s5)). That front is checked by the Lean
-kernel alone (`Examples.lptCounterexample_front`). No polynomial per-PPP rule can be exact unless
-P = NP: deciding whether a multiset of landings can be flown within a makespan is strongly
-NP-complete ([Theorem 8.1](proofs.qmd#node-theorem-8-1)).
-
-### Proposition I holds only for the front {#f2}
-
-"Pareto-optimal plans use exactly $2t - p$ central cities" is false for plans: with zero costs, a
-plan with more landings can be Pareto-optimal. What holds is the front statement: the front is
-the Pareto set of $(c(X), M(X))$ over multisets $X$ of $2t - p$ landings, with $M(X)$ the least
-makespan of an **admissible** partition of $X$
-([Corollary 4.8](proofs.qmd#node-corollary-4-8), machine-checked).
-
-### Waiting can be harmful in the non-symmetric case {#f3}
-
-The arXiv paper's non-symmetric argument assumes that no plane has to wait harmfully for a
-passenger. That is false, even with no central flights and under the triangle inequality
-([Conjecture 6.5, refuted](proofs.qmd#node-conjecture-6-5);
-[Proposition 6.5](proofs.qmd#node-proposition-6-5)). The note replaces the assumption with
-*schedulable domination* ([Theorem 6.9](proofs.qmd#node-theorem-6-9), machine-checked for every
-plan). An exhaustive search over role configurations with exact schedules is therefore sound, and
-`zeno` uses it to close such gaps.
-
-### The pairing argument without (A1) is incomplete {#f4}
-
-Without (A1), the arXiv pairing argument concludes "lower cost" from a set inclusion and
-"dominates" from per-pattern durations; both steps fail. The note proves the converse it was meant
-to establish under the triangle inequality (AΔ) instead
-([Theorem 4.10](proofs.qmd#node-theorem-4-10), formerly Conjecture 4.10, a written proof not yet
-in Lean). The front characterisation then holds under (AΔ) too
-([Corollary 4.12](proofs.qmd#node-corollary-4-12)). Some hypothesis is needed: with central
-flights that violate both (A1) and (AΔ), a plan can beat every admissible partition
-([Example 4.13](proofs.qmd#node-example-4-13)).
-
-### What still holds {#holds}
-
-The model, the flight patterns, the lower bound of $2t - p$ landings, and the no-waiting
-construction of a plan from an admissible partition
-([Theorem 4.1](proofs.qmd#node-theorem-4-1), machine-checked). On the default generator the
-front is known in closed form, and the published benchmark fronts of that family are probably
-right despite the greedy (Conjecture 10.2, checked on 115 instances, not proved).
 
 ## Honesty: what is proved, and how {#honesty}
 
@@ -97,7 +21,8 @@ The blueprint's badges are computed when the site is built, from `collectAxioms`
 declarations each node lists. A node is badged machine-checked only if the declarations that
 formalise its **whole** statement are axiom-clean theorems. Declarations covering only part of a
 statement are listed under it, with their own badges, and the node keeps the note's status. The
-generator stops if a declaration is missing or a label is not found in the note.
+generator stops if a declaration is missing or a label is not found in the note. The same badges
+appear next to every theorem cited in the [paper](paper/index.qmd).
 
 The compiled tools add trust in the Lean compiler and in an unverified parser
 ([trust base](solver/lean.qmd#trust)).
@@ -105,8 +30,13 @@ The compiled tools add trust in the Lean compiler and in an unverified parser
 ## This website
 
 Built with [Quarto](https://quarto.org) from `site/` into `docs/`
-([how](solver/install.qmd#this-website)). The blueprint pages are generated from
-`site/blueprint.toml`, the theory note and the Lean sources by `site/gen_blueprint.py`; the tables
-from the committed baselines by `site/gen_pages.py`; the claim graph and the history from the
-knowledge commits and `claims.toml` by `site/gen_graph.py`. The paper excerpts are in
-`site/paper/`.
+([how](solver/install.qmd#this-website)). Generated, never typed by hand:
+
+- the blueprint, from `site/blueprint.toml`, the theory note and the Lean sources
+  (`site/gen_blueprint.py`);
+- the result tables, from the committed benchmark baselines (`site/gen_pages.py`);
+- the claim graph and its history, from the knowledge commits and `claims.toml`
+  (`site/gen_graph.py`);
+- the plans of the [problem page](problem.qmd), the [instance fronts](instances/index.qmd) and the
+  figures of the [algorithm page](solver/algorithm.qmd), computed with `zeno`
+  (`site/gen_problem.py`, `site/gen_fronts.py`, `site/gen_algorithm.py`).

@@ -48,6 +48,34 @@
     ]
    }
   },
+  "ZenoFront.Admissible.addPlane_of_size": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.AddPlane",
+   "name": "ZenoFront.Admissible.addPlane_of_size",
+   "provenance": {
+    "commit": "29959222a988419aae27bf7c75c06325a3d56809",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     110,
+     33
+    ],
+    "name": [
+     105,
+     8
+    ],
+    "start": [
+     103,
+     0
+    ]
+   }
+  },
   "ZenoFront.Admissible.exists_card_touched_le": {
    "axioms": [
     "propext",
@@ -92,6 +120,34 @@
     ],
     "start": [
      805,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Admissible.exists_remove_two": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.TriSegments",
+   "name": "ZenoFront.Admissible.exists_remove_two",
+   "provenance": {
+    "commit": "1b86268184e1fb562a4e5eb4c76c41b94907c61c",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     301,
+     30
+    ],
+    "name": [
+     294,
+     8
+    ],
+    "start": [
+     293,
      0
     ]
    }
@@ -164,6 +220,62 @@
     ],
     "start": [
      359,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Cert.check_sound_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.Cert.check_sound_ATri",
+   "provenance": {
+    "commit": "0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     547,
+     60
+    ],
+    "name": [
+     526,
+     8
+    ],
+    "start": [
+     525,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Cert.forestGapBound_le_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.Cert.forestGapBound_le_ATri",
+   "provenance": {
+    "commit": "0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     521,
+     16
+    ],
+    "name": [
+     506,
+     8
+    ],
+    "start": [
+     504,
      0
     ]
    }
@@ -329,6 +441,62 @@
     ],
     "start": [
      676,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_admissible_A1_flightTime": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.ConverseTri",
+   "name": "ZenoFront.Feasible.exists_admissible_A1_flightTime",
+   "provenance": {
+    "commit": "ee385d07211b69fe19b403b5e3d84286beec2600",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     637,
+     43
+    ],
+    "name": [
+     632,
+     8
+    ],
+    "start": [
+     631,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Feasible.exists_admissible_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.ConverseTri",
+   "name": "ZenoFront.Feasible.exists_admissible_ATri",
+   "provenance": {
+    "commit": "e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     618,
+     42
+    ],
+    "name": [
+     613,
+     8
+    ],
+    "start": [
+     612,
      0
     ]
    }
@@ -951,6 +1119,34 @@
     ]
    }
   },
+  "ZenoFront.exists_admissible_of_blocks": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.TriCore",
+   "name": "ZenoFront.exists_admissible_of_blocks",
+   "provenance": {
+    "commit": "3f228fc64911a105dde0d51ca76c7a8f1d64cace",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     843,
+     14
+    ],
+    "name": [
+     755,
+     8
+    ],
+    "start": [
+     754,
+     0
+    ]
+   }
+  },
   "ZenoFront.exists_transfer": {
    "axioms": [
     "propext",
@@ -1046,6 +1242,62 @@
     ]
    }
   },
+  "ZenoFront.minimal_achievable_iff_anywhere_of_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.minimal_achievable_iff_anywhere_of_ATri",
+   "provenance": {
+    "commit": "c6ab63a9bde9de51ea16679b29926ab16ed5bed7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     422,
+     53
+    ],
+    "name": [
+     415,
+     8
+    ],
+    "start": [
+     413,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_achievable_iff_minCost_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.minimal_achievable_iff_minCost_ATri",
+   "provenance": {
+    "commit": "c6ab63a9bde9de51ea16679b29926ab16ed5bed7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     460,
+     42
+    ],
+    "name": [
+     454,
+     8
+    ],
+    "start": [
+     453,
+     0
+    ]
+   }
+  },
   "ZenoFront.minimal_achievable_iff_multisetPoints": {
    "axioms": [
     "propext",
@@ -1066,6 +1318,34 @@
     ],
     "start": [
      1030,
+     0
+    ]
+   }
+  },
+  "ZenoFront.minimal_achievable_iff_multisetPoints_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.minimal_achievable_iff_multisetPoints_ATri",
+   "provenance": {
+    "commit": "c6ab63a9bde9de51ea16679b29926ab16ed5bed7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     442,
+     55
+    ],
+    "name": [
+     438,
+     8
+    ],
+    "start": [
+     437,
      0
     ]
    }
@@ -1209,6 +1489,33 @@
     ]
    }
   },
+  "ZenoFront.segment_bound": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.TriSegments",
+   "name": "ZenoFront.segment_bound",
+   "provenance": {
+    "commit": "6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     276,
+     53
+    ],
+    "name": [
+     249,
+     8
+    ],
+    "start": [
+     248,
+     0
+    ]
+   }
+  },
   "ZenoFront.sigmaBoundAt_eq_minCost": {
    "axioms": [
     "propext",
@@ -1253,6 +1560,34 @@
     ],
     "start": [
      414,
+     0
+    ]
+   }
+  },
+  "ZenoFront.solveFront_isParetoFront_ATri": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "theorem",
+   "module": "ZenoFront.FrontTri",
+   "name": "ZenoFront.solveFront_isParetoFront_ATri",
+   "provenance": {
+    "commit": "c6ab63a9bde9de51ea16679b29926ab16ed5bed7",
+    "source": "axioms from the CI-audited commit footer"
+   },
+   "range": {
+    "end": [
+     496,
+     68
+    ],
+    "name": [
+     464,
+     8
+    ],
+    "start": [
+     462,
      0
     ]
    }

@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -30,16 +65,22 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../solver/certificates.html" rel="next">
+<link href="../solver/api.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-30950e57ca2d683c179b59b95dd53cbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-43892f0d1bbc24a88ab374e546af6597.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-06d22339cf1bae60befde528b0c36036.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -99,11 +140,175 @@ window.Quarto = {
 };
 </script>
 
+<link rel="stylesheet" href="../styles/tokens.css">
 <link rel="stylesheet" href="../styles/provenance.css">
 <link rel="stylesheet" href="../styles/site.css">
+<link rel="stylesheet" href="../styles/algorithm.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -121,71 +326,21 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
-<span class="menu-text">Home</span></a>
+    <a class="nav-link" href="../problem.html"> 
+<span class="menu-text">Problem</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-solver" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Solver</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-solver">    
-        <li>
-    <a class="dropdown-item" href="../solver/install.html">
- <span class="dropdown-text">Installation and build</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="../paper/index.html"> 
+<span class="menu-text">Paper</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/cli.html">
- <span class="dropdown-text">Command line</span></a>
+  <li class="nav-item">
+    <a class="nav-link" href="../instances/index.html"> 
+<span class="menu-text">Instances</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/api.html">
- <span class="dropdown-text">C++ library</span></a>
+  <li class="nav-item">
+    <a class="nav-link active" href="../solver/install.html" aria-current="page"> 
+<span class="menu-text">Solver</span></a>
   </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/certificates.html">
- <span class="dropdown-text">Certificate format</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/lean.html">
- <span class="dropdown-text">Lean tools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../solver/algorithm.html">
- <span class="dropdown-text">Algorithm</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-instances" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Instances</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-instances">    
-        <li>
-    <a class="dropdown-item" href="../instances/model.html">
- <span class="dropdown-text">Model and data files</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/generator.html">
- <span class="dropdown-text">Generator</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/pddl.html">
- <span class="dropdown-text">PDDL</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/suites.html">
- <span class="dropdown-text">Benchmark and golden suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/known-fronts.html">
- <span class="dropdown-text">Instances with known fronts</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../instances/sizing.html">
- <span class="dropdown-text">Size guidance</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-theory" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Theory</span>
@@ -210,14 +365,6 @@ window.Quarto = {
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../experiments.html"> 
-<span class="menu-text">Experiments</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../results.html"> 
-<span class="menu-text">Results</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -228,46 +375,119 @@ window.Quarto = {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="../blueprint.pdf"> <i class="bi bi-file-pdf" role="img" aria-label="Blueprint as a PDF">
-</i> 
-<span class="menu-text"></span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../solver/algorithm.html">Algorithm</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/install.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation and build</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command line</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">C++ library</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/algorithm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Algorithm</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/certificates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Certificate format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../solver/lean.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lean tools</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../results.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Results</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-reformulation" id="toc-the-reformulation" class="nav-link active" data-scroll-target="#the-reformulation">The reformulation</a></li>
-  <li><a href="#symmetric-pipeline" id="toc-symmetric-pipeline" class="nav-link" data-scroll-target="#symmetric-pipeline">Symmetric pipeline</a></li>
-  <li><a href="#nonsymmetric" id="toc-nonsymmetric" class="nav-link" data-scroll-target="#nonsymmetric">Non-symmetric pipeline</a></li>
+  <li><a href="#setting" id="toc-setting" class="nav-link active" data-scroll-target="#setting">The setting</a>
+  <ul class="collapse">
+  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Notation</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">The worked example</a></li>
+  </ul></li>
+  <li><a href="#what" id="toc-what" class="nav-link" data-scroll-target="#what">What is computed</a>
+  <ul class="collapse">
+  <li><a href="#reduction" id="toc-reduction" class="nav-link" data-scroll-target="#reduction">Step 1. From plans to landing multisets</a></li>
+  <li><a href="#admissible" id="toc-admissible" class="nav-link" data-scroll-target="#admissible">Step 2. Admissible partitions</a></li>
+  <li><a href="#link-forests" id="toc-link-forests" class="nav-link" data-scroll-target="#link-forests">Step 3. Link forests</a></li>
+  <li><a href="#levels" id="toc-levels" class="nav-link" data-scroll-target="#levels">Step 4. The level function <span class="math inline">\(E(T)\)</span> and its breakpoints</a></li>
+  </ul></li>
+  <li><a href="#how" id="toc-how" class="nav-link" data-scroll-target="#how">How zeno computes it</a>
+  <ul class="collapse">
+  <li><a href="#reduce" id="toc-reduce" class="nav-link" data-scroll-target="#reduce">Step 5. Reduce the instance</a></li>
+  <li><a href="#one-plane" id="toc-one-plane" class="nav-link" data-scroll-target="#one-plane">Step 6. The one-plane table</a></li>
+  <li><a href="#bracket" id="toc-bracket" class="nav-link" data-scroll-target="#bracket">Step 7. The bracket</a></li>
+  <li><a href="#forest-dp" id="toc-forest-dp" class="nav-link" data-scroll-target="#forest-dp">Step 8. The link-forest DP</a></li>
+  <li><a href="#sigma-dp" id="toc-sigma-dp" class="nav-link" data-scroll-target="#sigma-dp">Step 9. The σ-DP</a></li>
+  <li><a href="#breakpoints" id="toc-breakpoints" class="nav-link" data-scroll-target="#breakpoints">Step 10. Finding the breakpoints</a></li>
+  <li><a href="#plans" id="toc-plans" class="nav-link" data-scroll-target="#plans">Step 11. Plans</a></li>
+  <li><a href="#certificates" id="toc-certificates" class="nav-link" data-scroll-target="#certificates">Step 12. Certificates</a></li>
+  </ul></li>
+  <li><a href="#nonsymmetric" id="toc-nonsymmetric" class="nav-link" data-scroll-target="#nonsymmetric">Non-symmetric instances</a></li>
   <li><a href="#complexity" id="toc-complexity" class="nav-link" data-scroll-target="#complexity">Complexity</a></li>
+  <li><a href="#reproduce" id="toc-reproduce" class="nav-link" data-scroll-target="#reproduce">Reproducing this page</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Algorithm</h1>
-<p class="subtitle lead">Bracket, link-forest DP, breakpoint search, and the non-symmetric pipeline</p>
+<p class="subtitle lead">How zeno computes an exact Pareto front, step by step, on one small instance</p>
 </div>
 
 
@@ -284,57 +504,1000 @@ window.Quarto = {
 </header>
 
 
-<p>This page summarises how <code>zeno</code> computes a front. The proofs are in the <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md">theory note</a> (§7 for the symmetric algorithm, §6.5 for the non-symmetric one), and each step links to its node of the <a href="../proofs.html">blueprint</a>.</p>
-<section id="the-reformulation" class="level2">
-<h2 class="anchored" data-anchor-id="the-reformulation">The reformulation</h2>
-<p>A plan lands at least <span class="math inline">\(s = 2t - p\)</span> times in central cities (<a href="../proofs.html#node-lemma-3-2">Lemma 3.2</a>). Under (S) and (A1), the front is reached by plans with exactly <span class="math inline">\(s\)</span> landings, split among the planes as an <strong>admissible partition</strong> (<a href="../proofs.html#node-corollary-4-8">Corollary 4.8</a>): a partition <span class="math inline">\(X_1, \dots, X_p\)</span> of a multiset <span class="math inline">\(X\)</span> of cities with a parity matrix, that is, in every connected component of the plane–city graph, an even number of planes land an even number of times (<a href="../proofs.html#node-definition-2-2">Definition 2.2</a>, <a href="../proofs.html#node-lemma-2-4">Lemma 2.4</a>). An admissible partition is flown with no waiting, in makespan <span class="math inline">\(2\max_k \delta(X_k)\)</span> where <span class="math inline">\(\delta\)</span> sums the durations (<a href="../proofs.html#node-theorem-4-1">Theorem 4.1</a>), and no plan does better (<a href="../proofs.html#node-theorem-4-7">Theorem 4.7</a>).</p>
-<p>With integer durations divided by their gcd <span class="math inline">\(g\)</span>, let <span class="math display">\[E(T) = \min\{c(X) : |X| = s,\ X_1,\dots,X_p \text{ admissible},\ \delta(X_k) \le T\ \forall k\}.\]</span> <span class="math inline">\(E\)</span> is non-increasing, and the front is the set of its breakpoints, <span class="math inline">\((E(T), 2gT)\)</span> wherever <span class="math inline">\(E(T) &lt; E(T-1)\)</span> (<a href="../proofs.html#node-proposition-7-1">Proposition 7.1</a>). Only the levels <span class="math inline">\(T_{\rm lo} = d_{\min}\kappa \le T \le T_{\rm hi} = d_{\rm cheap}\kappa\)</span> matter, with <span class="math inline">\(\kappa = \lceil s/p \rceil\)</span> (<a href="../proofs.html#node-proposition-7-10">Proposition 7.10</a>): below, there is no plan; above, <span class="math inline">\(E\)</span> is the cheapest cost <span class="math inline">\(s\,c_{\min}\)</span>.</p>
-</section>
-<section id="symmetric-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="symmetric-pipeline">Symmetric pipeline</h2>
-<ol type="1">
-<li><strong>Reduce.</strong> Divide the durations by their gcd, merge equal cities and drop dominated ones (<span class="math inline">\(d_{i'} \le d_i\)</span> and <span class="math inline">\(c_{i'} \le c_i\)</span>), which changes neither <span class="math inline">\(E\)</span> nor the front (<a href="../proofs.html#node-proposition-7-9">Proposition 7.9</a>). The kept cities form a staircase: durations strictly increasing, costs strictly decreasing (<code>reduce</code>, <code>zeno/reduce.hpp</code>).</li>
-<li><strong>One-plane table.</strong> <span class="math inline">\(G[m][T]\)</span>, the cheapest <span class="math inline">\(m\)</span> landings whose durations sum to at most <span class="math inline">\(T\)</span> (<a href="../proofs.html#node-lemma-7-2">Lemma 7.2</a>). It is stored densely when small, otherwise as one Pareto staircase of (load, cost) per <span class="math inline">\(m\)</span>, so that memory does not depend on the magnitude of the durations (<code>OnePlaneTable</code>).</li>
-<li><strong>Bracket each level.</strong> Three knapsacks over planes and landings combine <em>gadgets</em>:
+<p>This page explains how <code>zeno</code> computes the Pareto front of a MultiZenoTravel instance, and why the front it prints is exact. It can be read on its own: every symbol is defined here, and every claim cites the result that proves it. A citation links to the entry of the <a href="../proofs.html">blueprint</a> that states and proves the result; the badge after it says how much of it Lean checks (<em>machine-checked</em>, <em>parts in Lean</em>, <em>Lean definition</em>, or <em>informal</em> when the proof is on paper only). The proofs themselves are in the <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md">theory note</a>. For context, see the <a href="../problem.html">problem page</a>, which introduces the same example, and the <a href="../paper/index.html">paper section</a>.</p>
+<p>The page follows one instance from start to finish. Every number quoted for it, and every value in the figures, is recomputed from the definitions by <code>site/gen_algorithm.py</code> and checked against <code>zeno</code> (<a href="#reproduce">how</a>).</p>
+<section id="setting" class="level2">
+<h2 class="anchored" data-anchor-id="setting">The setting</h2>
+<p><strong>Instances and plans.</strong> An instance has two hubs, <span class="math inline">\(C_I\)</span>, where every plane and passenger starts, and <span class="math inline">\(C_G\)</span>, where they must all end, and <span class="math inline">\(n\)</span> central cities <span class="math inline">\(1, \dots, n\)</span> <a href="../proofs.html#node-s1-1">§1.1</a> <span class="badge ok">Lean definition</span>. A flight between <span class="math inline">\(C_I\)</span> and city <span class="math inline">\(i\)</span> lasts <span class="math inline">\(d_i\)</span>, a flight between city <span class="math inline">\(i\)</span> and <span class="math inline">\(C_G\)</span> lasts <span class="math inline">\(\bar d_i\)</span>, and no flight joins the two hubs. Central cities may also be joined by flights of their own. Landing in city <span class="math inline">\(i\)</span> costs <span class="math inline">\(c_i \ge 0\)</span>; landing in a hub is free. There are <span class="math inline">\(p\)</span> planes and <span class="math inline">\(t \ge p\)</span> passengers, and a plane carries at most one passenger at a time. A plan gives every plane a timed route and every passenger a journey. Its <em>cost</em> is the sum of its landing costs, and its <em>makespan</em> is the time at which the last plane reaches <span class="math inline">\(C_G\)</span> <a href="../proofs.html#node-s1-2">§1.2</a> <span class="badge ok">Lean definition</span>.</p>
+<p><strong>The front.</strong> A point <span class="math inline">\((C, M)\)</span> <em>weakly dominates</em> <span class="math inline">\((C', M')\)</span> if <span class="math inline">\(C \le C'\)</span> and <span class="math inline">\(M \le M'\)</span>. The Pareto front <span class="math inline">\(\mathcal F\)</span> is the set of (cost, makespan) points of feasible plans that no other such point weakly dominates <a href="../proofs.html#node-s1-5">§1.5</a> <span class="badge ok">Lean definition</span>. <code>zeno</code> prints it as <code>cost makespan</code> lines.</p>
+<p><strong>Assumptions</strong> <a href="../proofs.html#node-s1-4">§1.4</a> <span class="badge ok">Lean definition</span>. Most of this page assumes</p>
 <ul>
-<li><span class="math inline">\(L(T)\)</span>: single planes of any size, no admissibility. It is a lower bound on the cost of every plan of makespan at most <span class="math inline">\(2T\)</span>, whatever the central flights (lemma R, <a href="../proofs.html#node-lemma-3-4">Lemma 3.4</a>);</li>
-<li><span class="math inline">\(U(T)\)</span>: single planes of odd size, and <em>pairs</em>, two planes of even size linked at a city;</li>
-<li><span class="math inline">\(U_3(T)\)</span>: in addition, <em>chains</em> of three planes.</li>
+<li>(S), symmetry: <span class="math inline">\(d_i = \bar d_i\)</span> for every city, so a flight between city <span class="math inline">\(i\)</span> and either hub lasts <span class="math inline">\(d_i\)</span>;</li>
+<li>and either (A1): every central flight between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> lasts at least <span class="math inline">\(d_i + d_j\)</span>, so it is never faster than going through a hub; or (AΔ): the flight durations satisfy the triangle inequality.</li>
 </ul>
-<span class="math inline">\(L \le E \le U_3 \le U\)</span> (<a href="../proofs.html#node-proposition-7-3">Proposition 7.3</a>). <span class="math inline">\(E = U\)</span> when useful link trees have at most two planes, <span class="math inline">\(q_{\max} = \min(p, t-p+1) \le 2\)</span>, and <span class="math inline">\(E = U_3\)</span> when <span class="math inline">\(q_{\max} \le 3\)</span> (<a href="../proofs.html#node-proposition-7-4">Proposition 7.4</a>). A level is <em>settled</em> when the bracket closes.</li>
-<li><strong>Exact DP on the open levels.</strong> On the levels where <span class="math inline">\(L &lt; U_3\)</span>, the <strong>link-forest DP</strong> computes <span class="math inline">\(E(T)\)</span> exactly (<a href="../proofs.html#node-theorem-7-5">Theorem 7.5</a>). A partition is admissible iff it has a <em>link forest</em> (<a href="../proofs.html#node-lemma-2-6">Lemma 2.6</a>): a forest on the planes whose edges carry city labels, each edge <span class="math inline">\(\{u, v\}\)</span> labelled <span class="math inline">\(i\)</span> using one landing in <span class="math inline">\(i\)</span> of both <span class="math inline">\(X_u\)</span> and <span class="math inline">\(X_v\)</span>, such that every plane keeps an odd number of <em>free landings</em> (<a href="../proofs.html#node-definition-link-forest">Definition (link forest)</a>). In the plan, a link at <span class="math inline">\(i\)</span> is a passenger dropped off in <span class="math inline">\(i\)</span> by one plane and picked up by the other. Trees have at most <span class="math inline">\(q_{\max}\)</span> planes (<a href="../proofs.html#node-corollary-2-7">Corollary 2.7</a>). The DP roots every tree and combines child subtrees as Pareto staircases over <span class="math inline">\((\tau, \text{cost})\)</span>, <span class="math inline">\(\tau\)</span> being the part of a plane’s load taken by its child edges, so its work depends on the staircase sizes and not on <span class="math inline">\(T\)</span> (<code>ForestProgram</code>, <code>zeno/forest.hpp</code>). Because <span class="math inline">\(E\)</span> is non-increasing, equal values at both ends of an interval fix it on the whole interval (<code>monotone</code> in <code>--stats</code>).</li>
-<li><strong>Find the breakpoints.</strong> <code>--levels sweep</code> evaluates every level; <code>--levels search</code> splits every interval <span class="math inline">\((a, b)\)</span> with <span class="math inline">\(E(a) &gt; E(b)\)</span> at up to <code>threads</code> evenly spaced levels evaluated in parallel. Pieces with equal ends are constant, so with <span class="math inline">\(r\)</span> breakpoints it evaluates <span class="math inline">\(O(r \log(T_{\rm hi} - T_{\rm lo}))\)</span> levels (<code>breakpoints</code>, <code>zeno/breakpoints.hpp</code>). The default, <code>auto</code>, sweeps up to <span class="math inline">\(2^{12}\)</span> levels and searches beyond, which is why the time grows with the logarithm of the level range.</li>
-<li><strong>Plans.</strong> For each point, the partition is rebuilt from the exact method’s choices, a link forest computed from it, and the plan of <a href="../proofs.html#node-theorem-4-1">Theorem 4.1</a> built. Every plane first drops off one passenger per child edge (<span class="math inline">\(C_I \to b \to C_I\)</span>), then flies its free landings as alternating crossings, then picks up the passenger its parent dropped (<span class="math inline">\(C_G \to a \to C_G\)</span>). Every plan is re-simulated by <code>checkPlan</code>, which shares no code with the builder.</li>
-<li><strong>Certificate.</strong> Each gap gets <code>relaxed</code> when <span class="math inline">\(L\)</span> already reaches the cost at the level below the next point, <code>forest</code> otherwise (<a href="../solver/certificates.html">certificate format</a>).</li>
+<p>Instances with <span class="math inline">\(d \ne \bar d\)</span> have their own pipeline, described <a href="#nonsymmetric">at the end</a>.</p>
+<section id="notation" class="level3">
+<h3 class="anchored" data-anchor-id="notation">Notation</h3>
+<div class="alg-notation">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(s = 2t - p\)</span></td>
+<td>the least number of landings in central cities of a feasible plan (<a href="#reduction">step 1</a>)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\kappa = \lceil s/p \rceil\)</span></td>
+<td>the size of the largest group when <span class="math inline">\(s\)</span> landings are spread over <span class="math inline">\(p\)</span> planes as evenly as possible</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(X\)</span></td>
+<td>a multiset of central cities: the landings. <span class="math inline">\(X(i)\)</span> is the multiplicity of city <span class="math inline">\(i\)</span>, <span class="math inline">\(\lvert X \rvert\)</span> the size</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(c(X)\)</span>, <span class="math inline">\(\delta(X)\)</span></td>
+<td><span class="math inline">\(\sum_{i \in X} c_i\)</span> and <span class="math inline">\(\sum_{i \in X} d_i\)</span>, counted with multiplicity</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\ell(X) = 2\delta(X)\)</span></td>
+<td>the <em>load</em>: the flight time of a plane that serves each landing of <span class="math inline">\(X\)</span> by its own round trip from a hub</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(X_1, \dots, X_p\)</span></td>
+<td>a <em>partition</em> of <span class="math inline">\(X\)</span>: one group per plane, with <span class="math inline">\(X_1 + \dots + X_p = X\)</span></td>
+</tr>
+<tr class="odd">
+<td>even plane</td>
+<td>a plane whose group has an even number of landings</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(g\)</span></td>
+<td>the gcd of the durations; durations are divided by it</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T\)</span></td>
+<td>a <em>level</em>: an integer bound on every <span class="math inline">\(\delta(X_k)\)</span>, hence on every load, <span class="math inline">\(2gT\)</span> in the original units</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(E(T)\)</span></td>
+<td>the least cost of an admissible partition within level <span class="math inline">\(T\)</span> (<a href="#levels">step 4</a>)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(L(T)\)</span>, <span class="math inline">\(U(T)\)</span>, <span class="math inline">\(U_3(T)\)</span></td>
+<td>a lower bound and two upper bounds on <span class="math inline">\(E(T)\)</span> (<a href="#bracket">step 7</a>)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(G[m][\tau]\)</span></td>
+<td>the least cost of <span class="math inline">\(m\)</span> landings whose durations sum to at most <span class="math inline">\(\tau\)</span> (<a href="#one-plane">step 6</a>)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat m = s - p + 1\)</span></td>
+<td>the largest group that can occur, every group being non-empty</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q_{\max} = \min(p,\ t - p + 1)\)</span></td>
+<td>the most planes a useful link tree has (<a href="#link-forests">step 3</a>)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(w = \min(p - 1,\ t - p)\)</span></td>
+<td>the most cities a parity matrix needs to touch (<a href="#sigma-dp">step 9</a>)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_{\rm lo}\)</span>, <span class="math inline">\(T_{\rm hi}\)</span></td>
+<td>the first level with a plan, and the first level at the cheapest cost (<a href="#levels">step 4</a>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="math inline">\(s\)</span>, <span class="math inline">\(\kappa\)</span>, <span class="math inline">\(c\)</span>, <span class="math inline">\(\delta\)</span> and <span class="math inline">\(\ell\)</span> are the notation of the theory note <a href="../proofs.html#node-notation">Notation</a> <span class="badge informal">informal</span>.</p>
+</section>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">The worked example</h3>
+<p>The instance of the <a href="../problem.html">problem page</a> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/site/problem/example.dat"><code>site/problem/example.dat</code></a>) has <span class="math inline">\(n = 3\)</span> cities, <span class="math inline">\(t = 3\)</span> passengers and <span class="math inline">\(p = 2\)</span> planes:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>city <span class="math inline">\(i\)</span></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>duration <span class="math inline">\(d_i = \bar d_i\)</span></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td>landing cost <span class="math inline">\(c_i\)</span></td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>City 1 is fast and expensive, city 3 slow and cheap. So <span class="math inline">\(s = 2 \cdot 3 - 2 = 4\)</span> landings, <span class="math inline">\(\kappa = 2\)</span> and <span class="math inline">\(g = 1\)</span>. The instance has no central flight table, and the default central flights of <code>zeno</code> satisfy (A1). Its front, as <code>zeno -n 3 -t 3 -p 2 -d site/problem/example.dat</code> prints it:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>makespan</th>
+<th style="text-align: right;">8</th>
+<th style="text-align: right;">10</th>
+<th style="text-align: right;">12</th>
+<th style="text-align: right;">14</th>
+<th style="text-align: right;">16</th>
+<th style="text-align: right;">20</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cost</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
+<p>The rest of the page derives this list. Part one says what is computed; part two says how.</p>
+</section>
+</section>
+<section id="what" class="level2">
+<h2 class="anchored" data-anchor-id="what">What is computed</h2>
+<section id="reduction" class="level3">
+<h3 class="anchored" data-anchor-id="reduction">Step 1. From plans to landing multisets</h3>
+<p><strong>Idea.</strong> A plan is a timed object, with routes, journeys and waiting, but its point on the front depends on two numbers only. The first step replaces plans by a finite, untimed object: the multiset of central cities the planes land in, split among the planes. Under (S), a landing in city <span class="math inline">\(i\)</span> served by its own round trip from a hub (<span class="math inline">\(C_I \to i \to C_G\)</span>, <span class="math inline">\(C_G \to i \to C_I\)</span>, <span class="math inline">\(C_I \to i \to C_I\)</span> or <span class="math inline">\(C_G \to i \to C_G\)</span>) takes exactly <span class="math inline">\(2d_i\)</span> <a href="../proofs.html#node-lemma-3-3">Lemma 3.3</a> <span class="badge informal">informal, parts in Lean</span>. If every landing is flown this way, plane <span class="math inline">\(k\)</span> flies for <span class="math inline">\(\ell(X_k) = 2\delta(X_k)\)</span>, and the question becomes which landings to make and how to split them.</p>
+<p><strong>Results.</strong></p>
+<ol type="1">
+<li><em>Counting.</em> Every feasible plan lands at least <span class="math inline">\(s = 2t - p\)</span> times in central cities <a href="../proofs.html#node-lemma-3-2">Lemma 3.2</a> <span class="badge ok">machine-checked</span>. Every passenger needs a flight out of <span class="math inline">\(C_I\)</span> and a flight into <span class="math inline">\(C_G\)</span>. Cut each route at its visits to the hubs: each piece, a <em>segment</em>, lands in a central city, and a plane leaves <span class="math inline">\(C_I\)</span> one time more than it returns there. Counting the arrivals in the hubs gives at least <span class="math inline">\((t - p) + t\)</span> segments.</li>
+<li><em>Achievability.</em> For every multiset <span class="math inline">\(X\)</span> with <span class="math inline">\(|X| = s\)</span> and every <em>admissible</em> partition <span class="math inline">\(X_1, \dots, X_p\)</span> of it (<a href="#admissible">step 2</a>), there is a feasible plan whose central landings are exactly <span class="math inline">\(X\)</span>, hence of cost <span class="math inline">\(c(X)\)</span>, that uses no central flight, in which plane <span class="math inline">\(k\)</span> flies for <span class="math inline">\(\ell(X_k)\)</span>, and whose makespan is <span class="math inline">\(\max_k \ell(X_k)\)</span> <a href="../proofs.html#node-theorem-4-1">Theorem 4.1</a> <span class="badge ok">machine-checked</span>. <a href="#plans">Step 11</a> shows the construction.</li>
+<li><em>Converse.</em> Under (S) and (A1), every feasible plan with cost <span class="math inline">\(C\)</span> and makespan <span class="math inline">\(M\)</span> is matched by an admissible partition of some <span class="math inline">\(X\)</span> with <span class="math inline">\(|X| = s\)</span>, <span class="math inline">\(c(X) \le C\)</span> and <span class="math inline">\(\ell(X_k) \le M\)</span> for every plane <a href="../proofs.html#node-theorem-4-7">Theorem 4.7</a> <span class="badge ok">machine-checked</span>. The same holds under (S) and (AΔ) <a href="../proofs.html#node-theorem-4-10">Theorem 4.10</a> <span class="badge ok">machine-checked</span>.</li>
+<li><em>Together.</em> Let <span class="math inline">\(M(X)\)</span> be the least <span class="math inline">\(\max_k \ell(X_k)\)</span> over the admissible partitions of <span class="math inline">\(X\)</span>, or <span class="math inline">\(\infty\)</span> if there is none. Under (S) and (A1), <span class="math display">\[\mathcal F = \mathrm{Min}\,\mathcal X, \qquad \mathcal X = \{(c(X), M(X)) : |X| = s,\ M(X) &lt; \infty\},\]</span> where <span class="math inline">\(\mathrm{Min}\)</span> keeps the points that no other point of the set weakly dominates, and every front point is attained by a plan with exactly <span class="math inline">\(s\)</span> central landings <a href="../proofs.html#node-corollary-4-8">Corollary 4.8</a> <span class="badge ok">machine-checked</span>. The same holds under (S) and (AΔ) <a href="../proofs.html#node-corollary-4-12">Corollary 4.12</a> <span class="badge informal">informal, parts in Lean</span>.</li>
 </ol>
-<p>Why the 2016 solvers were wrong: they fixed the multiset of landings (a PPP) and scheduled it greedily, longest first onto the least-loaded plane. That is a heuristic, and deciding whether a fixed multiset can be flown within a makespan is strongly NP-complete (<a href="../proofs.html#node-s5">§5</a>, <a href="../proofs.html#node-theorem-8-1">Theorem 8.1</a>). The link-forest DP does not fix the multiset. Its cost is pseudo-polynomial (<a href="../proofs.html#node-corollary-8-3">Corollary 8.3</a>).</p>
+<p>Some condition on the central flights is needed: with fast central flights that satisfy neither (A1) nor (AΔ), a plan can beat every point of <span class="math inline">\(\mathcal X\)</span> <a href="../proofs.html#node-example-4-13">Example 4.13</a> <span class="badge informal">informal</span>.</p>
+<p><strong>In the example.</strong> <span class="math inline">\(s = 4\)</span>. The multiset <span class="math inline">\(\{3, 3, 3, 3\}\)</span> split as <span class="math inline">\(\{3, 3\} \mid \{3, 3\}\)</span> costs <span class="math inline">\(4\)</span>, each plane has <span class="math inline">\(\delta = 10\)</span>, and the makespan is <span class="math inline">\(20\)</span>: the point <span class="math inline">\((4, 20)\)</span>. The multiset <span class="math inline">\(\{1, 1, 1, 1\}\)</span> split as <span class="math inline">\(\{1, 1\} \mid \{1, 1\}\)</span> costs <span class="math inline">\(36\)</span> with makespan <span class="math inline">\(8\)</span>: the point <span class="math inline">\((36, 8)\)</span>. The four other points come from multisets in between.</p>
+<p><strong>In the code.</strong> <code>solveFront</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/solve.cpp"><code>src/zeno/solve.cpp</code></a>) takes symmetric instances and sends the others to <code>solveBracket</code> (<a href="#nonsymmetric">below</a>). <code>checkFlights</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/flights.hpp"><code>include/zeno/flights.hpp</code></a>) decides (A1), (AΔ) and (A1-NS) in exact integer arithmetic. With a central flight table that satisfies neither (A1) nor (AΔ), <code>zeno</code> still prints achieved points but warns that the front may not be exact.</p>
+</section>
+<section id="admissible" class="level3">
+<h3 class="anchored" data-anchor-id="admissible">Step 2. Admissible partitions</h3>
+<p><strong>Idea.</strong> Not every split of <span class="math inline">\(X\)</span> among the planes can be flown with loads <span class="math inline">\(\ell(X_k)\)</span>. In the plans of step 1, every landing is a round trip from a hub of one of four kinds: a <em>crossing</em> <span class="math inline">\(C_I \to i \to C_G\)</span> carrying a passenger, or its empty return <span class="math inline">\(C_G \to i \to C_I\)</span>; a <em>drop-off</em> <span class="math inline">\(C_I \to i \to C_I\)</span>, which leaves a passenger in city <span class="math inline">\(i\)</span>; and a <em>pick-up</em> <span class="math inline">\(C_G \to i \to C_G\)</span>, which collects one there. A plane starts in <span class="math inline">\(C_I\)</span> and ends in <span class="math inline">\(C_G\)</span>, so it flies an odd number of crossings, counting both directions <a href="../proofs.html#node-lemma-2-1">Lemma 2.1</a> <span class="badge informal">informal, parts in Lean</span>. Every drop-off in city <span class="math inline">\(i\)</span> is matched by a pick-up in city <span class="math inline">\(i\)</span> <a href="../proofs.html#node-definition-4-2">Definition 4.2</a> <span class="badge ok">Lean definition</span>. So a plane with an even number of landings must take part in a hand-off, and hand-offs pair up city by city. The parity matrix records exactly this: <span class="math inline">\(h_{k,i}\)</span> is the parity of the number of drop-offs and pick-ups of plane <span class="math inline">\(k\)</span> in city <span class="math inline">\(i\)</span> <a href="../proofs.html#node-lemma-4-5">Lemma 4.5</a> <span class="badge ok">machine-checked</span>.</p>
+<p><strong>Definition</strong> <a href="../proofs.html#node-definition-2-2">Definition 2.2</a> <span class="badge ok">Lean definition</span>. A <em>parity matrix</em> for a partition <span class="math inline">\(X_1, \dots, X_p\)</span> is a 0/1 matrix <span class="math inline">\(h\)</span> with one row per plane and one column per city such that</p>
+<ul>
+<li>(h1) <span class="math inline">\(h_{k,i} = 1\)</span> only if plane <span class="math inline">\(k\)</span> lands in city <span class="math inline">\(i\)</span>, that is <span class="math inline">\(X_k(i) \ge 1\)</span>;</li>
+<li>(h2) row <span class="math inline">\(k\)</span> has <span class="math inline">\(|X_k| + 1\)</span> ones modulo 2: an odd number for an even plane, an even number for an odd plane;</li>
+<li>(h3) every column has an even number of ones.</li>
+</ul>
+<p>The partition is <em>admissible</em> if it has a parity matrix.</p>
+<p><strong>Equivalent forms.</strong></p>
+<ul>
+<li>Counting with multiplicities changes nothing: integer entries <span class="math inline">\(0 \le \tilde h_{k,i} \le X_k(i)\)</span> with the same two parity conditions exist iff a parity matrix does <a href="../proofs.html#node-lemma-2-3">Lemma 2.3</a> <span class="badge informal">informal</span>. This is the form a link forest produces (<a href="#link-forests">step 3</a>).</li>
+<li><em>Component form.</em> Let <span class="math inline">\(H\)</span> be the bipartite graph on planes and cities with an edge between plane <span class="math inline">\(k\)</span> and city <span class="math inline">\(i\)</span> whenever <span class="math inline">\(X_k(i) \ge 1\)</span>. The partition is admissible iff every connected component of <span class="math inline">\(H\)</span> contains an even number of even planes <a href="../proofs.html#node-lemma-2-4">Lemma 2.4</a> <span class="badge informal">informal</span>. This is the quickest test by hand.</li>
+<li>Every row has at most <span class="math inline">\(|X_k| - 1\)</span> ones <a href="../proofs.html#node-lemma-2-5">Lemma 2.5</a> <span class="badge ok">machine-checked</span>: each plane keeps at least one landing outside the hand-offs, and an admissible partition has no empty group.</li>
+<li>A sufficient condition: if the groups are non-empty, their sizes add up to <span class="math inline">\(p\)</span> modulo 2, and some city belongs to every even group, the partition is admissible <a href="../proofs.html#node-lemma-2-9">Lemma 2.9</a> <span class="badge informal">informal</span>.</li>
+</ul>
+<p><strong>In the example</strong> (<a href="#fig-admissible" class="quarto-xref">Figure&nbsp;1</a>). The multiset <span class="math inline">\(\{2, 2, 3, 3\}\)</span> split as <span class="math inline">\(\{2, 3\} \mid \{2, 3\}\)</span>: both planes are even, so each row needs an odd number of ones, and marking city 2 in both rows gives the column sums <span class="math inline">\(0, 2, 0\)</span>. The split is admissible. It costs <span class="math inline">\(14\)</span>, both planes have <span class="math inline">\(\delta = 8\)</span>, and the makespan is <span class="math inline">\(16\)</span>: the front point <span class="math inline">\((14, 16)\)</span>. The split <span class="math inline">\(\{1, 3\} \mid \{2, 2\}\)</span> of <span class="math inline">\(\{1, 2, 2, 3\}\)</span> is not: plane 2 is even and lands only in city 2, so its row must mark city 2; plane 1 is even and lands in cities 1 and 3, so its row marks exactly one of them; column 2 then holds a single one. The graph <span class="math inline">\(H\)</span> shows it at a glance: plane 2 and city 2 form a component with one even plane. This split is not a candidate in Corollary 4.8, whatever its cost (22) and loads.</p>
+<div id="fig-admissible" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-admissible-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="alg-ink">
+<p><a href="../algorithm/fig-admissible.svg"><img src="../algorithm/fig-admissible.svg" class="img-fluid figure-img" alt="Two splits of four landings between two planes. Left, groups {2, 3} and {2, 3}: the parity matrix marks city 2 in both rows, every column is even, and the graph H is connected with two even planes. Right, groups {1, 3} and {2, 2}: column 2 is forced to hold a single one, and in H plane 2 and city 2 form a component with one even plane."></a></p>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-admissible-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: An admissible and a non-admissible split for the worked example, with the parity matrix of Definition 2.2 and the graph <span class="math inline">\(H\)</span> of Lemma 2.4. Cities keep their colours in every diagram of this page. Click to open the full-size drawing.
+</figcaption>
+</figure>
+</div>
+<p><strong>In the code.</strong> <code>zeno</code> never enumerates parity matrices. Its dynamic programs only build partitions that carry a link forest (<a href="#link-forests">step 3</a>), which are admissible by construction. Admissibility is still decidable by enumerating <span class="math inline">\(h\)</span> on the supports of the groups <a href="../proofs.html#node-definition-2-2">Definition 2.2</a> <span class="badge ok">Lean definition</span>; <code>gen_algorithm.py</code> does so over every partition of the example to check the figures of this page.</p>
+</section>
+<section id="link-forests" class="level3">
+<h3 class="anchored" data-anchor-id="link-forests">Step 3. Link forests</h3>
+<p><strong>Idea.</strong> A parity matrix says which landings take part in hand-offs, not who hands off to whom. A link forest says it. Draw an edge between planes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>, labelled with city <span class="math inline">\(i\)</span>, for each passenger that one of them drops off in city <span class="math inline">\(i\)</span> and the other picks up there. Each edge uses one landing in <span class="math inline">\(i\)</span> of both planes. The other landings of a plane are its <em>free landings</em>, flown as crossings.</p>
+<p><strong>Definition</strong> <a href="../proofs.html#node-definition-link-forest">Definition (link forest)</a> <span class="badge ok">Lean definition</span>. A <em>link forest</em> for <span class="math inline">\(X_1, \dots, X_p\)</span> is a forest <span class="math inline">\(\Lambda\)</span> on the planes whose edges carry city labels, such that</p>
+<ul>
+<li>(F1) for every plane <span class="math inline">\(u\)</span> and city <span class="math inline">\(i\)</span>, at most <span class="math inline">\(X_u(i)\)</span> edges at <span class="math inline">\(u\)</span> are labelled <span class="math inline">\(i\)</span>;</li>
+<li>(F2) <span class="math inline">\(r_u = |X_u| - \deg_\Lambda(u)\)</span>, the number of free landings of <span class="math inline">\(u\)</span>, is odd.</li>
+</ul>
+<p><strong>Results.</strong></p>
+<ul>
+<li>A partition is admissible iff it has a link forest, and then it has one with at most one edge of each label at each plane <a href="../proofs.html#node-lemma-2-6">Lemma 2.6</a> <span class="badge ok">machine-checked</span>. In one direction, counting the edges of each label at each plane gives the integer form of Lemma 2.3. In the other, the forest is built from a parity matrix whose ones lie on a spanning forest of <span class="math inline">\(H\)</span>.</li>
+<li>With <span class="math inline">\(|X| = s\)</span>, a link forest has at most <span class="math inline">\(t - p\)</span> edges, so each of its trees has at most <span class="math inline">\(q_{\max} = \min(p, t - p + 1)\)</span> planes <a href="../proofs.html#node-corollary-2-7">Corollary 2.7</a> <span class="badge informal">informal</span>. Every plane keeps at least one free landing, so the degrees add up to at most <span class="math inline">\(s - p = 2(t - p)\)</span>.</li>
+</ul>
+<p>Forests matter for two reasons. They can be built tree by tree, from the leaves up, by dynamic programming (<a href="#forest-dp">step 8</a>). And in the plan built from a forest, each plane picks up at most once, from its parent, which is what keeps waiting harmless (<a href="#plans">step 11</a>).</p>
+<p><strong>In the example</strong> (<a href="#fig-link-tree" class="quarto-xref">Figure&nbsp;2</a>). <span class="math inline">\(t - p = 1\)</span>, so there is at most one link, and <span class="math inline">\(q_{\max} = 2\)</span>: every tree is a single plane or a pair. For the point <span class="math inline">\((14, 16)\)</span>, one edge labelled city 2 joins plane 1 to plane 2. Each plane keeps one free landing, in city 3: <span class="math inline">\(r_u = 2 - 1 = 1\)</span>, which is odd. In the plan, plane 1 drops passenger 1 in city 2 and plane 2 collects it.</p>
+<div id="fig-link-tree" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-link-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="alg-ink">
+<p><a href="../algorithm/fig-link-tree.svg"><img src="../algorithm/fig-link-tree.svg" class="img-fluid figure-img" alt="Left: a tree with plane 1 as root and plane 2 as its child, joined by an edge labelled city 2; each plane holds a landing in city 2 for the link and a free landing in city 3. Right: the plan on a time axis from 0 to 16. Plane 1 drops passenger 1 in city 2 from 0 to 6, then crosses through city 3 with passenger 2 until 16. Plane 2 crosses through city 3 with passenger 3 from 0 to 10, then picks up passenger 1 in city 2 from 10 to 16. Passenger 1 waits in city 2 from time 3 to time 13."></a></p>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-link-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: The link forest of the point <span class="math inline">\((14, 16)\)</span> and the plan built from it. Left: the tree; its edge uses one landing in city 2 of each plane (F1), and each plane keeps one free landing (F2). Right: the plan of Theorem 4.1 on a time axis, as <code>zeno --plans</code> prints it (<a href="#plans">step 11</a>).
+</figcaption>
+</figure>
+</div>
+<p><strong>In the code.</strong> <code>LinkForest</code> and <code>ForestPlane</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/forest.hpp"><code>include/zeno/forest.hpp</code></a>) store, for each plane, its <em>filler</em> (the odd number of free landings), its parent, and the label of the edge to it. The group of a plane is its filler, plus its parent’s label, plus one landing per child edge.</p>
+</section>
+<section id="levels" class="level3">
+<h3 class="anchored" data-anchor-id="levels">Step 4. The level function <span class="math inline">\(E(T)\)</span> and its breakpoints</h3>
+<p><strong>Idea.</strong> Corollary 4.8 still asks for the Pareto set of a search with two objectives. Turn it into a family of searches with one: fix a budget <span class="math inline">\(T\)</span> for every plane, and ask for the cheapest admissible way to fit in it. As the budget grows, the least cost can only drop, and each drop is a front point.</p>
+<p><strong>Definition.</strong> Durations are integers, divided by their gcd <span class="math inline">\(g\)</span> (rational durations are scaled to integers first). For an integer level <span class="math inline">\(T \ge 0\)</span>, <span class="math display">\[E(T) = \min\{c(X) : |X| = s,\ X_1, \dots, X_p \text{ admissible},\ \delta(X_k) \le T \text{ for every } k\},\]</span> with <span class="math inline">\(\min \emptyset = \infty\)</span>. A larger <span class="math inline">\(T\)</span> allows more partitions, so <span class="math inline">\(E\)</span> is non-increasing.</p>
+<p><strong>Results.</strong></p>
+<ul>
+<li>Under (S) and (A1), the front is the set of <em>breakpoints</em> of <span class="math inline">\(E\)</span> <a href="../proofs.html#node-proposition-7-1">Proposition 7.1</a> <span class="badge ok">machine-checked</span>: <span class="math display">\[\mathcal F = \{(E(T),\ 2gT) : E(T) &lt; E(T - 1)\}, \qquad E(-1) = \infty.\]</span> Under (S) and (AΔ) as well <a href="../proofs.html#node-corollary-4-12">Corollary 4.12</a> <span class="badge informal">informal, parts in Lean</span>.</li>
+<li>Only a bounded range of levels matters <a href="../proofs.html#node-proposition-7-10">Proposition 7.10</a> <span class="badge informal">informal, parts in Lean</span>. Let <span class="math inline">\(d_{\min}\)</span> be the smallest duration, <span class="math inline">\(c_{\min}\)</span> the smallest cost, and <span class="math inline">\(d_{\rm cheap}\)</span> the smallest duration among the cities of cost <span class="math inline">\(c_{\min}\)</span>. Then <span class="math inline">\(E(T) &lt; \infty\)</span> iff <span class="math inline">\(T \ge T_{\rm lo} = d_{\min}\kappa\)</span>, and <span class="math inline">\(E(T) = s\,c_{\min}\)</span> iff <span class="math inline">\(T \ge T_{\rm hi} = d_{\rm cheap}\kappa\)</span>. In the original units, every plan has makespan at least <span class="math inline">\(2d_{\min}\kappa\)</span>, which some plan attains, and the cheapest point of the front is <span class="math inline">\((s\,c_{\min},\ 2d_{\rm cheap}\kappa)\)</span>. Both hold under (S), whatever the central flights. The cost of the fastest point has no closed form: it is <span class="math inline">\(E(T_{\rm lo})\)</span>.</li>
+</ul>
+<p><strong>In the example</strong> (<a href="#fig-staircase" class="quarto-xref">Figure&nbsp;3</a>). <span class="math inline">\(T_{\rm lo} = 2 \cdot 2 = 4\)</span> and <span class="math inline">\(T_{\rm hi} = 5 \cdot 2 = 10\)</span>: seven levels. On <span class="math inline">\(T = 4, \dots, 10\)</span>, <span class="math inline">\(E\)</span> takes the values 36, 30, 24, 20, 14, 14 and 4. It drops at every level but <span class="math inline">\(T = 9\)</span>, where the cheapest groups within the budget are still <span class="math inline">\(\{2, 3\} \mid \{2, 3\}\)</span>: no plan of makespan 18 is cheaper than the plan of makespan 16. Six breakpoints, six front points.</p>
+<div id="fig-staircase" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-staircase-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div data-figure="">
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-line"></i>E(T)</span>
+    <span><i class="alg-key alg-key-dot"></i>breakpoint: front point (E(T), 2gT)</span>
+    <span><i class="alg-key alg-key-hollow"></i>no drop: no new point</span>
+  </div>
+  <div id="alg-staircase" class="alg-plot"></div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-staircase-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: <span class="math inline">\(E(T)\)</span> for the worked example. Each filled dot is a breakpoint, labelled with its front point; the hollow dot at <span class="math inline">\(T = 9\)</span> is a level where <span class="math inline">\(E\)</span> does not drop. Below <span class="math inline">\(T_{\rm lo}\)</span> no partition fits; from <span class="math inline">\(T_{\rm hi}\)</span> on, <span class="math inline">\(E\)</span> is the cheapest cost <span class="math inline">\(s\,c_{\min} = 4\)</span>. Hover over a level, or focus it with the keyboard, for its cheapest admissible groups.
+</figcaption>
+</figure>
+</div>
+<details>
+<summary>
+Table view: the levels of the worked example
+</summary>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">level <span class="math inline">\(T\)</span></th>
+<th style="text-align: right;">makespan <span class="math inline">\(2gT\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(L(T)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(E(T)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(U(T)\)</span></th>
+<th>settled by</th>
+<th>cheapest admissible groups</th>
+<th>front point</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td>below <span class="math inline">\(T_{\rm lo}\)</span></td>
+<td>none</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">36</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 1} | {1, 1}</td>
+<td>(36, 8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 2} | {1, 2}</td>
+<td>(30, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">24</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 2} | {2, 2}</td>
+<td>(24, 12)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">20</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 3} | {1, 3}</td>
+<td>(20, 14)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 3} | {2, 3}</td>
+<td>(14, 16)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 3} | {2, 3}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{3, 3} | {3, 3}</td>
+<td>(4, 20)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td>above <span class="math inline">\(T_{\rm hi}\)</span></td>
+<td>{3, 3} | {3, 3}</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</details>
+<p><strong>In the code.</strong> <code>ReducedInstance::lowestLevel()</code> and <code>highestLevel()</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/reduce.hpp"><code>include/zeno/reduce.hpp</code></a>) give <span class="math inline">\(T_{\rm lo}\)</span> and <span class="math inline">\(T_{\rm hi}\)</span>, and <code>makespanPerLevel</code> is <span class="math inline">\(2g\)</span>. Once every level is settled, <code>extract()</code> in <code>solve.cpp</code> emits a front point wherever <span class="math inline">\(E\)</span> drops, and checks that <span class="math inline">\(E\)</span> never rises.</p>
+</section>
+</section>
+<section id="how" class="level2">
+<h2 class="anchored" data-anchor-id="how">How zeno computes it</h2>
+<p><a href="#fig-pipeline" class="quarto-xref">Figure&nbsp;4</a> is the map of the symmetric solver, <code>solveFront</code>. The left column runs once per instance. The panel on the right settles one level: it tries the cheap bounds first, and the exact program only when they disagree.</p>
+<div id="fig-pipeline" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pipeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="alg-ink">
+<p><a href="../algorithm/fig-pipeline.svg"><img src="../algorithm/fig-pipeline.svg" class="img-fluid figure-img" alt="Flowchart. Instance; if not symmetric, the non-symmetric bracket. Otherwise: reduce (gcd, dominated cities), levels and one-plane table, settle every level, breakpoints, plans, certificate. Settling one level: compute L and U; if L equals U the level is settled; else if q_max is at most 2, E equals U; else compute U3; if L equals U3 or q_max is at most 3, E equals U3; else run the link-forest DP."></a></p>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pipeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: The orchestration of <code>solveFront</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/solve.cpp"><code>src/zeno/solve.cpp</code></a>), following §7.7 of the theory note. The branch that settles a level is what <code>zeno --stats</code> counts: <code>bracket</code>, <code>pairs</code>, <code>chains</code>, <code>exact</code>, and <code>monotone</code> for the levels that bisection settles (<a href="#forest-dp">step 8</a>).
+</figcaption>
+</figure>
+</div>
+<section id="reduce" class="level3">
+<h3 class="anchored" data-anchor-id="reduce">Step 5. Reduce the instance</h3>
+<p><strong>Idea.</strong> A city that is no faster and no cheaper than another is never needed: replacing each of its landings by a landing in the other city keeps the partition admissible (merge the two columns of the parity matrix) and raises neither the cost nor a load.</p>
+<p><strong>Result</strong> <a href="../proofs.html#node-proposition-7-9">Proposition 7.9</a> <span class="badge informal">informal, parts in Lean</span>. If <span class="math inline">\(d_{i'} \le d_i\)</span> and <span class="math inline">\(c_{i'} \le c_i\)</span> for two cities <span class="math inline">\(i \ne i'\)</span>, removing city <span class="math inline">\(i\)</span> leaves <span class="math inline">\(E(T)\)</span> and <span class="math inline">\(L(T)\)</span> unchanged at every level, and under (S) and (A1) it leaves the front unchanged. Applied repeatedly, keeping one city per class of equal <span class="math inline">\((d, c)\)</span>, the cities that remain form a <em>staircase</em>: durations strictly increasing, costs strictly decreasing.</p>
+<p><strong>In the example.</strong> <span class="math inline">\(2 &lt; 3 &lt; 5\)</span> and <span class="math inline">\(9 &gt; 6 &gt; 1\)</span>: the cities already form a staircase, and <span class="math inline">\(g = 1\)</span>. Nothing changes.</p>
+<p><strong>In the code.</strong> <code>reduce</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/reduce.cpp"><code>src/zeno/reduce.cpp</code></a>) merges equal cities, drops dominated ones, divides the durations by <span class="math inline">\(g\)</span>, and computes the level range. <code>zeno --stats</code> prints the result, here <code>levels 4..10 (x1, 7 levels), cities 3, max tree 2</code>.</p>
+</section>
+<section id="one-plane" class="level3">
+<h3 class="anchored" data-anchor-id="one-plane">Step 6. The one-plane table</h3>
+<p><strong>Idea.</strong> Every bound and every exact method below keeps asking one question: what is the cheapest way for a single plane to make <span class="math inline">\(m\)</span> landings within a budget <span class="math inline">\(\tau\)</span>? It is a knapsack with exactly <span class="math inline">\(m\)</span> items, in which each city can be used any number of times, and one table answers it for all <span class="math inline">\(m\)</span> and <span class="math inline">\(\tau\)</span> at once.</p>
+<p><strong>Result</strong> <a href="../proofs.html#node-lemma-7-2">Lemma 7.2</a> <span class="badge ok">machine-checked</span>. Let <span class="math inline">\(G[0][\tau] = 0\)</span> for <span class="math inline">\(\tau \ge 0\)</span>, <span class="math inline">\(G[m][\tau] = \infty\)</span> for <span class="math inline">\(\tau &lt; 0\)</span>, and <span class="math display">\[G[m][\tau] = \min_{i:\ d_i \le \tau} \big(c_i + G[m-1][\tau - d_i]\big).\]</span> Then <span class="math inline">\(G[m][\tau]\)</span> is the least cost of a multiset of <span class="math inline">\(m\)</span> cities whose durations sum to at most <span class="math inline">\(\tau\)</span>, and it is non-increasing in <span class="math inline">\(\tau\)</span>.</p>
+<p><strong>In the example</strong> (<a href="#fig-table" class="quarto-xref">Figure&nbsp;5</a>). <span class="math inline">\(m\)</span> runs up to <span class="math inline">\(\hat m = 3\)</span> and <span class="math inline">\(\tau\)</span> up to <span class="math inline">\(T_{\rm hi} = 10\)</span>. For instance <span class="math inline">\(G[2][8] = 7\)</span>: one landing in city 2 and one in city 3, of durations <span class="math inline">\(3 + 5 = 8\)</span>. Replay the fill to see each cell computed from a cell of the row above.</p>
+<div id="fig-table" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div data-figure="">
+  <div class="alg-controls" id="alg-table-controls">
+    <button type="button">Fill the table step by step</button>
+  </div>
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-hollow"></i>the cell computed</span>
+    <span><i class="alg-key alg-key-hollow" style="border-color: var(--zs-series-2)"></i>the cell of row m − 1 it extends</span>
+    <span><i class="alg-key alg-key-dot"></i>staircase point: G[m][·] drops</span>
+  </div>
+  <div id="alg-table"></div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: The one-plane table <span class="math inline">\(G[m][\tau]\)</span> of the worked example: rows <span class="math inline">\(m\)</span>, columns <span class="math inline">\(\tau\)</span>. Hover over a cell, or focus it, to see the cell of row <span class="math inline">\(m - 1\)</span> it extends (orange outline) and a cheapest group. A dot marks the cells where <span class="math inline">\(G[m][\cdot]\)</span> drops, the only cells the staircase layout stores.
+</figcaption>
+</figure>
+</div>
+<details>
+<summary>
+Table view: <span class="math inline">\(G[m][\tau]\)</span>
+</summary>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(m\)</span> / <span class="math inline">\(\tau\)</span></th>
+<th style="text-align: right;">0</th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+<th style="text-align: right;">7</th>
+<th style="text-align: right;">8</th>
+<th style="text-align: right;">9</th>
+<th style="text-align: right;">10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">16</td>
+</tr>
+</tbody>
+</table>
+</details>
+<p><strong>In the code.</strong> <code>OnePlaneTable</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/one_plane.hpp"><code>include/zeno/one_plane.hpp</code></a>) has two layouts. The dense one stores every cell and takes <span class="math inline">\(O(n\,\hat m\,T_{\rm hi})\)</span> time to build; <code>zeno</code> uses it up to <span class="math inline">\(2^{22}\)</span> cells. Beyond, it stores for each <span class="math inline">\(m\)</span> only the Pareto points (load, cost) where <span class="math inline">\(G[m][\cdot]\)</span> drops, the dotted cells of the figure, so that memory does not depend on the magnitude of the durations; a lookup is then a binary search.</p>
+</section>
+<section id="bracket" class="level3">
+<h3 class="anchored" data-anchor-id="bracket">Step 7. The bracket</h3>
+<p><strong>Idea.</strong> Before solving a level exactly, sandwich <span class="math inline">\(E(T)\)</span> between a cheap lower bound and cheap upper bounds, <span class="math inline">\(L \le E \le U_3 \le U\)</span>. All three are knapsacks that combine small <em>gadgets</em> (a few planes with their groups) filled with <span class="math inline">\(G\)</span>-optimal landings. Where the lower bound meets an upper bound, the level is settled.</p>
+<p><strong>The bounds.</strong> A knapsack over planes and landings combines gadgets, with <span class="math inline">\(\mathrm{For}[0][0] = 0\)</span> and <span class="math display">\[\mathrm{For}[P][J] = \min\big(\mathrm{For}[P - q][J - j] + \text{cost}\big)\]</span> over the gadgets of <span class="math inline">\(q\)</span> planes, <span class="math inline">\(j\)</span> landings and that cost; the bound is <span class="math inline">\(\mathrm{For}[p][s]\)</span>.</p>
+<ul>
+<li><span class="math inline">\(L(T)\)</span>: one plane with any number <span class="math inline">\(m \in [1, \hat m]\)</span> of landings, at cost <span class="math inline">\(G[m][T]\)</span>. Admissibility is ignored, so this is a relaxation. It bounds more than <span class="math inline">\(E\)</span>: under (S) alone, whatever the central flights, every feasible plan of makespan <span class="math inline">\(M\)</span> costs at least <span class="math inline">\(L(\lfloor M/2g \rfloor)\)</span> <a href="../proofs.html#node-lemma-3-4">Lemma 3.4</a> <span class="badge ok">machine-checked</span>.</li>
+<li><span class="math inline">\(U(T)\)</span>: one plane with an odd number <span class="math inline">\(m\)</span> of landings, at cost <span class="math inline">\(G[m][T]\)</span>; or a <em>pair</em>: two planes of even sizes <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> linked at a city <span class="math inline">\(i\)</span>, at cost <span class="math display">\[2c_i + G[a-1][T - d_i] + G[b-1][T - d_i].\]</span></li>
+<li><span class="math inline">\(U_3(T)\)</span>: the gadgets of <span class="math inline">\(U\)</span>, and a <em>chain</em>: three planes of sizes <span class="math inline">\(a\)</span> (even), <span class="math inline">\(b\)</span> (odd, at least
+<ol start="3" type="1">
+<li>and <span class="math inline">\(b'\)</span> (even), the first two linked at <span class="math inline">\(i\)</span> and the last two at <span class="math inline">\(j\)</span>, at cost <span class="math display">\[2c_i + 2c_j + G[a-1][T-d_i] + G[b-2][T-d_i-d_j] + G[b'-1][T-d_j].\]</span></li>
+</ol></li>
+</ul>
+<p><strong>Results.</strong></p>
+<ul>
+<li><span class="math inline">\(L(T) \le E(T) \le U_3(T) \le U(T)\)</span> <a href="../proofs.html#node-proposition-7-3">Proposition 7.3</a> <span class="badge informal">informal, parts in Lean</span>. Each gadget of <span class="math inline">\(U\)</span> and <span class="math inline">\(U_3\)</span> is a link tree with one, two or three planes that satisfies (F1) and (F2), so its groups are admissible by Lemma 2.6.</li>
+<li>The upper bounds are exact when useful trees are small: <span class="math inline">\(E = U\)</span> if <span class="math inline">\(q_{\max} \le 2\)</span>, that is <span class="math inline">\(p \le 2\)</span> or <span class="math inline">\(t \le p + 1\)</span>, and <span class="math inline">\(E = U_3\)</span> if <span class="math inline">\(q_{\max} \le 3\)</span> <a href="../proofs.html#node-proposition-7-4">Proposition 7.4</a> <span class="badge informal">informal</span>. By Corollary 2.7 the trees of an optimal forest then have at most two or three planes, and such trees are a vertex, an edge or a path: exactly the gadgets.</li>
+</ul>
+<p><strong>In the example</strong> (<a href="#fig-bracket" class="quarto-xref">Figure&nbsp;6</a>). <span class="math inline">\(q_{\max} = 2\)</span>, so <span class="math inline">\(E = U\)</span> at every level. Moreover <span class="math inline">\(L = U\)</span> at every level: all seven levels are closed by the bracket, and <code>zeno --stats</code> reports <code>settled: bracket 7, pairs 0, chains 0, monotone 0, exact 0</code>. This is no accident of the numbers. With two planes and four landings, the relaxation either splits them <span class="math inline">\(1 + 3\)</span>, two odd planes, which is always admissible since no component of <span class="math inline">\(H\)</span> then holds an even plane <a href="../proofs.html#node-lemma-2-4">Lemma 2.4</a> <span class="badge informal">informal</span>; or <span class="math inline">\(2 + 2\)</span>, where the cheapest choice is the same <span class="math inline">\(G\)</span>-optimal pair twice: the two groups share a city, which makes them admissible <a href="../proofs.html#node-lemma-2-9">Lemma 2.9</a> <span class="badge informal">informal</span>.</p>
+<p>The <em>contrast instance</em> of the figure shows what an open level looks like: three cities with <span class="math inline">\(d = (3, 5, 7)\)</span> and <span class="math inline">\(c = (10, 5, 1)\)</span>, <span class="math inline">\(t = 4\)</span> passengers and <span class="math inline">\(p = 2\)</span> planes (<a href="../algorithm/contrast.dat"><code>contrast.dat</code></a>), so <span class="math inline">\(s = 6\)</span> and the levels run from 9 to 21. At <span class="math inline">\(T = 12\)</span>, the cheapest relaxed split is <span class="math inline">\(\{2, 3\} \mid \{1, 1, 1, 1\}\)</span>, of cost 46: two even planes that share no city, so each component of <span class="math inline">\(H\)</span> holds one even plane, and the split is not admissible (Lemma 2.4). The cheapest admissible split, <span class="math inline">\(\{1, 1, 2\} \mid \{1, 1, 2\}\)</span>, costs <span class="math inline">\(50 = U(12)\)</span>. Levels 12 and 14 stay open, and <code>zeno --stats</code> reports <code>settled: bracket 11, pairs 2</code>: both are settled by <span class="math inline">\(U\)</span>, exact since <span class="math inline">\(q_{\max} = 2\)</span>.</p>
+<div id="fig-bracket" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bracket-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div data-figure="">
+  <div class="alg-controls" role="group" aria-label="Instance">
+    <button type="button" data-instance="example" aria-pressed="true">Worked example</button>
+    <button type="button" data-instance="contrast" aria-pressed="false">Contrast instance</button>
+  </div>
+  <div class="alg-legend" aria-hidden="true">
+    <span><i class="alg-key alg-key-L"></i>L(T), relaxation</span>
+    <span><i class="alg-key alg-key-U"></i>U(T), pairs bound</span>
+    <span><i class="alg-key alg-key-dot"></i>E(T)</span>
+    <span><i class="alg-key alg-key-band"></i>open level: L &lt; U</span>
+  </div>
+  <div id="alg-bracket" class="alg-plot"></div>
+  <p class="alg-status"><span data-note=""></span> <code data-stats=""></code></p>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bracket-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: The bracket per level. For each level <span class="math inline">\(T\)</span>, the aqua tick is <span class="math inline">\(L(T)\)</span>, the orange tick <span class="math inline">\(U(T)\)</span> and the blue dot <span class="math inline">\(E(T)\)</span>. On a closed level the three coincide; a shaded level is open. Switch between the worked example, where every level closes, and the contrast instance, where two levels stay open. Hover over a level for the groups behind each value.
+</figcaption>
+</figure>
+</div>
+<details>
+<summary>
+Table view: the levels of the contrast instance
+</summary>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">level <span class="math inline">\(T\)</span></th>
+<th style="text-align: right;">makespan <span class="math inline">\(2gT\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(L(T)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(E(T)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(U(T)\)</span></th>
+<th>settled by</th>
+<th>cheapest admissible groups</th>
+<th>front point</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td style="text-align: right;">∞</td>
+<td>below <span class="math inline">\(T_{\rm lo}\)</span></td>
+<td>none</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 1, 1} | {1, 1, 1}</td>
+<td>(60, 18)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 1, 1} | {1, 1, 1}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">50</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 1, 2} | {1, 1, 2}</td>
+<td>(50, 22)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">50</td>
+<td><span class="math inline">\(U\)</span> (exact, <span class="math inline">\(q_{\max} \le 2\)</span>)</td>
+<td>{1, 1, 2} | {1, 1, 2}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{1, 2, 2} | {1, 2, 2}</td>
+<td>(40, 26)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40</td>
+<td><span class="math inline">\(U\)</span> (exact, <span class="math inline">\(q_{\max} \le 2\)</span>)</td>
+<td>{1, 2, 2} | {1, 2, 2}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 2, 2} | {2, 2, 2}</td>
+<td>(30, 30)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 2, 2} | {2, 2, 2}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">22</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 2, 3} | {2, 2, 3}</td>
+<td>(22, 34)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">22</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 2, 3} | {2, 2, 3}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 3, 3} | {2, 3, 3}</td>
+<td>(14, 38)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{2, 3, 3} | {2, 3, 3}</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td><span class="math inline">\(L = U\)</span></td>
+<td>{3, 3, 3} | {3, 3, 3}</td>
+<td>(6, 42)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td>above <span class="math inline">\(T_{\rm hi}\)</span></td>
+<td>{3, 3, 3} | {3, 3, 3}</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</details>
+<p><strong>In the code.</strong> <code>relaxedCost</code> computes <span class="math inline">\(L\)</span>, and <code>forestCost(r, G, T, q)</code> runs the link-forest program of <a href="#forest-dp">step 8</a> restricted to trees of at most <span class="math inline">\(q\)</span> planes (<a href="https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/forest.cpp"><code>src/zeno/forest.cpp</code></a>): with <span class="math inline">\(q = 2\)</span> and <span class="math inline">\(q = 3\)</span> it ranges over the same trees as the gadgets of <span class="math inline">\(U\)</span> and <span class="math inline">\(U_3\)</span>. In sweep mode, <code>bracket()</code> computes <span class="math inline">\(L\)</span> and <span class="math inline">\(U\)</span> on every level in parallel, and <code>chains()</code> adds <span class="math inline">\(U_3\)</span> on the levels left open when <span class="math inline">\(q_{\max} \ge 3\)</span>. Every value is checked to lie inside its bracket.</p>
+</section>
+<section id="forest-dp" class="level3">
+<h3 class="anchored" data-anchor-id="forest-dp">Step 8. The link-forest DP</h3>
+<p><strong>Idea.</strong> When <span class="math inline">\(q_{\max} \ge 4\)</span> and <span class="math inline">\(L &lt; U_3\)</span> at a level, <code>zeno</code> computes <span class="math inline">\(E(T)\)</span> exactly. By Lemma 2.6 and Corollary 2.7, <span class="math inline">\(E(T)\)</span> is the least cost of <span class="math inline">\(p\)</span> groups with <span class="math inline">\(s\)</span> landings in all, each within <span class="math inline">\(T\)</span>, that carry a link forest whose trees have at most <span class="math inline">\(q_{\max}\)</span> planes. Root every tree at a plane. The group of a plane is then its free landings (an odd number <span class="math inline">\(r\)</span>), plus one landing per child edge, plus one for the edge to its parent. The program builds such trees from the leaves up, attaching to each plane the subtrees that hang from it.</p>
+<p><strong>Tables</strong>, for one level <span class="math inline">\(T\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\mathrm{Ch}_q[\tau][j]\)</span>: the least cost of a multiset of <em>child items</em>. An item is a link label <span class="math inline">\(b\)</span>, with one landing in <span class="math inline">\(b\)</span> in the parent’s group, and the subtree hanging from that link. The labels’ durations sum to <span class="math inline">\(\tau\)</span>, the subtrees have <span class="math inline">\(q\)</span> planes in all, and <span class="math inline">\(j\)</span> counts the landings;</li>
+<li><span class="math inline">\(\mathrm{Sub}_a[q][j]\)</span>: the least cost of a subtree with <span class="math inline">\(q\)</span> planes and <span class="math inline">\(j\)</span> landings whose root holds one landing in <span class="math inline">\(a\)</span> for the link to its parent;</li>
+<li><span class="math inline">\(\mathrm{Root}[q][j]\)</span>: the least cost of a tree with <span class="math inline">\(q\)</span> planes and <span class="math inline">\(j\)</span> landings;</li>
+<li><span class="math inline">\(\mathrm{For}[P][J]\)</span>: the least cost of a forest on <span class="math inline">\(P\)</span> planes with <span class="math inline">\(J\)</span> landings.</li>
+</ul>
+<p>For <span class="math inline">\(q = 1, \dots, q_{\max}\)</span> in order, with <span class="math inline">\(r\)</span> odd and <span class="math inline">\(\tau \in [0, T]\)</span>, <span class="math display">\[\mathrm{Sub}_a[q][j] = \min_{\tau,\ j' + 1 + r = j} \big(c_a + \mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - d_a - \tau]\big),\]</span> <span class="math display">\[\mathrm{Root}[q][j] = \min_{\tau,\ j' + r = j} \big(\mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - \tau]\big),\]</span> <span class="math display">\[\mathrm{Ch}_q[\tau][j] = \min_{b,\ 1 \le q' \le q,\ j'} \big(\mathrm{Ch}_{q-q'}[\tau - d_b][j - 1 - j'] + c_b + \mathrm{Sub}_b[q'][j']\big),\]</span> with <span class="math inline">\(\mathrm{Ch}_0[0][0] = 0\)</span>, and finally, with <span class="math inline">\(\mathrm{For}[0][0] = 0\)</span>, <span class="math display">\[\mathrm{For}[P][J] = \min_{q \le \min(P, q_{\max}),\ j} \big(\mathrm{For}[P - q][J - j] + \mathrm{Root}[q][j]\big).\]</span></p>
+<p><strong>Result</strong> <a href="../proofs.html#node-theorem-7-5">Theorem 7.5</a> <span class="badge ok">machine-checked</span>. <span class="math inline">\(\mathrm{For}[p][s] = E(T)\)</span>. Given <span class="math inline">\(G\)</span>, the program takes <span class="math inline">\(O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)\)</span> time per level.</p>
+<p><strong>In the example</strong>, at <span class="math inline">\(T = 8\)</span>. With <span class="math inline">\(q_{\max} = 2\)</span>, a tree is a single plane or a pair.</p>
+<ul>
+<li>A single plane with one or three landings: <span class="math inline">\(\mathrm{Root}[1][1] = G[1][8] = 1\)</span> and <span class="math inline">\(\mathrm{Root}[1][3] = G[3][8] = 21\)</span>.</li>
+<li>A leaf hanging from a link at city 2, with one free landing within <span class="math inline">\(8 - d_2 = 5\)</span>: <span class="math inline">\(\mathrm{Sub}_2[1][2] = c_2 + G[1][5] = 7\)</span>.</li>
+<li>The parent’s side of that link: <span class="math inline">\(\mathrm{Ch}_1[3][3] = c_2 + \mathrm{Sub}_2[1][2] = 13\)</span>.</li>
+<li>The pair, rooted at a plane with one free landing within <span class="math inline">\(8 - 3 = 5\)</span>: <span class="math display">\[\mathrm{Root}[2][4] = \mathrm{Ch}_1[3][3] + G[1][5] = 13 + 1 = 14.\]</span></li>
+<li>The forest, a pair or two single planes: <span class="math display">\[\mathrm{For}[2][4] = \min\big(\mathrm{Root}[2][4],\ \mathrm{Root}[1][1] + \mathrm{Root}[1][3]\big) = \min(14, 22) = 14 = E(8).\]</span></li>
+</ul>
+<p>The pair is the tree of <a href="#fig-link-tree" class="quarto-xref">Figure&nbsp;2</a>. A link at city 3 with free landings in city 2 gives the same groups and the same cost.</p>
+<p><strong>In the code.</strong> <code>ForestProgram</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/forest.hpp"><code>include/zeno/forest.hpp</code></a>, <a href="https://github.com/aquemy/ZenoSolver/blob/master/src/zeno/forest.cpp"><code>src/zeno/forest.cpp</code></a>). Instead of dense arrays over <span class="math inline">\(\tau\)</span>, it keeps the child items of a plane as Pareto staircases over <span class="math inline">\((\tau, \text{cost})\)</span>, so its work depends on the sizes of these staircases, not on the magnitude of <span class="math inline">\(T\)</span>. <code>reconstruct()</code> returns an optimal <code>LinkForest</code>, which <a href="#plans">step 11</a> turns into a plan. In sweep mode the exact program runs only where the bracket and monotonicity leave a level open. Since <span class="math inline">\(E\)</span> is non-increasing, a level between two settled levels <span class="math inline">\(a &lt; b\)</span> has <span class="math inline">\(E(b) \le E \le E(a)\)</span>, which tightens its bracket, and equal values at both ends settle every level between them (<code>monotone</code> in <code>--stats</code>). <code>bisect()</code> evaluates up to <code>threads</code> evenly spaced open levels exactly, and recurses on the pieces.</p>
+</section>
+<section id="sigma-dp" class="level3">
+<h3 class="anchored" data-anchor-id="sigma-dp">Step 9. The σ-DP</h3>
+<p><strong>Idea.</strong> A second exact method works with parity matrices directly. Process the planes one at a time, choosing for each its number of landings and its row of the parity matrix, and remember only the set <span class="math inline">\(\sigma\)</span> of cities whose column has an odd number of ones so far. At the end, <span class="math inline">\(\sigma\)</span> must be empty, which is (h3). Some parity matrix touches few cities, so <span class="math inline">\(\sigma\)</span> stays small.</p>
+<p><strong>Results.</strong></p>
+<ul>
+<li>For an admissible partition with <span class="math inline">\(|X| = s\)</span>, some parity matrix touches at most <span class="math inline">\(w = \min(p - 1, t - p)\)</span> cities, and its rows have at most <span class="math inline">\(\min(|X_k| - 1, w)\)</span> ones <a href="../proofs.html#node-lemma-2-8">Lemma 2.8</a> <span class="badge ok">machine-checked</span>.</li>
+<li>The <em>σ-graph</em> at level <span class="math inline">\(T\)</span> has nodes <span class="math inline">\((k, j, \sigma)\)</span>: <span class="math inline">\(k\)</span> planes processed, <span class="math inline">\(j\)</span> landings used, and <span class="math inline">\(\sigma\)</span> a set of at most <span class="math inline">\(w\)</span> cities. An arc gives plane <span class="math inline">\(k + 1\)</span> a size <span class="math inline">\(m\)</span> and a row <span class="math inline">\(\eta\)</span> with <span class="math inline">\(|\eta| \equiv m + 1 \pmod 2\)</span>, <span class="math inline">\(|\eta| \le \min(m - 1, w)\)</span> and <span class="math inline">\(|\sigma \triangle \eta| \le w\)</span>; it leads to <span class="math inline">\((k + 1, j + m, \sigma \triangle \eta)\)</span> and weighs <span class="math inline">\(c(\eta) + G[m - |\eta|][T - \delta(\eta)]\)</span>. The shortest path from <span class="math inline">\((0, 0, \emptyset)\)</span> to <span class="math inline">\((p, s, \emptyset)\)</span> weighs <span class="math inline">\(E(T)\)</span> <a href="../proofs.html#node-theorem-7-6">Theorem 7.6</a> <span class="badge ok">machine-checked</span>. It takes <span class="math inline">\(O(p\,s\,\hat m\,N_w)\)</span> time per level, where <span class="math inline">\(N_w\)</span> bounds the pairs of sets an arc can join: polynomial in <span class="math inline">\(n\)</span> for fixed <span class="math inline">\(w\)</span>.</li>
+<li>A variant carries Pareto sets of points <span class="math inline">\((c(X),\ \max_k \delta(X_k))\)</span> along the arcs instead of one level at a time, and yields the whole front in one pass <a href="../proofs.html#node-proposition-7-8">Proposition 7.8</a> <span class="badge informal">informal</span>.</li>
+</ul>
+<p><strong>In the example</strong>, <span class="math inline">\(w = 1\)</span>. At <span class="math inline">\(T = 8\)</span>, plane 1 takes <span class="math inline">\(m = 2\)</span> landings with the row <span class="math inline">\(\eta = \{2\}\)</span>: an arc of weight <span class="math inline">\(c_2 + G[1][8 - 3] = 7\)</span> from <span class="math inline">\((0, 0, \emptyset)\)</span> to <span class="math inline">\((1, 2, \{2\})\)</span>. Plane 2 takes the same option, <span class="math inline">\(\sigma\)</span> becomes <span class="math inline">\(\{2\} \triangle \{2\} = \emptyset\)</span>, and the path ends at <span class="math inline">\((2, 4, \emptyset)\)</span> with weight <span class="math inline">\(14 = E(8)\)</span>.</p>
+<p><strong>In the code.</strong> The C++ solver uses the link-forest DP. The σ-DP belongs to the Lean tools: <a href="../proofs.html#node-verified-solver">the verified solver zeno-front</a> <span class="badge ok">machine-checked</span> and the Lean checker compute <span class="math inline">\(E\)</span> with it, or with the link-forest DP when <code>useTreeDP</code> estimates that cheaper (<a href="../solver/lean.html">Lean tools</a>).</p>
+</section>
+<section id="breakpoints" class="level3">
+<h3 class="anchored" data-anchor-id="breakpoints">Step 10. Finding the breakpoints</h3>
+<p><strong>Idea.</strong> Proposition 7.1 needs <span class="math inline">\(E\)</span> only where it drops. Since <span class="math inline">\(E\)</span> is non-increasing, an interval of levels whose two ends have equal values is constant and holds no breakpoint, so a search can skip it whole.</p>
+<p><strong>The search</strong> <code>breakpoints</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/breakpoints.hpp"><code>include/zeno/breakpoints.hpp</code></a>). It starts from <span class="math inline">\(E(T_{\rm lo})\)</span> and the closed form <span class="math inline">\(E(T_{\rm hi}) = s\,c_{\min}\)</span>. Every open interval <span class="math inline">\((a, b)\)</span> with <span class="math inline">\(E(a) &gt; E(b)\)</span> is split at up to <code>threads</code> evenly spaced levels, evaluated in parallel; pieces with equal ends are dropped, and a piece <span class="math inline">\((a, a + 1)\)</span> has its breakpoint at <span class="math inline">\(a + 1\)</span>. With <span class="math inline">\(r\)</span> breakpoints this evaluates <span class="math inline">\(O(r \log(T_{\rm hi} - T_{\rm lo}))\)</span> levels. Each level is evaluated by the cascade of <a href="#fig-pipeline" class="quarto-xref">Figure&nbsp;4</a>: <span class="math inline">\(L\)</span> and <span class="math inline">\(U\)</span>, then <span class="math inline">\(U_3\)</span>, then the exact program, each only if the previous ones do not settle it.</p>
+<p><code>--levels sweep</code> brackets every level and runs the exact program only where needed (<a href="#forest-dp">step 8</a>); <code>--levels search</code> runs the search above; the default, <code>auto</code>, sweeps up to <span class="math inline">\(2^{12}\)</span> levels and searches beyond, so on wide level ranges the number of levels evaluated grows with the logarithm of the range.</p>
+<p><strong>In the example.</strong> Seven levels: <code>auto</code> sweeps them. With <code>--levels search --threads 1</code>, <code>zeno</code> evaluates <span class="math inline">\(T = 4\)</span>, then <span class="math inline">\(7\)</span>, then <span class="math inline">\(5\)</span> and <span class="math inline">\(8\)</span>, then <span class="math inline">\(6\)</span> and <span class="math inline">\(9\)</span>; <span class="math inline">\(T = 10\)</span> is the closed form. On so few levels the search saves nothing. It pays off on ranges of thousands of levels with few breakpoints.</p>
+</section>
+<section id="plans" class="level3">
+<h3 class="anchored" data-anchor-id="plans">Step 11. Plans</h3>
+<p><strong>Construction</strong> <a href="../proofs.html#node-theorem-4-1">Theorem 4.1</a> <span class="badge ok">machine-checked</span>. Take a link forest of the partition and root each tree. Every plane flies, in this order:</p>
+<ol type="1">
+<li>its <em>drop-offs</em>, <span class="math inline">\(C_I \to b \to C_I\)</span>, one per child edge labelled <span class="math inline">\(b\)</span>, each leaving a new passenger in city <span class="math inline">\(b\)</span>, from time 0;</li>
+<li>its free landings as alternating crossings: <span class="math inline">\(C_I \to x \to C_G\)</span> carrying a new passenger, then <span class="math inline">\(C_G \to x \to C_I\)</span> empty, and so on, ending in <span class="math inline">\(C_G\)</span>; there is an odd number of them by (F2);</li>
+<li>if it has a parent edge labelled <span class="math inline">\(a\)</span>, its <em>pick-up</em> <span class="math inline">\(C_G \to a \to C_G\)</span>, leaving city <span class="math inline">\(a\)</span> once the passenger its parent dropped there has arrived.</li>
+</ol>
+<p>No drop-off and no crossing ever waits. A plane picks up at most once, from its parent, whose drop-offs come first; the timing argument of the theorem shows that each pick-up ends by the larger load of the two planes. So every plane flies exactly <span class="math inline">\(\ell(X_k)\)</span> and the makespan is <span class="math inline">\(\max_k \ell(X_k)\)</span>. A forest with <span class="math inline">\(N\)</span> edges hands off <span class="math inline">\(N\)</span> passengers, and the crossings carry the other <span class="math inline">\(t - N\)</span>.</p>
+<p><strong>In the example.</strong> The plan of <span class="math inline">\((14, 16)\)</span>, as <code>zeno --plans</code> prints it; a leg reads <code>from-&gt;to[depart,arrive]</code>, followed by the passenger it carries:</p>
+<pre class="text"><code>plane 1: CI-&gt;c2[0,3]p1 c2-&gt;CI[3,6] CI-&gt;c3[6,11]p2 c3-&gt;CG[11,16]p2
+plane 2: CI-&gt;c3[0,5]p3 c3-&gt;CG[5,10]p3 CG-&gt;c2[10,13] c2-&gt;CG[13,16]p1</code></pre>
+<p>Plane 1 is the root: it drops passenger 1 in city 2 and returns, then crosses through city 3 with passenger 2. Plane 2 crosses through city 3 with passenger 3, flies empty from <span class="math inline">\(C_G\)</span> to city 2, and brings back passenger 1, who has waited there since time 3. Both planes finish at <span class="math inline">\(16 = 2 \cdot 8\)</span> (<a href="#fig-link-tree" class="quarto-xref">Figure&nbsp;2</a>).</p>
+<details>
+<summary>
+The full output of <code>zeno --plans --stats</code> for the worked example
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> zeno <span class="at">-n</span> 3 <span class="at">-t</span> 3 <span class="at">-p</span> 2 <span class="at">-d</span> site/problem/example.dat <span class="at">--plans</span> <span class="at">--stats</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">4</span> 20</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">14</span> 16</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span> 14</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">24</span> 12</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">30</span> 10</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">36</span> 8</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 4, makespan 20</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">0,5</span><span class="pp">]</span>p1 c3-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">5,10</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">10,15</span><span class="pp">]</span>p2 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">15,20</span><span class="pp">]</span>p2</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">0,5</span><span class="pp">]</span>p3 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">5,10</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">10,15</span><span class="pp">]</span> c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">15,20</span><span class="pp">]</span>p1</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 14, makespan 16</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">0,3</span><span class="pp">]</span>p1 c2-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">3,6</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">6,11</span><span class="pp">]</span>p2 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">11,16</span><span class="pp">]</span>p2</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">0,5</span><span class="pp">]</span>p3 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">5,10</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">10,13</span><span class="pp">]</span> c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">13,16</span><span class="pp">]</span>p1</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 20, makespan 14</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">0,2</span><span class="pp">]</span>p1 c1-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">2,4</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">4,9</span><span class="pp">]</span>p2 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">9,14</span><span class="pp">]</span>p2</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c3<span class="pp">[</span><span class="ss">0,5</span><span class="pp">]</span>p3 c3-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">5,10</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">10,12</span><span class="pp">]</span> c1-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">12,14</span><span class="pp">]</span>p1</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 24, makespan 12</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">0,3</span><span class="pp">]</span>p1 c2-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">3,6</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">6,9</span><span class="pp">]</span>p2 c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">9,12</span><span class="pp">]</span>p2</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">0,3</span><span class="pp">]</span>p3 c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">3,6</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">6,9</span><span class="pp">]</span> c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">9,12</span><span class="pp">]</span>p1</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 30, makespan 10</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">0,2</span><span class="pp">]</span>p1 c1-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">2,4</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">4,7</span><span class="pp">]</span>p2 c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">7,10</span><span class="pp">]</span>p2</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c2<span class="pp">[</span><span class="ss">0,3</span><span class="pp">]</span>p3 c2-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">3,6</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">6,8</span><span class="pp">]</span> c1-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">8,10</span><span class="pp">]</span>p1</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># cost 36, makespan 8</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 1: CI-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">0,2</span><span class="pp">]</span>p1 c1-<span class="op">&gt;</span>CI<span class="pp">[</span><span class="ss">2,4</span><span class="pp">]</span> CI-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">4,6</span><span class="pp">]</span>p2 c1-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">6,8</span><span class="pp">]</span>p2</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ex">plane</span> 2: CI-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">0,2</span><span class="pp">]</span>p3 c1-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">2,4</span><span class="pp">]</span>p3 CG-<span class="op">&gt;</span>c1<span class="pp">[</span><span class="ss">4,6</span><span class="pp">]</span> c1-<span class="op">&gt;</span>CG<span class="pp">[</span><span class="ss">6,8</span><span class="pp">]</span>p1</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ex">levels</span> 4..10 <span class="er">(</span><span class="ex">x1,</span> 7 levels<span class="kw">)</span><span class="ex">,</span> cities 3, max tree 2</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="ex">settled:</span> bracket 7, pairs 0, chains 0, monotone 0, exact 0</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ex">work:</span> 17 states, 266 relaxations</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="ex">seconds:</span> table 1.625e-06, bracket 6.9166e-05, chains 0, exact 0, plans 5.4084e-05</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>In the code.</strong> For each front point, <code>FrontSolver::plans</code> (<code>solve.cpp</code>) takes the level <span class="math inline">\(T = M/2g\)</span>, reruns <code>ForestProgram</code> with trees of at most 2, then 3, then <span class="math inline">\(q_{\max}\)</span> planes, and keeps the first whose value equals the point’s cost. <code>reconstruct()</code> gives its link forest, and <code>buildPlan</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/plan.hpp"><code>include/zeno/plan.hpp</code></a>) the plan of Theorem 4.1. <code>checkPlan</code> then re-simulates every plan against the model, sharing no code with <code>buildPlan</code>; a plan whose cost or makespan differs from its point stops the solver.</p>
+</section>
+<section id="certificates" class="level3">
+<h3 class="anchored" data-anchor-id="certificates">Step 12. Certificates</h3>
+<p><strong>Idea.</strong> A front can be checked without trusting the solver that found it. A certificate lists the points, a plan for each, and, for each gap between consecutive points, the name of a lower bound that the checker recomputes.</p>
+<p><strong>Result</strong> <a href="../proofs.html#node-theorem-9-1">Theorem 9.1</a> <span class="badge ok">machine-checked</span>. Let <span class="math inline">\((C_1, M_1), \dots, (C_r, M_r)\)</span> have increasing makespans and decreasing costs. The list is the front if</p>
+<ol type="1">
+<li>every listed plan is feasible, with cost <span class="math inline">\(C_i\)</span> and makespan <span class="math inline">\(M_i\)</span>: the checker simulates it;</li>
+<li>no plan is faster than <span class="math inline">\(M_1\)</span>: the checker verifies <span class="math inline">\(M_1 = 2d_{\min}\kappa\)</span> <a href="../proofs.html#node-proposition-7-10">Proposition 7.10</a> <span class="badge informal">informal, parts in Lean</span>;</li>
+<li>for every <span class="math inline">\(i &lt; r\)</span>, every plan of makespan below <span class="math inline">\(M_{i+1}\)</span> costs at least <span class="math inline">\(C_i\)</span>: a lower bound at the level <span class="math inline">\(T^\star_i = \lfloor \lfloor (M_{i+1} - 1)/2 \rfloor / g \rfloor\)</span> reaches <span class="math inline">\(C_i\)</span> (for a front point, <span class="math inline">\(T^\star_i = T_{i+1} - 1\)</span>);</li>
+<li>no plan is cheaper than <span class="math inline">\(C_r\)</span>: the checker verifies <span class="math inline">\(C_r = s\,c_{\min}\)</span>, since every plan lands at least <span class="math inline">\(s\)</span> times <a href="../proofs.html#node-lemma-3-2">Lemma 3.2</a> <span class="badge ok">machine-checked</span>.</li>
+</ol>
+<p>Obligation 3 names one of two bounds:</p>
+<ul>
+<li><code>relaxed</code>: <span class="math inline">\(L(T^\star_i) \ge C_i\)</span>. Sound under (S) alone, whatever the central flights <a href="../proofs.html#node-lemma-3-4">Lemma 3.4</a> <span class="badge ok">machine-checked</span>;</li>
+<li><code>forest</code>: <span class="math inline">\(E(T^\star_i) \ge C_i\)</span>, recomputed with the link-forest DP. Sound under (S) and (A1) <a href="../proofs.html#node-theorem-4-7">Theorem 4.7</a> <span class="badge ok">machine-checked</span>, or (S) and (AΔ) <a href="../proofs.html#node-theorem-4-10">Theorem 4.10</a> <span class="badge ok">machine-checked</span>.</li>
+</ul>
+<p><code>zeno</code> writes <code>relaxed</code> whenever <span class="math inline">\(L\)</span> reaches the cost, so a certificate whose gaps are all <code>relaxed</code> holds for every table of central flights.</p>
+<p><strong>In the example.</strong> All five gaps are <code>relaxed</code>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">gap</th>
+<th>between</th>
+<th style="text-align: right;">level <span class="math inline">\(T^\star\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(L(T^\star)\)</span></th>
+<th style="text-align: right;">needed <span class="math inline">\(C_i\)</span></th>
+<th>kind</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td>(36, 8) and (30, 10)</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">36</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td>(30, 10) and (24, 12)</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td>(24, 12) and (20, 14)</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">24</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td>(20, 14) and (14, 16)</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">20</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td>(14, 16) and (4, 20)</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><code>relaxed</code></td>
+</tr>
+</tbody>
+</table>
+<p>The contrast instance needs <code>forest</code> exactly at its two open levels, <span class="math inline">\(T^\star = 12\)</span> and <span class="math inline">\(14\)</span>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">gap</th>
+<th>between</th>
+<th style="text-align: right;">level <span class="math inline">\(T^\star\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(L(T^\star)\)</span></th>
+<th style="text-align: right;">needed <span class="math inline">\(C_i\)</span></th>
+<th>kind</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td>(60, 18) and (50, 22)</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td>(50, 22) and (40, 26)</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">50</td>
+<td><code>forest</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td>(40, 26) and (30, 30)</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">40</td>
+<td><code>forest</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td>(30, 30) and (22, 34)</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td>(22, 34) and (14, 38)</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">22</td>
+<td><code>relaxed</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td>(14, 38) and (6, 42)</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">14</td>
+<td><code>relaxed</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>In the code.</strong> <code>makeCertificate</code> and <code>symmetricGaps</code> (<a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/certificate.hpp"><code>include/zeno/certificate.hpp</code></a>). <code>zeno check FILE</code> is the reference checker; the Lean checker <code>zeno-check</code> is proved sound (<a href="../solver/lean.html">Lean tools</a>). The file format is on the <a href="../solver/certificates.html">certificates</a> page.</p>
+</section>
 </section>
 <section id="nonsymmetric" class="level2">
-<h2 class="anchored" data-anchor-id="nonsymmetric">Non-symmetric pipeline</h2>
-<p>When the durations to <span class="math inline">\(C_I\)</span> (<span class="math inline">\(d\)</span>) and to <span class="math inline">\(C_G\)</span> (<span class="math inline">\(\bar d\)</span>) differ, a landing’s weight depends on its role: a <strong>crossing</strong> <span class="math inline">\(C_I \to i \to C_G\)</span> or back weighs <span class="math inline">\(d_i + \bar d_i\)</span>, a <strong>drop-off</strong> <span class="math inline">\(C_I \to i \to C_I\)</span> weighs <span class="math inline">\(2d_i\)</span>, a <strong>pick-up</strong> <span class="math inline">\(C_G \to i \to C_G\)</span> weighs <span class="math inline">\(2\bar d_i\)</span>. A <em>role configuration</em> assigns roles per plane, each plane flying an odd number of crossings, with drop-offs and pick-ups balanced city by city (<a href="../proofs.html#node-definition-4-2">Definition 4.2</a>). A pick-up may have to wait for its drop-off, and that waiting can be harmful: the role loads alone do not give the front (<a href="../proofs.html#node-proposition-6-5">Proposition 6.5</a>). So <code>zeno</code> computes a <strong>certified bracket</strong> (<code>solveBracket</code>, <code>zeno/ns.hpp</code>):</p>
-<ol type="1">
-<li><strong>Upper points.</strong> Plans built from link forests in which every plane picks up at most once (or, by time reversal, drops off at most once), and from the cheapest balanced role configurations found in the gaps, all scheduled and simulated with their waiting. Every printed point is a real plan.</li>
-<li><strong>Lower bounds per gap,</strong> for every plan of makespan below the next point:
+<h2 class="anchored" data-anchor-id="nonsymmetric">Non-symmetric instances</h2>
+<p>When <span class="math inline">\(d \ne \bar d\)</span>, the duration of a landing depends on how it is flown, and step 1 no longer gives the front. <code>zeno</code> then computes a <em>certified bracket</em> instead (<code>solveBracket</code>, <a href="https://github.com/aquemy/ZenoSolver/blob/master/include/zeno/ns.hpp"><code>include/zeno/ns.hpp</code></a>).</p>
+<p><strong>Roles.</strong> A landing in city <span class="math inline">\(i\)</span> is flown as a <em>crossing</em> <span class="math inline">\(C_I \to i \to C_G\)</span> or back, which lasts <span class="math inline">\(d_i + \bar d_i\)</span>; as a <em>drop-off</em> <span class="math inline">\(C_I \to i \to C_I\)</span>, which lasts <span class="math inline">\(2d_i\)</span>; or as a <em>pick-up</em> <span class="math inline">\(C_G \to i \to C_G\)</span>, which lasts <span class="math inline">\(2\bar d_i\)</span>. A <em>role configuration</em> gives every plane its drop-offs, pick-ups and crossings, with an odd number of crossings per plane and, city by city, as many drop-offs as pick-ups. The <em>role load</em> <span class="math inline">\(\lambda_k\)</span> of plane <span class="math inline">\(k\)</span> sums the durations of its roles <a href="../proofs.html#node-definition-4-2">Definition 4.2</a> <span class="badge ok">Lean definition</span>.</p>
+<p><strong>What carries over, and what does not.</strong></p>
 <ul>
-<li><code>relaxed</code>: lemma R with weight <span class="math inline">\(\min(2d_i, 2\bar d_i)\)</span> per landing. No assumption on central flights;</li>
-<li><code>roles</code>: the role relaxation (each plane an odd number <span class="math inline">\(\ge 1\)</span> of crossings, all loads adding up to the crossing weight of the landings);</li>
-<li><code>lagrangian</code>: a Lagrangian relaxation of the per-city balance, with one multiplier per city;</li>
-<li><code>balanced</code>: the exact program over balanced role configurations, a DP over planes on the imbalance vector (<a href="../proofs.html#node-proposition-6-6">Proposition 6.6</a>), exponential in <span class="math inline">\(t - p\)</span> and stopped at the <code>roleStates</code> and <code>roleWork</code> limits;</li>
-<li><code>search</code>: the exhaustive search over role configurations of cost below the gap’s cost, each with every drop-off order and drop-off-to-pick-up matching, the closed form of the template schedule (<a href="../proofs.html#node-lemma-6-3">Lemma 6.3</a>) giving its makespan. It stops at the <code>searchWork</code> limit. It is the only kind that closes gaps opened by harmful waiting.</li>
+<li>Under (A1-NS), central flights at least as long as <span class="math inline">\(\min(d_i + d_j,\ \bar d_i + \bar d_j)\)</span>, every plan is weakly dominated by a role configuration with the same number of passengers, no larger cost, and role loads at most its makespan <a href="../proofs.html#node-theorem-6-1">Theorem 6.1</a> <span class="badge ok">machine-checked</span>. So the least cost of a role configuration within a load bound is a lower bound.</li>
+<li>A configuration need not fly within its largest role load: a pick-up can reach a city before the passenger it collects has been dropped there, and wait. That waiting can be harmful. On an instance with two cities, the cheapest role configuration with loads at most 73 costs 14, while no plan of makespan at most 73 costs less than 18 <a href="../proofs.html#node-proposition-6-5">Proposition 6.5</a> <span class="badge informal">informal</span>. Role loads alone do not give the front.</li>
+<li>For fixed orders of the drop-offs and pick-ups and a fixed matching of drop-offs to pick-ups, the <em>template</em> schedule (drop-offs first, then crossings, then pick-ups, each waiting for its passenger) is optimal, and its makespan has a closed form <a href="../proofs.html#node-lemma-6-3">Lemma 6.3</a> <span class="badge informal">informal, parts in Lean</span>. If every plane picks up at most once, or every plane drops off at most once, the template finishes within the largest role load, provided that no hub leg of a city is longer than the detour through another city and the other hub, (AΔ-path) <a href="../proofs.html#node-corollary-6-4">Corollary 6.4</a> <span class="badge informal">informal</span>.</li>
+<li>Under (A1-NS), every plan is dominated by a role configuration whose template finishes no later, without any assumption on the order of events <a href="../proofs.html#node-theorem-6-9">Theorem 6.9</a> <span class="badge ok">machine-checked</span>. Hence the front is the Pareto set of (cost, least template makespan) over role configurations <a href="../proofs.html#node-corollary-6-10">Corollary 6.10</a> <span class="badge informal">informal, parts in Lean</span>.</li>
 </ul>
-<code>roles</code>, <code>lagrangian</code> and <code>balanced</code> need (A1-NS) through <a href="../proofs.html#node-theorem-6-1">Theorem 6.1</a>: every plan is weakly dominated by a role configuration with the same cost and loads at most its makespan. <code>search</code> needs (A1-NS) through <a href="../proofs.html#node-theorem-6-9">Theorem 6.9</a>, <em>schedulable domination</em>: every plan is dominated by a role configuration whose template schedule is no later. Theorem 6.9 holds for every plan, also on instances with a city of <span class="math inline">\(d = \bar d = 0\)</span>, so no event-order assumption is needed.</li>
-<li><strong>Report.</strong> The front is exact when the fastest makespan is certified and every gap is closed. Otherwise <code>zeno</code> lists each open gap with its proved lower bound and the reason it stays open, rather than print a front it cannot prove (<a href="../solver/cli.html#front">command line</a>). The refinement of open gaps stops after <code>refineSeconds</code>.</li>
+<p><strong>The bracket.</strong></p>
+<ol type="1">
+<li><em>Upper points.</em> Plans built from link forests in which every plane picks up at most once, or, by time reversal, drops off at most once, and from the cheapest balanced role configurations found inside gaps. All are scheduled and simulated with their waiting, so every printed point is a real plan.</li>
+<li><em>Lower bounds per gap</em>, for every plan of makespan below the next point:
+<ul>
+<li><code>relaxed</code>: the relaxation of <a href="../proofs.html#node-lemma-3-4">Lemma 3.4</a> <span class="badge ok">machine-checked</span> with each landing weighted <span class="math inline">\(\min(2d_i, 2\bar d_i)\)</span>, which needs no assumption on central flights;</li>
+<li><code>roles</code>: the role relaxation, in which each plane flies an odd number of crossings and the loads add up to the crossing weight of the landings (Theorem 6.1, so (A1-NS));</li>
+<li><code>lagrangian</code>: a Lagrangian relaxation of the per-city balance, with one multiplier per city (A1-NS);</li>
+<li><code>balanced</code>: the exact program over balanced role configurations, a shortest path over the planes on the vector of per-city imbalances <a href="../proofs.html#node-proposition-6-6">Proposition 6.6</a> <span class="badge informal">informal, parts in Lean</span>. It is exponential in <span class="math inline">\(t - p\)</span> and stops at the <code>roleStates</code> and <code>roleWork</code> limits;</li>
+<li><code>search</code>: the exhaustive search over the role configurations cheaper than the gap’s cost, each with every drop-off order and matching, the closed form of Lemma 6.3 giving its makespan. It rests on Theorem 6.9 and Corollary 6.10, stops at <code>searchWork</code>, and is the only kind that closes gaps opened by harmful waiting.</li>
+</ul></li>
+<li><em>Report.</em> The front is exact when the fastest makespan is certified and every gap is closed. Otherwise <code>zeno</code> lists each open gap with its proved lower bound and the reason it stays open, rather than print a front it cannot prove (<a href="../solver/cli.html#front">command line</a>). The refinement of open gaps stops after <code>refineSeconds</code>.</li>
 </ol>
-<p>On 1,800 random tiny non-symmetric instances checked against the brute-force oracle, every bracket closes and equals the oracle’s front (<code>README.md</code>).</p>
+<p>On 1,800 random tiny non-symmetric instances checked against a brute-force oracle, every bracket closes and equals the oracle’s front (<a href="https://github.com/aquemy/ZenoSolver/blob/master/README.md"><code>README.md</code></a>).</p>
 </section>
 <section id="complexity" class="level2">
 <h2 class="anchored" data-anchor-id="complexity">Complexity</h2>
-<p>From §8 of the note, with <span class="math inline">\(\hat m = s - p + 1\)</span> (the largest group) and <span class="math inline">\(q_{\max} = \min(p, t-p+1)\)</span>:</p>
+<p>From §8 of the theory note, with <span class="math inline">\(\hat m = s - p + 1\)</span>, <span class="math inline">\(q_{\max} = \min(p, t - p + 1)\)</span>, <span class="math inline">\(w = \min(p - 1, t - p)\)</span> and <span class="math inline">\(N_w\)</span> as in <a href="#sigma-dp">step 9</a>:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Step</th>
@@ -355,16 +1518,33 @@ window.Quarto = {
 <td><span class="math inline">\(O(n^2\,\hat m\,s + p\,s^2)\)</span></td>
 </tr>
 <tr class="even">
-<td>Link-forest DP, per level</td>
+<td>Link-forest DP, per level (<a href="../proofs.html#node-theorem-7-5">Theorem 7.5</a>)</td>
 <td><span class="math inline">\(O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)\)</span></td>
 </tr>
 <tr class="odd">
+<td>σ-DP, per level (<a href="../proofs.html#node-theorem-7-6">Theorem 7.6</a>)</td>
+<td><span class="math inline">\(O(p\,s\,\hat m\,N_w)\)</span></td>
+</tr>
+<tr class="even">
 <td>Plan for one point</td>
 <td><span class="math inline">\(O(s + n + p)\)</span>, up to union–find</td>
 </tr>
 </tbody>
 </table>
-<p>These are the bounds of the dense algorithm. The staircase representations make the table and the forest DP independent of the magnitude of the durations in practice, and the breakpoint search evaluates <span class="math inline">\(O(r \log(T_{\rm hi} - T_{\rm lo}))\)</span> levels instead of all of them. Measured scaling is on the <a href="../results.html">results</a> and <a href="../instances/sizing.html">size guidance</a> pages.</p>
+<p><strong>How hard the problem is.</strong></p>
+<ul>
+<li>Deciding whether a <em>fixed</em> multiset <span class="math inline">\(X\)</span> has an admissible partition with every <span class="math inline">\(\delta(X_k) \le T\)</span>, that is <span class="math inline">\(M(X) \le 2T\)</span>, is strongly NP-complete <a href="../proofs.html#node-theorem-8-1">Theorem 8.1</a> <span class="badge informal">informal</span>, by a reduction from 3-Partition. So a method that fixes the multiset first and then schedules it, for instance greedily with the longest landing first onto the least-loaded plane, cannot be exact in general unless P = NP, and that greedy does miss front points <a href="../proofs.html#node-s5">(§5)</a> <span class="badge informal">informal, parts in Lean</span>. The link-forest DP never fixes the multiset: it chooses the landings and their split together.</li>
+<li>With two planes the decision stays NP-complete; for every fixed <span class="math inline">\(p\)</span> it takes time polynomial in <span class="math inline">\(n\)</span>, <span class="math inline">\(s\)</span> and <span class="math inline">\(T\)</span>, so it is weakly NP-complete <a href="../proofs.html#node-proposition-8-2">Proposition 8.2</a> <span class="badge informal">informal</span>.</li>
+<li><span class="math inline">\(E(T)\)</span>, and under (S) and (A1) the front, are computable in pseudo-polynomial time (Theorem 7.5), so computing the front is not strongly NP-hard unless P = NP <a href="../proofs.html#node-corollary-8-3">Corollary 8.3</a> <span class="badge informal">informal</span>. Whether deciding <span class="math inline">\(E(T) \le C\)</span> is NP-hard, with <span class="math inline">\(t\)</span> written in unary, is open.</li>
+</ul>
+<p>The bounds of the table are those of the dense algorithm. The staircase layouts make the table and the forest DP independent of the magnitude of the durations in practice, and the breakpoint search evaluates <span class="math inline">\(O(r \log(T_{\rm hi} - T_{\rm lo}))\)</span> levels instead of all of them. Measured scaling is on the <a href="../results.html">results</a> and <a href="../instances/sizing.html">size guidance</a> pages.</p>
+</section>
+<section id="reproduce" class="level2">
+<h2 class="anchored" data-anchor-id="reproduce">Reproducing this page</h2>
+<p>With <code>build/release/zeno</code> built (<a href="../solver/install.html">installation</a>), from the repository root:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> site/gen_algorithm.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The script needs nothing else. For the worked example and the contrast instance, it recomputes from their definitions the table <span class="math inline">\(G\)</span>, and at every level <span class="math inline">\(L\)</span>, <span class="math inline">\(U\)</span>, <span class="math inline">\(U_3\)</span>, and <span class="math inline">\(E\)</span> three ways: by the link-forest DP, by the σ-DP, and by brute force over every partition of every multiset of <span class="math inline">\(s\)</span> landings, with the parity matrix of Definition 2.2 deciding admissibility. It checks that these agree with one another and with <code>zeno</code>: the breakpoints of <span class="math inline">\(E\)</span> are the front <code>zeno</code> prints, the levels the bracket closes are those <code>--stats</code> counts, the gap kinds are those of the certificate <code>zeno</code> writes, and every number this page quotes still holds. It then writes the data of the figures and the tables into <code>site/algorithm/</code>. The three drawings are hand-made SVG files in the same directory.</p>
+<script src="../js/algorithm.js"></script>
 
 
 </section>
@@ -372,6 +1552,19 @@ window.Quarto = {
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -769,6 +1962,18 @@ window.Quarto = {
     }
   });
   </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../solver/api.html" class="pagination-link" aria-label="C++ library">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">C++ library</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../solver/certificates.html" class="pagination-link" aria-label="Certificate format">
+        <span class="nav-page-text">Certificate format</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -779,8 +1984,8 @@ window.Quarto = {
       &nbsp;
     </div>
     <div class="nav-footer-right">
-<p>Original papers: Quemy &amp; Schoenauer (EvoCOP 2015); Quemy, Schoenauer &amp; Dréo (arXiv:2304.14659).</p>
-</div>
+      &nbsp;
+    </div>
   </div>
 </footer>
 

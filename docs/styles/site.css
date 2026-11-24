@@ -24,10 +24,13 @@ main p code, main li code, main dt code, main dd code {
   overflow-wrap: anywhere;
 }
 
-/* MathJax does not break long inline formulas: on narrow screens a provenance box scrolls
+/* A blueprint node's body. MathJax does not break long inline formulas: on narrow screens it scrolls
    sideways instead of the page. */
-.from-paper, .our-work, .strengthen {
+.node-body {
   overflow-x: auto;
+  border-left: 3px solid var(--zs-rule);
+  padding: 0.2em 0 0.2em 1em;
+  margin: 0.8em 0 1.4em;
 }
 
 /* Wide display equations scroll in their own box on narrow screens. */
@@ -48,24 +51,15 @@ main pre, main pre code {
   overflow-wrap: anywhere;
 }
 
-/* A green box opens with a bold lead-in followed by prose: only the lead-in is a title. */
-.strengthen > p:first-child {
-  font-variant: normal;
-  letter-spacing: normal;
-  color: inherit;
-}
-.strengthen > p:first-child > strong:first-child {
-  font-variant: small-caps;
-  letter-spacing: 0.02em;
-  color: #1e7a32;
-}
 
-/* The one-line status row under each blueprint node. */
-.our-work + p, h3 + p .badge {
-  vertical-align: baseline;
-}
 
 /* Keyboard-ish option names in definition lists. */
 dl dt code {
   font-weight: 600;
+}
+
+/* Dark mode: inline code on the page surface rather than darkly's light chip. */
+body.quarto-dark :not(pre) > code {
+  background-color: var(--zs-surface-2);
+  color: var(--zs-ink);
 }

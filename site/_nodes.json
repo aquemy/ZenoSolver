@@ -1,0 +1,534 @@
+{
+"§1.1": {
+"anchor": "node-s1-1",
+"title": "Instances",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"§1.2": {
+"anchor": "node-s1-2",
+"title": "Plans, cost and makespan",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"Statement 1.2": {
+"anchor": "node-statement-1-2",
+"title": "Statement 1.2 (PDDL correspondence)",
+"lean": "informal",
+"class": "informal",
+"note": "S"
+},
+"§1.4": {
+"anchor": "node-s1-4",
+"title": "Assumptions",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"§1.5": {
+"anchor": "node-s1-5",
+"title": "Fronts",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"Notation": {
+"anchor": "node-notation",
+"title": "Notation",
+"lean": "informal",
+"class": "informal",
+"note": "definition"
+},
+"Lemma 1.1": {
+"anchor": "node-lemma-1-1",
+"title": "Lemma 1.1 (dominating subset)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Lemma 2.1": {
+"anchor": "node-lemma-2-1",
+"title": "Lemma 2.1",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Definition 2.2": {
+"anchor": "node-definition-2-2",
+"title": "Definition 2.2 (admissible partition)",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"Lemma 2.3": {
+"anchor": "node-lemma-2-3",
+"title": "Lemma 2.3 (integer form)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 2.4": {
+"anchor": "node-lemma-2-4",
+"title": "Lemma 2.4 (component form)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 2.5": {
+"anchor": "node-lemma-2-5",
+"title": "Lemma 2.5",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Definition (link forest)": {
+"anchor": "node-definition-link-forest",
+"title": "Definition (link forest)",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"Lemma 2.6": {
+"anchor": "node-lemma-2-6",
+"title": "Lemma 2.6 (link forest)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Corollary 2.7": {
+"anchor": "node-corollary-2-7",
+"title": "Corollary 2.7",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 2.8": {
+"anchor": "node-lemma-2-8",
+"title": "Lemma 2.8 (few touched cities)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 2.9": {
+"anchor": "node-lemma-2-9",
+"title": "Lemma 2.9 (shared city)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 3.1": {
+"anchor": "node-lemma-3-1",
+"title": "Lemma 3.1 (cleaning)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Lemma 3.2": {
+"anchor": "node-lemma-3-2",
+"title": "Lemma 3.2 (counting)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 3.3": {
+"anchor": "node-lemma-3-3",
+"title": "Lemma 3.3 (segment durations)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Lemma 3.4": {
+"anchor": "node-lemma-3-4",
+"title": "Lemma 3.4 (relaxation)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Theorem 4.1": {
+"anchor": "node-theorem-4-1",
+"title": "Theorem 4.1",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Definition 4.2": {
+"anchor": "node-definition-4-2",
+"title": "Definition 4.2 (role configuration)",
+"lean": "Lean definition",
+"class": "ok",
+"note": "definition"
+},
+"Lemma 4.3": {
+"anchor": "node-lemma-4-3",
+"title": "Lemma 4.3 (direct selection)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Lemma 4.4": {
+"anchor": "node-lemma-4-4",
+"title": "Lemma 4.4 (shrinking)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 4.5": {
+"anchor": "node-lemma-4-5",
+"title": "Lemma 4.5 (parity)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 4.6": {
+"anchor": "node-lemma-4-6",
+"title": "Lemma 4.6 (adding a plane)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Theorem 4.7": {
+"anchor": "node-theorem-4-7",
+"title": "Theorem 4.7 (converse)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Corollary 4.8": {
+"anchor": "node-corollary-4-8",
+"title": "Corollary 4.8",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Theorem 4.9": {
+"anchor": "node-theorem-4-9",
+"title": "Theorem 4.9 (bridge)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Theorem 4.10": {
+"anchor": "node-theorem-4-10",
+"title": "Theorem 4.10 (converse without (A1))",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 4.11": {
+"anchor": "node-lemma-4-11",
+"title": "Lemma 4.11 (shrinking)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Corollary 4.12": {
+"anchor": "node-corollary-4-12",
+"title": "Corollary 4.12",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Example 4.13": {
+"anchor": "node-example-4-13",
+"title": "Example 4.13 (the hypothesis matters)",
+"lean": "informal",
+"class": "informal",
+"note": "P (computed)"
+},
+"§5": {
+"anchor": "node-s5",
+"title": "The greedy counterexample",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Theorem 6.1": {
+"anchor": "node-theorem-6-1",
+"title": "Theorem 6.1 (converse to role configurations)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 6.2": {
+"anchor": "node-lemma-6-2",
+"title": "Lemma 6.2 (relaxed role loads)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 6.3": {
+"anchor": "node-lemma-6-3",
+"title": "Lemma 6.3 (template)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Corollary 6.4": {
+"anchor": "node-corollary-6-4",
+"title": "Corollary 6.4 (one pick-up never waits harmfully)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Conjecture 6.5": {
+"anchor": "node-conjecture-6-5",
+"title": "Conjecture 6.5 (no harmful waiting), refuted",
+"lean": "informal",
+"class": "informal",
+"note": "refuted"
+},
+"Proposition 6.5": {
+"anchor": "node-proposition-6-5",
+"title": "Proposition 6.5 (harmful waiting)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.6": {
+"anchor": "node-proposition-6-6",
+"title": "Proposition 6.6 (imbalance-vector DP)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Conjecture 6.7": {
+"anchor": "node-conjecture-6-7",
+"title": "Conjecture 6.7 (shuttle triples complete the front) — false",
+"lean": "informal",
+"class": "informal",
+"note": "refuted"
+},
+"Definition 6.17": {
+"anchor": "node-definition-6-17",
+"title": "Definition 6.17 (shuttle triple, split crossing)",
+"lean": "informal",
+"class": "informal",
+"note": "definition"
+},
+"Proposition 6.7": {
+"anchor": "node-proposition-6-7",
+"title": "Proposition 6.7 (shuttles are not enough)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.18": {
+"anchor": "node-proposition-6-18",
+"title": "Proposition 6.18 (one central flight per segment is not enough)",
+"lean": "informal",
+"class": "informal",
+"note": "P (computed) for (a)–(c); S for the class claim of (d), which rests on the flow model only"
+},
+"Lemma 6.19": {
+"anchor": "node-lemma-6-19",
+"title": "Lemma 6.19 (cut bound)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 6.8": {
+"anchor": "node-lemma-6-8",
+"title": "Lemma 6.8 (event order)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Theorem 6.9": {
+"anchor": "node-theorem-6-9",
+"title": "Theorem 6.9 (schedulable domination)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Corollary 6.10": {
+"anchor": "node-corollary-6-10",
+"title": "Corollary 6.10 (non-symmetric front)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Example 6.11": {
+"anchor": "node-example-6-11",
+"title": "Example 6.11 (the reduction misses the front)",
+"lean": "informal",
+"class": "informal",
+"note": "refuted"
+},
+"Proposition 6.12": {
+"anchor": "node-proposition-6-12",
+"title": "Proposition 6.12 (the reduced front is attained)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.13": {
+"anchor": "node-proposition-6-13",
+"title": "Proposition 6.13 (same least cost)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.14": {
+"anchor": "node-proposition-6-14",
+"title": "Proposition 6.14 (dominated cities, Pareto paths)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.15": {
+"anchor": "node-proposition-6-15",
+"title": "Proposition 6.15 (where the reduction is exact)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 6.16": {
+"anchor": "node-proposition-6-16",
+"title": "Proposition 6.16 (time-expanded flows)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 7.1": {
+"anchor": "node-proposition-7-1",
+"title": "Proposition 7.1",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 7.2": {
+"anchor": "node-lemma-7-2",
+"title": "Lemma 7.2",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Proposition 7.3": {
+"anchor": "node-proposition-7-3",
+"title": "Proposition 7.3",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Proposition 7.4": {
+"anchor": "node-proposition-7-4",
+"title": "Proposition 7.4",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Theorem 7.5": {
+"anchor": "node-theorem-7-5",
+"title": "Theorem 7.5",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Theorem 7.6": {
+"anchor": "node-theorem-7-6",
+"title": "Theorem 7.6 (σ-DP)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Lemma 7.7": {
+"anchor": "node-lemma-7-7",
+"title": "Lemma 7.7 (Pareto sets)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 7.8": {
+"anchor": "node-proposition-7-8",
+"title": "Proposition 7.8 (Pareto-set variant)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 7.9": {
+"anchor": "node-proposition-7-9",
+"title": "Proposition 7.9 (dominance)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Proposition 7.10": {
+"anchor": "node-proposition-7-10",
+"title": "Proposition 7.10 (ends of the front)",
+"lean": "informal, parts in Lean",
+"class": "informal",
+"note": "P"
+},
+"Verified solver": {
+"anchor": "node-verified-solver",
+"title": "The verified solver `zeno-front`",
+"lean": "machine-checked",
+"class": "ok",
+"note": ""
+},
+"Theorem 8.1": {
+"anchor": "node-theorem-8-1",
+"title": "Theorem 8.1",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Proposition 8.2": {
+"anchor": "node-proposition-8-2",
+"title": "Proposition 8.2 (fixed $p$)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Corollary 8.3": {
+"anchor": "node-corollary-8-3",
+"title": "Corollary 8.3",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Theorem 9.1": {
+"anchor": "node-theorem-9-1",
+"title": "Theorem 9.1 (end to end)",
+"lean": "machine-checked",
+"class": "ok",
+"note": "P"
+},
+"Version 2 checker": {
+"anchor": "node-version-2-checker",
+"title": "Soundness of the version 2 checker",
+"lean": "machine-checked",
+"class": "ok",
+"note": ""
+},
+"Lemma 9.2": {
+"anchor": "node-lemma-9-2",
+"title": "Lemma 9.2 (potentials)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Lemma 9.3": {
+"anchor": "node-lemma-9-3",
+"title": "Lemma 9.3 (default potentials)",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Theorem 10.1": {
+"anchor": "node-theorem-10-1",
+"title": "Theorem 10.1",
+"lean": "informal",
+"class": "informal",
+"note": "P"
+},
+"Conjecture 10.2": {
+"anchor": "node-conjecture-10-2",
+"title": "Conjecture 10.2",
+"lean": "informal",
+"class": "informal",
+"note": "O"
+}
+}

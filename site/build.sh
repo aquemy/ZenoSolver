@@ -21,6 +21,18 @@ fi
 python3 "$here/gen_blueprint.py" "${blueprint_args[@]+"${blueprint_args[@]}"}"
 python3 "$here/gen_pages.py"
 
+# The problem page's plans, the instance fronts and the algorithm page's figures are computed with
+# zeno; without a built zeno the committed data is kept.
+if [[ -x "$root/build/release/zeno" ]]; then
+    for gen in gen_problem.py gen_fronts.py gen_algorithm.py; do
+        if [[ -f "$here/$gen" ]]; then
+            python3 "$here/$gen"
+        fi
+    done
+else
+    echo "build: no build/release/zeno; keeping the committed problem, fronts and algorithm data" >&2
+fi
+
 claimgraph_src="${CLAIMGRAPH_SRC:-$HOME/projects/hother/claimgraph}"
 if command -v uv >/dev/null && [[ -d "$claimgraph_src" ]]; then
     uv run --no-project --python 3.13 --with-editable "$claimgraph_src" python "$here/gen_graph.py"
@@ -38,7 +50,12 @@ if grep -rlE '(href|src)="(\.\./)+(doc|lean|src|include|bench|tests|site)/' "$ro
     echo "build: the pages above link outside docs/" >&2
     exit 1
 fi
-for f in blueprint.pdf graph/claimgraph-viewer.html graph/history-timeline.html; do
+for f in blueprint.pdf graph/claimgraph-viewer.html graph/history-timeline.html instances/fronts.json; do
     test -f "$root/docs/$f" || { echo "build: docs/$f is missing" >&2; exit 1; }
 done
-echo "site: docs/ is ready ($(find "$root/docs" -type f | wc -l | tr -d ' ') files)"
+size_kb=$(du -sk "$root/docs" | cut -f1)
+if (( size_kb > 10240 )); then
+    echo "build: docs/ is ${size_kb} KiB, above the 10 MiB budget" >&2
+    exit 1
+fi
+echo "site: docs/ is ready ($(find "$root/docs" -type f | wc -l | tr -d ' ') files, ${size_kb} KiB)"

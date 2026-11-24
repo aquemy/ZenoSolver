@@ -1,0 +1,14 @@
+---
+title: "Paper"
+subtitle: "A revised and extended version of the MultiZenoTravel paper"
+# Placeholder: the paper section comes in its own pull request, which replaces this page and adds
+# the other pages of site/paper/ (the render list and the sidebar pick them up by glob). The old
+# /experiments.html URL redirects here until then; move this alias to the experiments page.
+aliases: ["../experiments.html"]
+order: 1
+---
+
+The paper is being prepared. In the meantime, the [problem page](../problem.qmd) introduces
+MultiZenoTravel with a worked example, the [algorithm page](../solver/algorithm.qmd) explains how
+`zeno` computes an exact front, and the [blueprint](../proofs.qmd) gives every statement of the
+theory with its proof and its Lean formalization.

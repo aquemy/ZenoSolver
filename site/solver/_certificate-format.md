@@ -8,12 +8,14 @@ For an instance with symmetric durations and a front $(C_1, M_1), \dots, (C_r, M
 2. **Nothing is faster than $M_1$.** $M_1 = 2\, d_{\min} \lceil s/p \rceil$, where $s = 2t - p$. Every plan has at least $s$ segments (counting lemma), some plane flies at least $\lceil s/p \rceil$ of them, and under (S) each lasts at least $2 d_{\min}$.
 3. **Nothing in a gap is cheaper.** For every $i < r$, every plan with makespan $< M_{i+1}$ costs at least $C_i$. Such a plan has $\lfloor M/2 \rfloor \le h = \lfloor (M_{i+1} - 1)/2 \rfloor$; with $g$ the gcd of the durations, its groups fit in level $T = \lfloor h / g \rfloor$ of the instance with durations divided by $g$ (for a front point $M_{i+1} = 2gT_{i+1}$, so $T = T_{i+1} - 1$). As $E$ and $L$ are non-increasing, it suffices that the bound at level $T$ is at least $C_i$. The certificate names how the checker establishes this bound:
    - `relaxed`: recompute the relaxation $L(T)$ (no admissibility). Lemma R gives $\text{cost} \ge L(\lfloor M/2 \rfloor)$ for every plan under (S) alone, whatever the central flights.
-   - `forest`: recompute $E(T)$ with the link-forest dynamic program (trees of at most $\min(p, t-p+1)$ planes). This relies on the converse theorem, hence on (A1).
+   - `forest`: recompute $E(T)$ with the link-forest dynamic program (trees of at most $\min(p, t-p+1)$ planes). This relies on a converse theorem: every plan is dominated by an admissible partition. It holds when the central flights satisfy (A1) (Theorem 4.7) or the triangle inequality (AΔ) (Theorem 4.10, Corollary 4.12), and the certificate must list the assumption `A1` (or its synonym `A1|AD`, below).
 4. **Nothing is cheaper than $C_r$.** $C_r = s \cdot c_{\min}$: every plan lands at least $s$ times.
 
 Then every plan $(C, M)$ is weakly dominated by a listed point: $M \ge M_1$ by 2; if $M_i \le M < M_{i+1}$ then $C \ge C_i$ by 3; if $M \ge M_r$ then $C \ge C_r$ by 4. Together with 1, the list is the front.
 
-A certificate whose gap bounds are all `relaxed` is valid for every symmetric instance, without assumption (A1).
+A certificate whose gap bounds are all `relaxed` is valid for every symmetric instance, whatever its central flights: it needs neither (A1) nor (AΔ).
+
+The assumptions on central flights, from §1.4 of the theory note: (A1) $d_{ij} \ge d_i + d_j$ for every central flight (no faster than through a hub); (AΔ) $\mathrm{dur}(a,b) \le \mathrm{dur}(a,x) + \mathrm{dur}(x,b)$ whenever the three flights exist. A certificate does not contain the central flights, so no checker can test them: `assume` states the instances the certificate is claimed for.
 
 ### Syntax
 
@@ -41,7 +43,13 @@ end
 ```
 
 - `d`: durations between $C_I$ and each central city; `dbar`: between $C_G$ and each central city; `c`: landing costs.
-- `assume`: the assumptions the solver used. Version 1 knows `S` (symmetric durations, i.e. `d` = `dbar`) and `A1` (central flights at least as long as through a hub). A checker refuses an obligation that needs an assumption the certificate does not list.
+- `assume`: the assumptions the solver used. A checker refuses an obligation that needs an assumption the certificate does not list. Version 1 knows:
+  - `S`: symmetric durations, i.e. `d` = `dbar`.
+  - `A1`: the token of `forest` gaps. Its name comes from (A1), central flights at least as long as through a hub, but the gaps it allows are sound when the central flights satisfy (A1) **or** (AΔ). Both checkers are proved sound for both. In the theory note, this is Theorem 4.7 under (A1), and Theorem 4.10 with Corollary 4.12 under (AΔ). In Lean, it is `Cert.check_sound_A1` under (A1) and `Cert.check_sound_ATri` under (AΔ), with the variants `Cert.check_sound_anywhere_ATri` (planes ending anywhere), `Cert.check_sound_rat_ATri` (rational times) and `Cert.check_sound_minimal_ATri`.
+  - `A1|AD`: the same scope, spelled out, (A1) or (AΔ). `zeno check` accepts it for `forest` gaps like `A1`. The Lean checker reads only `A1`, so it rejects the `forest` gaps of a certificate that lists `A1|AD` alone.
+- What zeno writes and reports:
+  - `zeno --certificate` lists `A1` when a gap needs the forest bound and the instance's central flights satisfy (A1) or (AΔ). The default table ($\max(d_i, \bar d_i) + \max(d_j, \bar d_j) + 100$) satisfies (A1), and `--metric` tables satisfy (AΔ). When the central flights satisfy neither and a gap needs the forest bound, it writes no certificate (Example 4.13 shows such a gap can hide a cheaper plan). Without a `forest` gap, it lists `S` only.
+  - `zeno check` reports that the forest gaps relied on `A1|AD`, i.e. (A1) or (AΔ).
 - `front`: the points by increasing makespan.
 - `plan <i> <p>`: the plan of point $i$ (1-based), for the $p$ planes, in order $i = 1..r$. Each `plane <k> <m>` (k = 1..p, in order) is followed by its $m$ legs, in flight order.
 - A leg: locations are `0` for $C_I$, `1`..`n` for the central cities, `n+1` for $C_G$; times are integers; `passenger` is `1`..`t`, or `0` when the plane flies empty.
@@ -66,10 +74,10 @@ Boarding and debarking take no time. The cost is the sum of `c` over the legs th
 
 `zeno --certificate FILE` on a non-symmetric instance writes a version 2 certificate when its bracket is exact (every gap closed). Version 2 differs from version 1 in four places.
 
-- The header is `zeno-certificate 2`, and `dbar` may differ from `d`. `assume` lists `S` only for symmetric durations, and `A1-NS` when a bound below needs it (Theorem 6.1 of the theory note: every plan is weakly dominated by a role configuration with the same cost and loads at most its makespan, if central flights are useless).
+- The header is `zeno-certificate 2`, and `dbar` may differ from `d`. `assume` lists `S` only for symmetric durations, and `A1-NS` when a bound below needs it (Theorem 6.1 of the theory note: every plan is weakly dominated by a role configuration with the same cost and loads at most its makespan, if central flights are useless). `zeno` writes no certificate that needs `A1-NS` for an instance whose central-flight table violates it, such as a `--metric --hubs apart` instance with short central flights; whether (AΔ) suffices for non-symmetric instances is open (Conjecture 6.7).
 - Levels are in units of the gcd g of all durations, and are full loads: a crossing $C_I \to i \to C_G$ or back weighs $d_i + \bar d_i$, a drop-off $2 d_i$, a pick-up $2 \bar d_i$. A plan of makespan $< M_{i+1}$ fits in level $T = \lfloor (M_{i+1} - 1)/g \rfloor$. (For symmetric durations, version 1's half-loads and level $\lfloor (M_{i+1}-1)/(2g) \rfloor$ are kept.)
 - A line `fastest <kind>` after the front names the bound that rules out plans faster than $M_1$: the bound at level $\lfloor (M_1 - 1)/g \rfloor$ must be infinite. Kinds: `closed` (symmetric only, as in version 1), `relaxed`, `roles`, `balanced`, `search`.
-- Gap kinds, in addition to `relaxed` (lemma R with weight $\min(2d_i, 2\bar d_i)$ per landing, no assumption) and `forest` (symmetric, A1):
+- Gap kinds, in addition to `relaxed` (lemma R with weight $\min(2d_i, 2\bar d_i)$ per landing, no assumption) and `forest` (symmetric, `A1` or `A1|AD`):
   - `roles` (A1-NS): each plane flies an odd number $\ge 1$ of crossings and its other landings weigh at least $\min(2d, 2\bar d)$; all loads add up to the crossing weight of the landings, so the largest is at least that over $p$.
   - `lagrangian mu_1 ... mu_n` (A1-NS): with one signed integer multiplier per city, a drop-off in $i$ costs $c_i + \mu_i$ and a pick-up $c_i - \mu_i$; the balance of drop-offs and pick-ups city by city drops out and the planes decouple. Every $\mu$ gives a lower bound, so the checker only evaluates the bound at the listed $\mu$.
   - `balanced` (A1-NS): the checker reruns the exact program over balanced role configurations (a branch and bound against the cost $C_i$) and requires that it finishes.

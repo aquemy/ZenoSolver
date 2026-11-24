@@ -23,7 +23,7 @@ its dependencies; press **Play**, or drag the slider, to replay the knowledge co
 </iframe>
 
 [Open the viewer on its own page](graph/claimgraph-viewer.html) ·
-[the graph as JSON](graph/claimgraph.json) · [the commit history](history.qmd)
+[the commit history](history.qmd)
 
 The statuses are those of the ledger:
 
@@ -31,8 +31,8 @@ The statuses are those of the ledger:
   `Quot.sound`), recorded by a `formalize` commit that closes the claim with its declaration;
 - **proved informally**: a complete written proof in the note;
 - **conjectured**: open, or only sketched, in the note;
-- **disproved**: refuted by a counterexample, like the papers' claims that their per-PPP greedy
-  is optimal and that waiting is never harmful.
+- **disproved**: refuted by a counterexample, like the conjecture that shuttle triples complete
+  the non-symmetric front (Conjecture 6.7), or a converse under (S) alone (Example 4.13).
 
 {{< include _graph-divergence.md >}}
 

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 770" width="1200" height="770">
+  <defs>
+    <style type="text/css"><![CDATA[
+      /* THEME: clean - deterministic system monospace. NO network @import.
+         Never add an @import here (and never write &amp; inside CDATA - the literal
+         &amp; breaks the URL, the font silently fails, and the render becomes
+         non-deterministic). For the retro VT323 look, copy assets/scaffold-retro.svg
+         instead - it embeds the font as base64 (also zero-network). adv ≈ 0.60em. */
+      text          { fill: #111111; font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .mono         { font-family: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace; }
+      .title        { font-size: 40px; font-weight: 500; }
+      .section-label{ font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* INPUTS / OUTPUTS / zone tags */
+      .layer-tag    { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* tag above a band / layer / boundary */
+      .layer-label  { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }
+      .zone-label   { font-size: 17px; letter-spacing: 4px; fill: #6b7280; }   /* under a zone-band cell */
+      .box-h        { font-size: 28px; }                                       /* box heading */
+      .box-s        { font-size: 17px; fill: #6b7280; }                        /* box subtext, gray */
+      .box-v        { font-size: 18px; fill: #475569; }                        /* box value, slate */
+      .center-h     { font-size: 32px; fill: #ffffff; }                        /* heading on a genuinely DARK fill */
+      .center-s     { font-size: 18px; fill: #ffffff; }                        /* subtext on a dark fill */
+      .arrow-label  { font-size: 20px; fill: #6b7280; font-style: italic; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }  /* verb on a connector; white halo */
+      .caption      { font-size: 22px; fill: #111111; }                        /* one-line takeaway, bottom-center */
+      .id-big       { font-size: 76px; letter-spacing: 4px; }                  /* hero identifier (anatomy) */
+      .id-uuid      { font-size: 32px; letter-spacing: 1px; fill: #475569; }
+      .segment-label{ font-size: 20px; letter-spacing: 2px; }                  /* anatomy segment label */
+      .range        { font-size: 38px; }                                       /* big number in a zone band */
+      .signal-code  { font-size: 28px; }                                       /* legend code */
+      .signal-name  { font-size: 18px; fill: #475569; }                        /* legend name / gloss */
+    
+      .h24 { font-size: 24px; }
+      .h22 { font-size: 22px; }
+      .s19 { font-size: 19px; fill: #475569; }
+      .s18 { font-size: 18px; fill: #6b7280; }
+      .s17 { font-size: 17px; fill: #6b7280; }
+      .tok { font-size: 24px; }
+      .cell { font-size: 22px; }
+      .tag  { font-size: 16px; letter-spacing: 3px; fill: #6b7280; }
+    ]]></style>
+
+    <!-- Watercolor wash - feTurbulence + feDisplacementMap + blur. Put on COLORED FILL rects / shapes. -->
+    <filter id="wash-a" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="3" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" scale="16"/>
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <filter id="wash-b" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="9"/>
+      <feDisplacementMap in="SourceGraphic" scale="14"/>
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="wash-c" x="-20%" y="-25%" width="140%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="14"/>
+      <feDisplacementMap in="SourceGraphic" scale="18"/>
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <!-- Ink wobble - turbulence + small displacement, NO blur. Put on STROKES of 2-D shapes. -->
+    <filter id="ink-a" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+    <filter id="ink-b" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="13"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.8"/>
+    </filter>
+    <filter id="ink-c" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="21"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1200" height="770" fill="#ffffff"/>
+  <text x="600.0" y="50" text-anchor="middle" class="title">From link tree to plan</text>
+  <path d="M 316 68 Q 458 65 600 68 Q 742 71 884 67" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round" filter="url(#ink-a)"/>
+  <path d="M 470.00 105.00 L 469.77 146.79 L 470.48 188.57 L 470.40 230.36 L 469.54 272.14 L 468.82 313.93 L 470.95 355.71 L 468.85 397.50 L 468.87 439.29 L 470.62 481.07 L 470.40 522.86 L 470.38 564.64 L 469.34 606.43 L 469.03 648.21 L 470.00 690.00" fill="none" stroke="#cbd5e0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="250.0" y="122.0" text-anchor="middle" class="mono tag">LINK TREE OF (14, 16)</text>
+  <rect x="112" y="142" width="276" height="156" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
+  <rect x="120" y="150" width="260" height="140" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="250.0" y="184.0" text-anchor="middle" class="mono h22">PLANE 1  (root)</text>
+  <rect x="167.0" y="194.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-a)"/>
+  <rect x="173.0" y="200.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="195.0" y="230.5" text-anchor="middle" class="mono tok">2</text>
+  <text x="195.0" y="272.0" text-anchor="middle" class="mono s17">link</text>
+  <rect x="277.0" y="194.0" width="56" height="56" fill="#8fbcb1" opacity="0.62" filter="url(#wash-c)"/>
+  <rect x="283.0" y="200.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-a)"/>
+  <text x="305.0" y="230.5" text-anchor="middle" class="mono tok">3</text>
+  <text x="305.0" y="272.0" text-anchor="middle" class="mono s17">free</text>
+  <rect x="112" y="392" width="276" height="156" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
+  <rect x="120" y="400" width="260" height="140" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="250.0" y="434.0" text-anchor="middle" class="mono h22">PLANE 2</text>
+  <rect x="167.0" y="444.0" width="56" height="56" fill="#dcc085" opacity="0.6000000000000001" filter="url(#wash-a)"/>
+  <rect x="173.0" y="450.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-b)"/>
+  <text x="195.0" y="480.5" text-anchor="middle" class="mono tok">2</text>
+  <text x="195.0" y="522.0" text-anchor="middle" class="mono s17">link</text>
+  <rect x="277.0" y="444.0" width="56" height="56" fill="#8fbcb1" opacity="0.62" filter="url(#wash-c)"/>
+  <rect x="283.0" y="450.0" width="44" height="44" fill="none" stroke="#111111" stroke-width="1.2" filter="url(#ink-a)"/>
+  <text x="305.0" y="480.5" text-anchor="middle" class="mono tok">3</text>
+  <text x="305.0" y="522.0" text-anchor="middle" class="mono s17">free</text>
+  <path d="M 250.00 298.00 L 249.30 329.33 L 251.15 360.67 L 250.00 392.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="270.0" y="352.0" text-anchor="start" class="mono arrow-label">link at city 2</text>
+  <text x="250.0" y="600.0" text-anchor="middle" class="mono s17">(F1) the edge uses one landing</text>
+  <text x="250.0" y="624.0" text-anchor="middle" class="mono s17">in city 2 at each end</text>
+  <text x="250.0" y="662.0" text-anchor="middle" class="mono s17">(F2) free landings: 2 - 1 = 1, odd</text>
+  <text x="830.0" y="122.0" text-anchor="middle" class="mono tag">THE PLAN OF THEOREM 4.1</text>
+  <text x="540.0" y="160.0" text-anchor="start" class="mono tag">PLANE 1</text>
+  <text x="540.0" y="390.0" text-anchor="start" class="mono tag">PLANE 2</text>
+  <rect x="538.0" y="167" width="208.0" height="94" fill="#d29c82" opacity="0.4" filter="url(#wash-b)"/>
+  <rect x="546.0" y="175" width="192.0" height="78" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="642.0" y="207.0" text-anchor="middle" class="mono h22">DROP-OFF</text>
+  <text x="642.0" y="235.0" text-anchor="middle" class="mono s17">CI → 2 → CI, p1</text>
+  <rect x="742.0" y="167" width="344.0" height="94" fill="#d2cabb" opacity="0.5" filter="url(#wash-a)"/>
+  <rect x="750.0" y="175" width="328.0" height="78" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-b)"/>
+  <text x="914.0" y="207.0" text-anchor="middle" class="mono h22">CROSSING</text>
+  <text x="914.0" y="235.0" text-anchor="middle" class="mono s17">CI → 3 → CG, p2</text>
+  <rect x="538.0" y="397" width="344.0" height="94" fill="#d2cabb" opacity="0.5" filter="url(#wash-c)"/>
+  <rect x="546.0" y="405" width="328.0" height="78" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-a)"/>
+  <text x="710.0" y="437.0" text-anchor="middle" class="mono h22">CROSSING</text>
+  <text x="710.0" y="465.0" text-anchor="middle" class="mono s17">CI → 3 → CG, p3</text>
+  <rect x="878.0" y="397" width="208.0" height="94" fill="#a9c39c" opacity="0.35" filter="url(#wash-b)"/>
+  <rect x="886.0" y="405" width="192.0" height="78" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
+  <text x="982.0" y="437.0" text-anchor="middle" class="mono h22">PICK-UP</text>
+  <text x="982.0" y="465.0" text-anchor="middle" class="mono s17">CG → 2 → CG, p1</text>
+  <path d="M 642.0 263 Q 863.0 285 982.0 393" fill="none" stroke="#111111" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="7 7" filter="url(#ink-a)"/>
+  <path d="M 968.0 389.1 L 982.0 393.0 L 976.7 379.5" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-b)"/>
+  <text x="580.8" y="330.0" text-anchor="start" class="mono arrow-label">p1 waits in city 2</text>
+  <text x="580.8" y="356.0" text-anchor="start" class="mono arrow-label">from t = 3 to t = 13</text>
+  <path d="M 540.00 540.00 L 582.89 538.82 L 625.78 539.84 L 668.68 540.53 L 711.57 540.20 L 754.46 539.35 L 797.35 538.82 L 840.25 540.15 L 883.14 539.17 L 926.03 540.97 L 968.92 540.12 L 1011.82 539.87 L 1054.71 541.12 L 1097.60 540.00" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 540.00 540.00 L 540.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="540.0" y="572.0" text-anchor="middle" class="mono s17">0</text>
+  <path d="M 608.00 540.00 L 608.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="608.0" y="572.0" text-anchor="middle" class="mono s17">2</text>
+  <path d="M 676.00 540.00 L 676.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="676.0" y="572.0" text-anchor="middle" class="mono s17">4</text>
+  <path d="M 744.00 540.00 L 744.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="744.0" y="572.0" text-anchor="middle" class="mono s17">6</text>
+  <path d="M 812.00 540.00 L 812.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="812.0" y="572.0" text-anchor="middle" class="mono s17">8</text>
+  <path d="M 880.00 540.00 L 880.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="880.0" y="572.0" text-anchor="middle" class="mono s17">10</text>
+  <path d="M 948.00 540.00 L 948.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="948.0" y="572.0" text-anchor="middle" class="mono s17">12</text>
+  <path d="M 1016.00 540.00 L 1016.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1016.0" y="572.0" text-anchor="middle" class="mono s17">14</text>
+  <path d="M 1084.00 540.00 L 1084.00 548.00" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1084.0" y="572.0" text-anchor="middle" class="mono s17">16</text>
+  <text x="812.0" y="602.0" text-anchor="middle" class="mono s17">time</text>
+  <path d="M 1084.00 150.00 L 1083.86 193.33 L 1083.26 236.67 L 1084.09 280.00 L 1084.18 323.33 L 1084.25 366.67 L 1083.24 410.00 L 1084.87 453.33 L 1083.20 496.67 L 1084.00 540.00" fill="none" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 6"/>
+  <text x="1094.0" y="520.0" text-anchor="start" class="mono s18">M = 16</text>
+  <text x="830.0" y="640.0" text-anchor="middle" class="mono s18">plane 1 drops p1, then crosses with p2;</text>
+  <text x="830.0" y="666.0" text-anchor="middle" class="mono s18">plane 2 crosses with p3, then picks up p1</text>
+  <text x="600.0" y="736" text-anchor="middle" class="caption">drop-offs first, one pick-up last: the makespan is the largest load, 2 · 8 = 16</text>
+</svg>

@@ -62,6 +62,36 @@ class Extract:
     remarks: list[str] = field(default_factory=list)
 
 
+PAPERS = re.compile(r"(?i)\b(both papers|the papers|papers'|papers’|paper's|paper’s|arXiv|EvoCOP)")
+# sentences of a statement that only cite the papers
+PAPER_SENTENCES = [re.compile(r"\s*This is the EvoCOP 2015 assumption \(stated there with \$>\$\)\.")]
+
+
+def mentions_papers(text: str) -> bool:
+    return bool(PAPERS.search(text))
+
+
+def without_paper_items(paragraph: str) -> str:
+    """A list paragraph with the items that discuss the papers removed."""
+    lines = paragraph.split("\n")
+    if not re.match(r"^[*-] ", lines[0]):
+        return paragraph
+    items, cur = [], []
+    for line in lines:
+        if re.match(r"^[*-] ", line) and cur:
+            items.append(cur)
+            cur = []
+        cur.append(line)
+    items.append(cur)
+    return "\n".join(l for item in items if not mentions_papers("\n".join(item)) for l in item)
+
+
+def cut_paper_sentences(text: str) -> str:
+    for pattern in PAPER_SENTENCES:
+        text = pattern.sub("", text)
+    return text
+
+
 def paragraphs(lines: list[str]) -> list[str]:
     out, cur = [], []
     for line in lines:
@@ -128,6 +158,17 @@ class Note:
         return len(self.lines)
 
     def extract(self, label: str, paras: int | None = None) -> Extract:
+        """The node's text, without the note's remarks about the 2015/2023 papers: the site
+        presents the theory on its own terms. Statements and proofs stay verbatim; only remark
+        paragraphs (and paragraphs of a section block) that discuss the papers are left out."""
+        ex = self._extract_raw(label, paras)
+        ex.remarks = [p for p in map(without_paper_items, ex.remarks) if p and not mentions_papers(p)]
+        if label.startswith("§"):
+            ex.statement = [p for p in map(without_paper_items, ex.statement) if p and not mentions_papers(p)]
+        ex.statement = [cut_paper_sentences(p) for p in ex.statement]
+        return ex
+
+    def _extract_raw(self, label: str, paras: int | None = None) -> Extract:
         if label.startswith("§"):
             number = label[1:]
             for i, level, num, title in self.headings:
@@ -395,6 +436,17 @@ NOTE_BADGES = {
 }
 
 
+def note_badge(status: str) -> str:
+    """The badge of a status-table entry; a composite entry (e.g. "P (computed) for (a)–(c); S for
+    ...") is shown by its leading status, and anything unknown as written."""
+    if status in NOTE_BADGES:
+        return NOTE_BADGES[status]
+    for key in ("P (computed)", "refuted", "P", "S", "O"):
+        if status.startswith(key + " ") or status.startswith(key + ";"):
+            return NOTE_BADGES[key] + " (partly; see the status table)"
+    return f"[{status}]{{.badge .informal}}"
+
+
 # ---------------------------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------------------------
@@ -483,6 +535,11 @@ class Blueprint:
         url = f"{REPO}/blob/{self.ref}/{lst.path}#L{lst.first}-L{lst.last}"
         note = " (statement only; the proof is elided)" if lst.elided and d["kind"] == "theorem" else (
             " (shortened)" if lst.elided else "")
+        prov = d.get("provenance")
+        if prov:
+            sha = prov.get("commit", "")
+            note += (f". Axioms from the CI-audited commit footer of [`{sha[:7]}`]({REPO}/commit/{sha}) "
+                     "(`#print axioms` output, re-checked by CI on every push), not from a local Lean run")
         return [
             f"{heading} `{name}` {lean_badge([d])}",
             "",
@@ -517,24 +574,20 @@ class Blueprint:
             lean = "[informal]{.badge .informal}" + (" (parts in Lean)" if leaf_decls else "")
             lean_key = "partial" if leaf_decls else "informal"
         self.rows.append({"label": label, "title": title, "anchor": slug(label), "lean": lean,
-                          "lean_key": lean_key, "note": NOTE_BADGES.get(status, "") if status else "",
+                          "lean_key": lean_key, "note": note_badge(status) if status else "",
                           "note_key": status})
 
         out = [f"### {title} {{#{slug(label)}}}", ""]
         facts = [f"**Lean** {lean}"]
         if status:
-            facts.append(f"**Note** {NOTE_BADGES[status]}")
+            facts.append(f"**Note** {note_badge(status)}")
         if row.get("hypotheses") and row["hypotheses"] not in ("—", "definition"):
             facts.append(f"**Hypotheses** {row['hypotheses']}")
         if row.get("uses") and self.link_uses(row["uses"]):
             facts.append(f"**Uses** {self.link_uses(row['uses'])}")
         out += [" · ".join(facts), ""]
 
-        for pid in node.get("paper", []):
-            text = (SITE / "paper" / f"{pid}.md").read_text(encoding="utf-8").strip()
-            out += ["::: {.from-paper}", text, ":::", ""]
-
-        out.append("::: {.our-work}")
+        out.append("::: {.node-body}")
         where = f", {extract.where}" if extract.where else ""
         source = "theory note" if ex is None else "the Lean development"
         out += [f"**Statement** ({source}{where}).", ""]
@@ -553,9 +606,6 @@ class Blueprint:
             for n in leaf_names:
                 out += self.render_decl(n, "*Part*")
         out += [":::", ""]
-
-        if node.get("strengthen"):
-            out += ["::: {.strengthen}", node["strengthen"].strip(), ":::", ""]
         return out
 
     def write(self) -> None:
@@ -573,6 +623,19 @@ class Blueprint:
         (proofs / "_sections.qmd").write_text("\n\n".join(includes) + "\n", encoding="utf-8")
         self.write_summary(proofs / "_summary.md")
         self.write_stats(SITE / "_blueprint-stats.md")
+        self.write_index(SITE / "_nodes.json")
+
+    def write_index(self, path: Path) -> None:
+        """label -> anchor and badges, read by the `node` shortcode (shortcodes/node.lua)."""
+        badge = {"checked": ("machine-checked", "ok"), "definition": ("Lean definition", "ok"),
+                 "partial": ("informal, parts in Lean", "informal"), "informal": ("informal", "informal"),
+                 "sorry": ("open", "open"), "axiom": ("axiomatised", "axiom")}
+        index = {}
+        for r in self.rows:
+            text, cls = badge.get(r["lean_key"], ("informal", "informal"))
+            index[r["label"]] = {"anchor": r["anchor"], "title": r["title"],
+                                 "lean": text, "class": cls, "note": r["note_key"] or ""}
+        path.write_text(json.dumps(index, ensure_ascii=False, indent=0) + "\n", encoding="utf-8")
 
     def write_summary(self, path: Path) -> None:
         lines = ["| Node | Lean | Note |", "|---|---|---|"]
@@ -598,6 +661,11 @@ class Blueprint:
             f"Apart from `propext`, `Classical.choice` and `Quot.sound`, {clean}: "
             f"no `sorry` and no `native_decide`."
         )
+        footer = [d for d in self.lean["decls"].values() if d.get("provenance")]
+        if footer:
+            text += (f" These counts are from the last local Lean audit; {len(footer)} declarations "
+                     "added since then are badged from the `#print axioms` footers of their commits, "
+                     "which CI re-checks on every push.")
         path.write_text(text + "\n", encoding="utf-8")
 
 

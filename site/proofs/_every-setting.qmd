@@ -7,7 +7,7 @@ the relaxation $L$ that the checker uses without any assumption on central fligh
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §3).
 
 **Lemma 3.1 (cleaning).** Every plan can be changed, keeping all routes (hence cost, makespan and flight
@@ -49,7 +49,7 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
   …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -57,7 +57,7 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §3).
 
 **Lemma 3.2 (counting).** A feasible plan has at least $s = 2t - p$ segments, hence at least $s$ landings in
@@ -109,7 +109,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
     2 * t ≤ ∑ k, hubArrivals (P k) + p := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -117,7 +117,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) or (AΔ)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §3).
 
 **Lemma 3.3 (segment durations).** Let a segment $\gamma$ visit the central cities $x_1,\dots,x_m$ in this
@@ -149,7 +149,7 @@ from its first hub to $x_j$ lasts at least the direct flight between them, and l
 last hub. $\square$
 :::
 
-**In Lean.** Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (c) is `roleW_landingRecs_le` on routes without central flights. Part (b), under (AΔ), is not formalized.
+**In Lean.** Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (b) under (S) and (AΔ) is `segment_bound` (`F(γ) ≥ 2 d_x`); part (c) is `roleW_landingRecs_le` on routes without central flights.
 
 **Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
 
@@ -163,7 +163,20 @@ theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : F
       cost c Z ≤ landCostSum c legs := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
+
+*Part* `ZenoFront.segment_bound` [machine-checked]{.badge .ok}
+
+```lean
+`2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
+theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    {γ : List (Leg n t)} {h : Loc n} {τ : ℕ} (hh : h.isHub = true) (hr : IsRoute h τ γ)
+    (hf : ∀ ℓ ∈ γ, Flies N ℓ) (hone : hubArrivals γ = 1) {ℓ : Leg n t}
+    (hlast : γ.getLast? = some ℓ) (hℓ : ℓ.dst.isHub = true) :
+    ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 248–276](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/TriSegments.lean#L248-L276){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`6c6fdb8`](https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.roleW_landingRecs_le` [machine-checked]{.badge .ok}
 
@@ -176,7 +189,7 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
   …
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -184,35 +197,7 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [3.2](#node-lemma-3-2), [3.3](#node-lemma-3-3)
 
-::: {.from-paper}
-**From the original paper** (Quemy & Schoenauer, EvoCOP 2015, §2.2 *Pareto Optimal Plans*, HAL preprint hal-01109777v1, pp. 3–4).
-
-> Let us make another simplifying assumption:\
-> **Assumption A1**: $\forall (i, j) \in [1, n]^2, d_i + d_j < d_{ij}$. Then the following holds.
->
-> **Proposition**: Pareto-optimal plans are plans where exactly $2t - p$ (possibly identical) central
-> cities are used by a flight.
->
-> **Proof**: Consider a plan where a person flies from $C_i$ to $C_j$. Using the same plane, the same
-> person could fly instead from $C_i$ to $C_G$, and the plane would return empty to $C_j$. The plan
-> could continue unchanged from thereon: because of the hypothesis on makespans, the needed resource
-> would be in $C_j$ on time. Moreover, the total cost is unchanged, and the total makespan is lower or
-> equal to the original one: the new plan thus Pareto-dominates the original one.
->
-> Iterating the same reasoning for each person, and each empty plane, we conclude that there are no
-> flights between central cities in Pareto-optimal plans. Thus bringing the $t$ persons from $C_I$ to
-> $C_G$ will amount to carry each person through one central city: $t$ flights will be needed from
-> $C_I$ to one $C_i$, then $t$ flights from $C_i$ to $C_G$. Finally, because planes do not need to come
-> back from $C_G$ in the end, only $t - p$ flights back empty will be needed, possibly through some
-> different central cities – hence the result. $\square$
->
-> *Footnote 3 (on Assumption A1):* This might look unrealistic in real-world logistic domain. However,
-> we hypothesize that the proposition still holds with the weaker condition that for any cities
-> $C_i, C_j, C_k$ (if we state the cost of $C_I$ and $C_G$ are respectively $C_0$ and $C_{n+1}$),
-> $d_{ik} \le d_{ij} + d_{jk}$ (triangle inequality).
-:::
-
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §3).
 
 **Lemma 3.4 (relaxation) [R].** Assume (S). For every feasible plan with cost $C$ and makespan $M$ there are
@@ -256,7 +241,7 @@ theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin 
       (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.relaxCost_oneplane_le_totalCost` [machine-checked]{.badge .ok}
 
@@ -268,13 +253,6 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
     relaxCost (fun m => oneplane d c m T) p s ≤ (totalCost c Y : WithTop ℕ) := …
 ```
 
-[`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
 
-:::
-
-::: {.strengthen}
-**What survives of the papers' Proposition.** The papers' "Pareto-optimal plans use exactly $2t-p$
-central cities" needs (A1) and is true only in the sense of the front (Corollary 4.8). Lemma 3.2 keeps
-its lower-bound half with **no assumption at all**: every plan lands at least $2t-p$ times, and
-Lemma 3.4 turns that into a cost bound $L$ valid for any central flights.
 :::

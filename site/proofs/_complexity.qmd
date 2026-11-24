@@ -1,13 +1,13 @@
 ## Complexity {#sec-complexity}
 
-§8 explains why no fast per-PPP rule can be exact, and why the dynamic programs are
-pseudo-polynomial. None of it is formalized.
+§8 explains why no fast rule that schedules a fixed multiset of landings can be exact, and why the
+dynamic programs are pseudo-polynomial. None of it is formalized.
 
 ### Theorem 8.1 {#node-theorem-8-1}
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** $p$ in the input · **Uses** [2.4](#node-lemma-2-4)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §8).
 
 **Theorem 8.1.** Deciding $M(X) \le 2T$, with $d$, $X$, $p$ and $T$ as input, is strongly NP-complete.
@@ -44,7 +44,7 @@ preserves strong NP-hardness. $\square$
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2), [2.4](#node-lemma-2-4)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §8).
 
 **Proposition 8.2 (fixed $p$).** For $p = 2$ the problem stays NP-complete, even with positive durations. For
@@ -91,7 +91,7 @@ local to the city, and (h2) is checked at the end. The time is $O(n\,(T+1)^p\, 8
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [7.5](#node-theorem-7-5)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §8).
 
 **Corollary 8.3.** $E(T)$, and under (S) and (A1) the front, are computable in pseudo-polynomial time

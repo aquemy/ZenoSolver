@@ -1,0 +1,366 @@
+/* Hallmark · genre: editorial · macrostructure: Split Studio · theme: custom (quemy.info DNA)
+ * type: STIX Two Text (display) + Source Sans Pro (body) + Roboto Mono (labels), as on quemy.info
+ * colour: site/styles/tokens.css only (--zs-*), switched by body.quarto-dark
+ * enrichment: hand-built SVG data figure (the worked example's front) · nav/footer: Quarto's
+ * Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V4 */
+
+@import url("https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@400;600&family=Roboto+Mono:wght@400;500&display=swap");
+
+/* ---- Homepage tokens: derived from the site tokens, nothing else. ---- */
+.zs-home {
+  --home-bg: var(--bs-body-bg, var(--zs-surface));   /* the page itself: dot rings match it */
+  --home-serif: "STIX Two Text", Georgia, "Times New Roman", serif;
+  --home-sans: "Source Sans Pro", "Source Sans 3", -apple-system, "Segoe UI", sans-serif;
+  --home-mono: "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
+  --home-wash-alpha: 0.13;
+  --home-link-rule: color-mix(in srgb, var(--zs-accent) 35%, transparent);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --text-label: 0.72rem;
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-lede: 1.15rem;
+  --text-card: 1.4rem;
+  --text-figure: 2.1rem;
+  --text-hero-figure: clamp(3.2rem, 2.4rem + 3vw, 4.8rem);
+  --text-display: clamp(1.9rem, 1.2rem + 2.9vw, 3.6rem);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 140ms;
+}
+body.quarto-dark .zs-home {
+  --home-wash-alpha: 0.2;
+  --home-link-rule: color-mix(in srgb, var(--zs-accent) 45%, transparent);
+}
+
+/* ---- Frame ---- */
+html, body { overflow-x: clip; }
+.zs-home {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+/* Quarto pads every child of #quarto-content by 14px; the homepage sets its own frame. */
+#quarto-content > .zs-home, .zs-home {
+  padding: var(--space-12) var(--space-6) var(--space-16);
+}
+.zs-home {
+  font-family: var(--home-sans);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--zs-ink);
+}
+.zs-home *, .zs-home *::before, .zs-home *::after { box-sizing: border-box; }
+.zs-home p { margin: 0; }
+.zs-home a { color: var(--zs-accent); text-decoration: none; border-bottom: 1px solid var(--home-link-rule); }
+.zs-home a:hover { border-bottom-color: var(--zs-accent); }
+.zs-home a:focus-visible, .zs-home [tabindex]:focus-visible {
+  outline: 2px solid var(--zs-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.zs-home code:not(.sourceCode), .zs-home .mono {
+  font-family: var(--home-mono);
+  font-size: 0.86em;
+  color: inherit;
+  background: none;
+  padding: 0;
+  white-space: nowrap;
+}
+.zs-home .visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* Section labels: the small tracked capitals of quemy.info's homepage. */
+.zs-home .home-section {
+  font-family: var(--home-sans);
+  font-size: var(--text-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  color: var(--zs-ink-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+}
+.zs-home > section + section { margin-top: var(--space-16); }
+
+/* ---- Hero ---- */
+.zs-home h1.home-title {
+  font-family: var(--home-serif);
+  font-weight: 700;
+  font-size: var(--text-display);
+  line-height: 1.06;
+  letter-spacing: -0.012em;
+  color: var(--zs-ink);
+  margin: 0 0 var(--space-8);
+  max-width: 15em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.home-hero-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+.home-lede {
+  font-size: var(--text-lede);
+  line-height: 1.6;
+  color: var(--zs-ink-2);
+  max-width: 34rem;
+}
+.home-lede + .home-lede { margin-top: var(--space-4); }
+.home-lede strong { color: var(--zs-ink); font-weight: 600; }
+
+/* ---- The front figure ---- */
+.home-front { margin: 0; position: relative; min-width: 0; max-width: 33rem; }
+.home-front svg { display: block; width: 100%; height: auto; overflow: visible; }
+.home-front .grid line { stroke: var(--zs-rule); stroke-width: 1; shape-rendering: crispEdges; }
+.home-front .axis-line { stroke: var(--zs-ink-3); stroke-width: 1; shape-rendering: crispEdges; }
+.home-front text {
+  font-family: var(--home-mono);
+  font-size: 10.5px;
+  fill: var(--zs-ink-2);
+}
+.home-front text.axis-title { font-family: var(--home-sans); font-size: 12px; font-weight: 600; }
+.home-front text.region { font-family: var(--home-serif); font-style: italic; font-size: 14px; fill: var(--zs-ink-2); }
+.home-front text.end-label { fill: var(--zs-ink); }
+.home-front .wash { fill: var(--zs-series-1); opacity: var(--home-wash-alpha); }
+.home-front .stairs {
+  fill: none;
+  stroke: var(--zs-series-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.home-front .pt { cursor: default; outline: none; }
+.home-front .pt .hit { fill: transparent; }
+.home-front .pt .dot { fill: var(--zs-series-1); stroke: var(--home-bg); stroke-width: 2; }
+.home-front .pt .halo { fill: var(--zs-series-1); opacity: 0; }
+.home-front .pt:hover .halo, .home-front .pt:focus-visible .halo, .home-front .pt.is-on .halo { opacity: 0.22; }
+.home-front .pt:focus-visible .dot { stroke: var(--zs-ink); }
+
+.front-tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  background: var(--home-bg);
+  border: 1px solid var(--zs-rule);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem 0.4rem;
+  font-size: var(--text-small);
+  line-height: 1.35;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--zs-ink) 10%, transparent);
+  z-index: 2;
+}
+.front-tip[hidden] { display: none; }
+.front-tip b { font-weight: 600; color: var(--zs-ink); font-variant-numeric: tabular-nums; }
+.front-tip span { color: var(--zs-ink-2); }
+
+.home-front figcaption {
+  margin-top: var(--space-3);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--zs-ink-2);
+  max-width: 36rem;
+}
+.front-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  font-family: var(--home-mono);
+  font-size: 0.8rem;
+  color: var(--zs-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Routes: four ruled cards ---- */
+.home-routes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-routes li { min-width: 0; }
+.zs-home a.route {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-5) 0 var(--space-6);
+  border: 0;
+  border-top: 1px solid var(--zs-ink);
+  color: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.route-name {
+  font-family: var(--home-serif);
+  font-weight: 600;
+  font-size: var(--text-card);
+  line-height: 1.15;
+  color: var(--zs-ink);
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.route-name .arrow {
+  display: inline-block;
+  margin-left: 0.3em;
+  font-family: var(--home-sans);
+  font-weight: 400;
+  color: var(--zs-ink-2);
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.route-text { font-size: 0.95rem; line-height: 1.5; color: var(--zs-ink-2); }
+.route-fact {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  font-family: var(--home-mono);
+  font-size: 0.75rem;
+  color: var(--zs-ink-2);
+}
+.zs-home a.route:hover { border-top-color: var(--zs-accent); }
+.zs-home a.route:hover .route-name { color: var(--zs-accent); }
+.zs-home a.route:hover .arrow { color: var(--zs-accent); transform: translateX(3px); }
+.zs-home a.route:active .route-name { opacity: 0.8; }
+.zs-home a.route:focus-visible { outline-offset: 4px; }
+
+/* ---- Evidence: one square per suite instance ---- */
+.home-tally {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: var(--space-6) 0 0;
+  border-top: 1px solid var(--zs-rule);
+}
+.home-tally li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: var(--space-2) var(--space-5);
+  align-items: start;
+}
+.home-tally li .waffle { grid-row: 1 / span 2; margin: 0.2rem 0 0; }
+.waffle { display: block; width: 100%; max-width: 8.6rem; height: auto; margin-bottom: var(--space-2); }
+.zs-home .waffle-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.zs-home .on { fill: var(--zs-series-1); }
+.tally-figure {
+  font-family: var(--home-serif);
+  font-size: var(--text-figure);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--zs-ink);
+}
+.tally-figure .of { font-size: 0.55em; font-weight: 400; color: var(--zs-ink-2); margin-left: 0.15em; }
+.tally-text { font-size: 0.95rem; line-height: 1.45; color: var(--zs-ink-2); max-width: 17rem; }
+.tally-text code { color: var(--zs-ink); }
+.home-note {
+  margin-top: var(--space-8) !important;
+  font-size: var(--text-small);
+  color: var(--zs-ink-2);
+}
+
+/* ---- The theory in Lean: the count, then four of the statements ---- */
+.home-lean {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--zs-rule);
+}
+.lean-count { min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.lean-count .waffle { margin-bottom: var(--space-2); }
+.zs-home .tally-big { font-size: var(--text-hero-figure); font-weight: 600; letter-spacing: -0.01em; }
+.lean-count .tally-text { font-size: var(--text-lede); line-height: 1.5; max-width: 24rem; }
+.lean-trust { font-size: var(--text-small); line-height: 1.5; color: var(--zs-ink-2); max-width: 24rem; }
+.home-ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.home-ledger li {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--zs-rule);
+  min-width: 0;
+}
+.home-ledger li:first-child { padding-top: 0; }
+.zs-home a.ledger-ref {
+  font-family: var(--home-mono);
+  font-size: 0.78rem;
+  padding-top: 0.3rem;
+  justify-self: start;
+  align-self: start;
+  white-space: nowrap;
+}
+.ledger-text {
+  font-family: var(--home-serif);
+  font-size: 1.12rem;
+  line-height: 1.4;
+  color: var(--zs-ink);
+  min-width: 0;
+}
+
+/* ---- Breakpoints ---- */
+@media (min-width: 640px) {
+  .home-routes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 760px) {
+  .home-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+  .home-tally li { display: flex; flex-direction: column; gap: var(--space-2); }
+  .home-tally li .waffle { margin: 0 0 var(--space-2); }
+}
+@media (min-width: 920px) {
+  .home-hero-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 33rem);
+    gap: var(--space-12);
+    align-items: center;
+  }
+  .home-hero-body .home-copy { padding-bottom: var(--space-12); }
+  .home-routes { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .home-lean { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-12); }
+}
+@media (max-width: 599px) {
+  #quarto-content > .zs-home, .zs-home { padding: var(--space-8) var(--space-4) var(--space-12); }
+  .zs-home > section + section { margin-top: var(--space-12); }
+  .zs-home h1.home-title { margin-bottom: var(--space-6); }
+  .home-lede { font-size: 1.05rem; }
+  .home-front text { font-size: 13px; }
+  .home-front text.axis-title { font-size: 14px; }
+  .home-front text.region { font-size: 16px; }
+  .home-ledger li { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+}
+@media (max-width: 759px) {
+  .zs-home .waffle { max-width: 7rem; }   /* one cell size for every square chart */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zs-home a.route, .route-name, .route-name .arrow { transition: none; }
+  .zs-home a.route:hover .arrow { transform: none; }
+}
+.zs-home .nobr { white-space: nowrap; }

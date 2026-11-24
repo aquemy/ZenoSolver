@@ -9,7 +9,7 @@ them.
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S), (A1) · **Uses** [4.8](#node-corollary-4-8)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.1).
 
 **Proposition 7.1.** Under (S) and (A1), $\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$ with
@@ -46,7 +46,7 @@ theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : �
         ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
 
@@ -59,7 +59,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -67,7 +67,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.2).
 
 **Lemma 7.2.** $G[m][\tau] = \min\{c(Y) : |Y| = m,\ \delta(Y) \le \tau\}$, and $G$ is non-increasing in $\tau$.
@@ -95,7 +95,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
       (oneplane d c m T) := …
 ```
 
-[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -103,7 +103,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Uses** [2.6](#node-lemma-2-6), [7.2](#node-lemma-7-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.3).
 
 **Proposition 7.3.** $L(T) \le E(T) \le U_3(T) \le U(T)$.
@@ -139,7 +139,7 @@ theorem relaxedBoundAt_le_minCost (d c : Fin n → ℕ) {t p Tmax T : ℕ} :
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
 
 *Part* `ZenoFront.minCost_le_pairsBoundAt` [machine-checked]{.badge .ok}
 
@@ -151,7 +151,7 @@ theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T
       pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T := …
 ```
 
-[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -159,7 +159,7 @@ theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.6](#node-lemma-2-6), [2.7](#node-corollary-2-7), [7.3](#node-proposition-7-3)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.3).
 
 **Proposition 7.4.** If $q_{\max} \le 2$, that is $p \le 2$ or $t \le p + 1$, then $E = U$. If
@@ -187,7 +187,7 @@ corresponding $G$ value (Lemma 7.2). So the forest costs at least some combinati
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.6](#node-lemma-2-6), [2.7](#node-corollary-2-7), [7.2](#node-lemma-7-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.4).
 
 **Theorem 7.5.** $\mathrm{For}[p][s] = E(T)$. Given $G$, the computation takes
@@ -275,7 +275,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -283,7 +283,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 
 **Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2), [2.8](#node-lemma-2-8), [7.2](#node-lemma-7-2)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.5).
 
 **Theorem 7.6 (σ-DP) [Claim C].** The shortest path from $(0, 0, \emptyset)$ to $(p, s, \emptyset)$ has
@@ -353,7 +353,7 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 143–190](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Solver.lean#L143-L190){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 143–190](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Solver.lean#L143-L190){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -361,7 +361,7 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [1.1](#node-lemma-1-1), [7.6](#node-theorem-7-6)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.5).
 
 **Lemma 7.7 (Pareto sets).** Let $\otimes$ be a binary operation on $\mathbb K^2$ that is monotone in the
@@ -389,7 +389,7 @@ This subset is finite and dominating, and Lemma 1.1 applies. The same argument w
 
 **Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [1.1](#node-lemma-1-1), [7.6](#node-theorem-7-6)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.5).
 
 **Proposition 7.8 (Pareto-set variant) [PS].** In the σ-graph, replace the weight of the arc with option
@@ -447,7 +447,7 @@ the cost range is narrow.
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** — ; fronts: (S), (A1) · **Uses** [2.2](#node-definition-2-2), [7.1](#node-proposition-7-1)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.6).
 
 **Proposition 7.9 (dominance) [DOM].** Let $i \ne i'$ with $d_{i'} \le d_i$ and $c_{i'} \le c_i$. Removing
@@ -496,7 +496,7 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
     d (domRep d c i) ≤ d i ∧ c (domRep d c i) ≤ c i := …
 ```
 
-[`lean/ZenoFront/AdmissibleBound.lean`, lines 182–199](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/AdmissibleBound.lean#L182-L199){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/AdmissibleBound.lean`, lines 182–199](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/AdmissibleBound.lean#L182-L199){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -504,7 +504,7 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
 
 **Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [2.9](#node-lemma-2-9), [3.2](#node-lemma-3-2), [3.4](#node-lemma-3-4), [4.1](#node-theorem-4-1)
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (theory note, §7.6).
 
 **Proposition 7.10 (ends of the front) [END].** Assume (S). Let $d_{\min} = \min_i d_i$,
@@ -589,7 +589,7 @@ theorem Feasible.minOf_le_makespan {N : Network n} (hS : N.dbar = N.d) (c : Fin 
     2 * minOf N.d * ((2 * t - p + p - 1) / p) ≤ planMakespan P := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 110–124](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Checker.lean#L110-L124){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 110–124](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Checker.lean#L110-L124){.lean-src} (statement only; the proof is elided)
 
 *Part* `ZenoFront.Feasible.minOf_le_cost` [machine-checked]{.badge .ok}
 
@@ -600,7 +600,7 @@ theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n �
     (2 * t - p) * minOf c ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 126–133](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Checker.lean#L126-L133){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 126–133](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Checker.lean#L126-L133){.lean-src} (statement only; the proof is elided)
 
 :::
 
@@ -608,7 +608,7 @@ theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n �
 
 **Lean** [machine-checked]{.badge .ok}
 
-::: {.our-work}
+::: {.node-body}
 **Statement** (the Lean development).
 
 Under (S) and (A1), with $1 \le p \le t$, the list computed by `solveFront` is exactly the Pareto
@@ -630,6 +630,6 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 414–449](https://github.com/aquemy/ZenoSolver/blob/d90b3006488a75365faf437a9bae79a551384196/lean/ZenoFront/Solver.lean#L414-L449){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 414–449](https://github.com/aquemy/ZenoSolver/blob/392512425f33b68bfd9d0415de20fdd999f4197e/lean/ZenoFront/Solver.lean#L414-L449){.lean-src} (statement only; the proof is elided)
 
 :::

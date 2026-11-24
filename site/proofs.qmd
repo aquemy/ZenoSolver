@@ -1,48 +1,29 @@
 ---
 title: "Blueprint"
-subtitle: "Every statement of the theory note, the papers' versions, and the Lean declarations"
+subtitle: "Every statement of the theory note, with its proof and its Lean declarations"
 toc: true
 toc-depth: 3
 ---
 
-This blueprint follows the theory note
-[`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md),
-which closes the gaps in the optimality arguments of Quemy & Schoenauer (EvoCOP 2015) and of
-Quemy, Schoenauer & Dréo (arXiv:2304.14659, 2023). For each node it gives, where they exist, the
-papers' statement, the note's statement and proof, and the Lean declarations of `lean/ZenoFront`,
-with their source.
+The blueprint is the detailed reference behind the [paper](paper/index.qmd). It follows the theory
+note
+[`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
+statement by statement. For each node it gives the statement, the note's proof (collapsed), the
+remarks around it, and the Lean declarations of `lean/ZenoFront` that formalise it, with a link to
+their exact source lines. Statements and proofs are cut out of the note, and listings out of the
+Lean sources, when the site is built, so neither can drift from the repository.
 
-::: {.callout-note appearance="simple"}
-**Authorship.** The grey boxes reproduce the papers verbatim, with their attribution, for
-scholarly comparison. The note, the Lean development and this page are the work of Alexandre
-Quemy. The statements and proofs in the blue boxes are cut out of the note when the site is built,
-and the listings out of the Lean sources, so neither can drift from the repository.
-:::
+Every node has two badges:
 
-How to read the boxes:
-
-::: {.from-paper}
-**From the original paper.** The papers' statements, verbatim, with section and page.
-:::
-
-::: {.our-work}
-**The note and Lean.** The note's statement, its proof (collapsed), the remarks around it, and the
-Lean declarations that formalise it, with a link to the exact source lines.
-:::
-
-::: {.strengthen}
-**What the note corrects.** Where the papers are wrong or incomplete, and what replaces them.
-:::
-
-Every node has two badges. **Lean**: [machine-checked]{.badge .ok} when every declaration that
-formalises the whole statement is a theorem whose axioms are among `propext`, `Classical.choice`
-and `Quot.sound` (read from `collectAxioms`, the check behind `#print axioms`, when the page is
-built); [Lean definition]{.badge .ok} for definitions; [informal]{.badge .informal} when the
-statement is not in Lean, possibly with formalised parts listed under it. A node is never badged
-above what its own declarations cover. **Note**: [proof in the note]{.badge .informal} for a
-complete written proof, [sketch]{.badge .informal}, [open problem]{.badge .open},
-[refuted]{.badge .refuted} or [definition]{.badge .informal}, from the status table of §0 of the
-note.
+- **Lean.** [machine-checked]{.badge .ok} when every declaration that formalises the whole
+  statement is a theorem whose axioms are among `propext`, `Classical.choice` and `Quot.sound`
+  (read from `collectAxioms`, the check behind `#print axioms`); [Lean definition]{.badge .ok} for
+  definitions; [informal]{.badge .informal} when the statement is not in Lean, possibly with
+  formalised parts listed under it. A node is never badged above what its own declarations cover.
+- **Note.** [proof in the note]{.badge .informal} for a complete written proof,
+  [sketch]{.badge .informal}, [computed]{.badge .informal}, [open problem]{.badge .open},
+  [refuted]{.badge .refuted} or [definition]{.badge .informal}, from the status table of §0 of the
+  note.
 
 {{< include _blueprint-stats.md >}}
 

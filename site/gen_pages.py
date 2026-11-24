@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import statistics
 import subprocess
 import tempfile
@@ -54,14 +55,11 @@ def suite_args() -> dict[str, str]:
 
 def results() -> None:
     _, zeno = load("zeno", "zeno")
-    legacy = {v: load("legacy", v)[1] for v in ("zenoSolver", "zenoSolver_naive", "zenoSolver_noDuplicate")}
-    lctx = load("legacy", "zenoSolver")[0]
     zctx = load("zeno", "zeno")[0]
     fctx, front = load("lean", "zeno-front-suite")
     _, check = load("lean", "zeno-check-suite")
     by = lambda rows: {r["name"]: r for r in rows}
     z, f, c = by(zeno), by(front), by(check)
-    lg = {k: by(v) for k, v in legacy.items()}
     n = len(zeno)
 
     def ok(rows, key="status", good="ok"):
@@ -80,11 +78,6 @@ def results() -> None:
         f"| `zeno` (C++, all cores) | {len(zt)} of {n} | {seconds(statistics.median(zt))} | "
         f"{seconds(slow_z['real_time'])} (`{slow_z['name']}`) | {zctx.get('zs_timeout_s', 30):.0f} s timeout, median of 3 runs |",
     ]
-    for variant, rows in legacy.items():
-        done = ok(rows)
-        med = statistics.median([r["real_time"] for r in done]) if done else 0
-        lines.append(f"| 2016 `{variant}` | {len(done)} of {n} | {seconds(med)} (finished only) | "
-                     f"timeout on {n - len(done)} | {lctx.get('zs_timeout_s', 30):.0f} s timeout, median of 3 runs |")
     lines.append(f"| Lean `zeno-front` (verified solver) | {len(ft)} of {n} | {seconds(statistics.median(ft))} | "
                  f"{seconds(slow_f['real_time'])} (`{slow_f['name']}`) | 60 s timeout, one run; front equal to "
                  f"`zeno front` on {equal} of {n} |")
@@ -93,27 +86,12 @@ def results() -> None:
                  f"{seconds(sum(ct))} in total |")
     (SITE / "_results-summary.md").write_text("\n".join(lines) + "\n")
 
-    # speed-up where the 2016 solver also finishes
-    ratios = []
-    for name, r in lg["zenoSolver"].items():
-        if r.get("status") == "ok" and z.get(name, {}).get("status") == "ok":
-            ratios.append((r["real_time"] / z[name]["real_time"], name))
-    ratios.sort()
-    best = ratios[-1]
-    speed = (f"On the {len(ratios)} instances that the 2016 `zenoSolver` finishes, `zeno` is "
-             f"{statistics.median(r for r, _ in ratios):,.0f} times faster at the median and up to "
-             f"{best[0]:,.0f} times faster (`{best[1]}`). Process start-up, about 3 ms, is the floor of "
-             f"every `zeno` timing.")
-    (SITE / "_results-speedup.md").write_text(speed + "\n")
-
     # per instance
     args = suite_args()
-    rows = ["| Instance | Arguments | Front | `zeno` | 2016 `zenoSolver` | `zeno-front` | `zeno-check` | Certificate |",
-            "|---|---|--:|--:|--:|--:|--:|--:|"]
+    rows = ["| Instance | Arguments | Front | `zeno` | `zeno-front` | `zeno-check` | Certificate |",
+            "|---|---|--:|--:|--:|--:|--:|"]
     for r in zeno:
         name = r["name"]
-        old = lg["zenoSolver"].get(name, {})
-        old_t = seconds(old["real_time"]) if old.get("status") == "ok" else "timeout"
         fr = f.get(name, {})
         fr_t = seconds(fr["real_time"]) + ("" if fr.get("front_equals_zeno") else " (differs)") if fr else "—"
         ch = c.get(name, {})
@@ -121,7 +99,7 @@ def results() -> None:
         size = ch.get("certificate_bytes")
         size_s = f"{size / 1e6:.1f} MB" if size and size >= 1e6 else (f"{size / 1e3:.0f} kB" if size else "—")
         rows.append(f"| `{name}` | `{args.get(name, r.get('arguments', ''))}` | {r.get('front_size', '')} | "
-                    f"{seconds(r['real_time'])} | {old_t} | {fr_t} | {ch_t} | {size_s} |")
+                    f"{seconds(r['real_time'])} | {fr_t} | {ch_t} | {size_s} |")
     (SITE / "_results-instances.md").write_text("\n".join(rows) + "\n")
 
     # the Lean checker on its own test sets
@@ -164,7 +142,7 @@ def results() -> None:
                         f"{int(x['front_size'])} | {seconds(ms)} |")
     (SITE / "_results-largedurations.md").write_text("\n".join(rows) + "\n")
 
-    dates = sorted({ctx["date"][:10] for ctx in (zctx, lctx, fctx)})
+    dates = sorted({ctx["date"][:10] for ctx in (zctx, fctx)})
     (SITE / "_results-meta.md").write_text(
         f"Apple M4 Max, 16 cores, macOS, Release builds; recorded {', '.join(dates)}. "
         f"Source: `bench/baselines/*/{MACHINE}/`.\n")
@@ -212,6 +190,7 @@ def suites() -> None:
         path = ROOT / "bench" / "instances" / f"{suite}.txt"
         entries = [l.split("|", 1) for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")]
         head = " ".join(c for c in comments(path)[1:])  # the first line documents the syntax
+        head = re.sub(r"Table 1 of [^:]*: ", "", head)  # the site does not cite the earlier papers
         out.append(f"| [`{suite}`](#suite-{suite}) | {len(entries)} | {head} |")
         detail += [f"### `{suite}` {{#suite-{suite}}}", "", "| Name | Arguments | Front size |", "|---|---|--:|"]
         for name, args in entries:
