@@ -392,6 +392,13 @@ lean      = "ZenoFront.sigmaBoundAt_eq_minCost"
 paper     = "Thm 7.6, doc/theory/exact-front.md §7.5"
 created   = "2026-11-23"
 
+[claims.lem-7-7]
+kind      = "lemma"
+statement = "Lemma 7.7 (Pareto sets): for a binary operation ⊗ on K² monotone in the product order and finite A, B, Min(A ⊗ B) = Min(Min A ⊗ Min B) and Min(A ∪ B) = Min(Min A ∪ Min B)."
+status    = "math.proved-informal"
+paper     = "Lemma 7.7, doc/theory/exact-front.md §7.5"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
