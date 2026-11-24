@@ -282,6 +282,13 @@ status    = "math.proved-informal"
 paper     = "Lemma 6.3, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
+[claims.cor-6-4]
+kind      = "corollary"
+statement = "Corollary 6.4 (one pick-up never waits harmfully) [W1]: under (AΔ-path), if every plane has at most one pick-up, or every plane at most one drop-off, then M_tmpl = max_k λ_k for every order and matching."
+status    = "math.proved-informal"
+paper     = "Cor 6.4, doc/theory/exact-front.md §6.2"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
