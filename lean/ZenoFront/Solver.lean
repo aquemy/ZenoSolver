@@ -6,6 +6,7 @@ module
 
 public import ZenoFront.Achievability
 public import ZenoFront.AdmissibleBound
+public import ZenoFront.Breakpoints
 
 /-!
 # A verified solver for the symmetric front
@@ -25,9 +26,12 @@ the front of the feasible plans. `lake exe zeno-front FILE` runs it (`ZenoFrontM
   (`isParityWitness_of_list`). No link forest is needed.
 * **The front from `E`** (`minimal_admissiblePoints_iff`): `(C, 2T)` is a minimal admissible
   point iff `E(T) = C` and `E(T') > C` for every `T' < T`. Such a breakpoint has
-  `T ≤ (2t − p) · d_max` (`breakpoint_le`), so the solver scans the levels `0, …, (2t − p) · d_max`
-  and keeps `(E(T), 2T)` whenever `E` drops (`scanFront`, `mem_scanFront`). Corollary 4.8
-  (`minimal_achievable_iff_admissiblePoints`) turns the minimal admissible points into the front.
+  `T ≤ (2t − p) · d_max` (`breakpoint_le`), and `E(T) = ⊤` below `d_min · ⌈s/p⌉`
+  (`minCost_eq_top_of_lt`). The breakpoints are the points of the scan of every level
+  (`scanFront`, `mem_scanFront`). The solver finds them by splitting intervals between those two
+  levels (`breakpoints`, `Breakpoints.lean`), which gives the same list (`solveFront_eq`).
+  Corollary 4.8 (`minimal_achievable_iff_admissiblePoints`) turns the minimal admissible points
+  into the front.
 
 The tables that do not depend on the level (the subsets of non-dominated cities, their
 symmetric differences, and the one-plane table) are computed once (`sigmaAt`).
@@ -333,92 +337,6 @@ theorem breakpoint_le (d c : Fin n → ℕ) {t T C : ℕ} (hE : minCost d c t p 
   rw [← hcost] at this
   exact absurd (minCost_le d c hX hsize hload) (not_le.mpr this)
 
-/-- The scan of the levels `T₀, …, T₀ + k − 1`: `(E(T), 2T)` is kept when `E(T)` is below the
-last kept value `prev`. -/
-def scanFront (E : ℕ → WithTop ℕ) : ℕ → ℕ → WithTop ℕ → List (ℕ × ℕ)
-  | _, 0, _ => []
-  | T, k + 1, prev =>
-    if E T < prev then ((E T).untopD 0, 2 * T) :: scanFront E (T + 1) k (E T)
-    else scanFront E (T + 1) k prev
-
-theorem mem_scanFront (E : ℕ → WithTop ℕ) : ∀ (T₀ k : ℕ) (prev : WithTop ℕ) (C M : ℕ),
-    (C, M) ∈ scanFront E T₀ k prev ↔ ∃ T, T₀ ≤ T ∧ T < T₀ + k ∧ M = 2 * T ∧ E T = C ∧
-      (C : WithTop ℕ) < prev ∧ ∀ T', T₀ ≤ T' → T' < T → (C : WithTop ℕ) < E T'
-  | T₀, 0, prev, C, M => by simp [scanFront]; omega
-  | T₀, k + 1, prev, C, M => by
-    simp only [scanFront]
-    split_ifs with hlt
-    · rw [List.mem_cons, mem_scanFront E (T₀ + 1) k (E T₀) C M]
-      obtain ⟨e, he⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_lt hlt)
-      have he' : ((e : ℕ) : WithTop ℕ) = E T₀ := he
-      have hu : (E T₀).untopD 0 = e := by rw [← he]; rfl
-      rw [hu]
-      constructor
-      · rintro (h | ⟨T, h₁, h₂, h₃, h₄, h₅, h₆⟩)
-        · simp only [Prod.mk.injEq] at h
-          obtain ⟨rfl, rfl⟩ := h
-          refine ⟨T₀, le_rfl, by omega, rfl, he'.symm, ?_, fun T' h₁ h₂ => by omega⟩
-          rw [he']
-          exact hlt
-        · refine ⟨T, by omega, by omega, h₃, h₄, h₅.trans hlt, fun T' h₇ h₈ => ?_⟩
-          rcases Nat.eq_or_lt_of_le h₇ with rfl | h₇
-          · exact h₅
-          · exact h₆ T' h₇ h₈
-      · rintro ⟨T, h₁, h₂, h₃, h₄, h₅, h₆⟩
-        rcases Nat.eq_or_lt_of_le h₁ with rfl | h₁
-        · left
-          have : e = C := by exact_mod_cast he'.trans h₄
-          rw [this, h₃]
-        · right
-          exact ⟨T, h₁, by omega, h₃, h₄, h₆ T₀ le_rfl h₁, fun T' h₇ h₈ => h₆ T' (by omega) h₈⟩
-    · rw [mem_scanFront E (T₀ + 1) k prev C M]
-      push Not at hlt
-      constructor
-      · rintro ⟨T, h₁, h₂, h₃, h₄, h₅, h₆⟩
-        refine ⟨T, by omega, by omega, h₃, h₄, h₅, fun T' h₇ h₈ => ?_⟩
-        rcases Nat.eq_or_lt_of_le h₇ with rfl | h₇
-        · exact h₅.trans_le hlt
-        · exact h₆ T' h₇ h₈
-      · rintro ⟨T, h₁, h₂, h₃, h₄, h₅, h₆⟩
-        rcases Nat.eq_or_lt_of_le h₁ with rfl | h₁
-        · exact absurd (h₄ ▸ h₅) (not_lt.mpr hlt)
-        · exact ⟨T, h₁, by omega, h₃, h₄, h₅, fun T' h₇ h₈ => h₆ T' (by omega) h₈⟩
-
-theorem scanFront_pairwise (E : ℕ → WithTop ℕ) : ∀ (T₀ k : ℕ) (prev : WithTop ℕ),
-    (∀ x ∈ scanFront E T₀ k prev, 2 * T₀ ≤ x.2 ∧ (x.1 : WithTop ℕ) < prev) ∧
-      (scanFront E T₀ k prev).Pairwise fun a b => a.2 < b.2 ∧ b.1 < a.1
-  | T₀, 0, prev => by simp [scanFront]
-  | T₀, k + 1, prev => by
-    obtain ⟨ih₁, ih₂⟩ := scanFront_pairwise E (T₀ + 1) k (E T₀)
-    obtain ⟨ih₁', ih₂'⟩ := scanFront_pairwise E (T₀ + 1) k prev
-    simp only [scanFront]
-    split_ifs with hlt
-    · obtain ⟨e, he⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_lt hlt)
-      have he' : ((e : ℕ) : WithTop ℕ) = E T₀ := he
-      have hu : (E T₀).untopD 0 = e := by rw [← he]; rfl
-      rw [hu]
-      refine ⟨fun x hx => ?_, List.Pairwise.cons (fun b hb => ?_) ih₂⟩
-      · rcases List.mem_cons.mp hx with rfl | hx
-        · refine ⟨le_rfl, ?_⟩
-          show ((e : ℕ) : WithTop ℕ) < prev
-          rw [he']
-          exact hlt
-        · have := ih₁ x hx
-          exact ⟨by omega, this.2.trans hlt⟩
-      · have := ih₁ b hb
-        rw [← he'] at this
-        exact ⟨by simp only; omega, by exact_mod_cast this.2⟩
-    · exact ⟨fun x hx => by have := ih₁' x hx; exact ⟨by omega, this.2⟩, ih₂'⟩
-
-theorem scanFront_congr {E E' : ℕ → WithTop ℕ} : ∀ (T₀ k : ℕ) (prev : WithTop ℕ),
-    (∀ T, T₀ ≤ T → T < T₀ + k → E T = E' T) → scanFront E T₀ k prev = scanFront E' T₀ k prev
-  | _, 0, _, _ => rfl
-  | T₀, k + 1, prev, h => by
-    simp only [scanFront]
-    rw [h T₀ le_rfl (by omega),
-      scanFront_congr (T₀ + 1) k (E' T₀) fun T h₁ h₂ => h T (by omega) (by omega),
-      scanFront_congr (T₀ + 1) k prev fun T h₁ h₂ => h T (by omega) (by omega)]
-
 /-! ### The solver -/
 
 /-- The σ-DP at level `T`, with the tables that do not depend on `T` (the subsets and their
@@ -429,25 +347,61 @@ def sigmaAt (subs : List (Finset (Fin n))) (xt : Array (Array ℕ)) (d c : Fin n
       (groupOption d c (fun m τ => (table.getD m #[]).getD τ ⊤) T) s) p).getD s #[]).getD
     (subs.idxOf ∅) ⊤
 
+/-- Nothing is faster than `d_min · ⌈s/p⌉`: below that level `E` is `⊤`. Some group has at
+least `⌈s/p⌉` landings, each of duration at least `d_min`. -/
+theorem minCost_eq_top_of_lt (d c : Fin n → ℕ) {t T : ℕ} (hp : 1 ≤ p)
+    (hT : T < minOf d * ((2 * t - p + p - 1) / p)) : minCost d c t p T = ⊤ := by
+  by_contra hne
+  obtain ⟨C, hC⟩ := WithTop.ne_top_iff_exists.mp hne
+  obtain ⟨X, -, hsize, hload, -⟩ := minCost_attained d c (C := C) hC.symm
+  obtain ⟨k, hk⟩ := exists_ceil_le_card X hp
+  rw [hsize] at hk
+  have h₁ := card_mul_minOf_le_sum d (X k)
+  have h₂ := hload k
+  have h₃ : minOf d * ((2 * t - p + p - 1) / p) ≤ minOf d * (X k).card :=
+    Nat.mul_le_mul_left _ hk
+  change (X k).card * minOf d ≤ load d (X k) at h₁
+  rw [mul_comm] at h₁
+  omega
+
 /-- **The solver.** The Pareto front of a symmetric instance (durations `d`, costs `c`, `t`
-passengers, `p` planes), by increasing makespan: the scan of `E(T)`, computed by the σ-DP, over
-the levels `0, …, (2t − p) · d_max`. -/
+passengers, `p` planes), by increasing makespan: the breakpoints of `E(T)`, computed by the
+σ-DP, found by splitting intervals (`breakpoints`) on the levels
+`d_min · ⌈s/p⌉, …, (2t − p) · d_max`. -/
 def solveFront (d c : Fin n → ℕ) (t p : ℕ) : List (ℕ × ℕ) :=
   let s := 2 * t - p
   let Tmax := s * maxDur d
+  let Tlo := minOf d * ((s + p - 1) / p)
   let table := oneplaneTable d c Tmax s
   let subs := smallSubsetList (domReps d c) (min (p - 1) (t - p))
   let xt := symmDiffTable subs
-  scanFront (sigmaAt subs xt d c p s table) 0 (Tmax + 1) ⊤
+  let E := sigmaAt subs xt d c p s table
+  if Tlo ≤ Tmax then breakpoints E Tlo Tmax else []
 
-/-- The solver scans `E` itself. -/
+/-- The solver finds the breakpoints of `E` itself: it agrees with the scan of every level. -/
 theorem solveFront_eq (d c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
     solveFront d c t p = scanFront (minCost d c t p) 0 ((2 * t - p) * maxDur d + 1) ⊤ := by
   unfold solveFront
-  refine scanFront_congr 0 _ ⊤ fun T _ hT => ?_
-  rw [← sigmaBoundAt_eq_minCost d c hp hpt (Tmax := (2 * t - p) * maxDur d) (by omega)]
-  simp only [sigmaBoundAt, show T ≤ (2 * t - p) * maxDur d by omega, ↓reduceIte, sigmaValue,
-    sigmaAt]
+  set Tmax := (2 * t - p) * maxDur d with hTmax
+  set Tlo := minOf d * ((2 * t - p + p - 1) / p) with hTlo
+  set E := sigmaAt (smallSubsetList (domReps d c) (min (p - 1) (t - p)))
+    (symmDiffTable (smallSubsetList (domReps d c) (min (p - 1) (t - p)))) d c p (2 * t - p)
+    (oneplaneTable d c Tmax (2 * t - p)) with hEdef
+  have hE : ∀ T ≤ Tmax, E T = minCost d c t p T := by
+    intro T hT
+    rw [← sigmaBoundAt_eq_minCost d c hp hpt (Tmax := Tmax) hT]
+    simp only [sigmaBoundAt, hT, ↓reduceIte, sigmaValue, sigmaAt, E]
+  have htop : ∀ T < Tlo, minCost d c t p T = ⊤ := fun T hT => minCost_eq_top_of_lt d c hp hT
+  have hskip : ∀ j, j ≤ Tlo → ∀ T, 0 ≤ T → T < 0 + j → ¬ minCost d c t p T < ⊤ :=
+    fun j hj T _ hT h => by rw [htop T (by omega)] at h; exact lt_irrefl _ h
+  by_cases hlo : Tlo ≤ Tmax
+  · rw [ite_eq_left hlo, breakpoints_eq_scanFront E hlo fun T T' h₁ h₂ h₃ => by
+        rw [hE T' h₃, hE T (by omega)]
+        exact minCost_antitone d c t p h₂,
+      scanFront_congr Tlo _ ⊤ fun T _ h₂ => hE T (by omega)]
+    conv_rhs => rw [show Tmax + 1 = Tlo + (Tmax + 1 - Tlo) by omega]
+    rw [scanFront_skip _ Tlo 0 _ ⊤ (hskip Tlo le_rfl), zero_add]
+  · rw [ite_eq_right hlo, scanFront_nil_of_ge _ 0 _ ⊤ (hskip (Tmax + 1) (by omega))]
 
 /-- **The solver lists exactly the minimal admissible points.** -/
 theorem mem_solveFront_iff (N : Network n) (c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t)
@@ -494,7 +448,8 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
       Prod.le_def.mpr ⟨?_, by simp only; omega⟩⟩
     rw [hC₀'] at hET
     exact_mod_cast hET
-  · exact (scanFront_pairwise _ 0 _ ⊤).2.imp fun {a b} hab =>
+  · rw [solveFront_eq N.d c hp hpt]
+    exact (scanFront_pairwise _ 0 _ ⊤).2.imp fun {a b} hab =>
       ⟨fun hle => absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2),
         fun hle => absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)⟩
 
