@@ -1,6 +1,6 @@
 # Front certificates, format versions 1 and 2
 
-`zeno --certificate FILE` writes, next to the front, a certificate that a checker can verify without trusting the solver. The reference checker is `zeno check FILE`; the Lean checker in `lean/` (in progress) reads the same format. This page defines the format and what a checker must verify. The proofs behind each obligation are in `doc/theory/exact-front.md`.
+`zeno --certificate FILE` writes, next to the front, a certificate that a checker can verify without trusting the solver. The reference checker is `zeno check FILE`; the Lean checker in `lean/` (`lake exe zeno-check FILE`), whose soundness is proved in Lean, reads the same format. This page defines the format and what a checker must verify. The proofs behind each obligation are in `doc/theory/exact-front.md`.
 
 ## What a certificate proves
 

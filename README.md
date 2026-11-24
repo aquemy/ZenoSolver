@@ -122,7 +122,7 @@ Every pull request is built and tested on Linux (GCC, Clang) and macOS, and once
 - `check` verifies a certificate and prints the assumptions it relied on (`S`: symmetric durations; `A1`: central flights no faster than through a hub).
 - `pddl` writes a PDDL problem (below); `generate` writes the instance as a data file for `-d`.
 
-Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Also as in 2016, when the first duration exceeds the second the duration and cost vectors are swapped (the 2016 code assumed increasing durations); `zeno` prints a note when this happens to a data file. Order the cities by duration to avoid it.
+Costs and durations are integers. Generated values are multiplied by `-r` and truncated, as in 2016: `-r 100` avoids equal values for slowly growing functions such as log. Each option means what it says (`-C` costs, `-D` durations, `-E` C_I-side and `-W` C_G-side durations), and data files are read as written, so `zeno generate` output reads back as the same instance. The 2016 solvers instead swapped the duration and cost vectors, and reversed the C_G-side durations, whenever the first duration exceeded the second, which their generator always produced. So a 2016 or paper instance `-C a -D b` is `-C b -D a` here (and `-j`/`-k` with `-l`/`-m`), and `-C c -E a -W b` is `-C a -E c -W b`, up to the order of the cities, which does not change the front. The benchmark suites and golden instances are written in the current meaning; the golden names keep the 2016 flags.
 
 # PDDL
 

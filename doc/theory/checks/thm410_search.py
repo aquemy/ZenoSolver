@@ -78,7 +78,7 @@ def gen(rng, family, nmax, tmax, pmin, pmax, dmax):
         c = [max(0, base * (d[-1] + 2) - base * x + rng.randint(-2, 2)) for x in d]
     else:
         raise ValueError(family)
-    pairs = sorted(zip(d, c))  # increasing durations: avoids the data reader's 2016 swap quirk
+    pairs = sorted(zip(d, c))  # increasing durations (also valid for readers older than #64, which swapped)
     return [x for x, _ in pairs], [y for _, y in pairs], t, p
 
 

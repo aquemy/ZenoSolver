@@ -7,12 +7,17 @@
 
 namespace zeno::legacy
 {
-/// The instance options of the 2016 solvers (`zenoSolver -h`). Building an
-/// instance from them reproduces the 2016 construction exactly, quirks
-/// included, so that both solvers see the same data:
-/// - values are multiplied by `adjust` (-r) and truncated toward zero;
-/// - if d[0] > d[1] after that, the duration and cost vectors are swapped and
-///   the east durations reversed (the 2016 code assumed increasing durations).
+/// The instance options of the 2016 solvers (`zenoSolver -h`), with their
+/// generators: values are multiplied by `adjust` (-r) and truncated toward
+/// zero, as in 2016. Each option means what it says: -C the costs, -D the
+/// durations, -E the C_I-side and -W the C_G-side durations; data files are
+/// read as written.
+///
+/// The 2016 solvers also swapped the duration and cost vectors (and reversed
+/// the C_G-side durations) whenever d[0] > d[1], which their generator always
+/// produced. zeno does not: a 2016 or paper instance "-C a -D b" is "-C b -D a"
+/// here (and -j/-k with -l/-m), and "-C c -E a -W b" is "-C a -E c -W b", up to
+/// the order of the cities, which leaves the front unchanged.
 struct Options
 {
     int n = 3, t = 3, p = 2;
@@ -28,7 +33,6 @@ struct Options
 };
 
 /// Builds the instance; throws std::invalid_argument or std::runtime_error.
-/// Unlike the 2016 solvers it accepts t = p. When `swapped` is given, it tells
-/// whether the 2016 swap of durations and costs (d[0] > d[1]) was applied.
-[[nodiscard]] Instance buildInstance(const Options& options, bool* swapped = nullptr);
+/// Unlike the 2016 solvers it accepts t = p.
+[[nodiscard]] Instance buildInstance(const Options& options);
 } // namespace zeno::legacy

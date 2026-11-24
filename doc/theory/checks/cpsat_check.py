@@ -61,8 +61,9 @@ def main():
         n = rng.randint(2, maxN)
         d = [rng.randint(1, maxD) for _ in range(n)]
         c = [rng.randint(1, 60) for _ in range(n)]
-        # The data-file reader keeps a 2016 quirk: if d[0] > d[1] it swaps the
-        # duration and cost vectors. Order the first two cities to avoid it.
+        # Before #64 the data-file reader swapped the duration and cost vectors
+        # when d[0] > d[1]. Reordering the first two cities (a relabelling, so
+        # the front is unchanged) keeps this script valid for older builds.
         if d[0] > d[1]:
             d[0], d[1], c[0], c[1] = d[1], d[0], c[1], c[0]
         with tempfile.NamedTemporaryFile("w", suffix=".dat") as f:

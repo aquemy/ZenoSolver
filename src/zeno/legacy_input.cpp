@@ -59,7 +59,7 @@ std::vector<std::vector<double>> readRows(const std::string& path, int n)
 }
 } // namespace
 
-Instance buildInstance(const Options& o, bool* swapped)
+Instance buildInstance(const Options& o)
 {
     if(o.n < 1 || o.t < 1 || o.p < 1)
         throw std::invalid_argument("n, t and p must be positive");
@@ -115,13 +115,6 @@ Instance buildInstance(const Options& o, bool* swapped)
         for(auto& value : *v)
             value = static_cast<double>(static_cast<int>(o.adjust * value));
 
-    if(swapped)
-        *swapped = n > 1 && d[0] > d[1];
-    if(n > 1 && d[0] > d[1])
-    {
-        std::swap(d, c);
-        std::ranges::reverse(de);
-    }
     if(symmetric)
         de = d;
 

@@ -69,8 +69,8 @@ struct GapSearch
 /// canonical order (as a multiset of plane contents), crossings only at the
 /// Pareto points of the crossing table (cheaper and shorter crossings never
 /// hurt a template), pruned with the role relaxation on the remaining planes.
-/// Closed is a proof under (A1-NS) for event-ordered plans (always for PDDL),
-/// and for all plans when no city has d = dbar = 0 (Theorem 6.9).
+/// Closed is a proof under (A1-NS) for every feasible plan, also when a city
+/// has d = dbar = 0 (Theorem 6.9; Corollary 6.10).
 /// Stops (Incomplete) after `budget` steps or at `deadline`.
 [[nodiscard]] GapSearch searchGap(const Instance& instance, const ReducedInstance& r, const OnePlaneTable& fill, const RoleRelaxation& roles,
                                   Time T, Cost costBelow, Time makespanBelow, std::size_t budget = 20'000'000,

@@ -3,6 +3,7 @@
 #include <zeno/io.hpp>
 #include <zeno/legacy_input.hpp>
 
+#include <algorithm>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -150,6 +151,69 @@ int main()
         const zeno::Instance back = zeno::legacy::buildInstance(options);
         std::filesystem::remove(path);
         check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, "data file round trip");
+    }
+
+    // Data files are read as written, even with decreasing durations (the 2016
+    // solvers swapped durations and costs then; zeno does not).
+    {
+        const auto path = std::filesystem::temp_directory_path() / "zeno-ut-swap.dat";
+        {
+            std::ofstream out(path);
+            out << "9 2 9 9\n8 7 8 3\n14 13 17 15\n";
+        }
+        zeno::legacy::Options options;
+        options.n = 4;
+        options.t = 4;
+        options.p = 2;
+        options.dataFile = path.string();
+        const zeno::Instance literal = zeno::legacy::buildInstance(options);
+        check(literal.d == std::vector<zeno::Time>{9, 2, 9, 9} && literal.dbar == std::vector<zeno::Time>{8, 7, 8, 3}
+                  && literal.c == std::vector<zeno::Cost>{14, 13, 17, 15},
+              "data file read as written");
+        std::filesystem::remove(path);
+    }
+
+    // Generator options mean what they say, and `zeno generate` output reads
+    // back as the same instance.
+    {
+        const auto roundTrip = [&](const zeno::legacy::Options& generated, const char* what) {
+            const zeno::Instance instance = zeno::legacy::buildInstance(generated);
+            const auto path = std::filesystem::temp_directory_path() / "zeno-ut-generate.dat";
+            {
+                std::ofstream out(path);
+                zeno::writeDataFile(out, instance);
+            }
+            zeno::legacy::Options read;
+            read.n = generated.n;
+            read.t = generated.t;
+            read.p = generated.p;
+            read.dataFile = path.string();
+            const zeno::Instance back = zeno::legacy::buildInstance(read);
+            std::filesystem::remove(path);
+            check(back.d == instance.d && back.dbar == instance.dbar && back.c == instance.c, what);
+            return instance;
+        };
+        zeno::legacy::Options sym;
+        sym.n = 5;
+        sym.t = 4;
+        sym.p = 2;
+        sym.costFunction = 2;
+        sym.durationFunction = 4;
+        sym.adjust = 10;
+        const zeno::Instance generated = roundTrip(sym, "generate round trip (symmetric)");
+        // -D 4 (2^i) at l (n + 1 - i): durations 2^5, ..., 2^1 times 10; -C 2 (sqrt i) times 10, truncated.
+        check(generated.d == std::vector<zeno::Time>{320, 160, 80, 40, 20}, "-D sets the durations");
+        check(generated.c == std::vector<zeno::Cost>{10, 14, 17, 20, 22}, "-C sets the costs");
+
+        zeno::legacy::Options ns = sym;
+        ns.costFunction = 3;
+        ns.eastFunction = 1;
+        ns.westFunction = 3;
+        ns.adjust = 100;
+        const zeno::Instance nonSymmetric = roundTrip(ns, "generate round trip (-E -W)");
+        check(!nonSymmetric.symmetric(), "-E 1 -W 3 is non-symmetric");
+        check(nonSymmetric.dbar == std::vector<zeno::Time>{500, 400, 300, 200, 100}, "-W sets the C_G side");
+        check(nonSymmetric.c == std::vector<zeno::Cost>{100, 200, 300, 400, 500}, "-C sets the costs");
     }
 
     if(failures == 0)
