@@ -432,6 +432,13 @@ status    = "math.proved-informal"
 paper     = "Thm 8.1, doc/theory/exact-front.md §8"
 created   = "2026-11-23"
 
+[claims.prop-8-2]
+kind      = "proposition"
+statement = "Proposition 8.2 (fixed p): for p = 2 deciding M(X) ≤ 2T stays NP-complete, even with positive durations, and for every fixed p it is solvable in time polynomial in n, s and T, so it is weakly NP-complete."
+status    = "math.proved-informal"
+paper     = "Prop 8.2, doc/theory/exact-front.md §8"
+created   = "2026-11-23"
+
 # ===========================================================================
 # Claims of the two papers (refuted)
 # ===========================================================================
