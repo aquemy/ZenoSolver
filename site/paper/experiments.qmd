@@ -153,8 +153,8 @@ as the triangular inequality allows, $|d_a - d_b|$, and up to $2t - p + 2$ landi
 counterexample is a plan inside a gap that costs less than $E$.
 
 **Result.** 231 instances have a `forest` gap; in all 255 of their gaps, the cheapest plan costs
-exactly $E$, and no search timed out. This search is independent of the written proof of
-Theorem 4.10. [Pass]{.verdict}
+exactly $E$, and no search timed out. This search is independent of the proof of Theorem 4.10,
+written and machine-checked. [Pass]{.verdict}
 
 ![E6. Cheapest plan in each gap against $E$; a counterexample would lie in the shaded region below the diagonal.](figures/e6-conj410_gaps.svg){#fig-e6 .paper-fig}
 
@@ -292,10 +292,13 @@ exact front. [Pass]{.verdict}
 
 In @fig-fronts, we display some examples of the variety of Pareto Fronts that it is possible to
 obtain by modifying the functions to generate $d$ and $c$, on symmetric instances with $n = 7$,
-$t = 8$ and $p = 3$, for which the fronts are exact. With logarithmic costs and linear durations,
-the front shows regular patterns with a uniform disposition of points; costs growing as $2^i$
-against logarithmic durations, or durations in a staircase, give fronts with a non-uniform
-distribution of points.
+$t = 8$ and $p = 3$, for which the fronts are exact. The top left picture shows regular patterns
+with a uniform disposition of points. This instance is obtained with a logarithmic cost and
+linear durations. The top right figure is obtained by using square-root durations and displays a
+less regular point distribution over the front. By using slightly more complex combination of
+generators, it is possible to obtain non-regular fronts with non-uniform distribution such as the
+bottom two figures: on the left, costs $2^i$ and logarithmic durations, while on the right,
+durations in a staircase, whose points come in clusters.
 
 ::: {#fig-fronts}
 

@@ -59,8 +59,8 @@ claim.
 
 | Setting | Pareto front characterized | Computed exactly |
 |---|---|---|
-| (S) and (A1) | by admissible partitions ({{< node "Corollary 4.8" badge=false >}}) | yes, pseudo-polynomial ({{< node "Corollary 8.3" badge=false >}}) |
-| (S) and (AΔ) | by admissible partitions ({{< node "Corollary 4.12" badge=false >}}) | yes, pseudo-polynomial |
+| (S) and (A1) | by admissible partitions ({{< node "Theorem 4.7" badge=false >}}, {{< node "Corollary 4.8" badge=false >}}) | yes, pseudo-polynomial ({{< node "Corollary 8.3" badge=false >}}) |
+| (S) and (AΔ) | by admissible partitions ({{< node "Theorem 4.10" badge=false >}}, {{< node "Corollary 4.12" badge=false >}}) | yes, pseudo-polynomial |
 | (S) only | no, a plan can beat every admissible partition ({{< node "Example 4.13" badge=false >}}) | where the lower bound $L$ meets the plans found |
 | Non-symmetric, (A1-NS) | by role configurations with least makespans ({{< node "Corollary 6.10" badge=false >}}) | bracket, then search over configurations |
 | Non-symmetric, (AΔ) only | not by $B\bar A\bar B$ situations ({{< node "Proposition 6.7" badge=false >}}) nor by one central flight per pattern ({{< node "Proposition 6.18" badge=false >}}); open | small instances only (exhaustive search, flow model) |
