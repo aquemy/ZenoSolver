@@ -2,31 +2,73 @@
 order: 1
 title: "MultiZenoTravel"
 subtitle: "a Tunable Benchmark for Multi-Objective Planning with Known Pareto Front"
-author:
-  - Alexandre Quemy
-  - Marc Schoenauer
-  - Johann Dreo
 css: ../styles/paper.css
 toc: true
-abstract: |
-  Multi-objective AI planning suffers from a lack of benchmarks exhibiting known Pareto Fronts.
-  In this work, we propose a tunable benchmark generator, together with a dedicated solver that
-  provably computes the true Pareto front of the resulting instances. First, we prove a
-  proposition allowing us to characterize the optimal plans for a constrained version of the
-  problem, symmetric durations whose flights obey the triangular inequality, and we show how far
-  this characterization extends to the non-symmetric and general problems. Second, we provide a
-  constructive way to find all the Pareto-optimal plans and discuss the complexity of the
-  algorithm: computing the makespan of a fixed list of cities is strongly NP-hard, yet the
-  Pareto front is computable in pseudo-polynomial time. We provide an implementation that allows
-  the solver to handle realistic instances in a reasonable time, and that returns with each front
-  a certificate that an independent checker verifies. Finally, we validate the solver and the
-  theory in a seeded experiment campaign against exhaustive searches written independently, and
-  the central results are formally verified in Lean 4.
 ---
 
 ::: {.revision-note}
 Revised and extended version of
 [arXiv:2304.14659](https://arxiv.org/abs/2304.14659) (2023).
+:::
+
+::: {.paper-authors}
+**Alexandre Quemy**^1,2,\*^, **Marc Schoenauer**^3,4^, **Johann Dreo**^5,6^
+
+^1^ YData Lab Inc., Seattle, United States (^\*^corresponding author) ·
+^2^ Poznan University of Technology, Poznan, Poland ·
+^3^ Inria Saclay, Orsay, France ·
+^4^ Universite Paris-Saclay, Orsay, France ·
+^5^ Computational Systems Biomedicine laboratory, Department of Computational Biology, Institut
+Pasteur, Paris, France ·
+^6^ Bioinformatics and Biostatistics hub, Université Paris Cité, Institut Pasteur, Paris, France
+:::
+
+::: {.abstract}
+**Abstract.** Multi-objective AI planning suffers from a lack of benchmarks exhibiting known
+Pareto Fronts. In this work, we propose a tunable benchmark generator, together with a dedicated
+solver that provably computes the true Pareto front of the resulting instances. First, we prove a
+proposition allowing us to characterize the optimal plans for a constrained version of the
+problem, symmetric durations that obey the triangular inequality, and then show how far this
+characterization extends to the non-symmetric and general problems. Second, we provide a
+constructive way to find all the Pareto-optimal plans and discuss the complexity of the
+algorithm: computing the makespan of a fixed list of cities is strongly NP-hard, yet the Pareto
+front is computable in pseudo-polynomial time. We provide an implementation that allows the
+solver to handle realistic instances in a reasonable time, and that returns each front with a
+certificate that an independent checker verifies; the central results, the checker and a solver
+are formally verified in Lean 4. We validate the solver and the theory in a seeded experiment
+campaign against exhaustive searches written independently. Finally, as a practical
+demonstration, we used this solver to find the Pareto-optimal plans between the two largest
+airports in the world, considering eleven large intermediate airports, spherical distances
+between airports and a made-up cost.
+:::
+
+::: {.chapters}
+[Introduction](#sec-intro)
+:   Motivation, previous works, contribution and outline.
+
+[MultiZenoTravel problems](model.qmd)
+:   Instances, plans, Pareto fronts, assumptions and patterns.
+
+[Symmetric MultiZenoTravel](front.qmd)
+:   Proposition I: admissible partitions, link forests, and the converse under (A1) and (AΔ).
+
+[Non-symmetric and general MultiZenoTravel](nonsymmetric.qmd)
+:   Role configurations, waiting, $B\bar A\bar B$ situations, and general graphs.
+
+[Pareto Optimal Plans](algorithm.qmd)
+:   The exact method, its complexity, ZenoSolver, certificates and their verification.
+
+[Experiments](experiments.qmd)
+:   Validation of the solver and of the theory, performances, and examples of instances.
+
+[Application: OpenFlights data](application.qmd)
+:   The Pareto front of the transport from Atlanta to Beijing.
+
+[Conclusion and Perspectives](conclusion.qmd)
+:   What is established, and the open problems.
+
+[References](#sec-references)
+:   The works cited in every section.
 :::
 
 ## Introduction {#sec-intro}
@@ -189,21 +231,32 @@ without trusting the solver, and the main theorems, the checker and a solver of 
 formally verified in Lean 4.
 
 Although we think that the primary utility of ZenoSolver is to generate benchmarks with known
-Pareto Front to study other solvers' properties and behaviors, real data come as arbitrary
-graphs. The extension of the solver capabilities from the symmetric clique problem to arbitrary
-graphs is therefore studied in detail, together with the part of it that is exact.
+Pareto Front to study other solvers' properties and behaviors, we provide a demonstration of the
+ZenoSolver on a problem using real data. This has been made possible by the extension of the
+solver capabilities from the symmetric clique problem to non-symmetric instances. Real data also
+come as arbitrary graphs, and the extension to arbitrary graphs is studied in detail, together
+with the part of it that is exact.
 
 ### Outline {#sec-outline}
 
-The plan of this paper is as follows. In [MultiZenoTravel problems](model.qmd), we define three
-versions of the MultiZenoTravel problem, the plans and the assumptions. [Symmetric
-MultiZenoTravel](front.qmd) is dedicated to characterizing the Pareto front of the symmetric
-version of the problem, and [Pareto Optimal Plans](algorithm.qmd) to computing it exactly, with
-the ZenoSolver, its complexity and its certificates. [Non-symmetric and general
-MultiZenoTravel](nonsymmetric.qmd) focuses on the non-symmetric version of the problem, then on
-the reduction of the general problem to a clique one. [Experiments](experiments.qmd) reports the
-validation of the solver and of the theory, its performances and examples of instances, and
-[Conclusion and Perspectives](corrections.qmd) closes with the open problems.
+The plan of this paper is as follows: in [MultiZenoTravel problems](model.qmd), we define three
+versions of the MultiZenoTravel problem, together with the plans and the assumptions.
+[Symmetric MultiZenoTravel](front.qmd) is dedicated to solve the symmetric MultiZenoTravel
+problem, followed by [Non-symmetric and general MultiZenoTravel](nonsymmetric.qmd) that focuses
+on the non-symmetric version of the problem. In the same section, we study how an instance of the
+general MultiZenoTravel problem can be reduced to a non-symmetric clique version, and when the
+reduction preserves the Pareto front.
+
+In [Pareto Optimal Plans](algorithm.qmd), we detail how to compute the Pareto front and
+construct Pareto optimal plans, and we introduce the ZenoSolver, a C++ implementation of the
+algorithm, with its certificates and their verification in Lean. [Experiments](experiments.qmd)
+reports the validation of the solver and of the theory, its performances and examples of
+instances.
+
+Finally, in [Application](application.qmd), we study an (almost) realistic application for
+MultiZenoTravel and ZenoSolver using the OpenFlights database to find the optimal routes between
+the two largest airports in the world, and [Conclusion and Perspectives](conclusion.qmd) closes
+with the open problems.
 
 ::: {.callout-note appearance="simple"}
 **Statements, proofs and formal status.** Results keep the numbering of the
