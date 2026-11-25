@@ -85,7 +85,7 @@ created   = "2026-11-23"
 
 [claims.lem-2-4]
 kind      = "lemma"
-statement = "Lemma 2.4 (component form): (a) a partition is admissible iff every connected component of the plane-city graph H (k joined to i when X_k(i) ≥ 1) has an even number of even planes; (b) then every spanning forest of H contains the support of some parity matrix."
+statement = "Lemma 2.4 (disjoint groups): if no city lies in two groups, a partition is admissible iff every group has an odd number of landings. Lean form: no city in two groups is ∀ i k k', i ∈ X k → i ∈ X k' → k = k'."
 status    = "math.machine-checked"
 lean      = "ZenoFront.admissible_iff_odd_of_disjoint"
 paper     = "Lemma 2.4, doc/theory/exact-front.md §2"
@@ -546,7 +546,7 @@ created      = "2026-11-23"
 
 [claims.thm-8-1]
 kind      = "theorem"
-statement = "Theorem 8.1: deciding M(X) ≤ 2T, with d, X, p and T as input, is strongly NP-complete."
+statement = "Theorem 8.1 (3-Partition reduction): let a_1, …, a_{3m} and B be natural numbers with Σ_i a_i = mB and B/4 < a_i < B/2. In the symmetric instance with one city of duration a_i for each i, p = m and t = 2m, the multiset X that lands once at every city (|X| = 3m = 2t − p) has M(X) ≤ 2B iff the a_i split into m triples of sum B. Lean form: M(X) is minMakespan; B/4 < a_i < B/2 is B < 4a_i and 2a_i < B; the split is an assignment of the indices to the m triples, each with three indices of sum B."
 status    = "math.machine-checked"
 lean      = "ZenoFront.threePartition_iff"
 paper     = "Thm 8.1, doc/theory/exact-front.md §8"
@@ -554,7 +554,7 @@ created   = "2026-11-23"
 
 [claims.prop-8-2]
 kind      = "proposition"
-statement = "Proposition 8.2 (fixed p): for p = 2 deciding M(X) ≤ 2T stays NP-complete, even with positive durations, and for every fixed p it is solvable in time polynomial in n, s and T, so it is weakly NP-complete."
+statement = "Proposition 8.2 (Partition reduction, p = 2): let a_1, …, a_m be natural numbers with sum 2B, r ≥ m odd and K = B + 1. In the symmetric instance with 2r cities, of durations a_i + K for i ≤ m and K for the other 2r − m (all positive), p = 2 and t = r + 1, the multiset X that lands once at every city (|X| = 2r = 2t − p) has M(X) ≤ 2(B + rK) iff some sub-multiset of the a_i sums to B. Lean form: M(X) is minMakespan; the durations are partitionDur a r (B + 1); the sub-multiset is a set of indices."
 status    = "math.machine-checked"
 lean      = "ZenoFront.partition_iff"
 paper     = "Prop 8.2, doc/theory/exact-front.md §8"
@@ -562,7 +562,7 @@ created   = "2026-11-23"
 
 [claims.cor-8-3]
 kind      = "corollary"
-statement = "Corollary 8.3: E(T), and under (S) and (A1) the front, are computable in pseudo-polynomial time, so computing the front is not strongly NP-hard unless P = NP."
+statement = "Corollary 8.3 (step count of the link-forest DP): (a) the link-forest DP with a step counter returns, at every level T, the value of the checker's tree DP, which is E(T) for T ≤ Tmax when p ≥ 1, in at most P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1) steps; (b) building the one-plane table once and running the counted DP at every level 0, …, Tmax = (2t − p)·d_max gives, for 1 ≤ p ≤ t, the front of the verified solver (the Pareto front under (S) and (A1)) in at most (Tmax + 1)·P(n, t, p, Tmax) steps. Lean form: a step is one iteration of a minimum loop, one table cell, one label scanned by a membership test or one level of the scan, and the link labels cost 2n² steps."
 status    = "math.machine-checked"
 lean      = "ZenoFront.treeBoundSteps_value, ZenoFront.treeBoundSteps_eq_minCost, ZenoFront.treeBoundSteps_le, ZenoFront.scanSteps_fst, ZenoFront.scanSteps_le, ZenoFront.scanSteps_isParetoFront"
 paper     = "Cor 8.3, doc/theory/exact-front.md §8"
