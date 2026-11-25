@@ -334,8 +334,9 @@ created   = "2026-11-23"
 
 [claims.prop-6-5]
 kind      = "proposition"
-statement = "Proposition 6.5 (harmful waiting): for n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4 and no central flights, (A1-NS) and (AΔ-path) hold, the cheapest role configuration with every λ_k ≤ 73 costs 14, and no plan of makespan at most 73 costs less than 18."
-status    = "math.proved-informal"
+statement = "Proposition 6.5 (harmful waiting): for n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4 and no central flights, (A1-NS) holds, the cheapest role configuration with every λ_k ≤ 73 costs 14, and no plan of makespan at most 73 costs less than 18. ((AΔ-path) fails: d_2 = 19 > d̄_2 + d̄_1 + d_1 = 17.)"
+status    = "math.machine-checked"
+lean      = "ZenoFront.Prop65.prop65, ZenoFront.Prop65.cost_ge_of_makespan_le_noCentral, ZenoFront.Prop65.harmful_waiting"
 paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
@@ -626,6 +627,7 @@ created   = "2026-11-23"
 kind      = "conjecture"
 statement = "Assumption of arXiv:2304.14659, Conjecture 6.5 of the note: under (AΔ-path), every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations."
 status    = "math.disproved"
+lean      = "ZenoFront.Prop65.harmful_waiting"
 paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 

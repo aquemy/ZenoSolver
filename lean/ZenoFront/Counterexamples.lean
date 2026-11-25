@@ -8,6 +8,9 @@ public import ZenoFront.Examples
 public import ZenoFront.Graph
 public import ZenoFront.Solver
 public import ZenoFront.TriSegments
+public import ZenoFront.CheckerV2
+public import ZenoFront.DominationAll
+public import ZenoFront.RoleBound
 
 /-!
 # The counterexamples of the theory note, checked by the kernel
@@ -62,6 +65,19 @@ landings with loads `δ(X_k) ≤ 19` costs at least 264 (`Ex413.minCost_19`), so
 weakly dominates `(260, 39)` (`Ex413.not_admissible_le`). The conclusion of Theorem 4.10 and
 Corollary 4.8 fail there (`Ex413.no_admissible_partition`, `Ex413.not_isParetoFront`).
 
+## Proposition 6.5: harmful waiting
+
+On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, the cheapest role configuration
+with every role load at most 73 costs 14 (`Prop65.cheapest_roleConfig`, through the `roles` bound).
+Yet no feasible plan of makespan at most 73 costs less than 18, for every table of central flights
+satisfying (A1-NS) (`Prop65.cost_ge_of_makespan_le`). The proof is Theorem 6.9 and the exhaustive
+search of a `search` gap (`SearchData.closed_sound`). The kernel decides that search in eight
+pieces, split by the option of the first plane, so that no declaration needs more than a few
+gigabytes. The test certificate `v2-search-prop65.cert` also uses `balanced` gaps, whose bound uses
+`Std.HashMap`; the kernel cannot reduce it, and with `search` gaps only the whole certificate
+exhausts memory. So only the gap below makespan 74 is proved here, which is all the statement
+needs.
+
 ## Main results
 
 * `ZenoFront.Greedy.evocop_misses_lpt`, `ZenoFront.Greedy.arxiv_misses_lpt`: neither greedy reaches
@@ -70,6 +86,7 @@ Corollary 4.8 fail there (`Ex413.no_admissible_partition`, `Ex413.not_isParetoFr
   `(42, 12)` of the `p3First` instance.
 * `ZenoFront.Ex413.plan_feasible`, `ZenoFront.Ex413.not_admissible_le`,
   `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
+* `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
 -/
 
 @[expose] public section
@@ -530,5 +547,226 @@ theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront 
   exact not_admissible_le x hmin.prop hle
 
 end Ex413
+
+/-! ### Proposition 6.5: harmful waiting -/
+
+namespace Prop65
+
+/-- The durations to `C_I` of Proposition 6.5, `d = (3, 19)`. -/
+def d : Fin 2 → ℕ := ![3, 19]
+
+/-- The durations to `C_G`, `d̄ = (3, 11)`. -/
+def db : Fin 2 → ℕ := ![3, 11]
+
+/-- The landing costs, `c = (5, 1)`. -/
+def c : Fin 2 → ℕ := ![5, 1]
+
+/-- Without central flights, (A1-NS) holds: in the Lean model, whose table of central flights is
+complete, every central flight at least as long as the detour through a hub, for instance of
+duration 100. -/
+theorem a1ns_of_long : (⟨d, db, fun _ _ => 100⟩ : Network 2).A1NS := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> decide
+
+/-! #### The role-load bound at level 73 is 14 -/
+
+/-- A role configuration of cost 14 with every role load at most 72: plane 1 crosses at city 1
+and picks up three passengers at city 2 (load `6 + 3 · 22 = 72`); the three other planes cross at
+city 2 and drop one passenger there (load `30 + 38 = 68`). -/
+def cfg14 : RoleConfig 2 4 where
+  drop := ![0, {1}, {1}, {1}]
+  pick := ![{1, 1, 1}, 0, 0, 0]
+  cross := ![{0}, {1}, {1}, {1}]
+  odd_card_cross := by decide
+  sum_drop_eq_sum_pick := by decide
+
+theorem cfg14_size : size cfg14.groups = 10 := by decide
+
+theorem cfg14_cost : totalCost c cfg14.groups = 14 := by decide
+
+theorem cfg14_load (dc : Fin 2 → Fin 2 → ℕ) : ∀ k, cfg14.roleLoad ⟨d, db, dc⟩ k ≤ 72 := by
+  have h : ∀ k, cfg14.roleLoad ⟨d, db, fun _ _ => 0⟩ k ≤ 72 := by decide
+  exact h
+
+set_option maxRecDepth 100000 in
+/-- The `roles` bound at level 73, computed in the kernel. -/
+theorem rolesBound_73 : rolesBoundAt 4 10 73 (roleLayers d db c 73 10)
+    (oneplaneTable (fillW d db) c (4 * 73) 10) 73 = 14 := by
+  decide +kernel
+
+/-- **The cheapest role configuration with every role load at most 73 costs 14** (with
+passenger count 7, that is `2t − p = 10` landings). -/
+theorem cheapest_roleConfig (dc : Fin 2 → Fin 2 → ℕ) :
+    (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups = 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      ∀ cfg : RoleConfig 2 4, size cfg.groups = 10 → (∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) →
+        14 ≤ totalCost c cfg.groups := by
+  refine ⟨⟨cfg14, cfg14_size, cfg14_cost, fun k => (cfg14_load dc k).trans (by decide)⟩,
+    fun cfg hsize hload => ?_⟩
+  have h := rolesBoundAt_le_totalCost d db c dc (Tmax := 73) cfg hsize hload
+  rw [rolesBound_73] at h
+  exact_mod_cast h
+
+/-! #### The search below makespan 74, split for the kernel -/
+
+/-- The exhaustive search of a `search` gap below makespan 74 (level 73), for configurations
+cheaper than 18. -/
+def search73 : SearchData 2 := ⟨d, db, c, 4, 10, 73, ((18 : ℕ) : WithTop ℕ)⟩
+
+/-- The plane options of the search (`search73.opts`), as a literal. -/
+def opts73 : List (POpt 2) :=
+  [
+    ([], [], [0]), ([], [], [0, 0, 0]), ([], [], [0, 0, 1]), ([], [], [0, 1, 1]),
+    ([], [], [1]), ([], [0], [0]), ([], [0], [0, 0, 1]), ([], [0], [0, 1, 1]),
+    ([], [0], [1]), ([], [0, 0], [0]), ([], [0, 0], [1]), ([], [0, 0, 0], [1]),
+    ([], [0, 0, 0, 1], [1]), ([], [0, 0, 1], [0]), ([], [0, 0, 1], [1]), ([], [0, 0, 1, 0], [1]),
+    ([], [0, 0, 1, 1], [0]), ([], [0, 1], [0]), ([], [0, 1], [0, 0, 1]), ([], [0, 1], [1]),
+    ([], [0, 1, 0], [0]), ([], [0, 1, 0], [1]), ([], [0, 1, 0, 0], [1]), ([], [0, 1, 0, 1], [0]),
+    ([], [0, 1, 1], [0]), ([], [0, 1, 1, 0], [0]), ([], [1], [0]), ([], [1], [0, 0, 0]),
+    ([], [1], [0, 0, 1]), ([], [1], [1]), ([], [1, 0], [0]), ([], [1, 0], [0, 0, 1]),
+    ([], [1, 0], [1]), ([], [1, 0, 0], [0]), ([], [1, 0, 0], [1]), ([], [1, 0, 0, 0], [1]),
+    ([], [1, 0, 0, 1], [0]), ([], [1, 0, 1], [0]), ([], [1, 0, 1, 0], [0]), ([], [1, 1], [0]),
+    ([], [1, 1], [0, 0, 0]), ([], [1, 1, 0], [0]), ([], [1, 1, 0, 0], [0]), ([], [1, 1, 1], [0]),
+    ([0], [], [0]), ([0], [], [0, 0, 1]), ([0], [], [0, 1, 1]), ([0], [], [1]),
+    ([0], [0], [0]), ([0], [0], [1]), ([0], [0, 0], [1]), ([0], [0, 0, 1], [1]),
+    ([0], [0, 1], [0]), ([0], [0, 1], [1]), ([0], [0, 1, 0], [1]), ([0], [0, 1, 1], [0]),
+    ([0], [1], [0]), ([0], [1], [0, 0, 1]), ([0], [1], [1]), ([0], [1, 0], [0]),
+    ([0], [1, 0], [1]), ([0], [1, 0, 0], [1]), ([0], [1, 0, 1], [0]), ([0], [1, 1], [0]),
+    ([0], [1, 1, 0], [0]), ([0, 0], [], [0]), ([0, 0], [], [1]), ([0, 0], [0], [1]),
+    ([0, 0], [0, 1], [1]), ([0, 0], [1], [0]), ([0, 0], [1], [1]), ([0, 0], [1, 0], [1]),
+    ([0, 0], [1, 1], [0]), ([0, 0, 0], [], [1]), ([0, 0, 0], [1], [1]), ([0, 0, 1], [], [0]),
+    ([0, 1], [], [0]), ([0, 1], [0], [0]), ([0, 1], [1], [0]), ([0, 1, 0], [], [0]),
+    ([1], [], [0]), ([1], [], [0, 0, 0]), ([1], [], [1]), ([1], [0], [0]),
+    ([1], [0, 0], [0]), ([1], [0, 1], [0]), ([1], [1], [0]), ([1], [1, 0], [0]),
+    ([1, 0], [], [0]), ([1, 0], [0], [0]), ([1, 0], [1], [0]), ([1, 0, 0], [], [0])
+  ]
+
+set_option maxRecDepth 100000 in
+theorem opts73_eq : search73.opts = opts73 := by decide +kernel
+
+/-- The test of one tuple of plane options: not a full configuration, or every assignment of its
+pick-ups to drop-offs has a closed form above the level. -/
+def tupleOK (D : SearchData 2) (tu : List (POpt 2)) : Bool :=
+  !D.full tu || (SearchData.assignments (SearchData.pickSlots tu) (SearchData.dropSlots tu)).all
+    fun asg => decide (D.T < D.tmplOf tu asg)
+
+/-- The search restricted to the tuples whose first plane takes the option `o`. -/
+def firstOK (D : SearchData 2) (os : List (POpt 2)) (o : POpt 2) : Bool :=
+  if ((0 + D.optCost o : ℕ) : WithTop ℕ) < D.C ∧ SearchData.optLand (n := 2) o ≤ D.s then
+    ((D.tuples os 3 (0 + D.optCost o) (D.s - SearchData.optLand (n := 2) o)).map (o :: ·)).all
+      (tupleOK D)
+  else true
+
+/-- The search of `search73` splits by the option of the first plane. -/
+theorem search73_closed_eq :
+    search73.closed = search73.opts.all (firstOK search73 search73.opts) := by
+  change (search73.tuples search73.opts 4 0 10).all (tupleOK search73) = _
+  rw [SearchData.tuples, List.all_flatMap]
+  congr 1
+  funext o
+  unfold firstOK
+  split_ifs <;> first | rfl | (exfalso; tauto)
+
+theorem all_drop_of_take {α : Type*} (l : List α) (F : α → Bool) (a b : ℕ)
+    (h₁ : ((l.drop a).take b).all F = true) (h₂ : (l.drop (a + b)).all F = true) :
+    (l.drop a).all F = true := by
+  rw [← List.take_append_drop b (l.drop a), List.all_append, h₁, List.drop_drop, h₂]
+  rfl
+
+set_option maxRecDepth 100000 in
+theorem search73_0 : ((opts73.drop 0).take 4).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_4 : ((opts73.drop 4).take 1).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_5 : ((opts73.drop 5).take 24).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_29 : ((opts73.drop 29).take 1).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_30 : ((opts73.drop 30).take 28).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_58 : ((opts73.drop 58).take 24).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_82 : ((opts73.drop 82).take 1).all (firstOK search73 opts73) = true := by
+  decide +kernel
+
+set_option maxRecDepth 100000 in
+theorem search73_83 : (opts73.drop 83).all (firstOK search73 opts73) = true := by decide +kernel
+
+/-- **The search is closed**: no valid scheduled configuration of cost below 18 has a closed form
+(the template makespan of Lemma 6.3) at most 73. -/
+theorem search73_closed : search73.closed = true := by
+  rw [search73_closed_eq, opts73_eq]
+  exact all_drop_of_take _ _ 0 4 search73_0 <| all_drop_of_take _ _ 4 1 search73_4 <|
+    all_drop_of_take _ _ 5 24 search73_5 <| all_drop_of_take _ _ 29 1 search73_29 <|
+    all_drop_of_take _ _ 30 28 search73_30 <| all_drop_of_take _ _ 58 24 search73_58 <|
+    all_drop_of_take _ _ 82 1 search73_82 search73_83
+
+/-- **Every valid scheduled configuration of cost below 18 waits harmfully**: whatever its orders
+and link matching, its template makespan exceeds 73. -/
+theorem tmpl_gt_of_cost_lt (S : Sched 2 4) (hS : S.Valid) (hsize : S.size = 10)
+    (hcost : S.cost c < 18) : 73 < S.tmpl d db :=
+  SearchData.closed_sound search73 search73_closed S hS hsize
+    (show ((S.cost c : ℕ) : WithTop ℕ) < ((18 : ℕ) : WithTop ℕ) by exact_mod_cast hcost)
+
+/-- **No plan of makespan at most 73 costs less than 18**, for every table of central flights
+satisfying (A1-NS): Theorem 6.9 turns the plan into a valid scheduled configuration, of cost at
+most the plan's and closed form at most its makespan. -/
+theorem cost_ge_of_makespan_le (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS)
+    {P : Plan 2 7 4} (hP : Feasible ⟨d, db, dc⟩ P) (hM : planMakespan P ≤ 73) :
+    18 ≤ planCost c P := by
+  obtain ⟨S, hS, hsize, hcost, htmpl⟩ := schedulableDomination_all c (by decide) hA hP
+  by_contra hlt
+  have := tmpl_gt_of_cost_lt S hS hsize (by omega)
+  change S.tmpl d db ≤ planMakespan P at htmpl
+  omega
+
+/-- The same without central flights: the plans of the clique instance are plans of the network
+whose central flights last 100, which satisfies (A1-NS). -/
+theorem cost_ge_of_makespan_le_noCentral {P : Plan 2 7 4}
+    (hP : GFeasible (cliqueGraph d db) P) (hM : planMakespan P ≤ 73) :
+    18 ≤ planCost c P :=
+  cost_ge_of_makespan_le _ a1ns_of_long (hP.feasible_of_clique _) hM
+
+/-- **Proposition 6.5.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
+central flights satisfying (A1-NS), the cheapest role configuration with `2t − p = 10` landings and
+every role load at most 73 costs 14, and no feasible plan of makespan at most 73 costs less than
+18. -/
+theorem prop65 (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS) :
+    (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups = 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      (∀ cfg : RoleConfig 2 4, size cfg.groups = 10 → (∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) →
+        14 ≤ totalCost c cfg.groups) ∧
+      ∀ x ∈ achievable ⟨d, db, dc⟩ c 7 4, x.2 ≤ 73 → 18 ≤ x.1 :=
+  ⟨(cheapest_roleConfig dc).1, (cheapest_roleConfig dc).2,
+    fun _ ⟨_, hP, hx⟩ hM => by subst hx; exact cost_ge_of_makespan_le dc hA hP hM⟩
+
+/-- **No harmful waiting is false** (Conjecture 6.5 of the note). The configuration `cfg14` has
+role loads at most 72, but every valid scheduled configuration of its cost waits: whatever the
+orders and the matching, its template makespan exceeds 73. In front form: some role configuration
+has cost 14 and role loads at most 73, but no feasible plan has cost at most 14 and makespan at
+most 73, so the front is not the Pareto set of (cost, largest role load). -/
+theorem harmful_waiting (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS) :
+    (∀ k, cfg14.roleLoad ⟨d, db, dc⟩ k ≤ 72) ∧
+      (∀ S : Sched 2 4, S.Valid → S.size = 10 → S.cost c ≤ 14 → 73 < S.tmpl d db) ∧
+      (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups ≤ 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      ¬ ∃ x ∈ achievable ⟨d, db, dc⟩ c 7 4, x.1 ≤ 14 ∧ x.2 ≤ 73 :=
+  ⟨cfg14_load dc, fun S hS hsize hcost => tmpl_gt_of_cost_lt S hS hsize (by omega),
+    ⟨cfg14, cfg14_size, cfg14_cost.le, fun k => (cfg14_load dc k).trans (by decide)⟩,
+    fun ⟨x, hx, h₁, h₂⟩ => absurd ((prop65 dc hA).2.2 x hx h₂) (by omega)⟩
+
+end Prop65
 
 end ZenoFront
