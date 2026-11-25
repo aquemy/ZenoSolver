@@ -63,9 +63,10 @@ or real times (Lemma 1.3).
   `planned:` names are proposals for the work package, not existing declarations.
 * *WP.* The work package that supplies the missing Lean. `—` means the Lean is complete; the row then
   needs only WP7 (text) and WP8 (ledger).
-* *cond. WP3 / cond. WP4.* The row stands or falls with that package's decision (the σ-DP, and the
-  role-load route). Such rows sit last in their section where possible, so that removing them shifts
-  few labels; if one goes, the section is renumbered consecutively and Table C regenerated.
+* *Conditional rows.* `cond. WP3`: the row stands or falls with WP3's decision on the σ-DP.
+  `remove if WP4 confirms Corollary 5.4 from Theorem 5.3`: Lemmas 5.11 and 5.12. Such rows sit last in
+  their section where possible, so that removing them shifts few labels; if one goes, the section is
+  renumbered consecutively and Table C regenerated.
 * *Notation.* `s = 2t − p`; `e_i = min(d_i, d̄_i)`; `δ(Y) = Σ_{w∈Y} d_w`, `δ̄(Y) = Σ_{w∈Y} d̄_w`,
   `e(Y)` likewise; `c(Y)` the cost of a multiset and |Y| its size; `F_k` the flight time of plane
   `k`; `(H)` the hub triangles of Definition 1.4.
@@ -85,13 +86,15 @@ Sections and subsections of §1 keep their numbers; §2–§8 have no subsection
   Proposition 3.6 (makespan and cost lower bounds).
 * **§4 Symmetric front.** Theorem 4.1 (achievability), Lemma 4.2 (adding a plane), Lemma 4.3
   (shrinking), Theorem 4.4 (converse under (S) and (H)), Theorem 4.5 (symmetric front, H1), Example
-  4.6 ((H) cannot be dropped), Proposition 4.7 (the papers' greedy is not exact).
+  4.6 (an optimal plan with extra landings), Example 4.7 ((H) cannot be dropped), Proposition 4.8 (the
+  papers' greedy is not exact).
 * **§5 Non-symmetric front.** Definition 5.1 (role configuration), Definition 5.2 (scheduled
   configuration, template value), Theorem 5.3 (schedulable domination), Corollary 5.4 (role-load
   bound), Lemma 5.5 (template achievability), Corollary 5.6 (non-symmetric front, H4), Proposition
   5.7 (harmful waiting), Definition 5.8 (flight graphs, the reduction), Example 5.9 (the reduction
-  misses the front), Lemma 5.10 (records give a configuration, cond. WP4), Lemma 5.11 (shrinking role
-  configurations, cond. WP4).
+  misses the front), Example 5.10 (the shuttle construction misses the front), Lemma 5.11 (records
+  give a configuration) and Lemma 5.12 (shrinking role configurations), both to be removed if WP4
+  confirms Corollary 5.4 from Theorem 5.3.
 * **§6 Algorithm.** Lemma 6.1 (one-plane table), Lemma 6.2 (the function E), Proposition 6.3 (front
   = breakpoints of E), Proposition 6.4 (bracket), Proposition 6.5 (dominance, symmetric), Proposition
   6.6 (dominance, non-symmetric), Theorem 6.7 (link-forest DP), Theorem 6.8 (σ-DP, cond. WP3),
@@ -104,8 +107,8 @@ Sections and subsections of §1 keep their numbers; §2–§8 have no subsection
 
 ## 3. Table A: kept results
 
-57 rows: 9 keep, 29 narrow, 4 merge, 3 wrap, 12 new. Five slugs are archived by merges: `thm-4-7`,
-`conj-4-10`, `thm-4-9`, `cor-4-12`, `lem-3-4`. Eighteen slugs are new.
+59 rows: 8 keep, 31 narrow, 4 merge, 3 wrap, 13 new. Four slugs are archived by merges: `thm-4-7`,
+`conj-4-10`, `thm-4-9`, `cor-4-12`. Eighteen slugs are new.
 
 ### §1 Model
 
@@ -114,7 +117,7 @@ Sections and subsections of §1 keep their numbers; §2–§8 have no subsection
 | Definition 1.1 (instance) | §1.1 | `def-instance` (new) | narrow | Central cities 1, …, n and hubs C_I, C_G; durations d_i (C_I–i) and d̄_i (i–C_G) in ℕ and a central duration dc(i, j) ∈ ℕ for every ordered pair of central cities, i = j included; no flight joins the two hubs. Landing in i costs c_i ∈ ℕ, hubs are free; p planes and t passengers start in C_I. Theorems assume 1 ≤ p ≤ t where they use it. | Plan.lean: `Network`, `Network.duration` | — |
 | Definition 1.2 (plan) | Definition (plan); §1.2 | `def-plan` (new) | narrow | A plan gives each plane a list of legs (origin, destination, departure, arrival, passenger or none). It is feasible if every leg is a flight of exactly its duration, each plane's legs form a route from C_I (each leg leaves where the previous one arrived, no earlier, the first at time ≥ 0) ending in C_G, and for each passenger the legs naming it form, in some order, such a route from time 0 ending in C_G. Cost: the landing costs of all legs into central cities; makespan: the latest end of a route; in the variant with planes ending anywhere, routes need not end in C_G. | Plan.lean: `Leg`, `Plan`, `Flies`, `IsRoute`, `PlaneFeasible`, `Feasible`, `planCost`, `planMakespan`; Checker.lean: `achievable`; Bridge.lean: `PlaneFeasibleAnywhere`, `FeasibleAnywhere`, `achievableAnywhere` | — |
 | Lemma 1.3 (rounding times) | — (the times in 𝕂 of §1.1) | `lem-rounding` (new) | new | Let a plan have times in ℚ or ℝ, integer durations, and satisfy Definition 1.2. Rounding every time down gives a feasible plan with natural-number times, the same cost and a makespan at most the original one; conversely an integer plan is such a plan with the same cost and makespan. | RationalPlans.lean: `QFeasible`, `QFeasible.floor`, `qPlanCost_eq`, `planMakespan_floor_le`, `Feasible.toRat` (over ℚ); planned: the same over any `FloorRing`, generalising `QFeasible.floor`, in RationalPlans.lean | WP2 |
-| Definition 1.4 (assumptions) | §1.4 | `def-assumptions` (new) | keep | (S) d̄ = d. (A1) d_i + d_j ≤ dc(i, j). (A1-NS) min(d_i + d_j, d̄_i + d̄_j) ≤ dc(i, j). (AΔ) dur(a, b) ≤ dur(a, x) + dur(x, b) whenever a ≠ b and the three flights exist. (H) d_j ≤ d_i + dc(i, j) and d_i ≤ dc(i, j) + d_j for all central i, j (the triangles through C_I, and under (S) through C_G). (AΔ-path) d̄_i ≤ d_i + d_z + d̄_z for all central i, z (one-sided: open question 1). | hypothesis `N.dbar = N.d`; Converse.lean: `Network.A1`; NonSymmetric.lean: `Network.A1NS`; TriSegments.lean: `Network.ATri`, `Network.ATriHub`; planned: `Network.APath` in Counterexamples.lean | WP5 |
+| Definition 1.4 (assumptions) | §1.4 | `def-assumptions` (new) | narrow | (S) d̄ = d. (A1) d_i + d_j ≤ dc(i, j). (A1-NS) min(d_i + d_j, d̄_i + d̄_j) ≤ dc(i, j). (AΔ) dur(a, b) ≤ dur(a, x) + dur(x, b) whenever a ≠ b and the three flights exist. (H) d_j ≤ d_i + dc(i, j) and d_i ≤ dc(i, j) + d_j for all central i, j (the triangles through C_I, and under (S) through C_G). | hypothesis `N.dbar = N.d`; Converse.lean: `Network.A1`; NonSymmetric.lean: `Network.A1NS`; TriSegments.lean: `Network.ATri`, `Network.ATriHub` | — |
 | Lemma 1.5 (hub triangles) | — | `lem-hub-triangles` (new) | new | (A1) implies (H), and (AΔ) implies (H). | TriSegments.lean: `Network.A1.hub`, `Network.ATri.hub` | — |
 | Definition 1.6 (fronts) | §1.5 | `def-front` (new) | keep | Points (cost, makespan) are ordered componentwise, and y weakly dominates z when y ≤ z. Min S is the set of minimal points of S; the front is F = Min A, A (A′) the points of the feasible plans (of the plans whose planes end anywhere). A list is the Pareto front of S if its points lie in S, weakly dominate every point of S and are pairwise incomparable. | Checker.lean: `achievable`, `IsParetoFront`; Bridge.lean: `achievableAnywhere`; Mathlib `Minimal` | — |
 | Lemma 1.7 (dominating sets) | Lemma 1.1 | `lem-1-1` | narrow | (a) If every point of A is weakly dominated by a point of B and every point of B by a point of A, then Min A = Min B; in particular when B ⊆ A and B dominates A. (b) A list that is the Pareto front of S lists exactly Min S. | Achievability.lean: `minimal_iff_of_dominated`; Bridge.lean: `minimal_iff_of_subset_of_dominated`; Checker.lean: `IsParetoFront.mem_iff_minimal` | — |
@@ -125,7 +128,7 @@ Sections and subsections of §1 keep their numbers; §2–§8 have no subsection
 |---|---|---|---|---|---|---|
 | Definition 2.1 (admissible partition) | Definition 2.2 | `def-2-2` | keep | A partition of a multiset X over p planes is a family of groups X_1, …, X_p with Σ_k X_k = X. A parity matrix gives each plane k a set η_k of cities of X_k with \|η_k\| ≡ \|X_k\| + 1 (mod 2), every city lying in an even number of the η_k. The partition is admissible if it has a parity matrix. | Admissible.lean: `IsParityWitness`, `Admissible` | — |
 | Lemma 2.2 (integer form) | Lemma 2.3 | `lem-2-3` | wrap | A partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ \|X_k\| + 1 (mod 2) for every plane k, and Σ_k h̃_{k,i} even for every city i. | planned: `admissible_iff_exists_natWitness` in Admissible.lean | WP2 |
-| Lemma 2.3 (disjoint groups) | Lemma 2.4 | `lem-2-4` | narrow | If no city lies in two groups, the partition is admissible iff every group has odd size. (See open question 4.) | planned: `admissible_iff_odd_of_disjoint` in Complexity.lean | WP6 |
+| Lemma 2.3 (disjoint groups) | Lemma 2.4 | `lem-2-4` | narrow | If no city lies in two groups, the partition is admissible iff every group has odd size. | planned: `admissible_iff_odd_of_disjoint` in Complexity.lean | WP6 |
 | Lemma 2.4 (row bound) | Lemma 2.5 | `lem-2-5` | keep | For every parity matrix and plane k, \|η_k\| + 1 ≤ \|X_k\|. Hence the groups of an admissible partition are non-empty, and \|X\| ≡ p (mod 2). | Admissible.lean: `IsParityWitness.card_add_one_le`, `Admissible.card_pos`; Shrink.lean: `IsParityWitness.size_mod_two` | — |
 | Definition 2.5 (link forest) | Definition (link forest) | `def-link-forest` (new) | keep | A rooted link tree is a plane with a multiset of free landings and a list of children, each hung from it by a link labelled with a city; the group of a plane is its free landings, one copy of each child's label and one copy of its parent's label, so (F1) holds by construction. (F2): every plane has an odd number of free landings. A link forest of a partition is a list of such trees satisfying (F2) whose groups are the partition's groups, up to relabelling the planes. | LinkForest.lean: `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `forestGroups` | — |
 | Lemma 2.6 (link forests) | Lemma 2.6 | `lem-2-6` | narrow | A partition is admissible iff it has a link forest. | TreeExact.lean: `admissible_iff_exists_linkForest`, `admissible_forestPartition`; LinkForest.lean: `Admissible.exists_linkForest` | — |
@@ -142,7 +145,7 @@ consecutive hub arrivals (Lean `hubArrivals`), of types A, Ā, B, B̄ by their e
 | Lemma 3.2 (chains) | Lemma 3.1 | `lem-3-1` | narrow | (a) In a feasible plan, and in a plan whose planes end anywhere, every passenger rides a chain: legs carrying it, the first leaving C_I, each leaving where the previous one arrived and no earlier, landing in central cities until the last, which arrives in C_G. (b) If the plan has no central flight, every passenger rides a leg C_I → x and then a leg x → C_G leaving no earlier than the first one arrives. | ConverseTri.lean: `ToGoal`, `exists_chain`, `Feasible.exists_chains`; FrontTri.lean: `FeasibleAnywhere.exists_chains`, `ToGoal.dst_ne_ci`; Domination.lean: `exists_transfer_pw` | — |
 | Lemma 3.3 (counting) | Lemma 3.2 | `lem-3-2` | narrow | In a feasible plan, 2t ≤ Σ_k h_k + p, where h_k is the number of hub arrivals (segments) of plane k. | PlanBounds.lean: `ciDepartures_add_cgArrivals`, `Feasible.le_ciDepartures`, `Feasible.le_cgArrivals`, `Feasible.le_sum_hubArrivals` | — |
 | Lemma 3.4 (segment durations) | Lemma 3.3 | `lem-3-3` | narrow | (a) A feasible plane has a multiset Z of central cities with \|Z\| equal to its number of hub arrivals, 2e(Z) ≤ its end time and c(Z) ≤ its landing cost. (b) Under (S) and (H) its route is the concatenation of its segments, one per hub arrival, each landing in a central city and flying at least 2d_y for every central city y it lands in; and a chain from a central city y ends at least d_y after it starts. (c) On a route without central flights the two legs of a central landing at x last its role weight, d_x + d̄_x for a crossing, 2d_x for a drop-off and 2d̄_x for a pick-up, so the role weights sum to at most the flight time. | PlanBounds.lean: `PlaneFeasible.exists_segments_emin`, `PlaneFeasible.exists_segments`; TriSegments.lean: `PlaneFeasible.exists_segments_tri`, `segment_bound`; FrontTri.lean: `ToGoal.add_d_le_endTime`, `ToGoal.arr_add_d_le`; SchedBuild.lean: `VOK.w_eq`, `VChain.sum_w_le`; NonSymmetric.lean: `roleW_landingRecs_le` | — |
-| Lemma 3.5 (relaxation) | Lemma 3.4; the `relaxed` kind of format v2 | `lem-relaxation-emin` (new); `lem-3-4` (archived: merged) | merge | Let p ≤ t. Every feasible plan with cost C and makespan M has non-empty multisets Y_1, …, Y_p with Σ_k \|Y_k\| = s, c(Y_1 + ⋯ + Y_p) ≤ C and 2e(Y_k) ≤ M for every k; under (S), e = d. Hence C ≥ L_e(⌊M/2⌋), where L_e(T) is the least Σ_k min{c(Y) : \|Y\| = m_k, e(Y) ≤ T} over m_1, …, m_p ≥ 1 with Σ_k m_k = s (∞ if none). | PlanBounds.lean: `Network.emin`, `Network.emin_eq_of_sym`, `exists_trim`, `Feasible.exists_relaxation_emin`, `Feasible.exists_relaxation`; Relaxation.lean: `relaxCost`, `relaxCost_oneplane_le_totalCost`; planned: `Feasible.relaxCost_le_planCost` in Relaxation.lean | WP2 |
+| Lemma 3.5 (relaxation) | Lemma 3.4; the `relaxed` kind of format v2 | `lem-3-4` | merge | Let p ≤ t. Every feasible plan with cost C and makespan M has non-empty multisets Y_1, …, Y_p with Σ_k \|Y_k\| = s, c(Y_1 + ⋯ + Y_p) ≤ C and 2e(Y_k) ≤ M for every k; under (S), e = d. Hence C ≥ L_e(⌊M/2⌋), where L_e(T) is the least Σ_k min{c(Y) : \|Y\| = m_k, e(Y) ≤ T} over m_1, …, m_p ≥ 1 with Σ_k m_k = s (∞ if none). | PlanBounds.lean: `Network.emin`, `Network.emin_eq_of_sym`, `exists_trim`, `Feasible.exists_relaxation_emin`, `Feasible.exists_relaxation`; Relaxation.lean: `relaxCost`, `relaxCost_oneplane_le_totalCost`; planned: `Feasible.relaxCost_le_planCost` in Relaxation.lean | WP2 |
 | Proposition 3.6 (lower bounds) | Proposition 7.10 (a), (b), lower halves | `prop-7-10` | narrow | Let p ≤ t. Every feasible plan costs at least s·c_min. Under (S) and 1 ≤ p, every feasible plan has makespan at least 2d_min⌈s/p⌉. | Checker.lean: `minOf`, `Feasible.minOf_le_cost_emin`, `Feasible.minOf_le_cost`, `Feasible.minOf_le_makespan` | — |
 
 ### §4 Symmetric front
@@ -154,8 +157,9 @@ consecutive hub arrivals (Lean `hubArrivals`), of types A, Ā, B, B̄ by their e
 | Lemma 4.3 (shrinking) | Lemma 4.11 | `lem-4-11` | keep | If X is admissible with at least s landings, p ≤ s and s ≡ p (mod 2), some admissible Y with Y_k ≤ X_k for every k has exactly s landings; in particular two landings can be removed when \|X\| ≥ p + 2. | Shrink.lean: `Admissible.exists_shrink`; TriSegments.lean: `Admissible.exists_remove_two` | — |
 | Theorem 4.4 (converse under (S) and (H)) | Theorem 4.10; Theorem 4.7; Conjecture 4.10 | `thm-4-10`; `thm-4-7`, `conj-4-10` (archived: merged) | merge | Assume (S), (H) and p ≤ t. If every plane flies from C_I to C_G and every passenger rides a chain (Lemma 3.2), some admissible partition X_1, …, X_p has \|X\| = 2t − p, c(X) at most the plan's cost and 2δ(X_k) ≤ F_k for every plane. In particular this holds for every feasible plan, where F_k ≤ M. | ConverseTri.lean: `exists_merge`, `exists_admissible_of_chains`, `PlaneFeasible.durSum_le_planMakespan`, `Feasible.exists_admissible_hub`, corollaries `Feasible.exists_admissible_ATri`, `Feasible.exists_admissible_A1_flightTime`; TriCore.lean: `TriCore.exists_tjoin`, `TriCore.exists_selection`, `exists_admissible_of_blocks` | WP1 (callers, delete `Feasible.exists_admissible`) |
 | Theorem 4.5 (symmetric front, H1) | Corollary 4.8; Theorem 4.9; Corollary 4.12 | `cor-4-8`; `thm-4-9`, `cor-4-12` (archived: merged) | merge | Assume (S), (H) and p ≤ t. The feasible plans, the plans whose planes end anywhere, the admissible partitions of 2t − p landings (points (c(X), 2·max_k δ(X_k))) and the multisets of 2t − p landings that have an admissible partition (points (c(X), M(X)), M(X) the least 2·max_k δ(X_k) over them) have the same minimal points: F = Min A′ = Min 𝒫 = Min 𝒳. | Achievability.lean ((A1)): `admissiblePoints`, `multisetPoints`, `minMakespan`, `minimal_admissiblePoints_iff_multisetPoints`, `minimal_achievable_iff_admissiblePoints`, `minimal_achievable_iff_multisetPoints`, `minimal_achievable_iff_anywhere_of_A1`; FrontTri.lean ((AΔ)): `FeasibleAnywhere.exists_admissible_hub`, `minimal_achievable_iff_admissiblePoints_ATri`, `minimal_achievable_iff_multisetPoints_ATri`, `minimal_achievable_iff_anywhere_of_ATri`; planned: `minimal_achievable_iff_admissiblePoints_hub`, `minimal_achievable_iff_multisetPoints_hub`, `minimal_achievable_iff_anywhere_hub` in FrontTri.lean | WP1 |
-| Example 4.6 ((H) cannot be dropped) | Example 4.13 | `claim-4-13` | narrow | Take d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and the symmetric central table dc_12 = 1, dc_13 = 5, dc_14 = 6, dc_23 = 3, dc_24 = 6, dc_34 = 1 (dc_ii arbitrary). (S) holds and (H) fails (d_4 > d_3 + dc_34). The plan of the note is feasible, of cost 260 and makespan 39, while every admissible partition of 9 landings with every δ(X_k) ≤ 19 costs at least 264, so none has cost ≤ 260 and makespan ≤ 39: the conclusion of Theorem 4.4 fails, and no point of 𝒫 weakly dominates (260, 39). | planned: `hubCounterexample_feasible` (needs a feasibility check that accepts central legs; `planOK` accepts hub legs only), `hubCounterexample_minCost` (the bound 264 at level 19 by `decide +kernel` through `treeBoundAt_eq_minCost`) in Counterexamples.lean | WP5 |
-| Proposition 4.7 (the papers' greedy is not exact) | §5 | `claim-5` | narrow | Let G be the per-PPP greedy of EvoCOP 2015 Algorithm 1 (longest durations first, to the least-loaded plane) and F_G the Pareto set of its points. (a) For d = (6, 10), c = (40, 20), t = 5, p = 2, (260, 60) ∈ F and no point of F_G weakly dominates it (on the landings of that point G ends at 68). (b) For d = (1, 3), c = (9, 5), t = 4, p = 2, (42, 12) ∈ F and no point of F_G weakly dominates it. | Examples.lean: `Examples.lptCounterexample_check`, `Examples.lptCounterexample_front`; planned: `greedy`, `greedy_misses_260_60`, `greedy_misses_42_12` and a front certificate for (b) in Counterexamples.lean | WP5 |
+| Example 4.6 (an optimal plan with extra landings) | — (the remark after Corollary 4.8) | `claim-extra-landings` (new) | new | Take n = 1, d_1 = 1, c_1 = 0, t = 5, p = 3, symmetric durations and any central table, so (H) holds. The front is {(0, 6)}, and a feasible plan with 9 central landings, more than s = 7, attains (0, 6). So a Pareto-optimal plan need not have exactly 2t − p landings: the papers' Proposition I holds only in the sense of Theorem 4.5. | planned: `extraLandings_plan_feasible` (`planOK` by `decide +kernel`, then `planOK_feasible`) and `extraLandings_front` (`solveFront` by `decide +kernel`, then Theorem 6.9) in Counterexamples.lean | WP5 |
+| Example 4.7 ((H) cannot be dropped) | Example 4.13 | `claim-4-13` | narrow | Take d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and the symmetric central table dc_12 = 1, dc_13 = 5, dc_14 = 6, dc_23 = 3, dc_24 = 6, dc_34 = 1 (dc_ii arbitrary). (S) holds and (H) fails (d_4 > d_3 + dc_34). The plan of the note is feasible, of cost 260 and makespan 39, while every admissible partition of 9 landings with every δ(X_k) ≤ 19 costs at least 264, so none has cost ≤ 260 and makespan ≤ 39: the conclusion of Theorem 4.4 fails, and no point of 𝒫 weakly dominates (260, 39). | planned: `hubCounterexample_feasible` (needs a feasibility check that accepts central legs; `planOK` accepts hub legs only), `hubCounterexample_minCost` (the bound 264 at level 19 by `decide +kernel` through `treeBoundAt_eq_minCost`) in Counterexamples.lean | WP5 |
+| Proposition 4.8 (the papers' greedy is not exact) | §5 | `claim-5` | narrow | Let G be the per-PPP greedy of EvoCOP 2015 Algorithm 1 (longest durations first, to the least-loaded plane) and F_G the Pareto set of its points. (a) For d = (6, 10), c = (40, 20), t = 5, p = 2, (260, 60) ∈ F and no point of F_G weakly dominates it (on the landings of that point G ends at 68). (b) For d = (1, 3), c = (9, 5), t = 4, p = 2, (42, 12) ∈ F and no point of F_G weakly dominates it. | Examples.lean: `Examples.lptCounterexample_check`, `Examples.lptCounterexample_front`; planned: `greedy`, `greedy_misses_260_60`, `greedy_misses_42_12` and a front certificate for (b) in Counterexamples.lean | WP5 |
 
 ### §5 Non-symmetric front
 
@@ -167,11 +171,12 @@ consecutive hub arrivals (Lean `hubArrivals`), of types A, Ā, B, B̄ by their e
 | Corollary 5.4 (role-load bound) | Theorem 6.1 | `thm-6-1` | narrow | Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a role configuration with 2t − p landings, cost at most C and every λ_k ≤ M. | NonSymmetric.lean: `Feasible.exists_roleConfig_ns`; planned: `Sched.load_le_tmpl` in SearchGap.lean and `Sched.toRoleConfig`, to derive it from Theorem 5.3 | WP4 |
 | Lemma 5.5 (template achievability) | Lemma 6.3 | `lem-6-3` | narrow | Let p ≤ t. For every central table and every valid scheduled configuration S with 2t − p landings, some feasible plan has cost c(S) and makespan at most M_tmpl(S). | planned: `Sched.exists_plan` in Template.lean | WP4 |
 | Corollary 5.6 (non-symmetric front, H4) | Corollary 6.10 | `cor-6-10` | narrow | Assume (A1-NS) and p ≤ t. F = Min 𝒦, where 𝒦 is the set of points (c(S), M_tmpl(S)) of the valid scheduled configurations S with 2t − p landings. | planned: `minimal_achievable_iff_schedPoints` in Template.lean (from `schedulableDomination_all`, `Sched.exists_plan`, `minimal_iff_of_dominated`) | WP4 |
-| Proposition 5.7 (harmful waiting) | Proposition 6.5; Conjecture 6.5 | `prop-6-5` | narrow | Take n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4, so (AΔ-path) holds (open question 1). For every central table satisfying (A1-NS) the front is (10, 90), (14, 74), (18, 68), (22, 66), (26, 52), (34, 42), (38, 36), (42, 30), (50, 18), so no plan of makespan ≤ 73 costs less than 18; yet some role configuration with 2t − p landings has cost 14 and every λ_k ≤ 73. So the front is not the Pareto set of (cost, max_k λ_k) over role configurations, as arXiv:2304.14659 assumes. | planned: `prop65_check` (`Cert2.check` on `lean/test/certificates/accepted/v2-search-prop65.cert` by `decide +kernel`), `prop65_front` (with `Cert2.check_sound`), `prop65_roleConfig` in Counterexamples.lean | WP5 |
+| Proposition 5.7 (harmful waiting) | Proposition 6.5; Conjecture 6.5 | `prop-6-5` | narrow | Take n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4, with any central table satisfying (A1-NS) (the note's "no central flights", under which (A1-NS) and (AΔ) hold vacuously). The cheapest role configuration with 2t − p landings and every λ_k ≤ 73 costs 14, but every feasible plan of makespan ≤ 73 costs at least 18. So the front is not the Pareto set of (cost, max_k λ_k) over role configurations, as arXiv:2304.14659 assumes when it rules out harmful waiting. | planned: `prop65_check` (`Cert2.check` on `lean/test/certificates/accepted/v2-search-prop65.cert` by `decide +kernel`), `prop65_cost_ge` (with `Cert2.check_sound`), `prop65_roleConfig` (a configuration of cost 14) and `prop65_roleBound` (none cheaper, by `decide +kernel` on a role-configuration bound of §8, such as `BalData.value_le_totalCost`) in Counterexamples.lean | WP5 |
 | Definition 5.8 (flight graphs, the reduction) | — (§6.6: Model, Reduction) | `def-flight-graph` (new) | new | A flight graph U has hubs C_I, C_G, central vertices 1, …, n, an optional duration on every pair of locations (none between the hubs) and landing costs; its plans, feasibility, cost and makespan are those of Definition 1.2 with its edges as flights. Its reduction f(U) is the clique instance with the same t and p and one city v = (w, e) for every central vertex i, simple path w from C_I to i and simple path e from i to C_G, with d_v = φ(w), d̄_v = φ(e) and c_v = ω(w) + ω(e) (φ the duration of a path, ω the landing costs of its vertices after the first). | planned: `FlightGraph`, `FlightGraph.Feasible`, `FlightGraph.reduce` in Graph.lean | WP5 |
 | Example 5.9 (the reduction misses the front) | Example 6.11 | `claim-6-11` | narrow | Let U be the path C_I–a–b–C_G with durations 1, 2, 1, c_a = c_b = 1, t = 3, p = 2. f(U) has the two cities (d, d̄, c) = (1, 3, 2) and (3, 1, 2), and for every central table of f(U) satisfying (A1-NS) its front is {(8, 10)}; U has a feasible plan of cost 8 and makespan 8. So F_U ≠ F_{f(U)}, against arXiv:2304.14659 §2.4. | planned: `pathGraph_reduce`, `pathGraph_plan_feasible`, `pathGraph_reduced_front` (a v2 certificate checked by `decide +kernel` and `Cert2.check_sound`) in Counterexamples.lean | WP5 |
-| Lemma 5.10 (records give a configuration) | Lemma 4.3 | `lem-4-3` | narrow (cond. WP4) | Every feasible plan on p planes gives a role configuration with at least 2t − p landings whose drop-offs and pick-ups are cities of landing records (Lemma 3.1) of type B (from and back to C_I) and B̄ (neither) of their plane, and whose crossings are exactly the cities of its records of type A and Ā. | Converse.lean: `recCities`, `Feasible.exists_roleConfig_records` | WP4 |
-| Lemma 5.11 (shrinking role configurations) | Lemma 4.4 | `lem-4-4` | keep (cond. WP4) | Let p ≤ s. A role configuration with s + 2N landings has one with exactly s landings whose drop-offs, pick-ups and crossings are sub-multisets of the old ones, so its cost, role loads and groups do not grow. | NonSymmetric.lean: `RoleConfig.exists_shrink` | WP4 |
+| Example 5.10 (the shuttle construction misses the front) | Proposition 6.7; Conjecture 6.7 | `prop-6-7` | narrow | Take n = 2, d = (1, 3), d̄ = (3, 1), c = (6, 1), t = 3, p = 2 and the central flight dc_12 = dc_21 = 2 (dc_ii arbitrary); (AΔ) holds. The clique instance that arXiv:2304.14659 (§2.3, §3.3) builds from it, with one virtual city for every "B Ā B̄" situation (a drop-off at x, a shuttle C_G → x → y → C_I carrying the passenger to y, a pick-up at y) and no central flights, has front {(4, 10)} for every central table satisfying (A1-NS); the instance has a feasible plan of cost 15 and makespan 8, which (4, 10) does not dominate. So the construction misses the front. | planned: `shuttleInstance` (the paper's construction, for every instance) in Graph.lean; `shuttle_reduced_front` (a v2 certificate checked by `decide +kernel` and `Cert2.check_sound`) and `shuttle_plan_feasible` (the plan flies the central leg, so it needs a feasibility check that accepts central legs) in Counterexamples.lean | WP5 |
+| Lemma 5.11 (records give a configuration) | Lemma 4.3 | `lem-4-3` | narrow (remove if WP4 confirms Corollary 5.4 from Theorem 5.3) | Every feasible plan on p planes gives a role configuration with at least 2t − p landings whose drop-offs and pick-ups are cities of landing records (Lemma 3.1) of type B (from and back to C_I) and B̄ (neither) of their plane, and whose crossings are exactly the cities of its records of type A and Ā. | Converse.lean: `recCities`, `Feasible.exists_roleConfig_records` | WP4 |
+| Lemma 5.12 (shrinking role configurations) | Lemma 4.4 | `lem-4-4` | keep (remove if WP4 confirms Corollary 5.4 from Theorem 5.3) | Let p ≤ s. A role configuration with s + 2N landings has one with exactly s landings whose drop-offs, pick-ups and crossings are sub-multisets of the old ones, so its cost, role loads and groups do not grow. | NonSymmetric.lean: `RoleConfig.exists_shrink` | WP4 |
 
 ### §6 Algorithm
 
@@ -213,10 +218,11 @@ They stay active as `math.disproved`, each with the Lean refutation of the resul
 
 | Slug | Claim | Refuted by | WP |
 |---|---|---|---|
-| `paper-greedy-optimal` | the per-PPP greedy of both papers is exact | Proposition 4.7 | WP5 |
-| `paper-no-harmful-waiting` | arXiv:2304.14659: no harmful waiting (note's Conjecture 6.5) | Proposition 5.7 (open question 1) | WP5 |
+| `paper-greedy-optimal` | the per-PPP greedy of both papers is exact | Proposition 4.8 | WP5 |
+| `paper-no-harmful-waiting` | arXiv:2304.14659: no harmful waiting (note's Conjecture 6.5); to be restated without (AΔ-path) | Proposition 5.7 | WP5 |
 | `paper-general-graph-reduction` | arXiv:2304.14659 §2.4: F_U = F_{f(U)} | Example 5.9 | WP5 |
-| `claim-converse-s-only` | the converse under (S) alone; to be restated as "(S) without (H)" | Example 4.6 | WP5 |
+| `conj-6-7` | arXiv:2304.14659 §2.3, §3.3: virtual cities for the shuttle situations complete the front (note's Conjecture 6.7); to be restated as the paper's construction | Example 5.10 | WP5 |
+| `claim-converse-s-only` | the converse under (S) alone; to be restated as "(S) without (H)" | Example 4.7 | WP5 |
 
 ## 4. Table B: removed results
 
@@ -232,12 +238,10 @@ here.
 | Lemma 4.5 | `lem-4-5` | used only by the role-route proof of Theorem 4.7, replaced by Theorem 4.4 | deleted; ledger archive (WP1 deletes `RoleConfig.admissible_groups`, `RoleConfig.isParityWitness_witness`) |
 | Lemma 6.2 | `lem-6-2` | L_NS is implemented nowhere (§6.5 and the paper say otherwise, wrongly); no kept proof uses it | deleted; ledger archive |
 | Corollary 6.4 | `cor-6-4` | no code, certificate kind or headline proof uses it | deleted; ledger archive |
-| Conjecture 6.7 | `conj-6-7` | the note's form of the shuttle claim; its refutation, Proposition 6.7, goes (open question 2) | deleted; ledger archive |
 | Lemma 6.8 | `lem-6-8` | event orders leave the model: Theorem 5.3 covers every plan, and WP1 deletes the `EO` assumption | deleted; ledger archive |
 | end of §6.2 | `claim-6-2-end` | superseded: Theorem 5.3 holds for every plan | deleted; ledger archive |
-| Definition 6.17 | `def-6-17` | used only by Propositions 6.7 and 6.18 | deleted; ledger archive |
-| Proposition 6.7 | `prop-6-7` | no headline proof, certificate kind or solver step uses it (open question 2) | deleted; ledger archive |
-| Proposition 6.18 (a)–(c) | `prop-6-18` | computed by search only; no kept result uses it (open question 2) | deleted; ledger archive |
+| Definition 6.17 | `def-6-17` | Example 5.10 defines the shuttle situation it needs, and Proposition 6.18, its other user, goes | deleted; ledger archive |
+| Proposition 6.18 (a)–(c) | `prop-6-18` | computed by search only; no kept result uses it | deleted; ledger archive |
 | Proposition 6.18 (d) | `claim-6-18-d` | rests on the flow model only; no kept result uses it | deleted; ledger archive |
 | Lemma 6.19 | `lem-6-19` | no code, certificate kind or headline proof uses it | deleted; ledger archive |
 | Proposition 6.12 | `prop-6-12` | decision 2; Example 5.9 is proved by certificate without it | deleted; ledger archive |
@@ -266,8 +270,10 @@ in the paper), §12, and the clauses dropped from narrowed results (§6 below).
 whole labels: the table has chains (Lemma 3.1 → 3.2, Lemma 3.2 → 3.3) and prefixes (Theorem 4.1 and
 Theorem 4.10). Identity pairs are listed so that every kept label is accounted for. Abbreviated
 forms (Thm, Prop, Cor, Ex, Def) in Lean docstrings and C++ messages follow the same map.
-`Conjecture 4.10` is left out: the sentences that mention it are deleted. `Proposition 7.10` maps to
-two results (Proposition 3.6 and Lemma 6.2); its site uses are checked by hand (open question 8).
+`Conjecture 4.10` is left out: the sentences that mention it are deleted. `Conjecture 6.5` and
+`Conjecture 6.7` are redirected to the results that state the claims they refute. `Proposition 7.10`
+maps to two results (Proposition 3.6 and Lemma 6.2); its site uses are checked by hand (review item
+8).
 The `§` entries of this table are blueprint node labels, as in `{{< node "§1.1" >}}`; section
 references in prose ("§4.6 of the note") follow the section map after it instead.
 
@@ -300,8 +306,8 @@ Theorem 4.7	Theorem 4.4
 Corollary 4.8	Theorem 4.5
 Theorem 4.9	Theorem 4.5
 Corollary 4.12	Theorem 4.5
-Example 4.13	Example 4.6
-§5	Proposition 4.7
+Example 4.13	Example 4.7
+§5	Proposition 4.8
 Definition 4.2	Definition 5.1
 Theorem 6.9	Theorem 5.3
 Theorem 6.1	Corollary 5.4
@@ -310,8 +316,10 @@ Corollary 6.10	Corollary 5.6
 Proposition 6.5	Proposition 5.7
 Conjecture 6.5	Proposition 5.7
 Example 6.11	Example 5.9
-Lemma 4.3	Lemma 5.10
-Lemma 4.4	Lemma 5.11
+Proposition 6.7	Example 5.10
+Conjecture 6.7	Example 5.10
+Lemma 4.3	Lemma 5.11
+Lemma 4.4	Lemma 5.12
 Lemma 7.2	Lemma 6.1
 Proposition 7.1	Proposition 6.3
 Proposition 7.3	Proposition 6.4
@@ -370,23 +378,27 @@ result that stays.
 * *Definition 1.1* [§1.1]: drops durations and times in an archimedean field (Lemma 1.3 covers
   rational and real times), undirected flights, the absence of a flight i–i and optional central
   flights (the table is complete and directed). Every kept theorem holds for every table, so none
-  uses the absence of a flight; Proposition 5.7 and Example 5.9, which had "no central flights", now
-  quantify over the tables satisfying (A1-NS).
+  uses the absence of a flight; Proposition 5.7 and Examples 5.9 and 5.10, which had "no central
+  flights", now quantify over the tables satisfying (A1-NS).
 * *Definition 1.2* [Definition (plan)]: drops the condition that consecutive legs of a journey on
   one plane come later on its route, and the event-ordered plans. Kept uses: none (the route
   condition is used at 1033, Lemma 6.8(b); event orders at 155–162, 1017–1041, 1144–1159, all
   removed).
+* *Definition 1.4* [§1.4]: drops (AΔ-path). Its users were Corollary 6.4 (945–958) and Conjecture
+  6.5 (960), both removed, and Proposition 6.5 (966), now stated without it; 75–76 (§0), 1007 (a
+  remark) and 1046 (Theorem 6.9: "not needed") go with them. The instance of Proposition 6.5 satisfied
+  only the first of the two inequalities of §1.4 (for i = 2, z = 1: 19 > 11 + 3 + 3).
 * *Lemma 1.7* [Lemma 1.1]: drops finiteness and "every point is weakly dominated by a point of
   Min S". Cited at 613, 630, 805, 1154, 1946 (kept proofs: only Min A = Min B is used) and at 1549,
   1569, 1786, 2046 (removed; 1786, Lemma 7.7, used the dropped clause).
 * *Lemma 2.3* [Lemma 2.4]: drops (a) for general components and (b) (a parity matrix inside every
   spanning forest). Cited at 271 (text), 373 (Lemma 2.9), 2207 (Appendix A), removed; at 1899 and
   1912 (Theorems 7.1, 7.2), which use only the disjoint case; at 323 (Lemma 2.6) and 704 (Theorem
-  4.10, Step 2), which used (b): both proofs are re-routed (open question 5).
+  4.10, Step 2), which used (b): both proofs are re-routed (review item 5).
 * *Lemma 2.6*: drops "a link forest with at most one edge of each label at each plane". Used only
   inside its own proof (315, 323–326).
 * *Lemma 2.7* [Lemma 2.8]: drops (a) and (b) as statements, and the clause h_k ≤ min(|X_k| − 1, w)
-  of (c). Cited at 1768 (Theorem 7.6, which used the clause; re-routed, open question 5) and 2007
+  of (c). Cited at 1768 (Theorem 7.6, which used the clause; re-routed, review item 5) and 2007
   (§9 trust list, deleted).
 * *Lemma 3.1* [Lemma 2.1]: counts landing records and visits instead of segment types; on routes
   without central flights they coincide. Cited at 524 (Lemma 4.3(b): record form), 1103 (Theorem
@@ -397,8 +409,8 @@ result that stays.
   chains), 670 and 812 (Theorem 4.10, Corollary 4.12: the chain form, `ToGoal.dst_ne_ci`), 877
   (Theorem 6.1: `exists_transfer`), 1393, 1603 (removed).
 * *Lemma 3.3* [Lemma 3.2]: drops "hence at least s landings in central cities". Cited at 428, 673
-  and 690 (segment count only), 1847 (Proposition 7.10(b), which used the clause; re-routed, open
-  question 5), 1955 (§9 text, deleted).
+  and 690 (segment count only), 1847 (Proposition 7.10(b), which used the clause; re-routed,
+  review item 5), 1955 (§9 text, deleted).
 * *Lemma 3.4* [Lemma 3.3]: (a) becomes the per-plane form with weight e (the per-segment bound
   d_{x_1} + d_{x_m} is its step); (b) becomes the (S) + (H) form (2d_y per landing, and the chain
   bound); drops the non-symmetric (AΔ) bounds for the four segment types. Non-symmetric (b) was used
@@ -413,9 +425,9 @@ result that stays.
   flight" (the statement holds for every central table). Used at 1025 and 1041 (Lemma 6.8(c)), 1844
   (Proposition 7.10(a)), 2045 (Theorem 10.1), all removed; 609 (Corollary 4.8's "exactly s central
   landings") is covered by "land exactly at the groups".
-* *Example 4.6* [Example 4.13]: drops L(19) = 260, the consecutive front points and the evidence
+* *Example 4.7* [Example 4.13]: drops L(19) = 260, the consecutive front points and the evidence
   from other solvers; "neither (A1) nor (AΔ)" becomes "(H) fails". Not cited by kept results.
-* *Proposition 4.7* [§5]: drops the explanation of the greedy's choices. Cited at 30 and 108 (status
+* *Proposition 4.8* [§5]: drops the explanation of the greedy's choices. Cited at 30 and 108 (status
   tables) and 2061 (§10), all deleted.
 * *Theorem 5.3* [Theorem 6.9]: the template's makespan becomes the closed form M_tmpl. Used at 1154
   (Corollary 6.10, which now combines the closed form with Lemma 5.5) and 1572 (removed).
@@ -428,15 +440,20 @@ result that stays.
   makespan of §6.2, which Corollary 5.6 replaces by M_tmpl.
 * *Corollary 5.6* [Corollary 6.10]: drops F = Min A_eo (event-ordered plans) and the least makespan
   m(cfg). Cited at 1157 and 197 (Statement 1.2, removed).
-* *Proposition 5.7* [Proposition 6.5]: drops "the cheapest role configuration at level 73 costs 14"
-  (minimality) and the waiting argument, now replaced by the certificate. The refutation needs only
-  existence. Not cited by kept results.
+* *Proposition 5.7* [Proposition 6.5]: drops (AΔ-path), the list of all front points (only "cost at
+  least 18 up to makespan 73" is used) and the waiting argument, which the certificate replaces. Not
+  cited by kept results.
 * *Example 5.9* [Example 6.11]: drops F_U = {(8, 8)} (it needed Proposition 6.13) and the remarks on
   relays. Cited at 1252 (Proposition 6.7 text) and 1591 (Proposition 6.15), both removed.
-* *Lemma 5.10* [Lemma 4.3]: drops (a), the hypotheses "simple plan" and "clean journeys" (Lean works
+* *Example 5.10* [Proposition 6.7]: replaces the class bound (every plan whose central flights lie in
+  segments of type Ā has makespan at least 10) by the front of the paper's own construction; fixes
+  c = (6, 1) instead of "any costs"; drops the full front {(4, 10), (15, 8)}, "(A1-NS) fails" and
+  Definition 6.17, whose shuttle situation is defined inside the example. Cited at 1252, 1257–1264,
+  1286, 1334–1340 and 1369 (text, Proposition 6.18, Lemma 6.19, §6.5), all removed.
+* *Lemma 5.11* [Lemma 4.3]: drops (a), the hypotheses "simple plan" and "clean journeys" (Lean works
   on records of any feasible plan) and the cost and λ_k ≤ F_k conclusions (the role-load route takes
   them from Lemma 3.4(c)). (a) was used at 639 (Theorem 4.9, merged), 1034 (Lemma 6.8, removed), 1049
-  (Theorem 6.9, Step 1; re-routed, open question 5) and 1453 (removed).
+  (Theorem 6.9, Step 1; re-routed, review item 5) and 1453 (removed).
 * *Lemma 6.1* [Lemma 7.2]: drops "G is non-increasing in τ". No use.
 * *Proposition 6.4* [Proposition 7.3]: drops U₃. Used at 1680–1690 (Proposition 7.4), 1867 (§7.7)
   and 2007 (§9), removed or untrusted C++.
@@ -457,8 +474,8 @@ result that stays.
 
 **Merge rows.**
 
-* *Lemma 3.5* [Lemma 3.4 + the v2 `relaxed` kind]: the weight becomes e = min(d, d̄), with no
-  assumption; drops ℓ(Y_k) ≤ F_k. Cited at 1842, 1848 and 1950 (which use ≤ M only) and 2044
+* *Lemma 3.5* [Lemma 3.4 + the v2 `relaxed` kind], slug `lem-3-4`: the weight becomes e = min(d, d̄),
+  with no assumption; drops ℓ(Y_k) ≤ F_k. Cited at 1842, 1848 and 1950 (which use ≤ M only) and 2044
   (removed).
 * *Theorem 4.4* [Theorems 4.7, 4.10, Conjecture 4.10]: (A1) and (AΔ) become (H) (Lemma 1.5); the
   form "on any set Q of planes" is the case of any p ≤ t.
@@ -468,64 +485,54 @@ result that stays.
 * *Theorem 7.3* [Corollary 8.3, Theorem 7.5's bounds]: an explicit polynomial replaces the O-bounds;
   drops "not strongly NP-hard unless P = NP" and the open question on E(T) ≤ C.
 
-## 7. Open questions for review
+## 7. Review decisions (2026-11-25)
 
-1. **(AΔ-path) and Proposition 5.7.** §1.4 defines (AΔ-path) by two inequalities, but the instance
-   of Proposition 6.5 violates the second one: for i = 2, z = 1, d_2 = 19 > d̄_2 + d̄_1 + d_1 = 17.
-   Only the first one holds there. The paper says "(AΔ-path) bounds d̄ by d but not d by d̄"
-   (`site/paper/_nonsymmetric.qmd`), against its own two-sided definition (`_model.qmd`), and
-   `checks/waiting_search.cpp` tests the first inequality only. The map defines (AΔ-path) one-sided
-   (Corollary 6.4, the only user of the second inequality, goes). Check which form arXiv:2304.14659
-   assumes before WP5: if it is two-sided, Proposition 5.7 does not refute it as stated.
-2. **The shuttle claim of arXiv §2.3 and §3.3.** `doc/erratum.md` §1 ("shuttles do not complete the
-   front", and "segments with a single central flight do not suffice") rests on Propositions 6.7 and
-   6.18, which the plan removes. By the keep rule they could stay, since they refute a paper claim
-   that the erratum corrects. The map follows the plan. Options: keep Proposition 6.7 with a kernel
-   proof (the plan of makespan 8 is decidable; the bound 10 for shuttle-only plans needs a model of
-   segment classes in Lean, the hard part); drop the erratum item; or restate it through Example 5.9,
-   whose two cities are those of Proposition 6.7.
-3. **Proposition I of the papers.** The remark after Corollary 4.8 claims that with zero costs a plan
-   with 9 landings is Pareto-optimal, and `doc/erratum.md` §2 relies on "Proposition I holds in the
-   sense of the front" (Theorem 4.5). Rule 3 says delete it or number it. If it should stay as a
-   correction of the papers, make it a numbered example with a kernel proof (the plan, and the front
-   {(0, 6)} by a v1 certificate).
-4. **Lemma 2.3.** The plan keeps the component form (Lemma 2.4(a)) as new Lean. Only its
-   disjoint-groups case is used, by Theorems 7.1 and 7.2, so the map narrows it to that case, which
-   needs no T-join. Confirm, or restore (a) (WP6 would build it on `TriCore.exists_tjoin`).
-5. **Kept proofs that used a dropped clause.** Each proof is rewritten to follow its Lean proof,
-   which does not use the clause. WP7 must write them that way:
+The open questions of the first version of this map, with the decisions taken on them. Earlier
+sections cite them as review items.
+
+1. **(AΔ-path)** is removed from the model. Its only users, Corollary 6.4 and Conjecture 6.5, are
+   removed, and Proposition 5.7 is stated without it. (The instance of Proposition 6.5 satisfied only
+   the first of the two inequalities of §1.4, the only one that the paper's prose and
+   `checks/waiting_search.cpp` used.)
+2. **Shuttles.** A refutation of arXiv §2.3 and §3.3 stays, since it refutes a paper claim: Example
+   5.10, slug `prop-6-7`, through the paper's own construction; `conj-6-7` stays in the ledger as the
+   refuted claim. Definition 6.17, Proposition 6.18 and `claim-6-18-d` stay removed, and the example
+   defines what it needs. The sentence of `doc/erratum.md` §1 on segments with one central flight
+   loses its support (WP9).
+3. **Proposition I.** The remark after Corollary 4.8 becomes Example 4.6, slug
+   `claim-extra-landings`, with a kernel proof (WP5).
+4. **Lemma 2.3** is narrowed to disjoint groups, the only case Theorems 7.1 and 7.2 use.
+5. **Proofs re-routed to Lean.** Each kept proof that used a dropped clause is written as its Lean
+   proof, which does not use the clause:
    * Lemma 2.6, "only if" (Lemma 2.4(b)) → a witness with the fewest edges and removal of a leaf
      (`Admissible.exists_linkForest`, `Admissible.exists_minimal`).
-   * Theorem 4.4, Step 2 (the T-join "as in Lemma 2.4(b)") → `TriCore.exists_tjoin`; and Step 4 ("leave
-     out a segment") → merging two segments of one plane (`exists_merge`).
+   * Theorem 4.4, Step 2 (the T-join "as in Lemma 2.4(b)") → `TriCore.exists_tjoin`; and Step 4
+     ("leave out a segment") → merging two segments of one plane (`exists_merge`).
    * Theorem 5.3, Step 1 (Lemma 4.3(a)) → Lemma 3.2(b) (`exists_transfer_pw`).
    * Theorem 5.3, Step 6 (Lemma 4.4) → the shrinking inside the proof (`exists_sched_of`, Step 6), so
-     Theorem 5.3 does not depend on Lemma 5.11.
+     Theorem 5.3 does not depend on Lemma 5.12.
    * Theorem 6.8 (the bound on η_k from Lemma 2.8(c)) → Lemma 2.4 and η_k ⊆ Z(h)
      (`sigmaBoundAt_le_totalCost`).
    * Proposition 3.6, cost bound ("at least s central landings" of Lemma 3.2) → Lemma 3.5
      (`Feasible.minOf_le_cost_emin`).
-6. **WP4 and Lemmas 5.10–5.11.** `Sched.load k ≤ Sched.tmpl` holds by the definition of `tmpl` as a
-   maximum, so Corollary 5.4 should follow from Theorem 5.3. Lemmas 5.10 and 5.11 then have no user
-   left (Theorem 5.3 needs neither, item 5), and should go with their Lean:
-   `Feasible.exists_roleConfig_records`, `RoleConfig.exists_shrink`, and `PlaneFeasible.cntA_eq` and
-   `roleW_landingRecs_le`, whose only users they are (the visit forms of Lemmas 3.1 and 3.4 stay).
-   They are last in §5, so nothing shifts. If the corollary route fails, they move before
-   Corollary 5.4 and §5 is renumbered.
+6. **Lemmas 5.11 and 5.12** are removed if WP4 confirms Corollary 5.4 from Theorem 5.3
+   (`Sched.load k ≤ Sched.tmpl` holds by the definition of `tmpl` as a maximum, and Theorem 5.3 needs
+   neither lemma, item 5). Their Lean goes with them: `Feasible.exists_roleConfig_records`,
+   `RoleConfig.exists_shrink`, and `PlaneFeasible.cntA_eq` and `roleW_landingRecs_le`, whose only
+   users they are (the visit forms of Lemmas 3.1 and 3.4 stay). They are last in §5, so nothing
+   shifts. If the corollary route fails, they move before Corollary 5.4 and §5 is renumbered.
 7. **WP3.** Lemma 2.7 and Theorem 6.8 stand or fall with the σ-DP. If it goes, Theorem 6.9 becomes
    Theorem 6.8; nothing else shifts.
 8. **Proposition 7.10** splits into Proposition 3.6 (lower bounds) and Lemma 6.2 (E = ∞ below
-   d_min⌈s/p⌉). Table C sends the label to Proposition 3.6; its four site uses need a manual check.
-9. **Numbered model definitions.** The model (§1.1, §1.2, §1.4, §1.5) becomes Definitions 1.1, 1.2,
-   1.4 and 1.6 with new `def-` slugs, and the blueprint nodes labelled "§1.1" etc. take these labels.
-   The alternative is to keep them as unnumbered section nodes.
-10. **Surviving slugs of merges.** `thm-4-10` (its Lean is the hub converse), `cor-4-8` (the front)
-    and `lem-relaxation-emin` (over `lem-3-4`, since the emin relaxation was to get a new slug). The
-    alternative for the relaxation is to keep `lem-3-4` as the surviving ID.
-11. **Conjecture 6.5** has no slug of its own (it is `paper-no-harmful-waiting`); Table C redirects
-    its label to Proposition 5.7, which states the claim it refutes.
+   d_min⌈s/p⌉). Table C sends the label to Proposition 3.6; its four site uses are checked by hand.
+9. **Model definitions** are numbered: Definitions 1.1, 1.2, 1.4 and 1.6, with new `def-` slugs; the
+   blueprint nodes labelled "§1.1" etc. take these labels.
+10. **Surviving slugs of merges:** `lem-3-4` (the relaxation), `thm-4-10` (the converse) and
+    `cor-4-8` (the front).
+11. **Conjecture 6.5** has no slug of its own (it is `paper-no-harmful-waiting`); Table C redirects its
+    label to Proposition 5.7, which states the claim it refutes, and Conjecture 6.7 to Example 5.10.
 
-## 8. Notes for WP8 (ledger)
+## 8. Notes for WP8 (ledger) and WP9
 
 * `exp-e9-linear-family` is archived with §10 (decision 3); `exp-e10-greedy-density` drops
   `conj-10-2` from `tests`.
@@ -535,3 +542,10 @@ result that stays.
 * New definition claims (`def-instance`, `def-plan`, `def-assumptions`, `def-front`,
   `def-link-forest`, `def-scheduled-config`, `def-flight-graph`) are badged machine-checked by their
   Lean definitions, as `def-2-2` is.
+* `lem-3-4` survives the relaxation merge and takes the statement with the weight min(d, d̄).
+* `paper-no-harmful-waiting` is restated without (AΔ-path).
+* `prop-6-7` takes the label Example 5.10 and its new statement; `conj-6-7` is restated as the claim of
+  arXiv §2.3 and §3.3 and stays `math.disproved`, refuted by Example 5.10.
+* `claim-extra-landings` (Example 4.6) is new.
+* WP9: `doc/erratum.md` §1 keeps its shuttle item, now proved by Example 5.10, and drops the sentence
+  on segments with one central flight (Proposition 6.18 goes).
