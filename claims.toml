@@ -528,6 +528,14 @@ status    = "math.proved-informal"
 paper     = "Prop 6.16, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
+[claims.def-scheduled-config]
+kind      = "definition"
+statement = "Definition (scheduled configuration, template value), new in revision 3: A scheduled configuration gives each plane an ordered list of drop-offs, an ordered list of pick-ups and a multiset of crossings, and matches every pick-up slot to a drop-off slot; it is valid if every |Cr_k| is odd and the matching is a bijection between pick-up and drop-off slots of the same city. Its template value is M_tmpl = max(max_k λ_k, max over links (u, j; v, l) at x of Pre_u(j) + d_x + d̄_x + Suf_v(l)), with Pre_u(j) = 2Σ_{j′<j} d(Dr_u[j′]) and Suf_v(l) = 2Σ_{l′>l} d̄(Pk_v[l′])."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Sched, ZenoFront.Sched.Valid, ZenoFront.Sched.size, ZenoFront.Sched.cost, ZenoFront.Sched.load, ZenoFront.Sched.pre, ZenoFront.Sched.suf, ZenoFront.Sched.term, ZenoFront.Sched.tmpl"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
