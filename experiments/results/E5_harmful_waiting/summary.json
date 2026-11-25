@@ -1,13 +1,13 @@
 {
   "claim": "exp-e5-harmful-waiting",
-  "criterion": "on the instance of Proposition 6.5 the cheapest point with makespan <= 73 costs 14 when waiting is ignored and 18 with exact waiting, and zeno, zenoOracle and config_front all give the front stated in the note",
+  "criterion": "on the instance of Proposition 5.7 the cheapest point with makespan <= 73 costs 14 when waiting is ignored and 18 with exact waiting, and zeno, zenoOracle and config_front all give the front stated in the note",
   "experiment": "E5_harmful_waiting",
-  "explanation": "Ignoring waiting gives [(14, 72), (30, 50)] on the Prop 6.5 instance, which no plan reaches: the cheapest plan within makespan 73 costs 18, not 14. Harmful waiting is rare at the configuration level (1 of 900,143, 29 of 1,011,529, 28 of 506,408) but changes the front of 9 of 150 instances shaped like Prop 6.5 and 0 of 150 uniform ones.",
+  "explanation": "Ignoring waiting gives [(14, 72), (30, 50)] on the Prop 5.7 instance, which no plan reaches: the cheapest plan within makespan 73 costs 18, not 14. Harmful waiting is rare at the configuration level (1 of 900,143, 29 of 1,011,529, 28 of 506,408) but changes the front of 9 of 150 instances shaped like Prop 5.7 and 0 of 150 uniform ones.",
   "figures": [
     "E5_harmful_waiting/harmful_waiting.png",
     "E5_harmful_waiting/harmful_waiting.svg"
   ],
-  "hypothesis": "Conjecture 6.5 (no harmful waiting) would make the front the Pareto set of (cost, largest load) over role configurations; Proposition 6.5 says it is not.",
+  "hypothesis": "No harmful waiting (the papers' assumption) would make the front the Pareto set of (cost, largest load) over role configurations; Proposition 5.7 says it is not.",
   "metrics": {
     "configuration_search": {
       "one shortest crossing per plane, p<=4, <=5 links, d<=20": {
@@ -294,7 +294,7 @@
       "one shortest crossing per plane, p<=5, <=6 links, d<=30": "100,000 trials x 8 seeds",
       "random crossings, p<=4, <=4 links, d<=12": "200,000 trials x 8 seeds"
     },
-    "front_level": "300 instances, half uniform (d, dbar in [1,20]), half shaped like Prop 6.5; n<=3, p<=4, t<=7, s<=10"
+    "front_level": "300 instances, half uniform (d, dbar in [1,20]), half shaped like Prop 5.7; n<=3, p<=4, t<=7, s<=10"
   },
   "tests": [
     "prop-6-5"
