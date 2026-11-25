@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="ZenoSolver computes the exact Pareto fronts, cost against makespan, of MultiZenoTravel planning instances, with machine-checked proofs in Lean 4.">
+<meta name="description" content="MultiZenoTravel, a multi-objective planning benchmark: ZenoSolver computes its exact Pareto fronts, cost against makespan, with machine-checked proofs in Lean 4.">
 
 <title>ZenoSolver</title>
 <style>
@@ -77,6 +77,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/provenance.css">
 <link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/problem.css">
 <link rel="stylesheet" href="styles/home.css">
 </head>
 
@@ -328,8 +329,10 @@ ul.task-list li input[type="checkbox"] {
 
 
 <!-- Homepage. Every figure below is copied from a generated or checked source; update them together.
-  - The front of the worked example (n = 3, t = 3, p = 2, site/problem/example.dat):
-      build/release/zeno -n 3 -t 3 -p 2 -d site/problem/example.dat
+  - The example in the hero (n = 3, t = 3, p = 2, site/problem/example.dat), its front and the
+    plans the player shows: site/problem/plans.json, written by gen_problem.py from
+      build/release/zeno -n 3 -t 3 -p 2 -d site/problem/example.dat --plans
+    The front SVG is drawn by hand from the same points.
   - 66 of 66, slowest 61 ms (zeno); 66 of 66 with the same front (zeno-front); 66 of 66 accepted
     (zeno-check): site/_results-summary.md, written by gen_pages.py from the committed baselines.
   - The Lean tally (machine-checked results, results with parts in Lean, Lean definitions) is
@@ -339,86 +342,97 @@ ul.task-list li input[type="checkbox"] {
 <div class="zs-home">
 
 <section class="home-hero" aria-labelledby="home-title">
-  <h1 class="home-title" id="home-title">Exact Pareto fronts, with <span class="nobr">machine-checked</span> proofs.</h1>
-  <div class="home-hero-body">
-    <div class="home-copy">
-      <p class="home-lede"><strong>ZenoSolver</strong> computes the exact Pareto front, cost against makespan, of MultiZenoTravel planning instances.</p>
-      <p class="home-lede">For symmetric durations, the front theorem, a solver and a certificate checker are proved in Lean 4.</p>
-    </div>
+  <h1 class="home-title" id="home-title">A multi-objective planning benchmark with exact, <span class="nobr">proven</span> Pareto fronts.</h1>
+  <div class="home-copy">
+    <p class="home-lede"><strong>MultiZenoTravel</strong>: planes carry passengers from C<sub>I</sub> to C<sub>G</sub> through central cities. Every landing has a price, and the cheap cities are the far ones, so each plan trades its <strong>cost</strong> against its <strong>makespan</strong>. The best trade-offs form the Pareto front.</p>
+    <p class="home-lede"><strong>ZenoSolver</strong> computes that front exactly. For symmetric durations, the front theorem and a solver are proved in Lean 4, and every front of the benchmark suite carries a certificate accepted by a checker proved sound in Lean 4.</p>
+  </div>
+
+  <div class="home-demo" id="home-demo" data-zs-plans="problem/plans.json" data-featured="20">
+    <figure class="home-map figure">
+      <p class="home-figlabel">One instance · 3 central cities · 3 passengers · 2 planes</p>
+      <div class="zs-plan-stage">
+        <div data-part="map" class="zs-plan-map"></div>
+        <div data-part="controls" class="zs-plan-controls"></div>
+        <p data-part="story" class="zs-plan-story" aria-live="polite"></p>
+      </div>
+      <figcaption>The numbers on the flights are durations; each central city shows its landing cost. A plane carries one passenger at a time, and a passenger may change planes in a central city.</figcaption>
+      <noscript><p>The plan player needs JavaScript. The plans are in <a href="problem/plans.json">problem/plans.json</a>.</p></noscript>
+    </figure>
 
     <figure class="home-front figure" id="home-front">
-      <svg viewbox="0 0 440 300" role="img" aria-labelledby="home-front-title home-front-desc">
-        <title id="home-front-title">The Pareto front of the worked example</title>
-        <desc id="home-front-desc">Six points, as cost and makespan: (4, 20), (14, 16), (20, 14), (24, 12), (30, 10), (36, 8). Every plan of the instance lies on or above and to the right of the staircase through them.</desc>
-        <defs>
-          <clippath id="hf-plot"><rect x="40" y="22" width="386" height="238"></rect></clippath>
-          <filter id="hf-wash" x="-10%" y="-10%" width="120%" height="120%">
-            <feturbulence type="fractalNoise" basefrequency="0.028" numoctaves="3" seed="9"></feturbulence>
-            <fedisplacementmap in="SourceGraphic" scale="16" xchannelselector="R" ychannelselector="G"></fedisplacementmap>
-            <fegaussianblur stddeviation="1.1"></fegaussianblur>
-          </filter>
-        </defs>
+      <p class="home-figlabel">Its Pareto front · cost against makespan</p>
+  <svg viewbox="0 0 440 300" role="img" aria-labelledby="home-front-title home-front-desc">
+          <title id="home-front-title">The Pareto front of the example</title>
+          <desc id="home-front-desc">Six points, as cost and makespan: (4, 20), (14, 16), (20, 14), (24, 12), (30, 10), (36, 8). Every plan of the instance lies on or above and to the right of the staircase through them.</desc>
+          <defs>
+            <clippath id="hf-plot"><rect x="40" y="22" width="386" height="238"></rect></clippath>
+            <filter id="hf-wash" x="-10%" y="-10%" width="120%" height="120%">
+              <feturbulence type="fractalNoise" basefrequency="0.028" numoctaves="3" seed="9"></feturbulence>
+              <fedisplacementmap in="SourceGraphic" scale="16" xchannelselector="R" ychannelselector="G"></fedisplacementmap>
+              <fegaussianblur stddeviation="1.1"></fegaussianblur>
+            </filter>
+          </defs>
 
-        <g class="grid" aria-hidden="true">
-          <line x1="40" x2="426" y1="230.2" y2="230.2"></line>
-          <line x1="40" x2="426" y1="170.8" y2="170.8"></line>
-          <line x1="40" x2="426" y1="111.2" y2="111.2"></line>
-          <line x1="40" x2="426" y1="51.8" y2="51.8"></line>
-          <line x1="136.5" x2="136.5" y1="22" y2="260"></line>
-          <line x1="233" x2="233" y1="22" y2="260"></line>
-          <line x1="329.5" x2="329.5" y1="22" y2="260"></line>
-          <line x1="426" x2="426" y1="22" y2="260"></line>
-        </g>
+          <g class="grid" aria-hidden="true">
+            <line x1="40" x2="426" y1="230.2" y2="230.2"></line>
+            <line x1="40" x2="426" y1="170.8" y2="170.8"></line>
+            <line x1="40" x2="426" y1="111.2" y2="111.2"></line>
+            <line x1="40" x2="426" y1="51.8" y2="51.8"></line>
+            <line x1="136.5" x2="136.5" y1="22" y2="260"></line>
+            <line x1="233" x2="233" y1="22" y2="260"></line>
+            <line x1="329.5" x2="329.5" y1="22" y2="260"></line>
+            <line x1="426" x2="426" y1="22" y2="260"></line>
+          </g>
 
-        <g clip-path="url(#hf-plot)" aria-hidden="true">
-          <polygon class="wash" filter="url(#hf-wash)" points="78.6,0 78.6,51.8 175.1,51.8 175.1,111.2 233,111.2 233,141 271.6,141 271.6,170.8 329.5,170.8 329.5,200.5 387.4,200.5 387.4,230.2 460,230.2 460,0"></polygon>
-        </g>
+          <g clip-path="url(#hf-plot)" aria-hidden="true">
+            <polygon class="wash" filter="url(#hf-wash)" points="78.6,0 78.6,51.8 175.1,51.8 175.1,111.2 233,111.2 233,141 271.6,141 271.6,170.8 329.5,170.8 329.5,200.5 387.4,200.5 387.4,230.2 460,230.2 460,0"></polygon>
+          </g>
 
-        <g aria-hidden="true">
-          <line class="axis-line" x1="40" x2="40" y1="22" y2="260"></line>
-          <line class="axis-line" x1="40" x2="426" y1="260" y2="260"></line>
-          <text x="32" y="234.2" text-anchor="end">8</text>
-          <text x="32" y="174.8" text-anchor="end">12</text>
-          <text x="32" y="115.2" text-anchor="end">16</text>
-          <text x="32" y="55.8" text-anchor="end">20</text>
-          <text x="40" y="278" text-anchor="middle">0</text>
-          <text x="136.5" y="278" text-anchor="middle">10</text>
-          <text x="233" y="278" text-anchor="middle">20</text>
-          <text x="329.5" y="278" text-anchor="middle">30</text>
-          <text x="426" y="278" text-anchor="middle">40</text>
-          <text class="axis-title" x="40" y="12">makespan</text>
-          <text class="axis-title" x="426" y="297" text-anchor="end">cost</text>
-          <text class="region" x="372" y="86" text-anchor="middle">dominated</text>
-          <text class="region" x="56" y="238">unattainable</text>
-        </g>
+          <g aria-hidden="true">
+            <line class="axis-line" x1="40" x2="40" y1="22" y2="260"></line>
+            <line class="axis-line" x1="40" x2="426" y1="260" y2="260"></line>
+            <text x="32" y="234.2" text-anchor="end">8</text>
+            <text x="32" y="174.8" text-anchor="end">12</text>
+            <text x="32" y="115.2" text-anchor="end">16</text>
+            <text x="32" y="55.8" text-anchor="end">20</text>
+            <text x="40" y="278" text-anchor="middle">0</text>
+            <text x="136.5" y="278" text-anchor="middle">10</text>
+            <text x="233" y="278" text-anchor="middle">20</text>
+            <text x="329.5" y="278" text-anchor="middle">30</text>
+            <text x="426" y="278" text-anchor="middle">40</text>
+            <text class="axis-title" x="40" y="12">makespan</text>
+            <text class="axis-title" x="426" y="297" text-anchor="end">cost</text>
+            <text class="region" x="372" y="86" text-anchor="middle">dominated</text>
+            <text class="region" x="56" y="238">unattainable</text>
+          </g>
 
-        <polyline class="stairs" aria-hidden="true" points="78.6,22 78.6,51.8 175.1,51.8 175.1,111.2 233,111.2 233,141 271.6,141 271.6,170.8 329.5,170.8 329.5,200.5 387.4,200.5 387.4,230.2 426,230.2"></polyline>
+          <polyline class="stairs" aria-hidden="true" points="78.6,22 78.6,51.8 175.1,51.8 175.1,111.2 233,111.2 233,141 271.6,141 271.6,170.8 329.5,170.8 329.5,200.5 387.4,200.5 387.4,230.2 426,230.2"></polyline>
 
-        <text class="end-label" x="88" y="43" aria-hidden="true">(4, 20) cheapest</text>
-        <text class="end-label" x="378" y="250" text-anchor="end" aria-hidden="true">fastest (36, 8)</text>
-
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 4, makespan 20" data-x="78.6" data-y="51.8" data-cost="4" data-makespan="20">
-          <circle class="hit" cx="78.6" cy="51.8" r="15"></circle><circle class="halo" cx="78.6" cy="51.8" r="10"></circle><circle class="dot" cx="78.6" cy="51.8" r="4.5"></circle>
-        </g>
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 14, makespan 16" data-x="175.1" data-y="111.2" data-cost="14" data-makespan="16">
-          <circle class="hit" cx="175.1" cy="111.2" r="15"></circle><circle class="halo" cx="175.1" cy="111.2" r="10"></circle><circle class="dot" cx="175.1" cy="111.2" r="4.5"></circle>
-        </g>
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 20, makespan 14" data-x="233" data-y="141" data-cost="20" data-makespan="14">
-          <circle class="hit" cx="233" cy="141" r="15"></circle><circle class="halo" cx="233" cy="141" r="10"></circle><circle class="dot" cx="233" cy="141" r="4.5"></circle>
-        </g>
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 24, makespan 12" data-x="271.6" data-y="170.8" data-cost="24" data-makespan="12">
-          <circle class="hit" cx="271.6" cy="170.8" r="15"></circle><circle class="halo" cx="271.6" cy="170.8" r="10"></circle><circle class="dot" cx="271.6" cy="170.8" r="4.5"></circle>
-        </g>
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 30, makespan 10" data-x="329.5" data-y="200.5" data-cost="30" data-makespan="10">
-          <circle class="hit" cx="329.5" cy="200.5" r="15"></circle><circle class="halo" cx="329.5" cy="200.5" r="10"></circle><circle class="dot" cx="329.5" cy="200.5" r="4.5"></circle>
-        </g>
-        <g class="pt" tabindex="0" role="img" aria-label="Cost 36, makespan 8" data-x="387.4" data-y="230.2" data-cost="36" data-makespan="8">
-          <circle class="hit" cx="387.4" cy="230.2" r="15"></circle><circle class="halo" cx="387.4" cy="230.2" r="10"></circle><circle class="dot" cx="387.4" cy="230.2" r="4.5"></circle>
-        </g>
-      </svg>
+          <text class="end-label" x="88" y="43" aria-hidden="true">(4, 20) cheapest</text>
+          <text class="end-label" x="378" y="250" text-anchor="end" aria-hidden="true">fastest (36, 8)</text>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 4 and makespan 20" data-x="78.6" data-y="51.8" data-cost="4" data-makespan="20">
+            <circle class="hit" cx="78.6" cy="51.8" r="15"></circle><circle class="halo" cx="78.6" cy="51.8" r="10"></circle><circle class="ring" cx="78.6" cy="51.8" r="9"></circle><circle class="dot" cx="78.6" cy="51.8" r="4.5"></circle>
+          </g>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 14 and makespan 16" data-x="175.1" data-y="111.2" data-cost="14" data-makespan="16">
+            <circle class="hit" cx="175.1" cy="111.2" r="15"></circle><circle class="halo" cx="175.1" cy="111.2" r="10"></circle><circle class="ring" cx="175.1" cy="111.2" r="9"></circle><circle class="dot" cx="175.1" cy="111.2" r="4.5"></circle>
+          </g>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 20 and makespan 14" data-x="233" data-y="141" data-cost="20" data-makespan="14">
+            <circle class="hit" cx="233" cy="141" r="15"></circle><circle class="halo" cx="233" cy="141" r="10"></circle><circle class="ring" cx="233" cy="141" r="9"></circle><circle class="dot" cx="233" cy="141" r="4.5"></circle>
+          </g>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 24 and makespan 12" data-x="271.6" data-y="170.8" data-cost="24" data-makespan="12">
+            <circle class="hit" cx="271.6" cy="170.8" r="15"></circle><circle class="halo" cx="271.6" cy="170.8" r="10"></circle><circle class="ring" cx="271.6" cy="170.8" r="9"></circle><circle class="dot" cx="271.6" cy="170.8" r="4.5"></circle>
+          </g>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 30 and makespan 10" data-x="329.5" data-y="200.5" data-cost="30" data-makespan="10">
+            <circle class="hit" cx="329.5" cy="200.5" r="15"></circle><circle class="halo" cx="329.5" cy="200.5" r="10"></circle><circle class="ring" cx="329.5" cy="200.5" r="9"></circle><circle class="dot" cx="329.5" cy="200.5" r="4.5"></circle>
+          </g>
+          <g class="pt" tabindex="0" role="button" aria-pressed="false" aria-label="Play the plan of cost 36 and makespan 8" data-x="387.4" data-y="230.2" data-cost="36" data-makespan="8">
+            <circle class="hit" cx="387.4" cy="230.2" r="15"></circle><circle class="halo" cx="387.4" cy="230.2" r="10"></circle><circle class="ring" cx="387.4" cy="230.2" r="9"></circle><circle class="dot" cx="387.4" cy="230.2" r="4.5"></circle>
+          </g>
+        </svg>
       <div class="front-tip" hidden=""><b class="tip-c"></b> <span>cost</span><br><b class="tip-m"></b> <span>makespan</span></div>
       <figcaption>
-        The front of one instance: 3 central cities, 3 passengers, 2 planes. No plan is both cheaper and faster than a point of the front. <a href="problem.html">The problem, worked through</a>
+        Each point is a plan, and no plan is both cheaper and faster. Pick a point to play its plan on the map. <a href="problem.html">The problem, worked through</a>
         <ul class="front-points" aria-label="The six points of the front, as (cost, makespan)">
           <li>(4, 20)</li><li>(14, 16)</li><li>(20, 14)</li><li>(24, 12)</li><li>(30, 10)</li><li>(36, 8)</li>
         </ul>
@@ -432,8 +446,8 @@ ul.task-list li input[type="checkbox"] {
   <ul class="home-routes">
     <li><a class="route" href="problem.html">
       <span class="route-name">Problem<span class="arrow" aria-hidden="true">→</span></span>
-      <span class="route-text">Planes carry passengers from one city to another through central cities. Every plan has a cost and a makespan.</span>
-      <span class="route-fact">cost · makespan</span>
+      <span class="route-text">The model, a plan played step by step with its cost and makespan, and why the problem is hard.</span>
+      <span class="route-fact">model · plans · parity</span>
     </a></li>
     <li><a class="route" href="paper/index.html">
       <span class="route-name">Paper<span class="arrow" aria-hidden="true">→</span></span>
@@ -516,15 +530,21 @@ ul.task-list li input[type="checkbox"] {
 
 </div>
 
+<script src="js/plan-viewer.js"></script>
 <script>
 (function () {
   var fig = document.getElementById('home-front');
-  if (!fig) return;
+  var demo = document.getElementById('home-demo');
+  if (!fig || !demo) return;
   var svg = fig.querySelector('svg');
   var tip = fig.querySelector('.front-tip');
   var vc = tip.querySelector('.tip-c');
   var vm = tip.querySelector('.tip-m');
+  var pts = Array.prototype.slice.call(fig.querySelectorAll('.pt'));
   var on = null;
+  var viewer = null;
+
+  // Hover and focus: a tooltip with the point's cost and makespan.
   function show(pt) {
     if (on) on.classList.remove('is-on');
     on = pt;
@@ -549,11 +569,49 @@ ul.task-list li input[type="checkbox"] {
     on = null;
     tip.hidden = true;
   }
-  fig.querySelectorAll('.pt').forEach(function (pt) {
+
+  // Selection: a point of the front is a plan; picking it plays that plan on the map.
+  function pick(pt) {
+    if (!viewer) return;
+    var cost = Number(pt.getAttribute('data-cost'));
+    var i = viewer.data.plans.findIndex(function (p) { return p.cost === cost; });
+    if (i < 0) return;
+    viewer.select(i);
+    viewer.play();
+  }
+  demo.addEventListener('zs-plan-select', function (e) {
+    var first = viewer === null;
+    viewer = e.detail.viewer;
+    pts.forEach(function (pt) {
+      var sel = Number(pt.getAttribute('data-cost')) === e.detail.plan.cost;
+      pt.classList.toggle('is-sel', sel);
+      pt.setAttribute('aria-pressed', String(sel));
+    });
+    if (first) autoplay(viewer);
+  });
+
+  // Play the featured plan once, when the player first comes into view. Nothing moves on its
+  // own for a reader who asked for reduced motion; the controls still play it.
+  function autoplay(v) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (en) { return en.isIntersecting; })) return;
+      io.disconnect();
+      if (!v.playing && v.tau === 0) v.play();
+    }, { threshold: 0.6 });
+    io.observe(demo.querySelector('.home-map'));
+  }
+
+  pts.forEach(function (pt) {
     pt.addEventListener('pointerenter', function () { show(pt); });
     pt.addEventListener('pointerleave', hide);
     pt.addEventListener('focus', function () { show(pt); });
     pt.addEventListener('blur', hide);
+    pt.addEventListener('click', function () { pick(pt); });
+    pt.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(pt); }
+    });
   });
 })();
 </script>
