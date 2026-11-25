@@ -45,3 +45,4 @@ public import ZenoFront.LinkForest
 public import ZenoFront.TreeBound
 public import ZenoFront.RationalPlans
 public import ZenoFront.FrontTri
+public import ZenoFront.Complexity

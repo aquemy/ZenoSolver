@@ -86,7 +86,8 @@ created   = "2026-11-23"
 [claims.lem-2-4]
 kind      = "lemma"
 statement = "Lemma 2.4 (component form): (a) a partition is admissible iff every connected component of the plane-city graph H (k joined to i when X_k(i) ≥ 1) has an even number of even planes; (b) then every spanning forest of H contains the support of some parity matrix."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.admissible_iff_odd_of_disjoint"
 paper     = "Lemma 2.4, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
