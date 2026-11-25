@@ -18,18 +18,19 @@ A *role configuration* gives every plane `k` three multisets of landings:
 
 and every city receives as many drop-offs as pick-ups: `Σ_k D_k = Σ_k P_k`.
 
-This is the abstraction of a plan without central flights used by the direct-selection
-converse (lemmas DS and PAR of the proof review). Its grouping is `X_k = D_k + P_k + Cr_k`.
+This is the abstraction of a plan used by the non-symmetric converse (Theorem 6.1) and its
+bounds. Every feasible plan gives one (Lemma 4.3(b), `Feasible.exists_roleConfig_records`). Its
+grouping is `X_k = D_k + P_k + Cr_k`.
 
 ## Main results
 
-* `ZenoFront.RoleConfig.isParityWitness_witness` (PAR): the grouping of a role configuration is
-  admissible, with the explicit witness `h_{k,i} = (D_k(i) + P_k(i)) mod 2`.
-* `ZenoFront.IsParityWitness.exists_roleConfig` (converse): from any parity witness `h` of `X`,
-  build a role configuration with grouping `X` and `D_k + P_k = h k`, by splitting the planes of
-  `h` at every city into two halves of equal size.
-* `ZenoFront.admissible_iff_exists_roleConfig`: admissible groupings are exactly the groupings
-  of role configurations.
+* `ZenoFront.RoleConfig`, `ZenoFront.RoleConfig.groups`: role configurations and their groupings.
+* `ZenoFront.RoleConfig.isParityWitness_witness` (Lemma 4.5, PAR): the grouping of a role
+  configuration is admissible, with the explicit witness `h_{k,i} = (D_k(i) + P_k(i)) mod 2`.
+  Nothing else uses it; it is kept until revision 3 archives Lemma 4.5 (WP8).
+* `ZenoFront.IsParityWitness.exists_roleConfig`: from any parity witness `h` of `X`, build a role
+  configuration with grouping `X` and `D_k + P_k = h k`, by splitting the planes of `h` at every
+  city into two halves of equal size.
 -/
 
 @[expose] public section
@@ -59,7 +60,8 @@ variable (R : RoleConfig n p)
 /-- The grouping of a role configuration, `X_k = D_k + P_k + Cr_k`. -/
 def groups : Groups n p := fun k => R.drop k + R.pick k + R.cross k
 
-/-- The parity witness of PAR: `i ∈ h k` iff `D_k(i) + P_k(i)` is odd. -/
+/-- The parity witness of PAR: `i ∈ h k` iff `D_k(i) + P_k(i)` is odd. Kept until revision 3
+archives Lemma 4.5 (WP8). -/
 def witness (k : Fin p) : Finset (Fin n) :=
   {i | Odd ((R.drop k + R.pick k).count i)}
 
@@ -78,8 +80,8 @@ private theorem card_filter_odd_mod_two {ι : Type*} (s : Finset ι) (f : ι →
   rw [Nat.even_iff, Nat.even_iff] at this
   omega
 
-/-- **PAR.** The grouping of a role configuration is admissible, with witness
-`h_{k,i} = (D_k(i) + P_k(i)) mod 2`. -/
+/-- **PAR (Lemma 4.5).** The grouping of a role configuration is admissible, with witness
+`h_{k,i} = (D_k(i) + P_k(i)) mod 2`. Kept until revision 3 archives Lemma 4.5 (WP8). -/
 theorem isParityWitness_witness : IsParityWitness R.groups R.witness where
   subset k i hi := by
     rw [mem_witness] at hi
@@ -105,7 +107,7 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness where
     rw [Nat.even_iff, h₁, h₂]
     omega
 
-/-- **PAR**, admissibility form. -/
+/-- **PAR (Lemma 4.5)**, admissibility form. Kept until revision 3 archives Lemma 4.5 (WP8). -/
 theorem admissible_groups : Admissible R.groups := ⟨_, R.isParityWitness_witness⟩
 
 end RoleConfig
@@ -119,11 +121,11 @@ theorem val_le (hw : IsParityWitness X h) (k : Fin p) : (h k).val ≤ X k := by
   intro i hi
   simpa using hw.subset k hi
 
-/-- **Converse of PAR.** A parity witness `h` of `X` gives a role configuration with grouping
-`X` whose drop-offs and pick-ups at plane `k` are exactly the cities of `h k`: at every city,
-the (even number of) planes of `h` are split into two halves of equal size, the first half
-dropping and the second half picking up. The remaining `|X_k| − |h k|` landings, an odd number,
-are crossings. -/
+/-- **Role configurations from a parity witness.** A parity witness `h` of `X` gives a role
+configuration with grouping `X` whose drop-offs and pick-ups at plane `k` are exactly the cities
+of `h k`: at every city, the (even number of) planes of `h` are split into two halves of equal
+size, the first half dropping and the second half picking up. The remaining `|X_k| − |h k|`
+landings, an odd number, are crossings. -/
 theorem exists_roleConfig (hw : IsParityWitness X h) :
     ∃ R : RoleConfig n p, R.groups = X ∧ ∀ k, R.drop k + R.pick k = (h k).val := by
   -- At each city `i`, choose half `A i` of the planes `K i = {k | i ∈ h k}`.
@@ -172,16 +174,11 @@ theorem exists_roleConfig (hw : IsParityWitness X h) :
 
 end IsParityWitness
 
-/-- The converse of PAR, admissibility form. -/
+/-- Every admissible grouping is the grouping of a role configuration. -/
 theorem Admissible.exists_roleConfig {X : Groups n p} (hX : Admissible X) :
     ∃ R : RoleConfig n p, R.groups = X := by
   obtain ⟨h, hw⟩ := hX
   obtain ⟨R, hR, -⟩ := hw.exists_roleConfig
   exact ⟨R, hR⟩
-
-/-- Admissible groupings are exactly the groupings of role configurations. -/
-theorem admissible_iff_exists_roleConfig (X : Groups n p) :
-    Admissible X ↔ ∃ R : RoleConfig n p, R.groups = X :=
-  ⟨Admissible.exists_roleConfig, fun ⟨R, hR⟩ => hR ▸ R.admissible_groups⟩
 
 end ZenoFront

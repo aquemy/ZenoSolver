@@ -117,16 +117,15 @@ nodes without a status and carry no claim.
 A kernel-checked theorem:
 
 ```
-formalize(lean): Theorem 4.7, every plan is dominated by an admissible partition
+formalize(lean): Theorem 4.10, every plan is dominated by an admissible partition
 
-Lean form: 2 δ(X_k) ≤ M in place of ℓ(X_k) ≤ F_k ≤ M.
+Lean form: under the triangles through a hub (Network.ATriHub), which (AΔ) and (A1) imply.
 
-Lean: ZenoFront.Feasible.exists_admissible
+Lean: ZenoFront.Feasible.exists_admissible_hub
 Status: math.machine-checked
-Axioms: 'ZenoFront.Feasible.exists_admissible' depends on axioms: [propext, Classical.choice, Quot.sound]
-Closes: claim:thm-4-7
-Depends-On: claim:lem-4-4
-Depends-On: claim:lem-4-5
+Axioms: 'ZenoFront.Feasible.exists_admissible_hub' depends on axioms: [propext, Classical.choice, Quot.sound]
+Closes: claim:thm-4-10
+Depends-On: claim:lem-4-11
 ```
 
 A written proof:

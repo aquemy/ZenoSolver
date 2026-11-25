@@ -3,22 +3,22 @@
 `ZenoFront` is a Lean 4 / Mathlib library about the exact Pareto front of symmetric
 MultiZenoTravel. The informal proofs are in
 [`doc/theory/exact-front.md`](../doc/theory/exact-front.md); the statements follow the IDs of
-the proof review and of the note (Claim A, PAR, Claim B′, G, R, Theorem 4.7).
+the proof review and of the note (Claim A, Claim B′, G, R, Theorem 4.10).
 
 It has three parts:
 
 * **the combinatorial core** (no time, no plans): admissibility, role configurations, the
   support bound, the one-plane table, shrinking and merging partitions;
 * **the plan theory**: plan semantics with arbitrary central flights, counting, Lemma R, and the
-  converse under (S) and (A1) (Theorem 4.7): every feasible plan is weakly dominated by an
-  admissible partition;
+  converse under (S) and the triangles through a hub (Theorem 4.10, which covers (A1) and (AΔ)):
+  every feasible plan is weakly dominated by an admissible partition;
 * **a verified checker for front certificates** (format v1 of
   [`doc/certificate-format.md`](../doc/certificate-format.md)), for `relaxed` and `forest` gaps.
-  The soundness theorem `Cert.check_sound` says that if `check` accepts, the listed points are
-  exactly the Pareto front of the instance. The front is over *every* feasible plan: with any
-  central flights when all gaps are `relaxed`, and with any central flights satisfying (A1)
-  (`Cert.check_sound_A1`) or (AΔ) (`Cert.check_sound_ATri`) otherwise (format v1 plans fly none
-  of them).
+  The soundness theorem `Cert.check_sound_hub` says that if `check` accepts, the listed points
+  are exactly the Pareto front of the instance. The front is over *every* feasible plan: with any
+  central flights when all gaps are `relaxed`, and with any central flights satisfying the
+  triangles through a hub otherwise, in particular (A1) (`Cert.check_sound_A1`) or (AΔ)
+  (`Cert.check_sound_ATri`) (format v1 plans fly none of them).
 
 Section [TODO](#todo) lists the rest.
 
@@ -134,7 +134,7 @@ plan). The C++ checker agrees with every verdict.
 |---|---|---|
 | `ZenoFront/Model.lean` | Instance (`n` cities, `d c : Fin n → ℕ`, `t` passengers, `p` planes, `1 ≤ p ≤ t`), `s = 2t − p`, groupings `X : Fin p → Multiset (Fin n)`, load `δ`, cost | `Instance`, `Instance.s`, `Groups`, `load`, `cost`, `size`, `totalCost`, `maxLoad` |
 | `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.5, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
-| `ZenoFront/Roles.lean` | Role configurations, PAR and its converse | `RoleConfig`, `RoleConfig.groups`, `RoleConfig.witness` |
+| `ZenoFront/Roles.lean` | Role configurations, PAR (Lemma 4.5), the configuration of a parity witness | `RoleConfig`, `RoleConfig.groups`, `RoleConfig.admissible_groups`, `IsParityWitness.exists_roleConfig` |
 | `ZenoFront/SupportBound.lean` | Claim B′, `t − p` part | `touched`, `edgeCount` |
 | `ZenoFront/MinimalWitness.lean` | Claim B′, `p − 1` part, and the combined `min(p − 1, t − p)` bound | `edgeVec`, `coordSum` |
 | `ZenoFront/OnePlane.lean` | One-plane table `G[m][T]`: specification and memoised table | `oneplane`, `oneplaneTable` |
@@ -143,24 +143,23 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
-| `ZenoFront/Converse.lean` | (A1), central landings, segment types after Step 1, transfers (cleaning), Theorem 4.7 | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_admissible` |
-| `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutRoute`, `FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere` |
+| `ZenoFront/Converse.lean` | (A1), central landings, landing records, transfers, Lemma 4.3(b) | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_roleConfig_records` |
+| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `Network.A1.hub`, `Network.ATri.hub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
+| `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
+| `ZenoFront/ConverseTri.lean` | Theorem 4.10, the one symmetric converse (under (S) and the triangles through a hub, so under (A1) and under (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_hub` |
+| `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes after their last chain leg, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutTri`, `FeasibleAnywhere.exists_admissible_hub`, `Cert.check_sound_anywhere_hub` |
 | `ZenoFront/MinCost.lean` | `E(T)`, the least cost of an admissible partition with loads `≤ T` | `minCost`, `minCost_antitone`, `minCost_attained` |
 | `ZenoFront/TreeExact.lean` | Lemma 2.6 "if" and the iff; the link-forest DP is exact | `admissible_iff_exists_linkForest`, `admissible_forestPartition`, `treeBoundAt_eq_minCost` |
 | `ZenoFront/PairBound.lean` | The bracket `L(T) ≤ E(T) ≤ U₂(T)`: the pairs bound (forests of single planes and linked pairs), attained | `pairsBoundAt`, `minCost_le_pairsBoundAt`, `minCost_eq_of_bracket` |
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
-| `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E`, the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `solveFront`, `solveFront_isParetoFront` |
-| `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `admissibleAchievable`, `minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_multisetPoints` |
-| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
-| `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
-| `ZenoFront/ConverseTri.lean` | Theorem 4.10 (converse under (S) and (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_ATri` |
-| `ZenoFront/FrontTri.lean` | Corollary 4.12: Theorem 4.9 under (AΔ) (cutting routes after their last chain leg), Corollary 4.8, Proposition 7.1, the solver and the checker's soundness under (AΔ) | `cutTri`, `FeasibleAnywhere.exists_admissible_ATri`, `minimal_achievable_iff_anywhere_of_ATri`, `minimal_achievable_iff_multisetPoints_ATri`, `solveFront_isParetoFront_ATri`, `Cert.check_sound_ATri` |
+| `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E` (Proposition 7.1), the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `minimal_achievable_iff_minCost_hub`, `solveFront`, `solveFront_isParetoFront_hub` |
+| `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `minimal_achievable_iff_anywhere_hub`, `minimal_achievable_iff_multisetPoints_hub` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
-| `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
-| `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat` |
+| `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check`, `Cert.check_sound_hub` |
+| `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
 | `ZenoFront/CheckerV2.lean` | Format v2 (non-symmetric): certificates, `check`, soundness | `Kind2`, `Cert2`, `Cert2.check`, `Cert2.check_sound` |
 | `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role weights of landing records, role shrinking (Lemma 4.4), Theorem 6.1 | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad`, `RoleConfig.exists_shrink`, `Feasible.exists_roleConfig_ns` |
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
@@ -202,13 +201,13 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 
 **Role configurations (`Roles.lean`)**
 
-* `RoleConfig.isParityWitness_witness` (**PAR**): `X_k = D_k + P_k + Cr_k` is admissible, with
-  witness `h_{k,i} = (D_k(i) + P_k(i)) mod 2`.
-* `RoleConfig.admissible_groups`: PAR, admissibility form.
-* `IsParityWitness.exists_roleConfig` (**converse of PAR**): every witness `h` of `X` gives a
-  role configuration with grouping `X` and `D_k + P_k = h k`.
-* `Admissible.exists_roleConfig`, `admissible_iff_exists_roleConfig`: the admissible groupings
-  are exactly the groupings of role configurations.
+* `RoleConfig.isParityWitness_witness`, `RoleConfig.admissible_groups` (**PAR**, Lemma 4.5):
+  `X_k = D_k + P_k + Cr_k` is admissible, with witness `h_{k,i} = (D_k(i) + P_k(i)) mod 2`.
+  Nothing uses it since the converse goes through Theorem 4.10; it is kept until revision 3
+  archives Lemma 4.5 (WP8).
+* `IsParityWitness.exists_roleConfig`: every witness `h` of `X` gives a role configuration with
+  grouping `X` and `D_k + P_k = h k`. `Admissible.exists_roleConfig`: every admissible grouping
+  is the grouping of a role configuration.
 
 **Claim B′ (`SupportBound.lean`, `MinimalWitness.lean`)**
 
@@ -288,68 +287,20 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `Admissible.addPlanes`: AP applied `m` times, from `q` to `q + m ≤ t` planes (step 4 of
   bridge B3).
 
-**Converse (`Converse.lean`)**
+**Landing records and transfers (`Converse.lean`)**
 
-* `PlaneFeasible.two_mul_load_landings_le` (**Step 1**): under (S) and (A1), a plane's flight
-  time is at least `2 δ` of all its central landings.
-* `countP_landingRecs_entry`, `countP_landingRecs_exit`, `PlaneFeasible.cntA_eq`: the segment
-  types of the plan after Step 1, read off the routes. Landings entered from `C_I` are the legs
-  `C_I → x`, landings exited towards `C_G` are the legs leaving `x` not towards `C_I`, and
-  `#A = #Ā + 1` per plane (Lemma 2.1).
-* `exists_transfer` (**cleaning**): every passenger route has a leg `C_I → x` followed by a leg
+* `countP_landingRecs_entry`, `countP_landingRecs_exit`, `PlaneFeasible.cntA_eq`: the landing
+  records of a route, each landing with its entry and exit hub (a central leg counts as passing
+  through `C_G`). Records entered from `C_I` are the legs `C_I → x`, records exited towards `C_G`
+  are the legs leaving `x` not towards `C_I`, and `#A = #Ā + 1` per plane (Lemma 2.1).
+* `exists_transfer` (**transfers**): every passenger route has a leg `C_I → x` followed by a leg
   leaving `x` not towards `C_I`.
-* `Feasible.exists_admissible` (**Theorem 4.7**): under (S) and (A1), with `p ≤ t`, every
-  feasible plan with cost `C` and makespan `M` yields an admissible partition with
-  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M` for every plane, and `Σ_k c(X_k) ≤ C`.
-* `Feasible.exists_admissible_A1_flightTime` (`ConverseTri.lean`): Theorem 4.7 with the
-  per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, from Theorem 4.10, since (A1) implies the triangles through
-  a hub (`Network.A1.hub`).
-
-The proof of `Feasible.exists_admissible` does Step 1, cleaning, DS, SH and PAR of the note
-without changing the plan.
-* **Step 1:** a central leg counts as passing through `C_G`, and under (A1) it lasts at least
-  the weights of its two endpoints.
-* **Cleaning:** each passenger uses its last departure from `C_I` and the next leg.
-* **DS:** all `A` and `Ā` landings are kept as crossings, and each city gets
-  `min(#B, #B̄)` drop-off/pick-up pairs. This is at least as many passengers as DS selects. The
-  count `passengers at x ≤ #A_x + min(#B_x, #B̄_x)` comes from two injections: passengers into
-  landings entered from `C_I`, and passengers into landings exited towards `C_G`.
-* **PAR**, then **SH** in partition form (`Admissible.exists_shrink`).
-
-**Planes ending anywhere (`Bridge.lean`)**
-
-* `Feasible.anywhere`, `achievable_subset_achievableAnywhere`: a feasible plan is a plan of the
-  variant (`FeasibleAnywhere`: planes may end anywhere, the makespan is the last arrival), with
-  the same cost and makespan.
-* `exists_admissible_of_transfers` (`Converse.lean`): Theorem 4.7 for planes that all end in
-  `C_G` and passengers that each have a transfer. The passengers' routes are not needed.
-* `FeasibleAnywhere.exists_admissible` (**Theorem 4.9, B3**): under (S) and (A1), with `p ≤ t`,
-  every plan of the variant with cost `C` and makespan `M′` yields an admissible partition with
-  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` for every plane, and `Σ_k c(X_k) ≤ C`. Every route is
-  cut after its last transfer leg and closed in `C_G` (`cutRoute`): after a final `C_I → x`, the
-  flight `x → C_G` leaving on arrival is appended. Theorem 4.7 from transfers then applies to the
-  planes that are not idle, and AP to the idle ones (`Admissible.addPlanes_le`).
-* `Cert.check_sound_anywhere`: if `check` accepts, the listed points are the Pareto front of the
-  variant, for every `dc` satisfying (A1). So the two fronts are equal on every certified
-  instance (`Cert.minimal_achievable_iff_anywhere`).
-* `minimal_achievable_iff_anywhere`: on every instance, the two fronts are equal under (S), (A1)
-  and Theorem 4.1, taken as a hypothesis (`AdmissibleAchievable`). `Achievability.lean` proves
-  it (`minimal_achievable_iff_anywhere_of_A1`).
-
-**Achievability (`Achievability.lean`)**
-
-* `Admissible.exists_plan` (**Theorem 4.1**): under (S), with `p ≤ t`, every admissible
-  partition of `2t − p` landings is achieved by a feasible plan. Its planes land exactly at the
-  groups (up to relabelling the planes), so it costs `c(X)`, and its makespan is
-  `max_k 2 δ(X_k)`. On a rooted link forest, each plane drops off its children's passengers,
-  crosses its free landings, then picks up its parent's passenger (`LTree.routes`).
-* `admissibleAchievable`: Theorem 4.1 as `AdmissibleAchievable`.
-* `minimal_achievable_iff_anywhere_of_A1` (**Theorem 4.9**): under (S) and (A1), the two fronts
-  are equal on every instance.
-* `minimal_achievable_iff_admissiblePoints`, `minimal_achievable_iff_multisetPoints`
-  (**Corollary 4.8**): under (S) and (A1), the front is `Min 𝒳`, with `𝒳` the points
-  `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition.
-  `minimal_achievableAnywhere_iff_admissiblePoints` is the same for planes ending anywhere.
+* `Feasible.exists_roleConfig_records` (**Lemma 4.3(b)**, direct selection): every feasible plan
+  with `p ≤ t` gives a role configuration whose groups are sub-multisets of the records and have at
+  least `2t − p` landings. All `A` and `Ā` records are crossings, and each city gets
+  `min(#B, #B̄)` drop-off/pick-up pairs. The count `passengers at x ≤ #A_x + min(#B_x, #B̄_x)`
+  comes from two injections: passengers into records entered from `C_I`, and passengers into
+  records exited towards `C_G`. Theorem 6.1 uses it.
 
 **(AΔ) and the segment bound (`TriSegments.lean`)**
 
@@ -387,7 +338,12 @@ it.
   even number of planes with an even number of blocks, some admissible partition has one city per
   block, `δ(X_k) ≤ Σ_γ max_{x ∈ γ} d_x`, and landings at most the blocks' landings.
 
-**Theorem 4.10 (`ConverseTri.lean`)**
+**Theorem 4.10, the one symmetric converse (`ConverseTri.lean`)**
+
+Every symmetric result rests on this converse. Each is stated once, under (S) and the triangles
+through a hub (`Network.ATriHub`, name suffix `_hub`); its forms under (A1) and under (AΔ) are
+one-line corollaries through `Network.A1.hub` and `Network.ATri.hub`, under the names the ledger
+cites (`_ATri` for (AΔ)).
 
 * `Feasible.exists_chains`: every passenger rides a *chain* (`ToGoal`), its last departure from
   `C_I` and its legs up to the next arrival in `C_G`, which meet in central cities. So a chain stays
@@ -398,40 +354,48 @@ it.
   still flies at least `2 d_x` for each of its landings.
 * `exists_admissible_of_chains`: Theorem 4.10 for planes that end in `C_G` and passengers that
   ride chains, with `2 δ(X_k) ≤ F_k` (`durSum`, the flight time).
-* `Feasible.exists_admissible_ATri` (**Theorem 4.10**): under (S) and (AΔ), with `p ≤ t` (a plan
-  on any number `p ≤ t` of planes, the note's set `Q` with `t ≥ |Q|`), every feasible plan gives an
-  admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane, and
-  `c(X) ≤ C`. `Feasible.exists_admissible_hub`: the same under `ATriHub`.
-  `Feasible.exists_admissible_ATri_makespan`: the shape of `Feasible.exists_admissible`.
+* `Feasible.exists_admissible_hub` (**Theorem 4.10**): under (S) and `ATriHub`, with `p ≤ t` (a
+  plan on any number `p ≤ t` of planes, the note's set `Q` with `t ≥ |Q|`), every feasible plan
+  gives an admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every
+  plane, and `c(X) ≤ C`. `Feasible.exists_admissible_ATri`: the same under (AΔ).
+* `Feasible.exists_admissible_A1_flightTime` (**Theorem 4.7**): the same under (A1).
 
-**Corollary 4.12, the fronts under (AΔ) (`FrontTri.lean`)**
+**Planes ending anywhere (`Bridge.lean`)**
 
-Theorem 4.1 needs no assumption on central flights, so every front statement of (A1) holds under
-(AΔ) with Theorem 4.10 in place of Theorem 4.7.
-
-* `FeasibleAnywhere.exists_admissible_ATri` (**Theorem 4.9, converse direction**): under (S) and
-  (AΔ), with `p ≤ t`, every plan whose planes may end anywhere gives an admissible partition with
-  `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` and `c(X) ≤ C`. Every route is cut after its last leg on a
-  passenger's chain, and an empty flight `b → C_G` is appended when that leg lands in `b`
+* `Feasible.anywhere`, `achievable_subset_achievableAnywhere`: a feasible plan is a plan of the
+  variant (`FeasibleAnywhere`: planes may end anywhere, the makespan is the last arrival), with
+  the same cost and makespan.
+* `FeasibleAnywhere.exists_admissible_hub` (**Theorem 4.9, converse direction**): under (S) and
+  `ATriHub`, with `p ≤ t`, every plan whose planes may end anywhere gives an admissible partition
+  with `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` and `c(X) ≤ C`. Every route is cut after its last leg
+  on a passenger's chain, and an empty flight `b → C_G` is appended when that leg lands in `b`
   (`cutTri`). The rest of the chain from `b` lasts at least `d̄_b` (`ToGoal.arr_add_d_le`, the
-  second use of (AΔ)), so the flight arrives by `M′`. Theorem 4.10 from chains then applies to
-  the planes that are not idle, and AP to the idle ones.
-* `minimal_achievable_iff_anywhere_of_ATri` (**Theorem 4.9**): under (S) and (AΔ), the two fronts
-  are equal on every instance.
-* `minimal_achievable_iff_admissiblePoints_ATri`, `minimal_achievable_iff_multisetPoints_ATri`
-  (**Corollary 4.8**), and `minimal_achievableAnywhere_iff_admissiblePoints_ATri`.
-* `minimal_achievable_iff_minCost_ATri` (**Proposition 7.1**, integer levels): `(C, M)` is on the
-  front iff `M = 2T`, `E(T) = C` and `E(T') > C` for every `T' < T`.
-* `solveFront_isParetoFront_ATri`: under (S) and (AΔ), with `1 ≤ p ≤ t`, `solveFront` is the
-  Pareto front of the feasible plans.
-* `Cert.forestGapBound_le_ATri` (**obligation 3**, `forest`, under (AΔ)): a feasible plan with
-  makespan below `M` costs at least the forest bound at the gap level of `M`.
-* `Cert.check_sound_ATri` (**soundness under (AΔ)**): `C.check = true` implies
-  `IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front` for every `dc` satisfying (AΔ),
-  whatever the gap kinds. A feasible plan gives an admissible partition (Theorem 4.10), which a
-  listed point dominates (`Cert.exists_le_of_admissible`). Also `Cert.check_sound_minimal_ATri`,
-  `Cert.check_sound_anywhere_ATri` (planes ending anywhere), `Cert.check_sound_rat_ATri`
-  (rational times) and `Cert.minimal_achievable_iff_anywhere_ATri`.
+  second use of the triangles through a hub), so the flight arrives by `M′`. Theorem 4.10 from
+  chains then applies to the planes that are not idle, and AP to the idle ones
+  (`Admissible.addPlanes_le`). Under (A1): `FeasibleAnywhere.exists_admissible`; under (AΔ):
+  `FeasibleAnywhere.exists_admissible_ATri`.
+* `Cert.check_sound_anywhere_hub`: if `check` accepts, the listed points are the Pareto front of
+  the variant, for every `dc` satisfying `ATriHub` (`Cert.check_sound_anywhere`,
+  `Cert.check_sound_anywhere_ATri`). So the two fronts are equal on every certified instance
+  (`Cert.minimal_achievable_iff_anywhere_hub`, `Cert.minimal_achievable_iff_anywhere`,
+  `Cert.minimal_achievable_iff_anywhere_ATri`).
+
+**Achievability and the fronts (`Achievability.lean`)**
+
+* `Admissible.exists_plan` (**Theorem 4.1**): under (S), with `p ≤ t`, every admissible
+  partition of `2t − p` landings is achieved by a feasible plan. Its planes land exactly at the
+  groups (up to relabelling the planes), so it costs `c(X)`, and its makespan is
+  `max_k 2 δ(X_k)`. On a rooted link forest, each plane drops off its children's passengers,
+  crosses its free landings, then picks up its parent's passenger (`LTree.routes`).
+* `minimal_achievable_iff_anywhere_hub` (**Theorem 4.9**): under (S) and `ATriHub`, the two
+  fronts are equal on every instance (`minimal_achievable_iff_anywhere_of_A1`,
+  `minimal_achievable_iff_anywhere_of_ATri`).
+* `minimal_achievable_iff_admissiblePoints_hub`, `minimal_achievable_iff_multisetPoints_hub`
+  (**Corollary 4.8**): under (S) and `ATriHub`, the front is `Min 𝒳`, with `𝒳` the points
+  `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition
+  (`minimal_achievable_iff_multisetPoints` under (A1), `minimal_achievable_iff_multisetPoints_ATri`
+  under (AΔ)). `minimal_achievableAnywhere_iff_admissiblePoints_hub` is the same for planes ending
+  anywhere.
 
 **The verified solver (`Solver.lean`, `ZenoFrontMain.lean`)**
 
@@ -454,8 +418,12 @@ Theorem 4.1 needs no assumption on central flights, so every front statement of 
   two meet, both are `E(T)`.
 * `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and
   `E(T') > C` for every `T' < T`. `breakpoint_le`: then `T ≤ (2t − p) · d_max`.
-* `solveFront_isParetoFront` (**the solver is correct**): under (S) and (A1), with `1 ≤ p ≤ t`,
-  `solveFront` is the Pareto front of the feasible plans (`IsParetoFront`). It finds the levels
+* `minimal_achievable_iff_minCost_hub` (**Proposition 7.1**, integer levels): under (S) and
+  `ATriHub`, `(C, M)` is on the front iff `M = 2T`, `E(T) = C` and `E(T') > C` for every `T' < T`
+  (`minimal_achievable_iff_minCost_ATri` under (AΔ)).
+* `solveFront_isParetoFront_hub` (**the solver is correct**): under (S) and `ATriHub`, with
+  `1 ≤ p ≤ t`, `solveFront` is the Pareto front of the feasible plans (`IsParetoFront`);
+  `solveFront_isParetoFront` under (A1), `solveFront_isParetoFront_ATri` under (AΔ). It finds the levels
   where `E` drops by splitting intervals between `d_min · ⌈s/p⌉` (`minCost_eq_top_of_lt`) and
   `(2t − p) · d_max` (`breakpoints`), which lists the same points as the scan of every level
   (`solveFront_eq`, `breakpoints_eq_scanFront`). At each level it takes `L(T)` if the bracket
@@ -518,18 +486,21 @@ Theorem 4.1 needs no assumption on central flights, so every front statement of 
   `≥ s · c_min`.
 * `Cert.gapBound_le` (**obligation 3**, `relaxed`): a feasible plan with makespan below `M`
   costs at least the relaxed bound at the gap level of `M`, for every `dc`.
-* `Cert.forestGapBound_le` (**obligation 3**, `forest`): under (A1), a feasible plan with
-  makespan below `M` costs at least the forest bound at the gap level of `M`. The proof chains
-  Theorem 4.7 and `forestBoundAt_le_totalCost`.
+* `Cert.forestGapBound_le_hub` (**obligation 3**, `forest`): under `ATriHub`, a feasible plan
+  with makespan below `M` costs at least the forest bound at the gap level of `M`. The proof
+  chains Theorem 4.10 and `forestBoundAt_le_totalCost` (`Cert.forestGapBound_le` under (A1),
+  `Cert.forestGapBound_le_ATri` under (AΔ)).
 * `exists_le_of_gapsOK`: the domination argument along the front.
-* `Cert.check_sound` (**soundness**): `C.check = true` implies
+* `Cert.check_sound_hub` (**soundness**): `C.check = true` implies
   `IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front`. That is, every point is
   achieved by a feasible plan, every feasible plan is weakly dominated by a point, and the points
-  are pairwise incomparable. It holds for every `dc` satisfying (A1), or for every `dc` if all
-  gaps are `relaxed`.
-* `Cert.check_sound_A1`, `Cert.check_sound_relaxed`: the two cases of `check_sound`.
-* `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`: equivalently, a pair is listed
-  iff it is a minimal achievable (cost, makespan) pair.
+  are pairwise incomparable. It holds for every `dc` satisfying `ATriHub`, or for every `dc` if
+  all gaps are `relaxed`.
+* `Cert.check_sound` (for every `dc` satisfying (A1), or every `dc` if all gaps are `relaxed`),
+  `Cert.check_sound_A1`, `Cert.check_sound_ATri` (under (AΔ)), `Cert.check_sound_relaxed`: its
+  cases.
+* `IsParetoFront.mem_iff_minimal`, `Cert.check_sound_minimal`, `Cert.check_sound_minimal_ATri`:
+  equivalently, a pair is listed iff it is a minimal achievable (cost, makespan) pair.
 
 **Non-symmetric instances (`PlanBounds.lean`, `NonSymmetric.lean`, `RoleBound.lean`,
 `LagrangianBound.lean`, `CheckerV2.lean`)**
@@ -541,8 +512,7 @@ Theorem 4.1 needs no assumption on central flights, so every front statement of 
   makespan and no central flight.
 * `roleW_landingRecs_le`: on a route without central flights, each landing's two legs last
   exactly its role weight (crossing `d + d̄`, drop-off `2d`, pick-up `2d̄`).
-* `Feasible.exists_roleConfig_records`: direct selection (Lemma 4.3(b)), shared by Theorems 4.7
-  and 6.1. `RoleConfig.exists_shrink`: Lemma 4.4 in role form.
+* `Feasible.exists_roleConfig_records`: direct selection (Lemma 4.3(b)). `RoleConfig.exists_shrink`: Lemma 4.4 in role form.
 * `Feasible.exists_roleConfig_ns` (**Theorem 6.1**): under (A1-NS), every feasible plan gives a
   role configuration on the `p` planes with passenger count `t`, cost at most the plan's and
   every role load at most its makespan.
@@ -636,8 +606,8 @@ Theorem 4.1 needs no assumption on central flights, so every front statement of 
   an inclusion-minimal witness (`card_touched_le_of_minimal_subset`).
 * **Role configuration.** Three multisets per plane: drop-offs `D_k`, pick-ups `P_k` and
   crossings `Cr_k`, with `|Cr_k|` odd and `Σ_k D_k = Σ_k P_k` as multisets (per-city balance).
-  The converse of PAR produces `D_k + P_k = h k`, so every city appears at most once in
-  `D_k + P_k`.
+  `IsParityWitness.exists_roleConfig` produces `D_k + P_k = h k`, so every city appears at most
+  once in `D_k + P_k`.
 * **Infinity.** The tables use `WithTop ℕ`, with `⊤ = ∞`. `ℕ∞` is not used because its lattice
   instance is not computable. The C++ table must agree on `G[0][T] = 0` and
   `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`, the minimum over no city being `∞`.
@@ -741,32 +711,31 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [ ] Completeness of the simulation: the greedy passenger walk finds a route whenever the
       C++ one does. Only soundness is proved.
 
-**P3, Theorem 4.7 (converse under (S) + (A1)).**
-
-- [x] Step 1, cleaning, DS, SH and PAR, done directly on the routes
-      (`Feasible.exists_admissible`).
-- [x] Front theorem X3 for `forest` gaps (`Cert.check_sound`, `Cert.check_sound_A1`).
-
-**P3′, Theorem 4.10 (converse under (S) + (AΔ)).**
+**P3, Theorem 4.10 (the converse under (S) + the triangles through a hub).**
 
 - [x] (AΔ), the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`) and Lemma 4.11
       (`Admissible.exists_remove_two`).
 - [x] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3, with `ℓ(X_k) ≤ F_k`
-      (`Feasible.exists_admissible_ATri`).
-- [x] Corollary 4.12, fronts: Corollary 4.8, Theorem 4.9, Proposition 7.1 and the solver under
-      (AΔ) (`minimal_achievable_iff_multisetPoints_ATri`, `minimal_achievable_iff_anywhere_of_ATri`,
-      `minimal_achievable_iff_minCost_ATri`, `solveFront_isParetoFront_ATri`).
-- [x] Corollary 4.12, `forest` gaps: the checker is sound for every `dc` satisfying (AΔ)
-      (`Cert.check_sound_ATri`).
-- [ ] Corollary 4.12, the front statements of Propositions 7.8 and 7.9 (not formalised under
-      (A1) either).
+      (`Feasible.exists_admissible_hub`). Theorem 4.7 under (A1)
+      (`Feasible.exists_admissible_A1_flightTime`) and Theorem 4.10 under (AΔ)
+      (`Feasible.exists_admissible_ATri`) are corollaries; the first route to Theorem 4.7 (Step 1,
+      cleaning, PAR) is removed.
+- [x] Fronts: Corollary 4.8, Theorem 4.9, Proposition 7.1 and the solver, each stated once under
+      the triangles through a hub (`minimal_achievable_iff_multisetPoints_hub`,
+      `minimal_achievable_iff_anywhere_hub`, `minimal_achievable_iff_minCost_hub`,
+      `solveFront_isParetoFront_hub`), with their (A1) and (AΔ) forms as corollaries.
+- [x] Front theorem X3 for `forest` gaps: the checker is sound for every `dc` satisfying the
+      triangles through a hub (`Cert.check_sound_hub`; `Cert.check_sound_A1`,
+      `Cert.check_sound_ATri`).
+- [ ] The front statements of Propositions 7.8 and 7.9.
 
 **P4.**
 
 - [x] Checker performance at suite scale: the 66 suite certificates in 4.9 s (478 s before).
 - [x] Bridge B3: the PDDL semantics (planes end anywhere, makespan = last action) has the same
-      front under (S) + (A1) (`FeasibleAnywhere.exists_admissible`, `Cert.check_sound_anywhere`).
-      On every instance, with Theorem 4.1: `minimal_achievable_iff_anywhere_of_A1`.
+      front under (S) + the triangles through a hub (`FeasibleAnywhere.exists_admissible_hub`,
+      `Cert.check_sound_anywhere_hub`). On every instance, with Theorem 4.1:
+      `minimal_achievable_iff_anywhere_hub`.
 - [x] Theorem 4.1: links, schedule with drop-offs first and at most one pick-up per plane,
       makespan = largest load (`Admissible.exists_plan`), and Corollary 4.8. Not needed by the
       checker.

@@ -8,36 +8,36 @@ public import ZenoFront.PlanBounds
 public import ZenoFront.Shrink
 
 /-!
-# The converse under (S) and (A1) (Theorem 4.7)
+# Landing records and transfers (Lemma 4.3(b))
 
-**Theorem 4.7.** Under symmetric durations (S) and useless central flights (A1,
-`dc i j ≥ d i + d j`), every feasible plan with cost `C` and makespan `M` is weakly dominated by
-an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = s = 2t − p`,
-`c(X) ≤ C` and `2 δ(X_k) ≤ M` for every plane (`Feasible.exists_admissible`).
+Every feasible plan gives a role configuration whose groups have at least `2t − p` landings
+(Lemma 4.3(b), `Feasible.exists_roleConfig_records`). Nothing is assumed on durations. The
+non-symmetric converse (Theorem 6.1, `NonSymmetric.lean`) uses it; the symmetric converse is
+Theorem 4.10 (`Feasible.exists_admissible_hub`, `ConverseTri.lean`), which also covers (A1)
+(`Network.A1.hub`).
 
-The proof follows the note's Steps 1–3, in a form that needs no surgery on the plan:
-
-* **Step 1 (removing central flights).** Under (S) and (A1), a central flight `a → b` lasts at
-  least `d_a + d_b`, as long as `a → C_G → b`. So every leg lasts at least the weights of its
-  central endpoints, and a route from `C_I` to `C_G` flies at least `2 δ(L_k)`, `L_k` being all
-  its central landings (`PlaneFeasible.two_mul_load_landings_le`). The segment *types* of the
-  plan after Step 1 are read off directly: a landing's entry hub is `C_I` iff its incoming leg
-  leaves `C_I`, and its exit hub is `C_I` iff its outgoing leg arrives at `C_I` (a central
-  outgoing leg counts as going through `C_G`) (`landingRecs`).
-* **Step 2 (cleaning).** For each passenger, take its last departure from `C_I`, a leg
-  `C_I → x`, and the next leg, which leaves `x` and does not arrive at `C_I`
-  (`exists_transfer`). They are the two flights of its clean journey after Step 1.
-* **Step 3 (direct selection, then PAR).** Every passenger transferring at `x` gives a distinct
-  landing at `x` entered from `C_I` (type `A` or `B`) and a distinct landing at `x` left towards
-  `C_G` (type `A` or `B̄`). So the passengers at `x` number at most
-  `#A_x + min(#B_x, #B̄_x)`. Taking all `A` and `Ā` landings as crossings (an odd number per
+* **Landing records** (`landingRecs`). The central landings of a route, each with its entry hub
+  and its exit hub: the entry hub is `C_I` iff the incoming leg leaves `C_I`, and the exit hub is
+  `C_I` iff the outgoing leg arrives at `C_I` (a central outgoing leg counts as going through
+  `C_G`). Every plane has one more record of type `A` (`C_I → x → C_G`) than of type `Ā`
+  (`PlaneFeasible.cntA_eq`).
+* **Transfers** (`exists_transfer`). For each passenger, take its last departure from `C_I`, a leg
+  `C_I → x`, and the next leg, which leaves `x` and does not arrive at `C_I`.
+* **Direct selection** (`exists_roleConfig_of_transfers`). Every passenger transferring at `x`
+  gives a distinct record at `x` entered from `C_I` (type `A` or `B`) and a distinct record at `x`
+  left towards `C_G` (type `A` or `B̄`). So the passengers at `x` number at most
+  `#A_x + min(#B_x, #B̄_x)`. Taking all `A` and `Ā` records as crossings (an odd number per
   plane, as `#A = #Ā + 1`) and `min(#B_x, #B̄_x)` drop-offs and pick-ups at every city gives a
-  role configuration with at least `t` passengers. PAR (`RoleConfig.admissible_groups`) makes its
-  groups admissible, with at least `s` landings, and shrinking (`Admissible.exists_shrink`)
-  brings them to exactly `s`.
+  role configuration with at least `t` passengers.
 
-Every group is a sub-multiset of its plane's central landings, so the cost is at most `C` and,
-by Step 1, `2 δ(X_k) ≤ M`.
+## Main results
+
+* `ZenoFront.Network.A1`: assumption (A1).
+* `ZenoFront.routeLandings`, `ZenoFront.landCostSum_eq_cost`: the central landings of a route
+  and their cost.
+* `ZenoFront.PlaneFeasible.cntA_eq`: `#A = #Ā + 1` on every plane.
+* `ZenoFront.Feasible.exists_transfers`: every passenger's transfer.
+* `ZenoFront.Feasible.exists_roleConfig_records`: **Lemma 4.3(b)**.
 -/
 
 @[expose] public section
@@ -53,19 +53,11 @@ def Network.A1 (N : Network n) : Prop := ∀ i j, N.d i + N.d j ≤ N.dc i j
 
 namespace Loc
 
-/-- The duration weight of a location: `d i` for a central city `i`, `0` for a hub. -/
-def weight (d : Fin n → ℕ) : Loc n → ℕ
-  | city i => d i
-  | _ => 0
-
 /-- Whether the location is a central city satisfying `q`. -/
 def isCityWith (q : Fin n → Bool) : Loc n → Bool
   | city i => q i
   | _ => false
 
-@[simp] theorem weight_ci (d : Fin n → ℕ) : (ci : Loc n).weight d = 0 := rfl
-@[simp] theorem weight_cg (d : Fin n → ℕ) : (cg : Loc n).weight d = 0 := rfl
-@[simp] theorem weight_city (d : Fin n → ℕ) (i : Fin n) : (city i).weight d = d i := rfl
 @[simp] theorem isCityWith_ci (q : Fin n → Bool) : (ci : Loc n).isCityWith q = false := rfl
 @[simp] theorem isCityWith_cg (q : Fin n → Bool) : (cg : Loc n).isCityWith q = false := rfl
 @[simp] theorem isCityWith_city (q : Fin n → Bool) (i : Fin n) :
@@ -73,7 +65,7 @@ def isCityWith (q : Fin n → Bool) : Loc n → Bool
 
 end Loc
 
-/-! ### Landings and Step 1 -/
+/-! ### Landings -/
 
 /-- The central landings of a list of legs. -/
 def routeLandings : List (Leg n t) → Multiset (Fin n)
@@ -91,56 +83,7 @@ theorem landCostSum_eq_cost (c : Fin n → ℕ) : ∀ legs : List (Leg n t),
     simp only [landCostSum, List.map_cons, List.sum_cons] at ih ⊢
     cases dst <;> simp [routeLandings, landCost, ih]
 
-theorem Flies.duration_ge {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1) {ℓ : Leg n t}
-    (h : Flies N ℓ) : ℓ.src.weight N.d + ℓ.dst.weight N.d ≤ ℓ.arr - ℓ.dep := by
-  obtain ⟨src, dst, dep, arr, pax⟩ := ℓ
-  obtain ⟨τ, hdur, harr⟩ := h
-  simp only at hdur harr ⊢
-  have : arr - dep = τ := by omega
-  rw [this]
-  cases src <;> cases dst <;> simp [Network.duration, hS] at hdur ⊢ <;> try omega
-  rename_i i j
-  rw [← hdur]
-  exact hA1 i j
-
-/-- **Step 1.** Under (S) and (A1), a route flies at least twice the load of its central
-landings (with the endpoints' weights as boundary terms). -/
-theorem two_mul_load_landings_le {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1) :
-    ∀ (legs : List (Leg n t)) (x : Loc n) (τ : ℕ), IsRoute x τ legs →
-      (∀ ℓ ∈ legs, Flies N ℓ) →
-      2 * load N.d (routeLandings legs) + x.weight N.d ≤
-        durSum legs + (finalLoc x legs).weight N.d
-  | [], x, _, _, _ => by simp [routeLandings, durSum]
-  | ⟨src, dst, dep, arr, pax⟩ :: rest, x, τ, hroute, hflies => by
-    obtain ⟨hsrc, -, hrest⟩ := hroute
-    simp only at hsrc
-    subst hsrc
-    have hfl := (hflies _ List.mem_cons_self).duration_ge hS hA1
-    have ih := two_mul_load_landings_le hS hA1 rest dst arr hrest
-      fun m hm => hflies m (List.mem_cons_of_mem _ hm)
-    simp only [durSum, List.map_cons, List.sum_cons, finalLoc_cons] at ih hfl ⊢
-    cases dst with
-    | city i =>
-      simp only [routeLandings, load_cons, Loc.weight_city] at ih hfl ⊢
-      omega
-    | ci =>
-      simp only [routeLandings, Loc.weight_ci] at ih hfl ⊢
-      omega
-    | cg =>
-      simp only [routeLandings, Loc.weight_cg] at ih hfl ⊢
-      omega
-
-/-- **Step 1 for a plane.** Under (S) and (A1), `2 δ(L_k)` is at most the plane's end time. -/
-theorem PlaneFeasible.two_mul_load_landings_le {N : Network n} (hS : N.dbar = N.d)
-    (hA1 : N.A1) {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
-    2 * load N.d (routeLandings legs) ≤ endTime 0 legs := by
-  have h₁ := ZenoFront.two_mul_load_landings_le hS hA1 legs .ci 0 h.route h.flies
-  have h₂ := add_durSum_le_endTime legs .ci 0 h.route fun ℓ hℓ => (h.flies ℓ hℓ).dep_le_arr
-  rw [h.ends] at h₁
-  simp only [Loc.weight_ci, Loc.weight_cg, add_zero] at h₁
-  omega
-
-/-! ### Landing records: segment types after Step 1 -/
+/-! ### Landing records -/
 
 /-- The central landings of a route with, for each, whether its incoming leg leaves `C_I`
 (entry hub `C_I`) and whether its outgoing leg arrives at `C_I` (exit hub `C_I`; a central
@@ -370,7 +313,7 @@ theorem exitI_total (h : PlaneFeasible N legs) :
       simp [hd, Loc.isCityWith_true_of_city ((h.flies m hm).src_city_of_dst_isHub this)]
     · simp [hd]
 
-/-- `#A = #Ā + 1` for every plane (Lemma 2.1 after Step 1). -/
+/-- `#A = #Ā + 1` for every plane (Lemma 2.1 on the records). -/
 theorem cntA_eq (h : PlaneFeasible N legs) :
     cntA (fun _ => true) (landingRecs legs) = cntAbar (fun _ => true) (landingRecs legs) + 1 := by
   have h₁ := h.entry_total
@@ -402,9 +345,9 @@ theorem exitG_city (h : PlaneFeasible N legs) (x : Fin n) :
 
 end PlaneFeasible
 
-/-! ### Passengers: Step 2 (cleaning) -/
+/-! ### Passengers: transfers -/
 
-/-- **Step 2.** A route from `C_I` to `C_G` has a leg `C_I → x` followed, later, by a leg leaving
+/-- **Transfers.** A route from `C_I` to `C_G` has a leg `C_I → x` followed, later, by a leg leaving
 `x` that does not arrive at `C_I`: the last departure from `C_I` and the next leg. -/
 theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), IsRoute .ci τ l →
     (∀ ℓ ∈ l, Flies N ℓ) → finalLoc .ci l = .cg →
@@ -447,7 +390,7 @@ theorem card_le_countP_of_injective {α : Type*} [DecidableEq α] (S : Finset (F
     _ ≤ (l.filter q).length := List.toFinset_card_le _
     _ = l.countP q := List.countP_eq_length_filter.symm
 
-/-! ### Step 3: selection, PAR, shrinking -/
+/-! ### Direct selection -/
 
 /-- Choosing counts below `a` with a given total `μ ≤ Σ a`. -/
 theorem exists_le_sum_eq (a : Fin p → ℕ) : ∀ μ : ℕ, μ ≤ ∑ k, a k →
@@ -497,7 +440,7 @@ theorem card_ofCounts (v : Fin n → ℕ) : (ofCounts v).card = ∑ x, v x := by
 theorem Loc.isCI_eq_false_of_ne {x : Loc n} (h : x ≠ .ci) : x.isCI = false := by
   cases x <;> simp_all
 
-/-- **Step 2 for a plan.** Every passenger of a feasible plan has a transfer: a leg `C_I → x`
+/-- **Transfers of a plan.** Every passenger of a feasible plan has a transfer: a leg `C_I → x`
 and a leg leaving `x` not towards `C_I`, both carrying it. -/
 theorem Feasible.exists_transfers {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
     ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
@@ -534,7 +477,7 @@ theorem exists_roleConfig_of_transfers {N : Network n} {P : Plan n t p}
       have := hf π
       rw [h, hf π'] at this
       exact (Option.some_injective _ this).symm
-  -- Step 3: counts at each city.
+  -- Counts at each city.
   set b : Fin n → ℕ := fun x => ∑ k, cntB (fun y => decide (y = x)) (R k) with hb
   set bb : Fin n → ℕ := fun x => ∑ k, cntBbar (fun y => decide (y = x)) (R k) with hbb
   set A : Fin n → ℕ := fun x => ∑ k, cntA (fun y => decide (y = x)) (R k) with hA
@@ -641,45 +584,5 @@ theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP 
       (∀ k, cfg.cross k = recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))) ∧
       2 * t - p ≤ size cfg.groups :=
   exists_roleConfig_of_transfers hP.planes hP.exists_transfers
-
-/-- **Theorem 4.7 from transfers.** Under (S) and (A1), with `p ≤ t`: if every plane flies from
-`C_I` to `C_G` and every passenger has a transfer, some admissible `X_1, …, X_p` has
-`Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan for every plane, and total cost at most the
-plan's cost. -/
-theorem exists_admissible_of_transfers {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hplanes : ∀ k, PlaneFeasible N (P k))
-    (htr : ∀ π : Fin t, ∃ x : Fin n, ∃ ℓo ∈ paxLegs P π, ∃ ℓn ∈ paxLegs P π,
-      ℓo.src = .ci ∧ ℓo.dst = .city x ∧ ℓn.src = .city x ∧ ℓn.dst ≠ .ci) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
-  obtain ⟨cfg, hdr, hpk, hcr, hsize⟩ := exists_roleConfig_of_transfers hplanes htr
-  -- The groups are sub-multisets of the planes' landings.
-  have hsub : ∀ k, cfg.groups k ≤ routeLandings (P k) := by
-    intro k
-    refine le_trans ?_ (landingRecs_map_fst_le (P k))
-    rw [← recCities_split]
-    exact add_le_add (add_le_add (hdr k) (hpk k)) (le_of_eq (hcr k))
-  -- PAR, then shrinking to exactly `2t − p` landings.
-  obtain ⟨X, hX, hle, hXsize⟩ := cfg.admissible_groups.exists_shrink (s := 2 * t - p)
-    (by omega) (by omega) hsize
-  refine ⟨X, hX, hXsize, fun k => ?_, ?_⟩
-  · calc 2 * load N.d (X k) ≤ 2 * load N.d (routeLandings (P k)) :=
-          Nat.mul_le_mul_left 2 (load_mono _ ((hle k).trans (hsub k)))
-      _ ≤ endTime 0 (P k) := (hplanes k).two_mul_load_landings_le hS hA1
-      _ ≤ planMakespan P := endTime_le_planMakespan P k
-  · calc totalCost c X ≤ ∑ k, cost c (routeLandings (P k)) :=
-          Finset.sum_le_sum fun k _ => cost_mono c ((hle k).trans (hsub k))
-      _ = ∑ k, landCostSum c (P k) :=
-          Finset.sum_congr rfl fun k _ => (landCostSum_eq_cost c (P k)).symm
-      _ = planCost c P := rfl
-
-/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
-dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
-`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
-theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P :=
-  exists_admissible_of_transfers hS hA1 c hP.planes hP.exists_transfers hpt
 
 end ZenoFront

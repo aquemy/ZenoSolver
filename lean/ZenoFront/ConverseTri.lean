@@ -5,19 +5,23 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.TriCore
+public import Mathlib.Tactic.Ring
 
 /-!
-# The converse under (S) and (AΔ) (Theorem 4.10)
+# The converse under (S) and the triangles through a hub (Theorem 4.10)
 
-**Theorem 4.10.** Under symmetric durations (S) and the triangle inequality (AΔ), with no (A1),
-every feasible plan with cost `C` and flight times `F_k` is weakly dominated by an admissible
-partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = s = 2t − p`, `c(X) ≤ C` and
-`ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane (`Feasible.exists_admissible_ATri`). The plan is
-on any number `p ≤ t` of planes, which is the note's form for a set `Q` of planes with
-`t ≥ |Q|`.
+**Theorem 4.10.** Under symmetric durations (S) and the triangles through a hub
+(`Network.ATriHub`), every feasible plan with cost `C` and flight times `F_k` is weakly dominated
+by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = s = 2t − p`,
+`c(X) ≤ C` and `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane (`Feasible.exists_admissible_hub`).
+The plan is on any number `p ≤ t` of planes, which is the note's form for a set `Q` of planes
+with `t ≥ |Q|`. The triangles through a hub follow from (AΔ) (`Network.ATri.hub`) and from (A1)
+(`Network.A1.hub`), so this is the one converse of the symmetric theory: Theorem 4.10 under (AΔ)
+(`Feasible.exists_admissible_ATri`) and Theorem 4.7 under (A1)
+(`Feasible.exists_admissible_A1_flightTime`) are corollaries, and so are the fronts, the solver
+and the checkers built on it.
 
-The proof is the note's (§4.6), with (AΔ) used only on the triangles through a hub
-(`Network.ATriHub`), which (A1) also implies:
+The proof is the note's (§4.6):
 
 * **Segments** (`PlaneFeasible.exists_segments_tri`). Each plane's route is cut into its
   `σ_k` segments, each a block of landings with `F(γ) ≥ 2 d_x` for every landing `x`.
@@ -42,11 +46,9 @@ group has one city per block within the block's largest duration, so `2 δ(X_k) 
 * `ZenoFront.exists_merge`: one merge per class of odd parity.
 * `ZenoFront.exists_admissible_of_chains`: Theorem 4.10 for planes that end in `C_G` and
   passengers that have chains (used by the bridge, Theorem 4.9).
-* `ZenoFront.Feasible.exists_admissible_ATri`: **Theorem 4.10**, with `ℓ(X_k) ≤ F_k ≤ M`.
-* `ZenoFront.Feasible.exists_admissible_ATri_makespan`: the same in the shape of
-  `Feasible.exists_admissible` (Theorem 4.7).
-* `ZenoFront.Feasible.exists_admissible_A1_flightTime`: Theorem 4.7 with the per-plane bound
-  `ℓ(X_k) ≤ F_k`, as a corollary.
+* `ZenoFront.Feasible.exists_admissible_hub`: **Theorem 4.10**, with `ℓ(X_k) ≤ F_k ≤ M`.
+* `ZenoFront.Feasible.exists_admissible_ATri`: Theorem 4.10 under (AΔ).
+* `ZenoFront.Feasible.exists_admissible_A1_flightTime`: Theorem 4.7, under (A1).
 -/
 
 @[expose] public section
@@ -606,7 +608,7 @@ theorem Feasible.exists_admissible_hub {N : Network n} (hS : N.dbar = N.d) (hL :
     exists_admissible_of_chains hS hL c hP.planes hP.exists_chains hpt
   exact ⟨X, hX, hsize, fun k => ⟨hload k, (hP.planes k).durSum_le_planMakespan⟩, hcost⟩
 
-/-- **Theorem 4.10 (converse without (A1)).** Under (S) and (AΔ), with `p ≤ t` (a plan on any
+/-- **Theorem 4.10 under (AΔ).** Under (S) and (AΔ), with `p ≤ t` (a plan on any
 number of planes, at most `t`), every feasible plan with cost `C`, makespan `M` and flight times
 `F_k` gives an admissible partition `X_1, …, X_p` of a multiset with `Σ_k |X_k| = 2t − p`,
 `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane and `c(X) ≤ C`. -/
@@ -617,18 +619,9 @@ theorem Feasible.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d) (hA 
       totalCost c X ≤ planCost c P :=
   hP.exists_admissible_hub hS hA.hub c hpt
 
-/-- **Theorem 4.10, makespan form**, in the shape of `Feasible.exists_admissible`
-(Theorem 4.7): `2 δ(X_k) ≤ M`. -/
-theorem Feasible.exists_admissible_ATri_makespan {N : Network n} (hS : N.dbar = N.d)
-    (hA : N.ATri) (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := by
-  obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_ATri hS hA c hpt
-  exact ⟨X, hX, hsize, fun k => (hload k).1.trans (hload k).2, hcost⟩
-
-/-- **Theorem 4.7 with the per-plane bound.** Under (S) and (A1), with `p ≤ t`, every feasible
-plan gives an admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) ≤ F_k ≤ M` for every
-plane and `c(X) ≤ C`: Theorem 4.10's proof covers (A1) (`Network.A1.hub`). -/
+/-- **Theorem 4.7 (converse under (A1)).** Under (S) and (A1), with `p ≤ t`, every feasible plan
+gives an admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) ≤ F_k ≤ M` for every plane and
+`c(X) ≤ C`: Theorem 4.10, as (A1) implies the triangles through a hub (`Network.A1.hub`). -/
 theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = N.d)
     (hA1 : N.A1) (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
     ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧

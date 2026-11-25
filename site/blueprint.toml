@@ -222,7 +222,7 @@ section = "symmetric"
 label = "Lemma 4.3"
 gap = "Lean proves part (b), on landing records; part (a) is not stated."
 leaves = ["ZenoFront.Feasible.exists_roleConfig_records"]
-covers = "Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement."
+covers = "Part (b), on the landing records of a feasible plan; it is used by Theorem 6.1. Part (a) is not a separate Lean statement."
 
 [[node]]
 section = "symmetric"
@@ -242,8 +242,8 @@ lean = ["ZenoFront.Admissible.addPlane"]
 [[node]]
 section = "symmetric"
 label = "Theorem 4.7"
-lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime", "ZenoFront.Feasible.exists_admissible"]
-covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, obtained through the proof of Theorem 4.10, which covers (A1). `Feasible.exists_admissible` is the first proof, in makespan form (`2 δ(X_k) ≤ M`): Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan."
+lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime"]
+covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`. It is a corollary of Theorem 4.10 (`Feasible.exists_admissible_hub`), since (A1) implies the triangles through a hub (`Network.A1.hub`)."
 
 [[node]]
 section = "symmetric"
@@ -258,9 +258,9 @@ lean = ["ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.FeasibleAn
 [[node]]
 section = "symmetric"
 label = "Theorem 4.10"
-lean = ["ZenoFront.Feasible.exists_admissible_ATri"]
+lean = ["ZenoFront.Feasible.exists_admissible_ATri", "ZenoFront.Feasible.exists_admissible_hub"]
 leaves = ["ZenoFront.exists_admissible_of_blocks"]
-covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
+covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. It is the case (AΔ) of `Feasible.exists_admissible_hub`, which assumes only the triangles through a hub. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
 
 [[node]]
 section = "symmetric"
