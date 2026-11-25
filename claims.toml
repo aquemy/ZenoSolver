@@ -467,8 +467,8 @@ created   = "2026-11-24"
 [claims.prop-7-1]
 kind         = "proposition"
 statement    = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.minimal_admissiblePoints_iff"
+status       = "math.machine-checked"
+lean         = "ZenoFront.minimal_achievable_iff_minCost_hub"
 paper        = "Prop 7.1, doc/theory/exact-front.md §7.1"
 created      = "2026-11-23"
 
