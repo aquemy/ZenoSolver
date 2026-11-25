@@ -79,7 +79,8 @@ created   = "2026-11-23"
 [claims.lem-2-3]
 kind      = "lemma"
 statement = "Lemma 2.3 (integer form) [A′]: a partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ |X_k| + 1 for every plane k and Σ_k h̃_{k,i} ≡ 0 for every city i (mod 2)."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.admissible_iff_exists_natWitness"
 paper     = "Lemma 2.3, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
