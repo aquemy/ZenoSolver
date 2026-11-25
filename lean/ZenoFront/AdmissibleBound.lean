@@ -24,7 +24,8 @@ partition (`sigmaBoundAt_le_totalCost`).
   entries so far is odd; an admissible partition starts and ends at `σ = ∅`
   (`sigmaDP_le`).
 * To keep the state space small, cities are first merged into non-dominated representatives
-  (`domRep`): merging keeps admissibility (`Admissible.map`) and lowers neither cost nor loads.
+  (`domRep`): merging keeps admissibility (`Admissible.map`) and lowers neither cost nor loads
+  (`Admissible.map_dominated`, Proposition 7.9).
   `H` and `σ` then range over subsets of the representatives `R`.
 * The memoised version (`sigmaTable`) indexes the subsets of `R` by their position in a list.
 -/
@@ -197,6 +198,22 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
       · exact ⟨hj.1, hj.2.1⟩
       · exact hb
   exact this _ i ⟨le_rfl, le_rfl⟩
+
+/-- **Proposition 7.9 (dominance, symmetric).** Let `rep` send every city to one that is no slower
+and no more expensive (`domRep` is one, `domRep_le`). Relabelling the landings of an admissible
+grouping by `rep` gives an admissible grouping with the same group sizes, no larger cost and no
+larger load on any plane. -/
+theorem Admissible.map_dominated {X : Groups n p} (hX : Admissible X) (d c : Fin n → ℕ)
+    {rep : Fin n → Fin n} (hrep : ∀ i, d (rep i) ≤ d i ∧ c (rep i) ≤ c i) :
+    Admissible (fun k => (X k).map rep) ∧ (∀ k, ((X k).map rep).card = (X k).card) ∧
+      totalCost c (fun k => (X k).map rep) ≤ totalCost c X ∧
+      ∀ k, load d ((X k).map rep) ≤ load d (X k) := by
+  refine ⟨hX.map rep, fun k => Multiset.card_map _ _, Finset.sum_le_sum fun k _ => ?_,
+    fun k => ?_⟩
+  · simp only [cost, Multiset.map_map]
+    exact Multiset.sum_map_le_sum_map _ _ fun i _ => (hrep i).2
+  · simp only [load, Multiset.map_map]
+    exact Multiset.sum_map_le_sum_map _ _ fun i _ => (hrep i).1
 
 /-- The representatives. -/
 def domReps (d c : Fin n → ℕ) : Finset (Fin n) := univ.image (domRep d c)

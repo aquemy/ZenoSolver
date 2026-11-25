@@ -614,11 +614,13 @@ paper     = "Prop 7.8, doc/theory/exact-front.md §7.5"
 created   = "2026-11-23"
 
 [claims.prop-7-9]
-kind      = "proposition"
-statement = "Proposition 7.9 (dominance) [DOM]: if d_{i'} ≤ d_i and c_{i'} ≤ c_i for cities i ≠ i', removing city i leaves E(T) and L(T) unchanged at every T, and under (S) and (A1) the front unchanged."
-status    = "math.proved-informal"
-paper     = "Prop 7.9, doc/theory/exact-front.md §7.6"
-created   = "2026-11-23"
+kind         = "proposition"
+statement    = "Proposition 7.9 (dominance, symmetric): Let rep map cities to cities with d(rep i) ≤ d_i and c(rep i) ≤ c_i (domRep, the first non-dominated representative, is one). Replacing every landing of an admissible partition by its representative gives an admissible partition with the same group sizes, no larger cost and no larger loads."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Admissible.map_dominated, ZenoFront.domRep_le"
+lean_partial = "ZenoFront.Admissible.map, ZenoFront.domRep"
+paper        = "Prop 7.9, doc/theory/exact-front.md §7.6"
+created      = "2026-11-23"
 
 [claims.prop-7-10]
 kind         = "proposition"
