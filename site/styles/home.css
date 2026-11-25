@@ -1,7 +1,8 @@
 /* Hallmark · genre: editorial · macrostructure: Split Studio · theme: custom (quemy.info DNA)
  * type: STIX Two Text (display) + Source Sans Pro (body) + Roboto Mono (labels), as on quemy.info
  * colour: site/styles/tokens.css only (--zs-*), switched by body.quarto-dark
- * enrichment: hand-built SVG data figure (the worked example's front) · nav/footer: Quarto's
+ * enrichment: the example's plans played on a map (plan-viewer.js), linked to a hand-built SVG of
+ * its front · nav/footer: Quarto's
  * Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V4 */
 
 @import url("https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@400;600&family=Roboto+Mono:wght@400;500&display=swap");
@@ -34,7 +35,7 @@
   --text-card: 1.4rem;
   --text-figure: 2.1rem;
   --text-hero-figure: clamp(3.2rem, 2.4rem + 3vw, 4.8rem);
-  --text-display: clamp(1.9rem, 1.2rem + 2.9vw, 3.6rem);
+  --text-display: clamp(1.9rem, 1.2rem + 2.4vw, 3.2rem);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-fast: 140ms;
@@ -105,16 +106,16 @@ html, body { overflow-x: clip; }
   line-height: 1.06;
   letter-spacing: -0.012em;
   color: var(--zs-ink);
-  margin: 0 0 var(--space-8);
-  max-width: 15em;
+  margin: 0 0 var(--space-6);
+  max-width: 21em;
   text-wrap: balance;
   overflow-wrap: anywhere;
   min-width: 0;
 }
-.home-hero-body {
+.home-copy {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-8);
+  gap: var(--space-4);
 }
 .home-lede {
   font-size: var(--text-lede);
@@ -122,8 +123,34 @@ html, body { overflow-x: clip; }
   color: var(--zs-ink-2);
   max-width: 34rem;
 }
-.home-lede + .home-lede { margin-top: var(--space-4); }
 .home-lede strong { color: var(--zs-ink); font-weight: 600; }
+
+/* ---- The example: its plans played on the map (js/plan-viewer.js, styles/problem.css), and its
+   front; picking a point of the front plays its plan ---- */
+.home-demo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: start;
+  margin-top: var(--space-8);
+}
+.zs-home .home-figlabel {
+  font-family: var(--home-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--zs-ink-2);
+  margin: 0 0 var(--space-3);
+}
+.home-map { margin: 0; min-width: 0; }
+.zs-home .zs-plan-story { margin-top: var(--space-2); }
+.home-map figcaption {
+  margin-top: var(--space-3);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--zs-ink-2);
+  max-width: 40rem;
+}
 
 /* ---- The front figure ---- */
 .home-front { margin: 0; position: relative; min-width: 0; max-width: 33rem; }
@@ -146,7 +173,9 @@ html, body { overflow-x: clip; }
   stroke-linejoin: round;
   stroke-linecap: round;
 }
-.home-front .pt { cursor: default; outline: none; }
+.home-front .pt { cursor: pointer; outline: none; }
+.home-front .pt .ring { fill: none; stroke: var(--zs-series-2); stroke-width: 2; opacity: 0; }
+.home-front .pt.is-sel .ring { opacity: 1; }
 .home-front .pt .hit { fill: transparent; }
 .home-front .pt .dot { fill: var(--zs-series-1); stroke: var(--home-bg); stroke-width: 2; }
 .home-front .pt .halo { fill: var(--zs-series-1); opacity: 0; }
@@ -328,6 +357,7 @@ html, body { overflow-x: clip; }
 
 /* ---- Breakpoints ---- */
 @media (min-width: 640px) {
+  .home-copy { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
   .home-routes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 760px) {
@@ -336,14 +366,13 @@ html, body { overflow-x: clip; }
   .home-tally li .waffle { margin: 0 0 var(--space-2); }
 }
 @media (min-width: 920px) {
-  .home-hero-body {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 33rem);
-    gap: var(--space-12);
-    align-items: center;
-  }
-  .home-hero-body .home-copy { padding-bottom: var(--space-12); }
   .home-routes { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .home-lean { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-12); }
+}
+/* The map keeps its horizontal layout only above 520px (plan-viewer.js), so the two figures sit
+   side by side only when the map's column is that wide. */
+@media (min-width: 1024px) {
+  .home-demo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
 }
 @media (max-width: 599px) {
   #quarto-content > .zs-home, .zs-home { padding: var(--space-8) var(--space-4) var(--space-12); }

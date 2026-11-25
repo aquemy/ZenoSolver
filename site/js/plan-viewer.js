@@ -13,6 +13,10 @@
  *   <div data-part="front">     the instance's front (fronts.js), the shown plan ringed
  *
  * data-featured="COST" on the root picks the plan shown first (default: the first).
+ *
+ * Other scripts can drive the viewer: the root fires "zs-plan-select" each time a plan is shown,
+ * the first one included, with detail { viewer, index, plan }; detail.viewer.select(i) shows the
+ * i-th plan of plans.json and detail.viewer.play() plays it.
  * Colours: the tokens of styles/tokens.css (--zs-pax-1..4 for passengers, --zs-ink*, --zs-rule,
  * --zs-surface, --zs-series-*). Requires fronts.js for the front part.
  */
@@ -474,6 +478,9 @@
     if (this.front) this.front.update({ highlight: i });
     this._build();
     this.draw(true);
+    this.root.dispatchEvent(new CustomEvent("zs-plan-select", {
+      detail: { viewer: this, index: i, plan: this.data.plans[i] }
+    }));
   };
 
   Viewer.prototype._build = function () {
