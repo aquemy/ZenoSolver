@@ -318,7 +318,7 @@ created   = "2026-11-23"
 
 [claims.lem-6-3]
 kind      = "lemma"
-statement = "Lemma 6.3 (template) [N3]: the template of a role configuration with orders and a link matching is a schedule of makespan M_tmpl = max(max_k λ_k, max over links of Pre + d_i + d̄_i + Suf), and every schedule of the same configuration, orders and matching takes at least M_tmpl; no assumption on durations is needed."
+statement = "Lemma 6.3 (template achievability) [N3]: for every central table and every valid scheduled configuration S with 2t − p landings (an odd number of crossings per plane, a matching sending every pick-up slot injectively to a drop-off slot of the same city, as many drop-offs as pick-ups), the template of S is a feasible plan of cost c(S) and makespan exactly M_tmpl(S) = max(max_k λ_k, max over the links (u, j; v, l) at x of Pre_u(j) + d_x + d̄_x + Suf_v(l)); p ≤ t follows from the hypotheses, and nothing is assumed on the durations."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Sched.tmplPlan_spec"
 paper     = "Lemma 6.3, doc/theory/exact-front.md §6.2"
@@ -371,7 +371,7 @@ created      = "2026-11-24"
 
 [claims.cor-6-10]
 kind         = "corollary"
-statement    = "Corollary 6.10 (non-symmetric front): under (A1-NS), F = Min A_eo = Min K, with K the points (c(cfg), m(cfg)) of role configurations on the p planes with passenger count t and least makespan m(cfg), and A_eo the points of event-ordered feasible plans."
+statement    = "Corollary 6.10 (non-symmetric front): under (A1-NS) and p ≤ t, the front of the feasible plans is Min 𝒦_S = Min 𝒦, where 𝒦_S is the set of points (c(S), M_tmpl(S)) of the valid scheduled configurations S with 2t − p landings, and 𝒦 the set of points (c(cfg), m(cfg)) of the role configurations on the p planes with passenger count t, m(cfg) the least M_tmpl over orders and link matchings (attained, as every role configuration has one); a list is the Pareto front of the feasible plans iff it is that of 𝒦_S, and no event order or hypothesis on zero durations is needed."
 status       = "math.machine-checked"
 lean         = "ZenoFront.minimal_achievable_iff_configPoints, ZenoFront.minimal_achievable_iff_schedPoints"
 lean_partial = "ZenoFront.Cert2.check_sound_EO"
