@@ -320,6 +320,7 @@ created   = "2026-11-23"
 kind      = "lemma"
 statement = "Lemma 6.3 (template) [N3]: the template of a role configuration with orders and a link matching is a schedule of makespan M_tmpl = max(max_k λ_k, max over links of Pre + d_i + d̄_i + Suf), and every schedule of the same configuration, orders and matching takes at least M_tmpl; no assumption on durations is needed."
 status    = "math.proved-informal"
+lean      = "ZenoFront.Sched.tmplPlan_spec"
 paper     = "Lemma 6.3, doc/theory/exact-front.md §6.2"
 created   = "2026-11-23"
 
