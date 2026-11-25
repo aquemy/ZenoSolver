@@ -145,9 +145,10 @@ created   = "2026-11-23"
 
 [claims.lem-3-1]
 kind         = "lemma"
-statement    = "Lemma 3.1 (cleaning): every plan can be changed, keeping all routes (so cost, makespan and flight times), so that every journey is clean: its first flight is its only departure from C_I and its last flight its only arrival in C_G."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.exists_transfer"
+statement    = "Lemma 3.1 (chains): (a) In a feasible plan, and in a plan whose planes end anywhere, every passenger rides a chain: legs carrying it, the first leaving C_I, each leaving where the previous one arrived and no earlier, landing in central cities until the last, which arrives in C_G. (b) If the plan has no central flight, every passenger rides a leg C_I → x and then a leg x → C_G leaving no earlier than the first one arrives."
+status       = "math.machine-checked"
+lean         = "ZenoFront.ToGoal, ZenoFront.Feasible.exists_chains, ZenoFront.FeasibleAnywhere.exists_chains, ZenoFront.exists_transfer_pw"
+lean_partial = "ZenoFront.exists_chain, ZenoFront.ToGoal.dst_ne_ci"
 paper        = "Lemma 3.1, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
