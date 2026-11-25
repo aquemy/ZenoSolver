@@ -493,9 +493,10 @@ created   = "2026-11-23"
 
 [claims.lem-7-2]
 kind         = "lemma"
-statement    = "Lemma 7.2: the one-plane table satisfies G[m][τ] = min{c(Y) : |Y| = m, δ(Y) ≤ τ} (∞ if there is none), and G is non-increasing in τ."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.isLeast_oneplane"
+statement    = "Lemma 7.2 (the one-plane table): The table G[0][T] = 0, G[m + 1][T] = min over i with d_i ≤ T of c_i + G[m][T − d_i] (∞ over the empty set) gives the least cost of an m-multiset with δ ≤ T, and is ∞ iff there is none; its memoised version agrees with it."
+status       = "math.machine-checked"
+lean         = "ZenoFront.oneplane, ZenoFront.isLeast_oneplane, ZenoFront.oneplane_eq_top_iff, ZenoFront.oneplaneTable_getD"
+lean_partial = "ZenoFront.oneplane_le_cost"
 paper        = "Lemma 7.2, doc/theory/exact-front.md §7.2"
 created      = "2026-11-23"
 
