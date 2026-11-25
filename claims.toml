@@ -733,6 +733,15 @@ lean_partial = "ZenoFront.Cert2.searchWith_le"
 paper        = "revision 3 (planned)"
 created      = "2026-11-25"
 
+[claims.thm-checker-v2]
+kind         = "theorem"
+statement    = "Theorem (v2 checker), new in revision 3: If `Cert2.check` accepts a format v2 certificate, its points are the Pareto front of the feasible plans of its instance for every central table that satisfies (A1-NS) if the certificate lists it, and for every central table otherwise."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Cert2.check_sound"
+lean_partial = "ZenoFront.Cert2.check"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 10. The linear family
 # ===========================================================================
