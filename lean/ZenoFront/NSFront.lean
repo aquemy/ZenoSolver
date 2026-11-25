@@ -35,6 +35,9 @@ matching (`RoleConfig.exists_sched`), so `m(cfg)` is attained.
 * `configPoints`, `RoleConfig.leastTmpl`: the note's `𝒦` and `m(cfg)`.
 * `minimal_achievable_iff_configPoints` (**Corollary 6.10, as in the note**): the front is
   `Min 𝒦`.
+* `Feasible.exists_roleConfig_of_domination`: Theorem 6.1 in the form of
+  `Feasible.exists_roleConfig_ns` (role loads at most the makespan), as a corollary of
+  Theorem 6.9, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
 -/
 
 @[expose] public section
@@ -268,5 +271,28 @@ theorem minimal_achievable_iff_configPoints {N : Network n} (hA : N.A1NS) (c : F
     (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ configPoints N c t p) x :=
   (minimal_achievable_iff_schedPoints hA c hpt x).trans (minimal_schedPoints_iff_configPoints N c x)
+
+/-! ### Theorem 6.1 from Theorem 6.9 -/
+
+/-- Every role load is at most the closed form. -/
+theorem Sched.load_le_tmpl (S : Sched n p) (d db : Fin n → ℕ) (k : Fin p) :
+    S.load d db k ≤ S.tmpl d db :=
+  (Finset.le_sup (f := fun k => S.load d db k) (Finset.mem_univ k)).trans (le_max_left _ _)
+
+/-- **Theorem 6.1 as a corollary of Theorem 6.9.** Under (A1-NS), with `p ≤ t`, every feasible
+plan gives a role configuration on the `p` planes with `2t − p` landings, cost at most the
+plan's, and every role load at most the makespan: the role configuration of the scheduled
+configuration of `schedulableDomination_all`, whose role loads are at most its closed form.
+This is the statement of `Feasible.exists_roleConfig_ns`. -/
+theorem Feasible.exists_roleConfig_of_domination {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ cfg : RoleConfig n p, size cfg.groups = 2 * t - p ∧
+      totalCost c cfg.groups ≤ planCost c P ∧ ∀ k, cfg.roleLoad N k ≤ planMakespan P := by
+  obtain ⟨S, hv, hsize, hcost, htmpl⟩ := schedulableDomination_all c hpt hA hP
+  have hS := Sched.schedules_toRoleConfig hv
+  refine ⟨S.toRoleConfig hv, by rw [← hS.size_eq, hsize], by rw [← hS.cost_eq c]; exact hcost,
+    fun k => ?_⟩
+  rw [← hS.load_eq N k]
+  exact (S.load_le_tmpl N.d N.dbar k).trans htmpl
 
 end ZenoFront

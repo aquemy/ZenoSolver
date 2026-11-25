@@ -305,7 +305,7 @@ created      = "2026-11-23"
 kind         = "theorem"
 statement    = "Theorem 6.1 (converse to role configurations) [N1]: under (A1-NS), every feasible plan with cost C and makespan M gives a role configuration on all p planes with passenger count t, cost at most C and λ_k ≤ F_k ≤ M; (AΔ) is not needed."
 status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.exists_roleConfig_ns"
+lean_partial = "ZenoFront.Feasible.exists_roleConfig_ns, ZenoFront.Feasible.exists_roleConfig_of_domination"
 paper        = "Thm 6.1, doc/theory/exact-front.md §6.1"
 created      = "2026-11-23"
 
