@@ -86,6 +86,12 @@ reduction `f` of `Graph.lean` gives the clique instance with `d = (1, 3)`, `d̄ 
 is `{(8, 10)}` (`Ex611.reduced_front`). `U` has a plan of cost 8 and makespan 8 (`Ex611.plan`), so
 the two fronts differ (`Ex611.fronts_differ`).
 
+## Proposition I holds only in the front sense
+
+Both papers' Proposition I says that Pareto-optimal plans land exactly `2t − p` times. On `n = 1`,
+`d₁ = 1`, `c₁ = 0`, `t = 5`, `p = 3`, the front is `{(0, 6)}` (`PropI.front`), and a feasible plan
+with 9 central landings, more than `2t − p = 7`, attains it (`PropI.plan9_pareto`).
+
 ## Main results
 
 * `ZenoFront.Greedy.evocop_misses_lpt`, `ZenoFront.Greedy.arxiv_misses_lpt`: neither greedy reaches
@@ -96,6 +102,7 @@ the two fronts differ (`Ex611.fronts_differ`).
   `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
 * `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
 * `ZenoFront.Ex611.reduced_front`, `ZenoFront.Ex611.fronts_differ`: Example 6.11.
+* `ZenoFront.PropI.plan9_pareto`: a Pareto-optimal plan with more than `2t − p` landings.
 -/
 
 @[expose] public section
@@ -913,5 +920,71 @@ theorem fronts_differ :
   exact ⟨h₁, h₂, fun h => h₂ ((h _).mpr h₁)⟩
 
 end Ex611
+
+/-! ### Proposition I holds only in the front sense -/
+
+namespace PropI
+
+/-- The certificate of `n = 1`, `d₁ = 1`, `c₁ = 0`, `t = 5`, `p = 3`, as written by
+`zeno front --certificate`: one point, `(0, 6)`, with groups of 1, 3 and 3 landings. -/
+def cert : Cert where
+  n := 1
+  t := 5
+  p := 3
+  d := ![1]
+  dbar := ![1]
+  c := ![0]
+  assumptions := ["S"]
+  front := [(0, 6)]
+  plans := [
+    ![[⟨.ci, .city 0, 0, 1, some 0⟩, ⟨.city 0, .cg, 1, 2, some 0⟩],
+      [⟨.ci, .city 0, 0, 1, some 1⟩, ⟨.city 0, .cg, 1, 2, some 1⟩,
+        ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+        ⟨.ci, .city 0, 4, 5, some 2⟩, ⟨.city 0, .cg, 5, 6, some 2⟩],
+      [⟨.ci, .city 0, 0, 1, some 3⟩, ⟨.city 0, .cg, 1, 2, some 3⟩,
+        ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+        ⟨.ci, .city 0, 4, 5, some 4⟩, ⟨.city 0, .cg, 5, 6, some 4⟩]]]
+  gaps := []
+
+set_option maxRecDepth 100000 in
+/-- The kernel accepts the certificate. -/
+theorem cert_check : cert.check = true := by decide +kernel
+
+/-- **The front is `{(0, 6)}`**, for every central flight duration (here a flight from the city
+to itself). -/
+theorem front (dc : Fin 1 → Fin 1 → ℕ) :
+    IsParetoFront (achievable ⟨![1], ![1], dc⟩ ![0] 5 3) [(0, 6)] :=
+  cert.check_sound_relaxed cert_check (by decide) dc
+
+/-- The number of central landings of a plan. -/
+def centralLandings {n t p : ℕ} (P : Plan n t p) : ℕ :=
+  ((allLegs P).filter fun ℓ => !ℓ.dst.isHub).length
+
+/-- The plan of the certificate, in which the plane with one landing also flies a crossing pair
+`Ā, A`, empty, within its slack. -/
+def plan9 : Plan 1 5 3 :=
+  ![[⟨.ci, .city 0, 0, 1, some 0⟩, ⟨.city 0, .cg, 1, 2, some 0⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, none⟩, ⟨.city 0, .cg, 5, 6, none⟩],
+    [⟨.ci, .city 0, 0, 1, some 1⟩, ⟨.city 0, .cg, 1, 2, some 1⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, some 2⟩, ⟨.city 0, .cg, 5, 6, some 2⟩],
+    [⟨.ci, .city 0, 0, 1, some 3⟩, ⟨.city 0, .cg, 1, 2, some 3⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, some 4⟩, ⟨.city 0, .cg, 5, 6, some 4⟩]]
+
+/-- **A Pareto-optimal plan with more than `2t − p` landings.** For `n = 1`, `d₁ = 1`, `c₁ = 0`,
+`t = 5`, `p = 3` and every central flight duration, the plan `plan9` is feasible, lands 9 times in
+central cities, more than `2t − p = 7`, and attains the point `(0, 6)`, which is Pareto-optimal.
+So the papers' Proposition I (Pareto-optimal plans land exactly `2t − p` times) holds only in the
+front sense: every front point is attained with `2t − p` landings, not only with them. -/
+theorem plan9_pareto (dc : Fin 1 → Fin 1 → ℕ) :
+    Feasible ⟨![1], ![1], dc⟩ plan9 ∧ planCost ![0] plan9 = 0 ∧ planMakespan plan9 = 6 ∧
+      centralLandings plan9 = 9 ∧ 2 * 5 - 3 < centralLandings plan9 ∧
+      Minimal (· ∈ achievable ⟨![1], ![1], dc⟩ ![0] 5 3) (0, 6) :=
+  ⟨planOK_feasible dc (by decide +kernel), by decide +kernel, by decide +kernel, by decide +kernel,
+    by decide +kernel, ((front dc).mem_iff_minimal _).mp (by decide)⟩
+
+end PropI
 
 end ZenoFront

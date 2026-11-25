@@ -287,6 +287,14 @@ lean      = "ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_isPare
 paper     = "status summary (§0, the (S)-only case), doc/theory/exact-front.md; refuted by Ex 4.13 (§4.6)"
 created   = "2026-11-23"
 
+[claims.claim-prop-i-landings]
+kind      = "claim"
+statement = "Remark after Corollary 4.8 (Proposition I of both papers holds only in the front sense): for n = 1, d_1 = 1, c_1 = 0, t = 5 and p = 3, the front is {(0, 6)}, and a feasible plan with 9 central landings, more than 2t − p = 7, attains (0, 6). So a Pareto-optimal plan can have more than 2t − p landings."
+status    = "math.machine-checked"
+lean      = "ZenoFront.PropI.front, ZenoFront.PropI.plan9_pareto"
+paper     = "remark after Cor 4.8, doc/theory/exact-front.md §4.4; EvoCOP 2015 and arXiv:2304.14659, Proposition I"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 5. The per-PPP greedy of both papers is not exact
 # ===========================================================================
