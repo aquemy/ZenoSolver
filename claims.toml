@@ -637,6 +637,15 @@ lean      = "ZenoFront.minCost, ZenoFront.minCost_le, ZenoFront.minCost_attained
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.thm-verified-solver]
+kind         = "theorem"
+statement    = "Theorem (verified solver), new in revision 3: Assume (S), (H) and 1 ≤ p ≤ t. The list `solveFront d c t p` is the Pareto front of the feasible plans."
+status       = "math.machine-checked"
+lean         = "ZenoFront.solveFront_isParetoFront_hub"
+lean_partial = "ZenoFront.solveFront, ZenoFront.solveFront_eq, ZenoFront.mem_solveFront_iff"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 8. Complexity
 # ===========================================================================
