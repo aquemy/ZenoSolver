@@ -426,7 +426,8 @@ id = "complexity"
 title = "Complexity"
 intro = """
 §8 explains why no fast rule that schedules a fixed multiset of landings can be exact, and why the
-dynamic programs are pseudo-polynomial. None of it is formalized.
+dynamic programs are pseudo-polynomial. The reductions and the step count of the link-forest DP are
+formalized; the hardness of 3-Partition and of Partition is cited, not formalized.
 """
 
 [[node]]
