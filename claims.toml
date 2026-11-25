@@ -101,9 +101,9 @@ created   = "2026-11-23"
 
 [claims.lem-2-5]
 kind      = "lemma"
-statement = "Lemma 2.5: for every parity matrix and every plane k, h_k ≤ |X_k| − 1."
+statement = "Lemma 2.5 (the row bound): For every parity matrix and plane k, |η_k| + 1 ≤ |X_k|. Hence the groups of an admissible partition are non-empty, and |X| ≡ p (mod 2)."
 status    = "math.machine-checked"
-lean      = "ZenoFront.IsParityWitness.card_add_one_le"
+lean      = "ZenoFront.IsParityWitness.card_add_one_le, ZenoFront.Admissible.card_pos, ZenoFront.IsParityWitness.size_mod_two"
 paper     = "Lemma 2.5, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
