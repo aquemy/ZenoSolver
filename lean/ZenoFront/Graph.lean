@@ -27,6 +27,12 @@ the network bounds them.
 format v1, `planOK`, accepts hub flights only. `planOKDur` is sound (`gFeasible_of_planOKDur`), so
 a concrete plan with central legs is proved feasible by `decide`.
 
+The reduction of arXiv:2304.14659, §2.4, is defined for every flight graph. `vcities U` has one
+virtual city for each central vertex `i`, simple path `w` from `C_I` to `i` and simple path `e`
+from `i` to `C_G` (the paths may pass through a hub). `Reduced.graph U` is the clique instance of
+these cities, with `d = φ(w)`, `d̄ = φ(e)` (flight times) and no central flight, and `Reduced.c U c`
+gives them the costs `ω(w) + ω(e)` (the landings after the first vertex).
+
 ## Main results
 
 * `ZenoFront.FlightGraph`, `ZenoFront.GFeasible`, `ZenoFront.gAchievable`: the model.
@@ -35,6 +41,7 @@ a concrete plan with central legs is proved feasible by `decide`.
 * `ZenoFront.GFeasible.feasible_of_clique`: a plan of a clique instance without central flights is
   a plan of every network with its hub durations.
 * `ZenoFront.gFeasible_of_planOKDur`: the simulator is sound.
+* `ZenoFront.vcities`, `ZenoFront.Reduced.graph`, `ZenoFront.Reduced.c`: the reduction `f`.
 -/
 
 @[expose] public section
@@ -182,5 +189,84 @@ included. -/
 theorem feasible_of_planOKDur {N : Network n} {P : Plan n t p}
     (h : planOKDur N.toGraph P = true) : Feasible N P :=
   (feasible_iff_gFeasible N P).mpr (gFeasible_of_planOKDur h)
+
+/-! ### The reduction of arXiv §2.4 -/
+
+/-- The locations, in order: `C_I`, the central vertices, `C_G`. -/
+def allLocs (n : ℕ) : List (Loc n) := .ci :: (List.finRange n).map .city ++ [.cg]
+
+theorem mem_allLocs : ∀ x : Loc n, x ∈ allLocs n
+  | .ci => by simp [allLocs]
+  | .city i => by simp [allLocs]
+  | .cg => by simp [allLocs]
+
+/-- The simple paths from `x` to `b`, as vertex lists, that avoid the vertices `seen`; `fuel`
+bounds their number of vertices. A path stops at its first visit of `b`. -/
+def simplePathsFrom (U : FlightGraph n) (b : Loc n) : ℕ → List (Loc n) → Loc n → List (List (Loc n))
+  | 0, _, _ => []
+  | f + 1, seen, x =>
+    if x = b then [[x]]
+    else (allLocs n).flatMap fun y =>
+      if (U.dur x y).isSome ∧ y ∉ x :: seen then
+        (simplePathsFrom U b f (x :: seen) y).map (x :: ·)
+      else []
+
+/-- The simple paths from `a` to `b` (a simple path has at most `n + 2` vertices). -/
+def simplePaths (U : FlightGraph n) (a b : Loc n) : List (List (Loc n)) :=
+  simplePathsFrom U b (n + 2) [] a
+
+/-- The flight time `φ` of a walk: the sum of its flight durations. -/
+def pathDur (U : FlightGraph n) : List (Loc n) → ℕ
+  | x :: y :: rest => (U.dur x y).getD 0 + pathDur U (y :: rest)
+  | _ => 0
+
+/-- The landing cost of a location: `c i` at central vertex `i`, `0` at a hub. -/
+def locCost (c : Fin n → ℕ) : Loc n → ℕ
+  | .city i => c i
+  | _ => 0
+
+/-- The landing cost `ω` of a walk: its vertices after the first. -/
+def pathCost (c : Fin n → ℕ) : List (Loc n) → ℕ
+  | [] => 0
+  | _ :: rest => (rest.map (locCost c)).sum
+
+/-- A virtual city of the reduction: a central vertex `i`, a simple path `w` from `C_I` to `i`
+and a simple path `e` from `i` to `C_G`. -/
+structure VCity (n : ℕ) where
+  i : Fin n
+  w : List (Loc n)
+  e : List (Loc n)
+  deriving DecidableEq, Repr
+
+/-- **The reduction f of arXiv §2.4** (as in Example 6.11 of the note): one virtual city for every
+central vertex `i`, every simple path `w` from `C_I` to `i` and every simple path `e` from `i` to
+`C_G`. -/
+def vcities (U : FlightGraph n) : List (VCity n) :=
+  (List.finRange n).flatMap fun i =>
+    (simplePaths U .ci (.city i)).flatMap fun w =>
+      (simplePaths U (.city i) .cg).map fun e => ⟨i, w, e⟩
+
+namespace Reduced
+
+/-- The number of cities of `f(U)`. -/
+def m (U : FlightGraph n) : ℕ := (vcities U).length
+
+/-- The city `v` of `f(U)`. -/
+def city (U : FlightGraph n) (v : Fin (m U)) : VCity n := (vcities U)[v]
+
+/-- `d_v = φ(w)`. -/
+def d (U : FlightGraph n) (v : Fin (m U)) : ℕ := pathDur U (city U v).w
+
+/-- `d̄_v = φ(e)`. -/
+def dbar (U : FlightGraph n) (v : Fin (m U)) : ℕ := pathDur U (city U v).e
+
+/-- `c_v = ω(w) + ω(e)`: the landings of `w` followed by `e`, `c_i` counted once. -/
+def c (U : FlightGraph n) (c : Fin n → ℕ) (v : Fin (m U)) : ℕ :=
+  pathCost c (city U v).w + pathCost c (city U v).e
+
+/-- **`f(U)`**: the clique instance of the virtual cities, without central flights. -/
+def graph (U : FlightGraph n) : FlightGraph (m U) := cliqueGraph (d U) (dbar U)
+
+end Reduced
 
 end ZenoFront

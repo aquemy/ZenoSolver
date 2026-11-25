@@ -78,6 +78,14 @@ gigabytes. The test certificate `v2-search-prop65.cert` also uses `balanced` gap
 exhausts memory. So only the gap below makespan 74 is proved here, which is all the statement
 needs.
 
+## Example 6.11: the reduction of arXiv §2.4 misses the front
+
+On the path `U = C_I – a – b – C_G` with durations 1, 2, 1, `c_a = c_b = 1`, `t = 3`, `p = 2`, the
+reduction `f` of `Graph.lean` gives the clique instance with `d = (1, 3)`, `d̄ = (3, 1)`, `c = (2, 2)`
+(`Ex611.vcities_U`, `Ex611.reduced_graph`). A kernel-checked v2 certificate proves that its front
+is `{(8, 10)}` (`Ex611.reduced_front`). `U` has a plan of cost 8 and makespan 8 (`Ex611.plan`), so
+the two fronts differ (`Ex611.fronts_differ`).
+
 ## Main results
 
 * `ZenoFront.Greedy.evocop_misses_lpt`, `ZenoFront.Greedy.arxiv_misses_lpt`: neither greedy reaches
@@ -87,6 +95,7 @@ needs.
 * `ZenoFront.Ex413.plan_feasible`, `ZenoFront.Ex413.not_admissible_le`,
   `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
 * `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
+* `ZenoFront.Ex611.reduced_front`, `ZenoFront.Ex611.fronts_differ`: Example 6.11.
 -/
 
 @[expose] public section
@@ -768,5 +777,141 @@ theorem harmful_waiting (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : 
     fun ⟨x, hx, h₁, h₂⟩ => absurd ((prop65 dc hA).2.2 x hx h₂) (by omega)⟩
 
 end Prop65
+
+/-! ### Example 6.11: the reduction of arXiv §2.4 misses the front -/
+
+namespace Ex611
+
+/-- The path `C_I – a – b – C_G` of Example 6.11, with durations 1, 2, 1 (`a`, `b` are the
+central vertices 0 and 1). -/
+def U : FlightGraph 2 :=
+  ⟨fun x y =>
+    if (x = .ci ∧ y = .city 0) ∨ (x = .city 0 ∧ y = .ci) then some 1
+    else if (x = .city 0 ∧ y = .city 1) ∨ (x = .city 1 ∧ y = .city 0) then some 2
+    else if (x = .city 1 ∧ y = .cg) ∨ (x = .cg ∧ y = .city 1) then some 1
+    else none⟩
+
+/-- The landing costs `c_a = c_b = 1`. -/
+def c : Fin 2 → ℕ := ![1, 1]
+
+/-- `U` is undirected. -/
+theorem U_undirected : U.Undirected := by
+  intro a b
+  have : ∀ a ∈ allLocs 2, ∀ b ∈ allLocs 2, U.dur a b = U.dur b a := by decide +kernel
+  exact this a (mem_allLocs a) b (mem_allLocs b)
+
+/-- `U` has no flight between the hubs. -/
+theorem U_noHubFlight : U.NoHubFlight := ⟨by decide +kernel, by decide +kernel⟩
+
+/-- **`f(U)` has two cities**: `v_a = (C_I a, a b C_G)` and `v_b = (C_I a b, b C_G)`. -/
+theorem vcities_U : vcities U =
+    [⟨0, [.ci, .city 0], [.city 0, .city 1, .cg]⟩,
+      ⟨1, [.ci, .city 0, .city 1], [.city 1, .cg]⟩] := by
+  decide +kernel
+
+/-- Their `(d, d̄, c)` are `(1, 3, 2)` and `(3, 1, 2)`. -/
+theorem vcities_data : (vcities U).map (fun v => (pathDur U v.w, pathDur U v.e,
+    pathCost c v.w + pathCost c v.e)) = [(1, 3, 2), (3, 1, 2)] := by
+  decide +kernel
+
+/-- **`f(U)` is the two-city clique instance** with `d = (1, 3)`, `d̄ = (3, 1)` and no central
+flight. -/
+theorem reduced_graph : (Reduced.graph U : FlightGraph 2) = cliqueGraph ![1, 3] ![3, 1] := by
+  unfold Reduced.graph
+  congr 1 <;> funext v <;> fin_cases v <;> decide +kernel
+
+/-- The costs of `f(U)` are `c = (2, 2)`. -/
+theorem reduced_c : (Reduced.c U c : Fin 2 → ℕ) = ![2, 2] := by
+  funext v
+  fin_cases v <;> decide +kernel
+
+/-- The plan of Example 6.11 in `U` (passengers numbered from `0`). Plane 1 flies
+`C_I a b a b C_G`: it drops passenger 1 at `b` at time 3, flies the central edge back to `a` and
+picks passenger 2 up there at time 5. -/
+def plan : Plan 2 3 2 :=
+  ![[⟨.ci, .city 0, 0, 1, some 1⟩, ⟨.city 0, .city 1, 1, 3, some 1⟩, ⟨.city 1, .city 0, 3, 5, none⟩,
+      ⟨.city 0, .city 1, 5, 7, some 2⟩, ⟨.city 1, .cg, 7, 8, some 2⟩],
+    [⟨.ci, .city 0, 0, 1, some 2⟩, ⟨.city 0, .ci, 1, 2, none⟩, ⟨.ci, .city 0, 2, 3, some 0⟩,
+      ⟨.city 0, .city 1, 3, 5, some 0⟩, ⟨.city 1, .cg, 5, 6, some 0⟩, ⟨.cg, .city 1, 6, 7, none⟩,
+      ⟨.city 1, .cg, 7, 8, some 1⟩]]
+
+/-- The plan is feasible in `U`. -/
+theorem plan_feasible : GFeasible U plan := gFeasible_of_planOKDur (by decide +kernel)
+
+/-- It costs 8. -/
+theorem plan_cost : planCost c plan = 8 := by decide +kernel
+
+/-- Its makespan is 8. -/
+theorem plan_makespan : planMakespan plan = 8 := by decide +kernel
+
+/-- `(8, 8)` is a point of `U`. -/
+theorem mem_gAchievable_U : ((8, 8) : ℕ × ℕ) ∈ gAchievable U c 3 2 :=
+  ⟨plan, plan_feasible, by rw [plan_cost, plan_makespan]⟩
+
+/-- The certificate of the front of `f(U)`, as written by `zeno front --certificate`, with the
+fastest point closed by the `search` kind (Theorem 6.9). -/
+def reducedCert : Cert2 where
+  n := 2
+  t := 3
+  p := 2
+  d := ![1, 3]
+  dbar := ![3, 1]
+  c := ![2, 2]
+  assumptions := ["A1-NS"]
+  front := [(8, 10)]
+  fastest := .search
+  plans := [
+    ![[⟨.ci, .city 0, 0, 1, some 0⟩, ⟨.city 0, .ci, 1, 2, none⟩, ⟨.ci, .city 0, 2, 3, some 1⟩,
+        ⟨.city 0, .cg, 3, 6, some 1⟩],
+      [⟨.ci, .city 0, 0, 1, some 2⟩, ⟨.city 0, .cg, 1, 4, some 2⟩, ⟨.cg, .city 0, 4, 7, none⟩,
+        ⟨.city 0, .cg, 7, 10, some 0⟩]]]
+  gaps := []
+
+set_option maxRecDepth 100000 in
+/-- The kernel accepts the certificate of `f(U)`. -/
+theorem reducedCert_check : reducedCert.check = true := by decide +kernel
+
+/-- **The front of `f(U)` is `{(8, 10)}`**: its plans, which have no central flight, are plans of
+every network with its hub durations, and in such a network with (A1-NS) the certificate is
+sound. -/
+theorem reduced_front :
+    IsParetoFront (gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) [(8, 10)] := by
+  rw [reduced_graph, reduced_c]
+  refine ⟨fun x hx => ?_, fun y ⟨P, hP, hy⟩ => ?_, by simp⟩
+  · rw [List.mem_singleton.mp hx]
+    exact ⟨_, gFeasible_of_planOKDur (P := reducedCert.plans.headD fun _ => [])
+      (by decide +kernel), by decide +kernel⟩
+  · have hF := reducedCert.check_sound reducedCert_check (fun _ _ => 100)
+      (fun _ i j => by fin_cases i <;> fin_cases j <;> decide)
+    exact hF.dominates y ⟨P, hP.feasible_of_clique _, hy⟩
+
+/-- The front of `f(U)` read in the Lean model, whose table of central flights is complete: for
+every table of central flights satisfying (A1-NS), it is `{(8, 10)}`. -/
+theorem reduced_front_network (dc : Fin 2 → Fin 2 → ℕ)
+    (hA : (⟨![1, 3], ![3, 1], dc⟩ : Network 2).A1NS) :
+    IsParetoFront (achievable ⟨![1, 3], ![3, 1], dc⟩ ![2, 2] 3 2) [(8, 10)] :=
+  reducedCert.check_sound reducedCert_check dc fun _ => hA
+
+/-- In particular, every plan of `f(U)` has makespan at least 10. -/
+theorem reduced_makespan_ge : ∀ x ∈ gAchievable (Reduced.graph U) (Reduced.c U c) 3 2, 10 ≤ x.2 :=
+  fun x hx => by
+    obtain ⟨y, hy, hle⟩ := reduced_front.dominates x hx
+    rw [List.mem_singleton.mp hy] at hle
+    exact (Prod.le_def.mp hle).2
+
+/-- **The reduction misses the front (Example 6.11).** `(8, 10)` is Pareto-optimal for `f(U)` but
+not for `U`, which has the plan `(8, 8)`. So the fronts of `U` and `f(U)` differ, against the claim
+of arXiv §2.4. -/
+theorem fronts_differ :
+    Minimal (· ∈ gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) (8, 10) ∧
+      ¬ Minimal (· ∈ gAchievable U c 3 2) (8, 10) ∧
+      ¬ ∀ x, Minimal (· ∈ gAchievable U c 3 2) x ↔
+        Minimal (· ∈ gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) x := by
+  have h₁ := (reduced_front.mem_iff_minimal (8, 10)).mp (List.mem_singleton_self _)
+  have h₂ : ¬ Minimal (· ∈ gAchievable U c 3 2) ((8, 10) : ℕ × ℕ) := fun h =>
+    absurd (h.2 mem_gAchievable_U (by decide)) (by decide)
+  exact ⟨h₁, h₂, fun h => h₂ ((h _).mpr h₁)⟩
+
+end Ex611
 
 end ZenoFront

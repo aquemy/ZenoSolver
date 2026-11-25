@@ -422,8 +422,9 @@ created   = "2026-11-24"
 
 [claims.claim-6-11]
 kind      = "claim"
-statement = "Example 6.11 (the reduction misses the front): for the path C_I–a–b–C_G with durations 1, 2, 1, c_a = c_b = 1, t = 3 and p = 2, the reduced instance f(U) has the front {(8, 10)} while U has the front {(8, 8)}."
-status    = "math.proved-informal"
+statement = "Example 6.11 (the reduction misses the front): for the path U = C_I–a–b–C_G with durations 1, 2, 1, c_a = c_b = 1, t = 3 and p = 2, the reduced instance f(U) has the two cities (d, d̄, c) = (1, 3, 2) and (3, 1, 2) and the front {(8, 10)}, while U has a feasible plan of cost 8 and makespan 8. So F_U ≠ F_{f(U)}."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Ex611.vcities_data, ZenoFront.Ex611.reduced_graph, ZenoFront.Ex611.reduced_front, ZenoFront.Ex611.reduced_front_network, ZenoFront.Ex611.plan_feasible, ZenoFront.Ex611.fronts_differ"
 paper     = "Ex 6.11, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
@@ -635,6 +636,7 @@ created   = "2026-11-23"
 kind      = "conjecture"
 statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
 status    = "math.disproved"
+lean      = "ZenoFront.Ex611.fronts_differ"
 paper     = "arXiv:2304.14659 §2.4; Ex 6.11, doc/theory/exact-front.md §6.6"
 created   = "2026-11-24"
 
