@@ -192,33 +192,75 @@ def gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) : List (ℕ × ℕ) 
     decide ((x.1 : WithTop ℕ) ≤ bound g y.2) && gapsOK bound (y :: rest) gs
   | _, _ => false
 
-/-- The domination argument: if, for every named bound `g`, `bound g M` is a lower bound on the
-cost of `y` whenever `y`'s makespan is below `M`, the first point is at least as fast as `y`, and
-the last at least as cheap, then some listed point weakly dominates `y`. -/
-theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
-    ∀ (F : List (ℕ × ℕ)) (gs : List κ),
-      (∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) → gapsOK bound F gs = true →
-      (∀ x ∈ F.head?, x.2 ≤ y.2) → (∀ x ∈ F.getLast?, x.1 ≤ y.1) → ∃ x ∈ F, x ≤ y
-  | [], _, _, h, _, _ => by simp [gapsOK] at h
-  | [x], [], _, _, hh, hl => by
+/-- **The domination argument along a front.** For a point `y`, if every consecutive pair
+`(x, z)` of the list has `C_x ≤ y.1` as soon as `y` is faster than `z`, the first point is at least
+as fast as `y` and the last at least as cheap, then some listed point weakly dominates `y`. -/
+theorem exists_le_of_chain (y : ℕ × ℕ) : ∀ F : List (ℕ × ℕ), F ≠ [] →
+    F.IsChain (fun x z => y.2 < z.2 → x.1 ≤ y.1) → (∀ x ∈ F.head?, x.2 ≤ y.2) →
+      (∀ x ∈ F.getLast?, x.1 ≤ y.1) → ∃ x ∈ F, x ≤ y
+  | [], h, _, _, _ => absurd rfl h
+  | [x], _, _, hh, hl => by
     simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq',
       List.getLast?_singleton] at hh hl
     exact ⟨x, List.mem_singleton_self x, Prod.le_def.mpr ⟨hl, hh⟩⟩
-  | [_], _ :: _, _, h, _, _ => by simp [gapsOK] at h
-  | _ :: _ :: _, [], _, h, _, _ => by simp [gapsOK] at h
-  | x :: z :: rest, g :: gs, hb, h, hh, hl => by
-    simp only [gapsOK, Bool.and_eq_true, decide_eq_true_eq] at h
+  | x :: z :: rest, _, hc, hh, hl => by
+    rw [List.isChain_cons_cons] at hc
     simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq'] at hh
     by_cases hz : y.2 < z.2
-    · have h₁ : (x.1 : WithTop ℕ) ≤ y.1 := h.1.trans (hb g List.mem_cons_self z.2 hz)
-      exact ⟨x, List.mem_cons_self, Prod.le_def.mpr ⟨WithTop.coe_le_coe.mp h₁, hh⟩⟩
-    · have hl' : ∀ x' ∈ (z :: rest).getLast?, x'.1 ≤ y.1 := by
-        rw [List.getLast?_cons_cons] at hl
-        exact hl
-      obtain ⟨x', hx', hle⟩ := exists_le_of_gapsOK bound y (z :: rest) gs
-        (fun g' hg' => hb g' (List.mem_cons_of_mem _ hg')) h.2
-        (by simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq']; omega) hl'
+    · exact ⟨x, List.mem_cons_self, Prod.le_def.mpr ⟨hc.1 hz, hh⟩⟩
+    · rw [List.getLast?_cons_cons] at hl
+      obtain ⟨x', hx', hle⟩ := exists_le_of_chain y (z :: rest) (List.cons_ne_nil _ _) hc.2
+        (by simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq']; omega) hl
       exact ⟨x', List.mem_cons_of_mem _ hx', hle⟩
+
+/-- The gaps give the chain of `exists_le_of_chain`: if `bound g M` is a lower bound on the cost
+of `y` whenever `y`'s makespan is below `M`, every consecutive pair `(x, z)` has `C_x ≤ y.1` as
+soon as `y` is faster than `z`. -/
+theorem isChain_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
+    ∀ (F : List (ℕ × ℕ)) (gs : List κ),
+      (∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) → gapsOK bound F gs = true →
+      F ≠ [] ∧ F.IsChain (fun x z => y.2 < z.2 → x.1 ≤ y.1)
+  | [], _, _, h => by simp [gapsOK] at h
+  | [_], [], _, _ => ⟨List.cons_ne_nil _ _, List.IsChain.singleton _⟩
+  | [_], _ :: _, _, h => by simp [gapsOK] at h
+  | _ :: _ :: _, [], _, h => by simp [gapsOK] at h
+  | x :: z :: rest, g :: gs, hb, h => by
+    simp only [gapsOK, Bool.and_eq_true, decide_eq_true_eq] at h
+    refine ⟨List.cons_ne_nil _ _, List.isChain_cons_cons.mpr ⟨fun hz => ?_,
+      (isChain_of_gapsOK bound y (z :: rest) gs (fun g' hg' => hb g' (List.mem_cons_of_mem _ hg'))
+        h.2).2⟩⟩
+    exact WithTop.coe_le_coe.mp (h.1.trans (hb g List.mem_cons_self z.2 hz))
+
+/-- The domination argument of the checker: if, for every named bound `g`, `bound g M` is a lower
+bound on the cost of `y` whenever `y`'s makespan is below `M`, the first point is at least as fast
+as `y`, and the last at least as cheap, then some listed point weakly dominates `y`. -/
+theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ)
+    (F : List (ℕ × ℕ)) (gs : List κ)
+    (hb : ∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) (h : gapsOK bound F gs = true)
+    (hh : ∀ x ∈ F.head?, x.2 ≤ y.2) (hl : ∀ x ∈ F.getLast?, x.1 ≤ y.1) : ∃ x ∈ F, x ≤ y :=
+  have hc := isChain_of_gapsOK bound y F gs hb h
+  exists_le_of_chain y F hc.1 hc.2 hh hl
+
+/-- **Theorem 9.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
+`F = (C_1, M_1), …, (C_r, M_r)`, `r ≥ 1`, with `M_1 < ⋯ < M_r` and `C_1 > ⋯ > C_r`. If (1) every
+listed point is in `S`, (2) every point of `S` has makespan at least `M_1`, (3) for `i < r` every
+point of `S` with makespan below `M_{i+1}` costs at least `C_i`, and (4) every point of `S` costs at
+least `C_r`, then `F` is the Pareto front of `S`. -/
+theorem isParetoFront_of_obligations {S : Set (ℕ × ℕ)} {F : List (ℕ × ℕ)} (hne : F ≠ [])
+    (hmono : F.IsChain fun a b => a.2 < b.2 ∧ b.1 < a.1) (h₁ : ∀ x ∈ F, x ∈ S)
+    (h₂ : ∀ x ∈ F.head?, ∀ y ∈ S, x.2 ≤ y.2)
+    (h₃ : F.IsChain fun x z => ∀ y ∈ S, y.2 < z.2 → x.1 ≤ y.1)
+    (h₄ : ∀ x ∈ F.getLast?, ∀ y ∈ S, x.1 ≤ y.1) : IsParetoFront S F := by
+  refine ⟨h₁, fun y hy => ?_, ?_⟩
+  · exact exists_le_of_chain y F hne (h₃.imp fun x z h => h y hy) (fun x hx => h₂ x hx y hy)
+      fun x hx => h₄ x hx y hy
+  · have : Trans (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1)
+        (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1) (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1) :=
+      ⟨fun hab hbc => ⟨hab.1.trans hbc.1, hbc.2.trans hab.2⟩⟩
+    refine hmono.pairwise.imp fun {a b} hab =>
+      ⟨fun hle => ?_, fun hle => ?_⟩
+    · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
+    · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
 
 theorem exists_mem_zip_of_mem {α β : Type*} : ∀ {l₁ : List α} {l₂ : List β},
     l₁.length = l₂.length → ∀ {b : β}, b ∈ l₂ → ∃ a, (a, b) ∈ l₁.zip l₂

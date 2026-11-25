@@ -571,8 +571,8 @@ created   = "2026-11-23"
 [claims.thm-9-1]
 kind         = "theorem"
 statement    = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Cert.check_sound"
+status       = "math.machine-checked"
+lean         = "ZenoFront.isParetoFront_of_obligations"
 paper        = "Thm 9.1, doc/theory/exact-front.md §9"
 created      = "2026-11-23"
 
