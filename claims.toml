@@ -56,6 +56,14 @@ status    = "math.conjectured"
 paper     = "Statement 1.2, doc/theory/exact-front.md §1.3"
 created   = "2026-11-23"
 
+[claims.lem-rounding]
+kind      = "lemma"
+statement = "Lemma (rounding times), new in revision 3: Let a plan have times in ℚ or ℝ, integer durations, and satisfy Definition 1.2. Rounding every time down gives a feasible plan with natural-number times, the same cost and a makespan at most the original one; conversely an integer plan is such a plan with the same cost and makespan."
+status    = "math.machine-checked"
+lean      = "ZenoFront.QFeasible.floor, ZenoFront.qPlanCost_eq, ZenoFront.planMakespan_floor_le, ZenoFront.Feasible.toRat"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
@@ -78,7 +86,7 @@ created   = "2026-11-23"
 
 [claims.lem-2-3]
 kind      = "lemma"
-statement = "Lemma 2.3 (integer form) [A′]: a partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ |X_k| + 1 for every plane k and Σ_k h̃_{k,i} ≡ 0 for every city i (mod 2)."
+statement = "Lemma 2.3 (integer form): A partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ |X_k| + 1 (mod 2) for every plane k, and Σ_k h̃_{k,i} even for every city i."
 status    = "math.machine-checked"
 lean      = "ZenoFront.admissible_iff_exists_natWitness"
 paper     = "Lemma 2.3, doc/theory/exact-front.md §2"
@@ -158,12 +166,12 @@ paper        = "Lemma 3.3, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
 [claims.lem-3-4]
-kind         = "lemma"
-statement    = "Lemma 3.4 (relaxation) [R]: under (S), every feasible plan with cost C and makespan M has non-empty multisets Y_1..Y_p with Σ_k |Y_k| = s, c(Y) ≤ C and ℓ(Y_k) ≤ F_k ≤ M, hence C ≥ L(⌊M/2⌋) with integer durations; no assumption on central flights is needed."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Feasible.exists_relaxation_emin, ZenoFront.Feasible.relaxCost_le_planCost, ZenoFront.Network.emin_eq_of_sym"
-paper        = "Lemma 3.4, doc/theory/exact-front.md §3"
-created      = "2026-11-23"
+kind      = "lemma"
+statement = "Lemma 3.4 (relaxation): Let p ≤ t. Every feasible plan with cost C and makespan M has non-empty multisets Y_1, …, Y_p with Σ_k |Y_k| = s, c(Y_1 + ⋯ + Y_p) ≤ C and 2e(Y_k) ≤ M for every k; under (S), e = d. Hence C ≥ L_e(⌊M/2⌋), where L_e(T) is the least Σ_k min{c(Y) : |Y| = m_k, e(Y) ≤ T} over m_1, …, m_p ≥ 1 with Σ_k m_k = s (∞ if none)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Feasible.exists_relaxation_emin, ZenoFront.Feasible.relaxCost_le_planCost, ZenoFront.Network.emin_eq_of_sym"
+paper     = "Lemma 3.4, doc/theory/exact-front.md §3"
+created   = "2026-11-23"
 
 # ===========================================================================
 # 4. Symmetric case
@@ -465,12 +473,12 @@ created   = "2026-11-24"
 # ===========================================================================
 
 [claims.prop-7-1]
-kind         = "proposition"
-statement    = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g."
-status       = "math.machine-checked"
-lean         = "ZenoFront.minimal_achievable_iff_minCost_hub"
-paper        = "Prop 7.1, doc/theory/exact-front.md §7.1"
-created      = "2026-11-23"
+kind      = "proposition"
+statement = "Proposition 7.1 (front = breakpoints of E): Assume (S), (H) and p ≤ t. (C, M) ∈ F iff M = 2T for some T with E(T) = C and E(T′) > C for every T′ < T (original units)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_achievable_iff_minCost_hub"
+paper     = "Prop 7.1, doc/theory/exact-front.md §7.1"
+created   = "2026-11-23"
 
 [claims.lem-7-2]
 kind         = "lemma"
@@ -570,12 +578,12 @@ created   = "2026-11-23"
 # ===========================================================================
 
 [claims.thm-9-1]
-kind         = "theorem"
-statement    = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F."
-status       = "math.machine-checked"
-lean         = "ZenoFront.isParetoFront_of_obligations"
-paper        = "Thm 9.1, doc/theory/exact-front.md §9"
-created      = "2026-11-23"
+kind      = "theorem"
+statement = "Theorem 9.1 (obligations imply the front): Let S ⊆ ℕ² and (C_1, M_1), …, (C_r, M_r), r ≥ 1, with M_1 < ⋯ < M_r and C_1 > ⋯ > C_r. If (1) every listed point is in S, (2) every point of S has makespan ≥ M_1, (3) for i < r every point of S with makespan < M_{i+1} has cost ≥ C_i, and (4) every point of S has cost ≥ C_r, then the list is the Pareto front of S."
+status    = "math.machine-checked"
+lean      = "ZenoFront.isParetoFront_of_obligations"
+paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+created   = "2026-11-23"
 
 [claims.lem-9-2]
 kind      = "lemma"
