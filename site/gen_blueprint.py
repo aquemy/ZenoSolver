@@ -4,28 +4,30 @@
     python3 site/gen_blueprint.py            # ask Lean (lean/ must be built: `lake build`)
     python3 site/gen_blueprint.py --no-lean  # reuse site/lean-status.json
 
-The node registry `site/blueprint.toml` is the only hand-authored map. Everything else is derived:
+The node registry `site/blueprint.toml` is the only hand-authored map: one node per numbered
+result of the theory note (revision 3), by label. Everything else is derived:
 
-* the statement, the proof and the remarks of a node are cut out of `doc/theory/exact-front.md`
-  by its label, and its status (P / S / O / refuted) is read from the table of §0 of the note;
+* the statement, the note's *Lean:* paragraph, the proof and the remarks of a node are cut out of
+  `doc/theory/exact-front.md` by its label;
+* its claim is the entry of the claim ledger `claims.toml` with the same `label` (archived entries,
+  with `removed`, are skipped). Every node but Notation must have one;
 * the Lean facts (module, source range, kind, axioms) are asked of Lean itself
   (`findDeclarationRanges?`, `collectAxioms`) and kept in `site/lean-status.json`;
 * the listings are the source text of those ranges (theorems up to their `:=`);
-* the badges follow the claim ledger `claims.toml`: a node that is a claim there is machine-checked
-  only if the ledger's effective status is math.machine-checked (Lean proves every assertion of
-  the statement), and then its `lean` declarations must use no axiom beyond propext,
-  Classical.choice and Quot.sound; otherwise it has parts in Lean (the ledger's `lean_partial`,
-  with the registry's one-line `gap`) or is informal. Nodes that are not claims (the model's
-  definitions, the Lean-only results) are badged from their own declarations' axioms.
+* the badge follows the ledger: a node is machine-checked only if the ledger's effective status is
+  math.machine-checked (Lean proves every assertion of the statement), and then its `lean`
+  declarations must use no axiom beyond propext, Classical.choice and Quot.sound; otherwise it
+  has parts in Lean (the ledger's `lean_partial`) or is informal. Definitions are badged "Lean
+  definition".
 
 Outputs: `site/proofs/_<section>.qmd` (one partial per section), `site/proofs/_sections.qmd`
 (includes them in order), `site/proofs/_progress.md` (the one-line count at the top),
 `site/proofs/_main.md` (the main results), `site/proofs/_summary.md` (the status table),
 `site/_blueprint-stats.md` (the counts quoted on the About page), `site/_home-lean.md` (the Lean
-tally of the home page) and `site/_nodes.json` (read by the
-`node` shortcode; the registry's `note_only` labels point there to their section of the note on
-GitHub). The script fails if a label is not found in the note or a declaration is missing in Lean,
-so the pages cannot silently drift.
+tally of the home page) and `site/_nodes.json` (read by the `node` shortcode). The script fails if
+a label is not found in the note, a declaration is missing in Lean, a numbered result has no node
+or no claim, or a `{{< node "…" >}}` shortcode of the site names a label that is not a node, so the
+pages cannot silently drift.
 """
 
 from __future__ import annotations
@@ -39,7 +41,6 @@ import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
-from urllib.parse import quote
 
 SITE = Path(__file__).resolve().parent
 ROOT = SITE.parent
@@ -57,8 +58,10 @@ FULL_LISTING_LINES = 60  # definitions up to this length are listed whole
 
 HEADING = re.compile(r"^(#{1,6})\s+(?:(\d+(?:\.\d+)*)\.?\s+)?(.*)$")
 OPENER = re.compile(r"^\*\*([^*]+?)\*\*")
-PROOF_START = re.compile(r"^\*(Proof|Status)\b")
-STATEMENT_KIND = re.compile(r"^(Lemma|Theorem|Corollary|Proposition|Conjecture|Statement|Notation|Example)\b")
+PROOF_START = re.compile(r"^\*Proof\b")
+LEAN_PARA = re.compile(r"^\*Lean:\*")
+STATEMENT_KIND = re.compile(r"^(Definition|Lemma|Theorem|Corollary|Proposition|Example|Notation)\b")
+RESULT = re.compile(r"^((?:Definition|Lemma|Theorem|Corollary|Proposition|Example|Conjecture) \d+\.\d+)\b")
 SQUARE = r"\square"
 
 
@@ -69,13 +72,10 @@ class Extract:
     statement: list[str]
     proof: list[str] = field(default_factory=list)
     remarks: list[str] = field(default_factory=list)
+    lean: str = ""                  # the note's *Lean:* paragraph
 
 
 PAPERS = re.compile(r"(?i)\b(both papers|the papers|papers'|papers’|paper's|paper’s|arXiv|EvoCOP)")
-# sentences of a statement that only cite the papers
-PAPER_SENTENCES = [re.compile(r"\s*This is the EvoCOP 2015 assumption \(stated there with \$>\$\)\.")]
-
-
 def mentions_papers(text: str) -> bool:
     return bool(PAPERS.search(text))
 
@@ -93,12 +93,6 @@ def without_paper_items(paragraph: str) -> str:
         cur.append(line)
     items.append(cur)
     return "\n".join(l for item in items if not mentions_papers("\n".join(item)) for l in item)
-
-
-def cut_paper_sentences(text: str) -> str:
-    for pattern in PAPER_SENTENCES:
-        text = pattern.sub("", text)
-    return text
 
 
 def paragraphs(lines: list[str]) -> list[str]:
@@ -124,7 +118,10 @@ class Note:
                 self.headings.append((i, len(m.group(1)), m.group(2), m.group(3).strip()))
         self.openers = [(i, m.group(1)) for i, line in enumerate(self.lines)
                         if (m := OPENER.match(line))]
-        self.status = self._status_table()
+
+    def results(self) -> list[str]:
+        """The labels of the numbered results, in order."""
+        return [m.group(1) for _, text in self.openers if (m := RESULT.match(text))]
 
     def _where(self, index: int) -> str:
         """The innermost numbered heading above a line, as '§4.3'."""
@@ -136,27 +133,10 @@ class Note:
                 number = num
         return f"§{number}" if number else "§0"
 
-    def _status_table(self) -> dict[str, dict[str, str]]:
-        """Rows of the 'By statement' table of §0: number -> statement, hypotheses, status, uses."""
-        start = next(i for i, line in enumerate(self.lines) if line.startswith("**By statement.**"))
-        rows: dict[str, dict[str, str]] = {}
-        for line in self.lines[start + 1:]:
-            if line.startswith("## "):
-                break
-            if not line.startswith("|") or line.startswith("|---") or line.startswith("| # "):
-                continue
-            cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            if len(cells) != 5:
-                continue
-            number, statement, hyp, status, uses = cells
-            for key in [k.strip() for k in number.split(",")]:
-                rows[key] = {"statement": statement, "hypotheses": hyp, "status": status, "uses": uses}
-        return rows
-
     def _block_end(self, start: int, level: int | None) -> int:
         """End (exclusive) of a block opened at `start`: the next opener or heading. For a
-        heading, the next heading of the same or a higher level, or the next numbered
-        statement (which is a node of its own)."""
+        heading, the next heading of the same or a higher level, or the next statement (which is
+        a node of its own)."""
         for i in range(start + 1, len(self.lines)):
             m = HEADING.match(self.lines[i])
             if m and (level is None or len(m.group(1)) <= level):
@@ -180,23 +160,12 @@ class Note:
             raise SystemExit(f"blueprint: no statement '{label}' in {NOTE.name}")
         return found
 
-    def github_anchor(self, label: str) -> str:
-        """The GitHub anchor of the innermost heading at or above a label, as GitHub slugs it:
-        lower case, punctuation dropped, spaces as hyphens."""
-        index = self.line_of(label)
-        line = self.lines[max(i for i, *_ in self.headings if i <= index)]
-        text = line.lstrip("#").strip().lower()
-        return re.sub(r"[^\w\- ]", "", text).replace(" ", "-")
-
     def extract(self, label: str, paras: int | None = None) -> Extract:
-        """The node's text, without the note's remarks about the 2015/2023 papers: the site
-        presents the theory on its own terms. Statements and proofs stay verbatim; only remark
-        paragraphs (and paragraphs of a section block) that discuss the papers are left out."""
+        """The node's text. Statements, proofs and the *Lean:* paragraph stay verbatim; remark
+        paragraphs that discuss the 2015/2023 papers are left out (the statements that refute
+        the papers say so themselves)."""
         ex = self._extract_raw(label, paras)
         ex.remarks = [p for p in map(without_paper_items, ex.remarks) if p and not mentions_papers(p)]
-        if label.startswith("§"):
-            ex.statement = [p for p in map(without_paper_items, ex.statement) if p and not mentions_papers(p)]
-        ex.statement = [cut_paper_sentences(p) for p in ex.statement]
         return ex
 
     def _extract_raw(self, label: str, paras: int | None = None) -> Extract:
@@ -228,10 +197,17 @@ class Note:
 
     @staticmethod
     def _split(opener: str, where: str, paras: list[str], n_statement: int | None) -> Extract:
+        """Statement, *Lean:* paragraph, proof, remarks: the layout of revision 3. The statement is
+        everything before the *Lean:* paragraph (or, without one, the first paragraph and the
+        lists or displays that continue it)."""
         title = re.sub(r"\s*\[[^\]]*\]", "", opener).strip().rstrip(".").strip()
-        start = next((k for k, p in enumerate(paras) if k > 0 and p.startswith("*Proof")), None)
-        if start is None:
-            start = next((k for k, p in enumerate(paras) if k > 0 and PROOF_START.match(p)), None)
+        lean_at = next((k for k, p in enumerate(paras) if k > 0 and LEAN_PARA.match(p)), None)
+        lean = ""
+        if lean_at is not None and n_statement is None:
+            lean = paras[lean_at]
+            paras = paras[:lean_at] + paras[lean_at + 1:]
+            n_statement = lean_at
+        start = next((k for k, p in enumerate(paras) if k > 0 and PROOF_START.match(p)), None)
         end = None
         if start is not None:
             end = next((k for k in range(start, len(paras)) if SQUARE in paras[k]), None)
@@ -244,9 +220,11 @@ class Note:
             else:
                 while k < len(paras) and re.match(r"^(\* |- |\d+\. |\$\$|\(\w\) )", paras[k]):
                     k += 1
-            return Extract(title=title, where=where, statement=paras[:k], remarks=paras[k:])
-        return Extract(title=title, where=where, statement=paras[:start],
-                       proof=paras[start:end + 1], remarks=paras[end + 1:])
+            return Extract(title=title, where=where, statement=paras[:k], remarks=paras[k:],
+                           lean=lean)
+        k = start if n_statement is None else min(start, n_statement)
+        return Extract(title=title, where=where, statement=paras[:k], proof=paras[start:end + 1],
+                       remarks=paras[k:start] + paras[end + 1:], lean=lean)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -457,27 +435,6 @@ def lean_badge(decls: list[dict]) -> str:
     return "[machine-checked]{.badge .ok}"
 
 
-NOTE_BADGES = {
-    "P": "[proof in the note]{.badge .informal}",
-    "P (computed)": "[computed]{.badge .informal}",
-    "S": "[sketch]{.badge .informal}",
-    "O": "[open problem]{.badge .open}",
-    "refuted": "[refuted]{.badge .refuted}",
-    "definition": "[definition]{.badge .informal}",
-}
-
-
-def note_badge(status: str) -> str:
-    """The badge of a status-table entry; a composite entry (e.g. "P (computed) for (a)–(c); S for
-    ...") is shown by its leading status, and anything unknown as written."""
-    if status in NOTE_BADGES:
-        return NOTE_BADGES[status]
-    for key in ("P (computed)", "refuted", "P", "S", "O"):
-        if status.startswith(key + " ") or status.startswith(key + ";"):
-            return NOTE_BADGES[key] + " (partly; see the status table)"
-    return f"[{status}]{{.badge .informal}}"
-
-
 # ---------------------------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------------------------
@@ -507,7 +464,8 @@ def details(summary: str, body: list[str], pdf_title: str | None = None) -> list
 
 BADGES = {"checked": "[machine-checked]{.badge .ok}", "definition": "[Lean definition]{.badge .ok}",
           "partial": "[parts in Lean]{.badge .informal}", "informal": "[informal]{.badge .informal}",
-          "sorry": "[open]{.badge .open}", "axiom": "[axiomatised]{.badge .axiom}"}
+          "sorry": "[open]{.badge .open}", "axiom": "[axiomatised]{.badge .axiom}",
+          "notation": "[notation]{.badge .informal}"}
 
 
 def short_name(name: str) -> str:
@@ -519,20 +477,6 @@ def short_name(name: str) -> str:
 # ---------------------------------------------------------------------------------------------
 
 LEDGER = ROOT / "claims.toml"
-KIND_SLUG = {"Definition": "def", "Lemma": "lem", "Theorem": "thm", "Proposition": "prop",
-             "Corollary": "cor", "Conjecture": "conj", "Statement": "claim"}
-
-
-def claim_slug(label: str) -> str | None:
-    """The claims.toml slug of a blueprint label (Theorem 4.7 -> thm-4-7, §5 -> claim-5)."""
-    if label.startswith("§") and label[1:].isdigit():
-        return f"claim-{label[1:]}"
-    parts = label.split(" ", 1)
-    if len(parts) == 2 and parts[0] in KIND_SLUG and parts[1][:1].isdigit():
-        return f"{KIND_SLUG[parts[0]]}-{parts[1].split(' ')[0].replace('.', '-')}"
-    return None
-
-
 def names_of(value) -> list[str]:
     """A ledger field of declarations: a comma-separated string or a list."""
     if not value:
@@ -541,17 +485,43 @@ def names_of(value) -> list[str]:
 
 
 def load_ledger() -> dict[str, dict]:
-    return tomllib.loads(LEDGER.read_text(encoding="utf-8"))["claims"]
+    """The active claims of the ledger by label: archived entries (`removed`) are skipped."""
+    claims = tomllib.loads(LEDGER.read_text(encoding="utf-8"))["claims"]
+    out: dict[str, dict] = {}
+    for slug, claim in claims.items():
+        if "removed" in claim or "label" not in claim:
+            continue
+        if claim["label"] in out:
+            raise SystemExit(f"blueprint: two claims have the label {claim['label']!r}")
+        out[claim["label"]] = dict(claim, slug=slug)
+    return out
 
 
 def ledger_names(registry: dict, ledger: dict[str, dict]) -> set[str]:
     """The declarations the ledger lists for the blueprint's nodes."""
     out = set()
     for node in registry["node"]:
-        claim = ledger.get(claim_slug(node["label"]) or "")
+        claim = ledger.get(node["label"])
         if claim:
             out |= set(names_of(claim.get("lean")) + names_of(claim.get("lean_partial")))
     return out
+
+
+SHORTCODE = re.compile(r'\{\{<\s*node\s+"([^"]+)"')
+
+
+def site_shortcodes() -> dict[str, list[str]]:
+    """label -> the places (file:line) where a `{{< node "label" >}}` shortcode names it, in the
+    site's sources (the generated partials included, since the section intros may use it)."""
+    found: dict[str, list[str]] = {}
+    skip = {".quarto", "_site", "graph", "fonts"}
+    for path in sorted(SITE.rglob("*")):
+        if path.suffix not in (".qmd", ".md") or skip & set(path.relative_to(SITE).parts):
+            continue
+        for k, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for m in SHORTCODE.finditer(line):
+                found.setdefault(m.group(1), []).append(f"{path.relative_to(ROOT)}:{k}")
+    return found
 
 
 class Blueprint:
@@ -560,18 +530,28 @@ class Blueprint:
         self.sections = registry["section"]
         self.nodes = registry["node"]
         self.main = registry.get("main", [])
-        self.note_only = registry.get("note_only", [])
-        both = {n["label"] for n in self.nodes} & set(self.note_only)
-        if both:
-            raise SystemExit(f"blueprint: {sorted(both)} are both nodes and note_only")
+        if registry.get("note_only"):
+            raise SystemExit("blueprint: `note_only` is gone; every label of the site is a node")
         self.note = note
         self.lean = lean
         self.ref = ref
-        self.by_number: dict[str, str] = {}
+        labels = [n["label"] for n in self.nodes]
+        twice = sorted({l for l in labels if labels.count(l) > 1})
+        if twice:
+            raise SystemExit(f"blueprint: {twice} are nodes twice")
+        missing = [l for l in note.results() if l not in labels]
+        if missing:
+            raise SystemExit(f"blueprint: the numbered results {missing} of {NOTE.name} have no node "
+                             "in blueprint.toml")
+        unknown = sorted(set(ledger) - set(labels))
+        if unknown:
+            raise SystemExit(f"blueprint: the ledger labels {unknown} are not nodes")
+        sections = {sec["id"] for sec in self.sections}
         for node in self.nodes:
-            num = number_of(node["label"])
-            if num and num not in self.by_number:
-                self.by_number[num] = slug(node["label"])
+            if node["section"] not in sections:
+                raise SystemExit(f"blueprint: {node['label']} is in an unknown section {node['section']!r}")
+            if node.get("kind") != "notation" and node["label"] not in ledger:
+                raise SystemExit(f"blueprint: {node['label']} has no claim in claims.toml (a `label`)")
         self.rows: list[dict] = []
 
     def decl(self, name: str) -> dict:
@@ -582,63 +562,31 @@ class Blueprint:
             raise SystemExit(f"blueprint: no source range for {name}")
         return d
 
-    def badge_of(self, node: dict) -> tuple[str, list[str], list[str], list[str]]:
-        """The badge key of a node and its declarations: (key, whole, parts, related).
+    def badge_of(self, node: dict) -> tuple[str, list[str], list[str]]:
+        """The badge key of a node and its declarations: (key, whole, further).
 
-        A node that is a claim of the ledger takes its badge from the ledger's effective status,
-        the `status` of claims.toml (a cache that gen_graph.py checks against the history): it is
-        machine-checked only if the ledger says so, and then its `lean` declarations must be
-        axiom-clean. Otherwise it has parts in Lean when the ledger lists declarations for it, and
-        is informal when not. Its declarations are the ledger's `lean` and `lean_partial`; those
-        the registry adds are shown as related. A node with no claim (the model's definitions, the
-        Lean-only results) is badged by the kernel from its own declarations."""
+        The badge follows the ledger's effective status, the `status` of claims.toml (a cache that
+        gen_graph.py checks against the history): a node is machine-checked only if the ledger says
+        so, and then its `lean` declarations must be axiom-clean. Otherwise it has parts in Lean
+        when the ledger lists declarations for it, and is informal when not. The whole statement's
+        declarations are the ledger's `lean`; the ledger's `lean_partial` and the other names of
+        the note's *Lean:* paragraph (the registry's `lean`) are further declarations."""
         label = node["label"]
-        mine = node.get("lean", []) + node.get("leaves", [])
-        claim = self.ledger.get(claim_slug(label) or "")
-        if claim is None:
-            whole, parts = node.get("lean", []), node.get("leaves", [])
-            if not whole:
-                return ("partial" if parts else "informal"), [], parts, []
-            decls = [self.decl(n) for n in whole]
-            key = kernel_status(decls)
-            if key == "ok":
-                key = "definition" if all(d["kind"] != "theorem" for d in decls) else "checked"
-            return key, whole, parts, []
+        if node.get("kind") == "notation":
+            return "notation", [], []
+        claim = self.ledger[label]
         whole, parts = names_of(claim.get("lean")), names_of(claim.get("lean_partial"))
-        related = [n for n in mine if n not in whole + parts]
+        further = list(dict.fromkeys(n for n in parts + node.get("lean", []) if n not in whole))
+        for n in whole + further:
+            self.decl(n)
         if claim.get("status") == "math.machine-checked":
             if not whole:
                 raise SystemExit(f"blueprint: the ledger has {label} machine-checked with no `lean`")
             if kernel_status([self.decl(n) for n in whole]) != "ok":
                 raise SystemExit(f"blueprint: the ledger has {label} machine-checked, but {whole} "
                                  "are not axiom-clean")
-            return ("definition" if claim.get("kind") == "definition" else "checked"), whole, parts, related
-        return ("partial" if whole + parts else "informal"), [], whole + parts, related
-
-    def note_status(self, node: dict, label: str) -> tuple[str | None, dict]:
-        if "note_status" in node:
-            num = number_of(label)
-            return node["note_status"], self.note.status.get(num or "", {})
-        num = number_of(label)
-        row = self.note.status.get(num or "")
-        if row:
-            status = row["status"]
-            if status in ("—", "-") or "definition" in row["hypotheses"]:
-                status = "definition"
-            return status, row
-        if label.startswith(("§", "Definition", "Notation")):
-            return "definition", {}
-        return None, {}
-
-    def link_uses(self, uses: str) -> str:
-        if uses in ("—", ""):
-            return ""
-
-        def repl(m: re.Match) -> str:
-            anchor = self.by_number.get(m.group(1))
-            return f"[{m.group(1)}](#{anchor})" if anchor else m.group(1)
-
-        return re.sub(r"(?<![\d.])(\d+\.\d+)(?![\d.]*\d)", repl, uses)
+            return ("definition" if claim.get("kind") == "definition" else "checked"), whole, further
+        return ("partial" if whole + parts else "informal"), [], whole + further
 
     def source_url(self, name: str) -> str:
         lst = listing(self.decl(name))
@@ -672,24 +620,20 @@ class Blueprint:
 
     def render_node(self, node: dict) -> list[str]:
         label = node["label"]
-        ex = node.get("statement")
-        if ex is None:
-            extract = self.note.extract(label, node.get("paras"))
-        else:
-            extract = Extract(title=node.get("title", label), where="", statement=[ex.strip()])
+        extract = self.note.extract(label, node.get("paras"))
         title = node.get("title", extract.title)
-        status, row = self.note_status(node, label)
-        lean_key, lean_names, leaf_names, related = self.badge_of(node)
+        lean_key, lean_names, further = self.badge_of(node)
+        claim = self.ledger.get(label, {})
         if lean_key == "partial" and not node.get("gap"):
             raise SystemExit(f"blueprint: {label} has parts in Lean but no `gap` line saying what "
                              "the Lean covers or misses")
         self.rows.append({"label": label, "title": title, "anchor": slug(label),
-                          "lean": BADGES[lean_key], "lean_key": lean_key,
-                          "note": note_badge(status) if status else "", "note_key": status})
+                          "lean": BADGES[lean_key], "lean_key": lean_key, "where": extract.where,
+                          "slug": claim.get("slug", "")})
 
         # Shown: the title, one badge (with what the Lean misses, if it is not machine-checked),
         # the statement and one line naming the Lean declarations.
-        # Closed: the proof (with the note's status), the remarks, and the Lean listings.
+        # Closed: the proof, the remarks, and the Lean listings.
         badge = BADGES[lean_key]
         if lean_key == "partial":
             badge += f" [{' '.join(node['gap'].split())}]{{.node-gap}}"
@@ -698,18 +642,12 @@ class Blueprint:
         out += ["\n\n".join(extract.statement), ""]
         if lean_names:
             out += self.lean_line("Lean", lean_names)
-        elif leaf_names:
-            out += self.lean_line("Parts in Lean", leaf_names)
+        elif further:
+            out += self.lean_line("Parts in Lean", further)
 
-        facts = []
-        if status:
-            facts.append(f"**Note** {note_badge(status)}")
-        if extract.where:
-            facts.append(f"theory note, {extract.where}")
-        if row.get("hypotheses") and row["hypotheses"] not in ("—", "definition"):
-            facts.append(f"**Hypotheses** {row['hypotheses']}")
-        if row.get("uses") and self.link_uses(row["uses"]):
-            facts.append(f"**Uses** {self.link_uses(row['uses'])}")
+        facts = [f"theory note, {extract.where}"] if extract.where else []
+        if claim.get("slug"):
+            facts.append(f"ledger `{claim['slug']}`")
         facts_line = [" · ".join(facts), ""] if facts else []
         if extract.proof:
             proof = "\n\n".join(extract.proof)
@@ -719,19 +657,18 @@ class Blueprint:
             out += details("In the note", facts_line)
         if extract.remarks:
             out += details("Remarks", ["\n\n".join(extract.remarks)], pdf_title="Remarks in the note")
-        lean_body = [f"**In Lean.** {node['covers']}", ""] if node.get("covers") else []
+        lean_body = [extract.lean, ""] if extract.lean else []
+        if node.get("covers"):
+            lean_body += [f"**In Lean.** {node['covers']}", ""]
         for n in lean_names:
             lean_body += self.render_decl(n, "**Lean**")
-        if leaf_names:
-            lean_body += ["**Formalised parts.** These declarations prove part of the statement; "
-                          "the ledger records the statement as a written proof.", ""]
-            for n in leaf_names:
+        if further and lean_names:
+            # the proof's steps and the other declarations the note names: links, not listings
+            lean_body += self.lean_line("Further declarations", further)
+        elif further:
+            lean_body += ["**Formalised parts.** These declarations prove part of the statement.", ""]
+            for n in further:
                 lean_body += self.render_decl(n, "*Part*")
-        if related:
-            lean_body += ["**Related declarations.** The ledger does not list these for the "
-                          "statement.", ""]
-            for n in related:
-                lean_body += self.render_decl(n, "*Related*")
         if lean_body:
             out += details("Lean statement and source", lean_body)
         out += [":::", ""]
@@ -758,14 +695,25 @@ class Blueprint:
         self.write_index(SITE / "_nodes.json")
 
     def is_result(self, row: dict) -> bool:
-        return row["lean_key"] != "definition" and row["note_key"] != "definition"
+        """A numbered result other than a definition (definitions are counted on their own)."""
+        return row["lean_key"] not in ("definition", "notation") and bool(RESULT.match(row["label"])) \
+            and not row["label"].startswith("Definition")
+
+    def counts(self) -> tuple[int, int, int, int, int]:
+        """(results, machine-checked results, with parts in Lean, definitions, Lean definitions)."""
+        results = [r for r in self.rows if self.is_result(r)]
+        defs = [r for r in self.rows if r["label"].startswith("Definition")]
+        return (len(results), sum(1 for r in results if r["lean_key"] == "checked"),
+                sum(1 for r in results if r["lean_key"] == "partial"), len(defs),
+                sum(1 for r in defs if r["lean_key"] == "definition"))
 
     def write_progress(self, path: Path) -> None:
-        results = [r for r in self.rows if self.is_result(r)]
-        checked = sum(1 for r in results if r["lean_key"] == "checked")
-        partial = sum(1 for r in results if r["lean_key"] == "partial")
-        path.write_text(f"**{checked} of {len(results)} results are machine-checked; {partial} more "
-                        "have parts in Lean.**\n", encoding="utf-8")
+        n, checked, partial, ndefs, ldefs = self.counts()
+        text = f"**{checked} of {n} results are machine-checked"
+        text += f"; {partial} more have parts in Lean" if partial else ""
+        text += (f", and all {ndefs} definitions are stated in Lean.**" if ldefs == ndefs else
+                 f", and {ldefs} of the {ndefs} definitions are stated in Lean.**")
+        path.write_text(text + "\n", encoding="utf-8")
 
     def write_main(self, path: Path) -> None:
         """The main results: a definition list of name, label, badge and one sentence."""
@@ -781,8 +729,7 @@ class Blueprint:
         out = ["::: {.main-results}", ""]
         for entry in self.main:
             link, r = ref(entry["label"])
-            head = f"**{entry['name']}** · {link}" if number_of(entry["label"]) else \
-                f"[**{entry['name']}**](#{r['anchor']}) {BADGES[r['lean_key']]}"
+            head = f"**{entry['name']}** · {link}"
             text = " ".join(entry["text"].split())
             with_ = [f"{ref(w['label'])[0]} ({w['name']})" for w in entry.get("with", [])]
             if with_:
@@ -793,27 +740,23 @@ class Blueprint:
         path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
     def write_index(self, path: Path) -> None:
-        """label -> anchor and badges, read by the `node` shortcode (shortcodes/node.lua). The
-        `note_only` labels get an `href` to their section of the theory note on GitHub instead."""
+        """label -> anchor and badge, read by the `node` shortcode (shortcodes/node.lua)."""
         badge = {"checked": ("machine-checked", "ok"), "definition": ("Lean definition", "ok"),
                  "partial": ("parts in Lean", "informal"), "informal": ("informal", "informal"),
-                 "sorry": ("open", "open"), "axiom": ("axiomatised", "axiom")}
+                 "sorry": ("open", "open"), "axiom": ("axiomatised", "axiom"),
+                 "notation": ("notation", "informal")}
         index = {}
         for r in self.rows:
             text, cls = badge.get(r["lean_key"], ("informal", "informal"))
-            index[r["label"]] = {"anchor": r["anchor"], "title": r["title"],
-                                 "lean": text, "class": cls, "note": r["note_key"] or ""}
-        note_url = f"{REPO}/blob/master/{NOTE.relative_to(ROOT).as_posix()}"
-        for label in self.note_only:
-            ex = self.note.extract(label)
-            index[label] = {"href": f"{note_url}#{quote(self.note.github_anchor(label), safe='-')}",
-                            "title": ex.title, "where": ex.where}
+            index[r["label"]] = {"anchor": r["anchor"], "title": r["title"], "lean": text,
+                                 "class": cls, "where": r["where"]}
         path.write_text(json.dumps(index, ensure_ascii=False, indent=0) + "\n", encoding="utf-8")
 
     def write_summary(self, path: Path) -> None:
-        lines = ["| Node | Lean | Note |", "|---|---|---|"]
+        lines = ["| Node | Lean | Note | Ledger |", "|---|---|---|---|"]
         for r in self.rows:
-            lines.append(f"| [{r['title']}](#{r['anchor']}) | {r['lean']} | {r['note']} |")
+            ledger = f"`{r['slug']}`" if r["slug"] else ""
+            lines.append(f"| [{r['title']}](#{r['anchor']}) | {r['lean']} | {r['where']} | {ledger} |")
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     def write_stats(self, path: Path) -> None:
@@ -822,12 +765,14 @@ class Blueprint:
         meta = self.lean["meta"]
         clean = "no declaration uses another axiom" if not lib["nonstandard"] else \
             f"{len(lib['nonstandard'])} declarations use other axioms"
+        n, checked, partial, ndefs, ldefs = self.counts()
         text = (
-            f"The blueprint has **{len(self.rows)} nodes**. "
-            f"**{count('lean_key', 'checked')}** are machine-checked and "
-            f"**{count('lean_key', 'definition')}** are Lean definitions. "
-            f"**{count('lean_key', 'partial')}** have parts in Lean, and "
-            f"**{count('lean_key', 'informal')}** are not in Lean. These badges follow the claim "
+            f"The blueprint has **{len(self.rows)} nodes**: the {n + ndefs} numbered results of the "
+            f"theory note and its notation. **{checked}** of its {n} results are machine-checked and "
+            f"**{ldefs}** of its {ndefs} definitions are Lean definitions"
+            + (f"; **{partial}** results have parts in Lean" if partial else "")
+            + (f", and **{count('lean_key', 'informal')}** are not in Lean" if count('lean_key', 'informal') else "")
+            + ". These badges follow the claim "
             f"ledger [`claims.toml`]({REPO}/blob/master/claims.toml): a statement is machine-checked "
             "only if Lean proves every assertion of it. "
             f"The library has {lib['declarations']:,} declarations "
@@ -845,13 +790,11 @@ class Blueprint:
 
     def write_home(self, path: Path) -> None:
         """The Lean tally of the home page: one square per machine-checked result."""
-        results = [r for r in self.rows if self.is_result(r)]
-        checked = sum(1 for r in results if r["lean_key"] == "checked")
-        partial = sum(1 for r in results if r["lean_key"] == "partial")
-        definitions = sum(1 for r in self.rows if r["lean_key"] == "definition")
+        n, checked, partial, ndefs, ldefs = self.counts()
         rows = [min(12, checked - 12 * k) for k in range((checked + 11) // 12)]
         rects = "\n".join(f'    <rect y="{11 * k}" width="{11 * n - 2}" height="9" fill="url(#hw-on)"/>'
                           for k, n in enumerate(rows))
+        more = f", {partial} more have parts in Lean," if partial else ""
         path.write_text(
             "<!-- Written by site/gen_blueprint.py from the claim ledger; do not edit. -->\n"
             "```{=html}\n"
@@ -859,13 +802,19 @@ class Blueprint:
             f'  <svg class="waffle waffle-short" viewBox="0 0 130 {11 * len(rows) - 2}" role="img" '
             f'aria-label="{checked} squares, one per machine-checked result">\n{rects}\n  </svg>\n'
             f'  <p class="tally-figure tally-big">{checked}</p>\n'
-            '  <p class="tally-text">results of the theory are <span class="nobr">machine-checked</span> '
-            f"in Lean 4, {partial} more have parts in Lean, and {definitions} of its definitions are "
+            f'  <p class="tally-text">of the {n} results of the theory are <span class="nobr">'
+            f"machine-checked</span> in Lean 4{more} and {ldefs} of its {ndefs} definitions are "
             "stated in Lean.</p>\n"
             '  <p class="lean-trust">No <code>sorry</code>, no <code>native_decide</code>, and no axiom '
             "beyond <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>.</p>\n"
             "</div>\n"
             "```\n", encoding="utf-8")
+
+    def check_shortcodes(self) -> list[str]:
+        """Every `{{< node "…" >}}` of the site must name a node: the problems, one per label."""
+        labels = {r["label"] for r in self.rows}
+        return [f"{label!r} ({', '.join(places[:4])}{', …' if len(places) > 4 else ''})"
+                for label, places in sorted(site_shortcodes().items()) if label not in labels]
 
 
 def main() -> None:
@@ -876,7 +825,7 @@ def main() -> None:
     registry = tomllib.loads((SITE / "blueprint.toml").read_text(encoding="utf-8"))
     note = Note(NOTE)
     ledger = load_ledger()
-    names = sorted({n for node in registry["node"] for n in node.get("lean", []) + node.get("leaves", [])}
+    names = sorted({n for node in registry["node"] for n in node.get("lean", [])}
                    | ledger_names(registry, ledger))
     if args.no_lean:
         lean = json.loads(STATUS_JSON.read_text(encoding="utf-8"))
@@ -892,6 +841,12 @@ def main() -> None:
     bad = [r["label"] for r in bp.rows if r["lean_key"] in ("sorry", "axiom", "missing")]
     print(f"blueprint: {len(bp.rows)} nodes, {len(names)} Lean declarations"
           + (f"; NOT clean: {bad}" if bad else "; every listed declaration is axiom-clean"))
+    print("blueprint: " + (SITE / "proofs" / "_progress.md").read_text(encoding="utf-8").strip())
+    unknown = bp.check_shortcodes()
+    if unknown:
+        raise SystemExit("blueprint: these `node` shortcodes name no node of the blueprint (use the "
+                         "labels of revision 3, doc/theory/revision-3-map.md Table C):\n  "
+                         + "\n  ".join(unknown))
 
 
 if __name__ == "__main__":

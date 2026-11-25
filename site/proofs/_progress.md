@@ -1,1 +1,1 @@
-**11 of 53 results are machine-checked; 22 more have parts in Lean.**
+**48 of 48 results are machine-checked, and all 9 definitions are stated in Lean.**

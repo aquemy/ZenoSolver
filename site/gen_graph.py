@@ -14,6 +14,11 @@ registry `claims.toml` with [claimgraph](https://github.com/hotherio/claimgraph)
 
 and `site/_history-table.md` (the knowledge-commit log) and `site/_graph-stats.md` (the counts
 quoted on the pages).
+
+Claims are shown by their `label` (the current number in the theory note) next to their slug.
+Archived claims (`removed` in claims.toml: results that revision 3 of the note removed or merged)
+are left out of the graph and of the replay; the commits that touched them stay in the log. The
+status cache of claims.toml is checked against the history for every claim, archived or not.
 """
 
 from __future__ import annotations
@@ -52,16 +57,25 @@ def is_knowledge(commit) -> bool:
         return False
 
 
-def hide_paper_claims(graph) -> set[str]:
-    """Drop from the site's view the claims of the earlier papers (`paper-*` in claims.toml) and
-    the refutation nodes whose only purpose is to disprove them. Effective statuses are computed
-    before, so the theory's own claims keep theirs. Returns the hidden node ids."""
-    hidden = {nid for nid in graph.nodes if nid.startswith("paper-")}
+def hide_claims(graph, archived: set[str]) -> set[str]:
+    """Drop from the site's view the claims of the earlier papers (`paper-*` in claims.toml), the
+    archived claims, and the refutations and Lean declarations whose only purpose is to disprove
+    or close them. Effective
+    statuses are computed before, so the theory's own claims keep theirs. Returns the hidden node
+    ids. An archived experiment `exp-<id>-…` takes its commit-level node `<id>` with it."""
+    short = {slug.split("-")[1] for slug in archived if slug.startswith("exp-")}
+    hidden = {nid for nid in graph.nodes
+              if nid.startswith("paper-") or nid in archived or nid in short}
+    # the refutations of hidden claims, and the Lean declarations that only close hidden claims
     disproves: dict[str, set[str]] = {}
+    closes: dict[str, set[str]] = {}
     for e in graph.edges:
         if e.relation == "Disproves":
             disproves.setdefault(e.source, set()).add(e.target)
+        elif e.relation == "Closes" and graph.nodes[e.source].kind == "formalize":
+            closes.setdefault(e.source, set()).add(e.target)
     hidden |= {src for src, targets in disproves.items() if targets <= hidden}
+    hidden |= {src for src, targets in closes.items() if targets <= hidden}
     graph.nodes = {k: v for k, v in graph.nodes.items() if k not in hidden}
     graph.edges = [e for e in graph.edges if e.source not in hidden and e.target not in hidden]
     return hidden
@@ -105,9 +119,15 @@ def cell(text: str) -> str:
     return text.replace("|", "\\|").replace("\n", " ").strip()
 
 
-def history_table(frames: list[dict]) -> str:
+def history_table(frames: list[dict], labels: dict[str, str], archived: set[str]) -> str:
     """The knowledge commits, oldest first: date, commit, subject (which starts with the type),
-    and the claims touched."""
+    and the claims touched, by slug with their current label (archived claims marked so)."""
+    def claim(item) -> str:
+        sid = str(item).split(":", 1)[-1]
+        if sid in archived:
+            return f"`{sid}` (archived)"
+        return f"`{sid}` ({labels[sid]})" if sid in labels else f"`{sid}`"
+
     rows = ["| # | Date | Commit | Subject | Claims touched |", "|--:|---|---|---|---|"]
     for k, fr in enumerate(frames, 1):
         sha = str(fr.get("hash") or "")
@@ -115,19 +135,21 @@ def history_table(frames: list[dict]) -> str:
         link = f"[`{short}`]({REPO}/commit/{sha})" if sha else ""
         focus = fr.get("focus")
         items = focus if isinstance(focus, (list, tuple)) else ([focus] if focus else [])
-        claims = ", ".join(f"`{str(s).split(':', 1)[-1]}`" for s in items if s) or "—"
+        claims = ", ".join(claim(s) for s in items if s) or "—"
         rows.append(f"| {k} | {str(fr.get('date', ''))[:10]} | {link} "
                     f"| {cell(str(fr.get('subject') or ''))} | {claims} |")
     return "\n".join(rows) + "\n"
 
 
-def check_status_cache(nodes: list[dict]) -> None:
+def check_status_cache(graph, claims: dict[str, dict]) -> None:
     """The blueprint's badges read the `status` field of claims.toml, a cache of the effective
-    status. Fail if the history gives any claim another status, so the badges cannot drift."""
-    cache = {slug: entry.get("status")
-             for slug, entry in tomllib.loads((ROOT / "claims.toml").read_text(encoding="utf-8"))["claims"].items()}
-    stale = sorted(f"{n['id']} (cache {cache[n['id']]}, history {n['effective_status']})"
-                   for n in nodes if n["id"] in cache and cache[n["id"]] != n["effective_status"])
+    status. Fail if the history gives any claim, archived or not, another status, so the badges
+    cannot drift."""
+    stale = sorted(f"{slug} (cache {entry.get('status')}, history "
+                   f"{graph.nodes[slug].effective_status if slug in graph.nodes else 'none'})"
+                   for slug, entry in claims.items()
+                   if (graph.nodes[slug].effective_status if slug in graph.nodes else None)
+                   != entry.get("status"))
     if stale:
         raise SystemExit("graph: the status cache of claims.toml disagrees with the history for "
                          + ", ".join(stale) + "; regenerate it with `claimgraph status`")
@@ -138,16 +160,38 @@ def main() -> None:
     if not claims.exists():
         raise SystemExit("graph: no claims.toml at the repository root")
     registry = cg.load_registry(str(claims))
+    archived = {slug for slug, entry in registry.items() if "removed" in entry}
+    labels = {slug: entry["label"] for slug, entry in registry.items()
+              if "label" in entry and slug not in archived}
     history = read_git_dated(str(ROOT))
     # Compact: only the knowledge commits. Plain feat/fix/docs/... commits would add a node per
     # scope (bench, cli, site, ...) and a replay frame each, with no claim status to show.
     dated = [d for d in history if is_knowledge(d.commit)]
     graph = cg.compute(cg.build_graph([d.commit for d in dated], registry))
+    check_status_cache(graph, registry)
     frames = build_timeline(dated, registry)
-    hidden = hide_paper_claims(graph)
-    frames = [strip_frame(fr, hidden) for fr in frames if not frame_is_hidden(fr, hidden)]
+    papers = {nid for nid in graph.nodes if nid.startswith("paper-")}
+    before = {nid: node.effective_status for nid, node in graph.nodes.items()}
+    hidden = hide_claims(graph, archived)
+    # Recompute without the archived claims, so that nothing shown takes its effective status from
+    # a hidden node (the commit-level node of experiment E10 depended on Conjecture 10.2). The
+    # ledger's claims must keep the status the history gives them.
+    cg.compute(graph)
+    moved = sorted(nid for nid in registry if nid in graph.nodes
+                   and graph.nodes[nid].effective_status != before[nid])
+    if moved:
+        raise SystemExit(f"graph: hiding the archived claims changes the status of {moved}")
+    # The log keeps the commits on archived claims; the replay leaves them out.
+    log = [fr for fr in frames if not frame_is_hidden(fr, papers)]
+    frames = [strip_frame(fr, hidden) for fr in log if not frame_is_hidden(fr, hidden)]
     for k, fr in enumerate(frames):
         fr["i"] = k
+    # Show the current label: in the statement the viewer prints, and as the timeline's node name.
+    for nid, node in graph.nodes.items():
+        if nid in labels:
+            node.label = labels[nid]
+            if node.statement and not node.statement.startswith(labels[nid]):
+                node.statement = f"{labels[nid]}: {node.statement}"
     payload = to_dict(graph, timeline=frames)
 
     OUT.mkdir(exist_ok=True)
@@ -160,7 +204,7 @@ def main() -> None:
                             hint="Drag the slider through the knowledge commits; each claim's colour "
                                  "is its status as of that commit."),
         encoding="utf-8")
-    (SITE / "_history-table.md").write_text(history_table(frames), encoding="utf-8")
+    (SITE / "_history-table.md").write_text(history_table(log, labels, archived), encoding="utf-8")
 
     nodes = payload["nodes"]
     kinds = Counter(n["kind"] for n in nodes)
@@ -178,9 +222,8 @@ def main() -> None:
         f"The replay has **{len(frames)} knowledge commits**, "
         + (f"all of {first}" if first == last else f"from {first} to {last}") + "; the other "
         f"{len(history) - len(dated):,} commits of the history (features, fixes, documentation) are left "
-        "out.\n",
+        f"out, and so are the {len(archived)} claims that revision 3 of the theory note archived.\n",
         encoding="utf-8")
-    check_status_cache(nodes)
     sizes = {p.name: p.stat().st_size for p in OUT.iterdir()}
     print(f"graph: {len(graph.nodes)} claims, {len(frames)} frames, {sizes}")
 

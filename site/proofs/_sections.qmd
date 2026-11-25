@@ -2,7 +2,7 @@
 
 {{< include proofs/_admissibility.qmd >}}
 
-{{< include proofs/_every-setting.qmd >}}
+{{< include proofs/_counting.qmd >}}
 
 {{< include proofs/_symmetric.qmd >}}
 
@@ -13,5 +13,3 @@
 {{< include proofs/_complexity.qmd >}}
 
 {{< include proofs/_certificates.qmd >}}
-
-{{< include proofs/_linear.qmd >}}

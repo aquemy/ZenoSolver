@@ -1,553 +1,446 @@
-# Blueprint node registry: the one hand-authored map from the theory note to the Lean development.
+# Blueprint node registry: the map from the theory note (revision 3) to the site's blueprint.
 #
-# Everything else on a node is derived at build time by site/gen_blueprint.py:
-#   * the statement and the prose proof are extracted from doc/theory/exact-front.md by `label`;
-#   * the note's own status (P / S / O / refuted) comes from the status table in §0 of the note;
-#   * the Lean listing comes from the source, located by asking Lean for each declaration's range;
-#   * the badge comes from the claim ledger, ../claims.toml: a node that is a claim there (Theorem
-#     4.7 is thm-4-7) is machine-checked only if the ledger's effective status is
-#     math.machine-checked, which requires Lean to prove every assertion of the statement, and then
-#     its `lean` declarations must be axiom-clean (`#print axioms`, collectAxioms). Otherwise it has
-#     parts in Lean (the ledger's `lean_partial`) or is informal. The declarations shown are the
-#     ledger's; `lean` and `leaves` below add related ones. Nodes that are not claims are badged
-#     from their own `lean` declarations.
+# One node per numbered result of doc/theory/exact-front.md, under its label, in the sections of
+# revision 3, plus the unnumbered Notation paragraph. Everything else is derived at build time by
+# site/gen_blueprint.py:
+#   * the statement, the note's *Lean:* paragraph, the proof and the remarks are cut out of the note
+#     by `label`;
+#   * the claim is the entry of ../claims.toml with this `label` (and no `removed`); its effective
+#     status gives the badge: machine-checked only if the ledger says so, and then its `lean`
+#     declarations must be axiom-clean (`collectAxioms`). Every numbered result must have a claim;
+#   * the Lean listings come from the source, located by asking Lean for each declaration's range.
 #
 # Fields of a node:
-#   label     note label ("Lemma 2.6", "Definition (link forest)") or a heading ("§5", "§1.4").
+#   section   the id of its [[section]].
+#   label     the note's label ("Theorem 4.5"), unique; the `node` shortcode links by it.
+#   kind      "notation" for the Notation paragraph (no claim, no badge); omitted otherwise.
+#   lean      the declarations the note's *Lean:* paragraph names. The ledger's `lean` is listed as
+#             the node's Lean; these, with the ledger's `lean_partial`, as further declarations.
 #   title     optional heading override.
-#   lean      declarations that formalise the WHOLE statement (for a node that is not a claim of
-#             the ledger, the badge is machine-checked only if every one of them is axiom-clean).
-#   leaves    declarations that formalise PART of the statement.
-#   gap       one line, shown under the badge of a node with parts in Lean: what the Lean proves
-#             and what it misses, from the ledger's review record. Required for such a node.
-#   covers    what the Lean states, when it differs in form from the note (in the Lean details).
-#   note_status optional override of the status-table entry (used where one table row covers two
-#             statements).
-#   paras     for a statement without a proof in the note: how many paragraphs it has (by default
-#             the first paragraph and the lists or displays that continue it; the rest is shown as
-#             remarks).
-#   statement markdown statement, for a Lean result with no counterpart in the note.
-#
-# The blueprint keeps the positive results. Refuted conjectures, counterexamples, the greedy
-# counterexample of §5 and the general-graph reduction of §6.6 stay in the note only: the labels in
-# `note_only` are cited elsewhere on the site, and the `node` shortcode links them to their section
-# of the note on GitHub. A label that is neither a node nor in `note_only` fails the build.
+#   covers    optional sentence for the Lean details, after the note's *Lean:* paragraph.
 #
 # [[main]] lists the main results shown at the top of the page, in order: `label` (a node), `name`,
 # a one-sentence `text`, and optionally `with`, the nodes it rests on, as {label, name}.
-
-note_only = [
-  "Example 4.13", "§5", "Conjecture 6.5", "Proposition 6.5", "Conjecture 6.7", "Definition 6.17",
-  "Proposition 6.7", "Proposition 6.18", "Example 6.11", "Proposition 6.12", "Proposition 6.13",
-  "Proposition 6.14", "Proposition 6.15", "Proposition 6.16", "Conjecture 10.2",
-]
+# Generated once from the note's *Lean:* paragraphs; edit by hand when the note changes (the
+# generator fails if a label is missing from the note, or a declaration from Lean).
 
 [[section]]
 id = "model"
-title = "The model"
-intro = """
-The instance, the plans and the Pareto front, as fixed in §1 of the note. These definitions are the
-trusted interface of the formalization: every theorem below is about them.
-"""
+title = "Model"
+intro = '''
+The instances, the plans, the rounding of rational and real times, the assumptions on central
+flights and the Pareto front, as fixed in §1 of the note. These definitions are the trusted
+interface of the formalization: every theorem below is about them.
+'''
 
 [[node]]
 section = "model"
-label = "§1.1"
-title = "Instances"
-lean = ["ZenoFront.Network"]
-covers = "`Network` holds the durations `d`, `dbar` and an arbitrary table `dc` of central flights; costs are a separate argument `c : Fin n → ℕ`. Durations, costs and times are natural numbers (format v1); `Cert.check_sound_rat` extends the checker's soundness to rational times."
+label = "Definition 1.1"
+lean = ["ZenoFront.Network", "ZenoFront.Network.duration"]
 
 [[node]]
 section = "model"
-label = "§1.2"
-title = "Plans, cost and makespan"
-lean = ["ZenoFront.Plan", "ZenoFront.Feasible", "ZenoFront.achievable"]
-covers = "A plan gives every plane a list of legs (`Leg`: from, to, departure, arrival, passenger). `Feasible` requires routes chained from `C_I` at time ≥ 0 and ending in `C_G`, legs of exact duration, and every passenger's legs ordered into a route from `C_I` to `C_G`; capacity one holds by construction, since a leg names at most one passenger."
+label = "Definition 1.2"
+lean = ["ZenoFront.Leg", "ZenoFront.Plan", "ZenoFront.Flies", "ZenoFront.IsRoute", "ZenoFront.PlaneFeasible", "ZenoFront.Feasible", "ZenoFront.planCost", "ZenoFront.planMakespan", "ZenoFront.durSum", "ZenoFront.achievable", "ZenoFront.PlaneFeasibleAnywhere", "ZenoFront.FeasibleAnywhere", "ZenoFront.achievableAnywhere"]
 
 [[node]]
 section = "model"
-label = "Statement 1.2"
-title = "Statement 1.2 (PDDL correspondence)"
+label = "Lemma 1.3"
+lean = ["ZenoFront.QFeasible", "ZenoFront.QFeasible.floor", "ZenoFront.qPlanCost_eq", "ZenoFront.planMakespan_floor_le", "ZenoFront.Feasible.toRat"]
 
 [[node]]
 section = "model"
-label = "§1.4"
-title = "Assumptions"
-lean = ["ZenoFront.Network.A1", "ZenoFront.Network.A1NS"]
-covers = "(S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j`, `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`."
+label = "Definition 1.4"
+lean = ["ZenoFront.Network.A1", "ZenoFront.Network.A1NS", "ZenoFront.Network.ATri", "ZenoFront.Network.ATriHub"]
 
 [[node]]
 section = "model"
-label = "§1.5"
-title = "Fronts"
-lean = ["ZenoFront.IsParetoFront"]
-covers = "`IsParetoFront S F`: the listed points are in `S`, every point of `S` is weakly dominated by a listed point, and the list is an antichain. `IsParetoFront.mem_iff_minimal` shows that it lists exactly the minimal elements of `S`."
+label = "Lemma 1.5"
+lean = ["ZenoFront.Network.A1.hub", "ZenoFront.Network.ATri.hub"]
+
+[[node]]
+section = "model"
+label = "Definition 1.6"
+lean = ["ZenoFront.achievable", "ZenoFront.IsParetoFront", "ZenoFront.achievableAnywhere"]
+
+[[node]]
+section = "model"
+label = "Lemma 1.7"
+lean = ["ZenoFront.minimal_iff_of_dominated", "ZenoFront.minimal_iff_of_subset_of_dominated", "ZenoFront.IsParetoFront.mem_iff_minimal"]
 
 [[node]]
 section = "model"
 label = "Notation"
-title = "Notation"
-
-[[node]]
-section = "model"
-label = "Lemma 1.1"
-gap = "Lean proves Min S = Min S′, even without finiteness; not that every point is dominated by a minimal one."
-leaves = ["ZenoFront.minimal_iff_of_subset_of_dominated"]
-covers = "The first claim, `Min S = Min S'`, is machine-checked without the finiteness hypothesis. The last claim (every point is dominated by a minimal one) uses finiteness and is not stated in Lean."
+kind = "notation"
 
 [[section]]
 id = "admissibility"
-title = "Segments, admissible partitions, link forests"
-intro = """
-The combinatorial core (§2 of the note). A partition of the landings among the planes can be flown
-without waiting exactly when it is *admissible*, a parity condition that is a $\\mathcal T$-join of the
-plane-city incidence graph. It is what makes the front computable without fixing a schedule.
-"""
+title = "Admissible partitions"
+intro = '''
+A partition of the landings among the planes is *admissible* when it has a parity matrix (§2 of
+the note). Its integer, disjoint and link-forest forms are what the symmetric front, the dynamic
+programs and the reductions use.
+'''
 
 [[node]]
 section = "admissibility"
-label = "Lemma 2.1"
-gap = "Lean counts landing records by hub, not segments; on routes with central flights the two differ."
-leaves = ["ZenoFront.PlaneFeasible.cntA_eq"]
-covers = "The Lean lemma is the count on a route after Step 1 of Theorem 4.7, read off the legs (`#A = #Ā + 1`)."
+label = "Definition 2.1"
+lean = ["ZenoFront.IsParityWitness", "ZenoFront.Admissible"]
 
 [[node]]
 section = "admissibility"
-label = "Definition 2.2"
-paras = 3
-lean =["ZenoFront.IsParityWitness", "ZenoFront.Admissible"]
-covers = "`IsParityWitness X h` is (h1)–(h3) with `h k : Finset (Fin n)`, one set of cities per plane; `Admissible X` is `∃ h, IsParityWitness X h`, decidable through `witnessCandidates`."
+label = "Lemma 2.2"
+lean = ["ZenoFront.admissible_iff_exists_natWitness", "ZenoFront.card_filter_odd_mod_two"]
 
 [[node]]
 section = "admissibility"
 label = "Lemma 2.3"
+lean = ["ZenoFront.admissible_iff_odd_of_disjoint"]
 
 [[node]]
 section = "admissibility"
 label = "Lemma 2.4"
+lean = ["ZenoFront.IsParityWitness.card_add_one_le", "ZenoFront.Admissible.card_pos", "ZenoFront.IsParityWitness.size_mod_two"]
 
 [[node]]
 section = "admissibility"
-label = "Lemma 2.5"
-lean = ["ZenoFront.IsParityWitness.card_add_one_le"]
-
-[[node]]
-section = "admissibility"
-label = "Definition (link forest)"
-title = "Definition (link forest)"
-lean = ["ZenoFront.LTree"]
-covers = "Rooted link trees, as an inductive type: a plane with its free landings and a list of children, each hung by a link labelled with a city."
+label = "Definition 2.5"
+lean = ["ZenoFront.LTree", "ZenoFront.LKids", "ZenoFront.LTree.groups", "ZenoFront.LTree.WF", "ZenoFront.forestGroups"]
 
 [[node]]
 section = "admissibility"
 label = "Lemma 2.6"
-gap = "Lean proves admissible ⇔ a link forest exists; not that the forest can have at most one edge of each label at each plane."
-lean = ["ZenoFront.admissible_iff_exists_linkForest"]
-covers = "\"If\" (`admissible_forestPartition`) builds the witness from the cities with an odd number of links at a plane. \"Only if\" (`Admissible.exists_linkForest`) removes a leaf and recurses on the planes: a witness with the fewest edges has a plane with exactly one city, by the rank bound of Lemma 2.8(b). It does not go through the spanning-forest construction of the note's proof, which needs Lemma 2.4."
+lean = ["ZenoFront.admissible_iff_exists_linkForest", "ZenoFront.admissible_forestPartition", "ZenoFront.linkWitness", "ZenoFront.Admissible.exists_linkForest", "ZenoFront.IsParityWitness.exists_card_eq_one_of_minimal", "ZenoFront.attachForest", "ZenoFront.Admissible.exists_minimal", "ZenoFront.IsParityWitness.exists_edgeCount_lt"]
 
 [[node]]
 section = "admissibility"
-label = "Corollary 2.7"
-
-[[node]]
-section = "admissibility"
-label = "Lemma 2.8"
-gap = "Lean proves (a), (c) and the bound of (b); not that a parity matrix with the fewest entries has an acyclic support."
-lean = ["ZenoFront.IsParityWitness.card_touched_le", "ZenoFront.IsParityWitness.card_touched_le_of_minimal", "ZenoFront.Admissible.exists_card_touched_le"]
-covers = "Part (b) is proved over `ZMod 2`: if the edge vectors `e_k + e_i` of a witness are linearly dependent, removing an even subgraph gives a witness with fewer edges (`IsParityWitness.exists_edgeCount_lt`); independent edge vectors satisfy `#edges + 1 ≤ p + #touched`."
-
-[[node]]
-section = "admissibility"
-label = "Lemma 2.9"
+label = "Lemma 2.7"
+lean = ["ZenoFront.Admissible.exists_card_touched_le", "ZenoFront.IsParityWitness.card_touched_le_of_minimal", "ZenoFront.IsParityWitness.card_touched_le", "ZenoFront.IsParityWitness.edgeCount_le"]
 
 [[section]]
-id = "every-setting"
-title = "Lemmas valid in every setting"
-intro = """
-Counting and segment durations (§3). They hold for every plan, with any central flights, and give
-the relaxation $L$ that the checker uses without any assumption on central flights.
-"""
+id = "counting"
+title = "Counting and bounds"
+intro = '''
+Chains, counting and segment durations (§3). They hold for every plan, and give the relaxation
+$L$ and the two lower bounds that the checkers use without any assumption on central flights.
+'''
 
 [[node]]
-section = "every-setting"
+section = "counting"
 label = "Lemma 3.1"
-gap = "Lean extracts the legs a cleaned journey keeps; it does not rewrite the journeys."
-leaves = ["ZenoFront.exists_transfer"]
-covers = "Lean does not rewrite journeys: `exists_transfer` extracts, from every passenger's route, the leg `C_I → x` followed by a leg leaving `x` not towards `C_I` that the cleaned journey would keep."
+lean = ["ZenoFront.TChain.countP_isA", "ZenoFront.TRoute.countP_isA", "ZenoFront.TLoop.countP_isA"]
 
 [[node]]
-section = "every-setting"
+section = "counting"
 label = "Lemma 3.2"
-gap = "Lean proves the segment count; not its consequence, at least s central landings."
-lean = ["ZenoFront.Feasible.le_sum_hubArrivals"]
-covers = "Leg counting along each route: `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`, and every passenger leaves `C_I` and reaches `C_G` on its own leg."
+lean = ["ZenoFront.ToGoal", "ZenoFront.exists_chain", "ZenoFront.Feasible.exists_chains", "ZenoFront.FeasibleAnywhere.exists_chains", "ZenoFront.ToGoal.dst_ne_ci", "ZenoFront.exists_transfer_pw"]
 
 [[node]]
-section = "every-setting"
+section = "counting"
 label = "Lemma 3.3"
-gap = "Lean proves (a) and (c) only in the forms other proofs use: (a) inside the segment decomposition, (c) on routes without central flights."
-leaves = ["ZenoFront.PlaneFeasible.exists_segments", "ZenoFront.segment_bound", "ZenoFront.roleW_landingRecs_le"]
-covers = "Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (b) under (S) and (AΔ) is `segment_bound` (`F(γ) ≥ 2 d_x`); part (c) is `roleW_landingRecs_le` on routes without central flights."
+lean = ["ZenoFront.ciDepartures_add_cgArrivals", "ZenoFront.PlaneFeasible.ciDepartures_add_cgArrivals", "ZenoFront.Feasible.le_ciDepartures", "ZenoFront.Feasible.le_cgArrivals", "ZenoFront.Feasible.le_sum_hubArrivals"]
 
 [[node]]
-section = "every-setting"
+section = "counting"
 label = "Lemma 3.4"
-gap = "Lean bounds every group by the makespan, not by its plane's flight time."
-lean = ["ZenoFront.Feasible.exists_relaxation", "ZenoFront.relaxCost_oneplane_le_totalCost"]
+lean = ["ZenoFront.PlaneFeasible.exists_segments_emin", "ZenoFront.segment_bound", "ZenoFront.PlaneFeasible.exists_segments_tri", "ZenoFront.ToGoal.add_d_le_endTime", "ZenoFront.ToGoal.arr_add_d_le", "ZenoFront.Node.w_eq", "ZenoFront.TChain.sum_w_le"]
+
+[[node]]
+section = "counting"
+label = "Lemma 3.5"
+lean = ["ZenoFront.Network.emin", "ZenoFront.Network.emin_eq_of_sym", "ZenoFront.exists_trim", "ZenoFront.Feasible.exists_relaxation_emin", "ZenoFront.Feasible.exists_relaxation", "ZenoFront.relaxCost", "ZenoFront.relaxCost_oneplane_le_totalCost", "ZenoFront.Feasible.relaxCost_le_planCost"]
+
+[[node]]
+section = "counting"
+label = "Proposition 3.6"
+lean = ["ZenoFront.minOf", "ZenoFront.exists_ceil_le_card", "ZenoFront.Feasible.minOf_le_cost_emin", "ZenoFront.Feasible.minOf_le_cost", "ZenoFront.Feasible.minOf_le_makespan"]
 
 [[section]]
 id = "symmetric"
-title = "Symmetric case: achievability, converse, front"
-intro = """
-The heart of the note (§4). Theorem 4.1 flies every admissible partition without waiting, and
-Theorems 4.7 and 4.10 reduce every plan to an admissible partition, under (A1) or under the triangle
-inequality (AΔ); together they give the front (Corollaries 4.8 and 4.12). Some assumption on central
-flights is needed (theory note, {{< node "Example 4.13" >}}).
-"""
+title = "Symmetric front"
+intro = '''
+Under (S) and the hub triangles (H) (§4): Theorem 4.1 flies every admissible partition, Theorem 4.4
+reduces every plan to one, and together they give the front (Theorem 4.5). Example 4.6 shows a
+Pareto-optimal plan with more than $2t - p$ landings, Example 4.7 that (H) cannot be dropped, and
+Proposition 4.8 that the greedies of the 2015 and 2023 papers are not exact.
+'''
 
 [[node]]
 section = "symmetric"
 label = "Theorem 4.1"
-gap = "Lean builds the plan with cost c(X) and makespan max ℓ(X_k); not that plane k flies ℓ(X_k), picks up at most once and uses no central flight."
-lean = ["ZenoFront.Admissible.exists_plan"]
-covers = "The plan is built on a rooted link forest (`LTree.routes`): each plane drops off its children's passengers, crosses its free landings, then picks up its parent's passenger."
+lean = ["ZenoFront.Admissible.exists_plan", "ZenoFront.admissiblePoints_subset_achievable"]
 
 [[node]]
 section = "symmetric"
-label = "Definition 4.2"
-lean = ["ZenoFront.RoleConfig"]
+label = "Lemma 4.2"
+lean = ["ZenoFront.Admissible.addPlane", "ZenoFront.Admissible.addPlane_of_size", "ZenoFront.Admissible.addPlanes", "ZenoFront.Admissible.addPlanes_le"]
 
 [[node]]
 section = "symmetric"
 label = "Lemma 4.3"
-gap = "Lean proves part (b), on landing records; part (a) is not stated."
-leaves = ["ZenoFront.Feasible.exists_roleConfig_records"]
-covers = "Part (b), on the landing records of a feasible plan; it is used by Theorem 6.1. Part (a) is not a separate Lean statement."
+lean = ["ZenoFront.Admissible.exists_shrink", "ZenoFront.IsParityWitness.exists_shrink_step", "ZenoFront.Admissible.exists_remove_two"]
 
 [[node]]
 section = "symmetric"
-label = "Lemma 4.4"
-lean = ["ZenoFront.RoleConfig.exists_shrink", "ZenoFront.Admissible.exists_shrink"]
+label = "Theorem 4.4"
+lean = ["ZenoFront.exists_admissible_of_chains", "ZenoFront.exists_merge", "ZenoFront.PlaneFeasible.durSum_le_planMakespan", "ZenoFront.Feasible.exists_admissible_hub", "ZenoFront.TriCore.exists_tjoin", "ZenoFront.TriCore.exists_init", "ZenoFront.TriCore.Inv.step", "ZenoFront.TriCore.Inv.exists_final", "ZenoFront.TriCore.exists_selection", "ZenoFront.exists_admissible_of_blocks", "ZenoFront.Feasible.exists_admissible_ATri", "ZenoFront.Feasible.exists_admissible_A1_flightTime"]
 
 [[node]]
 section = "symmetric"
-label = "Lemma 4.5"
-lean = ["ZenoFront.RoleConfig.isParityWitness_witness", "ZenoFront.RoleConfig.admissible_groups"]
+label = "Theorem 4.5"
+lean = ["ZenoFront.admissiblePoints", "ZenoFront.multisetPoints", "ZenoFront.minMakespan", "ZenoFront.admissiblePoint_le", "ZenoFront.minimal_achievable_iff_admissiblePoints_hub", "ZenoFront.minimal_achievableAnywhere_iff_admissiblePoints_hub", "ZenoFront.minimal_admissiblePoints_iff_multisetPoints", "ZenoFront.minimal_achievable_iff_multisetPoints_hub", "ZenoFront.FeasibleAnywhere.exists_feasible_le_hub", "ZenoFront.minimal_achievable_iff_anywhere_hub", "ZenoFront.FeasibleAnywhere.exists_admissible_hub", "ZenoFront.cutTri", "ZenoFront.closeTri", "ZenoFront.minimal_achievable_iff_multisetPoints", "ZenoFront.minimal_achievable_iff_multisetPoints_ATri", "ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.minimal_achievable_iff_anywhere_of_ATri"]
 
 [[node]]
 section = "symmetric"
-label = "Lemma 4.6"
-lean = ["ZenoFront.Admissible.addPlane"]
+label = "Example 4.6"
+lean = ["ZenoFront.PropI.cert", "ZenoFront.PropI.cert_check", "ZenoFront.PropI.front", "ZenoFront.PropI.plan9", "ZenoFront.PropI.centralLandings", "ZenoFront.PropI.plan9_pareto"]
 
 [[node]]
 section = "symmetric"
-label = "Theorem 4.7"
-lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime"]
-covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`. It is a corollary of Theorem 4.10 (`Feasible.exists_admissible_hub`), since (A1) implies the triangles through a hub (`Network.A1.hub`)."
+label = "Example 4.7"
+lean = ["ZenoFront.Ex413.net", "ZenoFront.Ex413.plan", "ZenoFront.Ex413.usedGraph", "ZenoFront.Ex413.plan_feasible", "ZenoFront.Ex413.plan_cost", "ZenoFront.Ex413.plan_makespan", "ZenoFront.Ex413.not_ATriHub", "ZenoFront.Ex413.minCost_19", "ZenoFront.Ex413.admissible_cost_ge", "ZenoFront.Ex413.no_admissible_partition", "ZenoFront.Ex413.not_admissible_le", "ZenoFront.Ex413.not_isParetoFront", "ZenoFront.planOKDur", "ZenoFront.gFeasible_of_planOKDur", "ZenoFront.feasible_iff_gFeasible", "ZenoFront.GFeasible.mono"]
 
 [[node]]
 section = "symmetric"
-label = "Corollary 4.8"
-lean = ["ZenoFront.minimal_achievable_iff_multisetPoints"]
-
-[[node]]
-section = "symmetric"
-label = "Theorem 4.9"
-lean = ["ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.FeasibleAnywhere.exists_admissible"]
-
-[[node]]
-section = "symmetric"
-label = "Theorem 4.10"
-lean = ["ZenoFront.Feasible.exists_admissible_ATri", "ZenoFront.Feasible.exists_admissible_hub"]
-leaves = ["ZenoFront.exists_admissible_of_blocks"]
-covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. It is the case (AΔ) of `Feasible.exists_admissible_hub`, which assumes only the triangles through a hub. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
-
-[[node]]
-section = "symmetric"
-label = "Lemma 4.11"
-lean = ["ZenoFront.Admissible.exists_remove_two"]
-covers = "`Admissible.exists_remove_two` is the lemma; it is the case $s = |X| - 2$ of `Admissible.exists_shrink`, which shrinks an admissible grouping to any size $s \\ge p$ with $s \\equiv p \\pmod 2$."
-
-[[node]]
-section = "symmetric"
-label = "Corollary 4.12"
-gap = "Lean proves it for Corollary 4.8, Theorem 4.9, the solver and the checker; not for Propositions 7.8 and 7.9, nor for Proposition 7.1 with rescaling."
-leaves = ["ZenoFront.minimal_achievable_iff_multisetPoints_ATri", "ZenoFront.minimal_achievable_iff_anywhere_of_ATri", "ZenoFront.minimal_achievable_iff_minCost_ATri", "ZenoFront.solveFront_isParetoFront_ATri", "ZenoFront.Cert.forestGapBound_le_ATri", "ZenoFront.Cert.check_sound_ATri"]
-covers = "Under (S) and (AΔ), Lean proves Corollary 4.8 (`minimal_achievable_iff_multisetPoints_ATri`), Theorem 4.9 (`minimal_achievable_iff_anywhere_of_ATri`), Proposition 7.1 (`minimal_achievable_iff_minCost_ATri`), the verified solver and the soundness of `forest` gaps and of the checker. The front statements of Propositions 7.8 and 7.9 are not stated in Lean, so the corollary as a whole keeps the note's status."
+label = "Proposition 4.8"
+lean = ["ZenoFront.Greedy.minIdxs", "ZenoFront.Greedy.evocopLoadsAll", "ZenoFront.Greedy.evocopMakespansAll", "ZenoFront.Greedy.arxivLoadsAll", "ZenoFront.Greedy.arxivMakespansAll", "ZenoFront.Greedy.evocop_misses_lpt", "ZenoFront.Greedy.arxiv_misses_lpt", "ZenoFront.Greedy.evocop_lpt_noP3", "ZenoFront.Greedy.evocop_lpt_ppp", "ZenoFront.Greedy.p3First_front", "ZenoFront.Greedy.arxiv_misses_p3First", "ZenoFront.Greedy.evocop_reaches_p3First", "ZenoFront.Examples.lptCounterexample_front"]
 
 [[section]]
 id = "nonsymmetric"
-title = "Non-symmetric case"
-intro = """
-Different durations to the two hubs (§6). Waiting can now be harmful (theory note,
-{{< node "Proposition 6.5" >}}), so role loads alone do not give the front; under (A1-NS) it is
-characterised by *schedulable domination* (Theorem 6.9), which Lean proves for every plan on the
-template's closed form. (A1-NS) is needed: under (AΔ) alone, short central flights can beat every role configuration (theory note,
-{{< node "Proposition 6.7" >}}), and only the cut bound of Lemma 6.19 holds without any assumption.
-"""
+title = "Non-symmetric front"
+intro = '''
+Different durations to the two hubs, under (A1-NS) (§5). Every feasible plan is weakly dominated by
+a scheduled configuration (Theorem 5.3), whose template is a feasible plan (Lemma 5.5), so the
+front is that of the scheduled configurations (Corollary 5.6). Proposition 5.7 shows that role loads
+alone do not give the front, and Examples 5.9 and 5.10 that two constructions of arXiv:2304.14659
+miss it.
+'''
 
 [[node]]
 section = "nonsymmetric"
-label = "Theorem 6.1"
-gap = "Lean bounds every role load by the makespan, not by its plane's flight time."
-lean = ["ZenoFront.Feasible.exists_roleConfig_ns"]
-covers = "Central flights are split through the hub of the shorter detour (`Feasible.split`), which keeps the plan feasible with the same cost and no larger makespan."
+label = "Definition 5.1"
+lean = ["ZenoFront.RoleConfig", "ZenoFront.RoleConfig.groups", "ZenoFront.RoleConfig.roleLoad"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Lemma 6.2"
+label = "Definition 5.2"
+lean = ["ZenoFront.Sched", "ZenoFront.Sched.Valid", "ZenoFront.Sched.size", "ZenoFront.Sched.cost", "ZenoFront.Sched.load", "ZenoFront.Sched.pre", "ZenoFront.Sched.suf", "ZenoFront.Sched.term", "ZenoFront.Sched.tmpl", "ZenoFront.Sched.Schedules"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Lemma 6.3"
-leaves = ["ZenoFront.Sched.tmpl"]
-covers = "`Sched.tmpl` is the closed form. Lean does not prove that the template is optimal for fixed orders and matching: soundness only needs Theorem 6.9, which bounds the closed form directly."
+label = "Theorem 5.3"
+lean = ["ZenoFront.schedulableDomination_all", "ZenoFront.schedulableDomination_template", "ZenoFront.Feasible.split", "ZenoFront.exists_transfer_pw", "ZenoFront.withLoops", "ZenoFront.planesOK_withLoops", "ZenoFront.tExchange_step", "ZenoFront.tCut_step", "ZenoFront.tSplice_step", "ZenoFront.ordered_of_stuck", "ZenoFront.exists_rewired", "ZenoFront.exists_links", "ZenoFront.toSched", "ZenoFront.toSched_valid", "ZenoFront.toSched_cost_le", "ZenoFront.toSched_tmpl_le", "ZenoFront.exists_sched_of"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Corollary 6.4"
+label = "Corollary 5.4"
+lean = ["ZenoFront.Feasible.exists_roleConfig_of_domination", "ZenoFront.Sched.load_le_tmpl"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Proposition 6.6"
-gap = "Lean proves that the DP is at most the cost of every balanced configuration, the direction the checker uses; not equality."
-leaves = ["ZenoFront.BalData.value_le_totalCost"]
-covers = "The lower-bound direction (the DP is at most the cost of every balanced configuration), which is all the checker's `balanced` kind needs."
+label = "Lemma 5.5"
+lean = ["ZenoFront.Sched.tmplPlan", "ZenoFront.Sched.tmplPlan_spec", "ZenoFront.Sched.exists_plan", "ZenoFront.Sched.Valid.count_eq", "ZenoFront.Sched.Valid.slot_bijective", "ZenoFront.Sched.slack_succ", "ZenoFront.Sched.pickTime_length_eq", "ZenoFront.Sched.tmplPlan_chain"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Lemma 6.19"
+label = "Corollary 5.6"
+lean = ["ZenoFront.schedPoints", "ZenoFront.schedPoints_subset_achievable", "ZenoFront.achievable_dominated_schedPoints", "ZenoFront.minimal_achievable_iff_schedPoints", "ZenoFront.isParetoFront_iff_of_subset_of_dominated", "ZenoFront.isParetoFront_achievable_iff_schedPoints", "ZenoFront.RoleConfig.exists_sched", "ZenoFront.RoleConfig.leastTmpl", "ZenoFront.RoleConfig.exists_leastTmpl", "ZenoFront.configPoints", "ZenoFront.minimal_schedPoints_iff_configPoints", "ZenoFront.minimal_achievable_iff_configPoints"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Lemma 6.8"
+label = "Proposition 5.7"
+lean = ["ZenoFront.Prop65.cfg14", "ZenoFront.Prop65.cfg14_load", "ZenoFront.Prop65.rolesBound_73", "ZenoFront.Prop65.cheapest_roleConfig", "ZenoFront.Prop65.search73", "ZenoFront.Prop65.search73_closed", "ZenoFront.Prop65.tmpl_gt_of_cost_lt", "ZenoFront.Prop65.cost_ge_of_makespan_le", "ZenoFront.Prop65.prop65", "ZenoFront.Prop65.harmful_waiting"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Theorem 6.9"
-gap = "Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template's makespan is Lemma 6.3, written only."
-lean = ["ZenoFront.schedulableDomination_all"]
-covers = "Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`)."
+label = "Definition 5.8"
+lean = ["ZenoFront.FlightGraph", "ZenoFront.GFlies", "ZenoFront.GFeasible", "ZenoFront.gAchievable", "ZenoFront.Network.toGraph", "ZenoFront.cliqueGraph", "ZenoFront.simplePaths", "ZenoFront.pathDur", "ZenoFront.pathCost", "ZenoFront.VCity", "ZenoFront.vcities", "ZenoFront.Reduced.graph", "ZenoFront.Reduced.c"]
 
 [[node]]
 section = "nonsymmetric"
-label = "Corollary 6.10"
-gap = "Lean uses it only inside the version 2 checker (`Cert2.check_sound`); the corollary is not stated."
-leaves = ["ZenoFront.Cert2.check_sound"]
-covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` gives the front of every feasible plan on each certified instance. The corollary itself, for every instance, is not a Lean statement."
+label = "Example 5.9"
+lean = ["ZenoFront.Ex611.U", "ZenoFront.Ex611.U_undirected", "ZenoFront.Ex611.U_noHubFlight", "ZenoFront.Ex611.vcities_U", "ZenoFront.Ex611.vcities_data", "ZenoFront.Ex611.reduced_graph", "ZenoFront.Ex611.reduced_c", "ZenoFront.Ex611.reducedCert", "ZenoFront.Ex611.reducedCert_check", "ZenoFront.Ex611.reduced_front", "ZenoFront.Ex611.reduced_front_network", "ZenoFront.Ex611.plan", "ZenoFront.Ex611.plan_feasible", "ZenoFront.Ex611.mem_gAchievable_U", "ZenoFront.Ex611.fronts_differ", "ZenoFront.feasible_iff_gFeasible", "ZenoFront.GFeasible.feasible_of_clique", "ZenoFront.gFeasible_of_planOKDur"]
+
+[[node]]
+section = "nonsymmetric"
+label = "Example 5.10"
+lean = ["ZenoFront.Shuttle.TCity", "ZenoFront.Shuttle.plainCity", "ZenoFront.Shuttle.shuttleCity", "ZenoFront.Shuttle.augment", "ZenoFront.Shuttle.TConfig", "ZenoFront.Shuttle.TConfig.Valid", "ZenoFront.Shuttle.points", "ZenoFront.Shuttle.net_ATri", "ZenoFront.Shuttle.not_net_A1NS", "ZenoFront.Shuttle.plan", "ZenoFront.Shuttle.plan_feasible", "ZenoFront.Shuttle.plan_cost", "ZenoFront.Shuttle.plan_makespan", "ZenoFront.Shuttle.front_le", "ZenoFront.Shuttle.load_ge", "ZenoFront.Shuttle.points_ge", "ZenoFront.Shuttle.mem_points", "ZenoFront.Shuttle.shuttle_misses"]
 
 [[section]]
 id = "algorithm"
-title = "The exact algorithm (symmetric case)"
-intro = """
-§7 of the note turns Corollary 4.8 into a pseudo-polynomial algorithm: the front is the set of
-breakpoints of $E(T)$, the least cost of an admissible partition with loads at most $T$. Both exact
-dynamic programs are proved equal to $E(T)$ in Lean, and the verified solver `zeno-front` is built
-on them.
-"""
+title = "Algorithm"
+intro = '''
+The exact algorithm in the symmetric case (§6): the front is the set of breakpoints of $E(T)$, the
+least cost of an admissible partition with loads at most $T$ (Proposition 6.3). Both exact dynamic
+programs are proved equal to $E(T)$, and the verified solver `zeno-front` is built on them
+(Theorem 6.9).
+'''
 
 [[node]]
 section = "algorithm"
-label = "Proposition 7.1"
-gap = "Lean proves it in the original units; the rescaling by g is not formalised."
-lean = ["ZenoFront.minimal_admissiblePoints_iff", "ZenoFront.minimal_achievable_iff_multisetPoints"]
-covers = "`minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and `E(T') > C` for every `T' < T`; with Corollary 4.8 this is the proposition."
+label = "Lemma 6.1"
+lean = ["ZenoFront.oneplane", "ZenoFront.oneplane_le_cost", "ZenoFront.exists_cost_eq_oneplane", "ZenoFront.isLeast_oneplane", "ZenoFront.oneplane_eq_top_iff", "ZenoFront.oneplaneTable", "ZenoFront.oneplaneTable_getD"]
 
 [[node]]
 section = "algorithm"
-label = "Lemma 7.2"
-gap = "Lean proves that G is the least cost and when it is infinite; not that G is non-increasing in τ."
-lean = ["ZenoFront.isLeast_oneplane"]
+label = "Lemma 6.2"
+lean = ["ZenoFront.minCost", "ZenoFront.minCost_le", "ZenoFront.minCost_attained", "ZenoFront.minCost_antitone", "ZenoFront.minCost_eq_top_of_lt", "ZenoFront.breakpoint_le"]
 
 [[node]]
 section = "algorithm"
-label = "Proposition 7.3"
-gap = "Lean proves L ≤ E ≤ U₂; the chains bound U₃ is not formalised."
-leaves = ["ZenoFront.relaxedBoundAt_le_minCost", "ZenoFront.minCost_le_pairsBoundAt"]
-covers = "Lean proves `L(T) ≤ E(T) ≤ U₂(T)`, with `U₂` the pairs bound used by `zeno-front`. The chains bound `U₃` is not formalized."
+label = "Proposition 6.3"
+lean = ["ZenoFront.minimal_admissiblePoints_iff", "ZenoFront.minimal_achievable_iff_minCost_hub", "ZenoFront.minimal_achievable_iff_minCost_ATri"]
 
 [[node]]
 section = "algorithm"
-label = "Proposition 7.4"
+label = "Proposition 6.4"
+lean = ["ZenoFront.relaxedBoundAt", "ZenoFront.relaxRow_getD", "ZenoFront.relaxedBoundAt_le_totalCost", "ZenoFront.pairsBoundAt", "ZenoFront.relaxedBoundAt_le_minCost", "ZenoFront.minCost_le_pairsBoundAt", "ZenoFront.minCost_eq_of_bracket"]
 
 [[node]]
 section = "algorithm"
-label = "Theorem 7.5"
-gap = "Lean proves that the DP equals E(T); not its time and memory bounds."
-lean = ["ZenoFront.treeBoundAt_eq_minCost"]
-covers = "Exactness of the link-forest DP (`For ≥ E` and `For ≤ E`); the complexity statement is not formalized."
+label = "Proposition 6.5"
+lean = ["ZenoFront.Admissible.map", "ZenoFront.domRep", "ZenoFront.domRep_le", "ZenoFront.sigmaBoundAt_le_totalCost", "ZenoFront.treeBoundAt_le_totalCost"]
 
 [[node]]
 section = "algorithm"
-label = "Theorem 7.6"
-gap = "Lean proves that the σ-DP equals E(T) when it runs on the non-dominated cities only."
-lean = ["ZenoFront.sigmaBoundAt_eq_minCost"]
-covers = "The σ-DP's states are restricted to subsets of the non-dominated cities of size at most `min(p − 1, t − p)` (Lemma 2.8); every finite value is attained by groups whose witness sets form a parity witness, so no link forest is needed."
+label = "Proposition 6.6"
+lean = ["ZenoFront.domRep3", "ZenoFront.domRep3_le", "ZenoFront.RoleConfig.map", "ZenoFront.RoleConfig.size_map", "ZenoFront.RoleConfig.totalCost_map_le", "ZenoFront.RoleConfig.roleLoad_map_le", "ZenoFront.Sched.map", "ZenoFront.Sched.Valid.map", "ZenoFront.Sched.size_map", "ZenoFront.Sched.cost_map_le", "ZenoFront.Sched.tmpl_map_le"]
 
 [[node]]
 section = "algorithm"
-label = "Lemma 7.7"
+label = "Theorem 6.7"
+lean = ["ZenoFront.TreeData", "ZenoFront.TreeData.chEntry", "ZenoFront.TreeData.subEntry", "ZenoFront.TreeData.rootEntry", "ZenoFront.TreeData.forEntry", "ZenoFront.TreeData.value", "ZenoFront.repList", "ZenoFront.treeBoundAt", "ZenoFront.treeBoundAt_le_totalCost", "ZenoFront.TreeData.attained_ch_sub", "ZenoFront.TreeData.attained_root", "ZenoFront.TreeData.attained_for", "ZenoFront.treeBoundAt_eq_minCost"]
 
 [[node]]
 section = "algorithm"
-label = "Proposition 7.8"
+label = "Theorem 6.8"
+lean = ["ZenoFront.groupOption", "ZenoFront.groupOption_le_cost", "ZenoFront.sigmaDP", "ZenoFront.sigmaDP_le", "ZenoFront.sigmaBoundAt", "ZenoFront.sigmaBoundAt_le_totalCost", "ZenoFront.sigmaDP_attained", "ZenoFront.groupOption_attained", "ZenoFront.isParityWitness_of_list", "ZenoFront.sigmaBoundAt_eq_minCost"]
 
 [[node]]
 section = "algorithm"
-label = "Proposition 7.9"
-leaves = ["ZenoFront.domRep_le"]
-covers = "Merging cities into non-dominated representatives keeps the bounds valid (`domRep_le`); the front statement is not formalized."
-
-[[node]]
-section = "algorithm"
-label = "Proposition 7.10"
-gap = "Lean proves the two lower bounds; not that they are attained."
-leaves = ["ZenoFront.Feasible.minOf_le_makespan", "ZenoFront.Feasible.minOf_le_cost"]
-covers = "The two lower bounds the checker uses (obligations 2 and 4): every plan has makespan at least `2 d_min ⌈s/p⌉` and cost at least `s c_min`. The attainment half is not formalized."
-
-[[node]]
-section = "algorithm"
-label = "Verified solver"
-title = "The verified solver `zeno-front`"
-lean = ["ZenoFront.solveFront_isParetoFront"]
-statement = """
-Under (S) and (A1), with $1 \\le p \\le t$, the list computed by `solveFront` is exactly the Pareto
-front of the feasible plans. The solver finds the levels where $E$ drops by splitting intervals
-between $d_{\\min}\\lceil s/p\\rceil$ and $(2t-p)\\,d_{\\max}$; at each level it takes $L(T)$ when the bracket
-$L(T) \\le E(T) \\le U_2(T)$ closes, and otherwise runs the link-forest DP or the σ-DP, whichever is
-estimated cheaper. `lake exe zeno-front FILE` runs it.
-"""
-covers = "This is a Lean result with no single counterpart in the note: it assembles Corollary 4.8, Proposition 7.1, Theorems 7.5 and 7.6 and the bracket of Proposition 7.3 into one executable function and one theorem."
+label = "Theorem 6.9"
+lean = ["ZenoFront.solveFront", "ZenoFront.solveFront_eq", "ZenoFront.mem_solveFront_iff", "ZenoFront.solveFront_isParetoFront_hub", "ZenoFront.useTreeDP", "ZenoFront.scanFront", "ZenoFront.mem_scanFront", "ZenoFront.scanFront_pairwise", "ZenoFront.splitFront_eq", "ZenoFront.breakpoints_eq_scanFront", "ZenoFront.solveFront_isParetoFront", "ZenoFront.solveFront_isParetoFront_ATri"]
 
 [[section]]
 id = "complexity"
 title = "Complexity"
-intro = """
-§8 explains why no fast rule that schedules a fixed multiset of landings can be exact, and why the
-dynamic programs are pseudo-polynomial. The reductions and the step count of the link-forest DP are
-formalized; the hardness of 3-Partition and of Partition is cited, not formalized.
-"""
+intro = '''
+Two reductions to $M(X) \le 2T$ and the step count of the link-forest DP (§7). The strong
+NP-hardness of 3-Partition is the one cited fact; the note uses it in a remark, not in a
+statement.
+'''
 
 [[node]]
 section = "complexity"
-label = "Theorem 8.1"
+label = "Theorem 7.1"
+lean = ["ZenoFront.threePartition_iff", "ZenoFront.admissible_iff_odd_of_disjoint", "ZenoFront.minMakespan"]
 
 [[node]]
 section = "complexity"
-label = "Proposition 8.2"
+label = "Proposition 7.2"
+lean = ["ZenoFront.partitionDur", "ZenoFront.partitionDur_pos", "ZenoFront.partition_iff"]
 
 [[node]]
 section = "complexity"
-label = "Corollary 8.3"
+label = "Theorem 7.3"
+lean = ["ZenoFront.treeBoundSteps", "ZenoFront.treeBoundSteps_value", "ZenoFront.treeBoundSteps_eq_minCost", "ZenoFront.treeBoundSteps_le_levelBound", "ZenoFront.treeBoundSteps_le", "ZenoFront.stepBound", "ZenoFront.scanSteps", "ZenoFront.scanSteps_fst", "ZenoFront.scanSteps_le"]
 
 [[section]]
 id = "certificates"
 title = "Certificates"
-intro = """
-§9: a certificate lists one plan per point and one lower bound per gap, and four obligations imply
-that the list is the front. The Lean checker is the executable form of Theorem 9.1.
-"""
+intro = '''
+A certificate lists one plan per point and one lower bound per gap, and four obligations imply that
+the list is the front (§8, Theorem 8.1). The Lean checkers of formats v1 and v2 are proved sound
+(Theorems 8.2 and 8.7), with one proposition per bound kind of format v2.
+'''
 
 [[node]]
 section = "certificates"
-label = "Theorem 9.1"
-gap = "Lean proves it for the gap bounds its own checker supports (relaxed, and forest under (A1)); not for the potentials of Lemmas 9.2 and 9.3."
-lean = ["ZenoFront.Cert.check_sound"]
-covers = "`Cert.check_sound`: if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times and `Cert.check_sound_anywhere` to planes ending anywhere."
+label = "Theorem 8.1"
+lean = ["ZenoFront.isParetoFront_of_obligations", "ZenoFront.exists_le_of_chain"]
 
 [[node]]
 section = "certificates"
-label = "Version 2 checker"
-title = "Soundness of the version 2 checker"
-lean = ["ZenoFront.Cert2.check_sound"]
-statement = """
-For non-symmetric instances (certificate format version 2): if `Cert2.check` accepts, the listed
-points are exactly the Pareto front of every feasible plan, for every table of central flights
-that satisfies (A1-NS) if the certificate lists it, and for every table otherwise. Gap kinds
-`relaxed` (no assumption), `roles`, `lagrangian`, `balanced` (under (A1-NS), through the Lean form
-of Theorem 6.1) and `search` (under (A1-NS), through the Lean form of Theorem 6.9) are verified.
-"""
-covers = "The `search` kind rests on `schedulableDomination_all` and on the completeness of the search's enumeration (`SearchData.closed_sound`)."
+label = "Theorem 8.2"
+lean = ["ZenoFront.Cert", "ZenoFront.Cert.check", "ZenoFront.Cert.gapLevel", "ZenoFront.Cert.gapBound_le", "ZenoFront.Cert.forestGapBound_le_hub", "ZenoFront.Cert.check_sound_hub", "ZenoFront.Cert.check_sound_relaxed", "ZenoFront.planOK", "ZenoFront.planOK_feasible", "ZenoFront.load_eq_scale_mul", "ZenoFront.forestBoundAt", "ZenoFront.forestBoundAt_le_totalCost", "ZenoFront.Cert.check_sound_rat_hub", "ZenoFront.Cert.exists_le_of_admissible", "ZenoFront.Cert.check_sound_anywhere_hub", "ZenoFront.Cert.check_sound", "ZenoFront.Cert.check_sound_A1", "ZenoFront.Cert.check_sound_ATri"]
 
 [[node]]
 section = "certificates"
-label = "Lemma 9.2"
+label = "Proposition 8.3"
+lean = ["ZenoFront.fillW", "ZenoFront.lowW", "ZenoFront.roleM", "ZenoFront.roleM_le", "ZenoFront.rolesBoundAt", "ZenoFront.sum_roleLoad_eq_load_fill", "ZenoFront.rolesBoundAt_le_totalCost", "ZenoFront.Cert2.exists_repConfig", "ZenoFront.Cert2.rolesWith_le"]
 
 [[node]]
 section = "certificates"
-label = "Lemma 9.3"
-
-[[section]]
-id = "linear"
-title = "The linear family (default generator)"
-intro = """
-The generator's default instances have costs affine in durations. §10 gives their front in closed
-form, valid whatever the central flights.
-"""
+label = "Proposition 8.4"
+lean = ["ZenoFront.LagData", "ZenoFront.LagData.lagM_le", "ZenoFront.LagData.value_le_totalCost", "ZenoFront.Cert2.lagWith_le"]
 
 [[node]]
-section = "linear"
-label = "Theorem 10.1"
+section = "certificates"
+label = "Proposition 8.5"
+lean = ["ZenoFront.BalData", "ZenoFront.RoleConfig.planeOpts", "ZenoFront.BalData.layers_dominate", "ZenoFront.RoleConfig.norm_prefix_le", "ZenoFront.BalData.value_le_totalCost", "ZenoFront.Cert2.balWith_le"]
 
-# The main results, shown first on the page. Each sentence states what its badge covers: where Lean
-# proves a narrower form, the sentence says which.
+[[node]]
+section = "certificates"
+label = "Proposition 8.6"
+lean = ["ZenoFront.SearchData", "ZenoFront.SearchData.opts", "ZenoFront.SearchData.tuples", "ZenoFront.SearchData.assignments", "ZenoFront.SearchData.closed", "ZenoFront.SearchData.closed_sound", "ZenoFront.Sched.mul_tmpl_map_le", "ZenoFront.Cert2.searchWith_le"]
+
+[[node]]
+section = "certificates"
+label = "Theorem 8.7"
+lean = ["ZenoFront.Cert2", "ZenoFront.Cert2.check", "ZenoFront.Cert2.fastestOK", "ZenoFront.Cert2.relaxedWith_le", "ZenoFront.Cert2.exists_repConfig", "ZenoFront.Cert2.rolesWith_le", "ZenoFront.Cert2.lagWith_le", "ZenoFront.Cert2.balWith_le", "ZenoFront.Cert2.searchWith_le", "ZenoFront.Cert2.check_sound"]
+
+
+# The main results, shown first on the page: the four headline theorems of §0 of the note, and the
+# two results the non-symmetric front and the solver rest on.
 
 [[main]]
-label = "Corollary 4.8"
-name = "The front theorem"
-text = '''Under (S) and (A1), the Pareto front is the set of minimal points $(c(X), M(X))$ over the
-multisets $X$ of $s = 2t - p$ central landings, where $M(X)$ is the least largest load of an
-admissible partition of $X$.'''
+label = "Theorem 4.5"
+name = "The symmetric front (H1)"
+text = '''Under (S) and the hub triangles (H), with $p \le t$, the Pareto front is the set of minimal
+points $(c(X), M(X))$ over the multisets $X$ of $s = 2t - p$ central landings, $M(X)$ the least
+largest load of an admissible partition of $X$; the same holds for planes ending anywhere.'''
 with = [
-  { label = "Theorem 4.1", name = "achievability; Lean builds the plan with its cost and makespan, the part the front theorem uses" },
-  { label = "Theorem 4.7", name = "the converse under (A1)" },
-  { label = "Theorem 4.10", name = "the converse under (AΔ)" },
+  { label = "Theorem 4.1", name = "achievability" },
+  { label = "Theorem 4.4", name = "the converse under (S) and (H)" },
 ]
 
 [[main]]
-label = "Theorem 6.1"
-name = "Role configurations bound every non-symmetric plan"
-text = '''Under (A1-NS), every feasible plan has a role configuration with $t$ passengers, no larger
-cost and every role load at most the plan's makespan: the form Lean proves, and the one the checker
-uses.'''
+label = "Theorem 5.3"
+name = "Schedulable domination"
+text = '''Under (A1-NS), every feasible plan is weakly dominated by a valid scheduled configuration of no
+larger cost whose template value, the makespan of its template plan, is at most the plan's.'''
+
+[[main]]
+label = "Corollary 5.6"
+name = "The non-symmetric front (H4)"
+text = '''Under (A1-NS), with $p \le t$, the Pareto front is the set of minimal points $(c(S),
+M_{\rm tmpl}(S))$ of the valid scheduled configurations with $2t - p$ landings.'''
+with = [
+  { label = "Theorem 5.3", name = "schedulable domination" },
+  { label = "Lemma 5.5", name = "template plans" },
+]
+
+[[main]]
+label = "Theorem 6.7"
+name = "The link-forest DP is exact"
+text = '''The dynamic program over link forests computes $E(T)$, the least cost of an admissible
+partition whose loads are all at most $T$.'''
 
 [[main]]
 label = "Theorem 6.9"
-name = "Schedulable domination"
-text = '''Under (A1-NS), every feasible plan is matched by a role configuration of no larger cost with
-orders and a link matching whose template has makespan at most the plan's. Lean proves the bound on
-the template's closed form; that the closed form is the template's makespan is Lemma 6.3, written
-only.'''
-
-[[main]]
-label = "Theorem 7.5"
-name = "The link-forest DP is exact"
-text = '''The dynamic program over link forests computes $E(T)$, the least cost of an admissible
-partition whose loads are all at most $T$. Lean proves this equality, not the DP's time and memory
-bounds.'''
-
-[[main]]
-label = "Theorem 7.6"
-name = "The σ-DP is exact"
-text = '''A shortest path over parity states also computes $E(T)$. Lean proves it for the σ-DP on the
-non-dominated cities, the form the solver runs.'''
-
-[[main]]
-label = "Verified solver"
-name = "The verified solver"
-text = '''Under (S) and (A1), with $1 \le p \le t$, `solveFront` returns exactly the Pareto front;
+name = "The verified solver (H2)"
+text = '''Under (S) and (H), with $1 \le p \le t$, `solveFront` returns exactly the Pareto front;
 `lake exe zeno-front` runs it.'''
 
 [[main]]
-label = "Theorem 9.1"
-name = "Certificates are sound"
-text = '''If a certificate's four obligations hold, its points are exactly the Pareto front. Lean
-proves it for the gap bounds its own checker supports, so a certificate that the Lean checker
-accepts lists exactly the front.'''
+label = "Theorem 8.2"
+name = "The v1 checker is sound (H3)"
+text = '''A format v1 certificate that `Cert.check` accepts lists exactly the Pareto front, for every
+central table satisfying (H), and for every table if all its gaps are `relaxed`.'''
 
 [[main]]
-label = "Version 2 checker"
-name = "The non-symmetric checker is sound"
-text = '''For non-symmetric instances, a version 2 certificate that `Cert2.check` accepts lists exactly
-the Pareto front, under (A1-NS) when it uses a gap kind other than `relaxed`.'''
-
+label = "Theorem 8.7"
+name = "The v2 checker is sound (H3)"
+text = '''For non-symmetric instances, a format v2 certificate that `Cert2.check` accepts lists exactly the
+Pareto front, for every central table satisfying (A1-NS) when the certificate lists it, and for
+every table otherwise.'''
