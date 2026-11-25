@@ -1,88 +1,580 @@
 ## Certificates {#sec-certificates}
 
-§9: a certificate lists one plan per point and one lower bound per gap, and four obligations imply
-that the list is the front. The Lean checker is the executable form of Theorem 9.1.
+A certificate lists one plan per point and one lower bound per gap, and four obligations imply that
+the list is the front (§8, Theorem 8.1). The Lean checkers of formats v1 and v2 are proved sound
+(Theorems 8.2 and 8.7), with one proposition per bound kind of format v2.
 
-### Theorem 9.1 (end to end) {#node-theorem-9-1}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves it for the gap bounds its own checker supports (relaxed, and forest under (A1)); not for the potentials of Lemmas 9.2 and 9.3.]{.node-gap}
-:::
-
-::: {.node-body}
-**Theorem 9.1 (end to end) [X3].** If obligations 1–4 hold, then $\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
-
-::: {.node-lean}
-Parts in Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L359-L404)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [1.1](#node-lemma-1-1)
-
-*Proof.* Let $(C, M) \in \mathcal A$. By 2, $M \ge M_1$. Let $i$ be the largest index with $M_i \le M$. If
-$i < r$, then $M < M_{i+1}$ and $C \ge C_i$ by 3; if $i = r$, then $C \ge C_r$ by 4. Either way
-$(C_i, M_i) \preceq (C, M)$. So the list, contained in $\mathcal A$ by 1, is a finite dominating subset, and by
-Lemma 1.1, $\mathcal F$ is its $\mathrm{Min}$. That is the whole list, which is strictly monotone in both
-coordinates. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** `Cert.check_sound`: if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times and `Cert.check_sound_anywhere` to planes ending anywhere.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Cert.check_sound` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Soundness of the checker.** If `check` accepts a certificate, its points are exactly the
-Pareto front of the instance (every point is achieved by a feasible plan, every feasible plan is
-weakly dominated by a point, and the points are pairwise incomparable) for every table `dc` of
-central flight durations that satisfies (A1), or for every table if all gaps are `relaxed`. -/
-theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) :
-    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
-```
-
-[`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Soundness of the version 2 checker {#node-version-2-checker}
+### Theorem 8.1 (obligations imply the front) {#node-theorem-8-1}
 
 ::: {.node-badge}
 [machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-For non-symmetric instances (certificate format version 2): if `Cert2.check` accepts, the listed
-points are exactly the Pareto front of every feasible plan, for every table of central flights
-that satisfies (A1-NS) if the certificate lists it, and for every table otherwise. Gap kinds
-`relaxed` (no assumption), `roles`, `lagrangian`, `balanced` (under (A1-NS), through the Lean form
-of Theorem 6.1) and `search` (under (A1-NS), through the Lean form of Theorem 6.9) are verified.
+**Theorem 8.1 (obligations imply the front).** Let $\mathcal S \subseteq \mathbb N^2$ and $(C_1, M_1),
+\dots, (C_r, M_r)$, $r \ge 1$, with $M_1 < \dots < M_r$ and $C_1 > \dots > C_r$. If (1) every listed point
+is in $\mathcal S$, (2) every point of $\mathcal S$ has makespan at least $M_1$, (3) for $i < r$ every
+point of $\mathcal S$ with makespan below $M_{i+1}$ has cost at least $C_i$, and (4) every point of
+$\mathcal S$ has cost at least $C_r$, then the list is the Pareto front of $\mathcal S$.
 
 ::: {.node-lean}
-Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L486-L576)
+Lean: [`isParetoFront_of_obligations` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L244-L263)
 :::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `thm-9-1`
+
+*Proof.* Let $y \in \mathcal S$. By (2), $M_1 \le y_2$. Along the list, if $y_2 < M_{i+1}$ for the first
+$i$ such that this holds, then $(C_i, M_i) \le y$ by (3) and since $M_i \le y_2$; if no such $i$ exists,
+$(C_r, M_r) \le y$ by (4). The listed points lie in $\mathcal S$ by (1), and the strict monotonicity
+makes them pairwise incomparable. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+*Format v1* (symmetric instances). The header gives $n, t, p$, $d$, $\bar d$ and $c$; the checker requires
+$1 \le n$, $1 \le p \le t$, $d = \bar d$ and the assumption `S`. The points are strictly increasing in
+makespan and strictly decreasing in cost, each with a plan, and each gap $i < r$ names a kind. The checker
+verifies:
+
+1. each plan by simulation: every leg a hub flight of the right duration (no central legs), every
+   plane's legs a route from $C_I$ at time 0 ending in $C_G$, every passenger followed from $C_I$ along
+   the earliest legs that carry it, using all of them and ending in $C_G$; and its cost and makespan;
+2. $M_1 = 2d_{\min}\lceil s/p\rceil$;
+3. for each gap $i$, a bound at least $C_i$ at the level $T^\star_i = \lfloor\lfloor(M_{i+1} -
+   1)/2\rfloor/g\rfloor$ of the instance with durations divided by their gcd $g$: for `relaxed`, the
+   relaxation $L(T^\star_i)$; for `forest`, $E(T^\star_i)$ by the link-forest DP or the σ-DP, whichever
+   its estimate prefers, only if the assumption `A1` is listed (`zeno check` also accepts `A1|AD`);
+4. $C_r = s\,c_{\min}$.
+
+```{=html}
+</details>
+```
 
 ```{=html}
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** The `search` kind rests on `schedulableDomination_all` and on the completeness of the search's enumeration (`SearchData.closed_sound`).
+*Lean:* `isParetoFront_of_obligations`, `exists_le_of_chain` (Checker.lean).
+
+**Lean** `ZenoFront.isParetoFront_of_obligations` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 8.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
+`F = (C_1, M_1), …, (C_r, M_r)`, `r ≥ 1`, with `M_1 < ⋯ < M_r` and `C_1 > ⋯ > C_r`. If (1) every
+listed point is in `S`, (2) every point of `S` has makespan at least `M_1`, (3) for `i < r` every
+point of `S` with makespan below `M_{i+1}` costs at least `C_i`, and (4) every point of `S` costs at
+least `C_r`, then `F` is the Pareto front of `S`. -/
+theorem isParetoFront_of_obligations {S : Set (ℕ × ℕ)} {F : List (ℕ × ℕ)} (hne : F ≠ [])
+    (hmono : F.IsChain fun a b => a.2 < b.2 ∧ b.1 < a.1) (h₁ : ∀ x ∈ F, x ∈ S)
+    (h₂ : ∀ x ∈ F.head?, ∀ y ∈ S, x.2 ≤ y.2)
+    (h₃ : F.IsChain fun x z => ∀ y ∈ S, y.2 < z.2 → x.1 ≤ y.1)
+    (h₄ : ∀ x ∈ F.getLast?, ∀ y ∈ S, x.1 ≤ y.1) : IsParetoFront S F := …
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 244–263](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L244-L263){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`exists_le_of_chain` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L195-L214)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Theorem 8.2 (v1 checker, H3) {#node-theorem-8-2}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Theorem 8.2 (v1 checker, H3).** If `Cert.check` accepts a certificate of format v1, its points are the
+Pareto front of the feasible plans of its instance for every central table satisfying (H), and for every
+central table if all its gaps are `relaxed`. The same holds for the plans with times in any ordered ring
+with a floor function, such as $\mathbb Q$ or $\mathbb R$ (Lemma 1.3), and, for every table satisfying
+(H), for the plans whose planes end anywhere.
+
+::: {.node-lean}
+Lean: [`Cert.check_sound_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L419-L465), [`Cert.check_sound_rat_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L312-L342), [`Cert.check_sound_anywhere_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L563-L576)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `thm-checker-v1`
+
+*Proof.* A plan that the simulation accepts is feasible for every central table: it flies hub flights
+only, and following each passenger along the earliest legs exhibits the route of item 3 of Definition
+1.2. This is obligation (1) of Theorem 8.1 for $\mathcal S = \mathcal A$. Obligations (2) and (4) are
+Proposition 3.6. For (3), let a feasible plan have makespan $M < M_{i+1}$. For a `relaxed` gap, Lemma 3.5
+(under (S)) gives groups with $2\delta(Y_k) \le M$; for a `forest` gap under (H), Theorem 4.4 gives an
+admissible partition with $2\delta(X_k) \le M$. Durations are multiples of $g$, so the loads in units of
+$g$ are at most $\lfloor\lfloor (M_{i+1} - 1)/2\rfloor / g\rfloor = T^\star_i$, and the bound at that level
+(Lemma 3.5, Proposition 6.4, Theorems 6.7 and 6.8) is at most the plan's cost. Theorem 8.1 concludes;
+the Lean proof runs its argument along the gaps (`exists_le_of_gapsOK`). For times in $\mathbb K$:
+rounding down maps a plan to an integer plan of the same cost and no larger makespan, and integer plans
+are plans with times in $\mathbb K$ (Lemma 1.3). For planes ending anywhere: a feasible plan is a plan
+of the variant, and every plan of the variant gives an admissible partition of $s$ landings with cost at
+most its cost and loads $2\delta(X_k)$ at most its makespan (proof of Theorem 4.5). The obligations bound
+such a partition directly: some group has at least $\lceil s/p\rceil$ landings, its $s$ landings cost at
+least $s\,c_{\min}$, and the gap bounds are lower bounds on admissible partitions. So a listed point
+weakly dominates the plan's point. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+*Format v2* (non-symmetric instances). The header is `zeno-certificate 2`, and $\bar d$ may differ from
+$d$; `S` may be listed only if $d = \bar d$. Levels are full loads in units of the gcd $g$ of the weights:
+a plan of makespan below $M$ fits in level $\lfloor (M - 1)/g\rfloor$. A line `fastest <kind>` names the
+bound that rules out plans faster than $M_1$: the checker accepts $M_1 = 0$ (whatever the kind), the
+closed form of v1 (`closed`, symmetric instances only), or a bound of kind `relaxed`, `roles`, `balanced`
+or `search` that is $\infty$ at the level of $M_1$. Obligations 1 and 4 are those of v1. The kinds:
+
+* `relaxed`: the relaxation $L_e$ with the weight $2e_i = 2\min(d_i, \bar d_i)$ per landing (Lemma 3.5),
+  under no assumption;
+* `roles`, `lagrangian` $\mu_1 \dots \mu_n$, `balanced` and `search`, under (A1-NS), which the
+  certificate must list. They are computed on the representatives of $\mathrm{domRep3}$ (Proposition
+  6.6), with durations divided by the gcd of their $d$ and $\bar d$; a city that is not a representative
+  is given a weight above every budget;
+* `forest` is read, but the Lean v2 checker gives it no bound, so it never accepts a `forest` gap.
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Cert`, `Cert.check`, `Cert.gapLevel`, `Cert.gapBound_le`, `Cert.forestGapBound_le_hub`,
+`Cert.check_sound_hub`, `Cert.check_sound_relaxed` (Checker.lean); `planOK`, `planOK_feasible`
+(Simulate.lean); `load_eq_scale_mul` (Relaxation.lean); `forestBoundAt`, `forestBoundAt_le_totalCost`
+(TreeBound.lean); `Cert.check_sound_rat_hub` (RationalPlans.lean); `Cert.exists_le_of_admissible`,
+`Cert.check_sound_anywhere_hub` (Bridge.lean). Corollaries: `Cert.check_sound`, `Cert.check_sound_A1` under (A1) and
+`Cert.check_sound_ATri` under (AΔ) (Checker.lean).
+
+**Lean** `ZenoFront.Cert.check_sound_hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Soundness of the checker.** If `check` accepts a certificate, its points are exactly the
+Pareto front of the instance (every point is achieved by a feasible plan, every feasible plan is
+weakly dominated by a point, and the points are pairwise incomparable) for every table `dc` of
+central flight durations that satisfies the triangles through a hub, or for every table if all
+gaps are `relaxed`. -/
+theorem check_sound_hub (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).ATriHub ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 419–465](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L419-L465){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Cert.check_sound_rat_hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Soundness for plans with times in `𝕂`** (rational or real). If `check` accepts, the listed
+points are exactly the Pareto front of the (cost, makespan) pairs of the feasible plans with times
+in `𝕂`, for every table of central flight durations satisfying the triangles through a hub, or
+every table if all gaps are `relaxed`. -/
+theorem check_sound_rat_hub (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).ATriHub ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+    IsParetoFront (achievableQ 𝕂 (C.network dc) C.c C.t C.p)
+      (C.front.map fun x => (x.1, (x.2 : 𝕂))) := …
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 312–342](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L312-L342){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Cert.check_sound_anywhere_hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Soundness of the checker for planes ending anywhere.** If `check` accepts, the listed
+points are exactly the Pareto front of the plans whose planes may end anywhere (makespan = last
+arrival), for every table of central flight durations satisfying the triangles through a hub. -/
+theorem check_sound_anywhere_hub (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hL : (C.network dc).ATriHub) :
+    IsParetoFront (achievableAnywhere (C.network dc) C.c C.t C.p) C.front := …
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 563–576](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L563-L576){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Cert.check` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L368-L370), [`planOK_feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Simulate.lean#L146-L154), [`Cert` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L155-L168), [`Cert.gapLevel` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L284-L286), [`Cert.gapBound_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L372-L384), [`Cert.forestGapBound_le_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L386-L403), [`Cert.check_sound_relaxed` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L479-L484), [`planOK` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Simulate.lean#L139-L144), [`load_eq_scale_mul` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L172-L178), [`forestBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L574-L579), [`forestBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L581-L591), [`Cert.exists_le_of_admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L508-L561), [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L467-L471), [`Cert.check_sound_A1` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L473-L477), [`Cert.check_sound_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L486-L492)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 8.3 (`roles` bound) {#node-proposition-8-3}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 8.3 (`roles` bound).** At level $T$, the `roles` bound is the larger of (A) the plane-by-plane
+relaxation in which a plane's $m$ landings contain an odd number of crossings, of weight $d + \bar d$,
+the others weighing $2\min(d, \bar d)$, all within $T$, combined over the planes as in Lemma 3.5, and (B)
+$G_{d + \bar d}[s][pT]$, the least cost of $s$ landings of weight $d + \bar d$ within $pT$. It is at most
+the cost of every role configuration with $s$ landings and every $\lambda_k \le T$.
+
+::: {.node-lean}
+Lean: [`rolesBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L202-L264)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `prop-roles-bound`
+
+*Proof.* (A) In plane $k$'s group, the $|\mathrm{Cr}_k|$ crossings, an odd number, weigh $d + \bar d$
+each in $\lambda_k$, and a drop-off or a pick-up weighs $2d$ or $2\bar d$, at least $2\min(d, \bar d)$. So
+the group is one of the multisets over which the per-plane table minimises, and the planes combine as in
+Lemma 3.5. (B) By the balance, $2\delta(\sum_k \mathrm{Dr}_k) + 2\bar\delta(\sum_k \mathrm{Pk}_k) =
+(\delta + \bar\delta)(\sum_k \mathrm{Dr}_k + \sum_k \mathrm{Pk}_k)$, so $\sum_k \lambda_k = (\delta +
+\bar\delta)(X) \le pT$, and $c(X) \ge G_{d + \bar d}[s][pT]$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `fillW`, `lowW`, `roleM`, `roleM_le`, `rolesBoundAt`, `sum_roleLoad_eq_load_fill`,
+`rolesBoundAt_le_totalCost` (RoleBound.lean); `Cert2.exists_repConfig`, `Cert2.rolesWith_le`
+(CheckerV2.lean).
+
+**Lean** `ZenoFront.rolesBoundAt_le_totalCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The `roles` bound is a lower bound** on the cost of every role configuration with `s`
+landings and every role load at most `T`, for the tables computed from `d`, `d̄` and `c`. -/
+theorem rolesBoundAt_le_totalCost (d dbar c : Fin n → ℕ) (dc : Fin n → Fin n → ℕ) {s Tmax T : ℕ}
+    (cfg : RoleConfig n p) (hsize : size cfg.groups = s)
+    (hload : ∀ k, cfg.roleLoad ⟨d, dbar, dc⟩ k ≤ T) :
+    rolesBoundAt p s Tmax (roleLayers d dbar c Tmax s)
+      (oneplaneTable (fillW d dbar) c (p * Tmax) s) T ≤ (totalCost c cfg.groups : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/RoleBound.lean`, lines 202–264](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L202-L264){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Cert2.rolesWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L364-L375), [`sum_roleLoad_eq_load_fill` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L186-L200), [`fillW` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L54-L55), [`lowW` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L57-L58), [`roleM` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L82-L85), [`roleM_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L107-L159), [`rolesBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RoleBound.lean#L165-L173), [`Cert2.exists_repConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L340-L362)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 8.4 (`lagrangian` bound) {#node-proposition-8-4}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 8.4 (`lagrangian` bound).** For every integer vector $\mu$, the Lagrangian value at level
+$T$ (the plane-by-plane relaxation in which a drop-off at $i$ costs $c_i + \mu_i$, a pick-up $c_i -
+\mu_i$, a crossing $c_i$, and every plane has an odd number of crossings and weighs at most $T$, combined
+over the planes by a program over group sizes, for a given number $\ell$ of landings) is at most the cost
+of every role configuration with $\ell$ landings, all in the allowed cities, whose planes weigh at most $T$, a crossing at $i$ weighing
+$\mathrm{fill}_i$, a drop-off $\mathrm{drop}_i$ and a pick-up $\mathrm{pick}_i$ ($d_i + \bar d_i$, $2d_i$
+and $2\bar d_i$ in the checker).
+
+::: {.node-lean}
+Lean: [`LagData.value_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L323-L381)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `prop-lagrangian-bound`
+
+*Proof.* By the balance, $\sum_k \mu(\mathrm{Dr}_k) = \sum_k \mu(\mathrm{Pk}_k)$, so the cost of the
+configuration is $\sum_k \big(c(\mathrm{Cr}_k) + \sum_{i \in \mathrm{Dr}_k}(c_i + \mu_i) + \sum_{i \in
+\mathrm{Pk}_k}(c_i - \mu_i)\big)$. Each plane's term is at least the per-plane minimum for its number of
+landings, and the planes combine as in Lemma 3.5. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `LagData`, `LagData.lagM_le`, `LagData.value_le_totalCost` (LagrangianBound.lean);
+`Cert2.lagWith_le` (CheckerV2.lean).
+
+**Lean** `ZenoFront.LagData.value_le_totalCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The Lagrangian value is a lower bound** on the cost of every role configuration with `S`
+landings whose cities are allowed and whose planes weigh at most `T`
+(`fill(Cr) + drop(Dr) + pick(Pk) ≤ T`), for every multiplier. -/
+theorem LagData.value_le_totalCost (D : LagData n) (cfg : RoleConfig n p)
+    (hreps : ∀ k, ∀ i ∈ cfg.groups k, i ∈ D.reps)
+    (hload : ∀ k, load D.fill (cfg.cross k) + load D.drop (cfg.drop k) +
+      load D.pick (cfg.pick k) ≤ D.T) :
+    D.value p (size cfg.groups) ≤ ((totalCost D.c cfg.groups : ℤ) : WithTop ℤ) := …
+```
+
+[`lean/ZenoFront/LagrangianBound.lean`, lines 323–381](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L323-L381){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Cert2.lagWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L377-L398), [`LagData` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L85-L94), [`LagData.lagM_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L160-L268)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 8.5 (`balanced` bound) {#node-proposition-8-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 8.5 (`balanced` bound).** At level $T$, the imbalance-vector program (planes in order;
+state: the landings used and the imbalance vector $\sum (\mathrm{Dr} - \mathrm{Pk})$ of the planes so
+far, of $\ell^1$-norm at most $t - p$; a plane's option is its imbalance and an odd number of crossings,
+a drop-off and a pick-up at one city of one plane counting as two crossings there) has value at most the
+cost of every role configuration with $s$ landings and every $\lambda_k \le T$, for the weights and the
+crossing table that the checker builds.
+
+::: {.node-lean}
+Lean: [`BalData.value_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L466-L578), [`Cert2.balWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L400-L419)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `prop-6-6`
+
+*Proof.* A drop-off and a pick-up at $x$ on one plane weigh $2d_x + 2\bar d_x$ and cost $2c_x$, as two
+crossings at $x$, so a plane's roles are an option of the program with no larger cost; the crossings
+stay odd. Let $N$ be the number of remaining links; $2N + p \le s$, so $N \le t - p$. For a prefix of
+planes and a city $i$, the imbalance is $D^{\le}(i) - P^{\le}(i) = P^{>}(i) - D^{>}(i)$ by the balance,
+so its absolute value is at most the drop-offs at $i$ of the prefix or of the other planes, and the norm
+of the prefix's imbalance is at most $N$. So every prefix of the configuration is a state of the
+program, and by induction over the planes each layer holds it at a cost no larger than the prefix's.
+$\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `BalData`, `RoleConfig.planeOpts`, `BalData.layers_dominate`, `RoleConfig.norm_prefix_le`,
+`BalData.value_le_totalCost` (BalancedBound.lean); `Cert2.balWith_le` (CheckerV2.lean).
+
+**Lean** `ZenoFront.BalData.value_le_totalCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The `balanced` program is a lower bound** on the cost of every balanced role configuration
+with `s` landings and role loads at most `T`, for durations `dR`, `dbR` (scaled) when the program
+weighs a drop-off `2 dR`, a pick-up `2 dbR`, `links ≥ (s − p)/2`, and `G` bounds the crossings. -/
+theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
+    (dc : Fin n → Fin n → ℕ) (hdW : D.dW = fun i => 2 * dR i)
+    (hpW : D.pW = fun i => 2 * dbR i) (hlinks : D.s ≤ 2 * D.links + p)
+    (hG : ∀ r τ (Y : Multiset (Fin n)), Y.card = r → r ≤ D.s → τ ≤ D.T →
+      load (fillW dR dbR) Y ≤ τ → D.G r τ ≤ cost D.c Y)
+    (cfg : RoleConfig n p) (hsize : size cfg.groups = D.s)
+    (hload : ∀ k, cfg.roleLoad ⟨dR, dbR, dc⟩ k ≤ D.T) :
+    D.value p ≤ (totalCost D.c cfg.groups : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/BalancedBound.lean`, lines 466–578](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L466-L578){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Cert2.balWith_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The `balanced` bound is a lower bound** under (A1-NS). -/
+theorem balWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contains "A1-NS" = true →
+    (C.network dc).A1NS) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.balWith C.dR C.dbR M ≤ (planCost C.c P : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/CheckerV2.lean`, lines 400–419](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L400-L419){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`BalData.layers_dominate` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L240-L294), [`RoleConfig.norm_prefix_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L420-L452), [`BalData` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L93-L103), [`RoleConfig.planeOpts` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/BalancedBound.lean#L415-L418)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 8.6 (`search` bound) {#node-proposition-8-6}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 8.6 (`search` bound).** If the exhaustive search over the scheduled configurations of cost
+below $C$ (every ordered list of drop-offs, ordered list of pick-ups and multiset of crossings per plane,
+with an odd number of crossings and a role load at most $T$, and every matching of the pick-ups to
+drop-offs of the same city, self links included) reports the gap closed at level $T$, then every valid
+scheduled configuration with $s$ landings and cost below $C$ has $M_{\rm tmpl} > T$.
+
+::: {.node-lean}
+Lean: [`SearchData.closed_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L299-L471)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `prop-search-complete`
+
+*Proof.* Let $S$ be valid with $s$ landings, cost below $C$ and $M_{\rm tmpl}(S) \le T$. Then every role
+load is at most $T$, so every plane of $S$ is one of the enumerated options, the tuple of these options
+has $s$ landings and as many drop-offs as pick-ups, and the matching of $S$ is one of the enumerated
+assignments. The closed form of that tuple and assignment is $M_{\rm tmpl}(S) \le T$, so the search would
+not report the gap closed. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `SearchData`, `SearchData.opts`, `SearchData.tuples`, `SearchData.assignments`,
+`SearchData.closed`, `SearchData.closed_sound` (SearchGap.lean); `Sched.mul_tmpl_map_le` (SchedMap.lean);
+`Cert2.searchWith_le` (CheckerV2.lean).
+
+**Lean** `ZenoFront.SearchData.closed_sound` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Completeness of the enumeration.** If the search reports the gap closed, every valid
+scheduled configuration with `s` landings and cost below `C` has closed form above `T`. -/
+theorem closed_sound (h : D.closed = true) (S : Sched n D.p) (hv : S.Valid)
+    (hsize : S.size = D.s) (hcost : (S.cost D.c : WithTop ℕ) < D.C) :
+    D.T < S.tmpl D.d D.db := …
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 299–471](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L299-L471){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Cert2.searchWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L421-L460), [`SearchData` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L97-L106), [`SearchData.opts` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L137-L145), [`SearchData.tuples` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L147-L154), [`SearchData.assignments` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L166-L170), [`SearchData.closed` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L189-L194), [`Sched.mul_tmpl_map_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L117-L151)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Theorem 8.7 (v2 checker, H3) {#node-theorem-8-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Theorem 8.7 (v2 checker, H3).** If `Cert2.check` accepts a certificate of format v2, its points are the
+Pareto front of the feasible plans of its instance, for every central table that satisfies (A1-NS) if the
+certificate lists `A1-NS`, and for every central table otherwise.
+
+::: {.node-lean}
+Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L462-L552)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §8 · ledger `thm-checker-v2`
+
+*Proof.* Obligation (1) of Theorem 8.1 is the simulation, as in Theorem 8.2, and (4) is Proposition 3.6,
+which needs no assumption. For (2) and (3), let a feasible plan have makespan below $M$ and cost $C'$;
+every kind's bound at the level of $M$ is at most $C'$. For `relaxed`, by Lemma 3.5. For the other kinds
+(A1-NS) is listed, hence holds for the table. Corollary 5.4 gives a role configuration with $2t - p$
+landings, cost at most $C'$ and role loads at most the makespan; by Proposition 6.6 its image on the
+representatives keeps these properties, and it fits in the level once the durations are divided by their
+gcd; Propositions 8.3, 8.4 and 8.5 bound `roles`, `lagrangian` and `balanced`. For `search`, Theorem 5.3
+gives a valid scheduled configuration with cost at most $C'$ and $M_{\rm tmpl}$ at most the makespan,
+mapped to the representatives by Proposition 6.6 and to the scaled durations by `Sched.mul_tmpl_map_le`;
+by Proposition 8.6 its cost, hence $C'$, is at least the cost of the previous point, which is the bound
+of a closed search. A first point with $M_1 = 0$ needs no bound, and `closed` is Proposition 3.6.
+Theorem 8.1 concludes. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+The proof covers instances with a city of $d_x = \bar d_x = 0$, as Theorem 5.3 does.
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Cert2`, `Cert2.check`, `Cert2.fastestOK`, `Cert2.relaxedWith_le`, `Cert2.exists_repConfig`,
+`Cert2.rolesWith_le`, `Cert2.lagWith_le`, `Cert2.balWith_le`, `Cert2.searchWith_le`,
+`Cert2.check_sound` (CheckerV2.lean).
 
 **Lean** `ZenoFront.Cert2.check_sound` [machine-checked]{.badge .ok}
 
@@ -97,88 +589,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/CheckerV2.lean`, lines 462–552](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L462-L552){.lean-src} (statement only; the proof is elided)
 
-
-```{=html}
-</details>
-```
-
+::: {.node-lean}
+Further declarations: [`Cert2.check` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L277-L279), [`Cert2` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L82-L94), [`Cert2.fastestOK` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L224-L238), [`Cert2.relaxedWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L287-L299), [`Cert2.exists_repConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L340-L362), [`Cert2.rolesWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L364-L375), [`Cert2.lagWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L377-L398), [`Cert2.balWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L400-L419), [`Cert2.searchWith_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/CheckerV2.lean#L421-L460)
 :::
 
-### Lemma 9.2 (potentials) {#node-lemma-9-2}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 9.2 (potentials) [X2].** In a finite graph with arc weights in $\mathbb K$, let $V$ map nodes to
-$\mathbb K \cup \{\infty\}$ with $V(\text{target}) \le 0$ and $V(u) \le \mathrm{wt}(u,v) + V(v)$ on every arc.
-Then $V(\text{source})$ is at most the weight of every path from the source to the target.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [7.6](#node-theorem-7-6)
-
-*Proof.* Along a path $u_0, \dots, u_m$ ending at the target, $V(u_m) \le 0$, and by backward induction
-$V(u_j) \le \sum_{j' \ge j} \mathrm{wt}(u_{j'}, u_{j'+1})$. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 9.3 (default potentials) {#node-lemma-9-3}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 9.3 (default potentials).** At level $T$, let $G^a[m] = c_a + G[m-1][T - d_a]$, the cheapest
-$m$-group containing $a$. Let $L_{\rm rest}(p, s) = 0$, $L_{\rm rest}(p, j) = \infty$ for $j \ne s$, and
-$L_{\rm rest}(k, j) = \min_m \big(G[m][T] + L_{\rm rest}(k+1, j+m)\big)$. Let $L^a(p, j) = \infty$ and
-$L^a(k, j) = \min_m \min\big(G^a[m] + L_{\rm rest}(k+1, j+m),\ G[m][T] + L^a(k+1, j+m)\big)$. Define
-$V_0(k, j, \emptyset) = L_{\rm rest}(k, j)$ and $V_0(k, j, \sigma) = \max_{a\in\sigma} L^a(k, j)$ for
-$\sigma \ne \emptyset$. Then $V_0(\text{target}) = 0$ and $V_0(u) \le \mathrm{wt}(u, v) + V_0(v)$ on every arc of the
-σ-graph.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [7.6](#node-theorem-7-6)
-
-*Proof.* By induction from $k = p$, $L^a \ge L_{\rm rest}$, since $G^a[m] \ge G[m][T]$; so
-$V_0(v) \ge L_{\rm rest}(v)$ at every node $v$. An arc leaving $(k, j, \sigma)$ with option $(m, \eta)$ has weight
-at least $G[m][T]$, and at least $G^a[m]$ when $a \in \eta$, because $\eta$ with its filler is an $m$-group of
-duration at most $T$. If $\sigma = \emptyset$:
-$V_0(u) = L_{\rm rest}(k, j) \le G[m][T] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt} + V_0(v)$. If $\sigma \ne \emptyset$
-and $a \in \sigma$: when $a \in \eta$, $L^a(k, j) \le G^a[m] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt} + V_0(v)$;
-when $a \notin \eta$, $a \in \sigma \triangle \eta$, so $V_0(v) \ge L^a(k+1, j+m)$ and
-$L^a(k, j) \le G[m][T] + L^a(k+1, j+m) \le \mathrm{wt} + V_0(v)$. Take the maximum over $a$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-*Sparse potential.* The certificate lists some nodes $u$ with values $V(u)$. The checker sets
-$V'(u) = \max(V(u), V_0(u))$ on listed nodes and $V' = V_0$ elsewhere. It checks $V'(\text{target}) \le 0$,
-$V'(u) \le \mathrm{wt}(u, v) + V'(v)$ on every arc leaving a listed node, and $V'(\text{source}) \ge C_i$. Arcs
-leaving other nodes satisfy the inequality by Lemma 9.3, as $V' \ge V_0$. By Lemma 9.2 and Theorem 7.6,
-$E(T^\star_i) \ge C_i$. The listed nodes are those that survive the solver's pruning.
 
 ```{=html}
 </details>

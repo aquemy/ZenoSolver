@@ -130,13 +130,13 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
 
     // 2. Lower bounds, on tables covering every gap level.
     //  - lemma R: per-plane groups with weights min(drop, pick); no assumption.
-    //  - roles (Theorem 6.1, A1-NS): every plan is weakly dominated by a role
+    //  - roles (Corollary 5.4, A1-NS): every plan is weakly dominated by a role
     //    configuration, in which each plane flies an odd number >= 1 of
     //    crossings (weight fill) and its other landings weigh at least
     //    min(drop, pick); and, as drop-offs and pick-ups pair up city by
     //    city, the loads of all planes add up to fill(X), so the largest is
     //    at least fill(X) / p.
-    //  - balanced (Theorem 6.1, A1-NS): the cheapest balanced role
+    //  - balanced (Corollary 5.4, A1-NS): the cheapest balanced role
     //    configuration itself (BalancedRoles), on the gaps the others leave open.
     const Time maxLevel = std::max(hi, (result.upper.back().makespan - 1) / r.makespanPerLevel);
     const OnePlaneTable Glow(r.low, r.c, r.maxGroup(), maxLevel, options.table);
@@ -317,7 +317,7 @@ BracketResult solveBracket(const Instance& instance, const SolveOptions& options
                 offer(b, result.upper[i + 1].makespan);
         }
         // Last resort, when the bounds found no new point: the exact search over
-        // role configurations (Corollary 6.10), gap by gap.
+        // role configurations (Corollary 5.6), gap by gap.
         if(!added)
         {
             std::vector<std::pair<std::size_t, Time>> todo; // (gap index or npos for the fastest point, level)

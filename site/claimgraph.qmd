@@ -31,8 +31,9 @@ The statuses are those of the ledger:
   `Quot.sound`), recorded by a `formalize` commit that closes the claim with its declaration;
 - **proved informally**: a complete written proof in the note;
 - **conjectured**: open, or only sketched, in the note;
-- **disproved**: refuted by a counterexample, like the conjecture that shuttle triples complete
-  the non-symmetric front (Conjecture 6.7), or a converse under (S) alone (Example 4.13).
+- **disproved**: refuted by a counterexample, like the claim of arXiv:2304.14659 that virtual
+  cities for the shuttle situations complete the non-symmetric front (Example 5.10), or a converse
+  under (S) alone (Example 4.7).
 
 The blueprint's badges follow the same statuses: its build fails if the status cached in
 `claims.toml` differs from the one this history gives.

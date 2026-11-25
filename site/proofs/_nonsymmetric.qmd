@@ -1,37 +1,54 @@
-## Non-symmetric case {#sec-nonsymmetric}
+## Non-symmetric front {#sec-nonsymmetric}
 
-Different durations to the two hubs (§6). Waiting can now be harmful (theory note,
-{{< node "Proposition 6.5" >}}), so role loads alone do not give the front; under (A1-NS) it is
-characterised by *schedulable domination* (Theorem 6.9), which Lean proves for every plan on the
-template's closed form. (A1-NS) is needed: under (AΔ) alone, short central flights can beat every role configuration (theory note,
-{{< node "Proposition 6.7" >}}), and only the cut bound of Lemma 6.19 holds without any assumption.
+Different durations to the two hubs, under (A1-NS) (§5). Every feasible plan is weakly dominated by
+a scheduled configuration (Theorem 5.3), whose template is a feasible plan (Lemma 5.5), so the
+front is that of the scheduled configurations (Corollary 5.6). Proposition 5.7 shows that role loads
+alone do not give the front, and Examples 5.9 and 5.10 that two constructions of arXiv:2304.14659
+miss it.
 
-### Theorem 6.1 (converse to role configurations) {#node-theorem-6-1}
+### Definition 5.1 (role configuration) {#node-definition-5-1}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean bounds every role load by the makespan, not by its plane's flight time.]{.node-gap}
+[Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Theorem 6.1 (converse to role configurations) [N1].** Assume (A1-NS). For every feasible plan with cost $C$
-and makespan $M$ there is a role configuration on all $p$ planes with passenger count $t$, cost at most $C$
-and $\lambda_k \le F_k \le M$ for every $k$. (AΔ) is not needed.
+**Definition 5.1 (role configuration).** A *role configuration* on $p$ planes gives every plane $k$
+multisets $\mathrm{Dr}_k$ (drop-offs), $\mathrm{Pk}_k$ (pick-ups) and $\mathrm{Cr}_k$ (crossings) of
+central cities, with $|\mathrm{Cr}_k|$ odd and $\sum_k \mathrm{Dr}_k = \sum_k \mathrm{Pk}_k$ (the
+*balance*). Its groups are $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, its cost is $c(X)$,
+and the *role load* of plane $k$ is
+$$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) +
+\bar\delta(\mathrm{Cr}_k).$$
+Passengers are counted through the landings: the configurations for $t$ passengers are those with $|X|
+= 2t - p$.
 
 ::: {.node-lean}
-Parts in Lean: [`Feasible.exists_roleConfig_ns` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L474-L517)
+Lean: [`RoleConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Roles.lean#L40-L50), [`RoleConfig.groups` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Roles.lean#L56-L57), [`RoleConfig.roleLoad` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NonSymmetric.lean#L248-L251)
 :::
 
 ```{=html}
-<details class="node-more"><summary>Proof</summary>
+<details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §6.1 · **Hypotheses** (A1-NS) · **Uses** [3.1](#node-lemma-3-1), [4.3](#node-lemma-4-3), [4.4](#node-lemma-4-4)
+theory note, §5 · ledger `def-4-2`
 
-*Proof.* Replace a central flight $a \to b$ departing at $e$ by $a \to h \to b$ through a hub $h$ with
-$\mathrm{dur}(a,h) + \mathrm{dur}(h,b) \le d_{ab}$, which exists by (A1-NS). The plane waits in $b$ until its
-next departure, and a passenger on board stays on board through $h$. Then clean (Lemma 3.1): a journey that
-passes through $C_I$ now starts there, one that passes through $C_G$ ends there. The plan is simple, costs no
-more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+A drop-off and the pick-up of the same passenger form a *link*; with $N$ links, $|X| = 2N +
+\sum_k |\mathrm{Cr}_k|$, and the passengers are the $N$ linked ones and one per crossing $A$, $(|\mathrm
+{Cr}_k| + 1)/2$ per plane.
 
 ```{=html}
 </details>
@@ -41,23 +58,45 @@ more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Central flights are split through the hub of the shorter detour (`Feasible.split`), which keeps the plan feasible with the same cost and no larger makespan.
+*Lean:* `RoleConfig`, `RoleConfig.groups` (Roles.lean); `RoleConfig.roleLoad` (NonSymmetric.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Feasible.exists_roleConfig_ns` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.RoleConfig` [Lean definition]{.badge .ok}
 
 ```lean
-/-- **Theorem 6.1 (converse to role configurations).** Under (A1-NS), with `p ≤ t`, every
-feasible plan gives a role configuration on the `p` planes with `2t − p` landings (passenger
-count `t`), cost at most the plan's, and every role load at most the makespan. -/
-theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
-    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ cfg : RoleConfig n p, size cfg.groups = 2 * t - p ∧
-      totalCost c cfg.groups ≤ planCost c P ∧ ∀ k, cfg.roleLoad N k ≤ planMakespan P := …
+/-- A role configuration: per plane, drop-off halves, pick-up halves and an odd number of
+crossings, with as many drop-offs as pick-ups at every city. -/
+structure RoleConfig (n p : ℕ) where
+  /-- Drop-off halves `D_k` of each plane. -/
+  drop : Fin p → Multiset (Fin n)
+  /-- Pick-up halves `P_k` of each plane. -/
+  pick : Fin p → Multiset (Fin n)
+  /-- Crossings `Cr_k` of each plane. -/
+  cross : Fin p → Multiset (Fin n)
+  odd_card_cross : ∀ k, Odd (cross k).card
+  sum_drop_eq_sum_pick : ∑ k, drop k = ∑ k, pick k
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 474–517](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L474-L517){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Roles.lean`, lines 40–50](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Roles.lean#L40-L50){.lean-src}
+
+**Lean** `ZenoFront.RoleConfig.groups` [Lean definition]{.badge .ok}
+
+```lean
+/-- The grouping of a role configuration, `X_k = D_k + P_k + Cr_k`. -/
+def groups : Groups n p := fun k => R.drop k + R.pick k + R.cross k
+```
+
+[`lean/ZenoFront/Roles.lean`, lines 56–57](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Roles.lean#L56-L57){.lean-src}
+
+**Lean** `ZenoFront.RoleConfig.roleLoad` [Lean definition]{.badge .ok}
+
+```lean
+/-- The role load of plane `k` of a role configuration. -/
+def RoleConfig.roleLoad (N : Network n) (cfg : RoleConfig n p) (k : Fin p) : ℕ :=
+  2 * load N.d (cfg.drop k) + 2 * load N.dbar (cfg.pick k) + load N.d (cfg.cross k) +
+    load N.dbar (cfg.cross k)
+```
+
+[`lean/ZenoFront/NonSymmetric.lean`, lines 248–251](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NonSymmetric.lean#L248-L251){.lean-src}
 
 
 ```{=html}
@@ -66,74 +105,38 @@ theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n �
 
 :::
 
-### Lemma 6.2 (relaxed role loads) {#node-lemma-6-2}
+### Definition 5.2 (scheduled configuration, template value) {#node-definition-5-2}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Lemma 6.2 (relaxed role loads).** Assume (AΔ). For every feasible plan with cost $C$ and makespan $M$ there
-are multisets $\mathrm{Dr}_k$, $\mathrm{Pk}_k$, $\mathrm{Cr}_k$ ($k = 1,\dots,p$) with $|\mathrm{Cr}_k|$ odd,
-$\sum_k |\mathrm{Dr}_k| = \sum_k |\mathrm{Pk}_k|$ (only the totals balance), passenger count $t$, cost at most
-$C$ and $\lambda_k \le F_k \le M$. So the least cost $L_{\rm NS}(T)$ of such a family with every
-$\lambda_k \le T$ is a lower bound for every plan of makespan at most $T$, whatever its central flights,
-including the shuttles and the multi-landing segments of §6.4.
+**Definition 5.2 (scheduled configuration, template value).** A *scheduled configuration* $S$ gives
+every plane $k$ an ordered list $\mathrm{Dr}_k = (\mathrm{Dr}_k[0], \mathrm{Dr}_k[1], \dots)$ of
+drop-offs, an ordered list $\mathrm{Pk}_k$ of pick-ups and a multiset $\mathrm{Cr}_k$ of crossings, and
+maps every pick-up slot $(v, l)$ to a drop-off slot $\mathrm{mate}(v, l) = (u, j)$. It is *valid* if
+every $|\mathrm{Cr}_k|$ is odd, the drop-off $\mathrm{Dr}_u[j]$ of $\mathrm{mate}(v, l)$ is at the city
+of $\mathrm{Pk}_v[l]$, $\mathrm{mate}$ is injective, and there are as many drop-offs as pick-ups in all.
+Its size $|S|$, cost $c(S)$ and role loads $\lambda_k$ are those of Definition 5.1, read on the lists. A
+*link* $(u, j;\, v, l)$ at $x$ is a pick-up slot $(v, l)$ at $x$ with $\mathrm{mate}(v, l) = (u, j)$.
+The *template value* of $S$ is
+$$M_{\rm tmpl}(S) = \max\Big(\max_k \lambda_k,\ \max_{(u, j;\, v, l) \text{ at } x}\ \mathrm{Pre}_u(j) +
+d_x + \bar d_x + \mathrm{Suf}_v(l)\Big),$$
+with $\mathrm{Pre}_u(j) = 2\sum_{j' < j} d(\mathrm{Dr}_u[j'])$ and $\mathrm{Suf}_v(l) = 2\sum_{l' > l}
+\bar d(\mathrm{Pk}_v[l'])$. $S$ *schedules* a role configuration if its lists and multisets are that
+configuration's drop-offs, pick-ups and crossings.
 
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §6.1 · **Hypotheses** (AΔ) · **Uses** [2.1](#node-lemma-2-1), [3.3](#node-lemma-3-3), [4.4](#node-lemma-4-4)
-
-*Proof.* Give each segment $\gamma$ any of its landings. By Lemma 3.3(b), $F(\gamma)$ is at least the role
-duration of its type at that landing, reading $A$ and $\bar A$ as crossings, $B$ as drop-offs and $\bar B$ as
-pick-ups. A segment has exactly one flight departing from a hub (its first) and one arriving in a hub (its
-last). Mapping each passenger to the segment of its first flight (from $C_I$, so of type $A$ or $B$) and to
-the segment of its last flight (into $C_G$, of type $A$ or $\bar B$) is injective by capacity, so
-$\#A + \#B \ge t$ and $\#A + \#\bar B \ge t$. Take all $A$ and $\bar A$ segments of plane $k$ as its
-crossings, so $|\mathrm{Cr}_k| = 2\#A_k - 1$ (Lemma 2.1), and $\min(\#B, \#\bar B)$ of the $B$ and of the
-$\bar B$ segments as drop-offs and pick-ups. The passenger count is $\min(\#B, \#\bar B) + \#A \ge t$.
-Shrink as in Lemma 4.4, removing in the second case a drop-off and a pick-up anywhere. $\square$
-
-```{=html}
-</details>
-```
-
+::: {.node-lean}
+Lean: [`Sched` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L44-L50), [`Sched.Valid` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L56-L65), [`Sched.size` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L67-L68), [`Sched.cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L70-L72), [`Sched.load` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L74-L77), [`Sched.pre` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L79-L80), [`Sched.suf` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L82-L83), [`Sched.term` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L85-L87), [`Sched.tmpl` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L89-L91)
 :::
 
-### Lemma 6.3 (template) {#node-lemma-6-3}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 6.3 (template) [N3].** The template is a schedule, and its makespan is
-$$M_{\rm tmpl} = \max\Big(\max_k \lambda_k,\ \max_{(u,j;\,v,l) \in \mathcal L \text{ at } i}\ \mathrm{Pre}_u(j) + d_i + \bar d_i + \mathrm{Suf}_v(l)\Big).$$
-Every schedule of the same configuration, orders and matching has makespan at least $M_{\rm tmpl}$. So the
-least makespan of a role configuration is the minimum of $M_{\rm tmpl}$ over orders and matchings. No
-assumption on durations is needed.
-
 ```{=html}
-<details class="node-more"><summary>Proof</summary>
+<details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §6.2 · **Uses** [3.3](#node-lemma-3-3)
+theory note, §5 · ledger `def-scheduled-config`
 
-*Proof.* *Lower bound.* In any such schedule, plane $u$ starts its $j$-th drop-off after flying its earlier
-drop-offs, so this drop-off reaches $i$ no earlier than $\mathrm{Pre}_u(j) + d_i$. The linked pick-up of $v$
-leaves $i$ no earlier, flies $\bar d_i$ to $C_G$, and $v$ then still flies its later pick-ups, at least
-$\mathrm{Suf}_v(l)$. Also every plane flies $\lambda_k$ (Lemma 3.3(c)), so it finishes no earlier than
-$\lambda_k$.
-
-*Template.* Drop-offs come first and wait for nothing, so the $j$-th drop-off of $u$ reaches $i$ exactly at
-$\mathrm{Pre}_u(j) + d_i$, and no wait is cyclic. Let $\phi_v(l)$ be the time $v$ returns to $C_G$ after its
-$l$-th pick-up, with $\phi_v(0) = 2\delta(\mathrm{Dr}_v) + \delta(\mathrm{Cr}_v) + \bar\delta(\mathrm{Cr}_v)$.
-For the link $(u,j;v,l)$ at $i$,
-$\phi_v(l) = \max\big(\phi_v(l-1) + 2\bar d_i,\ \mathrm{Pre}_u(j) + d_i + \bar d_i\big)$. Unrolling, the last
-return of $v$ is the maximum of $\lambda_v$ and of the terms of the formula for the links into $v$. Planes
-without pick-ups finish at $\lambda_k$. The passenger count is $t$, so every passenger is carried. $\square$
 
 ```{=html}
 </details>
@@ -143,139 +146,111 @@ without pick-ups finish at $\lambda_k$. The passenger count is $t$, so every pas
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** `Sched.tmpl` is the closed form. Lean does not prove that the template is optimal for fixed orders and matching: soundness only needs Theorem 6.9, which bounds the closed form directly.
+*Lean:* `Sched`, `Sched.Valid`, `Sched.size`, `Sched.cost`, `Sched.load`, `Sched.pre`, `Sched.suf`,
+`Sched.term`, `Sched.tmpl` (SearchGap.lean); `Sched.Schedules` (NSFront.lean).
 
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
+**Lean** `ZenoFront.Sched` [Lean definition]{.badge .ok}
 
 ```lean
-/-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
+/-- A scheduled role configuration: drop-offs and pick-ups in order, crossings, and the matching
+from each pick-up slot `(v, l)` to the drop-off slot `(u, j)` whose passenger it collects. -/
+structure Sched (n p : ℕ) where
+  drops : Fin p → List (Fin n)
+  picks : Fin p → List (Fin n)
+  cross : Fin p → Multiset (Fin n)
+  mate : Fin p → ℕ → Fin p × ℕ
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 44–50](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L44-L50){.lean-src}
+
+**Lean** `ZenoFront.Sched.Valid` [Lean definition]{.badge .ok}
+
+```lean
+/-- A valid scheduled configuration: odd crossings, and a matching that sends every pick-up slot
+to a drop-off slot of the same city, injectively, with as many drop-offs as pick-ups (so it is a
+bijection, and drop-offs and pick-ups balance city by city). -/
+structure Valid : Prop where
+  odd : ∀ k, Odd (S.cross k).card
+  city : ∀ v l, l < (S.picks v).length →
+    (S.drops (S.mate v l).1)[(S.mate v l).2]? = (S.picks v)[l]?
+  inj : ∀ v l v' l', l < (S.picks v).length → l' < (S.picks v').length →
+    S.mate v l = S.mate v' l' → v = v' ∧ l = l'
+  count : ∑ k, (S.drops k).length = ∑ k, (S.picks k).length
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 56–65](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L56-L65){.lean-src}
+
+**Lean** `ZenoFront.Sched.size` [Lean definition]{.badge .ok}
+
+```lean
+/-- The number of landings. -/
+def size : ℕ := ∑ k, ((S.drops k).length + (S.picks k).length + (S.cross k).card)
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 67–68](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L67-L68){.lean-src}
+
+**Lean** `ZenoFront.Sched.cost` [Lean definition]{.badge .ok}
+
+```lean
+/-- The cost. -/
+def cost (c : Fin n → ℕ) : ℕ :=
+  ∑ k, (((S.drops k).map c).sum + ((S.picks k).map c).sum + ZenoFront.cost c (S.cross k))
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 70–72](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L70-L72){.lean-src}
+
+**Lean** `ZenoFront.Sched.load` [Lean definition]{.badge .ok}
+
+```lean
+/-- The role load of plane `k`, for durations `d` (via `C_I`) and `db` (via `C_G`). -/
+def load (d db : Fin n → ℕ) (k : Fin p) : ℕ :=
+  2 * ((S.drops k).map d).sum + 2 * ((S.picks k).map db).sum + ZenoFront.load d (S.cross k) +
+    ZenoFront.load db (S.cross k)
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 74–77](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L74-L77){.lean-src}
+
+**Lean** `ZenoFront.Sched.pre` [Lean definition]{.badge .ok}
+
+```lean
+/-- `Pre_u(j)`: the drop-offs of `u` before its `j`-th. -/
+def pre (d : Fin n → ℕ) (u : Fin p) (j : ℕ) : ℕ := 2 * (((S.drops u).take j).map d).sum
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 79–80](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L79-L80){.lean-src}
+
+**Lean** `ZenoFront.Sched.suf` [Lean definition]{.badge .ok}
+
+```lean
+/-- `Suf_v(l)`: the pick-ups of `v` after its `l`-th. -/
+def suf (db : Fin n → ℕ) (v : Fin p) (l : ℕ) : ℕ := 2 * (((S.picks v).drop (l + 1)).map db).sum
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 82–83](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L82-L83){.lean-src}
+
+**Lean** `ZenoFront.Sched.term` [Lean definition]{.badge .ok}
+
+```lean
+/-- The term of the link into pick-up slot `(v, l)`, at its city `x`. -/
+def term (d db : Fin n → ℕ) (v : Fin p) (l : Fin (S.picks v).length) : ℕ :=
+  S.pre d (S.mate v l).1 (S.mate v l).2 + d (S.picks v)[l] + db (S.picks v)[l] + S.suf db v l
+```
+
+[`lean/ZenoFront/SearchGap.lean`, lines 85–87](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L85-L87){.lean-src}
+
+**Lean** `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
+
+```lean
+/-- **The closed form of Lemma 5.5**: the largest role load and link term. -/
 def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
 ```
 
-[`lean/ZenoFront/SearchGap.lean`, lines 90–92](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/SearchGap.lean#L90-L92){.lean-src}
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Corollary 6.4 (one pick-up never waits harmfully) {#node-corollary-6-4}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Corollary 6.4 (one pick-up never waits harmfully) [W1].** Assume (AΔ-path). If every plane has at most one
-pick-up, then $M_{\rm tmpl} = \max_k \lambda_k$ for every order and matching. The same holds if every plane has
-at most one drop-off.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §6.2 · **Hypotheses** (AΔ-path) · **Uses** [6.3](#node-lemma-6-3)
-
-*Proof.* For a link $(u,j;v,1)$ at $i$, $\mathrm{Suf}_v(1) = 0$ and
-$\mathrm{Pre}_u(j) \le 2\delta(\mathrm{Dr}_u) - 2d_i$. Plane $u$ has a crossing $z$, since $|\mathrm{Cr}_u| \ge 1$,
-and $\bar d_i \le d_i + d_z + \bar d_z$. So the term is at most $2\delta(\mathrm{Dr}_u) + d_z + \bar d_z \le \lambda_u$.
-For the second claim, take a link $(u,1;v,l)$ at $i$. Then $\mathrm{Pre}_u(1) = 0$ and
-$\mathrm{Suf}_v(l) \le 2\bar\delta(\mathrm{Pk}_v) - 2\bar d_i$. Plane $v$ has a crossing $z$, and
-$d_i \le \bar d_i + \bar d_z + d_z$, so the term is at most
-$2\bar\delta(\mathrm{Pk}_v) + d_z + \bar d_z \le \lambda_v$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-This corrects §6.2 of the first version, which claimed that a pick-up after long drop-offs can push the
-makespan above the largest load. Under (AΔ-path) a single pick-up never does.
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 6.6 (imbalance-vector DP) {#node-proposition-6-6}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves that the DP is at most the cost of every balanced configuration, the direction the checker uses; not equality.]{.node-gap}
-:::
-
-::: {.node-body}
-**Proposition 6.6 (imbalance-vector DP) [N5].** Process the planes in order, with states $(k, j, v)$: $k$
-planes processed, $j$ landings used, and $v = \sum_{k' \le k} (\mathrm{Dr}_{k'} - \mathrm{Pk}_{k'}) \in \mathbb Z^n$
-the imbalance. A plane option is a triple $(\mathrm{Dr}, \mathrm{Pk}, r)$ with $r$ odd, of weight
-$c(\mathrm{Dr}) + c(\mathrm{Pk}) + G^{\rm cr}[r][T - 2\delta(\mathrm{Dr}) - 2\bar\delta(\mathrm{Pk})]$; it adds
-$|\mathrm{Dr}| + |\mathrm{Pk}| + r$ to $j$ and $\mathrm{Dr} - \mathrm{Pk}$ to $v$. With states restricted to
-$\|v\|_1 \le t - p$, the shortest path from $(0, 0, 0)$ to $(p, s, 0)$ has weight $E_{\rm NS}(T)$. There are at
-most $(p+1)(s+1)\sum_{u \le t-p} 2^u \binom{n}{u}\binom{t-p}{u}$ states, a polynomial in $n$ and $s$ for fixed
-$t - p$.
+[`lean/ZenoFront/SearchGap.lean`, lines 89–91](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SearchGap.lean#L89-L91){.lean-src}
 
 ::: {.node-lean}
-Parts in Lean: [`BalData.value_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/BalancedBound.lean#L466-L578)
+Further declarations: [`Sched.Schedules` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L139-L143)
 :::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §6.3 · **Uses** [7.2](#node-lemma-7-2)
-
-*Proof.* A path gives a role configuration whose cost is its weight, with $G^{\rm cr}$-optimal crossings:
-the final imbalance 0 is the balance, and $|X| = s$ gives the passenger count $(s + p)/2 = t$. Conversely,
-take a role configuration with passenger count $t$ and every $\lambda_k \le T$, and let
-$N = \sum_k |\mathrm{Dr}_k|$ be its number of links. From $s = 2N + \sum_k |\mathrm{Cr}_k| \ge 2N + p$,
-$N \le t - p$. For a prefix of $k$ planes and a city $i$, let $D^{\le}(i)$, $P^{\le}(i)$ count the drop-offs
-and pick-ups at $i$ of these planes, and $D^{>}(i)$, $P^{>}(i)$ those of the others. By the balance,
-$v_k(i) = D^{\le}(i) - P^{\le}(i) = P^{>}(i) - D^{>}(i)$, so $|v_k(i)| \le D^{\le}(i)$ if $v_k(i) \ge 0$ and
-$|v_k(i)| \le D^{>}(i)$ otherwise. Summing over $i$, $\|v_k\|_1 \le N \le t - p$, so the configuration is a
-path of the restricted graph, of weight at most its cost. To count the vectors $v$, choose a support of $u$
-cities, signs, and positive values summing to at most $t - p$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** The lower-bound direction (the DP is at most the cost of every balanced configuration), which is all the checker's `balanced` kind needs.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.BalData.value_le_totalCost` [machine-checked]{.badge .ok}
-
-```lean
-/-- **The `balanced` program is a lower bound** on the cost of every balanced role configuration
-with `s` landings and role loads at most `T`, for durations `dR`, `dbR` (scaled) when the program
-weighs a drop-off `2 dR`, a pick-up `2 dbR`, `links ≥ (s − p)/2`, and `G` bounds the crossings. -/
-theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
-    (dc : Fin n → Fin n → ℕ) (hdW : D.dW = fun i => 2 * dR i)
-    (hpW : D.pW = fun i => 2 * dbR i) (hlinks : D.s ≤ 2 * D.links + p)
-    (hG : ∀ r τ (Y : Multiset (Fin n)), Y.card = r → r ≤ D.s → τ ≤ D.T →
-      load (fillW dR dbR) Y ≤ τ → D.G r τ ≤ cost D.c Y)
-    (cfg : RoleConfig n p) (hsize : size cfg.groups = D.s)
-    (hload : ∀ k, cfg.roleLoad ⟨dR, dbR, dc⟩ k ≤ D.T) :
-    D.value p ≤ (totalCost D.c cfg.groups : WithTop ℕ) := …
-```
-
-[`lean/ZenoFront/BalancedBound.lean`, lines 466–578](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/BalancedBound.lean#L466-L578){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -284,265 +259,112 @@ theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
 
 :::
 
-### Lemma 6.19 (cut bound) {#node-lemma-6-19}
+### Theorem 5.3 (schedulable domination) {#node-theorem-5-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Lemma 6.19 (cut bound).** Let $\Phi$ be the least flight time of a sequence of flights from $C_I$ to $C_G$.
-For every feasible plan, $\sum_k F_k \ge (2t - p)\,\Phi$, so its makespan is at least $(2t - p)\Phi/p$. No
-assumption is needed. Under (AΔ), $\Phi = \min_x (d_x + \bar d_x)$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §6.4 · **Uses** [3.3](#node-lemma-3-3)
-
-*Proof.* Let $\phi(v)$ be the least flight time of a sequence of flights from $C_I$ to the city $v$, so
-$\phi(C_I) = 0$, $\phi(C_G) = \Phi$, and $|\phi(a) - \phi(b)| \le \mathrm{dur}(a, b)$ for every flight. For a
-leg $\ell$ from $a$ to $b$ let $\Delta(\ell) = \phi(b) - \phi(a)$. Along the route of plane $k$ the $\Delta$
-sum to $\Phi$. So its upward part $U_k = \sum_\ell \Delta(\ell)^+$ and its downward part
-$D_k = \sum_\ell \Delta(\ell)^-$ satisfy $U_k - D_k = \Phi$, and $F_k \ge U_k + D_k = 2U_k - \Phi$. Along the
-journey of a passenger the $\Delta$ also sum to $\Phi$, so the upward parts of its legs add up to at least
-$\Phi$. Journeys are disjoint (capacity), so $\sum_k U_k \ge t\Phi$ and $\sum_k F_k \ge 2t\Phi - p\Phi$.
-Every $F_k$ is at most the makespan. Under (AΔ), take a sequence of flights from $C_I$ to $C_G$, its first
-arrival in $C_G$, and its last visit to $C_I$ before that. Between them it visits only central cities, and
-if $x$ is the last of them, that part lasts at least $d_x + \bar d_x$ by the induction of Lemma 3.3(b). The
-sequence $C_I \to x \to C_G$ attains it. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-In Proposition 6.7 and in 6.18(a) and (c), the least makespan of all plans is this bound rounded up,
-$\lceil (2t-p)\Phi/p \rceil$ (8, 32 and 41), and role configurations stay above it. The relaxed role loads of
-Lemma 6.2 miss it: in 6.18(a) they allow makespan 14, dropping every linked passenger off in city 1 and
-picking it up in city 2. Lemma 6.19 is a lower bound for every plan, next to $L_{\rm NS}$, but it bounds
-makespans only, not costs. Its proof uses that every route ends in $C_G$, so it does not cover the variant of
-§4.5 in which planes may end anywhere; there the independent review found that the least makespan still meets
-the bound on the instances of Proposition 6.7 and 6.18(a).
-
-What remains for clique instances without (A1-NS): $L_{\rm NS}$ and Lemma 6.19 are lower bounds, and plans built from role
-configurations and from the segments above are upper bounds. The flow model and the exhaustive searches of
-§11 compute the front exactly on small instances. A combinatorial description of the front is open. The searches of §11 show where
-the difficulty lies. Shuttles never improved a front: wherever the exhaustive search compared them, plans
-whose only multi-landing segments are shuttles gave the front of role configurations. Split crossings alone
-completed the front on all but two of 600 random instances, and on those two, segments with more central
-landings were needed. And on 150 random instances whose hub durations $d$ and $\bar d$ order the cities alike,
-central flights never changed the front, as the mechanism above suggests; whether this holds in general is
-open.
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 6.8 (event order) {#node-lemma-6-8}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 6.8 (event order).** The *next-leg relation* of a plan relates a leg to the next leg on its route and
-to the next leg of the journey it belongs to, if any.
-
-(a) A plan is event-ordered iff its next-leg relation has no cycle.
-
-(b) In a simple plan with clean journeys, a cycle of the next-leg relation passes through a central city $x$
-with $d_x = \bar d_x = 0$.
-
-(c) The template of a role configuration (§6.2), and the plan of Theorem 4.1, are event-ordered.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §6.2 · **Uses** [4.3](#node-lemma-4-3)(a)
-
-*Proof.* (a) An event order extends the relation, so the relation has no cycle. Conversely, along the
-relation departure times do not decrease, since the next leg departs no earlier than the previous one
-arrives; sorting the legs by departure time, ties broken by a topological order of the acyclic relation,
-gives an event order.
-
-(b) Along each step the next leg departs no earlier than the previous one departs plus its duration, so every
-leg on a cycle has zero duration. Steps within one plane go forward on its route (§1.2, item 2), so a cycle
-contains a journey step between two planes. By Lemma 4.3(a) that step goes from a leg $C_I \to x$ to a leg
-$x \to C_G$, both on the cycle, so $d_x = \bar d_x = 0$.
-
-(c) Give the legs of a plane's drop-offs phase 1, of its crossings phase 2 and of its pick-ups phase 3. A step
-of the relation either stays on one plane and goes forward on its route, or follows a link from the first leg
-of a drop-off (phase 1) to the second leg of a pick-up (phase 3). Phases never decrease along the relation,
-and they increase at every step between two planes. A cycle therefore has no such step and stays on one
-route, which is impossible. The plan of Theorem 4.1 has the same three phases. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** `EventOrdered` is the definition; `EventOrdered.of_eoOK` proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them.
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.EventOrdered` [Lean definition]{.badge .ok}
-
-```lean
-/-- **Event-ordered plans** (§1.2 of the note). The legs have a total order (`rank`, injective)
-that extends every route and some journey of every passenger, and along which departure times
-do not decrease. Every plan with positive durations is event-ordered, and so is every PDDL plan.
-This is the scope of Theorem 6.9 when a city has `d = d̄ = 0`. -/
-def EventOrdered (P : Plan n t p) : Prop :=
-  ∃ rank : LegId P → ℕ, Function.Injective rank ∧
-    (∀ k (i j : Fin (P k).length), i < j → rank ⟨k, i⟩ < rank ⟨k, j⟩) ∧
-    (∀ x y, rank x < rank y → (legAt P x).dep ≤ (legAt P y).dep) ∧
-    ∀ π : Fin t, ∃ js : List (LegId P), (js.map (legAt P)).Perm (paxLegs P π) ∧
-      IsRoute .ci 0 (js.map (legAt P)) ∧ finalLoc .ci (js.map (legAt P)) = .cg ∧
-      js.Pairwise fun x y => rank x < rank y
-```
-
-[`lean/ZenoFront/SearchGap.lean`, lines 104–114](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/SearchGap.lean#L104-L114){.lean-src}
-
-*Related* `ZenoFront.EventOrdered.of_eoOK` [machine-checked]{.badge .ok}
-
-```lean
-/-- **The test is sound**: a plan it accepts is event-ordered. -/
-theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered P := …
-```
-
-[`lean/ZenoFront/EventOrderCheck.lean`, lines 134–158](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/EventOrderCheck.lean#L134-L158){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Theorem 6.9 (schedulable domination) {#node-theorem-6-9}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template's makespan is Lemma 6.3, written only.]{.node-gap}
-:::
-
-::: {.node-body}
-**Theorem 6.9 (schedulable domination) [SD].** Assume (A1-NS). Let a feasible plan have cost $C$ and makespan
-$M$. Then there are a role configuration on all $p$ planes with passenger count $t$ and cost at most $C$,
-orders of its drop-offs and pick-ups, and a link matching whose template has makespan at most $M$. Neither an
-event order, nor (AΔ), nor (AΔ-path) is needed.
+**Theorem 5.3 (schedulable domination).** Assume (A1-NS) and $p \le t$. Every feasible plan with cost
+$C$ and makespan $M$ gives a valid scheduled configuration $S$ with $|S| = 2t - p$, $c(S) \le C$ and
+$M_{\rm tmpl}(S) \le M$. The template of $S$ (Lemma 5.5) is then a feasible plan of cost $c(S)$ and
+makespan $M_{\rm tmpl}(S) \le M$.
 
 ::: {.node-lean}
-Parts in Lean: [`schedulableDomination_all` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/DominationAll.lean#L345-L473)
+Lean: [`schedulableDomination_all` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L407-L535), [`schedulableDomination_template` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L300-L314)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §6.2 · **Hypotheses** (A1-NS) · **Uses** [2.1](#node-lemma-2-1), [3.1](#node-lemma-3-1), [3.3](#node-lemma-3-3), [4.3](#node-lemma-4-3)(a), [4.4](#node-lemma-4-4), [6.1](#node-theorem-6-1), [6.3](#node-lemma-6-3)
+theory note, §5 · ledger `thm-6-9`
 
-*Proof.* *Step 1: a simple plan with clean journeys.* Replace central flights and clean, as in the proof of
-Theorem 6.1; cost, arrival times, flight times and makespan do not increase. By Lemma 4.3(a), every journey is
-now a leg $\alpha_\pi : C_I \to x$ followed by a leg $\beta_\pi : x \to C_G$, which departs no earlier than
-$\alpha_\pi$ arrives. Every route is a sequence of segments, one per landing. For a segment $\gamma$ at a city
-$x$, let $a(\gamma)$ be the time its first leg arrives in $x$ and $e(\gamma)$ the time its second leg departs,
-so $a(\gamma) \le e(\gamma)$. From here on only the routes and the pairs $(\alpha_\pi, \beta_\pi)$ matter:
-the moves below keep the routes valid, but need not keep a plan in the sense of item 2 of §1.2.
+*Proof.* *Step 1: no central flights.* Replace every central leg $a \to b$ by $a \to h \to b$ through
+the hub $h$ with $\mathrm{dur}(a, h) + \mathrm{dur}(h, b) \le d_c(a, b)$, which (A1-NS) provides, leaving
+at the same time. The plane reaches $b$ no later and waits there; a passenger on board stays on board
+through $h$. The plan stays feasible, its cost is the same ($h$ is free), and its makespan does not
+grow. Every route is now a sequence of visits (§3). By Lemma 3.2(b), every passenger $\pi$ rides a leg
+$\alpha_\pi : C_I \to x$ followed by a leg $\beta_\pi : x \to C_G$ that leaves no earlier than
+$\alpha_\pi$ arrives. For a visit $\gamma$ at $x$, $a(\gamma)$ is the time its first leg arrives in $x$
+and $e(\gamma)$ the time its second leg leaves, so $a(\gamma) \le e(\gamma)$. From now on only the
+visits of the planes and the legs $\alpha_\pi$, $\beta_\pi$ are used.
 
-*Step 2: rewiring.* Next to the routes, keep a set of *loops*, empty at first: closed walks whose legs all
-depart and arrive at one time $\tau$, so last $0$, and alternate between hubs and central cities, so that a
-loop is made of segments too. A passenger is *carried through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one segment,
-of a route or of a loop. Otherwise it is a *hand-off*, from the segment $\gamma$ of $\alpha_\pi$ to the segment
-$\gamma'$ of $\beta_\pi$, both at its city $x$. While one of these moves applies, apply it.
+*Step 2: rewiring.* Next to the routes, keep a set of *loops*, empty at first: closed sequences of
+visits whose legs all depart and arrive at one time $\tau$, so they last 0. A passenger is *carried
+through* if $\alpha_\pi$ and $\beta_\pi$ are the two legs of one visit, of a route or of a loop.
+Otherwise it is a *hand-off*, from the visit $\gamma$ of $\alpha_\pi$ to the visit $\gamma'$ of
+$\beta_\pi$, both at its city $x$. While one of these moves applies, apply it.
 
-* *Exchange.* $\gamma$ is on the route of $u$, $\gamma'$ on the route of $v \ne u$, and
-  $a(\gamma') \le e(\gamma)$: $v$ is in $x$ before $u$ leaves. Give $u$ the legs of $v$ from $\beta_\pi$ on,
-  and $v$ the legs of $u$ after $\alpha_\pi$. Both routes stay valid: $\beta_\pi$ departs after $\alpha_\pi$
-  arrives, and the second leg of $\gamma$ departs after the first leg of $\gamma'$ arrives.
+* *Exchange.* $\gamma$ is on the route of $u$, $\gamma'$ on the route of $v \ne u$, and $a(\gamma') \le
+  e(\gamma)$. Give $u$ the legs of $v$ from $\beta_\pi$ on, and $v$ the legs of $u$ after $\alpha_\pi$.
+  Both routes stay valid: $\beta_\pi$ leaves after $\alpha_\pi$ arrives, and the second leg of $\gamma$
+  leaves after the first leg of $\gamma'$ arrives.
 * *Cut.* $\gamma$ and $\gamma'$ are on one route, $\gamma'$ before $\gamma$. The route gives
-  $e(\gamma') \le a(\gamma)$ and the journey $a(\gamma) \le e(\gamma')$, so every leg from $\beta_\pi$ to
-  $\alpha_\pi$ departs and arrives at $\tau = e(\gamma')$ and lasts $0$; in particular $d_x = \bar d_x = 0$.
-  These legs form a closed walk at $x$. Remove it from the route, which keeps the first leg of $\gamma'$ and
-  the second leg of $\gamma$, a segment at $x$ since $a(\gamma') \le \tau \le e(\gamma)$. The walk becomes a
-  loop; its segments are $(\alpha_\pi, \beta_\pi)$ and the segments strictly between $\gamma'$ and $\gamma$.
-* *Splice.* One of $\gamma, \gamma'$ is a segment $F$ of a loop at time $\tau$, the other a segment $\delta$ of
-  a route, and $e(\gamma) > a(\gamma')$. Then $a(\delta) < \tau \le e(\delta)$ or
-  $a(\delta) \le \tau < e(\delta)$: if $F = \gamma$, then $e(\gamma) = \tau > a(\delta)$ and
-  $\tau \le e(\delta)$ by the journey; if $F = \gamma'$, then $a(\delta) \le \tau$ by the journey and
-  $e(\delta) > \tau$. Insert the loop into the route at $\delta$: the first leg of $\delta$, the second leg of
-  $F$, the loop around to $F$, the first leg of $F$, the second leg of $\delta$. The route stays valid, and
-  $\pi$ is carried through by the new segment of $\alpha_\pi$ and $\beta_\pi$.
+  $e(\gamma') \le a(\gamma)$ and the passenger $a(\gamma) \le e(\gamma')$, so every leg from $\beta_\pi$
+  to $\alpha_\pi$ departs and arrives at $\tau = e(\gamma')$. These legs form a closed walk at $x$. Remove
+  it from the route, which keeps the first leg of $\gamma'$ and the second leg of $\gamma$, a visit at $x$
+  since $a(\gamma') \le \tau \le e(\gamma)$. The walk becomes a loop, made of the visit
+  $(\alpha_\pi, \beta_\pi)$ and the visits strictly between $\gamma'$ and $\gamma$.
+* *Splice.* One of $\gamma, \gamma'$ is a visit $F$ of a loop at time $\tau$, the other a visit
+  $\delta$ of a route, and $e(\gamma) > a(\gamma')$. Then $a(\delta) \le \tau \le e(\delta)$: if $F =
+  \gamma$, then $e(\gamma) = \tau > a(\delta)$, and $\tau \le e(\delta)$ by the passenger; if $F =
+  \gamma'$, then $a(\delta) \le \tau$ by the passenger, and $e(\delta) > \tau$. Insert the loop into
+  the route at $\delta$: the first leg of $\delta$, the second leg of $F$, the loop around to $F$, the
+  first leg of $F$, the second leg of $\delta$. The route stays valid, and $\pi$ is carried through by
+  the new visit of $\alpha_\pi$ and $\beta_\pi$.
 
-Every move keeps the legs, so the cost, and every route's last leg or exchanges two of them, so the makespan.
-It keeps the routes valid and the loops closed walks at one time, and it carries one more passenger through.
-It carries none less: the only segments it breaks are $\gamma$ and $\gamma'$, and a segment carrying another
-passenger through holds both of that passenger's legs, so it is neither. So the moves
-stop, after at most $t$ of them. Then every hand-off from $\gamma$ to $\gamma'$ has $e(\gamma) \le a(\gamma')$:
+Every move keeps the multiset of legs, so the cost, and keeps every route's last leg or exchanges two of
+them, so the makespan bound. It carries one more passenger through and none fewer: the only visits it
+breaks are $\gamma$ and $\gamma'$, and a visit that carries another passenger through holds both of its
+legs, so it is neither. So the moves stop. Then every hand-off from $\gamma$
+to $\gamma'$ has $e(\gamma) \le a(\gamma')$: between two routes since the exchange does not apply; on
+one route since the cut does not apply, so $\gamma'$ comes after $\gamma$; between a loop and a route
+since the splice does not apply; between two loops at times $\tau$ and $\tau'$, since $e(\gamma) = \tau$
+is when $\alpha_\pi$ arrives and $a(\gamma') = \tau'$ when $\beta_\pi$ leaves.
 
-* between the routes of two planes, the exchange does not apply, so $e(\gamma) < a(\gamma')$;
-* on one route, the cut does not apply, so $\gamma'$ comes after $\gamma$, and $e(\gamma) \le a(\gamma')$
-  along the route;
-* between a loop and a route, the splice does not apply;
-* between two loops, at times $\tau$ and $\tau'$: $e(\gamma) = \tau$ is when $\alpha_\pi$ arrives and
-  $a(\gamma') = \tau'$ when $\beta_\pi$ departs.
+*Step 3: links.* Draw an arrow $\gamma \to \gamma'$ for every passenger, from the visit of $\alpha_\pi$
+to the visit of $\beta_\pi$ (an arrow $\gamma \to \gamma$ if it is carried through). A leg carries one
+passenger, so a visit has at most one outgoing and one incoming arrow; an arrow leaves a visit entered
+from $C_I$ and enters a visit left towards $C_G$; and $e(\gamma) \le a(\gamma')$ when $\gamma \ne
+\gamma'$. Then there is a set $\Lambda$ of *links*, pairs of a drop-off visit and a pick-up visit at the
+same city with $a(B) \le e(\bar B)$, each visit in at most one link, such that $t \le |\Lambda| +
+\#A$. By induction on $\#A$, the number of visits of type $A$: if there is none, an arrow leaves a
+visit entered from $C_I$ and not of type $A$, a $B$, and enters a visit left towards $C_G$, a $\bar B$;
+so $\gamma \ne \gamma'$, $a(\gamma) \le e(\gamma) \le a(\gamma') \le e(\gamma')$, and the arrows are the
+links. Otherwise remove a visit $w$ of type $A$, and replace two arrows $s \to w \to d$ by one arrow $s
+\to d$; for $s \ne d$, still $e(s) \le a(w) \le e(w) \le a(d)$. This loses at most one arrow, and
+$\#A$ drops by one.
 
-*Step 3: paths.* At each city $x$, draw an arrow from $\gamma$ to $\gamma'$ for each hand-off at $x$; the
-segments are those of the routes and of the loops. Each leg carries at most one passenger, so every segment
-has at most one outgoing and one incoming arrow. A $B$ has no incoming arrow, since its second leg returns to
-$C_I$, which clean journeys never reach, and a $\bar B$ has no outgoing arrow. So the arrows form disjoint
-paths $\gamma_0 \to \gamma_1 \to \dots \to \gamma_m$ with $m \ge 1$, and cycles. The inner segments of a path,
-and all segments of a cycle, have an incoming and an outgoing arrow, so they are $A$ segments, each dropping
-one passenger and picking up another. Along a path, by step 2,
-$a(\gamma_0) \le e(\gamma_0) \le a(\gamma_1) \le \dots \le e(\gamma_m)$.
+*Step 4: the configuration.* Attach every loop to some plane: its drop-off visits come first, its other
+visits last; they last 0. A plane's linked $B$ visits, in this order, are its drop-offs; its linked
+$\bar B$ visits, in this order, are its pick-ups; each pick-up is matched to the drop-off of its link;
+and its $A$ and $\bar A$ visits are its crossings, $2a_k + 1$ of them, with $a_k$ its number of $\bar A$
+visits (Lemma 3.1, on the route and on the loops). The configuration is valid. Distinct visits have
+distinct first legs, each a leg of the plan of Step 1 landing in the visit's city, so its cost is at
+most $C$.
 
-*Step 4: selection.* Attach each loop to any plane. Take every $A$ and $\bar A$ segment of each plane, on its
-route and its loops, as a crossing. A route from $C_I$ to $C_G$ has $\#A - \#\bar A = 1$ (Lemma 2.1) and a
-closed loop $0$, so each plane gets an odd number of crossings. For each path from a $B$ to a $\bar B$, take
-its $B$ as a drop-off and its $\bar B$ as a pick-up, linked to each other. Take no other segment. The balance
-holds link by link. A passenger carried through rides an $A$, which carries no arrow; every other passenger
-is an arrow of exactly one path or cycle. A cycle of $k$ arrows consists of $k$ $A$ segments. A path with $m$
-arrows contributes its $m - 1$ inner $A$ segments, one more for each end that is an $A$, and one link if it
-runs from a $B$ to a $\bar B$: at least $m$ in every case. So the passenger count, the number of links plus
-the number of $A$ segments, is at least $t$. Distinct segments have distinct first legs, each a leg of the plan
-of step 1 landing at the segment's city, so the selected segments are distinct landings of that plan and the
-cost is at most $C$. A route segment is simple and lasts its role duration (Lemma 3.3(c)); a loop segment has
-role duration $0$, since its legs last $0$. So $\lambda_k \le F_k \le M$, where $F_k$ is the flight time of
-the rewired route of plane $k$: it is valid, starts at time $\ge 0$ and ends by $M$.
+*Step 5: the template value.* By Lemma 3.4(c), every visit of a route lasts its role weight, a visit of
+a loop lasts 0, and the visits of plane $k$ last at most $M$ in all, so $\lambda_k \le M$. Take a link
+from the $j$-th drop-off $\gamma$ of $u$ to the $l$-th pick-up $\gamma'$ of $v$, at $x$. If $\gamma$ is
+on the route, $u$ flies its earlier drop-offs before it, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$; if
+$\gamma$ is in a loop, $\mathrm{Pre}_u(j) = d_x = 0$ (a loop's legs last 0, and its drop-offs come
+first). If $\gamma'$ is on the route, $v$ flies $\bar d_x$ to $C_G$ after $e(\gamma')$ and then its later
+pick-ups, all by $M$, so $e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop at
+time $\tau$, then $\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$. As $a(\gamma) \le
+e(\gamma')$, the term of the link is at most $M$. So $M_{\rm tmpl} \le M$.
 
-*Step 5: the closed form.* The closed form $M_{\rm tmpl}$ of Lemma 6.3 makes sense for any configuration,
-orders and matching. Order the drop-offs of each plane with those of its loops first, then those of its route
-in route order, and its pick-ups with those of its route in route order, then those of its loops. Use the
-links of step 4. Take a link from the $j$-th drop-off $\gamma$ of $u$ to the $l$-th pick-up $\gamma'$ of $v$,
-at $x$. If $\gamma$ is on the route, $u$ flies its earlier route drop-offs before $\gamma$, and the loop
-drop-offs weigh $0$, so $\mathrm{Pre}_u(j) + d_x \le a(\gamma)$; if $\gamma$ is in a loop,
-$\mathrm{Pre}_u(j) = d_x = 0$. If $\gamma'$ is on the route, $v$ flies $\bar d_x$ to $C_G$ after
-$e(\gamma')$ and then its later route pick-ups, all by time $M$, and the loop pick-ups weigh $0$, so
-$e(\gamma') + \bar d_x + \mathrm{Suf}_v(l) \le M$; if $\gamma'$ is in a loop at time $\tau$,
-$\bar d_x = \mathrm{Suf}_v(l) = 0$ and $e(\gamma') = \tau \le M$: every leg of a loop was a leg of a route
-before that route's last leg, which arrives by $M$. As $a(\gamma) \le e(\gamma')$ (step 3), the term of the link is at most $M$. Together
-with $\lambda_k \le M$, $M_{\rm tmpl} \le M$.
+*Step 6: shrinking.* With all of $\Lambda$ and all crossings, the configuration has $|\Lambda| + \sum_k
+(a_k + 1) = |\Lambda| + \#A \ge t$ passengers, and $D = |\Lambda| + \#A - t$ too many. If $D \le
+|\Lambda|$, keep $|\Lambda| - D$ of the links and all crossings. Otherwise keep no link, and $2(a_k -
+b_k) + 1$ of the crossings of plane $k$, with $b_k \le a_k$ and $\sum_k b_k = \#A - t$. Either way the
+configuration has $t$ passengers, so $2t - p$ landings. Dropping links and crossings, with the same
+orders, keeps it valid and does not raise its cost, its role loads, the $\mathrm{Pre}$ and $\mathrm{Suf}$
+or the link terms, so $M_{\rm tmpl} \le M$ still.
 
-*Step 6: shrink.* Lemma 4.4 ($t \ge p$, §1.1) brings the passenger count to $t$, deleting two crossings of a plane
-or a drop-off together with a pick-up at its city. Take the pick-up linked to it, so that the remaining links
-still match drop-offs and pick-ups city by city. With the same orders, deleting crossings only lowers loads,
-and deleting a link lowers loads and the $\mathrm{Pre}$ and $\mathrm{Suf}$ of the other links, so
-$M_{\rm tmpl}$ stays at most $M$. The configuration now has passenger count $t$, and by Lemma 6.3 its
-template has makespan $M_{\rm tmpl} \le M$. $\square$
+By Lemma 5.5, the template of $S$ is a feasible plan of cost $c(S)$ and makespan $M_{\rm tmpl}(S)$.
+$\square$
 
 ```{=html}
 </details>
@@ -556,13 +378,9 @@ template has makespan $M_{\rm tmpl} \le M$. $\square$
 *Remarks in the note.*
 :::
 
-The previous version of this proof kept a feasible, event-ordered plan through step 2. It exchanged only the
-hand-offs that overlap in the event order, so it needed one, and it left open plans that are not event-ordered
-on instances with a city of $d_x = \bar d_x = 0$. On such a plan an exchange could leave a journey whose two
-legs lie on one plane in the wrong order. The cut handles exactly that case: the two legs and everything
-between them happen at one instant, at a city with $d_x = \bar d_x = 0$, and the template does not need them
-in the plan's order, since their segments weigh nothing. `checks/sd_zero_check.py` runs the three moves and
-steps 3 to 6 on random plans of this kind (§11).
+No order of the legs beyond the routes and the passengers' chains is used. The cut and the loops
+handle a passenger handed backwards on one plane; by the cut, the legs between its two flights then all
+happen at one instant.
 
 ```{=html}
 </details>
@@ -572,14 +390,16 @@ steps 3 to 6 on random plans of this kind (§11).
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`). `not_schedulableDomination` shows that the hypothesis `p ≤ t` is needed.
+*Lean:* `schedulableDomination_all` (DominationAll.lean); `schedulableDomination_template`
+(NSFront.lean); `Feasible.split` (NonSymmetric.lean); `exists_transfer_pw`, `withLoops`,
+`planesOK_withLoops` (DominationAll.lean); `tExchange_step`, `tCut_step`, `tSplice_step`,
+`ordered_of_stuck`, `exists_rewired` (Rewire.lean); `exists_links` (LinkCount.lean); `toSched`,
+`toSched_valid`, `toSched_cost_le`, `toSched_tmpl_le`, `exists_sched_of` (SchedBuild.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
+/-- **Theorem 5.3 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
 plan's and closed form at most its makespan. No event order and no hypothesis on zero durations
 is needed. -/
@@ -589,7 +409,30 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
       S.tmpl N.d N.dbar ≤ planMakespan P := …
 ```
 
-[`lean/ZenoFront/DominationAll.lean`, lines 345–473](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/DominationAll.lean#L345-L473){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/DominationAll.lean`, lines 407–535](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L407-L535){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.schedulableDomination_template` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 5.3 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
+feasible plan is weakly dominated by a valid scheduled configuration with `2t − p` landings
+(a role configuration with passenger count `t`, orders of its drop-offs and pick-ups and a link
+matching) of cost at most the plan's, whose template is a feasible plan of the same cost and of
+makespan at most the plan's: `schedulableDomination_all` bounds the closed form by the
+makespan, and the template's makespan is the closed form (Lemma 5.5). -/
+theorem schedulableDomination_template {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    (hpt : p ≤ t) {P : Plan n t p} (hP : Feasible N P) :
+    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
+      Feasible N (S.tmplPlan (t := t) N.d N.dbar) ∧
+      planCost c (S.tmplPlan (t := t) N.d N.dbar) = S.cost c ∧
+      planMakespan (S.tmplPlan (t := t) N.d N.dbar) ≤ planMakespan P := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 300–314](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L300-L314){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Feasible.split` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NonSymmetric.lean#L214-L242), [`exists_transfer_pw` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L40-L75), [`exists_rewired` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L654-L765), [`exists_links` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkCount.lean#L36-L163), [`exists_sched_of` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L655-L776), [`withLoops` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L178-L183), [`planesOK_withLoops` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L254-L354), [`tExchange_step` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L255-L340), [`tCut_step` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L342-L441), [`tSplice_step` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L469-L535), [`ordered_of_stuck` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L581-L646), [`toSched` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L319-L329), [`toSched_valid` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L344-L377), [`toSched_cost_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L504-L519), [`toSched_tmpl_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L521-L626)
+:::
 
 
 ```{=html}
@@ -598,35 +441,659 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
 
 :::
 
-### Corollary 6.10 (non-symmetric front) {#node-corollary-6-10}
+### Corollary 5.4 (role-load bound) {#node-corollary-5-4}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean uses it only inside the version 2 checker (`Cert2.check_sound_EO`); the corollary is not stated.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Corollary 6.10 (non-symmetric front).** Assume (A1-NS). Let $m(\mathrm{cfg})$ be the least makespan of a
-role configuration (§6.2), let
-$$\mathcal K = \{(c(\mathrm{cfg}),\ m(\mathrm{cfg})) : \mathrm{cfg} \text{ a role configuration on the } p \text{ planes with passenger count } t\},$$
-and let $\mathcal A_{\rm eo} \subseteq \mathcal A$ be the set of points of feasible event-ordered plans. Then
-$\mathcal F = \mathrm{Min}\,\mathcal A_{\rm eo} = \mathrm{Min}\,\mathcal K$: a feasible plan with cost at most
-$C$ and makespan at most $M$ exists iff some configuration has cost at most $C$ and least makespan at most $M$,
-and then an event-ordered plan does too.
+**Corollary 5.4 (role-load bound).** Assume (A1-NS) and $p \le t$. Every feasible plan with cost $C$
+and makespan $M$ gives a role configuration with $2t - p$ landings, cost at most $C$ and every
+$\lambda_k \le M$.
 
 ::: {.node-lean}
-Parts in Lean: [`Cert2.check_sound_EO` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L586-L603)
+Lean: [`Feasible.exists_roleConfig_of_domination` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L283-L296), [`Sched.load_le_tmpl` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L278-L281)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §6.2 · **Hypotheses** (A1-NS) · **Uses** [1.1](#node-lemma-1-1), [6.3](#node-lemma-6-3), [6.8](#node-lemma-6-8), [6.9](#node-theorem-6-9)
+theory note, §5 · ledger `thm-6-1`
 
-*Proof.* $\mathcal K$ is finite, and each of its points is attained by a template, which is a feasible
-event-ordered plan (Lemma 6.8(c)); so $\mathcal K \subseteq \mathcal A_{\rm eo} \subseteq \mathcal A$. By
-Theorem 6.9, every point of $\mathcal A$ is weakly dominated by a point of $\mathcal K$. Lemma 1.1 applies to
-$\mathcal K \subseteq \mathcal A_{\rm eo}$ and to $\mathcal K \subseteq \mathcal A$. $\square$
+*Proof.* Take the $S$ of Theorem 5.3 and the role configuration it schedules: $\mathrm{mate}$ pairs
+every pick-up with a drop-off of the same city, injectively, and there are as many of each, so the
+balance holds. Its cost is $c(S) \le C$, and every $\lambda_k$ is one of the terms of the maximum
+$M_{\rm tmpl}(S) \le M$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Feasible.exists_roleConfig_of_domination`, `Sched.load_le_tmpl` (NSFront.lean).
+
+**Lean** `ZenoFront.Feasible.exists_roleConfig_of_domination` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Corollary 5.4 as a corollary of Theorem 5.3.** Under (A1-NS), with `p ≤ t`, every feasible
+plan gives a role configuration on the `p` planes with `2t − p` landings, cost at most the
+plan's, and every role load at most the makespan: the role configuration of the scheduled
+configuration of `schedulableDomination_all`, whose role loads are at most its closed form. -/
+theorem Feasible.exists_roleConfig_of_domination {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ cfg : RoleConfig n p, size cfg.groups = 2 * t - p ∧
+      totalCost c cfg.groups ≤ planCost c P ∧ ∀ k, cfg.roleLoad N k ≤ planMakespan P := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 283–296](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L283-L296){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Sched.load_le_tmpl` [machine-checked]{.badge .ok}
+
+```lean
+/-- Every role load is at most the closed form. -/
+theorem Sched.load_le_tmpl (S : Sched n p) (d db : Fin n → ℕ) (k : Fin p) :
+    S.load d db k ≤ S.tmpl d db := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 278–281](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L278-L281){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 5.5 (template plans) {#node-lemma-5-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 5.5 (template plans).** Let $S$ be a valid scheduled configuration with $|S| = 2t - p$. Then $p
+\le t$, and for every network with these durations, whatever its central table, the *template* of $S$ is
+a feasible plan of cost $c(S)$ and makespan exactly $M_{\rm tmpl}(S)$. In the template every plane $k$,
+from time 0,
+
+1. flies its drop-offs in order, $C_I \to x \to C_I$, the first leg carrying a new passenger, which it
+   leaves in $x$;
+2. flies its crossings, $C_I \to x \to C_G$ carrying a new passenger and $C_G \to x \to C_I$ empty,
+   alternately, beginning and ending with the former;
+3. flies its pick-ups in order, $C_G \to y \to C_G$, leaving $y$ at the later of its arrival and the
+   arrival of the passenger dropped by the matched drop-off, and carrying that passenger to $C_G$.
+
+Every other leg leaves as soon as the plane arrives. Nothing is assumed on the durations; zero
+durations are allowed.
+
+::: {.node-lean}
+Lean: [`Sched.tmplPlan_spec` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L708-L822)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §5 · ledger `lem-6-3`
+
+*Proof.* *Count.* Let $N$ be the number of drop-offs and $Q = \sum_k (|\mathrm{Cr}_k| + 1)/2$ the number
+of crossings $A$. As every $|\mathrm{Cr}_k|$ is odd, $|S| = 2N + 2Q - p$, so $N + Q = t$, and $Q \ge p$
+gives $p \le t$. The passengers are numbered by the drop-off slots and the crossings $A$.
+
+*Routes.* Each phase of a route starts where and when the previous one ends: the drop-offs start and
+end in $C_I$; an odd number of crossings leads from $C_I$ to $C_G$; the pick-ups start and end in
+$C_G$. Every leg is a hub flight of its duration, so every plane flies a route from $C_I$ at time 0 to
+$C_G$. Drop-offs never wait, so the $j$-th drop-off of $u$, at $x$, reaches $x$ at $\mathrm{Pre}_u(j) +
+d_x$.
+
+*Makespan.* Let $\varphi_k(l)$ be the time plane $k$ leaves $C_G$ for its $l$-th pick-up, so
+$\varphi_k(0) = 2\delta(\mathrm{Dr}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k)$. If that
+pick-up is at $y$ and its link comes from $(u, j)$, the plane is back in $C_G$ at
+$\varphi_k(l+1) = \max(\varphi_k(l) + 2\bar d_y,\ \mathrm{Pre}_u(j) + d_y + \bar d_y)$. Since
+$\mathrm{Suf}_k(l-1) = 2\bar d_y + \mathrm{Suf}_k(l)$, this reads $\varphi_k(l+1) + \mathrm{Suf}_k(l) =
+\max(\varphi_k(l) + \mathrm{Suf}_k(l-1),\ \text{the term of the link})$, and $\varphi_k(0) +
+\mathrm{Suf}_k(-1) = \lambda_k$. Unrolling, plane $k$ ends at the maximum of $\lambda_k$ and of the
+terms of the links into it, and the makespan is $M_{\rm tmpl}(S)$.
+
+*Passengers.* $\mathrm{mate}$ is injective and there are as many drop-off slots as pick-up slots, so
+it is a bijection, each pick-up slot at the city of its drop-off slot. The passenger of a drop-off slot
+rides the drop-off's first leg $C_I \to x$ and then the second leg $x \to C_G$ of the matched pick-up,
+which leaves no earlier than the first arrives; the passenger of a crossing rides its two legs. These
+are routes from $C_I$ at time 0 to $C_G$, and every other leg is empty, so the legs that carry a
+passenger are exactly its two. The central landings are the drop-offs, pick-ups and crossings, so the
+cost is $c(S)$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Sched.tmplPlan`, `Sched.tmplPlan_spec`, `Sched.exists_plan`, `Sched.Valid.count_eq`,
+`Sched.Valid.slot_bijective`, `Sched.slack_succ`, `Sched.pickTime_length_eq`, `Sched.tmplPlan_chain`
+(Template.lean).
+
+**Lean** `ZenoFront.Sched.tmplPlan_spec` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 5.5 (template), achievability.** For every valid scheduled configuration with
+`2t − p` landings, the template is a feasible plan whose cost is the configuration's and whose
+makespan is the closed form `M_tmpl`. Nothing is assumed on the durations (zero durations
+included) or on the central flights, which the template does not use. -/
+theorem tmplPlan_spec {N : Network n} (c : Fin n → ℕ) (hv : S.Valid)
+    (hsize : S.size = 2 * t - p) :
+    Feasible N (S.tmplPlan (t := t) N.d N.dbar) ∧
+      planCost c (S.tmplPlan (t := t) N.d N.dbar) = S.cost c ∧
+      planMakespan (S.tmplPlan (t := t) N.d N.dbar) = S.tmpl N.d N.dbar := …
+```
+
+[`lean/ZenoFront/Template.lean`, lines 708–822](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L708-L822){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Sched.tmplPlan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L170-L171), [`Sched.exists_plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L824-L829), [`Sched.Valid.count_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L665-L678), [`Sched.Valid.slot_bijective` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L696-L706), [`Sched.slack_succ` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L572-L578), [`Sched.pickTime_length_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L587-L612), [`Sched.tmplPlan_chain` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Template.lean#L616-L646)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Corollary 5.6 (non-symmetric front, H4) {#node-corollary-5-6}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Corollary 5.6 (non-symmetric front, H4).** Assume (A1-NS) and $p \le t$. Let $\mathcal K_S$ be the set
+of the points $(c(S), M_{\rm tmpl}(S))$ of the valid scheduled configurations $S$ with $|S| = 2t - p$,
+and $\mathcal K$ the set of the points $(c(\mathrm{cfg}), m(\mathrm{cfg}))$ of the role configurations
+with $2t - p$ landings, where $m(\mathrm{cfg})$ is the least $M_{\rm tmpl}(S)$ over the valid $S$ that
+schedule $\mathrm{cfg}$; every role configuration has one, so $m(\mathrm{cfg})$ is attained. Then
+$$\mathcal F = \mathrm{Min}\,\mathcal K_S = \mathrm{Min}\,\mathcal K,$$
+and a list is the Pareto front of the feasible plans iff it is the Pareto front of $\mathcal K_S$.
+
+::: {.node-lean}
+Lean: [`minimal_achievable_iff_schedPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L88-L95), [`minimal_achievable_iff_configPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L267-L274), [`isParetoFront_achievable_iff_schedPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L97-L103)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §5 · ledger `cor-6-10`
+
+*Proof.* $\mathcal K_S \subseteq \mathcal A$ by Lemma 5.5, and every point of $\mathcal A$ is weakly
+dominated by a point of $\mathcal K_S$ by Theorem 5.3; Lemma 1.7(a) gives $\mathcal F = \mathrm{Min}\,
+\mathcal K_S$. A Pareto front of $\mathcal A$ lists points of $\mathrm{Min}\,\mathcal A = \mathrm{Min}\,
+\mathcal K_S \subseteq \mathcal K_S$ (Lemma 1.7(b)) and dominates $\mathcal K_S \subseteq \mathcal A$;
+a Pareto front of $\mathcal K_S$ lies in $\mathcal A$ and dominates $\mathcal A$ through $\mathcal K_S$;
+incomparability is the same condition. Every role configuration is scheduled by a valid $S$: order its
+drop-offs and pick-ups in any way and match them city by city, which the balance allows. So
+$m(\mathrm{cfg})$ is a least element of a non-empty set of natural numbers, attained by some $S$, and
+$\mathcal K \subseteq \mathcal K_S$. The point of a valid $S$ is weakly dominated by the point of the
+configuration it schedules, which has the same cost and $m(\mathrm{cfg}) \le M_{\rm tmpl}(S)$. Lemma
+1.7(a) gives $\mathrm{Min}\,\mathcal K_S = \mathrm{Min}\,\mathcal K$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `schedPoints`, `schedPoints_subset_achievable`, `achievable_dominated_schedPoints`,
+`minimal_achievable_iff_schedPoints`, `isParetoFront_iff_of_subset_of_dominated`,
+`isParetoFront_achievable_iff_schedPoints`, `RoleConfig.exists_sched`, `RoleConfig.leastTmpl`,
+`RoleConfig.exists_leastTmpl`, `configPoints`, `minimal_schedPoints_iff_configPoints`,
+`minimal_achievable_iff_configPoints` (NSFront.lean).
+
+**Lean** `ZenoFront.minimal_achievable_iff_schedPoints` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Corollary 5.6 (non-symmetric front), for all plans.** Under (A1-NS), with `p ≤ t`, the
+minimal (cost, makespan) points of the feasible plans are the minimal points
+`(c(S), M_tmpl(S))` of the valid scheduled configurations with `2t − p` landings. -/
+theorem minimal_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ schedPoints N c t p) x := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 88–95](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L88-L95){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minimal_achievable_iff_configPoints` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Corollary 5.6 (non-symmetric front), as in the note.** Under (A1-NS), with `p ≤ t`, the
+front of the feasible plans is `Min 𝒦`, with `𝒦` the points `(c(cfg), m(cfg))` of the role
+configurations on the `p` planes with passenger count `t`, `m(cfg)` the least `M_tmpl` over
+their orders and link matchings. -/
+theorem minimal_achievable_iff_configPoints {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ configPoints N c t p) x := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 267–274](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L267-L274){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.isParetoFront_achievable_iff_schedPoints` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Corollary 5.6, Pareto-front form.** Under (A1-NS), with `p ≤ t`, a list of points is the
+Pareto front of the feasible plans iff it is the Pareto front of `schedPoints`. -/
+theorem isParetoFront_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS)
+    (c : Fin n → ℕ) (hpt : p ≤ t) (F : List (ℕ × ℕ)) :
+    IsParetoFront (achievable N c t p) F ↔ IsParetoFront (schedPoints N c t p) F := …
+```
+
+[`lean/ZenoFront/NSFront.lean`, lines 97–103](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L97-L103){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`schedPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L68-L71), [`schedPoints_subset_achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L73-L78), [`achievable_dominated_schedPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L80-L86), [`isParetoFront_iff_of_subset_of_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L52-L66), [`RoleConfig.exists_sched` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L188-L226), [`RoleConfig.leastTmpl` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L231-L235), [`RoleConfig.exists_leastTmpl` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L237-L241), [`configPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L247-L250), [`minimal_schedPoints_iff_configPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NSFront.lean#L252-L265)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 5.7 (harmful waiting) {#node-proposition-5-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 5.7 (harmful waiting).** Take $n = 2$, $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t
+= 7$ and $p = 4$, so $s = 10$, with any central table satisfying (A1-NS).
+
+(a) Some role configuration with 10 landings has cost 14 and every $\lambda_k \le 72$, and every role
+configuration with 10 landings and every $\lambda_k \le 73$ costs at least 14.
+
+(b) Every valid scheduled configuration with 10 landings and cost below 18 has $M_{\rm tmpl} > 73$.
+
+(c) Every feasible plan of makespan at most 73 costs at least 18.
+
+So some role configuration with 10 landings has cost at most 14 and every $\lambda_k \le 73$, but no
+feasible plan has cost at most 14 and makespan at most 73.
+
+::: {.node-lean}
+Lean: [`Prop65.cfg14_load` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L752-L754), [`Prop65.cheapest_roleConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L762-L773), [`Prop65.tmpl_gt_of_cost_lt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L881-L886), [`Prop65.cost_ge_of_makespan_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L888-L898), [`Prop65.prop65` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L907-L918), [`Prop65.harmful_waiting` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L920-L933)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §5 · ledger `prop-6-5`
+
+*Proof.* (a) Plane 1 crosses at city 1 and picks up three times at city 2: $\lambda_1 = 6 + 3 \cdot 22
+= 72$. Planes 2, 3 and 4 cross at city 2 and drop off once at city 2: $\lambda_k = 30 + 38 = 68$. The
+cost is $5 + 9 = 14$. The lower bound is the `roles` bound of Proposition 8.3 at level 73, which the
+kernel computes to be 14. (b) The exhaustive search of Proposition 8.6 at level 73, for configurations of
+cost below 18, is closed; the kernel decides it in eight parts, by the option of the first plane. (c)
+Theorem 5.3 turns a plan of cost $C$ and makespan at most 73 into a valid $S$ with 10 landings, $c(S)
+\le C$ and $M_{\rm tmpl}(S) \le 73$; by (b), $c(S) \ge 18$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Prop65.cfg14`, `Prop65.cfg14_load`, `Prop65.rolesBound_73`, `Prop65.cheapest_roleConfig`,
+`Prop65.search73`, `Prop65.search73_closed`, `Prop65.tmpl_gt_of_cost_lt`,
+`Prop65.cost_ge_of_makespan_le`, `Prop65.prop65`, `Prop65.harmful_waiting` (Counterexamples.lean).
+
+**Lean** `ZenoFront.Prop65.cfg14_load` [machine-checked]{.badge .ok}
+
+```lean
+theorem cfg14_load (dc : Fin 2 → Fin 2 → ℕ) : ∀ k, cfg14.roleLoad ⟨d, db, dc⟩ k ≤ 72 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 752–754](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L752-L754){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Prop65.cheapest_roleConfig` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The cheapest role configuration with every role load at most 73 costs 14** (with
+passenger count 7, that is `2t − p = 10` landings). -/
+theorem cheapest_roleConfig (dc : Fin 2 → Fin 2 → ℕ) :
+    (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups = 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      ∀ cfg : RoleConfig 2 4, size cfg.groups = 10 → (∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) →
+        14 ≤ totalCost c cfg.groups := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 762–773](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L762-L773){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Prop65.tmpl_gt_of_cost_lt` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Every valid scheduled configuration of cost below 18 waits harmfully**: whatever its orders
+and link matching, its template makespan exceeds 73. -/
+theorem tmpl_gt_of_cost_lt (S : Sched 2 4) (hS : S.Valid) (hsize : S.size = 10)
+    (hcost : S.cost c < 18) : 73 < S.tmpl d db := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 881–886](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L881-L886){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Prop65.cost_ge_of_makespan_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **No plan of makespan at most 73 costs less than 18**, for every table of central flights
+satisfying (A1-NS): Theorem 5.3 turns the plan into a valid scheduled configuration, of cost at
+most the plan's and closed form at most its makespan. -/
+theorem cost_ge_of_makespan_le (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS)
+    {P : Plan 2 7 4} (hP : Feasible ⟨d, db, dc⟩ P) (hM : planMakespan P ≤ 73) :
+    18 ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 888–898](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L888-L898){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Prop65.prop65` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Proposition 5.7.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
+central flights satisfying (A1-NS), the cheapest role configuration with `2t − p = 10` landings and
+every role load at most 73 costs 14, and no feasible plan of makespan at most 73 costs less than
+18. -/
+theorem prop65 (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS) :
+    (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups = 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      (∀ cfg : RoleConfig 2 4, size cfg.groups = 10 → (∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) →
+        14 ≤ totalCost c cfg.groups) ∧
+      ∀ x ∈ achievable ⟨d, db, dc⟩ c 7 4, x.2 ≤ 73 → 18 ≤ x.1 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 907–918](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L907-L918){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Prop65.harmful_waiting` [machine-checked]{.badge .ok}
+
+```lean
+/-- **No harmful waiting is false** (Proposition 5.7 of the note). The configuration `cfg14` has
+role loads at most 72, but every valid scheduled configuration of its cost waits: whatever the
+orders and the matching, its template makespan exceeds 73. In front form: some role configuration
+has cost 14 and role loads at most 73, but no feasible plan has cost at most 14 and makespan at
+most 73, so the front is not the Pareto set of (cost, largest role load). -/
+theorem harmful_waiting (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS) :
+    (∀ k, cfg14.roleLoad ⟨d, db, dc⟩ k ≤ 72) ∧
+      (∀ S : Sched 2 4, S.Valid → S.size = 10 → S.cost c ≤ 14 → 73 < S.tmpl d db) ∧
+      (∃ cfg : RoleConfig 2 4, size cfg.groups = 10 ∧ totalCost c cfg.groups ≤ 14 ∧
+        ∀ k, cfg.roleLoad ⟨d, db, dc⟩ k ≤ 73) ∧
+      ¬ ∃ x ∈ achievable ⟨d, db, dc⟩ c 7 4, x.1 ≤ 14 ∧ x.2 ≤ 73 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 920–933](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L920-L933){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Prop65.cfg14` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L738-L746), [`Prop65.rolesBound_73` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L757-L760), [`Prop65.search73` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L777-L779), [`Prop65.search73_closed` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L872-L879)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Definition 5.8 (flight graphs, the reduction) {#node-definition-5-8}
+
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
+
+::: {.node-body}
+**Definition 5.8 (flight graphs, the reduction).** A *flight graph* $U$ has the hubs $C_I$, $C_G$,
+central vertices $1, \dots, n$, an optional duration $\mathrm{dur}_U(a, b) \in \mathbb N$ for every
+ordered pair of locations, and landing costs $c_i$. Its plans, feasibility, cost and makespan are those
+of Definition 1.2 with the flights of $U$; $\mathcal A_U$ is the set of the points of its feasible plans
+and $\mathcal F_U = \mathrm{Min}\,\mathcal A_U$. A network of Definition 1.1 is the flight graph of all
+its flights; the *clique instance without central flights* with hub durations $d, \bar d$ is the flight
+graph of its hub flights only.
+
+For a walk $x_0, \dots, x_m$ of $U$, $\varphi$ is the sum of its durations and $\omega = \sum_{j \ge 1}
+c(x_j)$ the cost of its landings after the first vertex (hubs free). The *reduction* $f(U)$ of
+arXiv:2304.14659 §2.4 is the clique instance without central flights, with the same $t$ and $p$, that
+has one city $v = (i, w, e)$ for every central vertex $i$, every simple path $w$ from $C_I$ to $i$ and
+every simple path $e$ from $i$ to $C_G$ (the paths may pass through a hub), with $d_v = \varphi(w)$,
+$\bar d_v = \varphi(e)$ and $c_v = \omega(w) + \omega(e)$. The paper claims $\mathcal F_U = \mathcal
+F_{f(U)}$.
+
+::: {.node-lean}
+Lean: [`FlightGraph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L53-L57), [`GFlies` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L73-L75), [`GFeasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L84-L90), [`gAchievable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L92-L94), [`Network.toGraph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L69-L71), [`cliqueGraph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L120-L128), [`simplePaths` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L214-L216), [`pathDur` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L218-L221), [`pathCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L228-L231), [`VCity` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L233-L239), [`vcities` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L241-L247), [`Reduced.graph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L267-L268), [`Reduced.c` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L263-L265)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+theory note, §5 · ledger `def-flight-graph`
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `FlightGraph`, `GFlies`, `GFeasible`, `gAchievable`, `Network.toGraph`, `cliqueGraph`,
+`simplePaths`, `pathDur`, `pathCost`, `VCity`, `vcities`, `Reduced.graph`, `Reduced.c` (Graph.lean).
+
+**Lean** `ZenoFront.FlightGraph` [Lean definition]{.badge .ok}
+
+```lean
+/-- A flight graph on `n` central vertices: the duration of the flight between two locations, if
+there is one. -/
+structure FlightGraph (n : ℕ) where
+  /-- The duration of the flight from one location to another, `none` if there is none. -/
+  dur : Loc n → Loc n → Option ℕ
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 53–57](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L53-L57){.lean-src}
+
+**Lean** `ZenoFront.GFlies` [Lean definition]{.badge .ok}
+
+```lean
+/-- A leg is a flight of the graph, and lasts exactly the flight's duration. -/
+def GFlies (U : FlightGraph n) (ℓ : Leg n t) : Prop :=
+  ∃ τ, U.dur ℓ.src ℓ.dst = some τ ∧ ℓ.arr = ℓ.dep + τ
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 73–75](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L73-L75){.lean-src}
+
+**Lean** `ZenoFront.GFeasible` [Lean definition]{.badge .ok}
+
+```lean
+/-- A feasible plan of a flight graph: every plane is feasible, and the legs carrying each
+passenger form, in some order, a route from `C_I` at time `0` that ends in `C_G` (as
+`Feasible`). -/
+structure GFeasible (U : FlightGraph n) (P : Plan n t p) : Prop where
+  planes : ∀ k, GPlaneFeasible U (P k)
+  pax : ∀ π, ∃ route : List (Leg n t), route.Perm (paxLegs P π) ∧ IsRoute .ci 0 route ∧
+    finalLoc .ci route = .cg
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 84–90](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L84-L90){.lean-src}
+
+**Lean** `ZenoFront.gAchievable` [Lean definition]{.badge .ok}
+
+```lean
+/-- The (cost, makespan) points of the feasible plans of a flight graph. -/
+def gAchievable (U : FlightGraph n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
+  {x | ∃ P : Plan n t p, GFeasible U P ∧ (planCost c P, planMakespan P) = x}
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 92–94](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L92-L94){.lean-src}
+
+**Lean** `ZenoFront.Network.toGraph` [Lean definition]{.badge .ok}
+
+```lean
+/-- The flight graph of a network: a complete table of central flights, every hub flight, and no
+flight between the hubs. -/
+def Network.toGraph (N : Network n) : FlightGraph n := ⟨N.duration⟩
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 69–71](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L69-L71){.lean-src}
+
+**Lean** `ZenoFront.cliqueGraph` [Lean definition]{.badge .ok}
+
+```lean
+/-- The clique instance with hub durations `d` (to `C_I`) and `d̄` (to `C_G`) and no central
+flight. -/
+def cliqueGraph {m : ℕ} (d dbar : Fin m → ℕ) : FlightGraph m :=
+  ⟨fun a b => match a, b with
+    | .ci, .city v => some (d v)
+    | .city v, .ci => some (d v)
+    | .cg, .city v => some (dbar v)
+    | .city v, .cg => some (dbar v)
+    | _, _ => none⟩
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 120–128](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L120-L128){.lean-src}
+
+**Lean** `ZenoFront.simplePaths` [Lean definition]{.badge .ok}
+
+```lean
+/-- The simple paths from `a` to `b` (a simple path has at most `n + 2` vertices). -/
+def simplePaths (U : FlightGraph n) (a b : Loc n) : List (List (Loc n)) :=
+  simplePathsFrom U b (n + 2) [] a
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 214–216](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L214-L216){.lean-src}
+
+**Lean** `ZenoFront.pathDur` [Lean definition]{.badge .ok}
+
+```lean
+/-- The flight time `φ` of a walk: the sum of its flight durations. -/
+def pathDur (U : FlightGraph n) : List (Loc n) → ℕ
+  | x :: y :: rest => (U.dur x y).getD 0 + pathDur U (y :: rest)
+  | _ => 0
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 218–221](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L218-L221){.lean-src}
+
+**Lean** `ZenoFront.pathCost` [Lean definition]{.badge .ok}
+
+```lean
+/-- The landing cost `ω` of a walk: its vertices after the first. -/
+def pathCost (c : Fin n → ℕ) : List (Loc n) → ℕ
+  | [] => 0
+  | _ :: rest => (rest.map (locCost c)).sum
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 228–231](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L228-L231){.lean-src}
+
+**Lean** `ZenoFront.VCity` [Lean definition]{.badge .ok}
+
+```lean
+/-- A virtual city of the reduction: a central vertex `i`, a simple path `w` from `C_I` to `i`
+and a simple path `e` from `i` to `C_G`. -/
+structure VCity (n : ℕ) where
+  i : Fin n
+  w : List (Loc n)
+  e : List (Loc n)
+  deriving DecidableEq, Repr
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 233–239](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L233-L239){.lean-src}
+
+**Lean** `ZenoFront.vcities` [Lean definition]{.badge .ok}
+
+```lean
+/-- **The reduction f of arXiv §2.4** (as in Example 5.9 of the note): one virtual city for every
+central vertex `i`, every simple path `w` from `C_I` to `i` and every simple path `e` from `i` to
+`C_G`. -/
+def vcities (U : FlightGraph n) : List (VCity n) :=
+  (List.finRange n).flatMap fun i =>
+    (simplePaths U .ci (.city i)).flatMap fun w =>
+      (simplePaths U (.city i) .cg).map fun e => ⟨i, w, e⟩
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 241–247](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L241-L247){.lean-src}
+
+**Lean** `ZenoFront.Reduced.graph` [Lean definition]{.badge .ok}
+
+```lean
+/-- **`f(U)`**: the clique instance of the virtual cities, without central flights. -/
+def graph (U : FlightGraph n) : FlightGraph (m U) := cliqueGraph (d U) (dbar U)
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 267–268](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L267-L268){.lean-src}
+
+**Lean** `ZenoFront.Reduced.c` [Lean definition]{.badge .ok}
+
+```lean
+/-- `c_v = ω(w) + ω(e)`: the landings of `w` followed by `e`, `c_i` counted once. -/
+def c (U : FlightGraph n) (c : Fin n → ℕ) (v : Fin (m U)) : ℕ :=
+  pathCost c (city U v).w + pathCost c (city U v).e
+```
+
+[`lean/ZenoFront/Graph.lean`, lines 263–265](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L263-L265){.lean-src}
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Example 5.9 (the reduction misses the front) {#node-example-5-9}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Example 5.9 (the reduction misses the front).** Let $U$ be the path $C_I$–$a$–$b$–$C_G$, with
+durations 1, 2 and 1 in both directions and no other flight, $c_a = c_b = 1$, $t = 3$ and $p = 2$. Then
+$f(U)$ has the two cities $(a,\ C_I a,\ a b C_G)$ and $(b,\ C_I a b,\ b C_G)$, with $(d, \bar d, c) = (1,
+3, 2)$ and $(3, 1, 2)$. Its front is $\{(8, 10)\}$, as a flight graph, and also as an instance of
+Definition 1.1 for every central table satisfying (A1-NS). $U$ has a feasible plan of cost 8 and
+makespan 8 (legs as from → to [departure, arrival]):
+
+* plane 1: $C_I \to a$ [0, 1] and $a \to b$ [1, 3] carrying passenger 2; $b \to a$ [3, 5]; $a \to b$ [5,
+  7] and $b \to C_G$ [7, 8] carrying passenger 3;
+* plane 2: $C_I \to a$ [0, 1] carrying passenger 3; $a \to C_I$ [1, 2]; $C_I \to a$ [2, 3], $a \to b$
+  [3, 5] and $b \to C_G$ [5, 6] carrying passenger 1; $C_G \to b$ [6, 7]; $b \to C_G$ [7, 8] carrying
+  passenger 2.
+
+So $(8, 10) \notin \mathcal F_U$, and $\mathcal F_U \ne \mathcal F_{f(U)}$.
+
+::: {.node-lean}
+Lean: [`Ex611.vcities_data` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L968-L971), [`Ex611.reduced_graph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L973-L977), [`Ex611.reduced_c` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L979-L982), [`Ex611.reduced_front` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1030-L1042), [`Ex611.reduced_front_network` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1044-L1049), [`Ex611.plan_feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L994-L995), [`Ex611.mem_gAchievable_U` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1003-L1005), [`Ex611.fronts_differ` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1058-L1069)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §5 · ledger `claim-6-11`
+
+*Proof.* The kernel enumerates the simple paths and computes the two cities. A certificate of format v2
+for the two-city instance lists the single point $(8, 10)$, its plan, and the `search` kind for the
+fastest point; the kernel accepts it, so by Theorem 8.7 its front is $\{(8, 10)\}$ for every central
+table satisfying (A1-NS). A feasible plan of the flight graph $f(U)$ flies hub flights only, so it is a
+feasible plan of every network with the same hub durations, for instance the one whose central flights
+all last 100, which satisfies (A1-NS); so it is weakly dominated by $(8, 10)$, which the certificate's
+plan attains in $f(U)$. The plan of $U$ is accepted in the kernel by the sound simulator for optional
+durations. $(8, 8) \le (8, 10)$ and $(8, 8) \ne (8, 10)$, so $(8, 10)$ is not minimal in $\mathcal A_U$.
+$\square$
 
 ```{=html}
 </details>
@@ -640,9 +1107,10 @@ $\mathcal K \subseteq \mathcal A_{\rm eo}$ and to $\mathcal K \subseteq \mathcal
 *Remarks in the note.*
 :::
 
-By Statement 1.2, the PDDL front tends to $\mathrm{Min}\,\mathcal A_{\rm eo}$ as ε → 0, so under (A1-NS) it is
-$\mathrm{Min}\,\mathcal K = \mathcal F$ whatever the durations. Plans that are not event-ordered have no PDDL
-counterpart, and they do not beat the front either.
+Plane 1 flies the segment $C_I\,a\,b\,a\,b\,C_G$: it drops passenger 2 in $b$ at time 3, flies the central
+edge back to $a$ and picks passenger 3 up there at time 5. $f(U)$ has no central flights; between its two
+cities a plane passes through a hub, which takes $\bar d_1 + \bar d_2 = d_1 + d_2 = 4$, twice the edge
+$a$–$b$.
 
 ```{=html}
 </details>
@@ -652,23 +1120,289 @@ counterpart, and they do not beat the front either.
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement.
+*Lean:* `Ex611.U`, `Ex611.U_undirected`, `Ex611.U_noHubFlight`, `Ex611.vcities_U`,
+`Ex611.vcities_data`, `Ex611.reduced_graph`, `Ex611.reduced_c`, `Ex611.reducedCert`,
+`Ex611.reducedCert_check`, `Ex611.reduced_front`, `Ex611.reduced_front_network`, `Ex611.plan`,
+`Ex611.plan_feasible`, `Ex611.mem_gAchievable_U`, `Ex611.fronts_differ` (Counterexamples.lean);
+`feasible_iff_gFeasible`, `GFeasible.feasible_of_clique`, `gFeasible_of_planOKDur` (Graph.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Cert2.check_sound_EO` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Ex611.vcities_data` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Soundness over event-ordered plans**, when some city has `d = d̄ = 0` and the certificate
-lists `EO`: the listed plans are event-ordered (`eoOK`), so the listed points are also the front
-of the event-ordered feasible plans (Corollary 6.10), the PDDL front in the limit. -/
-theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
-    (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) :
-    IsParetoFront (achievableEO (C.network dc) C.c C.t C.p) C.front := …
+/-- Their `(d, d̄, c)` are `(1, 3, 2)` and `(3, 1, 2)`. -/
+theorem vcities_data : (vcities U).map (fun v => (pathDur U v.w, pathDur U v.e,
+    pathCost c v.w + pathCost c v.e)) = [(1, 3, 2), (3, 1, 2)] := …
 ```
 
-[`lean/ZenoFront/CheckerV2.lean`, lines 586–603](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L586-L603){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Counterexamples.lean`, lines 968–971](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L968-L971){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.reduced_graph` [machine-checked]{.badge .ok}
+
+```lean
+/-- **`f(U)` is the two-city clique instance** with `d = (1, 3)`, `d̄ = (3, 1)` and no central
+flight. -/
+theorem reduced_graph : (Reduced.graph U : FlightGraph 2) = cliqueGraph ![1, 3] ![3, 1] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 973–977](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L973-L977){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.reduced_c` [machine-checked]{.badge .ok}
+
+```lean
+/-- The costs of `f(U)` are `c = (2, 2)`. -/
+theorem reduced_c : (Reduced.c U c : Fin 2 → ℕ) = ![2, 2] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 979–982](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L979-L982){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.reduced_front` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The front of `f(U)` is `{(8, 10)}`**: its plans, which have no central flight, are plans of
+every network with its hub durations, and in such a network with (A1-NS) the certificate is
+sound. -/
+theorem reduced_front :
+    IsParetoFront (gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) [(8, 10)] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1030–1042](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1030-L1042){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.reduced_front_network` [machine-checked]{.badge .ok}
+
+```lean
+/-- The front of `f(U)` read in the Lean model, whose table of central flights is complete: for
+every table of central flights satisfying (A1-NS), it is `{(8, 10)}`. -/
+theorem reduced_front_network (dc : Fin 2 → Fin 2 → ℕ)
+    (hA : (⟨![1, 3], ![3, 1], dc⟩ : Network 2).A1NS) :
+    IsParetoFront (achievable ⟨![1, 3], ![3, 1], dc⟩ ![2, 2] 3 2) [(8, 10)] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1044–1049](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1044-L1049){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.plan_feasible` [machine-checked]{.badge .ok}
+
+```lean
+/-- The plan is feasible in `U`. -/
+theorem plan_feasible : GFeasible U plan := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 994–995](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L994-L995){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.mem_gAchievable_U` [machine-checked]{.badge .ok}
+
+```lean
+/-- `(8, 8)` is a point of `U`. -/
+theorem mem_gAchievable_U : ((8, 8) : ℕ × ℕ) ∈ gAchievable U c 3 2 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1003–1005](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1003-L1005){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex611.fronts_differ` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The reduction misses the front (Example 5.9).** `(8, 10)` is Pareto-optimal for `f(U)` but
+not for `U`, which has the plan `(8, 8)`. So the fronts of `U` and `f(U)` differ, against the claim
+of arXiv §2.4. -/
+theorem fronts_differ :
+    Minimal (· ∈ gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) (8, 10) ∧
+      ¬ Minimal (· ∈ gAchievable U c 3 2) (8, 10) ∧
+      ¬ ∀ x, Minimal (· ∈ gAchievable U c 3 2) x ↔
+        Minimal (· ∈ gAchievable (Reduced.graph U) (Reduced.c U c) 3 2) x := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1058–1069](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1058-L1069){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Ex611.U` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L941-L948), [`Ex611.U_undirected` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L953-L957), [`Ex611.U_noHubFlight` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L959-L960), [`Ex611.vcities_U` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L962-L966), [`Ex611.reducedCert` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1007-L1024), [`Ex611.reducedCert_check` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1027-L1028), [`Ex611.plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L984-L992), [`feasible_iff_gFeasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L96-L100), [`GFeasible.feasible_of_clique` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L141-L146), [`gFeasible_of_planOKDur` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L175-L185)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Example 5.10 (the shuttle construction misses the front) {#node-example-5-10}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Example 5.10 (the shuttle construction misses the front).** Take $n = 2$, $d = (1, 3)$, $\bar d = (3,
+1)$, $c = (6, 1)$, $t = 3$, $p = 2$, and the central table $d_c(1, 2) = d_c(2, 1) = 2$, $d_c(1, 1) = d_c(2,
+2) = 0$. (AΔ) holds and (A1-NS) fails. The instance has a feasible plan of cost 15 and makespan 8, so
+its front has a point that weakly dominates $(15, 8)$; the plan is feasible for every central table in
+which the flight $2 \to 1$ lasts 2:
+
+* plane 1: $C_I \to 1$ [0, 1] carrying passenger 1, left in 1; $1 \to C_I$ [1, 2]; $C_I \to 2$ [2, 5]
+  and $2 \to C_G$ [5, 6] carrying passenger 2; $C_G \to 2$ [6, 7]; $2 \to C_G$ [7, 8] carrying
+  passenger 3;
+* plane 2: $C_I \to 2$ [0, 3] carrying passenger 3, left in 2; $2 \to 1$ [3, 5]; $1 \to C_G$ [5, 8]
+  carrying passenger 1.
+
+arXiv:2304.14659 §3.3 handles the "$B\bar A\bar B$ situation" (a drop-off at $i$, a shuttle $C_G \to i
+\to j \to C_I$ carrying the passenger to $j$, a pick-up at $j$) by an augmented instance without central
+flights. Its cities have one duration and one cost per pattern $A$, $\bar A$, $B$, $\bar B$: a central
+city $i$ keeps $d_i + \bar d_i$, $d_i + \bar d_i$, $2d_i$, $2\bar d_i$ and the cost $c_i$ for each; every
+ordered pair $i \ne j$ adds a virtual city with durations $\min(d_i + \bar d_i,\ d_j + \bar d_j)$, $\bar
+d_i + d_c(i, j) + d_j$, $2d_i$, $2d_j$ and costs $c_i + c_j$, $c_i + c_j$, $c_i$, $c_j$ (equations
+(3)–(6) and Figure 10, as printed). A configuration of the augmented instance gives every plane a number
+of patterns of each type at every city, with one more $A$ than $\bar A$ per plane, as many $B$ as $\bar B$
+at every city, and $\#A + \#B = t$ passengers. Its points are its cost, for $2t - p$ landings, with any
+makespan at least its loads. The paper's "a $\bar A$ with a null multiplicity" has two readings: the
+shuttle is not counted, or every $B$ at a virtual city needs an $\bar A$ there. In both readings, every
+configuration has a plane whose patterns last at least 10, whatever its number of landings; so every point
+of the construction has makespan at least 10, and $(4, 10)$ is one. So the front of the construction is
+not the front of the instance.
+
+::: {.node-lean}
+Lean: [`Shuttle.net_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1244-L1253), [`Shuttle.not_net_A1NS` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1255-L1256), [`Shuttle.plan_feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1273-L1284), [`Shuttle.front_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1292-L1299), [`Shuttle.load_ge` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1318-L1333), [`Shuttle.points_ge` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1335-L1340), [`Shuttle.mem_points` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1350-L1353), [`Shuttle.shuttle_misses` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1355-L1368)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §5 · ledger `prop-6-7`
+
+*Proof.* (AΔ) is a finite check, decided by the kernel; (A1-NS) fails as $2 < \min(d_1 + d_2,\ \bar d_1 +
+\bar d_2) = 4$. The plan is checked by the sound simulator for optional durations, with cost 15 and
+makespan 8. The points of the plans below $(15, 8)$ form a non-empty subset of the well quasi-ordered
+$\mathbb N^2$, so it has a minimal point, which is minimal in $\mathcal A$. The augmented instance has
+four cities, whose patterns last $(4, 4, 2, 6)$, $(4, 4, 6, 2)$, $(4, 8, 2, 6)$ and $(4, 4, 6, 2)$ (the
+two central cities, then the virtual cities of $(1, 2)$ and $(2, 1)$). With 3 passengers on 2 planes,
+each plane flies an $A$, which lasts 4, so there is at most one $B\bar B$ pair. Without a pair, some
+plane flies $A\bar A A$, at least 12. With a pair at one city, its $B$ and $\bar B$ last $2$ and $6$ or $6$
+and $2$, so the plane flying the longer one, or both, reaches at least 10. Both planes crossing at city
+2, plane 1 dropping a passenger there and plane 2 picking it up, gives cost 4 and loads 10 and 6, valid
+in both readings. Since every point of the construction has makespan at least 10 and the front of the
+instance has a point of makespan at most 8, the two fronts differ. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+Plane 2 of the plan flies a *split crossing* $C_I \to 2 \to 1 \to C_G$: it leaves a passenger in 2 and
+takes another from 1, a link between two cities, which neither role configurations nor the shuttle
+construction contain. The construction is formalised as printed; with the pick-up at the virtual city
+lasting $2\bar d_j$ instead of $2d_j$, a correction proposed in revision 2, nothing is proved here.
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Shuttle.TCity`, `Shuttle.plainCity`, `Shuttle.shuttleCity`, `Shuttle.augment`,
+`Shuttle.TConfig`, `Shuttle.TConfig.Valid`, `Shuttle.points`, `Shuttle.net_ATri`,
+`Shuttle.not_net_A1NS`, `Shuttle.plan`, `Shuttle.plan_feasible`, `Shuttle.plan_cost`,
+`Shuttle.plan_makespan`, `Shuttle.front_le`, `Shuttle.load_ge`, `Shuttle.points_ge`, `Shuttle.mem_points`,
+`Shuttle.shuttle_misses` (Counterexamples.lean).
+
+**Lean** `ZenoFront.Shuttle.net_ATri` [machine-checked]{.badge .ok}
+
+```lean
+/-- (AΔ) holds: the only triangles are `C_I, 1, 2` and `C_G, 1, 2`, and `d_12 = 2` is between the
+difference and the sum of the two other sides. -/
+theorem net_ATri : net.ATri := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1244–1253](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1244-L1253){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.not_net_A1NS` [machine-checked]{.badge .ok}
+
+```lean
+/-- (A1-NS) fails: `d_12 = 2 < 4 = min(d_1 + d_2, d̄_1 + d̄_2)`. -/
+theorem not_net_A1NS : ¬ net.A1NS := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1255–1256](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1255-L1256){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.plan_feasible` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The plan is feasible** in every network with these hub durations and a central flight of
+duration 2 from city 2 to city 1. -/
+theorem plan_feasible (dc' : Fin 2 → Fin 2 → ℕ) (h : dc' 1 0 = 2) : Feasible ⟨d, db, dc'⟩ plan := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1273–1284](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1273-L1284){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.front_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The front of the instance has a point of makespan at most 8**, weakly dominating `(15, 8)`,
+in every network with these hub durations and a central flight of duration 2 from city 2 to
+city 1. `ℕ × ℕ` is well quasi-ordered, so the points of the plans below `(15, 8)` have a minimal
+one. -/
+theorem front_le (dc' : Fin 2 → Fin 2 → ℕ) (h : dc' 1 0 = 2) :
+    ∃ y ≤ ((15, 8) : ℕ × ℕ), Minimal (· ∈ achievable ⟨d, db, dc'⟩ c 3 2) y := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1292–1299](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1292-L1299){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.load_ge` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Every configuration of the augmented instance has a plane that flies at least 10**, with or
+without the shuttle counted, and whatever its number of landings. With 3 passengers, each plane
+flies an `A` (4), so there is at most one `B B̄` pair; without a pair a plane flies `A Ā A` (12 or
+more), and a pair at one city lasts `(2, 6)` or `(6, 2)`, in every city. -/
+theorem load_ge (shuttle : Bool) (cfg : TConfig 2 4) (h : cfg.Valid cities shuttle 3) :
+    10 ≤ cfg.load cities 0 ∨ 10 ≤ cfg.load cities 1 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1318–1333](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1318-L1333){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.points_ge` [machine-checked]{.badge .ok}
+
+```lean
+/-- So every point of the construction has makespan at least 10. -/
+theorem points_ge (shuttle : Bool) : ∀ x ∈ points cities shuttle 3 2, 10 ≤ x.2 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1335–1340](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1335-L1340){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.mem_points` [machine-checked]{.badge .ok}
+
+```lean
+/-- `(4, 10)` is a point of the construction, in both readings. -/
+theorem mem_points (shuttle : Bool) : ((4, 10) : ℕ × ℕ) ∈ points cities shuttle 3 2 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1350–1353](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1350-L1353){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Shuttle.shuttle_misses` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Example 5.10: the shuttle construction of arXiv §3.3 misses the front.** On
+`d = (1, 3)`, `d̄ = (3, 1)`, a central flight of duration 2, `c = (6, 1)`, `t = 3`, `p = 2`, (AΔ)
+holds, the front of the instance has a point of makespan at most 8, and every point of the
+augmented instance, as printed, has makespan at least 10, whether or not the shuttle is counted.
+So the construction's front is not the instance's front. -/
+theorem shuttle_misses (shuttle : Bool) :
+    net.ATri ∧ (∃ y ≤ ((15, 8) : ℕ × ℕ), Minimal (· ∈ achievable net c 3 2) y) ∧
+      (∀ x ∈ points cities shuttle 3 2, 10 ≤ x.2) ∧
+      ¬ ∀ x, Minimal (· ∈ achievable net c 3 2) x ↔ Minimal (· ∈ points cities shuttle 3 2) x := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1355–1368](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1355-L1368){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Shuttle.TCity` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1145-L1158), [`Shuttle.plainCity` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1162-L1165), [`Shuttle.shuttleCity` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1167-L1173), [`Shuttle.augment` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1175-L1180), [`Shuttle.TConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1182-L1188), [`Shuttle.TConfig.Valid` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1208-L1216), [`Shuttle.points` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1220-L1225), [`Shuttle.plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1258-L1265), [`Shuttle.plan_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1286-L1287), [`Shuttle.plan_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1289-L1290)
+:::
 
 
 ```{=html}

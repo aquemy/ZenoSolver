@@ -21,7 +21,7 @@ using FlightTable = std::vector<std::vector<Time>>;
 /// The solver never flies a central flight. Which theorem makes its front exact
 /// depends on them (zeno/flights.hpp): (A1), central flights no faster than
 /// through a hub, which the default table satisfies, or (AΔ), the triangle
-/// inequality (Theorem 4.10 and Corollary 4.12 of doc/theory/exact-front.md).
+/// inequality (Theorems 4.4 and 4.5 of doc/theory/exact-front.md).
 struct Instance
 {
     std::vector<Time> d;    ///< durations C_I <-> i

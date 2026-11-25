@@ -1,271 +1,36 @@
-## The exact algorithm (symmetric case) {#sec-algorithm}
+## Algorithm {#sec-algorithm}
 
-§7 of the note turns Corollary 4.8 into a pseudo-polynomial algorithm: the front is the set of
-breakpoints of $E(T)$, the least cost of an admissible partition with loads at most $T$. Both exact
-dynamic programs are proved equal to $E(T)$ in Lean, and the verified solver `zeno-front` is built
-on them.
+The exact algorithm in the symmetric case (§6): the front is the set of breakpoints of $E(T)$, the
+least cost of an admissible partition with loads at most $T$ (Proposition 6.3). Both exact dynamic
+programs are proved equal to $E(T)$, and the verified solver `zeno-front` is built on them
+(Theorem 6.9).
 
-### Proposition 7.1 {#node-proposition-7-1}
+### Lemma 6.1 (one-plane table) {#node-lemma-6-1}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves it in the original units; the rescaling by g is not formalised.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Proposition 7.1.** Under (S) and (A1), $\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$ with
-$E(-1) = \infty$, makespans in units of $g$.
+**Lemma 6.1 (one-plane table).** Let $G[0][T] = 0$ and $G[m + 1][T] = \min_{i :\, d_i \le T} (c_i +
+G[m][T - d_i])$ ($\infty$ over the empty set). Then $G[m][T]$ is the least cost of a multiset of $m$
+cities with $\delta \le T$, and it is $\infty$ iff there is none. The memoised table, with rows $0,
+\dots, m_{\max}$ and columns $0, \dots, T_{\max}$, agrees with it.
 
 ::: {.node-lean}
-Parts in Lean: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L209-L268)
+Lean: [`oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59), [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L125-L139), [`oneplane_eq_top_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L111-L123), [`oneplaneTable_getD` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L235-L241)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §7.1 · **Hypotheses** (S), (A1) · **Uses** [4.8](#node-corollary-4-8)
-
-*Proof.* Here $M(X)$ is an even integer and $E(T) = \min\{c(X) : M(X) \le 2T\}$. Let $(c, 2T) \in \mathrm{Min}\,\mathcal X$
-(Corollary 4.8). Then $c = E(T)$, otherwise a cheaper $X$ with $M(X) \le 2T$ dominates it; and $E(T-1) > c$,
-otherwise some $X$ with $c(X) \le c$ and $M(X) < 2T$ dominates it. Conversely, let $E(T) < E(T-1)$ and let $X$
-attain $E(T)$; then $M(X) = 2T$. A point $(c(Y), M(Y)) \in \mathcal X$ dominating it has $M(Y) \le 2T$, hence
-$M(Y) = 2T$ (otherwise $c(Y) \ge E(T-1) > E(T)$), and then $c(Y) = E(T)$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and `E(T') > C` for every `T' < T`; with Corollary 4.8 this is the proposition.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.minimal_admissiblePoints_iff` [machine-checked]{.badge .ok}
-
-```lean
-/-- **The minimal admissible points**: `(C, M)` is minimal iff `M = 2T` with `E(T) = C` and
-`E(T') > C` for every `T' < T` (the breakpoints of `E`). -/
-theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : ℕ} (C M : ℕ) :
-    Minimal (· ∈ admissiblePoints N c t p) (C, M) ↔
-      ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
-        ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
-```
-
-[`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
-`p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the multisets of `2t − p`
-landings that have an admissible partition. -/
-theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d)
-    (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
-    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
-```
-
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 7.2 {#node-lemma-7-2}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves that G is the least cost and when it is infinite; not that G is non-increasing in τ.]{.node-gap}
-:::
-
-::: {.node-body}
-**Lemma 7.2.** $G[m][\tau] = \min\{c(Y) : |Y| = m,\ \delta(Y) \le \tau\}$, and $G$ is non-increasing in $\tau$.
-
-::: {.node-lean}
-Parts in Lean: [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/OnePlane.lean#L125-L139)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.2
-
-*Proof.* Induction on $m$: removing an element $i$ of an optimal $Y$ leaves an $(m-1)$-multiset within
-$\tau - d_i$, and adding $i$ to such a multiset gives an $m$-multiset within $\tau$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.isLeast_oneplane` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Specification of the one-plane table.** When some multiset of `m` cities has load at most
-`T`, `G[m][T]` is the least cost of such a multiset. (Otherwise `G[m][T] = ∞`, by
-`oneplane_eq_top_iff`.) -/
-theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m ∧ load d Y ≤ T) :
-    IsLeast ((fun Y => (cost c Y : WithTop ℕ)) '' {Y | Y.card = m ∧ load d Y ≤ T})
-      (oneplane d c m T) := …
-```
-
-[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 7.3 {#node-proposition-7-3}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves L ≤ E ≤ U₂; the chains bound U₃ is not formalised.]{.node-gap}
-:::
-
-::: {.node-body}
-**Proposition 7.3.** $L(T) \le E(T) \le U_3(T) \le U(T)$.
-
-::: {.node-lean}
-Parts in Lean: [`relaxedBoundAt_le_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L284-L289), [`minCost_le_pairsBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L260-L282)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.3 · **Uses** [2.6](#node-lemma-2-6), [7.2](#node-lemma-7-2)
-
-*Proof.* $L \le E$: $E$ minimises over a subset. $U_3 \le U$: more gadgets. $E \le U_3$: each gadget with
-$G$-optimal fillers is a link tree satisfying (F1)–(F2). A single plane has odd size and degree 0; in a pair,
-both planes have even size and degree 1; in a chain, the ends have even size and degree 1 and the middle has
-odd size and degree 2. A combination is a link forest whose groups have duration at most $T$, admissible by
-Lemma 2.6. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** Lean proves `L(T) ≤ E(T) ≤ U₂(T)`, with `U₂` the pairs bound used by `zeno-front`. The chains bound `U₃` is not formalized.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.relaxedBoundAt_le_minCost` [machine-checked]{.badge .ok}
-
-```lean
-/-- **`L(T) ≤ E(T)`**: the relaxation is at most the cost of every admissible partition. -/
-theorem relaxedBoundAt_le_minCost (d c : Fin n → ℕ) {t p Tmax T : ℕ} :
-    relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T ≤
-      minCost d c t p T := …
-```
-
-[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
-
-*Part* `ZenoFront.minCost_le_pairsBoundAt` [machine-checked]{.badge .ok}
-
-```lean
-/-- **`E(T) ≤ U₂(T)`**: every finite value of the pairs bound is the cost of an admissible
-partition of `2t − p` landings with loads at most `T`. -/
-theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T ≤ Tmax) :
-    minCost d c t p T ≤
-      pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T := …
-```
-
-[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 7.4 {#node-proposition-7-4}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Proposition 7.4.** If $q_{\max} \le 2$, that is $p \le 2$ or $t \le p + 1$, then $E = U$. If
-$q_{\max} \le 3$, that is $p \le 3$ or $t \le p + 2$, then $E = U_3$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.3 · **Uses** [2.6](#node-lemma-2-6), [2.7](#node-corollary-2-7), [7.3](#node-proposition-7-3)
-
-*Proof.* Take $X$ attaining $E(T)$ and a link forest (Lemma 2.6). Its trees have at most $q_{\max}$ planes
-(Corollary 2.7), and trees with 1, 2 or 3 vertices are a vertex, an edge and a path. In each, a group consists
-of its link copies and a filler of the size and budget used in the gadget formula, whose cost is at least the
-corresponding $G$ value (Lemma 7.2). So the forest costs at least some combination of gadgets. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Theorem 7.5 {#node-theorem-7-5}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves that the DP equals E(T); not its time and memory bounds.]{.node-gap}
-:::
-
-::: {.node-body}
-**Theorem 7.5.** $\mathrm{For}[p][s] = E(T)$. Given $G$, the computation takes
-$O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ time and $O(q_{\max} s T + n q_{\max} s + p s)$ memory per level.
-
-::: {.node-lean}
-Parts in Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L488-L514)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.4 · **Uses** [2.6](#node-lemma-2-6), [2.7](#node-corollary-2-7), [7.2](#node-lemma-7-2)
-
-*Proof.* A *rooted structure* is a rooted tree on $q$ planes with city-labelled edges and a group $X_u$ for
-each plane, such that the edges at $u$ have distinct copies in $X_u$ (F1), $r_u = |X_u| - \deg(u)$ is odd and
-$\delta(X_u) \le T$. In a *hanging* structure with label $a$, the root's group holds one more copy of $a$,
-counted in its degree and its duration. Each group splits into its link copies and its free landings, of odd
-size $r_u$.
-
-($\ge$) By induction on $q$, every finite entry is the cost of a structure of its kind, with $G$-optimal free
-landings (Lemma 7.2): $\mathrm{Sub}_a$ and $\mathrm{Root}$ add a root with $r$ free landings within the
-remaining budget to a multiset of child items, and $\mathrm{Ch}_q$ adds one item to a multiset of items. The
-forest behind $\mathrm{For}[p][s]$ satisfies (F1)–(F2) and has $p$ planes, $s$ landings and groups of duration
-at most $T$, so it is admissible by Lemma 2.6, and $\mathrm{For}[p][s] \ge E(T)$.
-
-($\le$) Take $X$ attaining $E(T)$ and a link forest (Lemma 2.6); its trees have at most $q_{\max}$ planes
-(Corollary 2.7). Root each tree. By induction on subtree size: the child items of a plane $u$ cost at least
-$\mathrm{Ch}_{q-1}[\tau_u][j']$, where $\tau_u$ sums $d_b$ over the child links of $u$ (remove one item and
-bound its subtree by $\mathrm{Sub}_b$); the free landings of $u$ have size $r_u$ and duration at most
-$T - \tau_u$, less $d_a$ for a hanging root, so they cost at least the matching $G$ entry. So each subtree costs
-at least its $\mathrm{Sub}$ or $\mathrm{Root}$ entry, and the forest at least $\mathrm{For}[p][s]$.
-
-*Complexity.* $\mathrm{Ch}$ has $q_{\max}(T+1)(s+1)$ entries, each a minimum over $b$, $q'$ and $j'$, which is
-$O(n\,q_{\max} s)$. $\mathrm{Sub}$ and $\mathrm{Root}$ range over $q$, $a$, $\tau$, $j'$ and $r$:
-$O(n\,q_{\max} T s^2)$. $\mathrm{For}$ costs $O(p\,q_{\max} s^2)$. $\square$
+theory note, §6 · ledger `lem-7-2`
+
+*Proof.* By induction on $m$. A multiset $Y$ of $m + 1$ cities with $\delta(Y) \le T$ contains some $i$,
+with $d_i \le T$, and $Y - \{i\}$ has $m$ cities within $T - d_i$, so $c(Y) \ge c_i + G[m][T - d_i]$.
+Adding $i$ to a cheapest $m$-multiset within $T - d_i$ attains the minimum. The memoised table
+computes the same recursion row by row. $\square$
 
 ```{=html}
 </details>
@@ -279,9 +44,8 @@ $O(n\,q_{\max} T s^2)$. $\mathrm{For}$ costs $O(p\,q_{\max} s^2)$. $\square$
 *Remarks in the note.*
 :::
 
-Over the levels $[T_{\rm lo}, T_{\rm hi}]$ of Proposition 7.10, with $G$ built once in $O(n\,s\,T_{\rm hi})$,
-the whole front takes $O(n\,q_{\max}^2 s^2\, T_{\rm hi}(T_{\rm hi} - T_{\rm lo} + 1))$ time. This is
-pseudo-polynomial, since $T_{\rm hi} \le d_{\max}\kappa$.
+Lemma 6.1 holds for any durations $d$; with a weight $w$ in their place it gives $G_w$ (Notation,
+§1.5).
 
 ```{=html}
 </details>
@@ -291,11 +55,595 @@ pseudo-polynomial, since $T_{\rm hi} \le d_{\max}\kappa$.
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Exactness of the link-forest DP (`For ≥ E` and `For ≤ E`); the complexity statement is not formalized.
+*Lean:* `oneplane`, `oneplane_le_cost`, `exists_cost_eq_oneplane`, `isLeast_oneplane`,
+`oneplane_eq_top_iff`, `oneplaneTable`, `oneplaneTable_getD` (OnePlane.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+**Lean** `ZenoFront.oneplane` [Lean definition]{.badge .ok}
 
-*Part* `ZenoFront.treeBoundAt_eq_minCost` [machine-checked]{.badge .ok}
+```lean
+/-- `G[m][T]`, by the recursion of §6: `G[0][T] = 0` and
+`G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`. -/
+def oneplane : ℕ → ℕ → WithTop ℕ
+  | 0, _ => 0
+  | m + 1, T => oneplaneStep d c (oneplane m) T
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 55–59](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59){.lean-src}
+
+**Lean** `ZenoFront.isLeast_oneplane` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Specification of the one-plane table.** When some multiset of `m` cities has load at most
+`T`, `G[m][T]` is the least cost of such a multiset. (Otherwise `G[m][T] = ∞`, by
+`oneplane_eq_top_iff`.) -/
+theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m ∧ load d Y ≤ T) :
+    IsLeast ((fun Y => (cost c Y : WithTop ℕ)) '' {Y | Y.card = m ∧ load d Y ≤ T})
+      (oneplane d c m T) := …
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.oneplane_eq_top_iff` [machine-checked]{.badge .ok}
+
+```lean
+/-- `G[m][T] = ∞` exactly when every multiset of `m` cities has load larger than `T`. -/
+theorem oneplane_eq_top_iff {m T : ℕ} :
+    oneplane d c m T = ⊤ ↔ ∀ Y : Multiset (Fin n), Y.card = m → T < load d Y := …
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 111–123](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L111-L123){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.oneplaneTable_getD` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The memoised one-plane table is correct**: for `m ≤ mMax` and `T ≤ Tmax`, its entry
+`(m, T)` is `G[m][T]`, the least cost of an `m`-multiset with load `≤ T` (`isLeast_oneplane`), or
+`∞` when there is none (`oneplane_eq_top_iff`). -/
+theorem oneplaneTable_getD {mMax Tmax m T : ℕ} (hm : m ≤ mMax) (hT : T ≤ Tmax) :
+    ((oneplaneTable d c Tmax mMax).getD m #[]).getD T ⊤ = oneplane d c m T := …
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 235–241](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L235-L241){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`oneplane_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L68-L84), [`exists_cost_eq_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L86-L109), [`oneplaneTable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L192-L198)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 6.2 (the function $E$) {#node-lemma-6-2}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 6.2 (the function $E$).** Let $E(T)$ be the least cost of an admissible partition of $2t - p$
+landings into $p$ groups with every $\delta(X_k) \le T$ ($\infty$ if there is none). $E$ is
+non-increasing and attained when finite. With $1 \le p$, $E(T) = \infty$ for $T < d_{\min}\lceil
+s/p\rceil$. A level $T$ at which $E$ drops ($E(T) = C$ and $E(T') > C$ for every $T' < T$) has $T \le
+(2t - p)\,d_{\max}$.
+
+::: {.node-lean}
+Lean: [`minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L28-L32), [`minCost_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L34-L37), [`minCost_attained` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L39-L56), [`minCost_antitone` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L58-L61), [`minCost_eq_top_of_lt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L308-L323), [`breakpoint_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L282-L296)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `lem-min-cost`
+
+*Proof.* A larger level allows more partitions, and there are finitely many partitions of $2t - p$
+landings. Some group of every partition has at least $\lceil s/p\rceil$ landings, each of duration at
+least $d_{\min}$, so its load is at least $d_{\min}\lceil s/p\rceil$. A partition attaining $E(T)$ has every load at most $(2t - p)\,d_{\max}$, so if $T$ were larger, $E((2t -
+p)\,d_{\max}) \le C$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `minCost`, `minCost_le`, `minCost_attained`, `minCost_antitone` (MinCost.lean);
+`minCost_eq_top_of_lt`, `breakpoint_le` (Solver.lean).
+
+**Lean** `ZenoFront.minCost` [Lean definition]{.badge .ok}
+
+```lean
+/-- `E(T)`: the least cost of an admissible partition of `2t − p` landings into `p` groups whose
+loads are all at most `T` (`⊤` if there is none). -/
+noncomputable def minCost (d c : Fin n → ℕ) (t p T : ℕ) : WithTop ℕ :=
+  sInf {x | ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧ (∀ k, load d (X k) ≤ T) ∧
+    (totalCost c X : WithTop ℕ) = x}
+```
+
+[`lean/ZenoFront/MinCost.lean`, lines 28–32](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L28-L32){.lean-src}
+
+**Lean** `ZenoFront.minCost_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem minCost_le (d c : Fin n → ℕ) {t T : ℕ} {X : Groups n p} (hX : Admissible X)
+    (hsize : size X = 2 * t - p) (hT : ∀ k, load d (X k) ≤ T) :
+    minCost d c t p T ≤ totalCost c X := …
+```
+
+[`lean/ZenoFront/MinCost.lean`, lines 34–37](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L34-L37){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minCost_attained` [machine-checked]{.badge .ok}
+
+```lean
+/-- `E(T)` is attained when it is finite. -/
+theorem minCost_attained (d c : Fin n → ℕ) {t T C : ℕ} (h : minCost d c t p T = C) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧ (∀ k, load d (X k) ≤ T) ∧
+      totalCost c X = C := …
+```
+
+[`lean/ZenoFront/MinCost.lean`, lines 39–56](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L39-L56){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minCost_antitone` [machine-checked]{.badge .ok}
+
+```lean
+/-- `E` is non-increasing. -/
+theorem minCost_antitone (d c : Fin n → ℕ) (t p : ℕ) : Antitone (minCost d c t p) := …
+```
+
+[`lean/ZenoFront/MinCost.lean`, lines 58–61](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinCost.lean#L58-L61){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minCost_eq_top_of_lt` [machine-checked]{.badge .ok}
+
+```lean
+/-- Nothing is faster than `d_min · ⌈s/p⌉`: below that level `E` is `⊤`. Some group has at
+least `⌈s/p⌉` landings, each of duration at least `d_min`. -/
+theorem minCost_eq_top_of_lt (d c : Fin n → ℕ) {t T : ℕ} (hp : 1 ≤ p)
+    (hT : T < minOf d * ((2 * t - p + p - 1) / p)) : minCost d c t p T = ⊤ := …
+```
+
+[`lean/ZenoFront/Solver.lean`, lines 308–323](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L308-L323){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.breakpoint_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- A breakpoint of `E` lies at a level at most `(2t − p) · d_max`: every partition of `2t − p`
+landings has its loads below that. -/
+theorem breakpoint_le (d c : Fin n → ℕ) {t T C : ℕ} (hE : minCost d c t p T = C)
+    (hlt : ∀ T' < T, (C : WithTop ℕ) < minCost d c t p T') : T ≤ (2 * t - p) * maxDur d := …
+```
+
+[`lean/ZenoFront/Solver.lean`, lines 282–296](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L282-L296){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 6.3 (front = breakpoints of $E$) {#node-proposition-6-3}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 6.3 (front = breakpoints of $E$).** Assume (S), (H) and $p \le t$. Then $(C, M) \in
+\mathcal F$ iff $M = 2T$ for some $T$ with $E(T) = C$ and $E(T') > C$ for every $T' < T$.
+
+::: {.node-lean}
+Lean: [`minimal_achievable_iff_minCost_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L416-L425)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `prop-7-1`
+
+*Proof.* By Theorem 4.5, $\mathcal F = \mathrm{Min}\,\mathcal P$. Let $(C, M) \in \mathrm{Min}\,
+\mathcal P$, the point of an admissible $X$ with $T = \max_k \delta(X_k)$, so $M = 2T$ and $E(T) \le C$.
+A partition attaining $E(T)$ has a point $\le (C, M)$, so $E(T) = C$; and $E(T') \le C$ for some $T' <
+T$ would give a point $\le (C, 2T')$, below $(C, M)$. Conversely, let $E(T) = C < E(T')$ for all $T' <
+T$, and let $X$ attain $E(T)$. Then $T' = \max_k \delta(X_k) \le T$ and $E(T') \le C$, so $T' = T$ and
+$(C, 2T) \in \mathcal P$. A point $(C', 2T'') \in \mathcal P$ below it has $T'' \le T$ and $E(T'') \le C'
+\le C$, so $T'' = T$ and $C' = C$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `minimal_admissiblePoints_iff`, `minimal_achievable_iff_minCost_hub` (Solver.lean); corollary
+under (AΔ): `minimal_achievable_iff_minCost_ATri` (Solver.lean).
+
+**Lean** `ZenoFront.minimal_achievable_iff_minCost_hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Proposition 6.3 (the front from `E`).** Under (S) and the triangles through a hub, with
+`p ≤ t`, a pair `(C, M)` is on the front iff `M = 2T` with `E(T) = C` and `E(T') > C` for every
+`T' < T`: the front is the set of breakpoints of `E`. -/
+theorem minimal_achievable_iff_minCost_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    (c : Fin n → ℕ) {t : ℕ} (hpt : p ≤ t) (C M : ℕ) :
+    Minimal (· ∈ achievable N c t p) (C, M) ↔
+      ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
+        ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
+```
+
+[`lean/ZenoFront/Solver.lean`, lines 416–425](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L416-L425){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L211-L270), [`minimal_achievable_iff_minCost_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L427-L433)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 6.4 (bracket) {#node-proposition-6-4}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 6.4 (bracket).** Let $U_2(T)$ be the least cost of a partition of $2t - p$ landings, with
+every load at most $T$, whose link forest has trees of one or two planes: a single plane with an odd
+number of landings, or two planes linked at a city $b$ in the image of $\mathrm{domRep}$ (Proposition
+6.5), each with one copy of $b$ and an odd number of free landings; the free landings come from the
+table of Lemma 6.1. At every level $T \le T_{\max}$,
+$L(T) \le E(T) \le U_2(T)$, where $L = L_d$ is the relaxation of Lemma 3.5 computed from the table of
+Lemma 6.1, and where $L(T) = U_2(T)$, $E(T) = L(T)$.
+
+::: {.node-lean}
+Lean: [`relaxedBoundAt_le_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L284-L289), [`minCost_le_pairsBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L260-L282), [`minCost_eq_of_bracket` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L291-L296)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `prop-7-3`
+
+*Proof.* The groups of an admissible partition are non-empty (Lemma 2.4), so the partition is among the
+groupings over which $L$ minimises: $L \le E$. Every finite value of $U_2$ is the cost of such a forest
+with loads at most $T$, whose groups are admissible by Lemma 2.6: $E \le U_2$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `relaxedBoundAt`, `relaxRow_getD`, `relaxedBoundAt_le_totalCost` (Relaxation.lean);
+`pairsBoundAt`, `relaxedBoundAt_le_minCost`, `minCost_le_pairsBoundAt`, `minCost_eq_of_bracket`
+(PairBound.lean).
+
+**Lean** `ZenoFront.relaxedBoundAt_le_minCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **`L(T) ≤ E(T)`**: the relaxation is at most the cost of every admissible partition. -/
+theorem relaxedBoundAt_le_minCost (d c : Fin n → ℕ) {t p Tmax T : ℕ} :
+    relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T ≤
+      minCost d c t p T := …
+```
+
+[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minCost_le_pairsBoundAt` [machine-checked]{.badge .ok}
+
+```lean
+/-- **`E(T) ≤ U₂(T)`**: every finite value of the pairs bound is the cost of an admissible
+partition of `2t − p` landings with loads at most `T`. -/
+theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T ≤ Tmax) :
+    minCost d c t p T ≤
+      pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T := …
+```
+
+[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minCost_eq_of_bracket` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The bracket closes**: where `L(T) = U₂(T)`, both are `E(T)`. -/
+theorem minCost_eq_of_bracket (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T ≤ Tmax)
+    (h : relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T =
+      pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T) :
+    minCost d c t p T = relaxedBoundAt p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T := …
+```
+
+[`lean/ZenoFront/PairBound.lean`, lines 291–296](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L291-L296){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`pairsBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L79-L90), [`relaxedBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L133-L136), [`pairRows_attained` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PairBound.lean#L170-L256), [`relaxRow_getD` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L122-L131), [`relaxedBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L138-L149)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 6.5 (dominance, symmetric) {#node-proposition-6-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 6.5 (dominance, symmetric).** For every map $\mathrm{rep}$ from cities to cities,
+replacing every landing of an admissible partition by its image gives an admissible partition with the
+same group sizes. The map $\mathrm{domRep}$, which scans the cities in index order from $i$ and moves to
+a city that dominates $i$ whenever its $(d, c)$ is lexicographically smaller than the current one's, has
+$d_{\mathrm{domRep}(i)} \le d_i$ and $c_{\mathrm{domRep}(i)} \le c_i$; replacing every landing by its
+image under $\mathrm{domRep}$ does not raise the cost or the loads.
+
+::: {.node-lean}
+Lean: [`Admissible.map_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L202-L216), [`domRep_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L183-L200)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `prop-7-9`
+
+*Proof.* Let $\eta'_k$ be the set of cities $j$ such that an odd number of cities of $\eta_k$ are sent
+to $j$. Such a $j$ is the image of a city of $\eta_k \subseteq \mathrm{supp}\,X_k$: (h1). $|\eta'_k|
+\equiv |\eta_k|$: (h2). For every $j$, $\#\{k : j \in \eta'_k\} \equiv \sum_{i : \mathrm{rep}(i) = j}
+\#\{k : i \in \eta_k\}$, which is even: (h3). The scan that defines $\mathrm{domRep}(i)$ starts at
+$i$ and moves only to cities that dominate $i$. Costs and loads are sums over the landings. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Admissible.map` (Shrink.lean); `domRep`, `domRep_le`, and the replacement inside
+`sigmaBoundAt_le_totalCost` (AdmissibleBound.lean) and `treeBoundAt_le_totalCost` (TreeBound.lean).
+
+**Lean** `ZenoFront.Admissible.map_dominated` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Proposition 6.5 (dominance, symmetric).** Let `rep` send every city to one that is no slower
+and no more expensive (`domRep` is one, `domRep_le`). Relabelling the landings of an admissible
+grouping by `rep` gives an admissible grouping with the same group sizes, no larger cost and no
+larger load on any plane. -/
+theorem Admissible.map_dominated {X : Groups n p} (hX : Admissible X) (d c : Fin n → ℕ)
+    {rep : Fin n → Fin n} (hrep : ∀ i, d (rep i) ≤ d i ∧ c (rep i) ≤ c i) :
+    Admissible (fun k => (X k).map rep) ∧ (∀ k, ((X k).map rep).card = (X k).card) ∧
+      totalCost c (fun k => (X k).map rep) ≤ totalCost c X ∧
+      ∀ k, load d ((X k).map rep) ≤ load d (X k) := …
+```
+
+[`lean/ZenoFront/AdmissibleBound.lean`, lines 202–216](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L202-L216){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.domRep_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
+    d (domRep d c i) ≤ d i ∧ c (domRep d c i) ≤ c i := …
+```
+
+[`lean/ZenoFront/AdmissibleBound.lean`, lines 183–200](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L183-L200){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Admissible.map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L229-L278), [`domRep` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L177-L181), [`sigmaBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L355-L405), [`treeBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L532-L561)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 6.6 (dominance, non-symmetric) {#node-proposition-6-6}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 6.6 (dominance, non-symmetric).** Let $\mathrm{rep}$ satisfy $d_{\mathrm{rep}(i)} \le
+d_i$, $\bar d_{\mathrm{rep}(i)} \le \bar d_i$ and $c_{\mathrm{rep}(i)} \le c_i$ for every $i$
+($\mathrm{domRep3}$, the first city in the order $(d, \bar d, c, \text{index})$ among those that dominate
+$i$, is one). Replacing every city by its image maps a role configuration to one with the same number of
+landings, no larger cost and no larger role loads, and a valid scheduled configuration to a valid one
+with the same number of landings, no larger cost and no larger $M_{\rm tmpl}$.
+
+::: {.node-lean}
+Lean: [`RoleConfig.size_map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L431-L433), [`RoleConfig.totalCost_map_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L435-L440), [`RoleConfig.roleLoad_map_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L442-L455), [`Sched.Valid.map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L41-L48), [`Sched.size_map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L50-L51), [`Sched.cost_map_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L53-L63), [`Sched.tmpl_map_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L108-L115), [`domRep3_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L396-L413)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `prop-dominance-ns`
+
+*Proof.* The image of the balance is a balance, oddness is kept, and a matched drop-off and pick-up at
+one city are sent to one city, with the matching unchanged. Costs, role loads, $\mathrm{Pre}$,
+$\mathrm{Suf}$ and the link terms are sums of $d$, $\bar d$ and $c$ over the cities, termwise no larger.
+$\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `domRep3`, `domRep3_le`, `RoleConfig.map`, `RoleConfig.size_map`, `RoleConfig.totalCost_map_le`,
+`RoleConfig.roleLoad_map_le` (LagrangianBound.lean); `Sched.map`, `Sched.Valid.map`, `Sched.size_map`,
+`Sched.cost_map_le`, `Sched.tmpl_map_le` (SchedMap.lean).
+
+**Lean** `ZenoFront.RoleConfig.size_map` [machine-checked]{.badge .ok}
+
+```lean
+theorem RoleConfig.size_map (cfg : RoleConfig n p) (rep : Fin n → Fin n) :
+    size (cfg.map rep).groups = size cfg.groups := …
+```
+
+[`lean/ZenoFront/LagrangianBound.lean`, lines 431–433](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L431-L433){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.RoleConfig.totalCost_map_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem RoleConfig.totalCost_map_le (c : Fin n → ℕ) (cfg : RoleConfig n p)
+    {rep : Fin n → Fin n} (hrep : ∀ i, c (rep i) ≤ c i) :
+    totalCost c (cfg.map rep).groups ≤ totalCost c cfg.groups := …
+```
+
+[`lean/ZenoFront/LagrangianBound.lean`, lines 435–440](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L435-L440){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.RoleConfig.roleLoad_map_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem RoleConfig.roleLoad_map_le (N : Network n) (cfg : RoleConfig n p)
+    {rep : Fin n → Fin n} (hd : ∀ i, N.d (rep i) ≤ N.d i) (hdb : ∀ i, N.dbar (rep i) ≤ N.dbar i)
+    (k : Fin p) : (cfg.map rep).roleLoad N k ≤ cfg.roleLoad N k := …
+```
+
+[`lean/ZenoFront/LagrangianBound.lean`, lines 442–455](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L442-L455){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Sched.Valid.map` [machine-checked]{.badge .ok}
+
+```lean
+theorem Valid.map (h : S.Valid) (rep : Fin n → Fin n) : (S.map rep).Valid := …
+```
+
+[`lean/ZenoFront/SchedMap.lean`, lines 41–48](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L41-L48){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Sched.size_map` [machine-checked]{.badge .ok}
+
+```lean
+theorem size_map : (S.map rep).size = S.size := …
+```
+
+[`lean/ZenoFront/SchedMap.lean`, lines 50–51](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L50-L51){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Sched.cost_map_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem cost_map_le (c : Fin n → ℕ) (hc : ∀ i, c (rep i) ≤ c i) :
+    (S.map rep).cost c ≤ S.cost c := …
+```
+
+[`lean/ZenoFront/SchedMap.lean`, lines 53–63](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L53-L63){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Sched.tmpl_map_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem tmpl_map_le (d db : Fin n → ℕ) (hd : ∀ i, d (rep i) ≤ d i)
+    (hdb : ∀ i, db (rep i) ≤ db i) : (S.map rep).tmpl d db ≤ S.tmpl d db := …
+```
+
+[`lean/ZenoFront/SchedMap.lean`, lines 108–115](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L108-L115){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.domRep3_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem domRep3_le (d dbar c : Fin n → ℕ) (i : Fin n) :
+    d (domRep3 d dbar c i) ≤ d i ∧ dbar (domRep3 d dbar c i) ≤ dbar i ∧
+      c (domRep3 d dbar c i) ≤ c i := …
+```
+
+[`lean/ZenoFront/LagrangianBound.lean`, lines 396–413](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L396-L413){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`domRep3` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L390-L394), [`RoleConfig.map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LagrangianBound.lean#L422-L429), [`Sched.map` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedMap.lean#L34-L37)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Theorem 6.7 (link-forest DP) {#node-theorem-6-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Theorem 6.7 (link-forest DP).** Fix $1 \le p$ and a level $T \le T_{\max}$. The *link labels* are the
+cities in the image of $\mathrm{domRep}$. The tables, for $\tau \in [0, T]$ and odd $r \ge 1$, are:
+
+* $\mathrm{Ch}_q[\tau][j]$: the least cost of a multiset of *child items*, each a link label $b$, with
+  one copy of $b$ in the parent's group, and a subtree hanging from it; the labels' durations sum to
+  $\tau$, the subtrees have $q$ planes, and $j$ counts one landing per item plus the subtrees'
+  landings. $\mathrm{Ch}_0[0][0] = 0$ and the other entries of $\mathrm{Ch}_0$ are $\infty$; for $q \ge
+  1$, $\mathrm{Ch}_q[\tau][j] = \min_{b,\ 1 \le q' \le q,\ j'} \big(\mathrm{Ch}_{q-q'}[\tau - d_b][j - 1
+  - j'] + c_b + \mathrm{Sub}_b[q'][j']\big)$;
+* $\mathrm{Sub}_b[q][j]$: the least cost of a subtree with $q$ planes and $j$ landings whose root holds
+  one copy of $b$ for its parent link, $\mathrm{Sub}_b[q][j] = \min_{\tau,\ j' + 1 + r = j}\big(c_b +
+  \mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - d_b - \tau]\big)$;
+* $\mathrm{Root}[q][j] = \min_{\tau,\ j' + r = j}\big(\mathrm{Ch}_{q-1}[\tau][j'] + G[r][T - \tau]\big)$,
+  the least cost of a tree with $q$ planes and $j$ landings;
+* $\mathrm{For}[0][0] = 0$ and $\mathrm{For}[P][J] = \min_{1 \le q \le P,\ j}\big(\mathrm{For}[P -
+  q][J - j] + \mathrm{Root}[q][j]\big)$, the least cost of a forest with $P$ planes and $J$ landings.
+
+Then $\mathrm{For}[p][s] = E(T)$.
+
+::: {.node-lean}
+Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L488-L514)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `thm-7-5`
+
+*Proof.* ($\ge$) By induction on the number of planes, every finite entry is the cost of child items, a
+subtree, a tree or a forest with these parameters, whose groups have loads at most $T$ and whose free
+landings are cheapest multisets of Lemma 6.1. The forest behind $\mathrm{For}[p][s]$ satisfies (F2) and
+has $p$ planes and $s$ landings, so its groups form an admissible partition by Lemma 2.6, and
+$\mathrm{For}[p][s] \ge E(T)$.
+
+($\le$) Take $X$ attaining $E(T)$. By Proposition 6.5 its image under $\mathrm{domRep}$ is admissible,
+with the same sizes, no larger cost and no larger loads. Take a link forest of the image (Lemma 2.6); its
+labels are link labels. By induction on the subtrees: the child items of a plane $u$ cost at least
+$\mathrm{Ch}_{q}[\tau_u][j']$, with $\tau_u$ the duration of its child labels (remove one item and bound
+its subtree by $\mathrm{Sub}_b$); the free landings of $u$, an odd number $r_u$, have duration at most
+$T - \tau_u$, less $d_b$ for a hanging root, so they cost at least the matching entry of $G$. So the
+forest costs at least $\mathrm{For}[p][s]$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `TreeData`, `TreeData.chEntry`, `TreeData.subEntry`, `TreeData.rootEntry`, `TreeData.forEntry`,
+`TreeData.value`, `repList`, `treeBoundAt`, `treeBoundAt_le_totalCost` (TreeBound.lean);
+`TreeData.attained_ch_sub`, `TreeData.attained_root`, `TreeData.attained_for`, `treeBoundAt_eq_minCost`
+(TreeExact.lean).
+
+**Lean** `ZenoFront.treeBoundAt_eq_minCost` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The tree DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the tree-DP bound of the
@@ -307,7 +655,11 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`treeBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L532-L561), [`TreeData` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L122-L130), [`TreeData.chEntry` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L139-L151), [`TreeData.subEntry` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L153-L161), [`TreeData.rootEntry` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L180-L185), [`TreeData.forEntry` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L191-L198), [`TreeData.value` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L205-L209), [`repList` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L515-L519), [`treeBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L524-L530), [`TreeData.attained_ch_sub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L308-L392), [`TreeData.attained_root` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L394-L423), [`TreeData.attained_for` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L425-L465)
+:::
 
 
 ```{=html}
@@ -316,55 +668,42 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 
 :::
 
-### Theorem 7.6 (σ-DP) {#node-theorem-7-6}
+### Theorem 6.8 (σ-DP) {#node-theorem-6-8}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves that the σ-DP equals E(T) when it runs on the non-dominated cities only.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Theorem 7.6 (σ-DP) [Claim C].** The shortest path from $(0, 0, \emptyset)$ to $(p, s, \emptyset)$ has
-weight $E(T)$.
+**Theorem 6.8 (σ-DP).** Let $1 \le p \le t$, $w = \min(p - 1,\ t - p)$ and $T \le T_{\max}$. Process the
+planes in order, with states $(k, j, \sigma)$: $k$ planes processed, $j$ landings used, $\sigma$ a set of
+at most $w$ cities in the image of $\mathrm{domRep}$. A plane option $(m, H)$, with $H$ such a set,
+$|H| + 1 \le m$, $|H| \equiv m + 1 \pmod 2$ and $\delta(H) \le T$, costs $c(H) + G[m - |H|][T -
+\delta(H)]$; it adds $m$ to $j$ and replaces $\sigma$ by $\sigma \triangle H$, which must have at most $w$
+cities. The least cost of a path from $(0, 0, \emptyset)$ to $(p, s, \emptyset)$ is $E(T)$.
 
 ::: {.node-lean}
-Parts in Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L143-L190)
+Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L145-L192)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §7.5 · **Uses** [2.2](#node-definition-2-2), [2.8](#node-lemma-2-8), [7.2](#node-lemma-7-2)
+theory note, §6 · ledger `thm-7-6`
 
-*Proof.* *Paths give admissible partitions.* Take a path with options $(m_k, \eta_k)$. Let $R_k$ be a
-$G$-optimal $(m_k - |\eta_k|)$-multiset within $T - \delta(\eta_k)$ and $X_k = \eta_k + R_k$. Then $|X| = s$,
-$\delta(X_k) \le T$, and $h_{k,i} = [i \in \eta_k]$ is a parity matrix: (h1) as $\eta_k \le X_k$; (h2) as
-$|\eta_k| \equiv m_k + 1$; (h3) because the final $\sigma = \eta_1 \triangle \dots \triangle \eta_p$ is empty,
-so every city lies in an even number of the $\eta_k$. So the path's weight is at least $E(T)$.
+*Proof.* ($\ge$) Along a path, let plane $k$ take its set $H_k$ and a cheapest multiset of $m_k - |H_k|$
+cities within $T - \delta(H_k)$. Its group $X_k$ contains $H_k$ and $|H_k| \equiv |X_k| + 1$; the path
+ends at $\sigma = H_1 \triangle \dots \triangle H_p = \emptyset$, so every city lies in an even number of
+the $H_k$. So the sets $H_k$ form a parity matrix, and the path's cost is that of an admissible partition
+with loads at most $T$.
 
-*Admissible partitions give paths.* Take $X$ attaining $E(T)$ and a parity matrix touching at most $w$ cities
-(Lemma 2.8(c)). With the options $(|X_k|, \eta_k)$, every prefix
-$\sigma_k = \eta_1 \triangle \dots \triangle \eta_k \subseteq Z(h)$ has at most $w$ cities,
-$|\eta_k| \le \min(|X_k| - 1, w)$, and $R_k = X_k - \eta_k$ costs at least
-$G[|X_k| - |\eta_k|][T - \delta(\eta_k)]$. So some path has weight at most $c(X)$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-*Size.* An arc joins sets $\sigma, \sigma'$ with $|\sigma|, |\sigma'|, |\sigma \triangle \sigma'| \le w$, so
-$|\sigma \cup \sigma'| \le \lfloor 3w/2\rfloor$; there are at most
-$N_w = \sum_{u \le \lfloor 3w/2\rfloor} \binom{n}{u} 3^u$ such pairs. The DP takes $O(p\,s\,\hat m\,N_w)$ time
-per level: polynomial in $n$ for fixed $w$, practical only for small $w$ or few cities. The link-forest DP is
-the default otherwise.
+($\le$) Take $X$ attaining $E(T)$ and its image under $\mathrm{domRep}$, admissible with $|X| = s$ and
+no larger cost or loads (Proposition 6.5). By Lemma 2.7 it has a parity matrix $\eta$ touching at most
+$w$ cities, all in the image of $\mathrm{domRep}$. Every prefix $\eta_1 \triangle \dots \triangle \eta_k$
+lies in $Z(\eta)$, and so does every $\eta_k$, so all have at most $w$ cities. By Lemma 2.4, $|\eta_k| +
+1 \le |X_k|$, and $X_k - \eta_k$ costs at least $G[|X_k| - |\eta_k|][T - \delta(\eta_k)]$. So the options
+$(|X_k|, \eta_k)$ form a path of cost at most $c(X)$. $\square$
 
 ```{=html}
 </details>
@@ -374,11 +713,11 @@ the default otherwise.
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** The σ-DP's states are restricted to subsets of the non-dominated cities of size at most `min(p − 1, t − p)` (Lemma 2.8); every finite value is attained by groups whose witness sets form a parity witness, so no link forest is needed.
+*Lean:* `groupOption`, `groupOption_le_cost`, `sigmaDP`, `sigmaDP_le`, `sigmaBoundAt`,
+`sigmaBoundAt_le_totalCost` (AdmissibleBound.lean); `sigmaDP_attained`, `groupOption_attained`,
+`isParityWitness_of_list`, `sigmaBoundAt_eq_minCost` (Solver.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.sigmaBoundAt_eq_minCost` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.sigmaBoundAt_eq_minCost` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The σ-DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the bound the checker
@@ -390,259 +729,11 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 143–190](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L143-L190){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 7.7 (Pareto sets) {#node-lemma-7-7}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 7.7 (Pareto sets).** Let $\otimes$ be a binary operation on $\mathbb K^2$ that is monotone in the
-product order. For finite $A$ and $B$, $\mathrm{Min}(A \otimes B) = \mathrm{Min}(\mathrm{Min}\,A \otimes \mathrm{Min}\,B)$
-and $\mathrm{Min}(A \cup B) = \mathrm{Min}(\mathrm{Min}\,A \cup \mathrm{Min}\,B)$, where
-$A \otimes B = \{a \otimes b : a \in A, b \in B\}$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.5 · **Uses** [1.1](#node-lemma-1-1), [7.6](#node-theorem-7-6)
-
-*Proof.* Every $a \in A$ is weakly dominated by some $a^\star \in \mathrm{Min}\,A$ (finiteness), so
-$a \otimes b$ is weakly dominated by $a^\star \otimes b^\star \in \mathrm{Min}\,A \otimes \mathrm{Min}\,B \subseteq A \otimes B$.
-This subset is finite and dominating, and Lemma 1.1 applies. The same argument works for $\cup$. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 7.8 (Pareto-set variant) {#node-proposition-7-8}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Proposition 7.8 (Pareto-set variant) [PS].** In the σ-graph, replace the weight of the arc with option
-$(m, \eta)$ by the finite set
-$\mathrm{Opt}(m, \eta) = \mathrm{Min}\{(c(\eta) + G[m - |\eta|][\tau],\ \delta(\eta) + \tau) : 0 \le \tau \le T_{\rm hi} - \delta(\eta)\}$.
-Combine along paths with $(c, \tau) \otimes (c', \tau') = (c + c', \max(\tau, \tau'))$, and keep at each node
-the $\mathrm{Min}$ over its incoming arcs. The set obtained at $(p, s, \emptyset)$ is
-$\mathrm{Min}\{(c(X), \max_k \delta(X_k)) : |X| = s,\ X_1,\dots,X_p \text{ admissible},\ \max_k \delta(X_k) \le T_{\rm hi}\}$.
-Under (S) and (A1), or (S) and (AΔ) (Corollary 4.12), its points $(c, \tau)$ are the front points
-$(c, 2\tau)$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.5 · **Uses** [1.1](#node-lemma-1-1), [7.6](#node-theorem-7-6)
-
-*Proof.* $\otimes$ is monotone. $\mathrm{Opt}(m, \eta)$ is the $\mathrm{Min}$ of the points
-$(c(\eta) + c(R), \delta(\eta) + \delta(R))$ over all $R$ of size $m - |\eta|$ within the budget: each such
-point is weakly dominated by the term with $\tau = \delta(R)$, and each term is attained or weakly dominated by
-a $G$-optimal $R$. By Lemma 7.7 and induction over the layers, each node holds the $\mathrm{Min}$ of the
-points of all paths reaching it, with arbitrary fillers. By both directions of Theorem 7.6 (with any filler
-in place of the $G$-optimal one, and the restriction $w$ being independent of the level), these are exactly
-the points of admissible partitions with $|X| = s$. The front statement is Corollary 4.8 (Corollary 4.12 under
-(AΔ)), and every front point
-has $\tau \le T_{\rm hi}$ (Proposition 7.10). $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-Combining sets is no better than sweeping the levels in the worst case. It helps when durations are large and
-the cost range is narrow.
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 7.9 (dominance) {#node-proposition-7-9}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Proposition 7.9 (dominance) [DOM].** Let $i \ne i'$ with $d_{i'} \le d_i$ and $c_{i'} \le c_i$. Removing
-city $i$ leaves $E(T)$ and $L(T)$ unchanged at every $T$. Under (S) and (A1), it leaves the front unchanged.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.6 · **Hypotheses** — ; fronts: (S), (A1) · **Uses** [2.2](#node-definition-2-2), [7.1](#node-proposition-7-1)
-
-*Proof.* Removing a city can only raise $E$ and $L$. Conversely, in an optimal $X$ and its groups, replace
-every copy of $i$ by $i'$: costs and durations do not increase. Nothing else is needed for $L$. For $E$, set
-$h'_{k,i'} = (h_{k,i} + h_{k,i'}) \bmod 2$ and $h'_{k,i} = 0$. Row sums keep their parity, column $i'$ is the
-sum of two even columns, and $h'_{k,i'} = 1$ means $X_k$ contained $i$ or $i'$, so the new group contains
-$i'$. The instance without $i$ still satisfies (S) and (A1), and Proposition 7.1 expresses both fronts through
-$E$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-Applied repeatedly: keep one city per class of equal $(d, c)$, and drop every city dominated by another.
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** Merging cities into non-dominated representatives keeps the bounds valid (`domRep_le`); the front statement is not formalized.
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.domRep_le` [machine-checked]{.badge .ok}
-
-```lean
-theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
-    d (domRep d c i) ≤ d i ∧ c (domRep d c i) ≤ c i := …
-```
-
-[`lean/ZenoFront/AdmissibleBound.lean`, lines 182–199](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/AdmissibleBound.lean#L182-L199){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Proposition 7.10 (ends of the front) {#node-proposition-7-10}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves the two lower bounds; not that they are attained.]{.node-gap}
-:::
-
-::: {.node-body}
-**Proposition 7.10 (ends of the front) [END].** Assume (S). Let $d_{\min} = \min_i d_i$,
-$c_{\min} = \min_i c_i$ and $d_{\rm cheap} = \min\{d_i : c_i = c_{\min}\}$.
-
-(a) Every plan has makespan at least $M_1 := 2d_{\min}\kappa$, and some plan has makespan $M_1$.
-
-(b) Every plan costs at least $s\,c_{\min}$. A plan of cost $s\,c_{\min}$ has makespan at least
-$M_r := 2d_{\rm cheap}\kappa$, and some plan has cost $s\,c_{\min}$ and makespan $M_r$. So
-$(s\,c_{\min}, M_r)$ is the cheapest point of $\mathcal F$, and every point of $\mathcal F$ has makespan at
-least $M_1$.
-
-(c) With integer durations, $E(T) < \infty$ iff $T \ge T_{\rm lo} := d_{\min}\kappa$, and $E(T) = s\,c_{\min}$
-iff $T \ge T_{\rm hi} := d_{\rm cheap}\kappa$. The same holds for $L$.
-
-No assumption on central flights is needed, and zero durations and ties are covered. The cost of the first
-point is not in closed form; under (A1) or (AΔ) it is $E(T_{\rm lo})$ (Proposition 7.1, Corollary 4.12).
+[`lean/ZenoFront/Solver.lean`, lines 145–192](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L145-L192){.lean-src} (statement only; the proof is elided)
 
 ::: {.node-lean}
-Parts in Lean: [`Feasible.minOf_le_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L110-L124), [`Feasible.minOf_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L126-L133)
+Further declarations: [`sigmaBoundAt_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L355-L405), [`groupOption` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L43-L50), [`groupOption_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L52-L69), [`sigmaDP` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L73-L82), [`sigmaDP_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L95-L119), [`sigmaBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AdmissibleBound.lean#L345-L353), [`sigmaDP_attained` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L55-L93), [`groupOption_attained` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L95-L122), [`isParityWitness_of_list` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L124-L143)
 :::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §7.6 · **Hypotheses** (S) · **Uses** [2.9](#node-lemma-2-9), [3.2](#node-lemma-3-2), [3.4](#node-lemma-3-4), [4.1](#node-theorem-4-1)
-
-*Proof.* Pigeonhole: $p$ non-empty groups of total size $s$ include one of size at least $\kappa$.
-
-(a) Lemma 3.4 gives such groups with $\ell(Y_k) \le M$, so $M \ge 2d_{\min}\kappa$. For the plan, put $s$
-copies of a city of duration $d_{\min}$ into groups of sizes $\lfloor s/p\rfloor$ and $\lceil s/p\rceil$, all
-non-empty as $s \ge p$. This is admissible by Lemma 2.9 ($s \equiv p$, one city), and Theorem 4.1 gives a
-plan of makespan $2d_{\min}\kappa$.
-
-(b) By Lemma 3.2 there are at least $s$ central landings, each costing at least $c_{\min}$. If
-$C = s\,c_{\min}$, the multiset $Y$ of Lemma 3.4 has $c(Y) \le s\,c_{\min}$ and $|Y| = s$, so all its cities
-cost $c_{\min}$ and have $d \ge d_{\rm cheap}$; pigeonhole gives $M \ge 2d_{\rm cheap}\kappa$. The plan is that
-of (a) built on a cheapest city of duration $d_{\rm cheap}$. A point $(C, M) \in \mathcal A$ weakly dominating
-$(s\,c_{\min}, M_r)$ has $C = s\,c_{\min}$, hence $M \ge M_r$.
-
-(c) The same arguments apply to $E$ and $L$ directly: every partition has a group of size at least $\kappa$,
-and the single-city partitions are admissible. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-Only the levels $[T_{\rm lo}, T_{\rm hi}]$ need computing. On generator instances this range is about ten times
-shorter than $[0, d_{\max}\hat m]$.
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** The two lower bounds the checker uses (obligations 2 and 4): every plan has makespan at least `2 d_min ⌈s/p⌉` and cost at least `s c_min`. The attainment half is not formalized.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Feasible.minOf_le_makespan` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Obligation 2.** Under (S), every feasible plan has makespan at least
-`2 · d_min · ⌈s/p⌉`. -/
-theorem Feasible.minOf_le_makespan {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
-    {P : Plan n t p} (hP : Feasible N P) (hp : 1 ≤ p) (hpt : p ≤ t) :
-    2 * minOf N.d * ((2 * t - p + p - 1) / p) ≤ planMakespan P := …
-```
-
-[`lean/ZenoFront/Checker.lean`, lines 110–124](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L110-L124){.lean-src} (statement only; the proof is elided)
-
-*Part* `ZenoFront.Feasible.minOf_le_cost` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Obligation 4.** Under (S), every feasible plan costs at least `s · c_min`. -/
-theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
-    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    (2 * t - p) * minOf c ≤ planCost c P := …
-```
-
-[`lean/ZenoFront/Checker.lean`, lines 126–133](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L126-L133){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -651,41 +742,86 @@ theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n �
 
 :::
 
-### The verified solver `zeno-front` {#node-verified-solver}
+### Theorem 6.9 (verified solver, H2) {#node-theorem-6-9}
 
 ::: {.node-badge}
 [machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-Under (S) and (A1), with $1 \le p \le t$, the list computed by `solveFront` is exactly the Pareto
-front of the feasible plans. The solver finds the levels where $E$ drops by splitting intervals
-between $d_{\min}\lceil s/p\rceil$ and $(2t-p)\,d_{\max}$; at each level it takes $L(T)$ when the bracket
-$L(T) \le E(T) \le U_2(T)$ closes, and otherwise runs the link-forest DP or the σ-DP, whichever is
-estimated cheaper. `lake exe zeno-front FILE` runs it.
+**Theorem 6.9 (verified solver, H2).** Assume (S), (H) and $1 \le p \le t$. The list
+`solveFront d c t p` is the Pareto front of the feasible plans. The solver lists, by increasing
+makespan, the points $(E(T), 2T)$ at which $E$ drops, found by splitting intervals of the levels
+$d_{\min}\lceil s/p\rceil, \dots, (2t - p)\,d_{\max}$; at each level it evaluates $E(T)$ as $L(T)$ where
+$L(T) = U_2(T)$, and otherwise by the link-forest DP or the σ-DP, whichever its cost estimate prefers.
 
 ::: {.node-lean}
-Lean: [`solveFront_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L414-L449)
+Lean: [`solveFront_isParetoFront_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L435-L473)
 :::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §6 · ledger `thm-verified-solver`
+
+*Proof.* At every level the value the solver uses is $E(T)$, by Proposition 6.4 and Theorems 6.7 and
+6.8. $E$ is non-increasing (Lemma 6.2), so if it takes the same value at the ends of an interval it is
+constant on it, and splitting intervals finds the same points as scanning every level from 0 to $(2t -
+p)\,d_{\max}$; by Lemma 6.2 no point is lost below $d_{\min}\lceil s/p\rceil$ or above $(2t - p)\,
+d_{\max}$. The scan keeps $(E(T), 2T)$ whenever $E(T)$ is below every earlier value, so its points are
+those of Proposition 6.3, the points of $\mathrm{Min}\,\mathcal P = \mathcal F$ (Theorem 4.5), and they
+increase in makespan and decrease in cost, so they are pairwise incomparable. Every listed point is
+achieved (Theorems 4.5 and 4.1). A feasible plan of cost $C$ and makespan $M$ gives, by Theorem 4.4, an
+admissible partition with loads at most $T = \lfloor M/2 \rfloor$, so $E(T) \le C$. Let $T_1 \le T$ be
+the least level with $E(T_1) \le E(T)$; then $E(T_1) = E(T)$ and $E$ drops at $T_1$, so $(E(T), 2T_1)$
+is listed, and it weakly dominates $(C, M)$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+`lake exe zeno-front` runs this solver. The C++ solver `zeno` is not verified; its fronts are checked
+through certificates (§8).
+
+```{=html}
+</details>
+```
 
 ```{=html}
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** This is a Lean result with no single counterpart in the note: it assembles Corollary 4.8, Proposition 7.1, Theorems 7.5 and 7.6 and the bracket of Proposition 7.3 into one executable function and one theorem.
+*Lean:* `solveFront`, `solveFront_eq`, `mem_solveFront_iff`, `solveFront_isParetoFront_hub`, `useTreeDP`
+(Solver.lean, TreeBound.lean); `scanFront`, `mem_scanFront`, `scanFront_pairwise`, `splitFront_eq`,
+`breakpoints_eq_scanFront` (Breakpoints.lean). Corollaries: `solveFront_isParetoFront` under (A1) and
+`solveFront_isParetoFront_ATri` under (AΔ) (Solver.lean).
 
-**Lean** `ZenoFront.solveFront_isParetoFront` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.solveFront_isParetoFront_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **The solver is correct.** Under (S) and (A1), with `1 ≤ p ≤ t`, `solveFront` is the Pareto
-front of the (cost, makespan) pairs of the feasible plans: every listed point is achieved, every
-feasible plan is weakly dominated by a listed point, and the points are pairwise incomparable. -/
-theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+/-- **The solver is correct.** Under (S) and the triangles through a hub, with `1 ≤ p ≤ t`,
+`solveFront` is the Pareto front of the (cost, makespan) pairs of the feasible plans: every
+listed point is achieved, every feasible plan is weakly dominated by a listed point, and the
+points are pairwise incomparable. -/
+theorem solveFront_isParetoFront_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
     (c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 414–449](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L414-L449){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 435–473](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L435-L473){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`solveFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L331-L352), [`solveFront_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L354-L401), [`mem_solveFront_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L403-L414), [`useTreeDP` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeBound.lean#L566-L572), [`scanFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Breakpoints.lean#L30-L36), [`mem_scanFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Breakpoints.lean#L38-L79), [`scanFront_pairwise` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Breakpoints.lean#L81-L105), [`splitFront_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Breakpoints.lean#L175-L205), [`breakpoints_eq_scanFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Breakpoints.lean#L212-L222), [`solveFront_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L475-L480), [`solveFront_isParetoFront_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Solver.lean#L482-L487)
+:::
 
 
 ```{=html}

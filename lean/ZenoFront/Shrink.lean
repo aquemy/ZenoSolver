@@ -15,12 +15,12 @@ Two operations that keep a grouping admissible:
 
 * **Shrinking** (`Admissible.exists_shrink`). An admissible grouping with at least `s ≥ p`
   landings, `s ≡ p (mod 2)`, contains an admissible grouping with exactly `s` landings. This is
-  the partition form of Lemma 4.4 (SH) of the note. It works on the groups directly: remove two
+  Lemma 4.3 (shrinking) of the note. It works on the groups directly: remove two
   free landings of a plane that has at least three, or else remove the two copies of a city that
   carry a link.
 * **Merging cities** (`Admissible.map`). Relabelling the cities by any map `rep` keeps a
   grouping admissible. With `rep` sending each city to a city that is no slower and no more
-  expensive, this is the dominance reduction of §7.6: it lowers neither admissibility nor cost
+  expensive, this is the dominance reduction of §6: it lowers neither admissibility nor cost
   nor loads.
 -/
 
@@ -214,7 +214,7 @@ theorem exists_shrink_aux {s : ℕ} (hps : p ≤ s) : ∀ (N : ℕ) (X : Groups 
     obtain ⟨Z, hZ, hZle, hZsize⟩ := exists_shrink_aux hps N Y h' hw' (by omega)
     exact ⟨Z, hZ, fun k => (hZle k).trans (hle k), hZsize⟩
 
-/-- **Shrinking** (partition form of Lemma 4.4, SH): an admissible grouping with at least
+/-- **Shrinking** (Lemma 4.3): an admissible grouping with at least
 `s` landings, where `p ≤ s` and `s ≡ p (mod 2)`, contains an admissible grouping with exactly
 `s` landings. -/
 theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} (hps : p ≤ s)

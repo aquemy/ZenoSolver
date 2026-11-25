@@ -1,4 +1,4 @@
-# the Proposition 6.5 instance: the two search gaps close harmful waiting (Theorem 6.9, SearchData.closed_sound)
+# the Proposition 5.7 instance: the two search gaps close harmful waiting (Theorem 5.3, SearchData.closed_sound)
 zeno-certificate 2
 instance 2 7 4
 d 3 19

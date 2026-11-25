@@ -137,7 +137,7 @@
     const x = linear(T0, T1, m.l + 16, W - m.r);
     const top = m.t, bottom = H - m.b;
 
-    // No plan below T_lo; E is constant from T_hi on (Proposition 7.10).
+    // No plan below T_lo; E is constant from T_hi on (Proposition 3.6).
     svgEl("rect", { x: x(T0), y: top, width: x(ex.Tlo) - x(T0), height: bottom - top, class: "alg-band" }, svg);
     svgText(svg, (x(T0) + x(ex.Tlo)) / 2, top + 16, "E = ∞", "alg-tick-muted");
     for (const [T, name] of [[ex.Tlo, "T_lo"], [ex.Thi, "T_hi"]]) {
@@ -171,7 +171,7 @@
       hoverable(hit, () => {
         const rows = [[`T = ${r.T}`, `makespan 2gT = ${r.makespan}`]];
         if (r.E === null) {
-          rows.push(["E(T) = ∞", "no plan: below T_lo (Proposition 7.10)"]);
+          rows.push(["E(T) = ∞", "no plan: below T_lo (Proposition 3.6)"]);
           return rows;
         }
         rows.push([`E(T) = ${r.E}`, "cheapest admissible groups"]);
@@ -228,7 +228,7 @@
         rows.push([`E = ${r.E}`, groups(r.partition)]);
         rows.push(r.L === r.U
           ? ["closed", "L = U, so E = L = U"]
-          : ["open", `L < U; E = U since q_max = ${inst.qmax} ≤ 2 (Proposition 7.4)`]);
+          : ["open", `L < U; E = U since q_max = ${inst.qmax} ≤ 2 (a shortcut of the C++ solver, checked by the certificate)`]);
         return rows;
       }, () => {
         cursor.setAttribute("x", cx(i) - bw / 2);
@@ -317,7 +317,7 @@
       }
     }
 
-    // Replay the recurrence of Lemma 7.2 cell by cell, rows m = 1, 2, ... in order.
+    // Replay the recurrence of Lemma 6.1 cell by cell, rows m = 1, 2, ... in order.
     let timer = null;
     const button = controls && controls.querySelector("button");
     const finish = () => {

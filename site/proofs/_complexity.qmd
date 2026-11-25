@@ -1,32 +1,74 @@
 ## Complexity {#sec-complexity}
 
-§8 explains why no fast rule that schedules a fixed multiset of landings can be exact, and why the
-dynamic programs are pseudo-polynomial. None of it is formalized.
+Two reductions to $M(X) \le 2T$ and the step count of the link-forest DP (§7). The strong
+NP-hardness of 3-Partition is the one cited fact; the note uses it in a remark, not in a
+statement.
 
-### Theorem 8.1 {#node-theorem-8-1}
+### Theorem 7.1 (3-Partition reduction) {#node-theorem-7-1}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Theorem 8.1.** Deciding $M(X) \le 2T$, with $d$, $X$, $p$ and $T$ as input, is strongly NP-complete.
+**Theorem 7.1 (3-Partition reduction).** Let $a_1, \dots, a_{3m}$ and $B$ be natural numbers with
+$\sum_i a_i = mB$ and $B/4 < a_i < B/2$ for every $i$. In the symmetric instance with one city of
+duration $a_i$ for each $i$, $p = m$ planes and $t = 2m$ passengers (so $s = 3m$), the multiset $X$ that
+lands once at every city has $M(X) \le 2B$ iff the $a_i$ split into $m$ triples of sum $B$.
+
+::: {.node-lean}
+Lean: [`threePartition_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L219-L261)
+:::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Hypotheses** $p$ in the input · **Uses** [2.4](#node-lemma-2-4)
+theory note, §7 · ledger `thm-8-1`
 
-*Proof.* Membership: guess the partition and a parity matrix, and check Definition 2.2. Hardness, from
-3-Partition, which is strongly NP-complete: given integers $a_1,\dots,a_{3m}$ with $B/4 < a_i < B/2$ and
-$\sum_i a_i = mB$, can they be split into $m$ triples of sum $B$? Take $3m$ cities with $d_i = a_i$, $p = m$
-and $t = 2m$ (so $s = 3m$), $X$ containing every city once, and $T = B$. Each city lies in one group, so every
-component of $H$ is one plane with its cities, and admissibility makes every group odd (Lemma 2.4). A
-3-partition gives $m$ triples, odd groups of duration $B$. Conversely, groups of duration at most $B$ summing
-to $mB$ all have duration exactly $B$; a group of one or two items has duration below $B$ and one of four or
-more above $B$, so all groups are triples. The numbers are those of the 3-Partition instance, so the reduction
-preserves strong NP-hardness. $\square$
+*Proof.* Every city lies in one group, so by Lemma 2.3 a partition of $X$ is admissible iff all its groups
+are odd. A split into triples of sum $B$ is a partition into odd groups of load $B$, so $M(X) \le 2B$.
+Conversely, $X$ has an admissible partition (any $m$ groups of three cities), so $M(X) \le 2B$ is
+attained by an admissible partition with every load at most $B$. The loads
+sum to $mB$, so each is $B$. A group of one or two cities has load below $B$, as $a_i < B/2$, and a
+group of four or more has load above $B$, as $a_i > B/4$. So every group is a triple of sum $B$.
+$\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `threePartition_iff`, `admissible_iff_odd_of_disjoint` (Complexity.lean); `minMakespan`
+(Achievability.lean).
+
+**Lean** `ZenoFront.threePartition_iff` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 7.1 (the 3-Partition reduction).** Let `a_1, …, a_{3m}` and `B` be natural numbers
+with `Σ_i a_i = mB` and `B/4 < a_i < B/2` (which make every `a_i`, and `B` when `m ≥ 1`,
+positive). In the symmetric instance with one city of duration `a_i` for each `i`, `p = m` planes
+(and `t = 2m` passengers, so `s = 3m`), the multiset `X` that lands once at every city has
+`M(X) ≤ 2B` iff the `a_i` split into `m` triples of sum `B`, an assignment `g` of the indices to the
+triples.
+
+The numbers of the instance are the `a_i`, `B` and `m`, so the reduction preserves strong
+NP-hardness (the hardness of 3-Partition is cited, not formalised). -/
+theorem threePartition_iff {m B : ℕ} (a : Fin (3 * m) → ℕ) (hsum : ∑ i, a i = m * B)
+    (hlo : ∀ i, B < 4 * a i) (hhi : ∀ i, 2 * a i < B) :
+    minMakespan a m univ.val ≤ 2 * B ↔
+      ∃ g : Fin (3 * m) → Fin m, ∀ k, #{i | g i = k} = 3 ∧ ∑ i with g i = k, a i = B := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 219–261](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L219-L261){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`admissible_iff_odd_of_disjoint` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L73-L103), [`minMakespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1059-L1062)
+:::
+
 
 ```{=html}
 </details>
@@ -34,36 +76,70 @@ preserves strong NP-hardness. $\square$
 
 :::
 
-### Proposition 8.2 (fixed $p$) {#node-proposition-8-2}
+### Proposition 7.2 (Partition reduction, $p = 2$) {#node-proposition-7-2}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Proposition 8.2 (fixed $p$).** For $p = 2$ the problem stays NP-complete, even with positive durations. For
-every fixed $p$ it is solvable in time polynomial in $n$, $s$ and $T$. So for fixed $p$ it is weakly
-NP-complete.
+**Proposition 7.2 (Partition reduction, $p = 2$).** Let $a_1, \dots, a_m$ be natural numbers with sum
+$2B$, $r \ge m$ odd and $K = B + 1$. In the symmetric instance with $2r$ cities, of durations $a_i + K$
+for $i \le m$ and $K$ for the other $2r - m$, $p = 2$ and $t = r + 1$ (so $s = 2r$), the multiset $X$
+that lands once at every city has $M(X) \le 2(B + rK)$ iff some sub-multiset of the $a_i$ sums to $B$.
+All durations are positive.
+
+::: {.node-lean}
+Lean: [`partition_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L323-L423)
+:::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Uses** [2.2](#node-definition-2-2), [2.4](#node-lemma-2-4)
+theory note, §7 · ledger `prop-8-2`
 
-*Proof.* Hardness, from Partition: given $a_1,\dots,a_m$ with sum $2B$, is there a subset of sum $B$? Choose an
-odd $r \ge m$, add $2r - m$ zero items, and give each of the $2r$ items its own city of duration $a_i + K$,
-with $K = B + 1$. Let $p = 2$, $t = r + 1$ (so $s = 2r$) and $T = B + rK$. Distinct cities make both groups
-odd (Lemma 2.4). If a subset of sum $B$ exists, pad both sides with zero items to $r$ items each, which
-$r \ge m$ allows: two odd groups of duration $B + rK$. Conversely, the two groups have duration exactly
-$B + rK$ each, since they sum to $2B + 2rK$. A group with $r + 1$ items or more has duration at least
-$(r+1)K > B + rK$, so both groups have $r$ items, and the original items of one of them sum to $B$.
+*Proof.* By Lemma 2.3, a partition of $X$ is admissible iff both groups are odd. The loads sum to $2B +
+2rK$. If the $a_i$ with $i \in S$ sum to $B$, put the cities of $S$ and $r - |S|$ cities of duration $K$
+in one group and the other $r$ cities in the other ($|S| \le m \le r$, and there are $2r - m \ge r - |S|$
+cities of duration $K$): two odd groups of load $B + rK$. Conversely, an admissible partition with both
+loads at most $B + rK$ has both loads equal to $B + rK$. A group of $r + 1$ cities or more has load at
+least $(r + 1)K > B + rK$, so both groups have $r$ cities, and the $a_i$ of the first sum to $B$.
+$\square$
 
-Algorithm for fixed $p$: process the cities one at a time, with states made of the group durations (each in
-$[0, T]$), the parities of $|X_k|$ and of $h_k$, and whether each group is non-empty: $(T+1)^p 8^p$ states.
-For city $i$, choose how its $X(i)$ copies split among the planes ($O(s^{p-1})$ ways), and an even set of
-planes that received a copy, on which $h_{k,i} = 1$ (at most $2^{p-1}$ ways). Conditions (h1) and (h3) are
-local to the city, and (h2) is checked at the end. The time is $O(n\,(T+1)^p\, 8^p\, s^{p-1}\, 2^p)$. $\square$
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `partitionDur`, `partitionDur_pos`, `partition_iff` (Complexity.lean).
+
+**Lean** `ZenoFront.partition_iff` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Proposition 7.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
+numbers with sum `2B`, `r ≥ m` odd and `K = B + 1`. In the symmetric instance with `2r` cities,
+of durations `a_i + K` for `i ≤ m` and `K` for the other `2r − m` (all positive,
+`partitionDur_pos`), `p = 2` planes (and `t = r + 1` passengers, so `s = 2r`), the multiset `X`
+that lands once at every city has `M(X) ≤ 2(B + rK)` iff some sub-multiset of the `a_i` sums to
+`B`, a set `S` of indices.
+
+The hardness of Partition is cited, not formalised. -/
+theorem partition_iff {m r B : ℕ} (a : Fin m → ℕ) (hsum : ∑ i, a i = 2 * B) (hr : Odd r)
+    (hmr : m ≤ r) :
+    minMakespan (partitionDur a r (B + 1)) 2 univ.val ≤ 2 * (B + r * (B + 1)) ↔
+      ∃ S : Finset (Fin m), ∑ i ∈ S, a i = B := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 323–423](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L323-L423){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`partitionDur` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L276-L279), [`partitionDur_pos` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L281-L285)
+:::
+
 
 ```{=html}
 </details>
@@ -71,22 +147,154 @@ local to the city, and (h2) is checked at the end. The time is $O(n\,(T+1)^p\, 8
 
 :::
 
-### Corollary 8.3 {#node-corollary-8-3}
+### Theorem 7.3 (step count) {#node-theorem-7-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Corollary 8.3.** $E(T)$, and under (S) and (A1) the front, are computable in pseudo-polynomial time
-(Theorem 7.5). So computing the front is not strongly NP-hard unless P = NP. Whether deciding $E(T) \le C$ is
-NP-hard, with $t$ in unary as in PDDL, is not established here.
+**Theorem 7.3 (step count).** In the cost model below:
+
+(a) at every level $T$, the link-forest DP of Theorem 6.7 with a step counter returns the value of the
+DP, which is $E(T)$ when $1 \le p$, $T \le T_{\max}$ and the table is that of Lemma 6.1, in at most
+$P(n, t, p, T) = 30\,(n + 1)^2(p + 1)^2(t + 1)^2(T + 1)$ steps, whatever table it reads;
+
+(b) with $1 \le p \le t$, building the one-plane table once for the levels $0, \dots, T_{\rm top} = (2t -
+p)\,d_{\max}$ and running the counted DP at each of them returns `solveFront d c t p`, the list of
+Theorem 6.9, in at most $(T_{\rm top} + 1)\,P(n, t, p, T_{\rm top})$ steps, the table included.
+
+A step is one iteration of a minimum loop, one cell of a table, one element scanned by a membership
+test, or one level of the scan; computing the $n$ link labels costs $n^2$ steps, and testing them $n^2$
+more; constant-time work outside loops is free.
+
+::: {.node-lean}
+Lean: [`treeBoundSteps_value` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L922-L929), [`treeBoundSteps_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L931-L936), [`treeBoundSteps_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L988-L994), [`scanSteps_fst` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1099-L1107), [`scanSteps_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1109-L1148), [`scanSteps_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1150-L1156)
+:::
 
 ```{=html}
-<details class="node-more"><summary>In the note</summary>
+<details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Uses** [7.5](#node-theorem-7-5)
+theory note, §7 · ledger `cor-8-3`
+
+*Proof.* The counted functions are those of Lemma 6.1 and Theorem 6.7 line for line, with every loop
+counting its iterations; each returns its value and its number of steps, and the value equals the
+uncounted one, by induction on the tables. With $R \le n$ labels, $S$ landings, $P$ planes and level $T$,
+one level, the link labels included, takes at most $7\,(P + 1)^2(n + 1)^2(T + 1)(S + 2)^2$ steps, by
+counting the cells of $\mathrm{Ch}$, $\mathrm{Sub}$, $\mathrm{Root}$ and $\mathrm{For}$ and the iterations
+of their minima; with $S = 2t - p$ this is at most $P(n, t, p, T)$, which gives (a). For (b), the scan returns the breakpoints of $E$ on the levels $0, \dots, T_{\rm top}$, which is
+`solveFront d c t p` (proof of Theorem 6.9). The one-plane table takes at most $(s + 1)(T_{\rm top} +
+1)(n + 1)$ steps; each level takes at most the per-level bound at $T_{\rm top}$, which grows with $T$,
+plus one step; and the sum is at most $(T_{\rm top} + 1)\,P(n, t, p, T_{\rm top})$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+*Remark (hardness, from the literature).* 3-Partition is strongly NP-complete and Partition is
+NP-complete (Garey & Johnson, *Computers and Intractability*, 1979). The instance of Theorem 7.1 has the
+numbers $a_i$, $B$ and $m$ of the 3-Partition instance, and both instances are written down in polynomial
+time; granted these cited results, deciding $M(X) \le 2T$ is therefore strongly NP-hard when $p$ is part
+of the input, by Theorem 7.1, and stays NP-hard for $p = 2$, by Proposition 7.2. By Theorem 7.3, by contrast,
+$E(T)$ and the front take a number of steps polynomial in $n$, $t$, $p$ and the largest level $(2t -
+p)\,d_{\max}$: pseudo-polynomial in the durations. In particular, unless P = NP, no polynomial algorithm,
+such as a greedy, computes $M(X)$ for every multiset $X$. The hardness results are cited, not
+formalised.
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `treeBoundSteps`, `treeBoundSteps_value`, `treeBoundSteps_eq_minCost`,
+`treeBoundSteps_le_levelBound`, `treeBoundSteps_le`, `stepBound`, `scanSteps`, `scanSteps_fst`,
+`scanSteps_le` (Complexity.lean).
+
+**Lean** `ZenoFront.treeBoundSteps_value` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 7.3 (a), value.** The counted DP returns the value of `treeBoundAt`. -/
+theorem treeBoundSteps_value (d c : Fin n → ℕ) (p s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
+    (T : ℕ) : (treeBoundSteps d c p s Tmax table T).1 = treeBoundAt d c p s Tmax table T := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 922–929](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L922-L929){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.treeBoundSteps_eq_minCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- The value of the counted DP is `E(T)` at every level `T ≤ Tmax` (`treeBoundAt_eq_minCost`). -/
+theorem treeBoundSteps_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 ≤ p)
+    (hT : T ≤ Tmax) :
+    (treeBoundSteps d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T).1 =
+      minCost d c t p T := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 931–936](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L931-L936){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.treeBoundSteps_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 7.3 (a), steps.** At every level, the counted link-forest DP of an instance with
+`n` cities, `t` passengers and `p` planes (`s = 2t − p` landings) takes at most
+`P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps, whatever the one-plane table. -/
+theorem treeBoundSteps_le (d c : Fin n → ℕ) (t p Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
+    (T : ℕ) : (treeBoundSteps d c p (2 * t - p) Tmax table T).2 ≤ stepBound n t p T := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 988–994](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L988-L994){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.scanSteps_fst` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 7.3 (b), value.** With `1 ≤ p ≤ t`, the scan returns the front of the verified
+solver (`solveFront_eq`): the breakpoints of `E`, which under (S) and (A1) are the Pareto front
+(`scanSteps_isParetoFront`). -/
+theorem scanSteps_fst (d c : Fin n → ℕ) {t p : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
+    (scanSteps d c t p).1 = solveFront d c t p := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 1099–1107](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1099-L1107){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.scanSteps_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 7.3 (b), steps.** The scan of the levels `0, …, (2t − p) · d_max` takes at most
+`((2t − p) · d_max + 1) · P(n, t, p, (2t − p) · d_max)` steps, the one-plane table included. -/
+theorem scanSteps_le (d c : Fin n → ℕ) (t p : ℕ) :
+    (scanSteps d c t p).2 ≤
+      ((2 * t - p) * maxDur d + 1) * stepBound n t p ((2 * t - p) * maxDur d) := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 1109–1148](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1109-L1148){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.scanSteps_isParetoFront` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The scan gives the front.** Under (S) and (A1), with `1 ≤ p ≤ t`, the list computed by the
+counted scan is the Pareto front of the feasible plans. -/
+theorem scanSteps_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1) (c : Fin n → ℕ)
+    {t p : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
+    IsParetoFront (achievable N c t p) (scanSteps N.d c t p).1 := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 1150–1156](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1150-L1156){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`treeBoundSteps` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L911-L920), [`treeBoundSteps_le_levelBound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L945-L960), [`stepBound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L962-L963), [`scanSteps` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L1089-L1097)
+:::
 
 
 ```{=html}

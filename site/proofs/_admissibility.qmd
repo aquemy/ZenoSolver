@@ -1,91 +1,51 @@
-## Segments, admissible partitions, link forests {#sec-admissibility}
+## Admissible partitions {#sec-admissibility}
 
-The combinatorial core (§2 of the note). A partition of the landings among the planes can be flown
-without waiting exactly when it is *admissible*, a parity condition that is a $\mathcal T$-join of the
-plane-city incidence graph. It is what makes the front computable without fixing a schedule.
+A partition of the landings among the planes is *admissible* when it has a parity matrix (§2 of
+the note). Its integer, disjoint and link-forest forms are what the symmetric front, the dynamic
+programs and the reductions use.
 
-### Lemma 2.1 {#node-lemma-2-1}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean counts landing records by hub, not segments; on routes with central flights the two differ.]{.node-gap}
-:::
-
-::: {.node-body}
-**Lemma 2.1.** On every route from $C_I$ to $C_G$, $\#A - \#\bar A = 1$.
-
-::: {.node-lean}
-Parts in Lean: [`PlaneFeasible.cntA_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L373-L380)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §2
-
-*Proof.* Only $A$ and $\bar A$ segments change hub. The route starts in $C_I$ and ends in $C_G$, so the
-changes are $A, \bar A, \dots, A$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** The Lean lemma is the count on a route after Step 1 of Theorem 4.7, read off the legs (`#A = #Ā + 1`).
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.PlaneFeasible.cntA_eq` [machine-checked]{.badge .ok}
-
-```lean
-/-- `#A = #Ā + 1` for every plane (Lemma 2.1 after Step 1). -/
-theorem cntA_eq (h : PlaneFeasible N legs) :
-    cntA (fun _ => true) (landingRecs legs) = cntAbar (fun _ => true) (landingRecs legs) + 1 := …
-```
-
-[`lean/ZenoFront/Converse.lean`, lines 373–380](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L373-L380){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Definition 2.2 (admissible partition) {#node-definition-2-2}
+### Definition 2.1 (admissible partition) {#node-definition-2-1}
 
 ::: {.node-badge}
 [Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Definition 2.2 (admissible partition).** Let $X_1,\dots,X_p$ be a partition of $X$. A *parity matrix* for
-it is $h \in \{0,1\}^{p\times n}$ such that
+**Definition 2.1 (admissible partition).** Let $X_1, \dots, X_p$ be a partition of $X$. A *parity
+matrix* for it gives every plane $k$ a set $\eta_k$ of central cities such that
 
-* (h1) $h_{k,i} = 1$ implies $X_k(i) \ge 1$;
-* (h2) $h_k := \sum_i h_{k,i} \equiv |X_k| + 1 \pmod 2$ for every plane $k$;
-* (h3) $\sum_k h_{k,i} \equiv 0 \pmod 2$ for every city $i$.
+* (h1) $\eta_k \subseteq \mathrm{supp}\,X_k$;
+* (h2) $|\eta_k| \equiv |X_k| + 1 \pmod 2$;
+* (h3) every city lies in an even number of the sets $\eta_k$.
 
-The partition is *admissible* if it has a parity matrix. Write $\eta_k = \{i : h_{k,i} = 1\}$, so that
-$|\eta_k| = h_k$, and $Z(h) = \bigcup_k \eta_k$ for the cities that $h$ *touches*. A plane with $|X_k|$ even
-is an *even plane*. An empty group would need $h_k = 0 \equiv 1$ by (h1)–(h2), so admissible partitions have
-non-empty groups. Admissibility is decidable by enumerating $h$ on the support of the groups. This
-definition replaces the component form of the first version (Lemma 2.4 shows they agree), and is the one to
-formalise.
+The partition is *admissible* if it has a parity matrix. The matrix *touches* the cities of $Z(\eta) =
+\bigcup_k \eta_k$, and its *entries* are the pairs $(k, i)$ with $i \in \eta_k$.
 
 ::: {.node-lean}
-Lean: [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Admissible.lean#L64-L66)
+Lean: [`IsParityWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L54-L64), [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L66-L67)
 :::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §2
+theory note, §2 · ledger `def-2-2`
 
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+In graph terms, the entries of a parity matrix form a $\mathcal T$-join of the bipartite graph joining
+plane $k$ to city $i$ when $i \in X_k$, for the set $\mathcal T$ of planes with $|X_k|$ even.
 
 ```{=html}
 </details>
@@ -95,21 +55,9 @@ Lean: [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** `IsParityWitness X h` is (h1)–(h3) with `h k : Finset (Fin n)`, one set of cities per plane; `Admissible X` is `∃ h, IsParityWitness X h`, decidable through `witnessCandidates`.
+*Lean:* `IsParityWitness`, `Admissible` (Admissible.lean).
 
-**Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
-
-```lean
-/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
-the component condition by Lemma 2.4). -/
-def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
-```
-
-[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.IsParityWitness` [Lean definition]{.badge .ok}
+**Lean** `ZenoFront.IsParityWitness` [Lean definition]{.badge .ok}
 
 ```lean
 /-- `h` is a *parity witness* for the grouping `X` (Claim A of the note): `h k` is a set of
@@ -125,7 +73,16 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   col : ∀ i, Even #{k | i ∈ h k}
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 54–64](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L54-L64){.lean-src}
+
+**Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
+
+```lean
+/-- A grouping is *admissible* if it has a parity witness (Definition 2.1 of the note). -/
+def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
+```
+
+[`lean/ZenoFront/Admissible.lean`, lines 66–67](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L66-L67){.lean-src}
 
 
 ```{=html}
@@ -134,90 +91,31 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
 
 :::
 
-### Lemma 2.3 (integer form) {#node-lemma-2-3}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 2.3 (integer form) [A′].** A partition is admissible if and only if some
-$\tilde h \in \mathbb N^{p\times n}$ has $\tilde h_{k,i} \le X_k(i)$, $\sum_i \tilde h_{k,i} \equiv |X_k| + 1$
-for every $k$, and $\sum_k \tilde h_{k,i} \equiv 0$ for every $i$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Uses** [2.2](#node-definition-2-2)
-
-*Proof.* A parity matrix is such an $\tilde h$, by (h1). Conversely, $h = \tilde h \bmod 2$ satisfies
-(h1)–(h3): $h_{k,i} = 1$ forces $\tilde h_{k,i} \ge 1$, and reduction mod 2 keeps both parity conditions. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 2.4 (component form) {#node-lemma-2-4}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 2.4 (component form).** Let $H$ be the bipartite graph on planes and cities with an edge $\{k,i\}$
-iff $X_k(i) \ge 1$.
-
-(a) The partition is admissible iff every connected component of $H$ contains an even number of even planes.
-
-(b) If it is admissible, then for every spanning forest $\Theta$ of $H$ it has a parity matrix whose support
-$\{(k,i) : h_{k,i} = 1\}$ is a set of edges of $\Theta$.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Uses** [2.2](#node-definition-2-2)
-
-*Proof.* By (h1), the support $J$ of a parity matrix is a set of edges of $H$. By (h2), $\deg_J(k)$ is odd
-exactly at the even planes, and by (h3) $\deg_J(i)$ is even at every city. So parity matrices are the
-$\mathcal T$-joins of $H$, for the set $\mathcal T$ of even planes. If $J$ exists, the degrees in a component
-$K$ sum to $2|J \cap E(K)|$, so $K$ has an even number of odd-degree vertices, that is, of even planes.
-Conversely, assume this parity condition and root every tree of $\Theta$. For a vertex $v$ let
-$\epsilon(v) \in \{0,1\}$ be the parity of the number of even planes in the subtree of $v$, and put the edge
-from $v$ to its parent in $J$ iff $\epsilon(v) = 1$. Then $\deg_J(v) = \epsilon(v) + \sum_u \epsilon(u)$
-over the children $u$ of $v$ (without the first term at a root), and
-$\epsilon(v) \equiv [v \in \mathcal T] + \sum_u \epsilon(u)$. So $\deg_J(v) \equiv [v \in \mathcal T]$ at a
-non-root. At a root, $\epsilon(v) = 0$ by assumption, so $\deg_J(v) = \sum_u \epsilon(u) \equiv [v \in \mathcal T]$. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 2.5 {#node-lemma-2-5}
+### Lemma 2.2 (integer form) {#node-lemma-2-2}
 
 ::: {.node-badge}
 [machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Lemma 2.5.** For every parity matrix and every plane $k$, $h_k \le |X_k| - 1$.
+**Lemma 2.2 (integer form).** A partition is admissible iff some $\tilde h \in \mathbb N^{p \times n}$
+has $\tilde h_{k,i} \le X_k(i)$ for all $k, i$, $\sum_i \tilde h_{k,i} \equiv |X_k| + 1 \pmod 2$ for every
+plane $k$, and $\sum_k \tilde h_{k,i}$ even for every city $i$.
 
 ::: {.node-lean}
-Lean: [`IsParityWitness.card_add_one_le` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Admissible.lean#L100-L108)
+Lean: [`admissible_iff_exists_natWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L142-L171)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Uses** [2.2](#node-definition-2-2)
+theory note, §2 · ledger `lem-2-3`
 
-*Proof.* $h_k \le |\mathrm{supp}\,X_k| \le |X_k|$ by (h1), and $h_k \ne |X_k|$ by (h2). $\square$
+*Proof.* The indicator matrix of a parity matrix is such an $\tilde h$, by (h1). Conversely, let
+$\eta_k = \{i : \tilde h_{k,i} \text{ odd}\}$. An odd $\tilde h_{k,i}$ is at least 1, so $X_k(i) \ge
+1$: (h1). $|\eta_k| \equiv \sum_i \tilde h_{k,i}$ gives (h2), and $\#\{k : i \in \eta_k\} \equiv
+\sum_k \tilde h_{k,i}$ gives (h3). $\square$
 
 ```{=html}
 </details>
@@ -227,17 +125,25 @@ Lean: [`IsParityWitness.card_add_one_le` ↗](https://github.com/aquemy/ZenoSolv
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.IsParityWitness.card_add_one_le` [machine-checked]{.badge .ok}
+*Lean:* `admissible_iff_exists_natWitness`, `card_filter_odd_mod_two` (Admissible.lean).
+
+**Lean** `ZenoFront.admissible_iff_exists_natWitness` [machine-checked]{.badge .ok}
 
 ```lean
-/-- Lemma 2.5 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
-`T`-join, not only for forests: `|h k| ≤ |supp X_k| ≤ |X_k|`, and equality is excluded by
-parity. -/
-theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
-    (h k).card + 1 ≤ (X k).card := …
+/-- **Lemma 2.2 (integer form).** A grouping is admissible iff some matrix `w` of naturals has
+`w k i ≤ X_k(i)` (the multiplicity of `i` in `X_k`), `Σ_i w k i ≡ |X_k| + 1 (mod 2)` for every
+plane `k`, and `Σ_k w k i` even for every city `i`. A parity witness is such a matrix with entries
+`0` and `1`; conversely the entries of odd value of a matrix form a parity witness. -/
+theorem admissible_iff_exists_natWitness (X : Groups n p) :
+    Admissible X ↔ ∃ w : Fin p → Fin n → ℕ, (∀ k i, w k i ≤ (X k).count i) ∧
+      (∀ k, (∑ i, w k i) % 2 = ((X k).card + 1) % 2) ∧ ∀ i, Even (∑ k, w k i) := …
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 100–108](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Admissible.lean#L100-L108){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Admissible.lean`, lines 142–171](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L142-L171){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`card_filter_odd_mod_two` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L135-L140)
+:::
 
 
 ```{=html}
@@ -246,28 +152,157 @@ theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
 
 :::
 
-### Definition (link forest) {#node-definition-link-forest}
+### Lemma 2.3 (disjoint groups) {#node-lemma-2-3}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 2.3 (disjoint groups).** If no city lies in two groups, the partition is admissible iff every
+group has odd size.
+
+::: {.node-lean}
+Lean: [`admissible_iff_odd_of_disjoint` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L73-L103)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §2 · ledger `lem-2-4`
+
+*Proof.* If every $|X_k|$ is odd, the empty sets $\eta_k = \emptyset$ form a parity matrix. Conversely,
+take a parity matrix. A city lies in at most one group, hence by (h1) in at most one $\eta_k$, hence by
+(h3) in none. So every $\eta_k$ is empty, and (h2) makes $|X_k|$ odd. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `admissible_iff_odd_of_disjoint` (Complexity.lean).
+
+**Lean** `ZenoFront.admissible_iff_odd_of_disjoint` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 2.3 (disjoint groups).** If no city lies in two groups, a partition is admissible iff
+every group has an odd number of landings. A parity witness can only use a city at the one plane
+that lands there, so every city has degree `0` and the witness is empty; then the row condition
+says `|X_k| + 1` is even. -/
+theorem admissible_iff_odd_of_disjoint {X : Groups n p}
+    (hX : ∀ i k k', i ∈ X k → i ∈ X k' → k = k') : Admissible X ↔ ∀ k, Odd (X k).card := …
+```
+
+[`lean/ZenoFront/Complexity.lean`, lines 73–103](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Complexity.lean#L73-L103){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 2.4 (row bound) {#node-lemma-2-4}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 2.4 (row bound).** For every parity matrix and plane $k$, $|\eta_k| + 1 \le |X_k|$. Hence the
+groups of an admissible partition are non-empty, and $|X| \equiv p \pmod 2$.
+
+::: {.node-lean}
+Lean: [`IsParityWitness.card_add_one_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L101-L109), [`Admissible.card_pos` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L119-L125), [`IsParityWitness.size_mod_two` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L39-L51)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §2 · ledger `lem-2-5`
+
+*Proof.* $|\eta_k| \le |\mathrm{supp}\,X_k| \le |X_k|$ by (h1), and $|\eta_k| \ne |X_k|$ by (h2). By
+(h2), $|X| = \sum_k |X_k| \equiv \sum_k |\eta_k| + p$, and $\sum_k |\eta_k| = \sum_i \#\{k : i \in
+\eta_k\}$ is even by (h3). $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `IsParityWitness.card_add_one_le`, `Admissible.card_pos` (Admissible.lean);
+`IsParityWitness.size_mod_two` (Shrink.lean).
+
+**Lean** `ZenoFront.IsParityWitness.card_add_one_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- Lemma 2.4 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
+`T`-join, not only for forests: `|h k| ≤ |supp X_k| ≤ |X_k|`, and equality is excluded by
+parity. -/
+theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :
+    (h k).card + 1 ≤ (X k).card := …
+```
+
+[`lean/ZenoFront/Admissible.lean`, lines 101–109](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L101-L109){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Admissible.card_pos` [machine-checked]{.badge .ok}
+
+```lean
+/-- Every group of an admissible grouping is non-empty (so the non-emptiness required in the
+note's definition is automatic). -/
+theorem Admissible.card_pos {X : Groups n p} (hX : Admissible X) (k : Fin p) :
+    0 < (X k).card := …
+```
+
+[`lean/ZenoFront/Admissible.lean`, lines 119–125](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L119-L125){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.IsParityWitness.size_mod_two` [machine-checked]{.badge .ok}
+
+```lean
+/-- The size of an admissible grouping has the parity of `p`. -/
+theorem size_mod_two (hw : IsParityWitness X h) : size X % 2 = p % 2 := …
+```
+
+[`lean/ZenoFront/Shrink.lean`, lines 39–51](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L39-L51){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Definition 2.5 (link forest) {#node-definition-2-5}
 
 ::: {.node-badge}
 [Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Definition (link forest).** A *link forest* for $X_1,\dots,X_p$ is a forest $\Lambda$ on the planes
-(without loops or parallel edges) whose edges carry city labels, such that
-
-* (F1) for every plane $u$ and city $i$, at most $X_u(i)$ edges at $u$ are labelled $i$;
-* (F2) $r_u := |X_u| - \deg_\Lambda(u)$ is odd for every plane $u$.
+**Definition 2.5 (link forest).** A *rooted link tree* is a plane with a multiset of *free landings*
+and a list of *children*, each a rooted link tree hung from the plane by a *link* labelled with a
+central city. The group of a plane consists of its free landings, one copy of the label of each of its
+child links, and one copy of the label of its parent link (none for a root). (F2): every plane has an
+odd number of free landings. A *link forest* of a partition is a list of rooted link trees satisfying
+(F2) whose groups are the groups of the partition, up to relabelling the planes.
 
 ::: {.node-lean}
-Lean: [`LTree` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/LinkForest.lean#L50-L52)
+Lean: [`LTree` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L50-L52), [`LKids` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L53-L56), [`LTree.groups` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L65-L68), [`LTree.WF` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L76-L78), [`forestGroups` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L85-L87)
 :::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §2
+theory note, §2 · ledger `def-link-forest`
 
 
 ```{=html}
@@ -282,9 +317,8 @@ Lean: [`LTree` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec
 *Remarks in the note.*
 :::
 
-An edge $\{u, v\}$ labelled $i$ is a *link at $i$*. By (F1) the links at $u$ can be given distinct copies of
-landings of $X_u$: the multiset of their labels is $\le X_u$. The remaining $r_u \ge 1$ landings are the
-*free landings* of $u$.
+Each link uses one copy of its label in each of the two groups it joins, so the links at a plane use
+distinct landings of its group by construction.
 
 ```{=html}
 </details>
@@ -294,7 +328,7 @@ landings of $X_u$: the multiset of their labels is $\le X_u$. The remaining $r_u
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Rooted link trees, as an inductive type: a plane with its free landings and a list of children, each hung by a link labelled with a city.
+*Lean:* `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `forestGroups` (LinkForest.lean).
 
 **Lean** `ZenoFront.LTree` [Lean definition]{.badge .ok}
 
@@ -304,7 +338,49 @@ inductive LTree (n : ℕ) : Type where
   | node (free : Multiset (Fin n)) (kids : LKids n)
 ```
 
-[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
+[`lean/ZenoFront/LinkForest.lean`, lines 50–52](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L50-L52){.lean-src}
+
+**Lean** `ZenoFront.LKids` [Lean definition]{.badge .ok}
+
+```lean
+/-- The child items of a plane: link labels, each with the subtree hanging from it. -/
+inductive LKids (n : ℕ) : Type where
+  | nil
+  | cons (b : Fin n) (child : LTree n) (rest : LKids n)
+```
+
+[`lean/ZenoFront/LinkForest.lean`, lines 53–56](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L53-L56){.lean-src}
+
+**Lean** `ZenoFront.LTree.groups` [Lean definition]{.badge .ok}
+
+```lean
+/-- The groups of the planes of a tree. The root's group is its free landings, one copy of each
+child label and `extra` (one copy of the parent's label for a hanging tree, `0` for a root). -/
+def LTree.groups : LTree n → Multiset (Fin n) → Multiset (Multiset (Fin n))
+  | .node free kids, extra => (free + kids.labels + extra) ::ₘ kids.groups
+```
+
+[`lean/ZenoFront/LinkForest.lean`, lines 65–68](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L65-L68){.lean-src}
+
+**Lean** `ZenoFront.LTree.WF` [Lean definition]{.badge .ok}
+
+```lean
+/-- (F2): every plane has an odd number of free landings. -/
+def LTree.WF : LTree n → Prop
+  | .node free kids => Odd free.card ∧ kids.WF
+```
+
+[`lean/ZenoFront/LinkForest.lean`, lines 76–78](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L76-L78){.lean-src}
+
+**Lean** `ZenoFront.forestGroups` [Lean definition]{.badge .ok}
+
+```lean
+/-- The groups of a forest of rooted trees. -/
+def forestGroups (F : List (LTree n)) : Multiset (Multiset (Fin n)) :=
+  (F.map fun t => t.groups 0).sum
+```
+
+[`lean/ZenoFront/LinkForest.lean`, lines 85–87](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L85-L87){.lean-src}
 
 
 ```{=html}
@@ -313,47 +389,53 @@ inductive LTree (n : ℕ) : Type where
 
 :::
 
-### Lemma 2.6 (link forest) {#node-lemma-2-6}
+### Lemma 2.6 (link forests) {#node-lemma-2-6}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves admissible ⇔ a link forest exists; not that the forest can have at most one edge of each label at each plane.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Lemma 2.6 (link forest) [LF].** A partition is admissible if and only if it has a link forest. An
-admissible partition has a link forest with at most one edge of each label at each plane.
+**Lemma 2.6 (link forests).** A partition is admissible iff it has a link forest.
 
 ::: {.node-lean}
-Parts in Lean: [`admissible_iff_exists_linkForest` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L516-L541)
+Lean: [`admissible_iff_exists_linkForest` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L516-L541)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Uses** [2.3](#node-lemma-2-3), [2.4](#node-lemma-2-4)
+theory note, §2 · ledger `lem-2-6`
 
-*Proof.* (If.) Let $\tilde h_{u,i}$ be the number of edges at $u$ labelled $i$. Then $\tilde h_{u,i} \le X_u(i)$
-by (F1), $\sum_i \tilde h_{u,i} = \deg_\Lambda(u) \equiv |X_u| + 1$ by (F2), and $\sum_u \tilde h_{u,i}$ is
-twice the number of edges labelled $i$. Lemma 2.3 applies. This direction holds for any loopless multigraph
-(a loop would add 2 to the degree but 1 to $\tilde h_{u,i}$).
+*Proof.* (If.) Let $\eta_u$ be the set of cities that label an odd number of links at plane $u$ (child
+and parent links together). Such a city labels a link at $u$, whose copy lies in $X_u$: (h1). The links
+at $u$ number $|X_u|$ minus the free landings of $u$, which is $\equiv |X_u| + 1$ by (F2), and $|\eta_u|$
+has the parity of that number: (h2). Every link counts at both its planes, so for every city the
+numbers of links at the planes sum to an even number: (h3).
 
-(Only if.) Take a spanning forest $\Theta$ of $H$ and a parity matrix with support $J \subseteq E(\Theta)$
-(Lemma 2.4(b)). At each city $i$, $\deg_J(i)$ is even. Split the planes $J$-adjacent to $i$ into
-$\deg_J(i)/2$ pairs, and for each pair $\{u, v\}$ add to $\Lambda$ an edge $uv$ labelled $i$. Then $u \ne v$,
-since $J$ has at most one edge per plane and city. At most one edge at $u$ is labelled $i$, and only if
-$(u,i) \in J$, hence $X_u(i) \ge 1$: (F1) holds. $\deg_\Lambda(u) = \deg_J(u) = h_u \equiv |X_u| + 1$: (F2)
-holds.
+(Only if.) By induction on the number of planes; with none, the empty list works. Let $\eta$ be a
+parity matrix with the fewest entries.
 
-$\Lambda$, built so far as a multigraph, has no cycle, and in particular no parallel edges. Take a cycle: a
-closed trail $u_0, u_1, \dots, u_{m-1}, u_0$ with $m \ge 2$ distinct edges $u_{j-1}u_j$ labelled $i_j$
-(indices mod $m$), with distinct vertices if $m \ge 3$; $m = 2$ is the case of parallel edges. It gives the
-closed walk $u_0, i_1, u_1, i_2, \dots, i_m, u_0$
-in $J$, which never uses the same edge twice in a row, even cyclically. At a city $i_j$ it arrives from
-$u_{j-1}$ and leaves to $u_j \ne u_{j-1}$. At a plane $u_j$ it arrives from $i_j$ and leaves to $i_{j+1}$;
-if $i_j = i_{j+1}$, then $u_j$ would belong to two different pairs at that city (the two distinct edges of
-the cycle at $u_j$). But a closed walk of positive length in a forest uses some edge twice in a row: at a
-vertex of the walk farthest from the root of its tree, both neighbours on the walk are its parent. $\square$
+*A minimal matrix has no cycle.* View each entry $(k, i)$ as the vector $e_k + e_i$ over $\mathbb Z/2$,
+indexed by the planes and the touched cities. If these vectors were linearly dependent, a non-empty set
+of entries would meet every plane and every city an even number of times; deleting it would keep
+(h1)–(h3) with fewer entries. So they are independent. They lie in the hyperplane of vectors whose
+coordinates sum to 0, which does not contain the unit vector of a plane, so
+$\#\text{entries} + 1 \le p + |Z(\eta)|$. By (h3) every touched city carries at least two entries, so
+$2|Z(\eta)| \le \#\text{entries}$.
+
+*Removing a leaf.* If some $\eta_u = \emptyset$, then $|X_u|$ is odd by (h2). The other planes, with the
+same sets $\eta_k$, are admissible; by induction they have a link forest, and $u$ is added as a tree of
+its own, with free landings $X_u$. Otherwise some $|\eta_u| = 1$: if every $|\eta_k| \ge 2$, then
+$\#\text{entries} \ge 2p$, while the two inequalities above give $\#\text{entries} \le 2p - 2$. Let
+$\eta_u = \{i\}$. By (h3) another plane $v$ has $i \in \eta_v$. Remove plane $u$, and remove one copy
+of $i$ from $X_v$ and from $\eta_v$. This is a parity matrix of the smaller partition: (h1) holds for
+the other cities of $\eta_v$, the size and the row of $v$ both drop by one, and the column of $i$ drops
+by two. By induction the smaller partition has a link forest. Hang $u$, with free landings $X_u - \{i\}$,
+from the plane whose group is $X_v - \{i\}$, by a link labelled $i$. That plane's group becomes $X_v$, the
+group of $u$ is $X_u$, and $|X_u| - 1$ is odd because $|\eta_u| = 1$ and (h2) make $|X_u|$ even.
+$\square$
 
 ```{=html}
 </details>
@@ -363,11 +445,12 @@ vertex of the walk farthest from the root of its tree, both neighbours on the wa
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** "If" (`admissible_forestPartition`) builds the witness from the cities with an odd number of links at a plane. "Only if" (`Admissible.exists_linkForest`) removes a leaf and recurses on the planes: a witness with the fewest edges has a plane with exactly one city, by the rank bound of Lemma 2.8(b). It does not go through the spanning-forest construction of the note's proof, which needs Lemma 2.4.
+*Lean:* `admissible_iff_exists_linkForest`, `admissible_forestPartition`, `linkWitness`
+(TreeExact.lean); `Admissible.exists_linkForest`, `IsParityWitness.exists_card_eq_one_of_minimal`,
+`attachForest` (LinkForest.lean); `Admissible.exists_minimal`, `IsParityWitness.exists_edgeCount_lt`
+(MinimalWitness.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.admissible_iff_exists_linkForest` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.admissible_iff_exists_linkForest` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Lemma 2.6 (link forest).** A grouping is admissible iff its groups are, as a multiset, the
@@ -377,78 +460,42 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
     Admissible X ↔ ∃ F : List (LTree n), (∀ t ∈ F, t.WF) ∧ forestGroups F = univ.val.map X := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Corollary 2.7 {#node-corollary-2-7}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Corollary 2.7.** If $|X| = s$, every link forest has at most $t - p$ edges, and each of its trees has at
-most $q_{\max} := \min(p,\ t - p + 1)$ planes.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Hypotheses** $\lvert X\rvert = s$ · **Uses** [2.6](#node-lemma-2-6)
-
-*Proof.* By (F2), $\deg_\Lambda(u) \le |X_u| - 1$. Summing over planes, $2\#E(\Lambda) \le s - p = 2(t-p)$.
-A tree with $q$ planes has $q - 1$ edges, so $q - 1 \le t - p$. $\square$
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 2.8 (few touched cities) {#node-lemma-2-8}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves (a), (c) and the bound of (b); not that a parity matrix with the fewest entries has an acyclic support.]{.node-gap}
-:::
-
-::: {.node-body}
-**Lemma 2.8 (few touched cities) [B′].** Let $X_1,\dots,X_p$ be admissible with $|X| = s$.
-
-(a) Every parity matrix touches at most $t - p$ cities.
-
-(b) A parity matrix with the fewest entries equal to 1 has an acyclic support, as a subgraph of $H$, and
-touches at most $p - 1$ cities.
-
-(c) So some parity matrix touches at most $w := \min(p-1,\ t-p)$ cities, and it has
-$h_k \le \min(|X_k| - 1,\ w)$ for every $k$.
+[`lean/ZenoFront/TreeExact.lean`, lines 516–541](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L516-L541){.lean-src} (statement only; the proof is elided)
 
 ::: {.node-lean}
-Parts in Lean: [`Admissible.exists_card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/MinimalWitness.lean#L248-L254), [`IsParityWitness.card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/SupportBound.lean#L100-L106), [`IsParityWitness.card_touched_le_of_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/MinimalWitness.lean#L197-L210)
+Further declarations: [`Admissible.exists_linkForest` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L228-L333), [`admissible_forestPartition` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L245-L262), [`linkWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TreeExact.lean#L185-L190), [`IsParityWitness.exists_card_eq_one_of_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L187-L208), [`attachForest` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/LinkForest.lean#L144-L179), [`Admissible.exists_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinimalWitness.lean#L231-L240), [`IsParityWitness.exists_edgeCount_lt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinimalWitness.lean#L118-L195)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 2.7 (few touched cities) {#node-lemma-2-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 2.7 (few touched cities).** Let $1 \le p \le t$. An admissible partition with $|X| = s$ has a
+parity matrix that touches at most $\min(p - 1,\ t - p)$ cities.
+
+::: {.node-lean}
+Lean: [`Admissible.exists_card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinimalWitness.lean#L248-L254)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Hypotheses** $\lvert X\rvert = s$ · **Uses** [2.5](#node-lemma-2-5)
+theory note, §2 · ledger `lem-2-8`
 
-*Proof.* (a) By Lemma 2.5, $\sum_k h_k \le \sum_k (|X_k| - 1) = 2(t-p)$, and by (h3) each touched city
-carries at least two of these entries.
-
-(b) Parity matrices form a finite non-empty set, so one with the fewest entries exists; let $J$ be its
-support. $H$ is a simple bipartite graph, so each vertex of a cycle of $H$ meets exactly two of its edges. If
-$J$ contained a cycle, setting $h$ to 0 on it would lower the degree of each of its vertices by 2 and keep
-(h1)–(h3), with fewer entries. So $J$ is a forest. Let $P'$ and $Z$ be the planes and the cities incident to
-$J$. If $Z = \emptyset$ the bound is $0 \le p - 1$. Otherwise every city of $Z$ has $J$-degree at least 2,
-so $2|Z| \le |J| \le |P'| + |Z| - 1$, and $|Z| \le |P'| - 1 \le p - 1$.
-
-(c) Apply (a) to the matrix of (b). Then $h_k \le |X_k| - 1$ by Lemma 2.5, and $\eta_k \subseteq Z(h)$. $\square$
+*Proof.* Take a parity matrix with the fewest entries. By the two inequalities of the proof of Lemma
+2.6, $|Z(\eta)| + 1 \le p$. By Lemma 2.4, $\#\text{entries} = \sum_k |\eta_k| \le \sum_k (|X_k| - 1) = s
+- p = 2(t - p)$, and $2|Z(\eta)| \le \#\text{entries}$ gives $|Z(\eta)| \le t - p$. $\square$
 
 ```{=html}
 </details>
@@ -458,11 +505,11 @@ so $2|Z| \le |J| \le |P'| + |Z| - 1$, and $|Z| \le |P'| - 1 \le p - 1$.
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Part (b) is proved over `ZMod 2`: if the edge vectors `e_k + e_i` of a witness are linearly dependent, removing an even subgraph gives a witness with fewer edges (`IsParityWitness.exists_edgeCount_lt`); independent edge vectors satisfy `#edges + 1 ≤ p + #touched`.
+*Lean:* `Admissible.exists_card_touched_le`, `IsParityWitness.card_touched_le_of_minimal`
+(MinimalWitness.lean); `IsParityWitness.card_touched_le`, `IsParityWitness.edgeCount_le`
+(SupportBound.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Claim B′.** With `Σ_k |X_k| = s = 2t − p`, an admissible grouping has a parity witness
@@ -472,58 +519,12 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
     ∃ h, IsParityWitness X h ∧ (touched h).card ≤ min (I.p - 1) (I.t - I.p) := …
 ```
 
-[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
 
-*Part* `ZenoFront.IsParityWitness.card_touched_le` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Claim B′, `t − p` part.** With `Σ_k |X_k| = s = 2t − p`, every parity witness touches at
-most `t − p` cities. -/
-theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Finset (Fin I.n)}
-    (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …
-```
-
-[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
-
-*Part* `ZenoFront.IsParityWitness.card_touched_le_of_minimal` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Claim B′, `p − 1` part.** A parity witness with the fewest edges touches at most `p − 1`
-cities. -/
-theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
-    (hmin : ∀ h', IsParityWitness X h' → edgeCount h ≤ edgeCount h') :
-    (touched h).card ≤ p - 1 := …
-```
-
-[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
+::: {.node-lean}
+Further declarations: [`IsParityWitness.card_touched_le_of_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/MinimalWitness.lean#L197-L210), [`IsParityWitness.card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SupportBound.lean#L100-L106), [`IsParityWitness.edgeCount_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SupportBound.lean#L92-L98)
 :::
 
-### Lemma 2.9 (shared city) {#node-lemma-2-9}
-
-::: {.node-badge}
-[informal]{.badge .informal}
-:::
-
-::: {.node-body}
-**Lemma 2.9 (shared city).** Let $X_1,\dots,X_p$ be non-empty groups with $\sum_k |X_k| \equiv p \pmod 2$.
-If some city belongs to every even group, the partition is admissible. This holds in particular when all
-groups contain a common city, and when all even groups are equal.
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §2 · **Uses** [2.4](#node-lemma-2-4)
-
-*Proof.* With $n_{\rm ev}$ even planes, $\sum_k |X_k| \equiv p - n_{\rm ev}$, so $n_{\rm ev}$ is even. All
-even planes lie in the component of $H$ containing the shared city, and the other components contain none.
-Lemma 2.4(a) applies. $\square$
 
 ```{=html}
 </details>

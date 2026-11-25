@@ -1,10 +1,11 @@
-# a city with d = dbar = 0: the search gaps hold for event-ordered plans (EO; Theorem 6.9, Cert2.check_sound_EO)
+# search gaps on an instance with a city of d = dbar = 0: Theorem 5.3 holds for every plan
+# (Cert2.check_sound, schedulableDomination_all), so no event order is assumed
 zeno-certificate 2
 instance 2 7 4
 d 0 19
 dbar 0 11
 c 9 1
-assume A1-NS EO
+assume A1-NS
 front 7
 90 0
 58 30

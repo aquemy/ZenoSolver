@@ -16,15 +16,15 @@ enum class GapProof : std::uint8_t
     Open,      ///< neither lower bound reaches the cost: the true front may hold a point in the gap
     Relaxed,   ///< lemma R with role weight min(2 d, 2 dbar): no assumption on central flights
     Roles,     ///< role relaxation (each plane an odd number >= 1 of crossings, and the
-               ///< loads add up to fill(X)): needs Theorem 6.1 of the theory note
+               ///< loads add up to fill(X)): needs Corollary 5.4 of the theory note
                ///< (assumption A1-NS)
     Lagrangian, ///< Lagrangian relaxation of the per-city balance (lagrangianRoles): needs
-                ///< Theorem 6.1 (assumption A1-NS)
+                ///< Corollary 5.4 (assumption A1-NS)
     Search,    ///< exhaustive search over role configurations with exact schedules
-               ///< (searchGap, Corollary 6.10): needs A1-NS (Theorem 6.9 covers every
+               ///< (searchGap, Corollary 5.6): needs A1-NS (Theorem 5.3 covers every
                ///< plan, also with cities where d = dbar = 0)
     Balanced,  ///< the cheapest balanced role configuration (BalancedRoles): needs
-               ///< Theorem 6.1 (assumption A1-NS)
+               ///< Corollary 5.4 (assumption A1-NS)
 };
 
 /// A certified bracket of the Pareto front of a (non-symmetric) instance.

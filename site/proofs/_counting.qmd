@@ -1,0 +1,535 @@
+## Counting and bounds {#sec-counting}
+
+Chains, counting and segment durations (§3). They hold for every plan, and give the relaxation
+$L$ and the two lower bounds that the checkers use without any assumption on central flights.
+
+### Lemma 3.1 (crossings outnumber returns) {#node-lemma-3-1}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 3.1 (crossings outnumber returns).** On a route from $C_I$ to $C_G$ without central flights, the
+visits of type $A$ number one more than those of type $\bar A$. On a closed walk of visits, from a hub
+back to it, they are equally many.
+
+::: {.node-lean}
+Lean: [`TChain.countP_isA` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L827-L841), [`TRoute.countP_isA` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L843-L847), [`TLoop.countP_isA` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L849-L855)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `lem-2-1`
+
+*Proof.* Along a sequence of visits from a hub, $\#A + [\text{it ends in } C_I] = \#\bar A + [\text{it
+starts in } C_I]$, by induction on the visits: a visit of type $A$ moves the walk from $C_I$ to $C_G$,
+one of type $\bar A$ back, and the others keep its hub. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `TChain.countP_isA`, `TRoute.countP_isA`, `TLoop.countP_isA` (Rewire.lean).
+
+**Lean** `ZenoFront.TChain.countP_isA` [machine-checked]{.badge .ok}
+
+```lean
+theorem TChain.countP_isA : ∀ {s : TState n} {L : List (Visit n t K)}, TChain N s L →
+    L.countP Visit.isA + (tEnd s L).1.isCI.toNat = L.countP Visit.isAbar + s.1.isCI.toNat
+  …
+```
+
+[`lean/ZenoFront/Rewire.lean`, lines 827–841](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L827-L841){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.TRoute.countP_isA` [machine-checked]{.badge .ok}
+
+```lean
+theorem TRoute.countP_isA {L : List (Visit n t K)} (h : TRoute N L) :
+    L.countP Visit.isA = L.countP Visit.isAbar + 1 := …
+```
+
+[`lean/ZenoFront/Rewire.lean`, lines 843–847](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L843-L847){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.TLoop.countP_isA` [machine-checked]{.badge .ok}
+
+```lean
+/-- A loop is closed, so it has as many `A` as `Ā` visits. -/
+theorem TLoop.countP_isA {τ : ℕ} {L : List (Visit n t K)} (h : TLoop N τ L) :
+    L.countP Visit.isA = L.countP Visit.isAbar := …
+```
+
+[`lean/ZenoFront/Rewire.lean`, lines 849–855](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L849-L855){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 3.2 (chains) {#node-lemma-3-2}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 3.2 (chains).** (a) In a feasible plan, and in a plan whose planes end anywhere, every passenger
+rides a *chain*: legs of the plan that carry it, the first leaving $C_I$, each later one leaving where
+the previous one arrived and no earlier, all landing in central cities except the last, which arrives in
+$C_G$. (b) If the plan has no central flight, every passenger rides a leg $C_I \to x$ and then a leg $x
+\to C_G$ that leaves no earlier than the first one arrives.
+
+::: {.node-lean}
+Lean: [`ToGoal` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L64-L70), [`Feasible.exists_chains` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L129-L143), [`FeasibleAnywhere.exists_chains` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L361-L376), [`exists_transfer_pw` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L40-L75)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `lem-3-1`
+
+*Proof.* (a) By item 3 of Definition 1.2, which the variant keeps, the legs carrying the passenger form
+a route from $C_I$ that ends in $C_G$. It leaves $C_I$ at least once. Take its last departure from $C_I$
+and the legs after it up to the first arrival in $C_G$. None of them arrives in $C_I$, since the route
+would then leave $C_I$ again, so all but the last land in central cities. (b) Without central flights,
+the leg after the first leg $C_I \to x$ of the chain of (a) leaves $x$ for a hub, which by (a) is
+$C_G$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `ToGoal`, `exists_chain`, `Feasible.exists_chains` (ConverseTri.lean);
+`FeasibleAnywhere.exists_chains`, `ToGoal.dst_ne_ci` (Bridge.lean); `exists_transfer_pw`
+(DominationAll.lean).
+
+**Lean** `ZenoFront.ToGoal` [Lean definition]{.badge .ok}
+
+```lean
+/-- A *chain* from `x` at time `τ`: a route that lands only in central cities until its last
+leg, which arrives in `C_G`. A passenger's last departure from `C_I` and the legs up to its next
+arrival in `C_G` form a chain from `C_I` (`Feasible.exists_chains`). -/
+def ToGoal : Loc n → ℕ → List (Leg n t) → Prop
+  | _, _, [] => False
+  | x, τ, ℓ :: rest => ℓ.src = x ∧ τ ≤ ℓ.dep ∧
+      ((ℓ.dst = .cg ∧ rest = []) ∨ ((∃ y, ℓ.dst = .city y) ∧ ToGoal ℓ.dst ℓ.arr rest))
+```
+
+[`lean/ZenoFront/ConverseTri.lean`, lines 64–70](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L64-L70){.lean-src}
+
+**Lean** `ZenoFront.Feasible.exists_chains` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The passengers' chains.** In a feasible plan, every passenger rides a chain from `C_I`. -/
+theorem Feasible.exists_chains {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    ∀ π : Fin t, ∃ ch : List (Leg n t), (∃ τ, ToGoal .ci τ ch) ∧
+      ∀ ℓ ∈ ch, ℓ ∈ allLegs P ∧ ℓ.pax = some π := …
+```
+
+[`lean/ZenoFront/ConverseTri.lean`, lines 129–143](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L129-L143){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.FeasibleAnywhere.exists_chains` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The passengers' chains**, for planes ending anywhere. -/
+theorem FeasibleAnywhere.exists_chains {N : Network n} {P : Plan n t p}
+    (hP : FeasibleAnywhere N P) :
+    ∀ π : Fin t, ∃ ch : List (Leg n t), (∃ τ, ToGoal .ci τ ch) ∧
+      ∀ ℓ ∈ ch, ℓ ∈ allLegs P ∧ ℓ.pax = some π := …
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 361–376](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L361-L376){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.exists_transfer_pw` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Step 1, the passengers.** In a route from `C_I` to `C_G` without central flights, some leg
+`C_I → x` is followed by a leg `x → C_G`: the last departure from `C_I` and the next leg. They
+are related by any pairwise relation of the route. -/
+theorem exists_transfer_pw {N : Network n} {α : Type*} (f : α → Leg n t) (r : α → α → Prop) :
+    ∀ (J : List α) (τ : ℕ), J.Pairwise r → IsRoute .ci τ (J.map f) →
+      (∀ a ∈ J, Flies N (f a) ∧ (f a).central = false) → finalLoc .ci (J.map f) = .cg →
+      ∃ a ∈ J, ∃ b ∈ J, (f a).src = .ci ∧ (∃ x, (f a).dst = .city x ∧ (f b).src = .city x) ∧
+        (f b).dst = .cg ∧ (f a).arr ≤ (f b).dep ∧ r a b
+  …
+```
+
+[`lean/ZenoFront/DominationAll.lean`, lines 40–75](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/DominationAll.lean#L40-L75){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`exists_chain` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L102-L127), [`ToGoal.dst_ne_ci` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L156-L168)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 3.3 (counting) {#node-lemma-3-3}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 3.3 (counting).** In a feasible plan, $2t \le \sum_k h_k + p$, where $h_k$ is the number of hub
+arrivals (segments) of plane $k$.
+
+::: {.node-lean}
+Lean: [`Feasible.le_sum_hubArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L153-L165)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `lem-3-2`
+
+*Proof.* Along a route from $x$, $\#\{\text{departures from } C_I\} + \#\{\text{arrivals in } C_G\} +
+[\text{it ends in } C_I] = \#\{\text{hub arrivals}\} + [x = C_I]$, by induction on the legs: a leg from
+$a$ to $b$ adds $[a = C_I] + [b = C_G]$ to the left side and changes the indicator by $[b = C_I] - [a =
+C_I]$, a total of $[b \text{ is a hub}]$. For a feasible plane this reads $\#\text{dep}_{C_I} +
+\#\text{arr}_{C_G} = h_k + 1$. The route of each passenger starts with a departure from $C_I$ and ends
+with an arrival in $C_G$, and a leg carries one passenger, so the plan has at least $t$ departures from
+$C_I$ and at least $t$ arrivals in $C_G$. Summing over the planes, $2t \le \sum_k (h_k + 1)$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `ciDepartures_add_cgArrivals`, `PlaneFeasible.ciDepartures_add_cgArrivals`,
+`Feasible.le_ciDepartures`, `Feasible.le_cgArrivals`, `Feasible.le_sum_hubArrivals` (PlanBounds.lean).
+
+**Lean** `ZenoFront.Feasible.le_sum_hubArrivals` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Counting.** A feasible plan has at least `2t − p` segments: `2t ≤ Σ_k #hub arrivals + p`. -/
+theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
+    2 * t ≤ ∑ k, hubArrivals (P k) + p := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`PlaneFeasible.ciDepartures_add_cgArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L77-L82), [`Feasible.le_ciDepartures` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L125-L137), [`Feasible.le_cgArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L139-L151), [`ciDepartures_add_cgArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L62-L75)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 3.4 (segment durations) {#node-lemma-3-4}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 3.4 (segment durations).** (a) A feasible plane has a multiset $Z$ of central cities with $|Z|$
+equal to its number of hub arrivals, $2e(Z)$ at most its end time, and $c(Z)$ at most its landing cost.
+
+(b) Assume (S) and (H). The route of a feasible plane is the concatenation of its segments, one per hub
+arrival; each lands in at least one central city and flies at least $2d_y$ for every central city $y$ it
+lands in. A chain (Lemma 3.2(a)) ends at least $d_y$ after any of its legs arrives in a central city
+$y$.
+
+(c) On a route without central flights, every visit lasts its role weight, and the visits of a route
+from a hub whose legs all arrive by $M$ last at most $M$ in total.
+
+::: {.node-lean}
+Lean: [`PlaneFeasible.exists_segments_emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L286-L296), [`PlaneFeasible.exists_segments_tri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L279-L287), [`ToGoal.add_d_le_endTime` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L110-L132), [`Node.w_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L426-L432), [`TChain.sum_w_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L812-L825)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `lem-3-3`
+
+*Proof.* (a) No flight joins the hubs, so a segment starts with a leg from a hub into a central city $a$
+and ends with a leg from a central city $b$ into a hub. These last at least $e_a$ and $e_b$, so the
+segment flies at least $e_a + e_b \ge 2\min(e_a, e_b)$. Put into $Z$ the one of $a, b$ with the smaller
+$e$, one per segment. Different segments have different legs, so these are distinct landings of the
+plane, and $c(Z)$ is at most its landing cost. The legs follow one another from time 0, so their
+durations sum to at most the end time.
+
+(b) Cut the route after every hub arrival. Along a segment from a hub, let $w$ be the current central
+city. The part flown so far lasts at least $d_w$, and adding $d_w$ to it gives at least $2d_x$ for every
+central city $x$ visited so far. Both hold after the first leg, which lasts $d_w$ under (S). A central
+leg from $i$ to $j$ keeps them: the first since $d_j \le d_i + d_c(i, j)$, the second since $d_i \le
+d_c(i, j) + d_j$, by (H). The last leg, from $w$ to a hub, lasts $d_w$ under (S). For the chain, by
+induction from its end: its last leg, from $y$ to $C_G$, lasts $\bar d_y = d_y$; a central leg from $y$ to
+$y'$ followed by a part lasting at least $d_{y'}$ lasts at least $d_c(y, y') + d_{y'} \ge d_y$, by (H).
+Every leg of the chain departs no earlier than the previous one arrives.
+
+(c) A visit at $x$ flies a hub leg into $x$, of duration $d_x$ from $C_I$ and $\bar d_x$ from $C_G$, and
+one out of $x$, of duration $d_x$ to $C_I$ and $\bar d_x$ to $C_G$. The legs of a route follow one
+another, so their durations sum to at most the last arrival. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* (a) `PlaneFeasible.exists_segments_emin` (PlanBounds.lean); (b) `segment_bound`,
+`PlaneFeasible.exists_segments_tri` (TriSegments.lean), `ToGoal.add_d_le_endTime`, `ToGoal.arr_add_d_le`
+(Bridge.lean); (c) `Node.w_eq` (SchedBuild.lean), `TChain.sum_w_le` (Rewire.lean).
+
+**Lean** `ZenoFront.PlaneFeasible.exists_segments_emin` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Segments of a plane.** A feasible plane yields a multiset `Z` with one landing per
+segment (`|Z| = #hub arrivals`), `2 δ(Z) ≤` the plane's end time for the durations
+`min(d, d̄)`, and `c(Z) ≤` the plane's landing cost. -/
+theorem PlaneFeasible.exists_segments_emin {N : Network n} (c : Fin n → ℕ)
+    {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
+    ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.emin Z ≤ endTime 0 legs ∧
+      cost c Z ≤ landCostSum c legs := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 286–296](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L286-L296){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.PlaneFeasible.exists_segments_tri` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The segments of a feasible plane.** Under (S) and (AΔ) on the triangles through a hub, the
+route is the concatenation of its segments: one per hub arrival, each ending with its only hub
+arrival, landing at least once, and flying at least `2 d_y` for each of its landings `y`. -/
+theorem PlaneFeasible.exists_segments_tri {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    {legs : List (Leg n t)} (h : PlaneFeasible N legs) :
+    ∃ segs : List (List (Leg n t)), segs.flatten = legs ∧ segs.length = hubArrivals legs ∧
+      ∀ γ ∈ segs, hubArrivals γ = 1 ∧ (∃ ℓ, γ.getLast? = some ℓ ∧ ℓ.dst.isHub = true) ∧
+        landList γ ≠ [] ∧ ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 279–287](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L279-L287){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.ToGoal.add_d_le_endTime` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The second use of the triangles through a hub.** A chain from a central city `y` lasts at
+least `d_y`: under (S) and the triangles through a hub, `d_y ≤ dc y y' + d_{y'}` along every
+central leg. -/
+theorem ToGoal.add_d_le_endTime {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub) :
+    ∀ (l : List (Leg n t)) (y : Fin n) (τ : ℕ), ToGoal (.city y) τ l → (∀ ℓ ∈ l, Flies N ℓ) →
+      τ + N.d y ≤ endTime τ l
+  …
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 110–132](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L110-L132){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Node.w_eq` [machine-checked]{.badge .ok}
+
+```lean
+theorem Node.w_eq (x : Node R) : x.vis.w =
+    (if x.eI then N.d (x.city x₀) else N.dbar (x.city x₀)) +
+      (if x.xI then N.d (x.city x₀) else N.dbar (x.city x₀)) := …
+```
+
+[`lean/ZenoFront/SchedBuild.lean`, lines 426–432](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/SchedBuild.lean#L426-L432){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.TChain.sum_w_le` [machine-checked]{.badge .ok}
+
+```lean
+theorem TChain.sum_w_le {M : ℕ} {s : TState n} {L : List (Visit n t K)} (h : TChain N s L)
+    (hM : ∀ v ∈ L, v.2.leg.arr ≤ M) : (L.map Visit.w).sum ≤ M := …
+```
+
+[`lean/ZenoFront/Rewire.lean`, lines 812–825](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Rewire.lean#L812-L825){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`PlaneFeasible.exists_segments` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L389-L394), [`segment_bound` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L247-L277), [`ToGoal.arr_add_d_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L134-L154)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 3.5 (relaxation) {#node-lemma-3-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 3.5 (relaxation).** Let $p \le t$. Every feasible plan with cost $C$ and makespan $M$ has
+non-empty multisets $Y_1, \dots, Y_p$ with $\sum_k |Y_k| = s$, $c(Y_1 + \dots + Y_p) \le C$ and
+$2e(Y_k) \le M$ for every $k$; under (S), $e = d$. Hence $C \ge L_e(\lfloor M/2\rfloor)$, where
+$L_e(T)$ is the least $\sum_k G_e[m_k][T]$ over $m_1, \dots, m_p \ge 1$ with $\sum_k m_k = s$ ($\infty$ if
+none). Nothing is assumed on central flights.
+
+::: {.node-lean}
+Lean: [`Feasible.exists_relaxation_emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L357-L387), [`Feasible.relaxCost_le_planCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L95-L109), [`Network.emin_eq_of_sym` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L195-L197)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `lem-3-4`
+
+*Proof.* Lemma 3.4(a) gives each plane $k$ a multiset $Z_k$ with $|Z_k| = h_k \ge 1$ (a feasible plane
+ends in $C_G$), $2e(Z_k)$ at most its end time, hence at most $M$, and $c(Z_k)$ at most its landing
+cost. By Lemma 3.3, $\sum_k |Z_k| \ge s \ge p$. Remove landings from groups with at least two until
+$s$ remain; the groups $Y_k \le Z_k$ stay non-empty, $2e(Y_k) \le M$, and $\sum_k c(Y_k) \le \sum_k
+c(Z_k) \le C$. The integer $e(Y_k)$ is at most $\lfloor M/2\rfloor$, so $c(Y_k) \ge G_e[|Y_k|][\lfloor
+M/2\rfloor]$, and the sizes $|Y_k|$ are among those $L_e$ minimises over. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Network.emin`, `Network.emin_eq_of_sym`, `exists_trim`, `Feasible.exists_relaxation_emin`,
+`Feasible.exists_relaxation` (PlanBounds.lean); `relaxCost`, `relaxCost_oneplane_le_totalCost`,
+`Feasible.relaxCost_le_planCost` (Relaxation.lean).
+
+**Lean** `ZenoFront.Feasible.exists_relaxation_emin` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma R** (relaxation), non-symmetric form. Whatever the durations and the central
+flights, a feasible plan with `1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size
+`s = 2t − p`, with `2 δ(Y_k) ≤` the makespan for the durations `min(d, d̄)`, and total cost at most
+the plan's cost. -/
+theorem Feasible.exists_relaxation_emin {N : Network n} (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ Y : Groups n p, (∀ k, 1 ≤ (Y k).card) ∧ size Y = 2 * t - p ∧
+      (∀ k, 2 * load N.emin (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 357–387](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L357-L387){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Feasible.relaxCost_le_planCost` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 3.5 (relaxation), the bound.** With `p ≤ t`, every feasible plan of makespan `M` costs
+at least `L_e(⌊M/2⌋) = relaxCost (G_e[·][⌊M/2⌋]) p s`, the relaxation for the weight
+`e = min(d, d̄)` (`Network.emin`; under (S), `e = d` by `Network.emin_eq_of_sym`). No assumption is
+made on central flights. The groups are those of `Feasible.exists_relaxation_emin`: one landing
+per segment, `2 e(Y_k) ≤ M`. -/
+theorem Feasible.relaxCost_le_planCost {N : Network n} (c : Fin n → ℕ) {P : Plan n t p}
+    (hP : Feasible N P) (hpt : p ≤ t) :
+    relaxCost (fun m => oneplane N.emin c m (planMakespan P / 2)) p (2 * t - p) ≤
+      (planCost c P : WithTop ℕ) := …
+```
+
+[`lean/ZenoFront/Relaxation.lean`, lines 95–109](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L95-L109){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Network.emin_eq_of_sym` [machine-checked]{.badge .ok}
+
+```lean
+theorem Network.emin_eq_of_sym {N : Network n} (hS : N.dbar = N.d) : N.emin = N.d := …
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 195–197](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L195-L197){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Network.emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L186-L188), [`exists_trim` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L300-L353), [`Feasible.exists_relaxation` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L396-L403), [`relaxCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L47-L51), [`relaxCost_oneplane_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Relaxation.lean#L82-L92)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 3.6 (lower bounds) {#node-proposition-3-6}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 3.6 (lower bounds).** Let $p \le t$. Every feasible plan costs at least $s\,c_{\min}$.
+Under (S) and $1 \le p$, every feasible plan has makespan at least $2d_{\min}\lceil s/p\rceil$.
+
+::: {.node-lean}
+Lean: [`Feasible.minOf_le_cost_emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L138-L145), [`Feasible.minOf_le_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L113-L127)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §3 · ledger `prop-7-10`
+
+*Proof.* The groups of Lemma 3.5 have $s$ landings in all, each costing at least $c_{\min}$. Under
+(S), some $Y_k$ has at least $\lceil s/p\rceil$ landings, each of duration at least $d_{\min}$, and
+$2\delta(Y_k) \le M$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `minOf`, `exists_ceil_le_card`, `Feasible.minOf_le_cost_emin`, `Feasible.minOf_le_cost`,
+`Feasible.minOf_le_makespan` (Checker.lean).
+
+**Lean** `ZenoFront.Feasible.minOf_le_cost_emin` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Obligation 4**, for any durations: every feasible plan costs at least `s · c_min`. -/
+theorem Feasible.minOf_le_cost_emin {N : Network n} (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    (2 * t - p) * minOf c ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 138–145](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L138-L145){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Feasible.minOf_le_makespan` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Obligation 2.** Under (S), every feasible plan has makespan at least
+`2 · d_min · ⌈s/p⌉`. -/
+theorem Feasible.minOf_le_makespan {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
+    {P : Plan n t p} (hP : Feasible N P) (hp : 1 ≤ p) (hpt : p ≤ t) :
+    2 * minOf N.d * ((2 * t - p + p - 1) / p) ≤ planMakespan P := …
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 113–127](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L113-L127){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`minOf` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L83-L85), [`Feasible.minOf_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L129-L136), [`exists_ceil_le_card` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L99-L111)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::

@@ -13,7 +13,8 @@ Reads the text format of `doc/certificate-format.md` into a `Cert` (v1) or a `Ce
 mirroring `readCertificate`
 in `src/zeno/certificate.cpp`: blank lines and lines starting with `#` are ignored, tokens are
 separated by white space, numbers are non-negative integers, plans, planes and gaps are listed
-in order, and nothing may follow `end`.
+in order, and nothing may follow `end`. An assumption other than `S`, `A1`, `A1|AD` and `A1-NS`
+is rejected.
 
 The parser is **not** part of the verified statement: `Cert.check_sound` is about the `Cert`
 value. A wrong parser could make the checker verify a different front than the file's. It is
@@ -155,6 +156,9 @@ inductive AnyCert where
   | v1 (C : Cert)
   | v2 (C : Cert2)
 
+/-- The assumptions a certificate may list (`doc/certificate-format.md`). -/
+def knownAssumptions : List String := ["S", "A1", "A1|AD", "A1-NS"]
+
 /-- A whole certificate. -/
 def anyCert : ParseM AnyCert := do
   let (num, header) ← nextLine "zeno-certificate" (some 2)
@@ -168,7 +172,10 @@ def anyCert : ParseM AnyCert := do
   let d ← numbers "d" n
   let dbar ← numbers "dbar" n
   let c ← numbers "c" n
-  let (_, assume) ← nextLine "assume" none
+  let (num, assume) ← nextLine "assume" none
+  for a in assume.drop 1 do
+    if !knownAssumptions.contains a then
+      throw s!"certificate, line {num}: unknown assumption '{a}'"
   let (num, frontHead) ← nextLine "front" (some 2)
   let r ← number num (frontHead.getD 1 "")
   let front ← (List.range r).mapM fun _ => do

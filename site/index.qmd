@@ -187,19 +187,19 @@ css: [styles/problem.css, styles/home.css]
 ```{=html}
     <ul class="home-ledger">
       <li>
-        <a class="ledger-ref" href="proofs.html#node-corollary-4-8">Cor. 4.8</a>
+        <a class="ledger-ref" href="proofs.html#node-theorem-4-5">Thm. 4.5</a>
         <p class="ledger-text">The front of a symmetric instance is the front of the admissible partitions of its landings.</p>
       </li>
       <li>
-        <a class="ledger-ref" href="proofs.html#node-theorem-7-5">Thm 7.5</a>
+        <a class="ledger-ref" href="proofs.html#node-theorem-6-7">Thm 6.7</a>
         <p class="ledger-text">The link-forest dynamic program computes the least cost at every makespan.</p>
       </li>
       <li>
-        <a class="ledger-ref" href="proofs.html#node-verified-solver">zeno-front</a>
+        <a class="ledger-ref" href="proofs.html#node-theorem-6-9">zeno-front</a>
         <p class="ledger-text">The verified solver returns exactly the Pareto front of the feasible plans.</p>
       </li>
       <li>
-        <a class="ledger-ref" href="proofs.html#node-theorem-9-1">zeno-check</a>
+        <a class="ledger-ref" href="proofs.html#node-theorem-8-2">zeno-check</a>
         <p class="ledger-text">The checker accepts a certificate only if its points are the Pareto front.</p>
       </li>
     </ul>

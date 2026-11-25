@@ -296,7 +296,7 @@ Metric instances (every flight lasts the distance between its ends):
                          rounded, then every duration becomes its shortest
                          path over the flights, so the table satisfies the
                          triangle inequality (AΔ) exactly. With --hubs same
-                         the front is exact (Theorem 4.10, Corollary 4.12)
+                         the front is exact (Theorems 4.4 and 4.5)
   -d -D -E -W -l -m do not apply. `zeno generate` writes the table as the
   "central" block of the data file.
 

@@ -5,7 +5,7 @@ Waiting, BĀB̄ situations, and the reduction of general graphs to clique instan
 :::
 
 This section relaxes the assumption (S), then the assumption that every central city is joined to
-$C_I$ and $C_G$. It corresponds to §6 of the
+$C_I$ and $C_G$. It corresponds to §5 of the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md).
 
 ### Non-Symmetric Clique MultiZenoTravel {#sec-nonsym}
@@ -22,37 +22,50 @@ result in a larger makespan.
 Two regimes must be distinguished. When no flight between central cities is shorter than a detour
 through $C_I$ or $C_G$, assumption (A1-NS), the method carries over with durations that depend on
 the role of each landing, provided the makespan accounts for the waiting it may force. When such
-flights are shorter, plans that move passengers between central cities, the $B\bar A\bar B$
-situations among them, can beat every plan of $2t - p$ simple patterns.
+flights are shorter, plans that move passengers between central cities can do better than the
+construction that the 2023 version of this paper proposed for them, through $B\bar A\bar B$
+situations.
 
 #### Role configurations {#sec-roles}
 
 A pattern $A$ or $\bar A$ in $C_w$ lasts $d_w + \bar d_w$, a pattern $B$ lasts $2 d_w$ and a
-pattern $\bar B$ lasts $2\bar d_w$. Lists of cities are therefore replaced by role configurations
-({{< node "Definition 4.2" >}}): for each plane $k$, the cities of its patterns $B$
-($\mathrm{Dr}_k$), $\bar B$ ($\mathrm{Pk}_k$) and $A$ or $\bar A$ ($\mathrm{Cr}_k$), balanced city
-by city, with the role load
-$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k)$.
+pattern $\bar B$ lasts $2\bar d_w$ (Lemma 3.4(c)). Lists of cities are therefore replaced by role
+configurations.
 
 ::: {.statement}
-{{< node "Theorem 6.1" >}} **Converse to role configurations.** Assume (A1-NS). For every
-feasible plan with cost $C$ and makespan $M$ there is a role configuration on the $p$ planes with
-passenger count $t$, cost at most $C$ and $\lambda_k \le F_k \le M$ for every $k$.
+{{< node "Definition 5.1" >}} **Role configuration.** A role configuration assigns to each plane
+$k$ three multisets of central cities, its patterns $B$ ($\mathrm{Dr}_k$, drop-offs), $\bar B$
+($\mathrm{Pk}_k$, pick-ups) and $A$ or $\bar A$ ($\mathrm{Cr}_k$, crossings), with
+$|\mathrm{Cr}_k|$ odd and the *per-city balance* $\sum_k \mathrm{Dr}_k = \sum_k \mathrm{Pk}_k$.
+Its groups are $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, its cost is $c(X)$, and the
+*role load* of plane $k$ is
+$$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k).$$
+Passengers are counted through the landings: the configurations for $t$ passengers are those with
+$|X| = 2t - p$.
+:::
+
+A drop-off and the pick-up of the same passenger form a *link*; with $N$ links, the passengers are
+the $N$ linked ones and one per pattern $A$, $(|\mathrm{Cr}_k| + 1)/2$ per plane. Under (S),
+$\lambda_k = \ell(X_k)$. Under (A1-NS), every plan gives a role configuration no costlier, whose
+role loads are at most its makespan.
+
+::: {.statement}
+{{< node "Corollary 5.4" >}} **Role-load bound.** Assume (A1-NS) and $p \le t$. Every feasible
+plan with cost $C$ and makespan $M$ gives a role configuration with $2t - p$ landings, cost at most
+$C$ and every $\lambda_k \le M$.
 :::
 
 ::: {.sketch}
-*Sketch.* Replace each flight $a \to b$ between central cities by $a \to h \to b$ through the hub
-$h$ for which the detour is no longer, which exists by (A1-NS); clean the journeys, and apply the
-direct selection and shrinking lemmas ({{< node "Lemma 4.3" badge=false >}},
-{{< node "Lemma 4.4" badge=false >}}; {{< node "Theorem 6.1" text="full proof" badge=false >}}).
+*Sketch.* Take the scheduled configuration of [Theorem 5.3](#sec-ns-front) and the role
+configuration it schedules: its cost is at most $C$, and every role load is a term of its template
+value, which is at most $M$ ({{< node "Corollary 5.4" text="full proof" badge=false >}}).
 :::
 
-Without (A1-NS), {{< node "Lemma 6.2" >}} still gives a lower bound $L_{\rm NS}$ under (AΔ), by
-requiring the balance only in total rather than city by city, whatever the flights between central
-cities. The least cost $E_{\rm NS}(T)$ of a role configuration with every $\lambda_k \le T$ is the
-shortest path of a dynamic program over *imbalance vectors*, the per-city difference between
-patterns $B$ and $\bar B$ so far ({{< node "Proposition 6.6" >}}); it is polynomial in $n$ and
-$2t - p$ for fixed $t - p$.
+The least cost of a role configuration with every $\lambda_k \le T$ is bounded below by a dynamic
+program over *imbalance vectors*, the per-city difference between patterns $B$ and $\bar B$ so far
+({{< node "Proposition 8.5" >}}), and by two relaxations, which require an odd number of crossings
+per plane ({{< node "Proposition 8.3" >}}) or the balance only through Lagrange multipliers
+({{< node "Proposition 8.4" >}}).
 
 #### Waiting {#sec-waiting}
 
@@ -62,157 +75,154 @@ implies that its makespan is not the sum of the durations of its patterns but th
 passenger arrives in the central city, plus the remaining duration of its sequence.
 
 Fix an order of the patterns $B$ and of the patterns $\bar B$ of every plane, and a *link
-matching*: in each city, which pattern $B$ feeds which pattern $\bar B$. The *template* flies
-every plane's patterns $B$ in order from time 0, then its patterns $A$ and $\bar A$, then its
-patterns $\bar B$ in order, every flight departing as soon as possible, a pattern $\bar B$ leaving
-its city only once its passenger is there. Let
+matching*: in each city, which pattern $B$ feeds which pattern $\bar B$.
+
+::: {.statement}
+{{< node "Definition 5.2" >}} **Scheduled configuration, template value.** A *scheduled
+configuration* $S$ gives every plane $k$ an ordered list $\mathrm{Dr}_k$ of drop-offs, an ordered
+list $\mathrm{Pk}_k$ of pick-ups and a multiset $\mathrm{Cr}_k$ of crossings, and matches every
+pick-up to a drop-off. It is *valid* if every $|\mathrm{Cr}_k|$ is odd, every pick-up is matched to
+a drop-off in its own city, no two pick-ups to the same drop-off, and there are as many drop-offs
+as pick-ups in all; its size, cost and role loads are those of Definition 5.1. Let
 $\mathrm{Pre}_u(j) = 2\sum_{j' < j} d_{\mathrm{Dr}_u[j']}$ be the duration of the patterns $B$
 that plane $u$ flies before its $j$-th, and
 $\mathrm{Suf}_v(l) = 2\sum_{l' > l} \bar d_{\mathrm{Pk}_v[l']}$ that of the patterns $\bar B$ that
-plane $v$ flies after its $l$-th.
-
-::: {.statement}
-{{< node "Lemma 6.3" >}} **Template.** The template is a plan, and its makespan is
-$$M_{\rm tmpl} = \max\Big(\max_k \lambda_k,\ \max_{(u, j;\, v, l) \text{ linked in } C_i}\ \mathrm{Pre}_u(j) + d_i + \bar d_i + \mathrm{Suf}_v(l)\Big).$$
-Every plan that flies the same configuration with the same orders and matching has makespan at
-least $M_{\rm tmpl}$. The *least makespan* of the configuration is the minimum of $M_{\rm tmpl}$
-over orders and matchings.
+plane $v$ flies after its $l$-th. The *template value* of $S$ is
+$$M_{\rm tmpl}(S) = \max\Big(\max_k \lambda_k,\ \max_{(u, j;\, v, l) \text{ linked in } C_i}\ \mathrm{Pre}_u(j) + d_i + \bar d_i + \mathrm{Suf}_v(l)\Big).$$
+$S$ *schedules* a role configuration if its lists and multisets are that configuration's
+drop-offs, pick-ups and crossings.
 :::
 
-A link term is the length of a chain that no plan can shorten: the plane performing $B$ flies its
-earlier patterns $B$ and reaches $C_i$, the passenger then needs $\bar d_i$ to reach $C_G$, and the
-plane performing $\bar B$ still flies its later patterns $\bar B$. With a single pattern $\bar B$
-per plane, as in the construction of Theorem 4.1, the chain never exceeds the loads:
+The *template* of $S$ flies every plane's patterns $B$ in order from time 0, then its patterns $A$
+and $\bar A$, then its patterns $\bar B$ in order, every flight departing as soon as possible, a
+pattern $\bar B$ leaving its city only once its passenger is there.
 
 ::: {.statement}
-{{< node "Corollary 6.4" >}} **One pick-up never waits harmfully.** Assume (AΔ-path). If every
-plane performs at most one pattern $\bar B$, then $M_{\rm tmpl} = \max_k \lambda_k$ for every
-order and matching. The same holds if every plane performs at most one pattern $B$.
+{{< node "Lemma 5.5" >}} **Template.** Let $S$ be a valid scheduled configuration with $2t - p$
+landings. Then $p \le t$, and for every table of flights between central cities the template of
+$S$ is a feasible plan of cost $c(S)$ and makespan exactly $M_{\rm tmpl}(S)$.
 :::
+
+A link term is the length of a chain in the template: the plane performing $B$ flies its earlier
+patterns $B$ and reaches $C_i$, the passenger then needs $\bar d_i$ to reach $C_G$, and the plane
+performing $\bar B$ still flies its later patterns $\bar B$.
 
 One may hope that waiting can always be avoided by choosing the orders and the matching well, so
 that the Pareto front would be the Pareto set of (cost, largest role load) over role
-configurations. This is Conjecture 6.5, and it is false.
-
-::: {.statement .refuted}
-{{< node "Conjecture 6.5" >}} **No harmful waiting.** Under (AΔ-path), every role configuration
-has orders and a matching with $M_{\rm tmpl} = \max_k \lambda_k$; in a weaker form, the Pareto
-front is the Pareto set of (cost, $\max_k \lambda_k$) over role configurations.
-:::
+configurations. The 2023 version of this paper assumed so, ruling out harmful waiting. It is
+false.
 
 ::: {.statement}
-{{< node "Proposition 6.5" >}} **Harmful waiting.** Take $n = 2$ cities with $d = (3, 19)$,
-$\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$ passengers, $p = 4$ planes and no flight between
-central cities. The cheapest role configuration with every $\lambda_k \le 73$ costs 14, but no
-plan of makespan at most 73 costs less than 18.
+{{< node "Proposition 5.7" >}} **Harmful waiting.** Take $n = 2$ cities with $d = (3, 19)$,
+$\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$ passengers and $p = 4$ planes, so $2t - p = 10$, with any
+flights between central cities satisfying (A1-NS).
+
+*(a)* Some role configuration with 10 landings has cost 14 and every $\lambda_k \le 72$, and every
+role configuration with 10 landings and every $\lambda_k \le 73$ costs at least 14.
+
+*(b)* Every valid scheduled configuration with 10 landings and cost below 18 has
+$M_{\rm tmpl} > 73$.
+
+*(c)* Every feasible plan of makespan at most 73 costs at least 18.
+
+So some role configuration with 10 landings has cost at most 14 and every $\lambda_k \le 73$, but
+no feasible plan has cost at most 14 and makespan at most 73.
 :::
 
-A configuration has $2t - p = 10$ landings, so cost 14 means one landing in $C_1$ and nine in
-$C_2$. A pattern $A$ or $\bar A$ weighs 6 in $C_1$ and 30 in $C_2$, a $B$ 6 and 38, a $\bar B$ 6 and
-22, which leaves one shape within 73: three planes perform an $A$ and a $B$ in $C_2$ (load 68),
-and the fourth plane $v$ an $A$ in $C_1$ and the three patterns $\bar B$ in $C_2$ (load
-$6 + 3 \cdot 22 = 72$). Every passenger left in $C_2$ arrives there at time 19 or later, but $v$
-reaches $C_2$ for its first $\bar B$ at $6 + 11 = 17$. It waits until 19, and its two other
-patterns $\bar B$ take 44 more: it finishes at $74 > 72$. The whole front was computed, by an
-oracle over role-configuration schedules, by the solver and by an exhaustive search over all
-plans (937 million states, plans with extra landings included):
-$$(10, 90),\ (14, 74),\ (18, 68),\ (22, 66),\ (26, 52),\ (34, 42),\ (38, 36),\ (42, 30),\ (50, 18),$$
-while ignoring waiting would add $(14, 72)$ and $(30, 50)$ (@fig-waiting).
+Cost 14 means one landing in $C_1$ and nine in $C_2$. In the configuration of (a), three planes
+perform an $A$ and a $B$ in $C_2$ (load $30 + 38 = 68$), and the fourth plane $v$ an $A$ in $C_1$
+and the three patterns $\bar B$ in $C_2$ (load $6 + 3 \cdot 22 = 72$). In its template, every
+passenger left in $C_2$ arrives there at time 19 or later, but $v$ reaches $C_2$ for its first
+$\bar B$ at $6 + 11 = 17$. It waits until 19, and its two other patterns $\bar B$ take 44 more: it
+finishes at $74 > 72$. By (b) and Lemma 5.5, every template of this configuration ends after 73,
+whatever the orders and the matching.
 
-![The instance of Proposition 6.5 (experiment E5). Left: the Pareto front with exact waiting (blue) and the two points that only exist when waiting is ignored (orange). Right: the share of random instances on which waiting changes the front, for uniform durations and for instances shaped like Proposition 6.5, with 95% Wilson intervals.](figures/e5-harmful_waiting.svg){#fig-waiting .paper-fig}
+![The instance of Proposition 5.7 (experiment E5). Left: the Pareto front computed with exact waiting (blue) and the two points that only appear when waiting is ignored (orange). Right: the share of random instances on which waiting changes the computed front, for uniform durations and for instances shaped like Proposition 5.7, with 95% Wilson intervals.](figures/e5-harmful_waiting.svg){#fig-waiting .paper-fig}
 
-Harmful waiting needs a plane with several patterns $\bar B$ in a city $C_y$ whose first one
-arrives before the earliest passenger left there, that is, a short phase of patterns $A$ and
-$\bar A$ with $d_x + \bar d_x + \bar d_y < d_y$ for its crossing city $x$. (AΔ-path) bounds
-$\bar d$ by $d$ but not $d$ by $\bar d$, so it does not prevent this. It is rare: in the experiment
-[E5](#sec-e5), random configurations waited harmfully at most 29 times in a million
-draws, and waiting changed the front of 9 of 150 instances shaped like Proposition 6.5 and of none
-of 150 uniform ones.
+In the experiment [E5](#sec-e5), random configurations waited harmfully at most 29 times in a
+million draws, and waiting changed the computed front of 9 of 150 instances shaped like
+Proposition 5.7 and of none of 150 uniform ones.
 
 #### The non-symmetric Pareto front {#sec-ns-front}
 
-Theorem 6.1 bounds the role loads of the configuration it selects, but not its waiting, since it
-pairs patterns $B$ and $\bar B$ by counts per city and not along the plan's own hand-offs. The
-following theorem selects the pairings along the hand-offs, after removing those that the planes
-could have avoided. Plans with zero durations need care: {{< node "Lemma 6.8" >}} shows that a plan
-fails to be event-ordered exactly when the relation "next flight on the plane or on the journey"
-has a cycle, that such a cycle passes through a city with $d_x = \bar d_x = 0$, and that templates
-and the plans of Theorem 4.1 are event-ordered.
+A bound on the role loads does not bound the waiting, since it pairs patterns $B$ and $\bar B$ by
+counts per city and not along the plan's own hand-offs. The following theorem selects the pairings
+along the hand-offs, after removing those that the planes could have avoided.
 
 ::: {.statement}
-{{< node "Theorem 6.9" >}} **Schedulable domination.** Assume (A1-NS). For every feasible plan
-with cost $C$ and makespan $M$, there are a role configuration on the $p$ planes with passenger
-count $t$ and cost at most $C$, orders of its patterns $B$ and $\bar B$, and a link matching whose
-template has makespan at most $M$. Neither an event order, nor (AΔ), nor (AΔ-path) is needed.
+{{< node "Theorem 5.3" >}} **Schedulable domination.** Assume (A1-NS) and $p \le t$. Every
+feasible plan with cost $C$ and makespan $M$ gives a valid scheduled configuration $S$ with
+$2t - p$ landings, $c(S) \le C$ and $M_{\rm tmpl}(S) \le M$. The template of $S$ is then a
+feasible plan of cost $c(S)$ and makespan $M_{\rm tmpl}(S) \le M$.
 :::
 
 ::: {.sketch}
-*Sketch.* Make the plan simple and clean, then rewire hand-offs by three moves (an *exchange* of
-the rest of the sequences of two planes that meet, a *cut* of a zero-time detour into a separate
-loop, and a *splice* of such a loop back into a sequence), each of which carries one more passenger
-through a single pattern, until every remaining hand-off goes forward in time. The hand-offs then
-form chains from a pattern $B$ to a pattern $\bar B$, which give the links, and along each chain
-the link term of Lemma 6.3 is at most $M$ ({{< node "Theorem 6.9" text="full proof" badge=false >}}).
+*Sketch.* Replace every flight between central cities by the detour through the hub that (A1-NS)
+makes no longer, so that every passenger rides a leg $C_I \to C_x$ and then a leg $C_x \to C_G$
+(Lemma 3.2). Then rewire hand-offs by three moves (an *exchange* of the rest of the sequences of
+two planes that meet, a *cut* of a zero-time detour into a separate loop, and a *splice* of such a
+loop back into a sequence), each of which carries one more passenger through a single pattern,
+until every remaining hand-off goes forward in time. The hand-offs then give the links, each link
+term is at most $M$, and dropping links or crossings brings the configuration down to $2t - p$
+landings ({{< node "Theorem 5.3" text="full proof" badge=false >}}).
 :::
 
+No order of the flights is used beyond the routes and the chains of the passengers, and zero
+durations are allowed.
+
 ::: {.statement}
-{{< node "Corollary 6.10" >}} **Non-symmetric front.** Assume (A1-NS). Let $\mathcal K$ be the
-set of pairs (cost, least makespan) of the role configurations on the $p$ planes with passenger
-count $t$, and $\mathcal A_{\rm eo}$ the set of points of feasible event-ordered plans. Then
-$\mathcal F = \mathrm{Min}\,\mathcal A_{\rm eo} = \mathrm{Min}\,\mathcal K$.
+{{< node "Corollary 5.6" >}} **Non-symmetric front.** Assume (A1-NS) and $p \le t$. Let
+$\mathcal K_S$ be the set of the points $(c(S), M_{\rm tmpl}(S))$ of the valid scheduled
+configurations $S$ with $2t - p$ landings, and $\mathcal K$ the set of the pairs (cost, least
+makespan) of the role configurations with $2t - p$ landings, the *least makespan* of a
+configuration being the least $M_{\rm tmpl}(S)$ over the valid $S$ that schedule it. Then
+$\mathcal F = \mathrm{Min}\,\mathcal K_S = \mathrm{Min}\,\mathcal K$, and a list is the Pareto
+front of the feasible plans if and only if it is the Pareto front of $\mathcal K_S$.
 :::
 
 So under (A1-NS) a constructive algorithm can still focus on plans with $2t - p$ central cities,
-with additional care for waiting. ZenoSolver brackets every level between the lower bounds
-$L_{\rm NS}$ and $E_{\rm NS}$ and the templates of the configurations it builds, which never wait
-when each plane performs at most one $\bar B$ (Corollary 6.4). A gap between consecutive achieved
-points $(C_i, M_i)$ and $(C_{i+1}, M_{i+1})$ is closed by enumerating the configurations of cost
-below $C_i$ whose loads are at most $M_{i+1} - 1$, and computing the least makespan of each by a
-search over orders and matchings with the closed form of Lemma 6.3. Proposition 6.5 shows that the
-search can be needed. The experiment [E4](#sec-e4) compares the resulting fronts
-with exhaustive searches over all plans.
+with additional care for waiting. ZenoSolver brackets every gap of the front between lower bounds,
+the relaxation $L$ of Lemma 3.5 and the bounds of Propositions 8.3 to 8.5, and the templates of the
+configurations it builds, which it simulates with their waiting. A gap between consecutive
+achieved points $(C_i, M_i)$ and $(C_{i+1}, M_{i+1})$ is closed by an exhaustive search over the
+scheduled configurations of cost below $C_i$ whose role loads are at most $M_{i+1} - 1$, the closed
+form of Definition 5.2 giving their template values ({{< node "Proposition 8.6" >}}).
+Proposition 5.7 shows that the search can be needed: there, the configuration of (a) holds the
+bounds of Propositions 8.3 to 8.5 at 14 or below at level 73, while every plan of makespan at most
+73 costs at least 18. The experiment [E4](#sec-e4) compares the resulting fronts with exhaustive
+searches over all plans.
 
 #### BĀB̄ situations {#sec-short}
 
 Without (A1-NS), a flight between central cities can be shorter than any detour through $C_I$ or
-$C_G$, and plans of simple patterns can miss the Pareto front: a first search found 11 such
-instances among 140. The natural candidates for the missing plans are the patterns with one flight
-between central cities.
+$C_G$. The 2023 version of this paper handled the $B\bar A\bar B$ *situation*, a pattern $B$ in
+$C_i$, a *shuttle* $C_G \to C_i \to C_j \to C_I$ carrying the passenger to $C_j$, and a pattern
+$\bar B$ in $C_j$, by an augmented instance without flights between central cities (its §2.3 and
+§3.3, equations (3) to (6) and Figure 10). Its cities have one duration and one cost per pattern
+$A$, $\bar A$, $B$, $\bar B$: a central city $C_i$ keeps $d_i + \bar d_i$, $d_i + \bar d_i$,
+$2d_i$, $2\bar d_i$ and the cost $c_i$ for each, and every ordered pair $i \ne j$ adds a virtual
+city with durations $\min(d_i + \bar d_i,\ d_j + \bar d_j)$, $\bar d_i + d_{ij} + d_j$, $2d_i$,
+$2d_j$ and costs $c_i + c_j$, $c_i + c_j$, $c_i$, $c_j$. A configuration of the augmented instance
+gives every plane a number of patterns of each type at every city, with one more $A$ than $\bar A$
+per plane, as many $B$ as $\bar B$ at every city, and $t$ passengers, one per $A$ and one per $B$;
+its points are its cost, for $2t - p$ landings, with any makespan at least its loads. The phrase "a
+$\bar A$ with a null multiplicity" has two readings: the shuttle is not counted, or every $B$ at a
+virtual city needs an $\bar A$ there. As printed, the construction misses the front.
 
 ::: {.statement}
-{{< node "Definition 6.17" >}} **Shuttle triple, split crossing.** Let $C_x \ne C_y$ be central
-cities joined by a flight. A *shuttle* from $C_x$ to $C_y$ is a pattern $C_G \to C_x \to C_y \to C_I$
-(type $\bar A$) that carries a passenger from $C_x$ to $C_y$. A $B\bar A\bar B$ *situation*, or
-*shuttle triple*, is a pattern $B$ in $C_x$, a shuttle from $C_x$ to $C_y$ and a pattern $\bar B$
-in $C_y$, carrying one passenger. A *split crossing* is a pattern $C_I \to C_x \to C_y \to C_G$
-(type $A$) whose flight between central cities is empty: its first flight leaves a passenger in
-$C_x$, and its last flight carries another one from $C_y$ to $C_G$.
-:::
-
-A shuttle and a split crossing fly the same three flights in opposite directions, but a split
-crossing is an $A$, while a shuttle is an $\bar A$, whose plane needs two more patterns $A$
-({{< node "Lemma 2.1" badge=false >}}). One may hope that $B\bar A\bar B$ situations complete the
-front, as in the following conjecture. They do not.
-
-::: {.statement .refuted}
-{{< node "Conjecture 6.7" >}} **Shuttle triples complete the front.** Under (AΔ), the Pareto front
-is the Pareto set of (cost, least makespan) over role configurations extended with $B\bar A\bar B$
-situations.
-:::
-
-::: {.statement}
-{{< node "Proposition 6.7" >}} **Shuttles are not enough.** Take $n = 2$, $d = (1, 3)$,
-$\bar d = (3, 1)$, $d_{12} = 2$, $t = 3$, $p = 2$ and any costs. (AΔ) holds and (A1-NS) fails.
-Some plan has makespan 8, but every plan whose flights between central cities all lie in patterns
-$\bar A$ has makespan at least 10. With $c = (6, 1)$ the Pareto front is
-$\{(4, 10), (15, 8)\}$, and plans with shuttles only, like role configurations, give
-$\{(4, 10)\}$.
+{{< node "Example 5.10" >}} **The shuttle construction misses the front.** Take $n = 2$,
+$d = (1, 3)$, $\bar d = (3, 1)$, $c = (6, 1)$, $t = 3$, $p = 2$, and the flights between central
+cities $d_{12} = d_{21} = 2$, $d_{11} = d_{22} = 0$. (AΔ) holds and (A1-NS) fails. The instance has
+a feasible plan of cost 15 and makespan 8 (@fig-split), so its front has a point that weakly
+dominates $(15, 8)$. In both readings, every configuration of the augmented instance has a plane
+whose patterns last at least 10, so every point of the construction has makespan at least 10, and
+$(4, 10)$ is one. So the front of the construction is not the front of the instance.
 :::
 
 ::: {#fig-split}
 
 ```{=html}
-<svg class="zs-gantt" viewBox="0 0 640 102" role="img" aria-label="Plan of makespan 8 of Proposition 6.7" xmlns="http://www.w3.org/2000/svg">
+<svg class="zs-gantt" viewBox="0 0 640 102" role="img" aria-label="Plan of makespan 8 of Example 5.10" xmlns="http://www.w3.org/2000/svg">
 <text class="rowlbl" x="56" y="25.0" text-anchor="end">p₁</text>
 <rect class="leg p1" x="65.0" y="8" width="68.5" height="26" rx="3"/>
 <text class="lbl" x="99.2" y="25.0" text-anchor="middle">I→1 t₁</text>
@@ -255,89 +265,42 @@ $\{(4, 10)\}$.
 </svg>
 ```
 
-The plan of makespan 8 of Proposition 6.7 ($I = C_I$, $G = C_G$; dashed flights are empty).
+The plan of makespan 8 of Example 5.10 ($I = C_I$, $G = C_G$; dashed flights are empty).
 $p_2$ performs the split crossing $C_I \to C_2 \to C_1 \to C_G$: it leaves $t_3$ in $C_2$ at time 3,
 flies empty to $C_1$, and carries $t_1$, left there by $p_1$ at time 1, to $C_G$. $p_1$ takes $t_3$
 from $C_2$ at time 7. Both planes finish at 8; the landings are $C_1, C_2, C_2$ and $C_2, C_1$.
 :::
 
 ::: {.sketch}
-*Sketch of the bound.* A pattern $A$ or $\bar A$ lasts at least $\min_x(d_x + \bar d_x) = 4$, and a
-plane with an $\bar A$ performs at least three such patterns, so a plan of makespan below 12 whose
-flights between central cities lie in patterns $\bar A$ has none. On the instance without that
-flight, Theorem 6.1 gives a role configuration with every load at most the makespan, and a case
-check on its four landings shows that some load is at least 10
-({{< node "Proposition 6.7" text="full proof" badge=false >}}).
+*Sketch.* The augmented instance has four cities, whose patterns $A$, $\bar A$, $B$, $\bar B$ last
+$(4, 4, 2, 6)$, $(4, 4, 6, 2)$, $(4, 8, 2, 6)$ and $(4, 4, 6, 2)$. With 3 passengers on 2 planes,
+each plane flies an $A$, which lasts 4, so there is at most one pair of patterns $B$ and $\bar B$.
+Without a pair, some plane flies $A\bar A A$, at least 12; with a pair, its $B$ and $\bar B$ last 2
+and 6, so the plane flying the longer one reaches at least 10. Both planes crossing at $C_2$, one
+of them dropping a passenger there and the other picking it up, gives cost 4 and loads 10 and 6
+({{< node "Example 5.10" text="full proof" badge=false >}}).
 :::
 
+Plane $p_2$ flies a *split crossing*: it leaves a passenger in $C_2$ and takes another from $C_1$,
+a link between two cities, which neither role configurations nor the shuttle construction contain.
 This is the case of the beginning of this section: $d_1 < d_2$ and $\bar d_2 < \bar d_1$, so no
 $(B\bar B)$-pairing within one city is short, as one costs $2 d_x + 2\bar d_x = 8$ in either city.
 The split crossing enters at $C_2$, next to $C_G$, and leaves from $C_1$, next to $C_I$; it lets
 $p_1$ leave a passenger in $C_1$ and take another from $C_2$ for 2 each, a pairing between two
-different cities. Split crossings do not complete the front either:
-
-::: {.statement}
-{{< node "Proposition 6.18" >}} **One flight between central cities per pattern is not enough.**
-In each instance below, (AΔ) holds and (A1-NS) fails.
-
-*(a)* $n = 2$, $d = (1, 7)$, $\bar d = (7, 1)$, $d_{12} = 6$ (the least value (AΔ) allows),
-$t = 5$, $p = 2$, any costs. The least makespan of a plan is 32, reached with the pattern
-$C_I \to C_2 \to C_1 \to C_2 \to C_1 \to C_G$. Plans whose patterns each make at most three central
-landings need 34, and role configurations 36.
-
-*(b)* $n = 3$, $d = (1, 3, 2)$, $\bar d = (3, 1, 2)$, flights $C_1$–$C_3$ and $C_2$–$C_3$ of
-duration 1 and none between $C_1$ and $C_2$, $c = (0, 0, 1)$, $t = 3$, $p = 2$. The Pareto front is
-$\{(0, 10), (1, 8)\}$; plans whose patterns make at most two central landings give
-$\{(0, 10), (2, 8)\}$. The point $(1, 8)$ needs the split crossing routed through $C_3$,
-$C_I \to C_2 \to C_3 \to C_1 \to C_G$.
-
-*(c)* $n = 2$, $d = (3, 8)$, $\bar d = (8, 3)$, $d_{12} = 5$, $t = 7$, $p = 3$. The least makespan,
-41, needs a pattern that lands six times; with at most five central landings per pattern it is 43.
-
-*(d)* $n = 3$, $d = (7, 1, 3)$, $\bar d = (2, 6, 6)$, $c = (4, 7, 4)$, $d_{12} = 7$, $d_{13} = 5$,
-$d_{23} = 3$, $t = 7$, $p = 3$. The point $(73, 29)$ is on the front, reached by a plan with the
-pattern $\bar B$: $C_G \to C_3 \to C_1 \to C_3 \to C_G$, and no plan whose flights between central
-cities all lie in patterns $A$ reaches makespan 29.
-:::
-
-Parts (a) to (c) were established by exhaustive search over the plans of each class of patterns,
-and cross-checked with an integer flow model (computed). For (d), the exhaustive search gives the
-plan and the front point, but the claim about patterns $A$ rests on the flow model alone, whose
-exactness for a class of patterns has no written proof; that claim is a sketch. The searches found
-no instance that needs more than six central landings in a pattern.
-
-One lower bound holds for every plan, with no assumption at all.
-
-::: {.statement}
-{{< node "Lemma 6.19" >}} **Cut bound.** Let $\Phi$ be the least flight time of a sequence of
-flights from $C_I$ to $C_G$. Every feasible plan has $\sum_k F_k \ge (2t - p)\Phi$, so its makespan
-is at least $(2t - p)\Phi/p$. Under (AΔ), $\Phi = \min_x(d_x + \bar d_x)$.
-:::
-
-::: {.sketch}
-*Sketch.* With $\phi(v)$ the least flight time from $C_I$ to $v$, each journey climbs at least
-$\Phi$ in $\phi$, journeys use distinct flights, and each plane climbs exactly $\Phi$ more than it
-descends; adding up gives $\sum_k F_k \ge 2t\Phi - p\Phi$
-({{< node "Lemma 6.19" text="full proof" badge=false >}}).
-:::
-
-In Proposition 6.7 and in 6.18(a) and (c), the least makespan of all plans is this bound rounded
-up (8, 32 and 41), while role configurations stay above it. For clique instances without (A1-NS),
-$L_{\rm NS}$ and the cut bound are lower bounds, plans built from role configurations and from the
-patterns above are upper bounds, and exact fronts come from exhaustive search or the flow model on
-small instances. In the searches, shuttles never improved a front, split crossings completed it
-on all but 2 of 600 random instances, and on 150 instances whose durations $d$ and $\bar d$ order
-the cities alike, flights between central cities never changed it. A combinatorial description of
-the front is open ([perspectives](#sec-open)).
+different cities. For clique instances without (A1-NS), the relaxation $L$ of Lemma 3.5 remains a
+lower bound for every plan; a combinatorial description of the front is open
+([perspectives](#sec-open)).
 
 ### General MultiZenoTravel {#sec-graphs}
 
-We now consider a connected weighted graph $U = (V, E)$ such that $|V| = n + 2$ and two arbitrary
-vertices named $I$ and $G$ (with weight 0), respectively for the initial and the goal cities, not
-joined by an edge. A MultiZenoTravel instance $\Pi$ is defined by the triplet $(U, I, G)$; its
-plans are those of the [model](#sec-plans), with the edges of $U$ as flights. We denote
-by $\Lambda$ the set of paths over $U$, and for any path $q$, $|q|$ is the number of cities in the
-path. We define the functions $\phi$ (resp. $\omega$) as follows:
+We now consider a weighted graph $U = (V, E)$ such that $|V| = n + 2$ and two arbitrary vertices
+named $I$ and $G$ (with weight 0), respectively for the initial and the goal cities, not joined by
+an edge; every edge has a duration in $\mathbb N$ in each direction, and every other vertex $i$ a
+landing cost $c_i$ ({{< node "Definition 5.8" >}}). A MultiZenoTravel instance $\Pi$ is defined by
+the triplet $(U, I, G)$; its plans are those of the [model](#sec-plans), with the edges of $U$ as
+flights, and $\mathcal F_U$ is its Pareto front. We denote by $\Lambda$ the set of paths over $U$,
+and for any path $q$, $|q|$ is the number of cities in the path. We define the functions $\phi$
+(resp. $\omega$) as follows:
 $$\phi(q) = \sum_{0 \le i < |q| - 1} \mathrm{dur}(q_i, q_{i+1}), \qquad \omega(q) = \sum_{1 \le i < |q|} c_{q_i}.$$
 The function $\phi$ provides the duration, while $\omega$ provides the landing cost of the path.
 Notice that the first city in a path does not appear in $\omega$ because the initial state is such
@@ -354,42 +317,26 @@ $(U, I, G)$ into a non-symmetric clique problem:
   $I \to i$ (resp. $i \to G$) of weight $\phi(w_i)$ (resp. $\phi(e_i)$).
 * For all couples of cities $(i, j)$ of the new instance, assign $d_{ij} = +\infty$.
 
-The reduced instance has no flight between central cities, so it satisfies (A1-NS), and its
-Pareto front is computed as above. Every city of $f(U)$ stands for one way of reaching a central
-vertex and one way of leaving it, and a pattern of $f(U)$ visits one city. A pattern of $U$, from
-$I$ or $G$ to $I$ or $G$, may visit several central vertices and hand passengers over at any of
-them. The reduction is therefore exact in one direction only.
+The reduced instance has no flight between central cities. Every city of $f(U)$ stands for one way
+of reaching a central vertex and one way of leaving it, and a pattern of $f(U)$ visits one city. A
+pattern of $U$, from $I$ or $G$ to $I$ or $G$, may visit several central vertices and hand
+passengers over at any of them. The 2023 version of this paper claimed that $U$ and $f(U)$ have the
+same Pareto front. This fails, already on a path.
 
 ::: {.statement}
-{{< node "Proposition 6.12" >}} **A solution to the transformed problem is a solution to the
-generic problem.** For every role configuration of $f(U)$, every order and every link matching,
-$U$ has a feasible plan with the configuration's cost and the makespan of its template. Hence
-$\mathcal F_{f(U)} \subseteq \mathcal A_U$.
-:::
-
-::: {.sketch}
-*Sketch.* Fly the template of $f(U)$ in $U$, each flight between a hub and a city $(w, e)$ being
-replaced by the path it stands for. A single pattern $B$ or $\bar B$ is charged differently in
-$U$ and in $f(U)$, but the two patterns of a $(B\bar B)$-pairing in one city cost together what
-$f$ charges for them ({{< node "Proposition 6.12" text="full proof" badge=false >}}).
-:::
-
-{{< node "Proposition 6.13" >}} adds that $U$ and $f(U)$ have the same least cost: with
-$\kappa^\star$ the least landing cost of a path from $I$ to $G$, every plan of $U$ costs at least
-$(2t - p)\kappa^\star$, and the cheapest point of $\mathcal F_{f(U)}$ costs exactly that. The
-converse inclusion fails, already on a path.
-
-::: {.statement}
-{{< node "Example 6.11" >}} **The reduction misses the front.** Let $U$ be the path
-$C_I, a, b, C_G$ with durations $1, 2, 1$ and $c_a = c_b = 1$, with $t = 3$ and $p = 2$. Then
-$f(U)$ has two cities, with $(d, \bar d, c) = (1, 3, 2)$ and $(3, 1, 2)$, and
-$$\mathcal F_{f(U)} = \{(8, 10)\}, \qquad \mathcal F_U = \{(8, 8)\}.$$
+{{< node "Example 5.9" >}} **The reduction misses the front.** Let $U$ be the path
+$C_I, a, b, C_G$ with durations $1, 2, 1$ in both directions and no other flight,
+$c_a = c_b = 1$, $t = 3$ and $p = 2$. Then $f(U)$ has two cities, with
+$(d, \bar d, c) = (1, 3, 2)$ and $(3, 1, 2)$, and its front is $\mathcal F_{f(U)} = \{(8, 10)\}$,
+as a graph and also as a clique instance for every table of flights between central cities that
+satisfies (A1-NS). $U$ has a feasible plan of cost 8 and makespan 8 (@fig-path), so
+$(8, 10) \notin \mathcal F_U$ and $\mathcal F_U \ne \mathcal F_{f(U)}$.
 :::
 
 ::: {#fig-path}
 
 ```{=html}
-<svg class="zs-gantt" viewBox="0 0 640 102" role="img" aria-label="Plan of cost 8 and makespan 8 of Example 6.11" xmlns="http://www.w3.org/2000/svg">
+<svg class="zs-gantt" viewBox="0 0 640 102" role="img" aria-label="Plan of cost 8 and makespan 8 of Example 5.9" xmlns="http://www.w3.org/2000/svg">
 <text class="rowlbl" x="56" y="25.0" text-anchor="end">p₁</text>
 <rect class="leg p2" x="65.0" y="8" width="68.5" height="26" rx="3"/>
 <text class="lbl" x="99.2" y="25.0" text-anchor="middle">I→a t₂</text>
@@ -438,60 +385,18 @@ $$\mathcal F_{f(U)} = \{(8, 10)\}, \qquad \mathcal F_U = \{(8, 8)\}.$$
 </svg>
 ```
 
-A plan of cost 8 and makespan 8 on the path of Example 6.11 ($I = C_I$, $G = C_G$; dashed flights
+A plan of cost 8 and makespan 8 on the path of Example 5.9 ($I = C_I$, $G = C_G$; dashed flights
 are empty). $p_1$ leaves $t_2$ in $b$ at time 3, flies back to $a$, and takes $t_3$ from there at
 time 5, all within the single pattern $C_I\,a\,b\,a\,b\,C_G$. Each plane lands twice in $a$ and
 twice in $b$, and each traveler changes planes at most once.
 :::
 
-Each edge of the path separates $C_I$ from $C_G$, so the planes fly it towards $C_G$ at least
-$t = 3$ times and back at least $t - p = 1$ time: $4 \cdot (1 + 2 + 1) = 16$ time units in total,
-so one plane flies at least 8. In $f(U)$, every role configuration has four landings of cost 2,
-and a $(B\bar B)$-pairing in either city puts a load of 10 on one plane. The plan above does in one
-pattern what $f(U)$ cannot: leave a passenger at one vertex, fly to the next one, and take another
-passenger there. This is the mechanism of the split crossings above. Giving $f(U)$ flights
-between its cities does not repair the reduction either; its front then becomes
-$\{(8, 10), (10, 8)\}$ (computed). On random small graphs, the two fronts differ on 342 of 4,000
-paths, spokes, cycles and random graphs, and on none of 1,000 clique instances under (A1-NS).
+In $f(U)$, every role configuration has four landings of cost 2, and a $(B\bar B)$-pairing in
+either city puts a load of 10 on one plane. Between the two cities of $f(U)$, a plane passes
+through a hub, which takes $\bar d_1 + \bar d_2 = d_1 + d_2 = 4$, twice the edge $a$–$b$. The plan
+above does in one pattern what $f(U)$ cannot: leave a passenger at one vertex, fly to the next one,
+and take another passenger there. This is the mechanism of the split crossing above.
 
-The reduction is exact in three cases, and the general problem has an exact method of its own.
-
-::: {.statement}
-{{< node "Proposition 6.15" >}} **Where the reduction is exact.**
-$\mathcal F_U = \mathcal F_{f(U)}$ when $U$ is a clique instance satisfying (A1-NS), when $p = 1$,
-and when $t = p$.
-:::
-
-Example 6.11 has $p = 2$ and $t = p + 1$, so the last two cases are sharp.
-{{< node "Proposition 6.16" >}} shows that, with integer durations of at least 1, integer flows of
-$p$ plane units and $t$ passenger units in the time-expanded network, passengers riding only where
-a plane flies, give the least cost $R(M)$ of a plan of makespan at most $M$, and that
-$\mathcal F_U = \{(R(M), M) : R(M) < R(M - 1)\}$: the exact front of a general instance is
-computable, level by level, as an integer program.
-
-**On the complexity:** In general the number of cities in $f(U)$ is not polynomial in function of
-$n$, the number of cities in $U$, and thus, solving $U$ through $f(U)$ might be challenging w.r.t.
-the initial complexity of the problem and our algorithm. On top of that, the number of paths
-between two vertices can be up to super-exponential: a graph made of $\sqrt n$ layers of
-$\sqrt n$ vertices has $(\sqrt n)^{\sqrt n}$ paths between its ends, and computing the cardinal of
-the set of paths is already a $\sharp P$-complete problem [[Val79](#ref-Val79)].
-
-Not every path is needed. A path is *non-dominated* if no other path between the same vertices has
-a landing cost and a duration both at most its own, one of them strictly smaller. Removing a city
-of a clique instance without flights between central cities that another city dominates in cost,
-$d$ and $\bar d$ does not change the front, so $f(U)$ keeps its front when built from the pairs of
-non-dominated paths only ({{< node "Proposition 6.14" >}}). Some elements of the Pareto set, in the
-decision space, may be lost, but the Pareto front of $f(U)$ is entirely found.
-
-However, even in this case, the number of central cities in $f(U)$ is function of the cardinal of
-the Pareto Set of non-dominated paths for each couple of cities in $U$. In
-[[Han80](#ref-Han80)], Hansen proposed some pathological instances of bicriterion graphs
-such that the set of non-dominated paths between two extreme nodes is exponential in the number of
-nodes $n$. Conversely, when the number of non-dominated paths of $U$ is bounded by a polynomial of
-$n$, the number of cities of the reduced instance is polynomial of $n$.
-
-In conclusion, the reduction of a general instance to a clique instance gives plans of the general
-instance and its exact least cost, and its exact Pareto front when the instance is a clique under
-(A1-NS), has one plane, or as many planes as passengers. In general, the exact front comes from
-the integer flows of Proposition 6.16, on small instances; a characterization in the spirit of
-Corollary 6.10 is open.
+In conclusion, the reduction of a general instance to a clique instance proposed in the 2023
+version of this paper does not preserve the Pareto front (Example 5.9). A characterization of the
+front of general instances in the spirit of Corollary 5.6 is open ([perspectives](#sec-open)).

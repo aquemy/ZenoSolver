@@ -8,43 +8,52 @@ The method to find the Pareto Front of any general MultiZenoTravel instance cons
 steps. First, we provide an efficient algorithm to find the Pareto Front for any symmetric clique
 MultiZenoTravel instance. Then, we show that for the non-symmetric version of the problem the
 method still applies when flights between central cities are not shorter than a detour through
-$C_I$ or $C_G$, provided waiting is accounted for, and that it does not otherwise. Last, we study
-the transformation of any instance of the general MultiZenoTravel problem into a non-symmetric
-clique version, and the cases in which it preserves the Pareto front. This section covers the
-first step; it corresponds to §2 to §4 of the
+$C_I$ or $C_G$, provided waiting is accounted for, and that the extension to shorter flights
+proposed in the 2023 version of this paper misses the front. Last, we study the transformation of
+any instance of the general MultiZenoTravel problem into a non-symmetric clique version, and show
+that it does not preserve the Pareto front in general. This section covers the first step; it
+corresponds to §2 to §4 of the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md).
 
 The following proposition is the cornerstone of the method to identify and construct the Pareto
 Set of any instance:
 
 ::: {.statement}
-**Proposition I**: Assume (S), and (AΔ) or (A1). Every point of the Pareto front is attained by a
-plan where exactly $2t - p$ (possibly identical) central cities are used by a plane.
+**Proposition I**: Assume (S) and (H), in particular (S) and (AΔ), or (S) and (A1). Every point of
+the Pareto front is attained by a plan where exactly $2t - p$ (possibly identical) central cities
+are used by a plane.
 :::
 
-Under (A1), Proposition I is {{< node "Theorem 4.7" >}} together with
-{{< node "Corollary 4.8" >}}; under (AΔ), it is {{< node "Theorem 4.10" >}}, from which
-{{< node "Corollary 4.12" >}} carries Corollary 4.8 over.
+Proposition I is {{< node "Theorem 4.5" >}} together with {{< node "Theorem 4.1" >}}: every point
+of the front is the point of an admissible partition of $2t - p$ landings, which Theorem 4.1 flies
+with exactly these landings. (A1) and (AΔ) imply (H) by Lemma 1.5.
 
-By Corollary II, no plan uses fewer than $2t - p$ central cities, so Proposition I reduces the
-search to lists of $2t - p$ cities. It is a statement about the front: with landing costs of
-zero, a Pareto-optimal plan may land more often. With one city of duration 1 and cost 0, $p = 3$
-and $t = 5$, the front is $\{(0, 6)\}$, attained by planes landing 3, 3 and 1 times; the plane
-landing once can add a pattern $\bar A$ and a pattern $A$ within its slack, and the resulting
-plan, with 9 landings, still attains $(0, 6)$.
+By Corollary II, no plan performs fewer than $2t - p$ patterns, so Proposition I reduces the
+search to lists of $2t - p$ cities. It is a statement about the front: a Pareto-optimal plan may
+land more often. [[QS15](#ref-QS15)] and the 2023 version of this paper state Proposition I for
+every Pareto-optimal plan; it holds only in the form above.
+
+::: {.statement}
+{{< node "Example 4.6" >}} **An optimal plan with extra landings.** Take $n = 1$,
+$d_1 = \bar d_1 = 1$, $c_1 = 0$, $t = 5$ and $p = 3$, so $2t - p = 7$, with any flight between
+central cities. The front is $\{(0, 6)\}$, and a feasible plan with 9 central landings attains
+$(0, 6)$: every plane flies $C_I \to C_1 \to C_G \to C_1 \to C_I \to C_1 \to C_G$ from time 0,
+without waiting; planes 2 and 3 carry a passenger on both patterns $A$, plane 1 on its first only.
+:::
 
 The goal of this section is to establish the proof of Proposition I for the Symmetric case. For
 that purpose, we first describe which lists of $2t - p$ cities can be flown, and how fast. We then
-show that every plan is dominated by one of them, first under the assumption (A1) of
-[[QS15](#ref-QS15)], then under the triangular inequality (AΔ). Precisely, with
+show that every plan is dominated by one of them under the hub triangles (H), which both the
+assumption (A1) of [[QS15](#ref-QS15)] and the triangular inequality (AΔ) imply. Precisely, with
 $$M(X) = \min\Big\{\max_k \ell(X_k) : X_1, \dots, X_p \text{ an admissible partition of } X\Big\},$$
-the front is the Pareto set of the pairs $(c(X), M(X))$ over the lists $X$ of $2t - p$ cities.
+the front is the Pareto set of the pairs $(c(X), M(X))$ over the lists $X$ of $2t - p$ cities that
+have an admissible partition.
 
 ### Admissible partitions {#sec-admissible}
 
 A list of $2t - p$ cities does not hold any information about which plane will land in a
 particular city. Assign to each plane $k$ the cities $X_k$ in which it lands: when can the
-partition $X_1, \dots, X_p$ be flown with simple patterns? By Lemma 2.1, a plane performs one
+partition $X_1, \dots, X_p$ be flown with simple patterns? By Lemma 3.1, a plane performs one
 more $A$ than $\bar A$, so a plane that performs only those patterns lands an odd number of times.
 A plane that lands an even number of times has to perform a pattern $B$ or $\bar B$, that is, to
 leave a passenger in a central city for another plane, or to take one left there by another
@@ -52,7 +61,7 @@ plane. These hand-offs pair up at each city. Admissibility records exactly this 
 modulo 2.
 
 ::: {.statement}
-{{< node "Definition 2.2" >}} **Admissible partition.** A *parity matrix* for $X_1, \dots, X_p$
+{{< node "Definition 2.1" >}} **Admissible partition.** A *parity matrix* for $X_1, \dots, X_p$
 is a matrix $h \in \{0, 1\}^{p \times n}$ such that
 
 * (h1) $h_{k,i} = 1$ implies $X_k(i) \ge 1$;
@@ -64,28 +73,36 @@ The partition is *admissible* if it has a parity matrix.
 
 Here $h_{k,i} = 1$ means that plane $k$ takes part in an odd number of hand-offs in city $i$.
 (h2) asks a plane with an even group, an *even plane*, to do so in an odd number of cities, and
-(h3) pairs the hand-offs of every city. An empty group would need an odd number of marked cities
-in which it does not land, so admissible partitions have non-empty groups. The condition reads
-more simply on a graph.
+(h3) pairs the hand-offs of every city. In graph terms, the marked pairs $(k, i)$ are a
+$\mathcal T$-join, for the set $\mathcal T$ of even planes, of the bipartite graph $H$ on planes and
+cities with an edge between $k$ and $i$ whenever $X_k(i) \ge 1$. Counting with multiplicities
+changes nothing: integer entries $0 \le \tilde h_{k,i} \le X_k(i)$ with the parities of (h2) and
+(h3) exist if and only if a parity matrix does ({{< node "Lemma 2.2" >}}).
 
 ::: {.statement}
-{{< node "Lemma 2.4" >}} **Component form.** Let $H$ be the bipartite graph on planes and cities
-with an edge between $k$ and $i$ whenever $X_k(i) \ge 1$. The partition is admissible if and only
-if every connected component of $H$ contains an even number of even planes.
+{{< node "Lemma 2.4" >}} **Row bound.** For every parity matrix and plane $k$,
+$\sum_i h_{k,i} + 1 \le |X_k|$. Hence the groups of an admissible partition are non-empty, and
+$|X| \equiv p \pmod 2$.
+:::
+
+The condition reads more simply when no two groups share a city.
+
+::: {.statement}
+{{< node "Lemma 2.3" >}} **Disjoint groups.** If no city lies in two groups, the partition is
+admissible if and only if every group has odd size.
 :::
 
 ::: {.sketch}
-*Sketch.* A parity matrix is a set of edges of $H$ with odd degree exactly at the even planes, so
-each component has an even number of them; conversely, such a set is built bottom-up in any
-spanning forest of $H$ ({{< node "Lemma 2.4" text="full proof" badge=false >}}).
+*Sketch.* Odd groups have the zero matrix as a parity matrix. Conversely, a city that lies in one
+group is marked in at most one row, hence by (h3) in none, and (h2) makes every group odd
+({{< node "Lemma 2.3" text="full proof" badge=false >}}).
 :::
 
-On the [example instance](#fig-plan), the groups $\{2, 3\}$ and $\{2, 3\}$ are
-admissible: both planes are even, and they share cities. The groups $\{1, 1\}$ and $\{3, 3\}$ are
-not: each plane is even, but they share no city, so each would have to hand a passenger to a plane
-that never comes to its city. Two odd groups, such as $\{1\}$ and $\{1, 1, 1\}$, are always
-admissible, and {{< node "Lemma 2.9" >}} shows that a partition with
-$\sum_k |X_k| \equiv p \pmod 2$ is admissible as soon as some city belongs to every even group.
+On the [example instance](#fig-plan), the groups $\{2, 3\}$ and $\{2, 3\}$ are admissible: both
+planes are even, and marking $C_2$ in both rows gives a parity matrix. The groups $\{1, 1\}$ and
+$\{3, 3\}$ are not: each plane is even, but they share no city, so each would have to hand a
+passenger to a plane that never comes to its city. Odd groups, such as $\{1\}$ and $\{1, 1, 1\}$,
+are always admissible: the zero matrix is a parity matrix.
 
 ### (BB̄)-pairings and link forests {#sec-links}
 
@@ -95,14 +112,17 @@ second takes it to $C_G$. The parity matrix says in which cities the pairings ar
 which planes. A link forest says both.
 
 ::: {.statement}
-{{< node "Definition (link forest)" >}} A *link forest* for $X_1, \dots, X_p$ is a forest
-$\Lambda$ on the planes whose edges carry city labels, such that
+{{< node "Definition 2.5" >}} A *link forest* for $X_1, \dots, X_p$ is a forest $\Lambda$ of
+rooted trees on the planes whose edges, the *links*, carry city labels. The group of a plane
+consists of its *free landings*, one landing in the label of each link to a child, and one landing
+in the label of the link to its parent, so that
 
-* (F1) for every plane $u$ and city $i$, at most $X_u(i)$ edges at $u$ are labelled $i$;
-* (F2) $r_u := |X_u| - \deg_\Lambda(u)$ is odd for every plane $u$.
+* (F1) the links at a plane $u$ use distinct landings of its group: for every city $i$, at most
+  $X_u(i)$ links at $u$ are labelled $i$;
+* (F2) every plane $u$ has an odd number $r_u = |X_u| - \deg_\Lambda(u)$ of free landings.
 
-An edge between $u$ and $v$ labelled $i$, a *link* in $i$, is a $(B\bar B)$-pairing; the $r_u$
-other landings of $u$, its *free landings*, are performed as patterns $A, \bar A, \dots, A$.
+A link between $u$ and $v$ labelled $i$, a *link* in $i$, is a $(B\bar B)$-pairing; the $r_u$
+free landings of $u$ are performed as patterns $A, \bar A, \dots, A$.
 :::
 
 ::: {.statement}
@@ -111,23 +131,21 @@ forest.
 :::
 
 ::: {.sketch}
-*Sketch.* Counting the labels of a link forest at each plane gives an integer parity matrix,
-which reduces mod 2 to a parity matrix ({{< node "Lemma 2.3" >}}). Conversely, take a parity
-matrix supported in a spanning forest of $H$, pair the planes marked in each city, and check
-that the pairs form no cycle ({{< node "Lemma 2.6" text="full proof" badge=false >}}).
+*Sketch.* Counting the labels of a link forest at each plane gives an integer parity matrix
+({{< node "Lemma 2.2" >}}). Conversely, a parity matrix with the fewest marks has no cycle, so
+some plane is marked in no city, and is a tree of its own, or in exactly one city $i$; removing it,
+with one landing in $i$ of another plane marked in $i$, leaves a smaller admissible partition, and
+the plane hangs back by a link in $i$, by induction
+({{< node "Lemma 2.6" text="full proof" badge=false >}}).
 :::
-
-When $|X| = 2t - p$, {{< node "Corollary 2.7" >}} bounds the structure: a link forest has at most
-$t - p$ links, and each of its trees has at most $q_{\max} = \min(p, t - p + 1)$ planes.
 
 ### Constructing the plan {#sec-achievability}
 
 ::: {.statement}
-{{< node "Theorem 4.1" >}} Assume (S). For every list $X$ of $2t - p$ cities and every
-admissible partition $X_1, \dots, X_p$ of $X$, there is a feasible plan whose central landings are
-exactly $X$ (so its cost is $c(X)$), in which plane $k$ flies for $\ell(X_k)$ and performs at most
-one pattern $\bar B$, and whose makespan is $\max_k \ell(X_k)$. The plan uses no flight between
-central cities.
+{{< node "Theorem 4.1" >}} Assume (S) and $p \le t$. For every table of flights between central
+cities, every admissible partition $X_1, \dots, X_p$ of a list $X$ of $2t - p$ cities is flown by a
+feasible plan whose planes land exactly at the groups, up to relabelling the planes, so of cost
+$c(X)$, and whose makespan is $\max_k \ell(X_k)$.
 :::
 
 The construction roots every tree of a link forest at a plane. For a link in $i$ between a parent
@@ -203,88 +221,107 @@ A first lower bound on the cost of every plan comes from forgetting admissibilit
 bound on the duration of a pattern.
 
 ::: {.statement}
-{{< node "Lemma 3.3" >}} **Pattern durations.** Let a pattern $\gamma$ visit the central cities
-$x_1, \dots, x_m$ in this order.
+{{< node "Lemma 3.4" >}} **Pattern durations.**
 
-*(a)* Under (S), $F(\gamma) \ge d_{x_1} + d_{x_m} \ge 2\min(d_{x_1}, d_{x_m})$.
+*(a)* A plane of a feasible plan has a multiset $Z$ of central cities, one per pattern, with
+$2e(Z)$ at most the time it ends and $c(Z)$ at most its landing costs.
 
-*(b)* Under (AΔ), for every $j$, $F(\gamma) \ge d_{x_j} + \bar d_{x_j}$ for patterns $A$ and
-$\bar A$, $F(\gamma) \ge 2 d_{x_j}$ for $B$ and $F(\gamma) \ge 2\bar d_{x_j}$ for $\bar B$.
+*(b)* Assume (S) and (H). Every pattern of a plane of a feasible plan lands in at least one central
+city and lasts at least $2d_y$ for every central city $y$ it lands in. A chain (Lemma 3.2) ends at
+least $d_y$ after any of its legs arrives in a central city $y$.
 
-*(c)* A simple pattern in $x$ lasts exactly $d_x + \bar d_x$ ($A$, $\bar A$), $2 d_x$ ($B$) or
-$2\bar d_x$ ($\bar B$).
+*(c)* On a route without flights between central cities, every pattern is simple, and a simple
+pattern in $x$ lasts exactly $d_x + \bar d_x$ ($A$, $\bar A$), $2 d_x$ ($B$) or $2\bar d_x$
+($\bar B$); the patterns of a route whose legs all arrive by $M$ last at most $M$ in total.
 :::
 
 ::: {.statement}
-{{< node "Lemma 3.4" >}} **Relaxation.** Assume (S). For every feasible plan with cost $C$ and
+{{< node "Lemma 3.5" >}} **Relaxation.** Let $p \le t$. For every feasible plan with cost $C$ and
 makespan $M$ there are non-empty multisets $Y_1, \dots, Y_p$ with $\sum_k |Y_k| = 2t - p$,
-$c(Y_1 + \dots + Y_p) \le C$ and $\ell(Y_k) \le F_k \le M$ for every $k$. Hence, with integer
-durations, $C \ge L(\lfloor M/2 \rfloor)$, where
-$$L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = 2t - p,\ Y_k \ne \emptyset \text{ and } \delta(Y_k) \le T \text{ for all } k\Big\}.$$
+$c(Y_1 + \dots + Y_p) \le C$ and $2e(Y_k) \le M$ for every $k$; under (S), $e = d$, so
+$\ell(Y_k) \le M$. Hence $C \ge L(\lfloor M/2 \rfloor)$, where
+$$L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = 2t - p,\ Y_k \ne \emptyset \text{ and } e(Y_k) \le T \text{ for all } k\Big\}.$$
 No assumption on the flights between central cities is needed.
 :::
 
 ::: {.sketch}
 *Sketch.* Charge each pattern to whichever of its first and last central cities has the smaller
-$d$, which by Lemma 3.3(a) costs at most half its flight time in load; by Corollary II there are
-at least $2t - p$ patterns, at least one per plane, and their charged landings are distinct
-({{< node "Lemma 3.4" text="full proof" badge=false >}}).
+$e$, which by Lemma 3.4(a) costs at most half its flight time in load; by Corollary II there are
+at least $2t - p$ patterns, at least one per plane, and their charged landings are distinct. Remove
+landings from groups with at least two until $2t - p$ remain
+({{< node "Lemma 3.5" text="full proof" badge=false >}}).
 :::
 
-$L$ is the minimisation that defines the front, without admissibility. Wherever it meets the
-least cost of an admissible partition, the front is known whatever the flights between central
-cities; this is the common case ([certificates](#sec-certificates)).
+$L$ is the minimisation that defines the front, without admissibility. A certificate whose gaps
+are all closed by $L$ holds whatever the flights between central cities
+([certificates](#sec-certificates)).
 
-### Proof of Proposition I under the assumption of [QS15] {#sec-converse}
+### Proof of Proposition I under the hub triangles {#sec-converse}
 
 Under (A1), a flight between central cities can always be replaced by a detour through $C_G$:
 using the same plane, the passenger on board flies to $C_G$ instead, and the plane flies on to
-the next city, arriving no later. The plan then only performs simple patterns, which we read
-through the passengers they carry.
+the next city, arriving no later. The plan then only performs simple patterns. Without (A1), the
+detour through $C_G$ can be longer than the flight it replaces, so a pattern may visit several
+central cities while its duration pays for only one of them. Each pattern can still be *reduced*:
+by Lemma 3.4(b), under (S) and (H), a pattern lasts at least twice the duration $d_x$ of every
+city $x$ it visits, so a simple pattern of the same type in any of these cities, or in a city of
+smaller duration, is no longer, and lands only once. Reducing patterns one by one does not
+conclude, however. After the reduction, the passenger left by a pattern $B$ may be taken by a
+pattern $\bar B$ in another city, and moving both to the city of smaller duration requires two
+landings there, which may cost more than the two landings they replace. The proof below does not
+follow passengers at all.
 
 ::: {.statement}
-{{< node "Definition 4.2" >}} **Role configuration.** A role configuration assigns to each plane
-$k$ three multisets of central cities, its patterns $B$ ($\mathrm{Dr}_k$, drop-offs), $\bar B$
-($\mathrm{Pk}_k$, pick-ups) and $A$ or $\bar A$ ($\mathrm{Cr}_k$, crossings), with
-$|\mathrm{Cr}_k|$ odd and the *per-city balance* $\sum_k \mathrm{Dr}_k = \sum_k \mathrm{Pk}_k$.
-Its passenger count is $\sum_k \big(|\mathrm{Dr}_k| + (|\mathrm{Cr}_k| + 1)/2\big)$, its cost is
-$\sum_k c(\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k)$, and the *role load* of plane $k$ is
-$$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k).$$
-:::
-
-Under (S), $\lambda_k = \ell(X_k)$ for the group $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$.
-Three lemmas connect plans, role configurations and partitions; call a plan *simple* if all its
-patterns are simple.
-
-* {{< node "Lemma 4.3" >}} (direct selection): in a simple plan with clean journeys every journey
-  is $C_I \to x \to C_G$, and selecting patterns by their role in the journeys gives a role
-  configuration with passenger count at least $t$, cost at most $C$ and $\lambda_k \le F_k$.
-* {{< node "Lemma 4.4" >}} (shrinking): deleting two crossings, or a $(B\bar B)$-pairing, brings
-  the passenger count down to exactly $t$ without increasing anything.
-* {{< node "Lemma 4.5" >}} (parity): the groups of a role configuration with passenger count $t$
-  form an admissible partition of $2t - p$ cities, with parity matrix
-  $h_{k,i} = (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) \bmod 2$.
-
-::: {.statement}
-{{< node "Theorem 4.7" >}} **Converse.** Assume (S) and (A1). For every feasible plan with cost
-$C$, makespan $M$ and flight times $F_k$, there is an admissible partition $X_1, \dots, X_p$ of a
-list $X$ of $2t - p$ cities with $c(X) \le C$ and $\ell(X_k) \le F_k \le M$ for every $k$.
+{{< node "Theorem 4.4" >}} **Converse under (S) and (H).** Assume (S), (H) and $p \le t$. If every
+plane flies a route from $C_I$ at time 0 to $C_G$ and every passenger rides a chain
+(Lemma 3.2) of legs of the plan, then some admissible partition $X_1, \dots, X_p$ of a list $X$ of
+$2t - p$ cities has $c(X)$ at most the cost of the plan and $\ell(X_k) \le F_k$ for every plane. In
+particular, every feasible plan with cost $C$ and makespan $M$ gives such a partition, with
+$c(X) \le C$ and $\ell(X_k) \le F_k \le M$ for every $k$.
 :::
 
 ::: {.sketch}
-*Sketch.* Replace every flight $a \to b$ between central cities by $a \to C_G \to b$: by (S) and
-(A1) the plane reaches $b$ no later, the landings are unchanged, and a passenger on board is
-delivered in $C_G$. Then clean the journeys (Lemma 3.1) and apply Lemmas 4.3, 4.4 and 4.5
-({{< node "Theorem 4.7" text="full proof" badge=false >}}).
+*Sketch.* By Lemma 3.4(b), the route of every plane is a sequence of patterns, each lasting at
+least twice the largest $d$ it visits. Planes that share a central city form classes, whose
+parities the counting of Corollary II fixes; where a class has the wrong parity, two patterns of
+one of its planes are merged. $(B\bar B)$-pairings between planes are laid along paths that join
+the planes with an even number of patterns within each class, so that every plane gets the right
+parity, and pairings that meet at one pattern are re-paired, each moved to the city of smaller
+duration together with the landing that pays for it, until every pattern carries at most one. Each
+pattern then takes one city, of duration at most the largest it visits. The pairings define an
+integer parity matrix ({{< node "Lemma 2.2" badge=false >}}), and {{< node "Lemma 4.3" >}} removes
+landings two at a time down to $2t - p$ ({{< node "Theorem 4.4" text="full proof" badge=false >}}).
 :::
 
-With Theorem 4.1 and Lemma 1.1, this proves Proposition I under (A1), in the following precise
-form.
+By {{< node "Lemma 1.5" badge=false >}}, the converse holds under (S) and the assumption (A1) of
+[[QS15](#ref-QS15)], and under (S) and the triangular inequality (AΔ). The proof uses no timing:
+only the patterns, their landings and which planes share which cities. Theorem 4.4 is
+machine-checked in Lean, as `Feasible.exists_admissible_hub`, with the corollaries
+`Feasible.exists_admissible_A1_flightTime` under (A1) and `Feasible.exists_admissible_ATri` under
+(AΔ). Independently of the proof, the experiment [E6](#sec-e6) searched the gaps where $L$ lies
+below the admissible optimum, on small instances with the shortest flights between central cities
+the triangular inequality allows, and found no plan cheaper than that optimum.
+
+With Theorem 4.1 and Lemma 1.7, this proves Proposition I, in the following precise form. The
+same holds when planes may finish anywhere, as in PDDL problems without goals on the planes.
 
 ::: {.statement}
-{{< node "Corollary 4.8" >}} Assume (S) and (A1). Then
-$$\mathcal F = \mathrm{Min}\,\mathcal X, \qquad \mathcal X = \{(c(X), M(X)) : |X| = 2t - p,\ M(X) < \infty\},$$
-and every point of $\mathcal F$ is attained by a plan with exactly $2t - p$ central landings.
+{{< node "Theorem 4.5" >}} **Symmetric front.** Assume (S), (H) and $p \le t$. Let
+$\mathcal P$ be the set of the points $(c(X), \max_k \ell(X_k))$ of the admissible partitions of
+the lists $X$ of $2t - p$ cities, let
+$$\mathcal X = \{(c(X), M(X)) : |X| = 2t - p,\ X \text{ has an admissible partition}\},$$
+and let $\mathcal A'$ be the set of the points of the plans whose planes may end anywhere. Then
+$$\mathcal F = \mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal P = \mathrm{Min}\,\mathcal X.$$
+:::
+
+::: {.sketch}
+*Sketch.* $\mathcal P \subseteq \mathcal A$ by Theorem 4.1, and every point of $\mathcal A$ is
+weakly dominated by a point of $\mathcal P$ by Theorem 4.4, so Lemma 1.7 applies. For planes that
+end anywhere, cut every route after its last leg that belongs to a chain, and complete a route that
+then ends in a central city $b$ by an empty leg $b \to C_G$, which arrives by the makespan by
+Lemma 3.4(b). The planes left without legs are added back one at a time by
+{{< node "Lemma 4.2" >}}, which gives a new plane one city taken from the others without raising
+the cost or the largest load ({{< node "Theorem 4.5" text="full proof" badge=false >}}).
 :::
 
 @tbl-example lists an admissible partition for each point of the example instance. Every point
@@ -303,96 +340,35 @@ $(24, 12)$.
 
 : The Pareto front of the example instance and the admissible partitions of the plans `zeno --plans` prints. In each, $p_1$ performs the pattern $B$ of the pairing and $p_2$ the pattern $\bar B$. {#tbl-example}
 
-The same holds when planes may finish anywhere, as in PDDL problems without goals on the planes:
-
-::: {.statement}
-{{< node "Theorem 4.9" >}} **Bridge.** Assume (S) and (A1). The Pareto front of the variant in
-which planes may end anywhere, the makespan being the last arrival of any flight, equals
-$\mathcal F$.
-:::
-
-::: {.sketch}
-*Sketch.* Remove flights between central cities and clean as in Theorem 4.7, delete every flight
-after a plane's last flight with a passenger, and complete a sequence that ends with
-$C_I \to x$ by $x \to C_G$. The planes left without flights are added back one at a time by
-{{< node "Lemma 4.6" >}}, which gives a new plane one city taken from the others without raising
-the cost or the largest load ({{< node "Theorem 4.9" text="full proof" badge=false >}}).
-:::
-
-### Proof of Proposition I under the triangular inequality {#sec-adelta}
-
-Without (A1), the detour through $C_G$ can be longer than the flight it replaces, so a pattern
-may visit several central cities while its duration pays for only one of them. Each pattern can
-still be *reduced*: by Lemma 3.3(b), under (S) and (AΔ), a pattern lasts at least twice the
-duration $d_x$ of every city $x$ it visits, so a simple pattern of the same type in any of these
-cities, or in a city of smaller duration, is no longer, and lands only once. Reducing patterns
-one by one does not conclude, however. After the reduction, the passenger left by a pattern $B$
-may be taken by a pattern $\bar B$ in another city, and moving both to the city of smaller
-duration requires two landings there, which may cost more than the two landings they replace.
-The proof below does not follow passengers at all.
-
-::: {.statement}
-{{< node "Theorem 4.10" >}} **Converse without (A1).** Assume (S) and (AΔ). For every feasible
-plan with cost $C$, makespan $M$ and flight times $F_k$, there is an admissible partition
-$X_1, \dots, X_p$ of a list $X$ of $2t - p$ cities with $c(X) \le C$ and
-$\ell(X_k) \le F_k \le M$ for every $k$. The same holds for a plan on any set $Q$ of planes with
-$t \ge |Q|$, with $|Q|$ in place of $p$.
-:::
-
-::: {.sketch}
-*Sketch.* Each pattern is reduced to a city of duration at most the largest $d$ it visits,
-provided some landing of the plan pays for it. Planes that share a central city form components,
-whose parities Corollary II fixes; $(B\bar B)$-pairings between planes are laid along a spanning
-forest of the sharing graph so that every plane gets the right parity, and pairings that meet at
-one pattern are re-paired, each moved to the city of smaller duration together with the landing
-that pays for it, until every pattern carries at most one. The pairings then define an integer
-parity matrix ({{< node "Lemma 2.3" badge=false >}}), and {{< node "Lemma 4.11" >}} removes
-landings two at a time down to $2t - p$ ({{< node "Theorem 4.10" text="full proof" badge=false >}}).
-:::
-
-The proof uses (AΔ) only through the inequality $F(\gamma) \ge 2d_x$ for every central city $x$
-of a pattern $\gamma$, which also holds under (A1), so it is a second proof of Theorem 4.7. Under
-(S) alone, the same inequality holds with $d_x$ replaced by the shortest flight time $d'_x$ from
-$x$ to $C_I$ or $C_G$, so the admissible optimum computed with the durations $d'$ is a lower
-bound for every plan, next to $L$. Everything built on Theorem 4.7 carries over:
-
-::: {.statement}
-{{< node "Corollary 4.12" >}} Under (S) and (AΔ), Corollary 4.8, Theorem 4.9,
-Proposition 7.1, the front statements of Propositions 7.8 and 7.9 hold, and `forest` gaps of a
-certificate are sound.
-:::
-
-This proves Proposition I under (AΔ). Theorem 4.10 is machine-checked in Lean, as
-`Feasible.exists_admissible_ATri`, and so are three parts of Corollary 4.12 that follow from it:
-Corollary 4.8 under (AΔ) (`minimal_achievable_iff_multisetPoints_ATri`), and the correctness of
-the verified solver and of the certificate checker under (AΔ) (`solveFront_isParetoFront_ATri`,
-`Cert.check_sound_ATri`). Independently of the proof, the experiment
-[E6](#sec-e6) searched the gaps where $L$ lies below the admissible optimum, on
-small instances with the shortest flights between central cities the triangular inequality
-allows, and found no plan cheaper than that optimum.
+Everything built on the converse holds under (S) and (H): the front as the breakpoints of a
+function of the levels ({{< node "Proposition 6.3" badge=false >}}), the verified solver
+({{< node "Theorem 6.9" badge=false >}}) and the `forest` gaps of a certificate
+({{< node "Theorem 8.2" badge=false >}}).
 
 ### The assumption is needed {#sec-ex413}
 
-Without (A1) and (AΔ), a plan can beat every admissible partition, so Proposition I needs some
-assumption on the flights between central cities.
+Without (H), a plan can beat every admissible partition, so Proposition I needs some assumption on
+the flights between central cities.
 
 ::: {.statement}
-{{< node "Example 4.13" >}} **The hypothesis matters.** Take $d = (2, 3, 9, 11)$,
-$c = (50, 44, 17, 0)$, $t = 6$ and $p = 3$, so $2t - p = 9$, and flights between central cities
-$d_{12} = 1$, $d_{13} = 5$, $d_{14} = 6$, $d_{23} = 3$, $d_{24} = 6$, $d_{34} = 1$. They satisfy
-neither (A1) nor (AΔ): $d_4 = 11 > d_{34} + d_3 = 10$. The front of admissible partitions has the
-consecutive points $(264, 34)$ and $(228, 40)$, so every admissible partition with makespan below
-40 costs at least 264. A plan has makespan 39 and cost $260 = L(19)$.
+{{< node "Example 4.7" >}} **(H) cannot be dropped.** Take $d = \bar d = (2, 3, 9, 11)$,
+$c = (50, 44, 17, 0)$, $t = 6$ and $p = 3$, so $2t - p = 9$, and the symmetric flights between
+central cities $d_{12} = 1$, $d_{13} = 5$, $d_{14} = 6$, $d_{23} = 3$, $d_{24} = 6$, $d_{34} = 1$
+and $d_{ii} = 0$. (S) holds and (H) fails: $d_4 = 11 > d_3 + d_{34} = 10$. A feasible plan has
+cost 260 and makespan 39, while every admissible partition of 9 landings with every
+$\delta(X_k) \le 19$ costs at least 264. So no admissible partition has cost at most 260 and
+$\max_k \ell(X_k) \le 39$: the conclusion of Theorem 4.4 fails for this plan, and no point of
+$\mathcal P$ weakly dominates $(260, 39)$.
 :::
 
 In that plan, one plane performs the pattern $C_I \to C_4 \to C_3 \to C_I$: it leaves a passenger
 in $C_4$ at time 11 and comes back through $C_3$, in $1 + 9 < d_4$, so its pattern lasts
-$21 < 2 d_4$. The plan was found with an integer flow model, simulated, and confirmed with a second
-solver (computed). Under (S) alone, the exact front is open; $L$ and the admissible optimum with
-the durations $d'$ remain lower bounds.
+$21 < 2 d_4$, which Lemma 3.4(b) excludes under (H). Under (S) alone, the relaxation $L$ remains a
+lower bound for every plan (Lemma 3.5).
 
-In conclusion, we proved that for the Symmetric MultiZenoTravel problem, under the triangular
-inequality as well as under the assumption of [[QS15](#ref-QS15)], every point of the
-Pareto front is attained by a plan using exactly $2t - p$ central cities, flown without waiting
-from an admissible partition. This will allow a constructive algorithm to drastically reduce the
-search space of feasible and Pareto-optimal plans ([Pareto Optimal Plans](#sec-algorithm)).
+In conclusion, we proved that for the Symmetric MultiZenoTravel problem, under the hub triangles
+(H), hence under the triangular inequality as well as under the assumption of
+[[QS15](#ref-QS15)], every point of the Pareto front is attained by a plan using exactly $2t - p$
+central cities, flown from an admissible partition. This will allow a constructive algorithm to
+drastically reduce the search space of feasible and Pareto-optimal plans
+([Pareto Optimal Plans](#sec-algorithm)).

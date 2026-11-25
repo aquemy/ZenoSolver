@@ -7,7 +7,7 @@
     "E7_scaling/scaling.png",
     "E7_scaling/scaling.svg"
   ],
-  "hypothesis": "Corollary 8.3: the front is computable in time polynomial in n, s and the level range; the running time should grow at most polynomially with the duration scale.",
+  "hypothesis": "Theorem 7.3: the front is computable in time polynomial in n, s and the level range; the running time should grow at most polynomially with the duration scale.",
   "metrics": {
     "duration_exponent": 0.392,
     "frontier": [

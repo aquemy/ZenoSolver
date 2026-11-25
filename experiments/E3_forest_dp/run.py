@@ -1,7 +1,7 @@
-"""E3, the link-forest DP (Theorem 7.5): `zeno`'s levels are the true E(T), at sizes enumeration cannot reach.
+"""E3, the link-forest DP (Theorem 6.7): `zeno`'s levels are the true E(T), at sizes enumeration cannot reach.
 
 E(T) is the least cost of an admissible partition of s = 2t - p landings into p non-empty groups of
-duration at most T. Theorem 7.5 says the link-forest DP computes it. Two references that share no code
+duration at most T. Theorem 6.7 says the link-forest DP computes it. Two references that share no code
 with the C++ solver check it:
 
 * a CP-SAT model of E(T) (`doc/theory/checks/cpsat_check.py`, `level_cost`, admissibility by a 0/1
@@ -141,7 +141,7 @@ def main() -> int:
         sizes={tier: {"instances": cnt, "n": f"2..{mn}", "t": f"p..{mt}", "p": f"2..{mp}", "d": f"0..{md}",
                       "c": "0..60"} for tier, cnt, mn, mt, mp, md in TIERS},
         tests=["thm-7-5"],
-        hypothesis="Theorem 7.5: the link-forest DP returns E(T), the least cost of an admissible partition at "
+        hypothesis="Theorem 6.7: the link-forest DP returns E(T), the least cost of an admissible partition at "
                    "level T, so the front zeno builds from it is the Pareto set of (E(T), 2T).",
         explanation=f"{levels:,} levels over {len(rows)} instances (up to n = 12, t = 28, p = 10) agree with an "
                     f"independent CP-SAT model; {forest_instances} instances needed the forest bound in their "

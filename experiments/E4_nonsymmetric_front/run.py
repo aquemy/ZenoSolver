@@ -1,9 +1,9 @@
-"""E4, the non-symmetric front (Theorems 6.1, 6.9 and Corollary 6.10).
+"""E4, the non-symmetric front (Theorem 5.3, Corollaries 5.4 and 5.6).
 
-Corollary 6.10: under (A1-NS) the front is the Pareto set of (cost, least makespan) over role
+Corollary 5.6: under (A1-NS) the front is the Pareto set of (cost, least makespan) over role
 configurations, where the least makespan is that of the best schedule with exact waiting. It rests on
-Theorem 6.9 (every plan is dominated by a role configuration whose template is no later) and on
-Theorem 6.1 (every plan is dominated by a role configuration with loads at most its makespan), which
+Theorem 5.3 (every plan is dominated by a role configuration whose template is no later) and on
+Corollary 5.4 (every plan is dominated by a role configuration with loads at most its makespan), which
 the `roles`, `lagrangian` and `balanced` bounds of `zeno` use.
 
 * A, all plans: on tiny instances, the exhaustive search over all plans (`truth`, central flights
@@ -11,7 +11,7 @@ the `roles`, `lagrangian` and `balanced` bounds of `zeno` use.
   and against `zeno` whenever it reports its bracket closed.
 * B, all simple plans: on larger instances, the front of every simple plan with clean journeys, any
   hand-offs and up to s + 1 landings (`simple_plans`), against `config_front` and `zeno`, on uniform
-  random durations and on a family shaped like Proposition 6.5 where waiting matters.
+  random durations and on a family shaped like Proposition 5.7 where waiting matters.
 
 Pass: `config_front` equals the all-plans (A) and all-simple-plans (B) fronts on every instance they
 finish, and every front `zeno` reports exact equals them.
@@ -36,7 +36,7 @@ TIMEOUT = 600
 
 
 def waiting_instance(rng, n, t, p, hi):
-    """Like Proposition 6.5: one short city, the others slow from C_I and fast from C_G, cheap."""
+    """Like Proposition 5.7: one short city, the others slow from C_I and fast from C_G, cheap."""
     d = [rng.randint(1, 3)] + [rng.randint(hi // 2, hi) for _ in range(n - 1)]
     db = [rng.randint(1, 3)] + [rng.randint(1, hi // 2) for _ in range(n - 1)]
     c = [rng.randint(3, 6)] + [rng.randint(0, 2) for _ in range(n - 1)]
@@ -164,13 +164,13 @@ def main() -> int:
                  "differences": diffs[:20]},
         sizes={"truth": f"{N_TRUTH} instances (x2 central regimes when n=2); n<=2, p<=3, t<=min(5,p+3), "
                         "d, dbar in [1,6], c in [0,6], up to s+3 landings",
-               "simple": f"{N_SIMPLE} instances, half uniform (d, dbar in [1,20]) and half shaped like Prop 6.5; "
+               "simple": f"{N_SIMPLE} instances, half uniform (d, dbar in [1,20]) and half shaped like Prop 5.7; "
                          "n<=3, p<=4, t<=7, s<=8 (s<=7 when n=3), up to s+1 landings",
                "timeout_s": TIMEOUT},
         tests=["thm-6-1", "thm-6-9", "cor-6-10"],
         hypothesis="Under (A1-NS), every plan is weakly dominated by a role configuration whose template is no "
-                   "later (Thm 6.9), so the front is the Pareto set of (cost, least makespan) over role "
-                   "configurations (Cor 6.10); zeno's role-load bounds (Thm 6.1) and its search are then sound.",
+                   "later (Thm 5.3), so the front is the Pareto set of (cost, least makespan) over role "
+                   "configurations (Cor 5.6); zeno's role-load bounds (Cor 5.4) and its search are then sound.",
         explanation=f"{stats['truth_compared']} all-plans and {stats['simple_compared']} all-simple-plans "
                     f"comparisons; {stats['truth_config_differs'] + stats['simple_config_differs']} differ from the "
                     f"role-configuration front. zeno closed its bracket on "

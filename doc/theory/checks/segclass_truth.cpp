@@ -1,5 +1,5 @@
 // Exhaustive search over plans of tiny MultiZenoTravel instances, as in truth.cpp, with a central table
-// given explicitly and the plans restricted to a class of segments (doc/theory/exact-front.md, §6.4).
+// given explicitly and the plans restricted to a class of segments (doc/theory/exact-front.md, revision 2, §6.4).
 //
 // A segment runs from a hub to a hub through central cities (§2). The class says which segments may
 // land in two or more central cities, by their start hub, end hub and largest number of central

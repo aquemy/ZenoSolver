@@ -1,11 +1,12 @@
-"""E5, harmful waiting (Proposition 6.5, refuting Conjecture 6.5 "no harmful waiting").
+"""E5, harmful waiting (Proposition 5.7, refuting the papers' assumption of no harmful waiting).
 
-The papers' non-symmetric argument, stated as Conjecture 6.5, takes the makespan of a role
-configuration to be its largest load: no schedule ever has to wait. Proposition 6.5 refutes it with
+The papers' non-symmetric argument (Conjecture 6.5 of revision 2 of the note) takes the makespan of
+a role configuration to be its largest load: no schedule ever has to wait. Proposition 5.7 refutes it
+with
 d = (3, 19), dbar = (3, 11), c = (5, 1), t = 7, p = 4: some role configuration of cost 14 has every load
 at most 73, yet no plan of makespan at most 73 costs less than 18.
 
-* A, the instance of Proposition 6.5: the front with waiting ignored (`simple_plans ... 0 nowait`:
+* A, the instance of Proposition 5.7: the front with waiting ignored (`simple_plans ... 0 nowait`:
   every simple plan with s landings, makespan = largest load) against the exact fronts (`config_front`
   and `zenoOracle`, which simulate waiting) and `zeno`'s.
 * B, configuration level: `waiting_search` draws random balanced role configurations under (AΔ-path),
@@ -13,7 +14,7 @@ at most 73, yet no plan of makespan at most 73 costs less than 18.
 * C, front level: on random instances, how often the front with waiting differs from the front that
   ignores it (Wilson 95% intervals).
 
-Pass: on the instance of Proposition 6.5 the cheapest point with makespan <= 73 costs 14 when waiting
+Pass: on the instance of Proposition 5.7 the cheapest point with makespan <= 73 costs 14 when waiting
 is ignored and 18 with exact waiting, and zeno, the oracle and config_front agree on the exact front.
 """
 
@@ -75,10 +76,60 @@ def cheapest_within(front, makespan):
     return min((c for c, m in front if m <= makespan), default=None)
 
 
+def plot(nowait, oracle, lb73, true73, part_a, share) -> list[str]:
+    """The figure: the two fronts of the Proposition 5.7 instance, and how often waiting matters."""
+    fig, axes = C.new_axes(figsize=(10.2, 4.0), ncols=2, gridspec_kw={"width_ratios": [1.25, 1]})
+    ax = axes[0]
+    for front, label, color, style in ((nowait, "waiting ignored (largest load)", C.PALETTE[1], "--"),
+                                       (oracle, "exact waiting (oracle, zeno)", C.PALETTE[0], "-")):
+        pts = sorted(front, key=lambda pt: pt[1])
+        ax.step([m for _, m in pts], [c for c, _ in pts], where="post", color=color, linestyle=style, linewidth=1.6)
+        ax.scatter([m for _, m in pts], [c for c, _ in pts], color=color, s=22, zorder=3, label=label)
+    for pt in sorted(set(nowait) - set(oracle)):
+        ax.annotate(f"({pt[0]}, {pt[1]})", (pt[1], pt[0]), textcoords="offset points", xytext=(-46, -12),
+                    fontsize=8.5, color=C.PALETTE[1])
+    ax.annotate("(14, 74)", (74, 14), textcoords="offset points", xytext=(6, -12), fontsize=8.5, color=C.PALETTE[0])
+    ax.axvline(73, color=C.MUTED, linewidth=0.8, linestyle=":")
+    ax.text(73.5, 33, "makespan 73", color=C.MUTED, fontsize=8.5)
+    ax.set_xlabel("makespan")
+    ax.set_ylabel("cost")
+    ax.set_title("Prop 5.7: d=(3,19), dbar=(3,11), c=(5,1), t=7, p=4")
+    ax.legend(loc="upper right")
+    C.verdict_badge(ax, part_a, f"cheapest within 73: {lb73} ignoring waiting, {true73} exact", loc=(0.01, 0.02),
+                    ha="left")
+    ax = axes[1]
+    fams = ["uniform", "waiting"]
+    vals = [share[f][0] / max(1, share[f][1]) for f in fams]
+    lo = [vals[i] - share[f][2][0] for i, f in enumerate(fams)]
+    hi = [share[f][2][1] - vals[i] for i, f in enumerate(fams)]
+    ax.bar(fams, vals, color=[C.PALETTE[0], C.PALETTE[1]], width=0.5, yerr=[lo, hi], capsize=4,
+           error_kw={"ecolor": C.INK2, "elinewidth": 1})
+    for i, f in enumerate(fams):
+        ax.text(i, share[f][2][1] + 0.01, f"{share[f][0]} / {share[f][1]}", ha="center", va="bottom", fontsize=8.5,
+                color=C.INK2)
+    ax.set_ylabel("share of instances where waiting changes the front")
+    ax.set_title("How often waiting matters (95% Wilson)")
+    ax.grid(axis="x", visible=False)
+    ax.set_ylim(0, max(0.2, max(share[f][2][1] for f in fams) * 1.3))
+    return C.save_figure(fig, NAME, "harmful_waiting")
+
+
+def replot() -> int:
+    """Redraw the figure from results/E5_harmful_waiting/summary.json without running again."""
+    import json
+
+    s = json.loads((C.RESULTS / NAME / "summary.json").read_text())
+    m = s["metrics"]
+    share = {f: (v["changed"], v["compared"], tuple(v["wilson95"])) for f, v in m["front_level"].items()}
+    plot([tuple(x) for x in m["prop65_front_ignoring_waiting"]], [tuple(x) for x in m["prop65_front_exact"]],
+         m["prop65_cheapest_within_73_ignoring_waiting"], m["prop65_cheapest_within_73_exact"], s["passed"], share)
+    return 0
+
+
 def main() -> int:
     rng = random.Random(SEED)
 
-    # A. the instance of Proposition 6.5
+    # A. the instance of Proposition 5.7
     nowait = simple(PROP65, "0", "nowait")
     exact_simple = simple(PROP65, "0")
     config = C.parse_front(subprocess.run([str(C.check_program("config_front")), *lists(PROP65)], capture_output=True,
@@ -130,44 +181,12 @@ def main() -> int:
 
     passed = part_a
 
-    fig, axes = C.new_axes(figsize=(10.2, 4.0), ncols=2, gridspec_kw={"width_ratios": [1.25, 1]})
-    ax = axes[0]
-    for front, label, color, style in ((nowait, "waiting ignored (largest load)", C.PALETTE[1], "--"),
-                                       (oracle, "exact waiting (oracle, zeno)", C.PALETTE[0], "-")):
-        pts = sorted(front, key=lambda pt: pt[1])
-        ax.step([m for _, m in pts], [c for c, _ in pts], where="post", color=color, linestyle=style, linewidth=1.6)
-        ax.scatter([m for _, m in pts], [c for c, _ in pts], color=color, s=22, zorder=3, label=label)
-    for pt in sorted(set(nowait) - set(oracle)):
-        ax.annotate(f"({pt[0]}, {pt[1]})", (pt[1], pt[0]), textcoords="offset points", xytext=(-46, -12),
-                    fontsize=8.5, color=C.PALETTE[1])
-    ax.annotate("(14, 74)", (74, 14), textcoords="offset points", xytext=(6, -12), fontsize=8.5, color=C.PALETTE[0])
-    ax.axvline(73, color=C.MUTED, linewidth=0.8, linestyle=":")
-    ax.text(73.5, 33, "makespan 73", color=C.MUTED, fontsize=8.5)
-    ax.set_xlabel("makespan")
-    ax.set_ylabel("cost")
-    ax.set_title("Prop 6.5: d=(3,19), dbar=(3,11), c=(5,1), t=7, p=4")
-    ax.legend(loc="upper right")
-    C.verdict_badge(ax, part_a, f"cheapest within 73: {lb73} ignoring waiting, {true73} exact", loc=(0.01, 0.02),
-                    ha="left")
-    ax = axes[1]
     fams = ["uniform", "waiting"]
-    vals = [share[f][0] / max(1, share[f][1]) for f in fams]
-    lo = [vals[i] - share[f][2][0] for i, f in enumerate(fams)]
-    hi = [share[f][2][1] - vals[i] for i, f in enumerate(fams)]
-    ax.bar(fams, vals, color=[C.PALETTE[0], C.PALETTE[1]], width=0.5, yerr=[lo, hi], capsize=4,
-           error_kw={"ecolor": C.INK2, "elinewidth": 1})
-    for i, f in enumerate(fams):
-        ax.text(i, share[f][2][1] + 0.01, f"{share[f][0]} / {share[f][1]}", ha="center", va="bottom", fontsize=8.5,
-                color=C.INK2)
-    ax.set_ylabel("share of instances where waiting changes the front")
-    ax.set_title("How often waiting matters (95% Wilson)")
-    ax.grid(axis="x", visible=False)
-    ax.set_ylim(0, max(0.2, max(share[f][2][1] for f in fams) * 1.3))
-    figures = C.save_figure(fig, NAME, "harmful_waiting")
+    figures = plot(nowait, oracle, lb73, true73, part_a, share)
 
     result = C.Result(
         name=NAME, claim=CLAIM, seed=SEED, passed=passed,
-        criterion="on the instance of Proposition 6.5 the cheapest point with makespan <= 73 costs 14 when waiting "
+        criterion="on the instance of Proposition 5.7 the cheapest point with makespan <= 73 costs 14 when waiting "
                   "is ignored and 18 with exact waiting, and zeno, zenoOracle and config_front all give the "
                   "front stated in the note",
         metrics={
@@ -182,17 +201,17 @@ def main() -> int:
             "front_level_examples": examples,
         },
         sizes={"configuration_search": {lab: f"{tr:,} trials x {len(SEEDS)} seeds" for lab, tr, *_ in SEARCHES},
-               "front_level": f"{N_FRONT} instances, half uniform (d, dbar in [1,20]), half shaped like Prop 6.5; "
+               "front_level": f"{N_FRONT} instances, half uniform (d, dbar in [1,20]), half shaped like Prop 5.7; "
                               "n<=3, p<=4, t<=7, s<=10"},
         tests=["prop-6-5"], refutes=["paper-no-harmful-waiting"],
-        hypothesis="Conjecture 6.5 (no harmful waiting) would make the front the Pareto set of (cost, largest "
-                   "load) over role configurations; Proposition 6.5 says it is not.",
-        explanation=f"Ignoring waiting gives {sorted(set(nowait) - set(oracle))} on the Prop 6.5 instance, which no "
+        hypothesis="No harmful waiting (the papers' assumption) would make the front the Pareto set of (cost, largest "
+                   "load) over role configurations; Proposition 5.7 says it is not.",
+        explanation=f"Ignoring waiting gives {sorted(set(nowait) - set(oracle))} on the Prop 5.7 instance, which no "
                     f"plan reaches: the cheapest plan within makespan 73 costs {true73}, not {lb73}. Harmful waiting "
                     "is rare at the configuration level ("
                     + ", ".join(f"{found[lab]} of {tested[lab]:,}" for lab, *_ in SEARCHES)
                     + f") but changes the front of {share['waiting'][0]} of {share['waiting'][1]} instances shaped "
-                      f"like Prop 6.5 and {share['uniform'][0]} of {share['uniform'][1]} uniform ones.",
+                      f"like Prop 5.7 and {share['uniform'][0]} of {share['uniform'][1]} uniform ones.",
         figures=figures, binaries=[C.ZENO, C.ORACLE, C.check_program("simple_plans"), C.check_program("config_front"),
                                    C.check_program("waiting_search")],
     )
@@ -201,4 +220,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(replot() if "--replot" in sys.argv else main())

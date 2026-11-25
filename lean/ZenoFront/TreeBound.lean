@@ -8,10 +8,10 @@ public import ZenoFront.AdmissibleBound
 public import ZenoFront.LinkForest
 
 /-!
-# The link-forest DP (Theorem 7.5, lower-bound direction)
+# The link-forest DP (Theorem 6.7, lower-bound direction)
 
 The σ-DP (`AdmissibleBound.lean`) is exponential in the number of non-dominated cities. The
-link-forest DP of §7.4 is polynomial in it, and pseudo-polynomial in the level `T`. This file
+link-forest DP of §6 is polynomial in it, and pseudo-polynomial in the level `T`. This file
 computes it and proves the direction the checker needs: the DP is **at most** the cost of every
 admissible partition into `p` groups of total size `s` with loads at most `T`
 (`treeBoundAt_le_totalCost`).

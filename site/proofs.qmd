@@ -7,7 +7,8 @@ toc-depth: 3
 
 The blueprint follows the theory note
 [`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
-and links each result to the Lean declarations of `lean/ZenoFront` that formalise it. The badges
+(revision 3), one node per numbered result, and links each result to the Lean declarations of
+`lean/ZenoFront` that formalise it. The badges
 follow the claim ledger
 [`claims.toml`](https://github.com/aquemy/ZenoSolver/blob/master/claims.toml): a result is
 [machine-checked]{.badge .ok} when Lean proves every assertion of it with no axiom beyond
@@ -28,10 +29,9 @@ blueprint is also a [PDF](blueprint.pdf).
 
 {{< include _blueprint-stats.md >}}
 
-The *Note* column gives the status of the proof written in the note:
-[proof in the note]{.badge .informal}, [sketch]{.badge .informal} or [definition]{.badge .informal}.
-Refuted conjectures, counterexamples and the reduction of general flight graphs are left to the
-note.
+The *Note* column gives the section of the theory note, and the *Ledger* column the claim's stable
+ID in `claims.toml`, the slug that commit footers cite (the note's numbers can change between
+revisions; the slugs do not).
 
 ```{=html}
 <details class="node-more"><summary>The status table</summary>

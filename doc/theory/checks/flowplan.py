@@ -7,7 +7,7 @@ every flight arc at most as many passengers as planes. Planes and passengers are
 indistinguishable, so a flow decomposes into routes (a flow on a DAG) and
 journeys (on each flight arc, the carried passengers go to distinct planes flying
 it). Passengers are restricted to clean journeys (no flight into C_I, none out of
-C_G), which loses nothing by Lemma 3.1. Every returned plan is decomposed and can
+C_G), which loses nothing by the chains of Lemma 3.2. Every returned plan is decomposed and can
 be re-simulated with `simulate`, which shares no code with the model.
 
 Locations: 0 = C_I, 1..n central, n+1 = C_G. A central table D has D[i][j] = 0 for
@@ -18,7 +18,7 @@ usage: python3 flowplan.py xval <checks dir> <trials> <seed>
        compares the fronts with those of bin/truth on tiny instances, for central
        flights none, a1 and tight.
        python3 flowplan.py ex413 [highs|cpsat]
-       Example 4.13 (central flights violating (AΔ)), solved and simulated; with
+       Example 4.7 (central flights violating (AΔ)), solved and simulated; with
        cpsat, also E(19) and E(20) from the independent model of cpsat_check.py.
 """
 import random
@@ -304,7 +304,7 @@ EX413 = dict(d=[2, 3, 9, 11], c=[50, 44, 17, 0], t=6, p=3,
 
 
 def example413(backend):
-    """Example 4.13: central flights violating (AΔ); a plan of makespan 39 costs 260 < E(19) = 264."""
+    """Example 4.7: central flights violating (AΔ); a plan of makespan 39 costs 260 < E(19) = 264."""
     e = EX413
     d, c, t, p, D = e["d"], e["c"], e["t"], e["p"], e["D"]
     for M in (38, 39):

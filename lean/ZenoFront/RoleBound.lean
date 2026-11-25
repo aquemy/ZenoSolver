@@ -24,8 +24,8 @@ larger of two bounds:
   (`sum_roleLoad_eq_load_fill`). With every load at most `T`, all `s` landings weigh at most
   `p · T`, and cost at least the one-plane entry `G_fill[s][p · T]`.
 
-With Theorem 6.1 (`Feasible.exists_roleConfig_ns`), this bounds the cost of every feasible plan
-under (A1-NS).
+With Corollary 5.4 (`Feasible.exists_roleConfig_of_domination`), this bounds the cost of every
+feasible plan under (A1-NS).
 
 ## Main results
 
@@ -182,10 +182,6 @@ theorem load_finset_sum (f : Fin n → ℕ) (Y : Fin p → Multiset (Fin n)) :
 theorem cost_finset_sum (c : Fin n → ℕ) (Y : Fin p → Multiset (Fin n)) :
     cost c (∑ k, Y k) = ∑ k, cost c (Y k) :=
   load_finset_sum c Y
-
-theorem load_add_fun (f g : Fin n → ℕ) (Y : Multiset (Fin n)) :
-    load (fun i => f i + g i) Y = load f Y + load g Y := by
-  simp [load, Multiset.sum_map_add]
 
 /-- **The role loads add up to the crossing weight of the landings**, by the balance. -/
 theorem sum_roleLoad_eq_load_fill (d dbar : Fin n → ℕ) (dc : Fin n → Fin n → ℕ)

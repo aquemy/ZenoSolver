@@ -1,4 +1,4 @@
-"""Schedulable domination, front level (doc/theory/exact-front.md, Thm 6.9): on random non-symmetric
+"""Schedulable domination, front level (doc/theory/exact-front.md, Thm 5.3): on random non-symmetric
 instances, compare the front of role-configuration schedules (config_front: exact waiting, best orders
 and matching) with the front of all plans (truth) or of all simple plans with clean journeys and up to
 `extra` landings beyond s (simple_plans). Every configuration schedule is a plan, so the fronts are equal
@@ -8,7 +8,7 @@ same plans with waiting ignored (`simple_plans ... 0 nowait`).
 
 usage: python3 sd_checks.py <checks dir> <oracle: truth|simple> <count> <seed> [family] [extra] [max s]
   family uniform : durations uniform in [1, 6] (truth) or [1, 20] (simple)
-  family waiting : like Prop 6.5, one city with d_y well above dbar_y and a short cheap-to-reach city
+  family waiting : like Prop 5.7, one city with d_y well above dbar_y and a short cheap-to-reach city
 truth runs with central = none and a1 (both satisfy (A1-NS)); simple plans have no central flights.
 Prints a summary and every instance whose fronts differ."""
 import random, subprocess, sys

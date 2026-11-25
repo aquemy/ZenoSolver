@@ -12,7 +12,7 @@
 /// Metric instances: the cities are points, and every flight lasts the
 /// distance between its ends (zeno --metric). Their central-flight tables
 /// satisfy the triangle inequality (AΔ) exactly, after rounding, so under (S)
-/// the front is exact by Theorem 4.10 and Corollary 4.12 of
+/// the front is exact by Theorems 4.4 and 4.5 of
 /// doc/theory/exact-front.md, although central flights are fast and (A1) fails.
 namespace zeno::metric
 {

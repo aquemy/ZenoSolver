@@ -8,7 +8,7 @@
 /// even number of planes with an even number of landings), by exhaustive
 /// branch and bound. The front is the Pareto set of (cost(X), M(X)).
 ///
-/// This is the characterisation of Corollary 4.5 of
+/// This is the characterisation of Theorem 4.5 of
 /// doc/theory/exact-front.md, computed without any of the solver's
 /// dynamic programs. It shares no code with the library.
 ////////////////////////////////////////////////////////////

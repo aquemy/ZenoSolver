@@ -7,7 +7,7 @@
     "E3_forest_dp/forest_dp_vs_cpsat.png",
     "E3_forest_dp/forest_dp_vs_cpsat.svg"
   ],
-  "hypothesis": "Theorem 7.5: the link-forest DP returns E(T), the least cost of an admissible partition at level T, so the front zeno builds from it is the Pareto set of (E(T), 2T).",
+  "hypothesis": "Theorem 6.7: the link-forest DP returns E(T), the least cost of an admissible partition at level T, so the front zeno builds from it is the Pareto set of (E(T), 2T).",
   "metrics": {
     "cpsat_mismatches": 0,
     "cpsat_timeouts": 0,

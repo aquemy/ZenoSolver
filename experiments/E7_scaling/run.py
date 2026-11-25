@@ -1,7 +1,9 @@
-"""E7, scaling (Corollary 8.3): the front in pseudo-polynomial time, and how large `zeno` can go.
+"""E7, scaling (Theorem 7.3): the front in pseudo-polynomial time, and how large `zeno` can go.
 
-Corollary 8.3: under (S) and (A1) the front is computable in pseudo-polynomial time; over the level
-range [T_lo, T_hi] of Proposition 7.10 the link-forest DP takes O(n q_max^2 s^2 T_hi (T_hi - T_lo + 1)).
+Theorem 7.3: the link-forest DP, with a step counter, takes a number of steps polynomial in n, t, p and
+the level, so the front is computable in pseudo-polynomial time. The C++ solver's work over the level
+range [T_lo, T_hi] (T_lo the bound of Proposition 3.6) is estimated here by
+n q_max^2 s^2 T_hi (T_hi - T_lo + 1), a work estimate, not a theorem.
 Two measurements:
 
 * sweeps, one parameter at a time (median of 3 runs): the duration scale -r on the square-root
@@ -84,8 +86,8 @@ def timed(args, timeout):
 
 
 def bound(args):
-    """n, s, q_max and the level range of Prop 7.10 from the generated data (durations over their gcd), and
-    the work bound n q_max^2 s^2 T_hi (T_hi - T_lo + 1) of Theorem 7.5."""
+    """n, s, q_max and the level range from the generated data (durations over their gcd; T_lo the bound
+    of Prop 3.6), and the work estimate n q_max^2 s^2 T_hi (T_hi - T_lo + 1) of the C++ link-forest DP."""
     with tempfile.TemporaryDirectory() as tmp:
         inst = C.generated_instance(args, Path(tmp))
     n, t, p = inst.n, inst.t, inst.p
@@ -131,7 +133,7 @@ def plot(sweeps, frontier, exponent, passed, load) -> list[str]:
     ax.set_ylabel("wall time (s, median of 3)")
     ax.set_title("One parameter at a time")
     for ax, xkey, xlabel in ((axes[1][0], "nt", "instance size n x t"),
-                             (axes[1][1], "bound", "Theorem 7.5 work bound n q^2 s^2 T_hi (T_hi - T_lo + 1)")):
+                             (axes[1][1], "bound", "work estimate n q^2 s^2 T_hi (T_hi - T_lo + 1)")):
         xv = (lambda r: r["n"] * r["t"]) if xkey == "nt" else (lambda r: r["bound"])
         for k, fam in enumerate(["identity", "sqrt"]):
             done = [r for r in frontier if r["family"] == fam and not r["timeout"]]
@@ -219,7 +221,7 @@ def main() -> int:
         sizes={"sweeps": {k: len(v) for k, v in SWEEPS.items()}, "repeats": REPEATS,
                "frontier_points": len(FRONTIER), "timeouts_s": {"sweep": SWEEP_TIMEOUT, "frontier": FRONTIER_TIMEOUT}},
         tests=["cor-8-3"],
-        hypothesis="Corollary 8.3: the front is computable in time polynomial in n, s and the level range; the "
+        hypothesis="Theorem 7.3: the front is computable in time polynomial in n, s and the level range; the "
                    "running time should grow at most polynomially with the duration scale.",
         explanation=f"On the duration sweep the time grows as levels^{exponent:.2f}. The frontier finished "
                     f"{len(finished)} of {len(frontier)} grid points within {FRONTIER_TIMEOUT} s; see the metrics for "

@@ -1,60 +1,55 @@
-## Symmetric case: achievability, converse, front {#sec-symmetric}
+## Symmetric front {#sec-symmetric}
 
-The heart of the note (§4). Theorem 4.1 flies every admissible partition without waiting, and
-Theorems 4.7 and 4.10 reduce every plan to an admissible partition, under (A1) or under the triangle
-inequality (AΔ); together they give the front (Corollaries 4.8 and 4.12). Some assumption on central
-flights is needed (theory note, {{< node "Example 4.13" >}}).
+Under (S) and the hub triangles (H) (§4): Theorem 4.1 flies every admissible partition, Theorem 4.4
+reduces every plan to one, and together they give the front (Theorem 4.5). Example 4.6 shows a
+Pareto-optimal plan with more than $2t - p$ landings, Example 4.7 that (H) cannot be dropped, and
+Proposition 4.8 that the greedies of the 2015 and 2023 papers are not exact.
 
-### Theorem 4.1 {#node-theorem-4-1}
+### Theorem 4.1 (achievability) {#node-theorem-4-1}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean builds the plan with cost c(X) and makespan max ℓ(X_k); not that plane k flies ℓ(X_k), picks up at most once and uses no central flight.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Theorem 4.1.** Assume (S). For every multiset $X$ with $|X| = s$ and every admissible partition
-$X_1,\dots,X_p$ of $X$, there is a feasible plan whose central landings are exactly $X$ (so of cost $c(X)$),
-in which plane $k$ flies for $\ell(X_k)$ and picks up at most one passenger, and whose makespan is
-$\max_k \ell(X_k)$. The plan uses no central flight, so no assumption on them is needed.
+**Theorem 4.1 (achievability).** Assume (S) and $p \le t$. For every central table, every admissible
+partition $X_1, \dots, X_p$ with $|X| = 2t - p$ is flown by a feasible plan whose planes land exactly at
+the groups (up to relabelling the planes), of cost $c(X)$ and makespan $2\max_k \delta(X_k)$.
 
 ::: {.node-lean}
-Parts in Lean: [`Admissible.exists_plan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L805-L920)
+Lean: [`Admissible.exists_plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L812-L927)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §4.1 · **Hypotheses** (S) · **Uses** [2.6](#node-lemma-2-6)
+theory note, §4 · ledger `thm-4-1`
 
-*Proof.* Take a link forest $\Lambda$ (Lemma 2.6) and root each of its trees at a plane. For a link at $i$
-between a parent $u$ and a child $v$, $u$ will drop a passenger in $i$ (a segment $B$) and $v$ will pick it
-up (a segment $\bar B$). A non-root plane has exactly one parent link, so every plane picks up at most once.
-Plane $u$ uses one copy of $i$ from $X_u$ per link at $u$ labelled $i$ (F1), and its $r_u$ free landings, an
-odd number (F2), for crossings.
+*Proof.* Take a link forest (Lemma 2.6) and label the planes by its trees. A link at $i$ from a parent
+$u$ to a child $v$ will carry a passenger: $u$ drops it in $i$ (a visit $B$), and $v$ picks it up (a
+visit $\bar B$). Every plane $k$ flies, from time 0:
 
-*Schedule of plane $k$.* Let $\tau^{\rm dr}_k$ be twice the sum of the durations of its child links (its
-drop-offs) and $\tau^{\rm cr}_k$ the load of its free landings.
+1. its drop-offs, one per child link: $C_I \to b \to C_I$, carrying a new passenger from $C_I$ and
+   leaving it in $b$;
+2. its free landings, an odd number by (F2), as crossings $A, \bar A, \dots, A$: each $A$ carries a new
+   passenger from $C_I$ to $C_G$, each $\bar A$ flies empty;
+3. if it has a parent link at $i$: $C_G \to i \to C_G$, leaving $i$ once the passenger dropped there
+   by its parent has arrived, and carrying it to $C_G$.
 
-1. Its drop-offs, one after the other from time 0: $C_I \to i \to C_I$, each carrying a new passenger from
-   $C_I$ and leaving it in $i$. These never wait.
-2. Its $r_k$ free landings as crossings $A, \bar A, A, \dots, A$; each $A$ carries a new passenger from
-   $C_I$ to $C_G$. These never wait.
-3. If $k$ has a parent link at $i$: $C_G \to i \to C_G$, leaving $i$ once the passenger dropped there by
-   its parent is present, and carrying it to $C_G$.
+Every leg departs as soon as the plane arrives, except the last leg of a pick-up. Under (S) every visit
+at $x$ lasts $2d_x$ (Lemma 3.4(c)), so plane $k$ flies exactly $2\delta(X_k)$. Plane $u$'s drop-off at
+$i$ reaches $i$ by $2\delta(X_u) - d_i$, since it comes before $u$'s crossings. Its child $v$ reaches
+$C_G$ after its drop-offs and crossings, at $2\delta(X_v) - 2d_i$, and $i$ at $2\delta(X_v) - d_i$; it
+leaves $i$ at the later of that time and the drop-off's arrival, and is back by $\max(2\delta(X_v),
+2\delta(X_u))$. So every plane ends by $2\max_k \delta(X_k)$, and the plane of largest load ends exactly
+then.
 
-*Timing.* The drop-off of $u$ at $i$ reaches $i$ at a time at most $\tau^{\rm dr}_u - d_i$. Its child $v$
-reaches $C_G$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v$, arrives in $i$ at $\tau^{\rm dr}_v + \tau^{\rm cr}_v + d_i$,
-leaves at the later of this time and the drop-off's arrival, and is back at a time at most
-$\max(\tau^{\rm dr}_v + \tau^{\rm cr}_v + 2d_i,\ \tau^{\rm dr}_u) = \max(\ell(X_v), \tau^{\rm dr}_u) \le \max(\ell(X_v), \ell(X_u))$.
-A plane without a parent link finishes at $\ell(X_k)$. Every plane flies exactly $\ell(X_k)$, as its segments
-are simple (Lemma 3.3(c)), so the makespan is $\max_k \ell(X_k)$.
-
-*Passengers.* Let $\Lambda$ have $N$ links. There are $\sum_k r_k = s - 2N$ crossings, and each plane makes
-one more $A$ than $\bar A$, so there are $(s - 2N + p)/2 = t - N$ segments $A$. They and the $N$ drop-offs
-carry $t$ distinct passengers out of $C_I$, each delivered to $C_G$ by its $A$ or by the pick-up linked to
-its drop-off. Every flight carries at most one passenger, every route ends in $C_G$, and the central landings
-are exactly $X$. $\square$
+*Passengers.* Let the forest have $N$ links. The free landings number $s - 2N$, and each plane makes one
+more $A$ than $\bar A$, so there are $(s - 2N + p)/2 = t - N$ crossings $A$. These and the $N$
+drop-offs carry $t$ distinct passengers out of $C_I$, each delivered to $C_G$ by its $A$ or by the
+pick-up linked to its drop-off, which leaves no earlier than the drop-off arrives. The plan flies no
+central flight, every route ends in $C_G$, and the central landings of plane $k$ are its group. $\square$
 
 ```{=html}
 </details>
@@ -64,11 +59,9 @@ are exactly $X$. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** The plan is built on a rooted link forest (`LTree.routes`): each plane drops off its children's passengers, crosses its free landings, then picks up its parent's passenger.
+*Lean:* `Admissible.exists_plan`, `admissiblePoints_subset_achievable` (Achievability.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Admissible.exists_plan` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Admissible.exists_plan` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 4.1 (achievability).** Under (S), with `p ≤ t`, every admissible partition `X` of
@@ -82,82 +75,11 @@ theorem Admissible.exists_plan {N : Network n} (hS : N.dbar = N.d) {p : ℕ} (hp
       planCost c P = totalCost c X ∧ planMakespan P = 2 * maxLoad N.d X := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 805–920](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L805-L920){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Definition 4.2 (role configuration) {#node-definition-4-2}
-
-::: {.node-badge}
-[Lean definition]{.badge .ok}
-:::
-
-::: {.node-body}
-**Definition 4.2 (role configuration).** A *role configuration* on a set $Q$ of planes is a family of
-multisets of central cities $\mathrm{Dr}_k$ (drop-offs), $\mathrm{Pk}_k$ (pick-ups) and $\mathrm{Cr}_k$
-(crossings), $k \in Q$, with $|\mathrm{Cr}_k|$ odd and the *per-city balance*
-$\sum_{k\in Q}\mathrm{Dr}_k = \sum_{k\in Q}\mathrm{Pk}_k$. Its *passenger count* is
-$t(\mathrm{cfg}) = \sum_k \big(|\mathrm{Dr}_k| + (|\mathrm{Cr}_k| + 1)/2\big)$, its cost is
-$\sum_k c(\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k)$, and the *role load* of plane $k$ is
-$$\lambda_k = 2\delta(\mathrm{Dr}_k) + 2\bar\delta(\mathrm{Pk}_k) + \delta(\mathrm{Cr}_k) + \bar\delta(\mathrm{Cr}_k).$$
-With $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, the balance gives
-$\sum_k |X_k| = 2t(\mathrm{cfg}) - |Q|$, and under (S), $\lambda_k = \ell(X_k)$.
+[`lean/ZenoFront/Achievability.lean`, lines 812–927](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L812-L927){.lean-src} (statement only; the proof is elided)
 
 ::: {.node-lean}
-Lean: [`RoleConfig` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Roles.lean#L43-L53)
+Further declarations: [`admissiblePoints_subset_achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L996-L1001)
 :::
-
-```{=html}
-<details class="node-more"><summary>In the note</summary>
-```
-
-**Note** [definition]{.badge .informal} · theory note, §4.2
-
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-A plan is *simple* if each of its flights joins a hub and a central city; all its segments are then simple.
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**Lean** `ZenoFront.RoleConfig` [Lean definition]{.badge .ok}
-
-```lean
-/-- A role configuration: per plane, drop-off halves, pick-up halves and an odd number of
-crossings, with as many drop-offs as pick-ups at every city. -/
-structure RoleConfig (n p : ℕ) where
-  /-- Drop-off halves `D_k` of each plane. -/
-  drop : Fin p → Multiset (Fin n)
-  /-- Pick-up halves `P_k` of each plane. -/
-  pick : Fin p → Multiset (Fin n)
-  /-- Crossings `Cr_k` of each plane. -/
-  cross : Fin p → Multiset (Fin n)
-  odd_card_cross : ∀ k, Odd (cross k).card
-  sum_drop_eq_sum_pick : ∑ k, drop k = ∑ k, pick k
-```
-
-[`lean/ZenoFront/Roles.lean`, lines 43–53](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Roles.lean#L43-L53){.lean-src}
 
 
 ```{=html}
@@ -166,136 +88,40 @@ structure RoleConfig (n p : ℕ) where
 
 :::
 
-### Lemma 4.3 (direct selection) {#node-lemma-4-3}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves part (b), on landing records; part (a) is not stated.]{.node-gap}
-:::
-
-::: {.node-body}
-**Lemma 4.3 (direct selection) [DS].** (a) In a simple plan with clean journeys, whether or not its routes end
-in $C_G$, every journey consists of exactly two flights, $C_I \to x$ and then $x \to C_G$, for a central
-city $x$.
-
-(b) Let $P$ be a simple plan on a set $Q$ of planes, every route ending in $C_G$, with clean journeys and
-cost $C$. Then there is a role configuration on $Q$ with $t(\mathrm{cfg}) \ge t$, cost at most $C$,
-$\lambda_k \le F_k$ for every $k$, and $\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ a sub-multiset of the
-central landings of plane $k$. No assumption on durations is needed.
-
-::: {.node-lean}
-Parts in Lean: [`Feasible.exists_roleConfig_records` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L632-L643)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.2 · **Hypotheses** simple, clean plan · **Uses** [2.1](#node-lemma-2-1), [3.1](#node-lemma-3-1), [3.3](#node-lemma-3-3)
-
-*Proof.* (a) The first flight of a journey departs from $C_I$, so it goes to a central city $x$. As
-$x \ne C_G$, the journey continues with a flight from $x$, which goes to a hub. That hub is not $C_I$
-(Lemma 3.1), so the flight arrives in $C_G$, and it is the last flight of the journey (Lemma 3.1).
-
-(b) *Journeys.* By (a), the first flight of a journey is the first flight of a segment of type $A$ or $B$,
-written $o(\pi)$, and its second flight is the second flight of a segment at the same city $x$ of type $A$ or
-$\bar B$, written $n(\pi)$. A segment has one first flight and one second flight, and by capacity a flight
-carries at most one passenger, so $o$ and $n$ are injective. Passenger $\pi$ is a *hand-off* if
-$o(\pi) \ne n(\pi)$. A $B$ is never an $n(\cdot)$, and a $\bar B$ never an $o(\cdot)$.
-
-*Counts at a city $x$.* Let $\beta_x$ be the number of $B$ segments at $x$ that are an $o(\cdot)$, and
-$\bar\beta_x$ the number of $\bar B$ segments at $x$ that are an $n(\cdot)$. Among the $A$ segments at $x$:
-$\theta_x$ are $o(\pi) = n(\pi)$ for some $\pi$ (*through*); $\omega_x$ are $o(\pi)$ and $n(\pi')$ with
-$\pi \ne \pi'$ (*swaps*); $\alpha_x$ are an $o(\cdot)$ and no $n(\cdot)$; $\bar\alpha_x$ are an $n(\cdot)$ and
-no $o(\cdot)$; the others are *empty*. Every hand-off at $x$ has its $o$ among the $\beta_x + \alpha_x + \omega_x$
-segments counted so, and its $n$ among the $\bar\beta_x + \bar\alpha_x + \omega_x$, and each of these segments
-serves exactly one hand-off at $x$ in that role. Hence
-$$\beta_x - \bar\beta_x = \bar\alpha_x - \alpha_x. \tag{1}$$
-Every passenger has exactly one $o$, so
-$$t = \textstyle\sum_x (\theta_x + \omega_x + \alpha_x + \beta_x). \tag{2}$$
-Let $z_k$ be the number of non-empty $A$ segments of plane $k$. Then
-$$\textstyle\sum_k z_k = \sum_x (\theta_x + \omega_x + \alpha_x + \bar\alpha_x). \tag{3}$$
-
-*Selection.* At each city $x$, let $\mu_x = \min(\beta_x, \bar\beta_x)$. Select $\mu_x$ of the $B$ segments at
-$x$ that are an $o(\cdot)$, and $\mu_x$ of the $\bar B$ segments at $x$ that are an $n(\cdot)$. For each plane
-$k$, let $z'_k = \max(z_k, 1)$, and select its $z_k$ non-empty $A$ segments, $z'_k - 1$ of its $\bar A$
-segments and, if $z_k = 0$, one (empty) $A$ segment. These exist: by Lemma 2.1, plane $k$ has at least one
-$A$, and $\#\bar A_k = \#A_k - 1 \ge z_k - 1$. Let $\mathrm{Dr}_k$, $\mathrm{Pk}_k$ and $\mathrm{Cr}_k$ be the
-cities of the selected $B$, $\bar B$, and $A$ or $\bar A$ segments of $k$. Then $|\mathrm{Cr}_k| = 2z'_k - 1$
-is odd, and the balance holds since both sides contain $\mu_x$ copies of $x$.
-
-*Count.* By (2) and (3),
-$t(\mathrm{cfg}) = \sum_x \mu_x + \sum_k z'_k \ge \sum_x \mu_x + \sum_k z_k = t + \sum_x (\mu_x - \beta_x + \bar\alpha_x)$.
-By (1), $\beta_x - \mu_x = (\beta_x - \bar\beta_x)^+ = (\bar\alpha_x - \alpha_x)^+ \le \bar\alpha_x$. So
-$t(\mathrm{cfg}) \ge t$.
-
-*Loads and cost.* The selected segments of $k$ are distinct and simple, and by Lemma 3.3(c) each lasts
-exactly its role duration: $2d_x$ for $B$, $2\bar d_x$ for $\bar B$, $d_x + \bar d_x$ for $A$ and $\bar A$.
-So $\lambda_k \le F_k$. Each selected segment contributes its single central landing, so
-$\mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$ is a sub-multiset of the landings of $k$, and the cost is at
-most $C$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.Feasible.exists_roleConfig_records` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
-gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
-records of type `B`, `B̄`, and `A` or `Ā` of their plane, and whose groups have at least
-`2t − p` landings. No assumption on durations is needed; under (S) and (A1), or on a plan
-without central flights, the records' types are those of the segments. -/
-theorem Feasible.exists_roleConfig_records {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
-    ∃ cfg : RoleConfig n p,
-      (∀ k, cfg.drop k ≤ recCities (fun r => r.2.1 && r.2.2) (landingRecs (P k))) ∧
-      (∀ k, cfg.pick k ≤ recCities (fun r => !r.2.1 && !r.2.2) (landingRecs (P k))) ∧
-      (∀ k, cfg.cross k = recCities (fun r => r.2.1 != r.2.2) (landingRecs (P k))) ∧
-      2 * t - p ≤ size cfg.groups := …
-```
-
-[`lean/ZenoFront/Converse.lean`, lines 632–643](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L632-L643){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 4.4 (shrinking) {#node-lemma-4-4}
+### Lemma 4.2 (adding a plane) {#node-lemma-4-2}
 
 ::: {.node-badge}
 [machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Lemma 4.4 (shrinking) [SH].** If a role configuration on $Q$ has $t(\mathrm{cfg}) > t \ge |Q|$, deleting
-landings gives one on $Q$ with passenger count $t(\mathrm{cfg}) - 1$; its cost, its role loads and its groups
-$X_k$ do not increase. Repeating, there is one with passenger count exactly $t$.
+**Lemma 4.2 (adding a plane).** An admissible partition of $q$ planes with $2t - q$ landings, $t \ge q +
+1$, gives an admissible partition of $q + 1$ planes with $2t - q - 1$ landings, no larger cost, and
+loads bounded by every bound on the old loads. Repeating, it gives one of $p$ planes for every $q \le p
+\le t$.
 
 ::: {.node-lean}
-Lean: [`RoleConfig.exists_shrink` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L441-L452), [`Admissible.exists_shrink` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Shrink.lean#L217-L225)
+Lean: [`Admissible.addPlane_of_size` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AddPlane.lean#L103-L110), [`Admissible.addPlanes_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L351-L357)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §4.2
+theory note, §4 · ledger `lem-4-6`
 
-*Proof.* If some $|\mathrm{Cr}_k| \ge 3$, delete two of its crossings. Otherwise every $|\mathrm{Cr}_k| = 1$,
-so $\sum_k |\mathrm{Dr}_k| = t(\mathrm{cfg}) - |Q| > t - |Q| \ge 0$: some plane $u$ drops off at some city
-$x$, and by the balance some plane $v$ picks up at $x$. Delete one copy of $x$ from $\mathrm{Dr}_u$ and one
-from $\mathrm{Pk}_v$. Oddness and balance are kept, and the passenger count drops by one. $\square$
+*Proof.* Here $|X| = 2t - q \ge q + 2$. Fix a parity matrix. By Lemma 2.4, $f_k := |X_k| - |\eta_k|$
+is odd and at least 1. Call *free* the $f_k$ copies in $X_k$ beyond one copy of each city of $\eta_k$.
+
+*Some $f_k \ge 3$.* Remove two free landings $y, y'$ from $X_k$ and give the new plane the group $\{y\}$
+with $\eta = \emptyset$. (h1)–(h3) still hold, $|X_k| - 2 \ge |\eta_k| + 1$, $d_y \le \delta(X_k)$, and
+the cost drops by $c_{y'}$.
+
+*Every $f_k = 1$.* Then $\sum_k |\eta_k| = |X| - q \ge 2$, so some city $i$ lies in $\eta_u$ and $\eta_v$
+for planes $u \ne v$, by (h3). Remove one copy of $i$ from $X_u$ and from $X_v$ and remove $i$ from
+$\eta_u$ and $\eta_v$, and give the new plane $\{i\}$ with $\eta = \emptyset$. The rows and the sizes of
+$u$ and $v$ drop by one, the column of $i$ by two, $d_i \le \delta(X_u)$, and the cost drops by $c_i$.
+$\square$
 
 ```{=html}
 </details>
@@ -305,155 +131,13 @@ from $\mathrm{Pk}_v$. Oddness and balance are kept, and the passenger count drop
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.RoleConfig.exists_shrink` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Lemma 4.4 (SH), role form.** A role configuration with `s + 2N` landings, `p ≤ s`, has one
-with exactly `s` landings, each role a sub-multiset of the old one. -/
-theorem RoleConfig.exists_shrink {s : ℕ} (hps : p ≤ s) : ∀ (N : ℕ) (cfg : RoleConfig n p),
-    size cfg.groups = s + 2 * N → ∃ cfg' : RoleConfig n p, size cfg'.groups = s ∧
-      (∀ k, cfg'.drop k ≤ cfg.drop k) ∧ (∀ k, cfg'.pick k ≤ cfg.pick k) ∧
-      (∀ k, cfg'.cross k ≤ cfg.cross k)
-  …
-```
-
-[`lean/ZenoFront/NonSymmetric.lean`, lines 441–452](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L441-L452){.lean-src} (statement only; the proof is elided)
-
-**Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Shrinking** (partition form of Lemma 4.4, SH): an admissible grouping with at least
-`s` landings, where `p ≤ s` and `s ≡ p (mod 2)`, contains an admissible grouping with exactly
-`s` landings. -/
-theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} (hps : p ≤ s)
-    (hpar : s % 2 = p % 2) (hs : s ≤ size X) :
-    ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
-```
-
-[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 4.5 (parity) {#node-lemma-4-5}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Lemma 4.5 (parity) [PAR].** For a role configuration on $Q$ with passenger count $t$, the groups
-$X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, $k \in Q$, form an admissible partition (Definition 2.2
-with the planes of $Q$) of a multiset of size $2t - |Q|$, with the same cost.
-
-::: {.node-lean}
-Lean: [`RoleConfig.admissible_groups` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Roles.lean#L108-L109)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.2 · **Uses** [2.2](#node-definition-2-2)
-
-*Proof.* Put $h_{k,i} = (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) \bmod 2$. (h1): $h_{k,i} = 1$ forces
-$X_k(i) \ge 1$. (h2): $h_k \equiv |\mathrm{Dr}_k| + |\mathrm{Pk}_k| = |X_k| - |\mathrm{Cr}_k| \equiv |X_k| + 1$.
-(h3): $\sum_k h_{k,i} \equiv \sum_k (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) = 2\sum_k \mathrm{Dr}_k(i) \equiv 0$
-by the balance. The size is that of Definition 4.2. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
-
-```lean
-/-- **PAR**, admissibility form. -/
-theorem admissible_groups : Admissible R.groups := …
-```
-
-[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.RoleConfig.isParityWitness_witness` [machine-checked]{.badge .ok}
-
-```lean
-/-- **PAR.** The grouping of a role configuration is admissible, with witness
-`h_{k,i} = (D_k(i) + P_k(i)) mod 2`. -/
-theorem isParityWitness_witness : IsParityWitness R.groups R.witness
-  …
-```
-
-[`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 4.6 (adding a plane) {#node-lemma-4-6}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Lemma 4.6 (adding a plane) [AP].** Let $(X_k)_{k \in Q}$ be admissible with $q = |Q|$,
-$\sum_k |X_k| = 2t - q$ and $t \ge q + 1$, and let $\star \notin Q$ be a further plane. Then some admissible
-partition $(Y_k)_{k \in Q \cup \{\star\}}$ has $\sum_k |Y_k| = 2t - q - 1$, $c(Y) \le c(X)$ and
-$\max_k \delta(Y_k) \le \max_k \delta(X_k)$. This corrects case (b) of the first version's Lemma 4.4, where
-the support has $2(t-q)$ entries, not $t - q$.
-
-::: {.node-lean}
-Lean: [`Admissible.addPlane_of_size` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/AddPlane.lean#L103-L110)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.2 · **Uses** [2.5](#node-lemma-2-5)
-
-*Proof.* Fix a parity matrix $h$. By Lemma 2.5, $f_k := |X_k| - h_k$ is odd and at least 1. In $X_k$, call
-*free* the $X_k(i) - h_{k,i}$ copies of each city $i$ beyond one copy for each $i \in \eta_k$; there are
-$f_k$ of them.
-
-*Case (a): some $f_k \ge 3$.* Let $y, y'$ be two free landings of $X_k$. Set $Y_k = X_k - \{y, y'\}$,
-$Y_\star = \{y\}$, keep the other groups, and give plane $\star$ a zero row. (h1) holds as
-$Y_k(i) \ge h_{k,i}$ for every $i$. (h2) holds for $k$, since $|Y_k| = |X_k| - 2$, and for $\star$, since
-$|Y_\star| = 1$ and $h_\star = 0$. (h3) is unchanged. Also $\delta(Y_\star) = d_y \le \delta(X_k)$ and
-$c(Y) = c(X) - c_{y'}$.
-
-*Case (b): every $f_k = 1$.* Then $2t - q = \sum_k (h_k + 1)$, so $\sum_k h_k = 2(t-q) \ge 2$. Some city $i$
-has a non-zero column, which is even, so $h_{u,i} = h_{v,i} = 1$ for two planes $u \ne v$. Set
-$Y_u = X_u - \{i\}$, $Y_v = X_v - \{i\}$ and $Y_\star = \{i\}$, set $h_{u,i} = h_{v,i} := 0$, and give plane
-$\star$ a zero row. (h1) holds for $j \ne i$, as $Y_u(j) = X_u(j)$. (h2) holds for $u$ and $v$, whose group
-size and row sum both drop by one, and for $\star$. Column $i$ drops by 2. $|Y_u| = h_u \ge 1$ (old $h_u$),
-$\delta(Y_\star) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
+*Lean:* `Admissible.addPlane`, `Admissible.addPlane_of_size`, `Admissible.addPlanes` (AddPlane.lean);
+`Admissible.addPlanes_le` (Bridge.lean).
 
 **Lean** `ZenoFront.Admissible.addPlane_of_size` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 4.6 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
+/-- **Lemma 4.2 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
 grouping has `2t − q − 1` landings. -/
 theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible X)
     (hsize : size X = 2 * t - q) (ht : q + 1 ≤ t) (d c : Fin n → ℕ) :
@@ -461,23 +145,23 @@ theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible 
       totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
 ```
 
-[`lean/ZenoFront/AddPlane.lean`, lines 103–110](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/AddPlane.lean#L103-L110){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`2995922`](https://github.com/aquemy/ZenoSolver/commit/29959222a988419aae27bf7c75c06325a3d56809) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/AddPlane.lean`, lines 103–110](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AddPlane.lean#L103-L110){.lean-src} (statement only; the proof is elided)
 
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.Admissible.addPlane` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Admissible.addPlanes_le` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 4.6 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
-landings gives an admissible grouping of `q + 1` planes with one landing less, no larger cost,
-and loads bounded by every bound on the old loads. -/
-theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤ size X)
-    (d c : Fin n → ℕ) :
-    ∃ Y : Groups n (q + 1), Admissible Y ∧ size Y + 1 = size X ∧
-      totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
+/-- **Lemma 4.2 (AP)** from `q` to `p` planes, `q ≤ p ≤ t`. -/
+theorem Admissible.addPlanes_le {q : ℕ} (d c : Fin n → ℕ) {X : Groups n q} (hX : Admissible X)
+    (hqp : q ≤ p) (hpt : p ≤ t) (hsize : size X = 2 * t - q) :
+    ∃ Y : Groups n p, Admissible Y ∧ size Y = 2 * t - p ∧ totalCost c Y ≤ totalCost c X ∧
+      ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
 ```
 
-[`lean/ZenoFront/AddPlane.lean`, lines 45–101](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/AddPlane.lean#L45-L101){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Bridge.lean`, lines 351–357](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L351-L357){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Admissible.addPlane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AddPlane.lean#L45-L101), [`Admissible.addPlanes` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/AddPlane.lean#L112-L122)
+:::
 
 
 ```{=html}
@@ -486,54 +170,31 @@ theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤
 
 :::
 
-### Theorem 4.7 (converse) {#node-theorem-4-7}
+### Lemma 4.3 (shrinking) {#node-lemma-4-3}
 
 ::: {.node-badge}
 [machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Theorem 4.7 (converse).** Assume (S) and (A1). For every feasible plan with cost $C$, makespan $M$ and flight
-times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ with $|X| = s$, $c(X) \le C$
-and $\ell(X_k) \le F_k \le M$ for every $k$.
+**Lemma 4.3 (shrinking).** If $X$ is admissible with at least $s$ landings, $p \le s$ and $s \equiv p
+\pmod 2$, some admissible $Y$ with $Y_k \le X_k$ for every $k$ has exactly $s$ landings. In particular two
+landings can be removed when $|X| \ge p + 2$.
 
 ::: {.node-lean}
-Lean: [`Feasible.exists_admissible_A1_flightTime` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/ConverseTri.lean#L631-L637)
+Lean: [`Admissible.exists_shrink` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L217-L225), [`Admissible.exists_remove_two` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L291-L302)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §4.3 · **Hypotheses** (S), (A1) · **Uses** [3.1](#node-lemma-3-1), [4.3](#node-lemma-4-3)–[4.5](#node-lemma-4-5)
+theory note, §4 · ledger `lem-4-11`
 
-*Proof.* *Step 1: remove central flights.* This step applies to any plan, whether or not its routes end in
-$C_G$. Replace a flight $a \to b$ between central cities, departing at $e$, by $a \to C_G$ departing at $e$
-followed by $C_G \to b$ departing on arrival. The plane reaches $b$ at $e + d_a + d_b \le e + d_{ab}$ by (S)
-and (A1), and waits there until its next departure, which is unchanged. A passenger on board is delivered at
-$C_G$: its journey is cut after $a \to C_G$. Central landings are unchanged ($C_G$ is free), and no arrival
-time and no $F_k$ increases; in a feasible plan the last flight of a route ends in $C_G$ and is never
-replaced, so the makespan is unchanged. After finitely many replacements the plan is simple.
-
-*Step 2.* Clean it (Lemma 3.1).
-
-*Step 3.* Lemma 4.3(b) on all $p$ planes gives a role configuration with passenger count at least $t$, cost at
-most $C$ and $\lambda_k \le F_k$. Lemma 4.4 ($t \ge p$) brings the count to $t$. Lemma 4.5 gives an
-admissible partition of a multiset of size $2t - p = s$ with $\ell(X_k) = \lambda_k \le F_k \le M$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-Theorem 4.10 reaches the same conclusion under (AΔ) instead of (A1), by an argument that covers (A1) too.
+*Proof.* By Lemma 2.4, $|X| \equiv p \equiv s$. While $|X| > s$, so $|X| \ge p + 2$, remove two
+landings as in the two cases of the proof of Lemma 4.2, without creating a plane: two free landings of
+a plane with $f_k \ge 3$, or one copy of a city $i$ from two planes whose sets $\eta$ contain it. Both
+keep a parity matrix. $\square$
 
 ```{=html}
 </details>
@@ -543,437 +204,39 @@ Theorem 4.10 reaches the same conclusion under (AΔ) instead of (A1), by an argu
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** `Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, obtained through the proof of Theorem 4.10, which covers (A1). `Feasible.exists_admissible` is the first proof, in makespan form (`2 δ(X_k) ≤ M`): Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan.
+*Lean:* `Admissible.exists_shrink`, `IsParityWitness.exists_shrink_step` (Shrink.lean);
+`Admissible.exists_remove_two` (TriSegments.lean).
 
-**Lean** `ZenoFront.Feasible.exists_admissible_A1_flightTime` [machine-checked]{.badge .ok}
-
-```lean
-plane and `c(X) ≤ C`: Theorem 4.10's proof covers (A1) (`Network.A1.hub`). -/
-theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = N.d)
-    (hA1 : N.A1) (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
-      totalCost c X ≤ planCost c P := …
-```
-
-[`lean/ZenoFront/ConverseTri.lean`, lines 631–637](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/ConverseTri.lean#L631-L637){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`ee385d0`](https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.Feasible.exists_admissible` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
-dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
-`2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
-theorem Feasible.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
+/-- **Shrinking** (Lemma 4.3): an admissible grouping with at least
+`s` landings, where `p ≤ s` and `s ≡ p (mod 2)`, contains an admissible grouping with exactly
+`s` landings. -/
+theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} (hps : p ≤ s)
+    (hpar : s % 2 = p % 2) (hs : s ≤ size X) :
+    ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y = s := …
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 676–683](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L676-L683){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Corollary 4.8 {#node-corollary-4-8}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Corollary 4.8.** Assume (S) and (A1). Let
-$M(X) = \min\{\max_k \ell(X_k) : X_1,\dots,X_p \text{ an admissible partition of } X\}$ ($\infty$ if there is
-none). Then
-$$\mathcal F = \mathrm{Min}\,\mathcal X, \qquad \mathcal X = \{(c(X), M(X)) : |X| = s,\ M(X) < \infty\},$$
-and every point of $\mathcal F$ is attained by a plan with exactly $s$ central landings (Theorem 4.1).
-
-::: {.node-lean}
-Lean: [`minimal_achievable_iff_multisetPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L1030-L1037)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.4 · **Hypotheses** (S), (A1) · **Uses** [1.1](#node-lemma-1-1), [4.1](#node-theorem-4-1), [4.7](#node-theorem-4-7)
-
-*Proof.* $\mathcal X$ is finite and, by Theorem 4.1, contained in $\mathcal A$. By Theorem 4.7, every point
-$(C, M)$ of $\mathcal A$ is weakly dominated by a point of $\mathcal X$, since $c(X) \le C$ and
-$M(X) \le \max_k \ell(X_k) \le M$. Lemma 1.1 applies. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**Lean** `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
-`p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the multisets of `2t − p`
-landings that have an admissible partition. -/
-theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d)
-    (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
-    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
-```
-
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Theorem 4.9 (bridge) {#node-theorem-4-9}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Theorem 4.9 (bridge) [B3].** Assume (S) and (A1). The front $\mathrm{Min}\,\mathcal A'$ of the variant in
-which planes may end anywhere and the makespan is the last arrival time (§1.2) equals $\mathcal F$.
-
-::: {.node-lean}
-Lean: [`minimal_achievable_iff_anywhere_of_A1` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L930-L935)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.5 · **Hypotheses** (S), (A1) · **Uses** [1.1](#node-lemma-1-1), [3.1](#node-lemma-3-1), [4.1](#node-theorem-4-1), [4.3](#node-lemma-4-3)–[4.8](#node-corollary-4-8)
-
-*Proof.* A feasible plan is a plan of the variant with the same cost and makespan, since the last arrival of
-each route is its latest; so $\mathcal A \subseteq \mathcal A'$. Conversely, take a plan of the variant with
-cost $C$ and makespan $M'$. We build an admissible partition of a multiset of size $s$ with cost at most $C$
-and loads at most $M'$; its point in $\mathcal X$ (Corollary 4.8) weakly dominates $(C, M')$. So
-$\mathcal X \subseteq \mathcal A \subseteq \mathcal A'$ is finite and dominates both sets, and Lemma 1.1 gives
-$\mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal X = \mathcal F$.
-
-1. Apply Step 1 of Theorem 4.7, which applies to any plan. Clean the plan (Lemma 3.1). From every route,
-   delete the flights after its last flight that carries a passenger. Cost and arrival times do not
-   increase.
-2. A route that is not empty now ends with a flight carrying a passenger $\pi$. That flight joins a hub and a
-   central city, and it cannot arrive in $C_I$ or depart from $C_G$ (Lemma 3.1). So either it arrives in
-   $C_G$, or it is $C_I \to x$, the first flight of $\pi$'s journey, arriving at some time $a$. In the
-   second case the journey's second flight is $x \to C_G$ (Lemma 4.3(a)), departing at some
-   $e' \ge a$ and arriving at $e' + \bar d_x \le M'$. Append to the route a flight $x \to C_G$ departing at
-   $a$ and carrying $\pi$; it arrives at $a + \bar d_x \le M'$, and $\pi$'s old second flight becomes empty.
-   Do this for all such routes at once: it only adds flights and empties others, so each inequality
-   $e' \ge a$ refers to a flight that is still there.
-3. Every route is now empty (an *idle* plane) or ends in $C_G$. Let $Q$ be the set of the $q$ planes that are
-   not idle; $q \ge 1$ since $t \ge 1$, and $q \le p \le t$. On $Q$ this is a simple plan with clean
-   journeys, every route ending in $C_G$, of cost at most $C$, with $F_k \le M'$. Lemmas 4.3(b), 4.4 and 4.5
-   on $Q$ give an admissible partition over $Q$ of a multiset of size $2t - q$, with cost at most $C$ and
-   loads at most $M'$.
-4. Lemma 4.6, applied once per idle plane (each time with $t \ge q' + 1$ for the current number $q' < p \le t$
-   of planes), gives a partition over all $p$ planes of size $s$, without increasing the cost or the largest
-   load. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**Lean** `ZenoFront.minimal_achievable_iff_anywhere_of_A1` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Theorem 4.9 (bridge B3).** Under (S) and (A1), with `p ≤ t`, the feasible plans and the
-plans whose planes end anywhere have the same minimal (cost, makespan) pairs. -/
-theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
-    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
-```
-
-[`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Theorem 4.9 (bridge B3), converse direction.** Under (S) and (A1), with `p ≤ t`, every
-plan whose planes may end anywhere is weakly dominated by an admissible partition: some
-admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan (the last arrival)
-for every plane, and total cost at most the plan's cost. -/
-theorem FeasibleAnywhere.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : FeasibleAnywhere N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P := …
-```
-
-[`lean/ZenoFront/Bridge.lean`, lines 395–504](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Bridge.lean#L395-L504){.lean-src} (statement only; the proof is elided)
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Theorem 4.10 (converse without (A1)) {#node-theorem-4-10}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Theorem 4.10 (converse without (A1)).** Assume (S) and (AΔ). For every feasible plan with cost $C$, makespan
-$M$ and flight times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ with
-$|X| = s$, $c(X) \le C$ and $\ell(X_k) \le F_k \le M$ for every $k$. More generally, for a feasible plan on
-any set $Q$ of planes with $t \ge |Q|$, the same holds with $|Q|$ in place of $p$: an admissible partition
-$(X_k)_{k \in Q}$ with $|X| = 2t - |Q|$.
-
-::: {.node-lean}
-Lean: [`Feasible.exists_admissible_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/ConverseTri.lean#L612-L618)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.6 · **Hypotheses** (S), (AΔ) · **Uses** [2.3](#node-lemma-2-3), [2.4](#node-lemma-2-4), [3.1](#node-lemma-3-1), [3.2](#node-lemma-3-2), [3.3](#node-lemma-3-3), [4.11](#node-lemma-4-11)
-
-*Proof.* We write the proof for all $p$ planes. It uses $t \ge p$ only for Lemma 4.11, through
-$s \ge p$, so it holds word for word for any set $Q$ with $t \ge |Q|$. Clean the plan (Lemma 3.1); this keeps
-the routes. For a segment $\gamma$, let $R(\gamma)$ be the
-largest $d_x$ over its central landings $x$. By Lemma 3.3(b) and (S), $F(\gamma) \ge 2R(\gamma)$. Plane $k$
-has $\sigma_k \ge 1$ segments, and $\sigma = \sum_k \sigma_k \ge s$ (Lemma 3.2).
-
-A *selection* is a set of segments, at least one per plane, with for each chosen $\gamma$ a city $x(\gamma)$
-such that $d_{x(\gamma)} \le R(\gamma)$, and a central landing $\pi(\gamma)$ of the plan in $x(\gamma)$, with
-$\pi$ injective. Its groups $X_k = \{x(\gamma) : \gamma \text{ chosen, of plane } k\}$ satisfy
-$\ell(X_k) \le \sum_{\gamma \text{ chosen}} 2R(\gamma) \le \sum_{\gamma} F(\gamma) = F_k \le M$, the last
-sum running over all segments of $k$, and $c(X) = \sum_\gamma c(\pi(\gamma)) \le C$. We build a selection whose groups are
-admissible with $|X| \ge s$ and $|X| \equiv s \pmod 2$. Lemma 4.11 then removes landings two at a time, down
-to $|X| = s$, keeping the groups admissible and making them smaller.
-
-*Step 1: sharing components.* Two planes *share* a central city if both land in it. Hubs do not count:
-every plane lands in $C_G$. Let $K$ be a connected component of the graph on planes whose edges join planes
-that share a central city. Let $q_K$ be its number of planes,
-$\sigma_K$ its number of segments, and $t_K$ the number of passengers whose journey uses a plane of $K$. A
-clean journey arrives in a hub only with its last flight. So two consecutive flights of a journey on
-different planes meet in a central city. The first plane lands there, and so does the second, whose route
-starts in $C_I$. Every journey therefore stays inside one component, $\sum_K t_K = t$, and $K$ with its
-passengers is a feasible plan. Lemma 3.2, whose proof does not use $t \ge p$, gives
-$\sigma_K \ge 2t_K - q_K$, even when $t_K < q_K$; write
-$\delta_K = \sigma_K - 2t_K + q_K \ge 0$, so that $\sum_K \delta_K = \sigma - s$. The number of planes of
-$K$ with $\sigma_k$ even has the parity of $q_K - \sigma_K$, hence of $\delta_K$. If $\delta_K$ is odd, some
-plane $\kappa_K$ of $K$ has $\sigma_{\kappa_K} \ge 2$; otherwise $\sigma_K = q_K$ and
-$\delta_K = 2(q_K - t_K)$ would be even. Let $\mathcal T$ be the set of planes with $\sigma_k$ even, with
-membership of $\kappa_K$ flipped for every $K$ with $\delta_K$ odd. Every component then contains an even
-number of planes of $\mathcal T$. Plane $\kappa_K$ will leave out one segment, so that $\mathcal T$ is the
-set of planes with an even number of chosen segments.
-
-*Step 2: links.* A *link* $(\gamma, \gamma', y)$ joins segments $\gamma, \gamma'$ of two different planes
-at a city $y$ with $d_y \le \min(R(\gamma), R(\gamma'))$. Its *ends* are $(\gamma, y)$ and $(\gamma', y)$.
-Each end will carry a *payment*, a central landing in $y$, and no landing will pay for two ends. The *degree*
-of a plane is the number of ends at its segments. Take a spanning forest of the sharing graph, and in it the
-$\mathcal T$-join $J$ built as in the proof of Lemma 2.4(b): the edge from a vertex to its parent is in $J$
-iff the vertex's subtree contains an odd number of planes of $\mathcal T$. Every tree has an even number of
-them, so in $J$ the planes of $\mathcal T$ have odd degree and the others even degree. For each edge
-$\{u, w\}$ of $J$, pick a central city that $u$ and $w$ share, and segments of $u$ and of $w$ that land in it, and
-make a link there. While a segment $\gamma$ has two ends at one city $y$, in links $(\gamma, \gamma_1, y)$ and
-$(\gamma, \gamma_2, y)$, replace them by $(\gamma_1, \gamma_2, y)$, or delete both if $\gamma_1$ and
-$\gamma_2$ belong to the same plane. This keeps every plane's degree mod 2 and lowers the number of links.
-At this point every end is at a city in which its segment lands, and no segment has two ends at one city.
-Pay each end with a landing of its own segment in its city. Later steps move ends to cities their segment
-does not visit. Only the payments and the bound by $R$ are tracked from now on.
-
-*Re-pairing.* Let a segment $\gamma$ have ends in the links $\lambda_1 = (\gamma, \gamma_1, y_1)$ and
-$\lambda_2 = (\gamma, \gamma_2, y_2)$, with $d_{y_1} \le d_{y_2}$. *Re-pairing* them replaces both links by
-$(\gamma_1, \gamma_2, y_1)$. In it, $\gamma_1$ keeps its payment from $\lambda_1$, and $\gamma_2$ receives
-the payment of $\gamma$ in $\lambda_1$. The payments of $\gamma$ and $\gamma_2$ in $\lambda_2$ are released.
-If $\gamma_1$ and $\gamma_2$ belong to the same plane, both links are deleted instead and all their payments
-released. A re-pairing keeps the following properties:
-
-* every end is within $R$, as $d_{y_1} \le d_{y_2} \le R(\gamma_2)$;
-* payments are in the right city and exclusive;
-* every plane's degree mod 2: the plane of $\gamma$ loses two ends, and the planes of $\gamma_1$ and
-  $\gamma_2$ keep one end each, or their common plane loses two;
-* no segment gains an end.
-
-It also lowers the number of links.
-
-*Step 3: one end per segment.* For every segment $\gamma$ fix one of its landings $z(\gamma)$ in a city of
-duration $R(\gamma)$. While some segment $\gamma$ has $r \ge 2$ ends, sort them by the duration of their
-city, putting last the end paid by $z(\gamma)$ if there is one. This is possible, because every end of
-$\gamma$ is within $R(\gamma)$. Then re-pair the first end with the second, the third with the fourth, and so
-on. Afterwards $\gamma$ has at most one end, and never gains another. The loop ends because the number of
-links decreases.
-
-*Claim: no landing $z(\gamma)$ ever pays for an end of another segment.* Payments are only ever moved from
-one end to another, or released, and a released landing never pays an end again. So a landing of $\gamma$ can
-pay for another segment only if $\gamma$ hands it over, which happens only when $\gamma$ is the middle
-segment of a re-pairing. That happens only when $\gamma$ itself is processed, which is at most once, and only
-for its ends at odd positions. If $z(\gamma)$ pays an end of $\gamma$, that end is at position $r$: for $r$
-even its payment is released, and for $r$ odd it is not re-paired.
-
-*Step 4: the left-out segments.* For each $K$ with $\delta_K$ odd, consider $\kappa = \kappa_K$. If $\kappa$
-has a segment without an end, leave it out. Otherwise two segments $\gamma, \gamma'$ of $\kappa$ have one end
-each, in links $(\gamma, \gamma_1, y)$ and $(\gamma', \gamma_2, y')$ with $d_y \le d_{y'}$. Replace both by
-$(\gamma_1, \gamma_2, y)$, or delete both if $\gamma_1$ and $\gamma_2$ belong to the same plane. Here
-$\gamma_1$ keeps its payment and $\gamma_2$ receives the payment of $\gamma$; the payments of $\gamma'$ and of
-$\gamma_2$ at $y'$ are released. The four properties hold as for a re-pairing, with $\kappa$ losing two ends.
-Leave out $\gamma$: its landing may now pay for $\gamma_2$, but $\gamma$ will not be chosen. The segment
-$\gamma'$ has no end left and handed nothing over. So the claim still holds for every segment that is not
-left out.
-
-*Step 5: the selection.* Choose all segments that are not left out. A chosen segment with an end takes the
-city of its end and the end's payment. One without an end takes the city of $z(\gamma)$ and $z(\gamma)$,
-which by the claim pays for no end. This $\pi$ is injective, and every city is within $R$. Plane $k$ has
-$m_k = \sigma_k$ chosen segments, or $\sigma_k - 1$ if $k$ is some $\kappa_K$. So $m_k \ge 1$, and $m_k$ is
-even exactly when $k \in \mathcal T$. Let $\tilde h_{k,y}$ be the number of chosen segments of $k$ with an
-end at $y$. Then $\tilde h_{k,y} \le X_k(y)$. The row sum $\sum_y \tilde h_{k,y}$ is the degree of $k$,
-which is odd iff $k \in \mathcal T$; hence it is $\equiv m_k + 1 = |X_k| + 1$. The column sum
-$\sum_k \tilde h_{k,y}$ is twice the number of links at $y$. By Lemma 2.3 the groups are admissible. Their
-size is $\sigma - \#\{K : \delta_K \text{ odd}\}$, which is at least $\sigma - \sum_K \delta_K = s$ and has
-the parity of $s$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** `Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`.
-
-**Lean** `ZenoFront.Feasible.exists_admissible_ATri` [machine-checked]{.badge .ok}
-
-```lean
-`ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every plane and `c(X) ≤ C`. -/
-theorem Feasible.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
-    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
-    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
-      (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
-      totalCost c X ≤ planCost c P := …
-```
-
-[`lean/ZenoFront/ConverseTri.lean`, lines 612–618](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/ConverseTri.lean#L612-L618){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`e1ee5c4`](https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
-
-**Related declarations.** The ledger does not list these for the statement.
-
-*Related* `ZenoFront.exists_admissible_of_blocks` [machine-checked]{.badge .ok}
-
-```lean
-landings. -/
-theorem exists_admissible_of_blocks {n p : ℕ} (d : Fin n → ℕ)
-    (blocks : Fin p → List (List (Fin n))) (hne : ∀ k, ∀ γ ∈ blocks k, γ ≠ [])
-    (hpar : ∀ a, Even #{k | Relation.ReflTransGen
-      (fun k k' => ∃ y, y ∈ (blocks k).flatten ∧ y ∈ (blocks k').flatten) a k ∧
-        Even (blocks k).length}) :
-    ∃ X : Groups n p, Admissible X ∧ (∀ k, (X k).card = (blocks k).length) ∧
-      (∀ k, load d (X k) ≤ ((blocks k).map (maxD d)).sum) ∧
-      ∑ k, X k ≤ ∑ k, ((blocks k).flatten : Multiset (Fin n)) := …
-```
-
-[`lean/ZenoFront/TriCore.lean`, lines 754–843](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TriCore.lean#L754-L843){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`3f228fc`](https://github.com/aquemy/ZenoSolver/commit/3f228fc64911a105dde0d51ca76c7a8f1d64cace) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 4.11 (shrinking) {#node-lemma-4-11}
-
-::: {.node-badge}
-[machine-checked]{.badge .ok}
-:::
-
-::: {.node-body}
-**Lemma 4.11 (shrinking).** Let $X_1,\dots,X_p$ be admissible with $|X| \ge p + 2$. Two landings can be
-removed from the groups so that the partition stays admissible, each new group a sub-multiset of the old one.
-
-::: {.node-lean}
-Lean: [`Admissible.exists_remove_two` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TriSegments.lean#L293-L301)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §4.6 · **Uses** [2.5](#node-lemma-2-5)
-
-*Proof.* Take a parity matrix $h$. By Lemma 2.5, $f_k = |X_k| - h_k$ is odd. If some $f_k \ge 3$, remove two
-of the $f_k$ copies in $X_k$ beyond one copy of each city of $\eta_k$: (h1)–(h3) still hold and
-$|X_k| - 2 \ge h_k + 1 \ge 1$. Otherwise every $f_k = 1$, so $\sum_k h_k = |X| - p \ge 2$. Some city $i$ has
-$h_{u,i} = h_{v,i} = 1$ for planes $u \ne v$, as its column is even and non-zero. Remove $i$ from $X_u$ and
-from $X_v$ and set $h_{u,i} = h_{v,i} = 0$, as in case (b) of Lemma 4.6. Then (h1) holds; (h2) holds, as row
-sums and sizes both drop by one; (h3) holds, as column $i$ drops by 2; and
-$|X_u| - 1 = h_u \ge 1$. $\square$
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Remarks</summary>
-```
-
-::: {.content-visible unless-format="html"}
-*Remarks in the note.*
-:::
-
-*Remarks.*
-
-* The proof of Theorem 4.10 uses (AΔ) only through $F(\gamma) \ge 2d_x$ for every central city $x$ of a
-  segment $\gamma$. Corollary 4.12 uses (AΔ) once more, for Theorem 4.9: the rest of a journey from a
-  central city $b$ lasts at least $\bar d_b$.
-  Under (S) and (A1) this holds too: a segment visiting $x_1,\dots,x_m$ lasts at least
-  $d_{x_1} + \sum_j (d_{x_j} + d_{x_{j+1}}) + d_{x_m} = 2\sum_j d_{x_j}$. So the proof is also a second
-  proof of Theorem 4.7, without Step 1 and without Lemmas 4.3–4.5. More generally, it suffices that no
-  sequence of flights from a central city to a hub is shorter than its hub leg.
-* Under (S) alone, let $d'_x$ be the shortest flight time from $x$ to a hub. It is the same for both hubs,
-  as swapping $C_I$ and $C_G$ preserves all durations. Then $F(\gamma) \ge 2d'_x$ for every central city $x$
-  of $\gamma$, and the proof, unchanged with $d'$ in place of $d$, gives an admissible partition with
-  $|X| = s$, $c(X) \le C$ and $2\sum_{x \in X_k} d'_x \le F_k$. So $E$ computed with the durations $d'$ is a
-  lower bound under (S) alone, next to $L$. Under (AΔ) or (A1), $d' = d$. Example 4.13 shows that $d$
-  itself does not give a lower bound in general.
-* No timing is used: only the flight times $F(\gamma)$, the landings, and which planes share which cities.
-  Zero durations are allowed. The re-pairing at one segment is the "one chain" contraction of the first
-  version (moving an end to the smaller duration, paid by a landing of the middle segment). Step 3 performs it
-  for all chains at once, by moving payments together with ends and keeping $z(\gamma)$ for $\gamma$ itself.
-
-```{=html}
-</details>
-```
-
-```{=html}
-<details class="node-more"><summary>Lean statement and source</summary>
-```
-
-**In Lean.** `Admissible.exists_remove_two` is the lemma; it is the case $s = |X| - 2$ of `Admissible.exists_shrink`, which shrinks an admissible grouping to any size $s \ge p$ with $s \equiv p \pmod 2$.
+[`lean/ZenoFront/Shrink.lean`, lines 217–225](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L217-L225){.lean-src} (statement only; the proof is elided)
 
 **Lean** `ZenoFront.Admissible.exists_remove_two` [machine-checked]{.badge .ok}
 
 ```lean
+/-- **Lemma 4.3 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
+removing two landings, each new group a sub-multiset of the old one. This is SH
+(`Admissible.exists_shrink`) with `s = |X| − 2`, whose parity hypothesis holds by
 `IsParityWitness.size_mod_two`. -/
 theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
     (h : p + 2 ≤ size X) :
     ∃ Y : Groups n p, Admissible Y ∧ (∀ k, Y k ≤ X k) ∧ size Y + 2 = size X := …
 ```
 
-[`lean/ZenoFront/TriSegments.lean`, lines 293–301](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TriSegments.lean#L293-L301){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`1b86268`](https://github.com/aquemy/ZenoSolver/commit/1b86268184e1fb562a4e5eb4c76c41b94907c61c) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/TriSegments.lean`, lines 291–302](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L291-L302){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`IsParityWitness.exists_shrink_step` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Shrink.lean#L53-L204)
+:::
 
 
 ```{=html}
@@ -982,42 +245,101 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
 
 :::
 
-### Corollary 4.12 {#node-corollary-4-12}
+### Theorem 4.4 (converse under (S) and (H)) {#node-theorem-4-4}
 
 ::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves it for Corollary 4.8, Theorem 4.9, the solver and the checker; not for Propositions 7.8 and 7.9, nor for Proposition 7.1 with rescaling.]{.node-gap}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Corollary 4.12.** Under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1, the front statements of
-Propositions 7.8 and 7.9 hold, and `forest` gaps (§9) are sound.
+**Theorem 4.4 (converse under (S) and (H)).** Assume (S), (H) and $p \le t$. If every plane flies a
+route from $C_I$ at time 0 to $C_G$ (items 1 and 2 of Definition 1.2) and every passenger rides a chain
+(Lemma 3.2(a)) of legs of the plan, then some admissible partition $X_1, \dots, X_p$ has $|X| = 2t - p$,
+$c(X)$ at most the plan's cost and $2\delta(X_k) \le F_k$ for every plane. In particular every feasible
+plan of makespan $M$ gives such a partition, with $2\delta(X_k) \le F_k \le M$.
 
 ::: {.node-lean}
-Parts in Lean: [`minimal_achievable_iff_multisetPoints_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L437-L442), [`minimal_achievable_iff_anywhere_of_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L413-L422), [`minimal_achievable_iff_minCost_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L453-L460), [`solveFront_isParetoFront_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L462-L496), [`Cert.check_sound_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L525-L547), [`Cert.forestGapBound_le_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L504-L521)
+Lean: [`exists_admissible_of_chains` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L442-L590), [`Feasible.exists_admissible_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L599-L609)
 :::
 
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [proof in the note]{.badge .informal} · theory note, §4.6 · **Hypotheses** (S), (AΔ) · **Uses** [1.1](#node-lemma-1-1), [3.1](#node-lemma-3-1), [3.3](#node-lemma-3-3), [4.1](#node-theorem-4-1), [4.6](#node-lemma-4-6), [4.8](#node-corollary-4-8), [4.9](#node-theorem-4-9), [4.10](#node-theorem-4-10), [7.1](#node-proposition-7-1), [7.8](#node-proposition-7-8), [7.9](#node-proposition-7-9)
+theory note, §4 · ledger `thm-4-10`
 
-*Proof.* Corollary 4.8 uses Theorem 4.7 only through its conclusion, which Theorem 4.10 provides; Lemma 1.1 and
-Theorem 4.1 need no assumption on central flights. Propositions 7.1 and 7.8 and the `forest` kind rest on
-Corollary 4.8 and on the groups of Theorem 4.7, which Theorem 4.10 replaces.
-For Proposition 7.9, the instance without city $i$ still satisfies (S) and (AΔ).
+*Proof.* By Lemma 3.4(b), the route of plane $k$ is the concatenation of its $\sigma_k \ge 1$ segments,
+each landing at least once and flying at least $2d_x$ for each central city $x$ it lands in. A *block*
+will be a segment, or two segments of one plane merged; $R(\gamma)$ is the largest $d_x$ over the
+landings $x$ of block $\gamma$, and $\gamma$ flies at least $2R(\gamma)$. Fix in every block a landing
+$z(\gamma)$ in a city of duration $R(\gamma)$.
 
-For Theorem 4.9, change items 1–3 of its proof. Clean the plan, and delete from every route the flights after
-its last flight that carries a passenger. Journeys are unchanged. A route that is not empty now ends with a
-flight carrying a passenger $\pi$. This flight does not arrive in $C_I$ (Lemma 3.1). Suppose it arrives in a
-central city $b$, at time $a$. The rest of $\pi$'s journey goes from $b$ to $C_G$, leaving $b$ no earlier
-than $a$, and by (AΔ), as in Lemma 3.3(b), its flights last at least $\bar d_b$. So $\pi$ reaches $C_G$ at
-some time in $[a + \bar d_b, M']$. Append to the route an empty flight $b \to C_G$ departing at $a$; it
-arrives by $M'$. Appending empty flights changes no journey, so this can be done for all such routes at once.
-The routes that are not empty now end in $C_G$, with $1 \le q \le p \le t$ such planes, and every flight time
-is at most $M'$. Theorem 4.10, in its form for a set $Q$ of planes with $t \ge |Q|$, applied to these $q$
-planes, gives an admissible partition over them of a multiset of size $2t - q$, with cost at most $C$ and loads at
-most $M'$. Item 4 is unchanged. $\square$
+*Step 1: classes and merges.* Two planes *share* if they land in a common central city; the *classes*
+are the classes of the equivalence relation this generates. Assign every passenger to the plane of the
+first leg of its chain. The chain stays in the class of that plane: two consecutive legs of the chain
+meet in a central city $y$, the plane of the first lands in $y$, and the plane of the second leaves $y$,
+so its route, which starts in $C_I$, has landed in $y$ before. Let a class $K$ have $q_K$ planes,
+$\sigma_K$ segments and $t_K$ passengers. The first legs of their chains are distinct departures from
+$C_I$ of planes of $K$, and their last legs distinct arrivals in $C_G$ of planes of $K$. By the identity
+of the proof of Lemma 3.3, a plane has $\sigma_k + 1$ such departures and arrivals in all, so $2t_K \le
+\sigma_K + q_K$. In every class with $\sigma_K + q_K$ odd, some plane has $\sigma_k \ge 2$ (otherwise
+$\sigma_K + q_K = 2q_K$): merge two of its segments into one block. Let $m_k \ge 1$ be the number of
+blocks of plane $k$. In every class, $m_K + q_K$ is now even, and so is the number of planes of $K$ with
+$m_k$ even, which has the parity of $\sum_{k \in K} (m_k + 1)$. A class loses a block only if $\sigma_K
++ q_K \ge 2t_K + 1$, so $\sum_k m_k + p \ge 2t$.
+
+*Step 2: ends from a $\mathcal T$-join.* Let $\mathcal T$ be the set of planes with an even number of
+blocks; every class contains an even number of them. Pair them up within each class, and join each pair
+by a path: a sequence of planes from one to the other, consecutive ones landing in a common city, with
+one landing of each taken at that city. Add up these paths over $\mathbb Z/2$: the landings taken an odd
+number of times form a set $J$ in which every plane of $\mathcal T$ has an odd number of landings, every
+other plane an even number, and every city an even number. Each landing of $J$ *pays an end* of its own
+block, at its city. These ends satisfy the invariant:
+
+* (i) every end of a block $\gamma$ is at a city of duration at most $R(\gamma)$;
+* (ii) every city has an even number of ends;
+* (iii) a plane has an odd number of ends iff it has an even number of blocks;
+* (iv) no landing $z(\gamma)$ pays an end of a block other than $\gamma$.
+
+*Step 3: re-pairing.* While some block $\gamma$ has two ends, choose two of them, $e_1$ and $e_2$, with
+$e_1 \ne z(\gamma)$ and $d(e_1) \le d(e_2)$ (if one of them is $z(\gamma)$, it is $e_2$, and (i) gives
+the inequality). By (ii) the city of $e_2$ has another end $e_3$, of a block $\gamma_3$. If $\gamma_3 =
+\gamma$, delete the ends $e_2$ and $e_3$. Otherwise delete $e_2$ and $e_3$, and let $e_1$ pay an end of
+$\gamma_3$ instead of $\gamma$, at its own city. (i) holds, as $d(e_1) \le d(e_2) = d(e_3) \le
+R(\gamma_3)$. (ii) holds: the city of $e_2$ loses two ends, the city of $e_1$ none. (iii) holds: the
+plane of $\gamma$ loses two ends and the plane of $\gamma_3$ trades $e_3$ for $e_1$ (or, if it is the
+same plane, loses two). (iv) holds: if $e_1 = z(\gamma')$, then $\gamma' = \gamma$ by (iv), which the
+choice of $e_1$ excludes. Each step removes two ends, so eventually every block has at most one end.
+
+*Step 4: selection.* A block with an end takes the city of its end and the end's landing; a block
+without one takes the city of $z(\gamma)$ and $z(\gamma)$ itself. These landings are distinct: a
+landing pays at most one end, different blocks have different landings, and by (iv) a $z(\gamma)$ taken
+by $\gamma$ pays no end of another block. Plane
+$k$'s group $X_k$ consists of the cities taken by its blocks, so $|X_k| = m_k$. By (i), $\delta(X_k)
+\le \sum_\gamma R(\gamma)$ over the blocks of $k$, hence $2\delta(X_k) \le F_k$. The taken landings are
+distinct central landings of the plan, so $c(X)$ is at most its cost. Let $\tilde h_{k,y}$ be the number
+of ends of plane $k$ at city $y$. Each such end is the end of a block of $k$ that takes $y$, so $\tilde
+h_{k,y} \le X_k(y)$; $\sum_y \tilde h_{k,y} \equiv |X_k| + 1$ by (iii); and $\sum_k \tilde h_{k,y}$ is
+even by (ii). By Lemma 2.2 the partition is admissible.
+
+*Step 5: size.* $|X| = \sum_k m_k \ge 2t - p$, and $|X| \equiv p$ by Lemma 2.4. Lemma 4.3 removes
+landings down to exactly $2t - p$; the groups shrink, so the cost and load bounds remain. In a feasible
+plan, the legs of plane $k$ follow one another from time 0 and end by $M$, so $F_k \le M$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+By Lemma 1.5 the converse holds under (A1) and under (AΔ). The proof uses no timing: only the
+segments, their landings and which planes share which cities.
 
 ```{=html}
 </details>
@@ -1027,81 +349,581 @@ most $M'$. Item 4 is unchanged. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** Under (S) and (AΔ), Lean proves Corollary 4.8 (`minimal_achievable_iff_multisetPoints_ATri`), Theorem 4.9 (`minimal_achievable_iff_anywhere_of_ATri`), Proposition 7.1 (`minimal_achievable_iff_minCost_ATri`), the verified solver and the soundness of `forest` gaps and of the checker. The front statements of Propositions 7.8 and 7.9 are not stated in Lean, so the corollary as a whole keeps the note's status.
+*Lean:* `exists_admissible_of_chains`, `exists_merge`, `PlaneFeasible.durSum_le_planMakespan`,
+`Feasible.exists_admissible_hub` (ConverseTri.lean); `TriCore.exists_tjoin`, `TriCore.exists_init`,
+`TriCore.Inv.step`, `TriCore.Inv.exists_final`, `TriCore.exists_selection`, `exists_admissible_of_blocks`
+(TriCore.lean). Corollaries: `Feasible.exists_admissible_ATri` under (AΔ) and
+`Feasible.exists_admissible_A1_flightTime` under (A1) (ConverseTri.lean).
 
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.minimal_achievable_iff_multisetPoints_ATri` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.exists_admissible_of_chains` [machine-checked]{.badge .ok}
 
 ```lean
-admissible partition. -/
-theorem minimal_achievable_iff_multisetPoints_ATri {N : Network n} (hS : N.dbar = N.d)
-    (hA : N.ATri) (c : Fin n → ℕ) (hpt : p ≤ t) (x : ℕ × ℕ) :
-    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
+/-- **Theorem 4.4 from chains.** Under (S) and (AΔ) on the triangles through a hub, with
+`p ≤ t`: if every plane flies from `C_I` to `C_G` and every passenger rides a chain from `C_I`
+(legs of the plan carrying it), some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
+`2 δ(X_k) ≤ F_k` (the plane's flight time) for every plane, and total cost at most the plan's
+cost. -/
+theorem exists_admissible_of_chains {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    (c : Fin n → ℕ) {P : Plan n t p} (hplanes : ∀ k, PlaneFeasible N (P k))
+    (hch : ∀ π : Fin t, ∃ ch : List (Leg n t), (∃ τ, ToGoal .ci τ ch) ∧
+      ∀ ℓ ∈ ch, ℓ ∈ allLegs P ∧ ℓ.pax = some π) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ durSum (P k)) ∧ totalCost c X ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 437–442](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L437-L442){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/ConverseTri.lean`, lines 442–590](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L442-L590){.lean-src} (statement only; the proof is elided)
 
-*Part* `ZenoFront.minimal_achievable_iff_anywhere_of_ATri` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Feasible.exists_admissible_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 4.9 under (AΔ)** (Corollary 4.12). Under (S) and (AΔ), with `p ≤ t`, the feasible
-plans and the plans whose planes end anywhere have the same minimal (cost, makespan) pairs. -/
-theorem minimal_achievable_iff_anywhere_of_ATri {N : Network n} (hS : N.dbar = N.d)
-    (hA : N.ATri) (c : Fin n → ℕ) (hpt : p ≤ t) (x : ℕ × ℕ) :
+/-- **Theorem 4.4 under the triangles through a hub.** Under (S) and `ATriHub`, with `p ≤ t`,
+every feasible plan gives an admissible `X_1, …, X_p` with `Σ_k |X_k| = 2t − p`,
+`2 δ(X_k) ≤ F_k ≤ M` for every plane and `c(X) ≤ C`. -/
+theorem Feasible.exists_admissible_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
+    ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
+      (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
+      totalCost c X ≤ planCost c P := …
+```
+
+[`lean/ZenoFront/ConverseTri.lean`, lines 599–609](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L599-L609){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Feasible.exists_admissible_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L611-L620), [`Feasible.exists_admissible_A1_flightTime` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L622-L630), [`exists_admissible_of_blocks` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L749-L843), [`exists_merge` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L270-L437), [`PlaneFeasible.durSum_le_planMakespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/ConverseTri.lean#L592-L597), [`TriCore.exists_tjoin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L146-L216), [`TriCore.exists_init` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L454-L501), [`TriCore.Inv.step` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L310-L417), [`TriCore.Inv.exists_final` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L419-L433), [`TriCore.exists_selection` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriCore.lean#L537-L652)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Theorem 4.5 (symmetric front, H1) {#node-theorem-4-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Theorem 4.5 (symmetric front, H1).** Assume (S), (H) and $p \le t$. Let $\mathcal P$ be the set of the
+points $(c(X), 2\max_k \delta(X_k))$ of the admissible partitions $X$ with $|X| = 2t - p$. For a multiset
+$X$, let $M(X)$ be the least $2\max_k \delta(X_k)$ over the admissible partitions of $X$ into $p$ groups
+(0 if there is none), and let $\mathcal X$ be the set of the points $(c(X), M(X))$ of the multisets of
+$2t - p$ landings that have an admissible partition. Then
+$$\mathcal F = \mathrm{Min}\,\mathcal A' = \mathrm{Min}\,\mathcal P = \mathrm{Min}\,\mathcal X.$$
+
+::: {.node-lean}
+Lean: [`minimal_achievable_iff_anywhere_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L946-L956), [`minimal_achievable_iff_admissiblePoints_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1014-L1024), [`minimal_achievable_iff_multisetPoints_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1089-L1096)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §4 · ledger `cor-4-8`
+
+*Proof.* *$\mathcal F = \mathrm{Min}\,\mathcal P$.* $\mathcal P \subseteq \mathcal A$ by Theorem 4.1,
+and every point of $\mathcal A$ is weakly dominated by a point of $\mathcal P$ by Theorem 4.4. Lemma
+1.7(a) applies.
+
+*$\mathrm{Min}\,\mathcal A' = \mathcal F$.* A feasible plan is a plan of the variant with the same cost
+and makespan, so $\mathcal A \subseteq \mathcal A'$. Take a plan of
+the variant, with cost $C$ and makespan $M'$, and a chain for every passenger (Lemma 3.2(a)). Cut every
+route after its last leg that belongs to a chain; if that leg lands in a central city $b$ at time $a$,
+append an empty leg $b \to C_G$ leaving at $a$. By Lemma 3.4(b) the chain through that leg ends at least
+$d_b$ after $a$, by $M'$, so the new leg, which lasts $\bar d_b = d_b$, arrives by $M'$. A route with no
+chain leg becomes empty. The chains are kept, the cost does not grow ($C_G$ is free), and the $q \le p
+\le t$ planes with a non-empty route now end in $C_G$, with flight times at most $M'$. Theorem 4.4 on
+these planes gives an admissible partition over them with $2t - q$ landings, cost at most $C$ and every
+$2\delta(X_k) \le M'$, and Lemma 4.2 adds the $p - q$ other planes. Theorem 4.1 flies this partition
+with cost at most $C$ and makespan at most $M'$. So every point of $\mathcal A'$ is weakly dominated by a
+point of $\mathcal A$, and Lemma 1.7(a) applies.
+
+*$\mathrm{Min}\,\mathcal P = \mathrm{Min}\,\mathcal X$.* A multiset of $\mathcal X$ has finitely many
+partitions, so its point is the point of a partition that attains $M(X)$: $\mathcal X \subseteq
+\mathcal P$. The point of a partition is weakly dominated by the point of its multiset. Lemma 1.7(a)
+applies. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `admissiblePoints`, `multisetPoints`, `minMakespan`, `admissiblePoint_le`,
+`minimal_achievable_iff_admissiblePoints_hub`, `minimal_achievableAnywhere_iff_admissiblePoints_hub`,
+`minimal_admissiblePoints_iff_multisetPoints`, `minimal_achievable_iff_multisetPoints_hub`,
+`FeasibleAnywhere.exists_feasible_le_hub`, `minimal_achievable_iff_anywhere_hub` (Achievability.lean); `FeasibleAnywhere.exists_admissible_hub`,
+`cutTri`, `closeTri` (Bridge.lean). Corollaries under (A1) and (AΔ):
+`minimal_achievable_iff_multisetPoints`, `minimal_achievable_iff_multisetPoints_ATri`,
+`minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_anywhere_of_ATri` (Achievability.lean).
+
+**Lean** `ZenoFront.minimal_achievable_iff_anywhere_hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.5 (bridge B3).** Under (S) and the triangles through a hub, with `p ≤ t`, the
+feasible plans and the plans whose planes end anywhere have the same minimal (cost, makespan)
+pairs. -/
+theorem minimal_achievable_iff_anywhere_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 413–422](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L413-L422){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/Achievability.lean`, lines 946–956](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L946-L956){.lean-src} (statement only; the proof is elided)
 
-*Part* `ZenoFront.minimal_achievable_iff_minCost_ATri` [machine-checked]{.badge .ok}
-
-```lean
-front is the set of breakpoints of `E`. -/
-theorem minimal_achievable_iff_minCost_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
-    (c : Fin n → ℕ) (hpt : p ≤ t) (C M : ℕ) :
-    Minimal (· ∈ achievable N c t p) (C, M) ↔
-      ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
-        ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
-```
-
-[`lean/ZenoFront/FrontTri.lean`, lines 453–460](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L453-L460){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
-
-*Part* `ZenoFront.solveFront_isParetoFront_ATri` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.minimal_achievable_iff_admissiblePoints_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **The solver is correct under (AΔ).** Under (S) and (AΔ), with `1 ≤ p ≤ t`, `solveFront` is
-the Pareto front of the (cost, makespan) pairs of the feasible plans. -/
-theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
-    (c : Fin n → ℕ) (hp : 1 ≤ p) (hpt : p ≤ t) :
-    IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …
+/-- **Theorem 4.5 (front characterisation), partition form.** Under (S) and the triangles
+through a hub, with `p ≤ t`, the front of the feasible plans is the set of minimal admissible
+points. -/
+theorem minimal_achievable_iff_admissiblePoints_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 462–496](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L462-L496){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/Achievability.lean`, lines 1014–1024](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1014-L1024){.lean-src} (statement only; the proof is elided)
 
-*Part* `ZenoFront.Cert.check_sound_ATri` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.minimal_achievable_iff_multisetPoints_hub` [machine-checked]{.badge .ok}
 
 ```lean
-satisfies (AΔ), whatever the gap kinds. -/
-theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : (C.network dc).ATri) :
-    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
+/-- **Theorem 4.5 (front characterisation), as in the note.** Under (S) and the triangles
+through a hub, with `p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the
+multisets of `2t − p` landings that have an admissible partition. -/
+theorem minimal_achievable_iff_multisetPoints_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 525–547](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L525-L547){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/Achievability.lean`, lines 1089–1096](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1089-L1096){.lean-src} (statement only; the proof is elided)
 
-*Part* `ZenoFront.Cert.forestGapBound_le_ATri` [machine-checked]{.badge .ok}
+::: {.node-lean}
+Further declarations: [`minimal_admissiblePoints_iff_multisetPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1070-L1087), [`FeasibleAnywhere.exists_admissible_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L379-L462), [`admissiblePoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L991-L994), [`multisetPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1064-L1068), [`minMakespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1059-L1062), [`admissiblePoint_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1003-L1012), [`minimal_achievableAnywhere_iff_admissiblePoints_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1038-L1045), [`FeasibleAnywhere.exists_feasible_le_hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L931-L944), [`cutTri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L187-L194), [`closeTri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L180-L185), [`minimal_achievable_iff_multisetPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1098-L1103), [`minimal_achievable_iff_multisetPoints_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L1105-L1110), [`minimal_achievable_iff_anywhere_of_A1` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L958-L962), [`minimal_achievable_iff_anywhere_of_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L964-L968)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Example 4.6 (an optimal plan with extra landings) {#node-example-4-6}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Example 4.6 (an optimal plan with extra landings).** Take $n = 1$, $d_1 = \bar d_1 = 1$, $c_1 = 0$,
+$t = 5$ and $p = 3$, so $s = 7$, with any central table. The front is $\{(0, 6)\}$, and a feasible plan
+with 9 central landings attains $(0, 6)$: every plane flies $C_I \to 1 \to C_G \to 1 \to C_I \to 1 \to
+C_G$ from time 0, without waiting; planes 2 and 3 carry a passenger on both crossings $A$, plane 1 on
+its first only.
+
+::: {.node-lean}
+Lean: [`PropI.cert_check` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1099-L1100), [`PropI.front` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1102-L1106), [`PropI.plan9` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1112-L1123), [`PropI.centralLandings` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1108-L1110), [`PropI.plan9_pareto` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1125-L1135)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §4 · ledger `claim-prop-i-landings`
+
+*Proof.* A certificate of format v1 (§8) lists the single point $(0, 6)$ with a plan and no gap; the
+kernel accepts it, so by Theorem 8.2 (all gaps `relaxed`, vacuously) $\{(0, 6)\}$ is the Pareto front for
+every central table. The plan above is accepted by the simulator of the checker, hence feasible
+(`planOK_feasible`), and the kernel computes its cost 0, its makespan 6 and its 9 central landings.
+$\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `PropI.cert`, `PropI.cert_check`, `PropI.front`, `PropI.plan9`, `PropI.centralLandings`,
+`PropI.plan9_pareto` (Counterexamples.lean).
+
+**Lean** `ZenoFront.PropI.cert_check` [machine-checked]{.badge .ok}
 
 ```lean
-/-- The forest gap bound is sound under (AΔ): a feasible plan with makespan below `M` costs at
-least `forestGapBound M`. This is where Theorem 4.10 is used. -/
-theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
-    (hA : (C.network dc).ATri) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
-    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
-    C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := …
+/-- The kernel accepts the certificate. -/
+theorem cert_check : cert.check = true := …
 ```
 
-[`lean/ZenoFront/FrontTri.lean`, lines 504–521](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/FrontTri.lean#L504-L521){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+[`lean/ZenoFront/Counterexamples.lean`, lines 1099–1100](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1099-L1100){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.PropI.front` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The front is `{(0, 6)}`**, for every central flight duration (here a flight from the city
+to itself). -/
+theorem front (dc : Fin 1 → Fin 1 → ℕ) :
+    IsParetoFront (achievable ⟨![1], ![1], dc⟩ ![0] 5 3) [(0, 6)] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1102–1106](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1102-L1106){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.PropI.plan9` [Lean definition]{.badge .ok}
+
+```lean
+/-- The plan of the certificate, in which the plane with one landing also flies a crossing pair
+`Ā, A`, empty, within its slack. -/
+def plan9 : Plan 1 5 3 :=
+  ![[⟨.ci, .city 0, 0, 1, some 0⟩, ⟨.city 0, .cg, 1, 2, some 0⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, none⟩, ⟨.city 0, .cg, 5, 6, none⟩],
+    [⟨.ci, .city 0, 0, 1, some 1⟩, ⟨.city 0, .cg, 1, 2, some 1⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, some 2⟩, ⟨.city 0, .cg, 5, 6, some 2⟩],
+    [⟨.ci, .city 0, 0, 1, some 3⟩, ⟨.city 0, .cg, 1, 2, some 3⟩,
+      ⟨.cg, .city 0, 2, 3, none⟩, ⟨.city 0, .ci, 3, 4, none⟩,
+      ⟨.ci, .city 0, 4, 5, some 4⟩, ⟨.city 0, .cg, 5, 6, some 4⟩]]
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1112–1123](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1112-L1123){.lean-src}
+
+**Lean** `ZenoFront.PropI.centralLandings` [Lean definition]{.badge .ok}
+
+```lean
+/-- The number of central landings of a plan. -/
+def centralLandings {n t p : ℕ} (P : Plan n t p) : ℕ :=
+  ((allLegs P).filter fun ℓ => !ℓ.dst.isHub).length
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1108–1110](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1108-L1110){.lean-src}
+
+**Lean** `ZenoFront.PropI.plan9_pareto` [machine-checked]{.badge .ok}
+
+```lean
+/-- **A Pareto-optimal plan with more than `2t − p` landings.** For `n = 1`, `d₁ = 1`, `c₁ = 0`,
+`t = 5`, `p = 3` and every central flight duration, the plan `plan9` is feasible, lands 9 times in
+central cities, more than `2t − p = 7`, and attains the point `(0, 6)`, which is Pareto-optimal.
+So the papers' Proposition I (Pareto-optimal plans land exactly `2t − p` times) holds only in the
+front sense: every front point is attained with `2t − p` landings, not only with them. -/
+theorem plan9_pareto (dc : Fin 1 → Fin 1 → ℕ) :
+    Feasible ⟨![1], ![1], dc⟩ plan9 ∧ planCost ![0] plan9 = 0 ∧ planMakespan plan9 = 6 ∧
+      centralLandings plan9 = 9 ∧ 2 * 5 - 3 < centralLandings plan9 ∧
+      Minimal (· ∈ achievable ⟨![1], ![1], dc⟩ ![0] 5 3) (0, 6) := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 1125–1135](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1125-L1135){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`PropI.cert` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L1077-L1096)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Example 4.7 ((H) cannot be dropped) {#node-example-4-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Example 4.7 ((H) cannot be dropped).** Take $d = \bar d = (2, 3, 9, 11)$, $c = (50, 44, 17, 0)$, $t = 6$
+and $p = 3$, so $s = 9$, and the symmetric central table $d_c(1, 2) = 1$, $d_c(1, 3) = 5$, $d_c(1, 4) =
+6$, $d_c(2, 3) = 3$, $d_c(2, 4) = 6$, $d_c(3, 4) = 1$, $d_c(i, i) = 0$. (S) holds and (H) fails: $d_4 = 11
+> d_3 + d_c(3, 4) = 10$. The following plan is feasible, of cost 260 and makespan 39, for every central
+table in which the flight $4 \to 3$ lasts 1 (legs as from → to [departure, arrival]):
+
+* plane 1: $C_I \to 1$ [0, 2] and $1 \to C_G$ [2, 4] carrying passenger 1; $C_G \to 4$ [4, 15]; $4 \to C_G$
+  [15, 26] carrying passenger 2, dropped in 4 by plane 3; $C_G \to 2$ [26, 29], $2 \to C_I$ [29, 32];
+  $C_I \to 2$ [32, 35] and $2 \to C_G$ [35, 38] carrying passenger 3;
+* plane 2: $C_I \to 2$ [0, 3] and $2 \to C_G$ [3, 6] carrying passenger 4; $C_G \to 2$ [6, 9], $2 \to
+  C_I$ [9, 12]; $C_I \to 4$ [12, 23] and $4 \to C_G$ [23, 34] carrying passenger 5;
+* plane 3: $C_I \to 4$ [0, 11] carrying passenger 2; $4 \to 3$ [11, 12] and $3 \to C_I$ [12, 21];
+  $C_I \to 3$ [21, 30] and $3 \to C_G$ [30, 39] carrying passenger 6.
+
+Every admissible partition of 9 landings with every $\delta(X_k) \le 19$ costs at least 264. So no
+admissible partition has cost at most 260 and $2\max_k \delta(X_k) \le 39$: the conclusion of Theorem
+4.4 fails for this plan, no point of $\mathcal P$ weakly dominates $(260, 39)$, and $\mathrm{Min}\,
+\mathcal P$, which `solveFront` lists, is not the Pareto front of the feasible plans.
+
+::: {.node-lean}
+Lean: [`Ex413.plan_feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L607-L618), [`Ex413.plan_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L623-L624), [`Ex413.plan_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L626-L627), [`Ex413.not_ATriHub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L636-L637), [`Ex413.minCost_19` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L640-L643), [`Ex413.admissible_cost_ge` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L645-L651), [`Ex413.no_admissible_partition` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L659-L671), [`Ex413.not_admissible_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L673-L680), [`Ex413.not_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L703-L712)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §4 · ledger `claim-4-13`
+
+*Proof.* The plan flies a central leg, which the simulator of format v1 rejects. A second simulator,
+for any table of optional durations and proved sound, accepts it in the kernel on the flights it uses;
+adding flights keeps a plan feasible, so it is feasible in every network whose flight $4 \to 3$ lasts 1.
+The kernel computes its cost and makespan, and $E(19) = 264$ by the link-forest DP (Theorem 6.7). An
+admissible partition with cost at most 260 and $2\max_k\delta(X_k) \le 39$ would have every
+$\delta(X_k) \le 19$, hence cost at least 264. By the proof of Theorem 6.9 (`mem_solveFront_iff`),
+`solveFront` lists $\mathrm{Min}\,\mathcal P$, and none of its points weakly dominates the point $(260,
+39)$ of $\mathcal A$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+Plane 3's first segment, $C_I \to 4 \to 3 \to C_I$, lasts $21 < 2d_4$: it drops a passenger in 4 and
+comes back through 3, which is what the segment bound of Lemma 3.4(b) excludes under (H).
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Ex413.net`, `Ex413.plan`, `Ex413.usedGraph`, `Ex413.plan_feasible`, `Ex413.plan_cost`,
+`Ex413.plan_makespan`, `Ex413.not_ATriHub`, `Ex413.minCost_19`, `Ex413.admissible_cost_ge`,
+`Ex413.no_admissible_partition`, `Ex413.not_admissible_le`, `Ex413.not_isParetoFront`
+(Counterexamples.lean); `planOKDur`, `gFeasible_of_planOKDur`, `feasible_iff_gFeasible`,
+`GFeasible.mono` (Graph.lean).
+
+**Lean** `ZenoFront.Ex413.plan_feasible` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The plan is feasible** in every network with the hub durations `d` (symmetric) and a
+central flight of duration 1 from city 4 to city 3, whatever the other central flights. -/
+theorem plan_feasible (dc' : Fin 4 → Fin 4 → ℕ) (h : dc' 3 2 = 1) :
+    Feasible ⟨d, d, dc'⟩ plan := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 607–618](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L607-L618){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.plan_cost` [machine-checked]{.badge .ok}
+
+```lean
+/-- The plan costs 260. -/
+theorem plan_cost : planCost c plan = 260 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 623–624](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L623-L624){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.plan_makespan` [machine-checked]{.badge .ok}
+
+```lean
+/-- The plan has makespan 39. -/
+theorem plan_makespan : planMakespan plan = 39 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 626–627](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L626-L627){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.not_ATriHub` [machine-checked]{.badge .ok}
+
+```lean
+/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.4 uses. -/
+theorem not_ATriHub : ¬ net.ATriHub := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 636–637](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L636-L637){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.minCost_19` [machine-checked]{.badge .ok}
+
+```lean
+/-- `E(19) = 264`, by the link-forest DP in the kernel. -/
+theorem minCost_19 : minCost d c 6 3 19 = 264 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 640–643](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L640-L643){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.admissible_cost_ge` [machine-checked]{.badge .ok}
+
+```lean
+/-- Every admissible partition of `2t − p = 9` landings with every `δ(X_k) ≤ 19` costs at least
+264. -/
+theorem admissible_cost_ge (X : Groups 4 3) (hX : Admissible X) (hsize : size X = 2 * 6 - 3)
+    (hload : ∀ k, load d (X k) ≤ 19) : 264 ≤ totalCost c X := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 645–651](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L645-L651){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.no_admissible_partition` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The conclusion of Theorem 4.4 fails for the plan**: no admissible partition of
+`2t − p = 9` landings costs at most 260 with every load `ℓ(X_k) = 2δ(X_k)` at most 39. -/
+theorem no_admissible_partition :
+    ¬ ∃ X : Groups 4 3, Admissible X ∧ size X = 2 * 6 - 3 ∧ totalCost c X ≤ planCost c plan ∧
+      ∀ k, 2 * load d (X k) ≤ planMakespan plan := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 659–671](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L659-L671){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.not_admissible_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **No admissible point weakly dominates the plan's point `(260, 39)`.** -/
+theorem not_admissible_le : ∀ x ∈ admissiblePoints net c 6 3, ¬ x ≤ (260, 39) := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 673–680](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L673-L680){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Ex413.not_isParetoFront` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Theorem 4.5 fails for Example 4.7**: the front of admissible partitions, which the solver
+computes, is not the Pareto front of the feasible plans, since it does not dominate the plan's
+point `(260, 39)`. -/
+theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront d c 6 3) := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 703–712](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L703-L712){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Ex413.net` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L579-L580), [`Ex413.plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L582-L595), [`Ex413.usedGraph` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L597-L601), [`planOKDur` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L168-L173), [`gFeasible_of_planOKDur` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L175-L185), [`feasible_iff_gFeasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L96-L100), [`GFeasible.mono` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Graph.lean#L109-L116)
+:::
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Proposition 4.8 (the papers' greedies are not exact) {#node-proposition-4-8}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Proposition 4.8 (the papers' greedies are not exact).** (a) For $d = \bar d = (6, 10)$, $c = (40,
+20)$, $t = 5$, $p = 2$ and every central table, $(260, 60) \in \mathcal F$, yet for every PPP of cost at
+most 260, $G_E$ (for every set $\beta$ and every tie-breaking) and $G_A$ (for every tie-breaking) give a
+makespan above 60. On the landings of $(260, 60)$ ($e = (1, 1, 1, 2, 2)$, $w = (1, 1, 2)$), loop 1 and
+loop 2 without P3 patterns end with the loads 52 and 68, and every $\beta$ gives at least 64.
+
+(b) For $d = \bar d = (1, 3)$, $c = (9, 5)$, $t = 4$, $p = 2$ and every central table, $(42, 12) \in
+\mathcal F$, and for every PPP of cost at most 42, $G_A$ gives a makespan above 12 for every tie-breaking.
+$G_E$ reaches $(42, 12)$: the PPP $e = (1, 1, 2, 2)$, $w = (1, 2)$, of cost 42, with one P3 pattern at
+city 2, gets makespan 12 for every tie-breaking.
+
+::: {.node-lean}
+Lean: [`Greedy.evocop_misses_lpt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L453-L462), [`Greedy.arxiv_misses_lpt` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L464-L472), [`Greedy.evocop_lpt_noP3` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L425-L431), [`Greedy.arxiv_misses_p3First` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L553-L561), [`Greedy.evocop_reaches_p3First` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L536-L542)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §4 · ledger `claim-5`
+
+*Proof.* The fronts come from certificates of format v1 whose gaps are all `relaxed`, accepted by the
+kernel, so by Theorem 8.2 they hold for every central table: in (a) the front is $(320, 48), (280, 56),
+(260, 60), (240, 64), (200, 72), (160, 80)$, and in (b) it is $(54, 6), (50, 8), (46, 10), (42, 12), (38,
+14), (30, 18)$. The greedies are defined in Lean as above, each returning the list of its outcomes over
+every sequence of tie-breaking choices. The statements about them are finite computations over the PPPs
+of the stated cost and their sets $\beta$, decided by the kernel. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Greedy.minIdxs`, `Greedy.evocopLoadsAll`, `Greedy.evocopMakespansAll`, `Greedy.arxivLoadsAll`,
+`Greedy.arxivMakespansAll`, `Greedy.evocop_misses_lpt`, `Greedy.arxiv_misses_lpt`,
+`Greedy.evocop_lpt_noP3`, `Greedy.evocop_lpt_ppp`, `Greedy.p3First_front`, `Greedy.arxiv_misses_p3First`,
+`Greedy.evocop_reaches_p3First` (Counterexamples.lean); `Examples.lptCounterexample_front`
+(Examples.lean).
+
+**Lean** `ZenoFront.Greedy.evocop_misses_lpt` [machine-checked]{.badge .ok}
+
+```lean
+/-- **EvoCOP's greedy is not exact (§5).** On `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`, the
+point `(260, 60)` is Pareto-optimal among all feasible plans, whatever the central flights, but for
+every PPP `(e, w)` of cost at most 260, every set `β` of P3 patterns and every tie-breaking,
+EvoCOP's two steps give a makespan above 60. -/
+theorem evocop_misses_lpt (dc : Fin 2 → Fin 2 → ℕ) :
+    Minimal (· ∈ achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2) (260, 60) ∧
+      ∀ e ∈ vecs 2 5, ∀ w ∈ vecs 2 (5 - 2), costOf ![40, 20] e + costOf ![40, 20] w ≤ 260 →
+        ∀ m ∈ evocopMakespansAll ![6, 10] 2 e w, 60 < m := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 453–462](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L453-L462){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Greedy.arxiv_misses_lpt` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The greedy of arXiv §3.2 is not exact.** On the same instance, for every PPP `(a, ā, b)` of
+cost at most 260 and every tie-breaking, the four steps (with Steps 2 and 3 read as in the module
+documentation) give a makespan above 60. -/
+theorem arxiv_misses_lpt (dc : Fin 2 → Fin 2 → ℕ) :
+    Minimal (· ∈ achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2) (260, 60) ∧
+      ∀ x ∈ triples 2 5 2, arxivCost ![40, 20] x ≤ 260 →
+        ∀ m ∈ arxivMakespansAll ![6, 10] 2 x, 60 < m := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 464–472](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L464-L472){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Greedy.evocop_lpt_noP3` [machine-checked]{.badge .ok}
+
+```lean
+/-- **§4 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
+every plane a crossing of 20 first and ends with the private makespans `(52, 68)`, in some order,
+whatever the tie-breaking. -/
+theorem evocop_lpt_noP3 :
+    ∀ D ∈ evocopLoadsAll 2 (durs ![6, 10] [3, 2]) (durs ![6, 10] [2, 1]) [],
+      D = [52, 68] ∨ D = [68, 52] := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 425–431](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L425-L431){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Greedy.arxiv_misses_p3First` [machine-checked]{.badge .ok}
+
+```lean
+/-- **The greedy of arXiv §3.2 is not exact (§4).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
+the point `(42, 12)` is Pareto-optimal among all feasible plans, whatever the central flights, but
+for every PPP `(a, ā, b)` of cost at most 42 and every tie-breaking, the four steps (with Steps 2
+and 3 read as in the module documentation) give a makespan above 12. -/
+theorem arxiv_misses_p3First (dc : Fin 2 → Fin 2 → ℕ) :
+    Minimal (· ∈ achievable ⟨![1, 3], ![1, 3], dc⟩ ![9, 5] 4 2) (42, 12) ∧
+      ∀ x ∈ triples 2 4 2, arxivCost ![9, 5] x ≤ 42 →
+        ∀ m ∈ arxivMakespansAll ![1, 3] 2 x, 12 < m := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 553–561](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L553-L561){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Greedy.evocop_reaches_p3First` [machine-checked]{.badge .ok}
+
+```lean
+/-- **EvoCOP's greedy reaches `(42, 12)`** on the `p3First` instance: the PPP `e = (1, 1, 2, 2)`,
+`w = (1, 2)` of cost 42 with one P3 at city 2 gets makespan 12 whatever the tie-breaking. -/
+theorem evocop_reaches_p3First :
+    costOf ![9, 5] [2, 2] + costOf ![9, 5] [1, 1] = 42 ∧
+      ∀ D ∈ evocopLoadsAll 2 (durs ![1, 3] (vsub [2, 2] [0, 1])) (durs ![1, 3] (vsub [1, 1] [0, 1]))
+        (durs ![1, 3] [0, 1]), maxLoad D = 12 := …
+```
+
+[`lean/ZenoFront/Counterexamples.lean`, lines 536–542](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L536-L542){.lean-src} (statement only; the proof is elided)
+
+::: {.node-lean}
+Further declarations: [`Greedy.minIdxs` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L329-L335), [`Greedy.evocopLoadsAll` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L366-L369), [`Greedy.evocopMakespansAll` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L371-L375), [`Greedy.arxivLoadsAll` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L401-L406), [`Greedy.arxivMakespansAll` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L408-L412), [`Greedy.evocop_lpt_ppp` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L437-L440), [`Greedy.p3First_front` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Counterexamples.lean#L529-L534), [`Examples.lptCounterexample_front` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Examples.lean#L96-L103)
+:::
 
 
 ```{=html}

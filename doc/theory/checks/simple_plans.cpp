@@ -1,7 +1,7 @@
-// Front of all simple plans with clean journeys (doc/theory/exact-front.md, Lemma 4.3(a)): every flight joins
+// Front of all simple plans with clean journeys (doc/theory/exact-front.md, revision 2, Lemma 4.3(a)): every flight joins
 // a hub and a central city, every journey is C_I -> x on the first flight of an A or B segment followed by
 // x -> C_G on the second flight of an A or Bbar segment at the same city. Under (A1-NS) every plan is weakly
-// dominated by such a plan (Theorem 6.1, Step 1 and cleaning), so this front is the front of all plans when
+// dominated by such a plan (Step 1 of Theorem 5.3, and the cleaning of revision 2's Lemma 3.1), so this front is the front of all plans when
 // the plans with at most s + extra landings suffice.
 //
 // Unlike role configurations, hand-offs may involve A segments (a crossing that drops its passenger and

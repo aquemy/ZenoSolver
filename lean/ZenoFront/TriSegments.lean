@@ -4,7 +4,7 @@ Released under the license of the ZenoSolver repository.
 -/
 module
 
-public import ZenoFront.Achievability
+public import ZenoFront.Converse
 
 /-!
 # The triangle inequality (AΔ) and the segment bound
@@ -16,12 +16,13 @@ network also has a central flight `i → i` (`dc i i`), which the note does not;
 the note has. Central durations may also differ by direction (`dc i j ≠ dc j i`); (AΔ) is then
 read on the directed durations.
 
-The proofs of Theorem 4.10 and Corollary 4.12 use (AΔ) only on the triangles through a hub:
-under (S), `d_j ≤ d_i + dc i j` (through `C_I → i → j`) and `d_i ≤ dc i j + d_j` (through
-`i → j → C_I`). This is `Network.ATriHub`. It follows from (AΔ) (`Network.ATri.hub`) and from (A1)
-(`Network.A1.hub`).
+The proof of Theorem 4.4, and so every symmetric result built on it (the fronts, the solver
+and the checkers), uses (AΔ) only on the triangles through a hub: under (S),
+`d_j ≤ d_i + dc i j` (through `C_I → i → j`) and `d_i ≤ dc i j + d_j` (through `i → j → C_I`).
+This is `Network.ATriHub`. It follows from (AΔ) (`Network.ATri.hub`) and from (A1)
+(`Network.A1.hub`), so each of those results is stated once, under `ATriHub`.
 
-**Lemma 3.3(b) under (S), the segment bound.** Under (S) and `ATriHub`, a segment `γ` of a route
+**Lemma 3.4(b) under (S), the segment bound.** Under (S) and `ATriHub`, a segment `γ` of a route
 (the legs between two hub arrivals) flies at least `2 d_x` for every central city `x` it lands
 in: `F(γ) ≥ 2 d_x`. Along the segment, the part from its first hub to the current city `w` lasts
 at least `d_w`, and the part so far plus `d_w` is at least `2 d_x` for every city `x` visited so
@@ -35,7 +36,7 @@ far; leaving `w` for the last hub adds `d_w`.
 * `ZenoFront.PlaneFeasible.exists_segments_tri`: a feasible plane's route is the concatenation
   of its segments, one per hub arrival, each landing at least once and satisfying the segment
   bound.
-* `ZenoFront.Admissible.exists_remove_two`: **Lemma 4.11**, removing two landings from an
+* `ZenoFront.Admissible.exists_remove_two`: **Lemma 4.3**, removing two landings from an
   admissible partition with `|X| ≥ p + 2`.
 -/
 
@@ -59,7 +60,7 @@ def Network.ATri (N : Network n) : Prop :=
 
 /-- (AΔ) on the triangles through `C_I`: `d_j ≤ d_i + dc i j` (`C_I → i → j` against `C_I → j`)
 and `d_i ≤ dc i j + d_j` (`i → j → C_I` against `i → C_I`). Under (S) these are also the
-triangles through `C_G`. This is all that Theorem 4.10 and Corollary 4.12 use. -/
+triangles through `C_G`. This is all that Theorem 4.4 and its corollaries use. -/
 def Network.ATriHub (N : Network n) : Prop :=
   ∀ i j : Fin n, N.d j ≤ N.d i + N.dc i j ∧ N.d i ≤ N.dc i j + N.d j
 
@@ -243,7 +244,7 @@ theorem exists_segs_aux {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub) :
               exact hpreb y hy
           · exact hsegs γ hγ
 
-/-- **The segment bound** (Lemma 3.3(b) under (S)). Under (S) and (AΔ) on the triangles through a
+/-- **The segment bound** (Lemma 3.4(b) under (S)). Under (S) and (AΔ) on the triangles through a
 hub, a segment — a route from a hub whose only hub arrival is its last leg — flies at least
 `2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
 theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
@@ -285,9 +286,9 @@ theorem PlaneFeasible.exists_segments_tri {N : Network n} (hS : N.dbar = N.d) (h
         landList γ ≠ [] ∧ ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ :=
   (exists_segs_aux hS hL legs .ci 0 h.route h.flies (by simp [h.ends])).1 rfl
 
-/-! ### Lemma 4.11 -/
+/-! ### Lemma 4.3 -/
 
-/-- **Lemma 4.11 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
+/-- **Lemma 4.3 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
 removing two landings, each new group a sub-multiset of the old one. This is SH
 (`Admissible.exists_shrink`) with `s = |X| − 2`, whose parity hypothesis holds by
 `IsParityWitness.size_mod_two`. -/

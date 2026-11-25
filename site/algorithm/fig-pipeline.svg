@@ -88,7 +88,7 @@
   <rect x="604" y="240" width="536" height="100" fill="#d3a3ad" opacity="0.4" filter="url(#wash-b)"/>
   <rect x="612" y="248" width="520" height="84" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="872.0" y="282.0" text-anchor="middle" class="mono h22">NON-SYMMETRIC BRACKET</text>
-  <text x="872.0" y="310.0" text-anchor="middle" class="mono s17">solveBracket, Corollary 6.10</text>
+  <text x="872.0" y="310.0" text-anchor="middle" class="mono s17">solveBracket, Corollary 5.6</text>
   <path d="M 250.00 346.00 L 250.00 376.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 243.5 363.0 L 250.0 376.0 L 256.5 363.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <text x="276.0" y="368.0" text-anchor="start" class="mono arrow-label">yes</text>
@@ -102,8 +102,8 @@
   <rect x="52.0" y="526" width="396" height="126" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
   <rect x="60.0" y="534" width="380" height="110" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="250.0" y="570.0" text-anchor="middle" class="mono h24">LEVELS AND TABLE</text>
-  <text x="250.0" y="602.0" text-anchor="middle" class="mono s17">T_lo .. T_hi, Prop. 7.10</text>
-  <text x="250.0" y="626.0" text-anchor="middle" class="mono s17">G[m][τ], Lemma 7.2</text>
+  <text x="250.0" y="602.0" text-anchor="middle" class="mono s17">T_lo .. T_hi, Prop. 3.6</text>
+  <text x="250.0" y="626.0" text-anchor="middle" class="mono s17">G[m][τ], Lemma 6.1</text>
   <path d="M 250.00 652.00 L 250.00 676.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 243.5 663.0 L 250.0 676.0 L 256.5 663.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <rect x="52.0" y="676" width="396" height="126" fill="#8d9aab" opacity="0.55" filter="url(#wash-b)"/>
@@ -117,7 +117,7 @@
   <rect x="60.0" y="834" width="380" height="110" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="250.0" y="870.0" text-anchor="middle" class="mono h24">BREAKPOINTS</text>
   <text x="250.0" y="902.0" text-anchor="middle" class="mono s17">(E(T), 2gT) where E drops,</text>
-  <text x="250.0" y="926.0" text-anchor="middle" class="mono s17">Proposition 7.1</text>
+  <text x="250.0" y="926.0" text-anchor="middle" class="mono s17">Proposition 6.3</text>
   <path d="M 250.00 952.00 L 250.00 976.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 243.5 963.0 L 250.0 976.0 L 256.5 963.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <rect x="52.0" y="976" width="396" height="126" fill="#d2cabb" opacity="0.5" filter="url(#wash-b)"/>
@@ -130,7 +130,7 @@
   <path d="M 122.0 1126 L 378.0 1126 A 50.0 50.0 0 0 1 378.0 1226 L 122.0 1226 A 50.0 50.0 0 0 1 122.0 1126 Z" fill="#a9c39c" opacity="0.35" filter="url(#wash-b)"/>
   <path d="M 122.0 1134 L 378.0 1134 A 42.0 42.0 0 0 1 378.0 1218 L 122.0 1218 A 42.0 42.0 0 0 1 122.0 1134 Z" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="250.0" y="1170.0" text-anchor="middle" class="mono h24">CERTIFICATE</text>
-  <text x="250.0" y="1198.0" text-anchor="middle" class="mono s17">gap kinds, Theorem 9.1</text>
+  <text x="250.0" y="1198.0" text-anchor="middle" class="mono s17">gap kinds, Theorem 8.1</text>
   <rect x="560" y="400" width="600" height="820" fill="#d2cabb" opacity="0.12" filter="url(#wash-a)"/>
   <path d="M 560.00 400.00 L 600.00 401.18 L 640.00 399.05 L 680.00 401.15 L 720.00 401.13 L 760.00 399.38 L 800.00 399.60 L 840.00 399.62 L 880.00 400.66 L 920.00 400.97 L 960.00 400.70 L 1000.00 398.85 L 1040.00 398.82 L 1080.00 399.84 L 1120.00 400.53 L 1160.00 400.00 L 1159.80 441.00 L 1160.65 482.00 L 1161.18 523.00 L 1159.85 564.00 L 1160.83 605.00 L 1159.03 646.00 L 1159.88 687.00 L 1160.13 728.00 L 1158.88 769.00 L 1159.86 810.00 L 1159.26 851.00 L 1160.09 892.00 L 1160.18 933.00 L 1160.25 974.00 L 1159.24 1015.00 L 1160.87 1056.00 L 1159.20 1097.00 L 1159.44 1138.00 L 1159.68 1179.00 L 1160.00 1220.00 L 1120.00 1220.95 L 1080.00 1220.47 L 1040.00 1219.01 L 1000.00 1219.73 L 960.00 1220.20 L 920.00 1221.14 L 880.00 1219.09 L 840.00 1220.85 L 800.00 1220.05 L 760.00 1220.22 L 720.00 1220.68 L 680.00 1220.80 L 640.00 1220.95 L 600.00 1220.54 L 560.00 1220.00 L 560.76 1179.00 L 559.37 1138.00 L 560.21 1097.00 L 560.25 1056.00 L 560.90 1015.00 L 560.35 974.00 L 559.59 933.00 L 558.83 892.00 L 560.04 851.00 L 559.45 810.00 L 561.13 769.00 L 559.98 728.00 L 560.36 687.00 L 560.24 646.00 L 559.93 605.00 L 560.09 564.00 L 559.76 523.00 L 560.57 482.00 L 559.09 441.00 L 560.00 400.00" fill="none" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 7"/>
   <text x="580.0" y="434.0" text-anchor="start" class="mono tag">ONE LEVEL T</text>
@@ -139,7 +139,7 @@
   <rect x="592" y="442" width="316" height="100" fill="#abc1d2" opacity="0.5" filter="url(#wash-b)"/>
   <rect x="600" y="450" width="300" height="84" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="750.0" y="484.0" text-anchor="middle" class="mono h22">L(T) AND U(T)</text>
-  <text x="750.0" y="512.0" text-anchor="middle" class="mono s17">Proposition 7.3</text>
+  <text x="750.0" y="512.0" text-anchor="middle" class="mono s17">Proposition 6.4</text>
   <path d="M 750.00 542.00 L 750.00 572.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 743.5 559.0 L 750.0 572.0 L 756.5 559.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <path d="M 750 564 L 888 622 L 750 680 L 612 622 Z" fill="#dcc085" opacity="0.4" filter="url(#wash-b)"/>
@@ -164,14 +164,14 @@
   <path d="M 994.0 720 L 1106.0 720 A 42.0 42.0 0 0 1 1106.0 804 L 994.0 804 A 42.0 42.0 0 0 1 994.0 720 Z" fill="#a9c39c" opacity="0.35" filter="url(#wash-b)"/>
   <path d="M 994.0 728 L 1106.0 728 A 34.0 34.0 0 0 1 1106.0 796 L 994.0 796 A 34.0 34.0 0 0 1 994.0 728 Z" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="1050.0" y="758.0" text-anchor="middle" class="mono h22">E = U</text>
-  <text x="1050.0" y="782.0" text-anchor="middle" class="mono s17">Prop. 7.4</text>
+  <text x="1050.0" y="782.0" text-anchor="middle" class="mono s17">per-run check</text>
   <path d="M 750.00 812.00 L 750.00 852.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 743.5 839.0 L 750.0 852.0 L 756.5 839.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <text x="774.0" y="840.0" text-anchor="start" class="mono arrow-label">no</text>
   <rect x="592" y="852" width="316" height="90" fill="#abc1d2" opacity="0.5" filter="url(#wash-b)"/>
   <rect x="600" y="860" width="300" height="74" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="750.0" y="892.0" text-anchor="middle" class="mono h22">U3(T): + chains</text>
-  <text x="750.0" y="918.0" text-anchor="middle" class="mono s17">Proposition 7.3</text>
+  <text x="750.0" y="918.0" text-anchor="middle" class="mono s17">C++ shortcut</text>
   <path d="M 750.00 942.00 L 750.00 966.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 743.5 953.0 L 750.0 966.0 L 756.5 953.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <path d="M 750 958 L 918 1030 L 750 1102 L 582 1030 Z" fill="#dcc085" opacity="0.4" filter="url(#wash-b)"/>
@@ -184,12 +184,12 @@
   <path d="M 994.0 988 L 1106.0 988 A 42.0 42.0 0 0 1 1106.0 1072 L 994.0 1072 A 42.0 42.0 0 0 1 994.0 988 Z" fill="#a9c39c" opacity="0.35" filter="url(#wash-b)"/>
   <path d="M 994.0 996 L 1106.0 996 A 34.0 34.0 0 0 1 1106.0 1064 L 994.0 1064 A 34.0 34.0 0 0 1 994.0 996 Z" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
   <text x="1050.0" y="1026.0" text-anchor="middle" class="mono h22">E = U3</text>
-  <text x="1050.0" y="1050.0" text-anchor="middle" class="mono s17">Prop. 7.4</text>
+  <text x="1050.0" y="1050.0" text-anchor="middle" class="mono s17">per-run check</text>
   <path d="M 750.00 1094.00 L 750.00 1126.00" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 743.5 1113.0 L 750.0 1126.0 L 756.5 1113.0" fill="none" stroke="#111111" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-a)"/>
   <text x="774.0" y="1116.0" text-anchor="start" class="mono arrow-label">no</text>
   <rect x="552" y="1126" width="396" height="74" fill="#8d9aab" opacity="0.55" filter="url(#wash-b)"/>
   <rect x="560" y="1134" width="380" height="58" fill="none" stroke="#111111" stroke-width="1.3" filter="url(#ink-c)"/>
-  <text x="750.0" y="1171.0" text-anchor="middle" class="mono h22">LINK-FOREST DP, Thm 7.5</text>
+  <text x="750.0" y="1171.0" text-anchor="middle" class="mono h22">LINK-FOREST DP, Thm 6.7</text>
   <text x="600.0" y="1266" text-anchor="middle" class="caption">only the levels the cheap bounds leave open reach the exact dynamic program</text>
 </svg>

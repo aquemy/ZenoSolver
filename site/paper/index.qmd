@@ -29,17 +29,17 @@ Pasteur, Paris, France ·
 ::: {.abstract}
 **Abstract.** Multi-objective AI planning suffers from a lack of benchmarks exhibiting known
 Pareto Fronts. In this work, we propose a tunable benchmark generator, together with a dedicated
-solver that provably computes the true Pareto front of the resulting instances. First, we prove a
-proposition allowing us to characterize the optimal plans for a constrained version of the
-problem, symmetric durations that obey the triangular inequality, and then show how far this
-characterization extends to the non-symmetric and general problems. Second, we provide a
-constructive way to find all the Pareto-optimal plans and discuss the complexity of the
-algorithm: computing the makespan of a fixed list of cities is strongly NP-hard, yet the Pareto
-front is computable in pseudo-polynomial time. We provide an implementation that allows the
-solver to handle realistic instances in a reasonable time, and that returns each front with a
-certificate that an independent checker verifies; the central results, the checker and a solver
-are formally verified in Lean 4. We validate the solver and the theory in a seeded experiment
-campaign against exhaustive searches written independently.
+solver that computes the true Pareto front of the resulting instances and certifies it. First, we
+prove a proposition allowing us to characterize the optimal plans for a constrained version of the
+problem, symmetric durations that obey the triangular inequality through the hubs, and then show
+how far this characterization extends to the non-symmetric and general problems. Second, we
+provide a constructive way to find a Pareto-optimal plan for every point of the front and discuss
+the complexity of the algorithm: computing the makespan of a fixed list of cities is as hard as
+3-Partition, yet the Pareto front is computable in pseudo-polynomial time. We provide an
+implementation that allows the solver to handle realistic instances in a reasonable time, and that
+returns each front with a certificate that an independent checker verifies; every numbered result,
+the checkers and a solver are formally verified in Lean 4. We validate the solver and the theory
+in a seeded experiment campaign against exhaustive searches written independently.
 :::
 
 ::: {.chapters}
@@ -50,10 +50,10 @@ campaign against exhaustive searches written independently.
 :   Instances, plans, Pareto fronts, assumptions and patterns.
 
 [Symmetric MultiZenoTravel](#sec-front)
-:   Proposition I: admissible partitions, link forests, and the converse under (A1) and (AΔ).
+:   Proposition I: admissible partitions, link forests, and the converse under the hub triangles (H).
 
 [Non-symmetric and general MultiZenoTravel](#sec-nonsymmetric)
-:   Role configurations, waiting, $B\bar A\bar B$ situations, and general graphs.
+:   Role and scheduled configurations, waiting, $B\bar A\bar B$ situations, and general graphs.
 
 [Pareto Optimal Plans](#sec-algorithm)
 :   The exact method, its complexity, ZenoSolver, certificates and their verification.
@@ -210,22 +210,23 @@ described by a parity condition on the way they are shared among the planes. Thi
 exact algorithm, pseudo-polynomial in the durations. For the non-symmetric clique problem, the
 same holds when no flight between central cities is shorter than a detour through $C_I$ or
 $C_G$, provided the makespan of a configuration accounts for the waiting it may force. We also
-show where the characterization stops: with short flights between central cities, and for the
-reduction of the general problem to a clique problem, which preserves the front only in some
-cases, for which we give exact methods on small instances.
+show where the characterization stops: the constructions proposed in the 2023 version of this
+paper for short flights between central cities, and for the reduction of the general problem to a
+clique problem, miss the front.
 
 In particular, we would like to insist on the fact that the triangular inequality assumption made
-in this paper contradicts the assumption of [[QS15](#ref-QS15)], so that the latter is not a
-special case of the former; both are covered here. In addition, even the technical
-implementation of the algorithm has been completely revised.
+in this paper is not the assumption of [[QS15](#ref-QS15)]; both imply the triangular inequality
+on the triangles through the hubs, under which the characterization is proved, so both are
+covered here. In addition, even the technical implementation of the algorithm has been completely
+revised.
 
 In addition, we present the ZenoSolver, a C++ implementation of the algorithm to solve
 MultiZenoTravel. It can output the instance definition in PDDL such that the generated instance
 can easily be used by other solvers. We demonstrate how to generate instances with different
 behavior by tuning the input parameters. We provide a theoretical and empirical study of the
 performances of ZenoSolver. Each front is returned with a certificate that a checker verifies
-without trusting the solver, and the main theorems, the checker and a solver of their own are
-formally verified in Lean 4.
+without trusting the solver, and every numbered result, the checkers and a solver of their own
+are formally verified in Lean 4.
 
 ### Outline {#sec-outline}
 
@@ -234,8 +235,8 @@ versions of the MultiZenoTravel problem, together with the plans and the assumpt
 [Symmetric MultiZenoTravel](#sec-front) is dedicated to solve the symmetric MultiZenoTravel
 problem, followed by [Non-symmetric and general MultiZenoTravel](#sec-nonsymmetric) that focuses
 on the non-symmetric version of the problem. In the same section, we study how an instance of the
-general MultiZenoTravel problem can be reduced to a non-symmetric clique version, and when the
-reduction preserves the Pareto front.
+general MultiZenoTravel problem can be reduced to a non-symmetric clique version, and show that the
+reduction does not preserve the Pareto front in general.
 
 In [Pareto Optimal Plans](#sec-algorithm), we detail how to compute the Pareto front and
 construct Pareto optimal plans, and we introduce the ZenoSolver, a C++ implementation of the
@@ -252,7 +253,9 @@ gives every proof in full. Each cited result links to its entry in the
 [blueprint](../proofs.qmd) and carries a badge from the claim ledger of the repository:
 *machine-checked* when Lean proves every assertion of the statement, *parts in Lean* when it proves
 part of it, *Lean definition* for a definition, and *informal* when the proof is written but not
-formalised. Here, proofs are sketched in a few sentences. A
+formalised. Here, proofs are sketched in a few sentences. Revision 3 of the note, whose numbers
+are used here, keeps only the results on the path of the main theorems and the refutations of
+claims of the 2023 version, each with a Lean proof. A
 gentler introduction to the problem, on a small example, is on the [Problem](../problem.qmd)
 page.
 :::
@@ -291,8 +294,8 @@ planning domains. *Journal of Artificial Intelligence Research*, 20:61–124, 20
 Yannis Dimopoulos. Deterministic planning in the fifth international planning competition: PDDL3
 and experimental evaluation of the planners. *Artificial Intelligence*, 173(5):619–668, 2009.
 
-[Han80]{#ref-Han80} Pierre Hansen. *Bicriterion Path Problems*, pages 109–127. Springer Berlin
-Heidelberg, 1980.
+[GJ79]{#ref-GJ79} Michael R. Garey and David S. Johnson. *Computers and Intractability: A Guide to
+the Theory of NP-Completeness*. W. H. Freeman, New York, 1979.
 
 [KSV+13]{#ref-KSV13} Mostepha Redouane Khouadjia, Marc Schoenauer, Vincent Vidal, Johann Dreo,
 and Pierre Savéant. Multi-objective AI planning: Evaluating DaE-YAHSP on a tunable benchmark. In
@@ -318,9 +321,6 @@ Planning Instances. In *European Conference on Combinatorial Optimization (EvoCO
 [SSV06]{#ref-SSV06} M. Schoenauer, P. Savéant, and V. Vidal. Divide-and-Evolve: a New Memetic
 Scheme for Domain-Independent Temporal Planning. In *6th EvoCOP*, pages 247–260. LNCS 3906,
 Springer Verlag, 2006.
-
-[Val79]{#ref-Val79} Leslie G. Valiant. The complexity of enumeration and reliability problems.
-*SIAM Journal on Computing*, 8(3):410–421, 1979.
 
 [VCM18]{#ref-VCM18} Mauro Vallati, Lukáš Chrpa, and Thomas L. McCluskey. What you always wanted
 to know about the deterministic part of the international planning competition (IPC) 2014 (but

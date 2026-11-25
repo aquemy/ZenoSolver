@@ -45,7 +45,7 @@ int main()
     const zeno::CertificateCheck check = zeno::checkCertificate(certificate);
     std::cout << (check.ok ? "accepted" : "rejected") << "\n";
 
-    // A non-symmetric instance (Proposition 6.5 of the note): a certified bracket.
+    // A non-symmetric instance (Proposition 5.7 of the note): a certified bracket.
     const zeno::Instance ns{.d = {3, 19}, .dbar = {3, 11}, .c = {5, 1}, .t = 7, .p = 4};
     const zeno::BracketResult bracket = zeno::solveBracket(ns);
     std::cout << bracket.upper.size() << " points, " << (bracket.exact() ? "exact" : "a bracket");
@@ -175,8 +175,8 @@ for it, and `addCost(a, b)` is saturating addition.
   `Roles` (role relaxation), `Lagrangian` (Lagrangian relaxation of the per-city balance),
   `Balanced` (the cheapest balanced role configuration), `Search` (exhaustive search over role
   configurations with exact schedules). All but `Relaxed` need (A1-NS): `Roles`, `Lagrangian`
-  and `Balanced` through [Theorem 6.1](../proofs.qmd#node-theorem-6-1), `Search` through
-  [Theorem 6.9](../proofs.qmd#node-theorem-6-9), which covers every plan. `Open` marks a gap that
+  and `Balanced` through [Corollary 5.4](../proofs.qmd#node-corollary-5-4), `Search` through
+  [Theorem 5.3](../proofs.qmd#node-theorem-5-3), which covers every plan. `Open` marks a gap that
   no bound closes.
 
 ### Certificates: `zeno/certificate.hpp`
@@ -232,12 +232,12 @@ These headers are public, for the tests and benchmarks; their interfaces may cha
 
 | Header | Content |
 |---|---|
-| `zeno/reduce.hpp` | `ReducedInstance` and `reduce(instance)`: dominated and equal cities merged ([Proposition 7.9](../proofs.qmd#node-proposition-7-9)), durations divided by their gcd, role weights (`fill`, `drop`, `pick`, `low`) for non-symmetric instances, `lowestLevel()` and `highestLevel()` ([Proposition 7.10](../proofs.qmd#node-proposition-7-10)), `maxTree()` $= \min(p, t-p+1)$. Kept cities of a symmetric instance form a staircase: $d$ strictly increasing, $c$ strictly decreasing. |
-| `zeno/one_plane.hpp` | `OnePlaneTable(d, c, maxLandings, maxLevel, layout)`: $G[m][T]$, the cheapest $m$ landings within $T$ ([Lemma 7.2](../proofs.qmd#node-lemma-7-2)), dense or as Pareto staircases (memory independent of the magnitude of the durations); `paretoPoints`, `witness`. |
-| `zeno/forest.hpp` | `relaxedCost` (the relaxation $L$, lemma R), `ForestProgram` / `forestCost` (link forests with trees of at most `maxTreePlanes` planes: 2 gives $U$, 3 gives $U_3$, `maxTree()` gives $E$ exactly, [Theorem 7.5](../proofs.qmd#node-theorem-7-5)), `LinkForest` and `ForestPlane`, `LevelStats`. |
+| `zeno/reduce.hpp` | `ReducedInstance` and `reduce(instance)`: dominated and equal cities merged ([Proposition 6.5](../proofs.qmd#node-proposition-6-5)), durations divided by their gcd, role weights (`fill`, `drop`, `pick`, `low`) for non-symmetric instances, `lowestLevel()` and `highestLevel()` ([Proposition 3.6](../proofs.qmd#node-proposition-3-6)), `maxTree()` $= \min(p, t-p+1)$. Kept cities of a symmetric instance form a staircase: $d$ strictly increasing, $c$ strictly decreasing. |
+| `zeno/one_plane.hpp` | `OnePlaneTable(d, c, maxLandings, maxLevel, layout)`: $G[m][T]$, the cheapest $m$ landings within $T$ ([Lemma 6.1](../proofs.qmd#node-lemma-6-1)), dense or as Pareto staircases (memory independent of the magnitude of the durations); `paretoPoints`, `witness`. |
+| `zeno/forest.hpp` | `relaxedCost` (the relaxation $L$, lemma R), `ForestProgram` / `forestCost` (link forests with trees of at most `maxTreePlanes` planes: 2 gives $U$, 3 gives $U_3$, `maxTree()` gives $E$ exactly, [Theorem 6.7](../proofs.qmd#node-theorem-6-7)), `LinkForest` and `ForestPlane`, `LevelStats`. |
 | `zeno/breakpoints.hpp` | `breakpoints(lo, flo, hi, fhi, f, threads)`: the breakpoints of a non-increasing function by parallel interval splitting, $O(r \log(hi - lo))$ evaluations for $r$ breakpoints. |
-| `zeno/roles.hpp` | Role configurations (`RoleConfig`), the exact balanced program `BalancedRoles` (DP over planes on the imbalance vector, [Proposition 6.6](../proofs.qmd#node-proposition-6-6); gives up beyond its state and work limits), `RoleRelaxation`, `lagrangianRoles` / `lagrangianValue`, `scheduleRoles`. |
-| `zeno/ns_search.hpp` | Template schedules ([Lemma 6.3](../proofs.qmd#node-lemma-6-3)): `templateMakespan`, `templatePlan`; `exactSchedule` (every drop-off order and matching of one configuration); `searchGap` (the exhaustive gap search of [Corollary 6.10](../proofs.qmd#node-corollary-6-10)). |
+| `zeno/roles.hpp` | Role configurations (`RoleConfig`), the exact balanced program `BalancedRoles` (DP over planes on the imbalance vector, [Proposition 8.5](../proofs.qmd#node-proposition-8-5); gives up beyond its state and work limits), `RoleRelaxation`, `lagrangianRoles` / `lagrangianValue`, `scheduleRoles`. |
+| `zeno/ns_search.hpp` | Template schedules ([Lemma 5.5](../proofs.qmd#node-lemma-5-5)): `templateMakespan`, `templatePlan`; `exactSchedule` (every drop-off order and matching of one configuration); `searchGap` (the exhaustive gap search of [Corollary 5.6](../proofs.qmd#node-corollary-5-6)). |
 | `zeno/parallel.hpp` | `workerCount(requested)` and `parallelFor(count, threads, body)`, dynamic scheduling, first exception rethrown. |
 
 Doxygen documentation of all headers is built by the `doc` target, with `-DZS_BUILD_DOC=ON`.

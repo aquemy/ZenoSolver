@@ -33,11 +33,11 @@ constexpr std::string_view kUsage = R"(usage: zeno [front] [instance options] [s
 front     Pareto front (cost, makespan) as "cost makespan" lines by
           increasing cost (the default command). Exact for symmetric
           instances whose central flights satisfy (A1) or the triangle
-          inequality (AΔ) (Theorem 4.10, Corollary 4.12; in Lean,
+          inequality (AΔ) (Theorems 4.4 and 4.5; in Lean,
           solveFront_isParetoFront_ATri): the default table satisfies (A1),
           --metric tables (AΔ). With a central-flight table,
           stderr says which holds, or warns that the front may not be exact
-          (Example 4.13). For non-symmetric instances: achieved points
+          (Example 4.7). For non-symmetric instances: achieved points
           (simulated plans) and, on stderr, which gaps a lower bound
           certifies
 check     verify a front certificate (doc/certificate-format.md) and print
@@ -151,23 +151,23 @@ void reportFlights(const zeno::Instance& instance, const zeno::Front& front)
     const zeno::FlightAssumptions flights = zeno::checkFlights(instance);
     if(flights.a1)
     {
-        std::cerr << "central flights satisfy (A1)" << (flights.triangle ? " and (AΔ)" : "") << ": the front is exact (Theorem 4.7, Corollary 4.8)\n";
+        std::cerr << "central flights satisfy (A1)" << (flights.triangle ? " and (AΔ)" : "") << ": the front is exact (Theorems 4.4 and 4.5)\n";
         return;
     }
     if(flights.triangle)
     {
-        std::cerr << "central flights satisfy (AΔ), not (A1): the front is exact (Theorem 4.10, Corollary 4.12)\n";
+        std::cerr << "central flights satisfy (AΔ), not (A1): the front is exact (Theorems 4.4 and 4.5)\n";
         return;
     }
     const auto gaps = zeno::symmetricGaps(instance, front);
     const auto unproved = static_cast<std::size_t>(std::ranges::count(gaps, zeno::GapBound::Forest));
     if(unproved == 0)
     {
-        std::cerr << "central flights satisfy neither (A1) nor (AΔ), but the relaxation L certifies every gap (Lemma 3.4): the front is exact\n";
+        std::cerr << "central flights satisfy neither (A1) nor (AΔ), but the relaxation L certifies every gap (Lemma 3.5): the front is exact\n";
         return;
     }
-    std::cerr << "warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.13). Every point is achieved "
-              << "without central flights, and the relaxation L (Lemma 3.4) certifies " << gaps.size() - unproved << " of " << gaps.size()
+    std::cerr << "warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.7). Every point is achieved "
+              << "without central flights, and the relaxation L (Lemma 3.5) certifies " << gaps.size() - unproved << " of " << gaps.size()
               << " gaps; the others need (A1) or (AΔ):\n";
     for(std::size_t i = 0; i < gaps.size(); ++i)
         if(gaps[i] == zeno::GapBound::Forest)
@@ -203,15 +203,15 @@ int runBracket(const zeno::Instance& instance, zeno::SolveOptions options, bool 
         shown.plans = result.plans;
         printPlans(shown, instance.n());
     }
-    // Every bound but lemma R needs (A1-NS) (Theorem 6.1), which a central-flight
+    // Every bound but lemma R needs (A1-NS) (Corollary 5.4), which a central-flight
     // table may violate. (AΔ) alone is not enough: short central flights can beat
-    // every role configuration (Proposition 6.7 of the theory note).
+    // every role configuration (Example 5.10 of the theory note).
     const bool a1ns = zeno::checkFlights(instance).a1ns;
     const auto proved = [&](zeno::GapProof proof) { return proof == zeno::GapProof::Relaxed || (a1ns && proof != zeno::GapProof::Open); };
     if(instance.central)
         std::cerr << (a1ns ? "central flights satisfy (A1-NS)\n"
-                           : "warning: central flights violate (A1-NS), which every bound but lemma R needs (Theorem 6.1), so only lemma R "
-                             "counts below (under (AΔ) alone, short central flights can beat role configurations: Proposition 6.7)\n");
+                           : "warning: central flights violate (A1-NS), which every bound but lemma R needs (Corollary 5.4), so only lemma R "
+                             "counts below (under (AΔ) alone, short central flights can beat role configurations: Example 5.10)\n");
     std::size_t closed = 0;
     for(auto proof : result.gapProof)
         closed += proved(proof);
@@ -317,8 +317,8 @@ int runCheck(const std::vector<std::string>& args)
         std::cout << " " << a;
     std::cout << "\n";
     if(std::ranges::find(report.relied, std::string(zeno::kA1OrTriangle)) != report.relied.end())
-        std::cout << zeno::kA1OrTriangle << ": the forest gaps hold when the central flights satisfy (A1) (Theorem 4.7) or (AΔ) "
-                  << "(Theorem 4.10, Corollary 4.12); the Lean checker is proved sound under both (Cert.check_sound_A1, Cert.check_sound_ATri)\n";
+        std::cout << zeno::kA1OrTriangle << ": the forest gaps hold when the central flights satisfy (A1) or (AΔ) "
+                  << "(Theorem 4.4, under the hub triangles both imply); the Lean checker is proved sound under both (Cert.check_sound_A1, Cert.check_sound_ATri)\n";
     return 0;
 }
 
@@ -339,7 +339,7 @@ int runPddl(const std::vector<std::string>& args)
             zeno::writePddlProblem(out, instance, &front);
             return 0;
         }
-        std::cerr << "zeno: warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.13); "
+        std::cerr << "zeno: warning: central flights satisfy neither (A1) nor (AΔ), so the front may not be exact (Example 4.7); "
                      "it is not written\n";
     }
     zeno::writePddlProblem(out, instance);

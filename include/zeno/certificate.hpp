@@ -15,7 +15,7 @@ enum class GapBound
 {
     Relaxed,    ///< recompute L at the level (lemma R; no assumption on central flights)
     Forest,     ///< recompute E with the link-forest DP (symmetric; needs (A1) or (AΔ):
-                ///< Theorems 4.7 and 4.10, Corollary 4.12)
+                ///< Theorems 4.4 and 4.5, under the hub triangles both imply)
     Roles,      ///< v2: recompute the role relaxation (needs A1-NS)
     Lagrangian, ///< v2: evaluate the Lagrangian bound at the listed multipliers (needs A1-NS)
     Balanced,   ///< v2: rerun the exact balanced role program (needs A1-NS)
@@ -41,8 +41,8 @@ struct Certificate
 };
 
 /// What `forest` gaps rely on: the central flights satisfy (A1) or the
-/// triangle inequality (AΔ). By Theorem 4.7 (under (A1)) and Theorem 4.10 with
-/// Corollary 4.12 (under (AΔ)), E is then a lower bound for every plan.
+/// triangle inequality (AΔ). Both imply the hub triangles (H), so by Theorem 4.4
+/// E is then a lower bound for every plan.
 /// checkCertificate reports this token, and accepts it in a certificate as a
 /// synonym of "A1", the token that certificates list for forest gaps: the Lean
 /// checker reads "A1", and is proved sound under (A1) (Cert.check_sound_A1)
@@ -56,7 +56,7 @@ inline constexpr const char* kA1OrTriangle = "A1|AD";
 /// The certificate of a solved front (requires SolveOptions::plans), with
 /// the gaps of symmetricGaps. When a gap is `forest`, it lists "A1" if the
 /// central flights satisfy (A1) or (AΔ), as the default and metric tables do,
-/// and throws std::invalid_argument if they satisfy neither (Example 4.13).
+/// and throws std::invalid_argument if they satisfy neither (Example 4.7).
 [[nodiscard]] Certificate makeCertificate(const Instance& instance, const SolveResult& result);
 
 struct BracketResult;
@@ -77,8 +77,9 @@ struct CertificateCheck
     std::vector<std::string> relied; ///< assumptions the accepted obligations needed
 };
 
-/// Reference checker: verifies the four obligations of the format. It uses
-/// the library's dynamic programs for the gap bounds, so it is a consistency
-/// check of the solver, not an independent proof; the Lean checker is.
+/// Reference checker: verifies the four obligations of the format, and rejects
+/// an assumption other than "S", "A1", "A1|AD" and "A1-NS". It uses the
+/// library's dynamic programs for the gap bounds, so it is a consistency check
+/// of the solver, not an independent proof; the Lean checker is.
 [[nodiscard]] CertificateCheck checkCertificate(const Certificate& certificate);
 } // namespace zeno

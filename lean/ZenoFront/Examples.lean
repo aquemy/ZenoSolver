@@ -13,7 +13,7 @@ Two certificates checked by the Lean **kernel** alone (`decide +kernel`, no comp
 with `Cert.check_sound_relaxed` they give fully kernel-checked statements about concrete
 instances.
 
-* `lptCounterexample`: the instance `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` of §5 of
+* `lptCounterexample`: the instance `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` of §4 of
   the theory note, on which the papers' greedy misses the point `(260, 60)`. Its exact front has
   six points (`tests/golden/data/lpt-counterexample.dat`).
 * `fourPlanes`: `n = 3`, `t = p = 4`; one point, `(248, 88)`.

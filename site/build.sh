@@ -50,8 +50,8 @@ if grep -rlE '(href|src)="(\.\./)+(doc|lean|src|include|bench|tests|site)/' "$ro
     echo "build: the pages above link outside docs/" >&2
     exit 1
 fi
-# Every link into the blueprint must reach a node. The `node` shortcode fails on an unknown label;
-# this also catches hand-written links to proofs.html#anchor.
+# Every link into the blueprint must reach a node. gen_blueprint.py (above) and the `node` shortcode
+# fail on an unknown label; this also catches hand-written links to proofs.html#anchor.
 python3 - "$root/docs" <<'EOF'
 import re, sys
 from pathlib import Path

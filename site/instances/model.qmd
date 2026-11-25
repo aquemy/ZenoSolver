@@ -5,7 +5,7 @@ subtitle: "What an instance is, and the 2-line and 3-line data files"
 
 ## The model
 
-A MultiZenoTravel instance ([§1.1 of the note](../proofs.qmd#node-s1-1)) has
+A MultiZenoTravel instance ([§1.1 of the note](../proofs.qmd#node-definition-1-1)) has
 
 - two hubs, the initial city $C_I$ and the goal city $C_G$, and $n$ central cities $1, \dots, n$;
 - flights between a hub and a central city: $C_I$–$i$ lasts $d_i$, $i$–$C_G$ lasts $\bar d_i$,
@@ -17,11 +17,11 @@ A MultiZenoTravel instance ([§1.1 of the note](../proofs.qmd#node-s1-1)) has
 A plan flies every passenger to $C_G$ and ends every plane in $C_G$. Its **cost** is the sum of its
 landing costs and its **makespan** the time the last plane reaches $C_G$. The front is the set of
 Pareto-optimal (cost, makespan) pairs over all plans, which may wait anywhere, hand passengers over
-anywhere, and use central flights ([§1.2](../proofs.qmd#node-s1-2)). Every plan lands at least
-$s = 2t - p$ times in central cities ([Lemma 3.2](../proofs.qmd#node-lemma-3-2)).
+anywhere, and use central flights ([§1.2](../proofs.qmd#node-definition-1-2)). Every plan lands at least
+$s = 2t - p$ times in central cities ([Lemmas 3.3 and 3.5](../proofs.qmd#node-lemma-3-5)).
 
 What `zeno` stores is `d`, `dbar`, `c`, `t` and `p`; durations, costs and times are non-negative
-integers. The assumptions ([§1.4](../proofs.qmd#node-s1-4)) are
+integers. The assumptions ([§1.4](../proofs.qmd#node-definition-1-4)) are
 
 - **(S)**, symmetry: $d_i = \bar d_i$ for every city. Every instance the generator builds without
   `-E`/`-W` is symmetric;
@@ -33,7 +33,7 @@ integers. The assumptions ([§1.4](../proofs.qmd#node-s1-4)) are
   $\mathrm{dur}(a, b) \le \mathrm{dur}(a, x) + \mathrm{dur}(x, b)$.
 
 The front `zeno` prints is exact for symmetric instances under (A1), and by the note's
-[Corollary 4.12](../proofs.qmd#node-corollary-4-12) under (AΔ) as well. For non-symmetric ones it
+[Theorem 4.5](../proofs.qmd#node-theorem-4-5) under (AΔ) as well. For non-symmetric ones it
 is exact wherever the certified bracket closes, under (A1-NS) when a bound needs it
 ([command line](../solver/cli.qmd#front)).
 
@@ -52,7 +52,7 @@ given and must match the file. Two layouts:
 This is `tests/golden/data/lpt-counterexample.dat`: $d = (6, 10)$, $c = (40, 20)$. With
 `-n 2 -t 5 -p 2` it is the smallest instance on which a greedy schedule of the landings misses a
 front point
-({{< node "§5" >}}).
+({{< node "Proposition 4.8" >}}).
 
 **3 lines, possibly non-symmetric:** $C_I$-side durations $d$, $C_G$-side durations $\bar d$,
 costs.
@@ -63,7 +63,7 @@ costs.
 5 1
 ```
 
-This is the instance of {{< node "Proposition 6.5" >}}
+This is the instance of {{< node "Proposition 5.7" >}}
 (`zeno -n 2 -t 7 -p 4 -d prop65.dat`), on which waiting is harmful. A 3-line file with equal
 first and second lines is symmetric.
 

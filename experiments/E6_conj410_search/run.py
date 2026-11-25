@@ -1,10 +1,11 @@
-"""E6, targeted search for counterexamples to the converse without (A1) (Theorem 4.10, formerly Conjecture 4.10).
+"""E6, targeted search for counterexamples to the converse without (A1) (now Theorem 4.4).
 
-Under (S) alone, central flights may be shorter than a detour through a hub, so Theorem 4.7, which
-assumes (A1), does not apply. The note now proves the converse under (AΔ) in writing (Theorem 4.10,
-formerly Conjecture 4.10); this search is independent of that proof. A plan can beat the
+Under (S) alone, central flights may be shorter than a detour through a hub, so the converse under
+(A1) (Theorem 4.7 of revision 2) does not apply. The note now proves the converse under the hub
+triangles (H), which (AΔ) implies (Theorem 4.4; Conjecture 4.10, then Theorem 4.10, of revision 2),
+and Lean checks it; this search is independent of that proof. A plan can beat the
 admissible-partition front E only where the relaxation L, valid for every plan under (S) alone
-(Lemma 3.4), lies strictly below E: the gaps that a certificate must mark `forest`. Everywhere else
+(Lemma 3.5), lies strictly below E: the gaps that a certificate must mark `forest`. Everywhere else
 L = E closes the gap without the converse.
 
 The search draws random tiny symmetric instances, keeps those whose certificate has a `forest` gap,
@@ -115,12 +116,12 @@ def main() -> int:
                             "d sorted in [1,9], c in [1,30]",
                "truth": f"central flights |d_a - d_b|, up to s+2 landings, timeout {TRUTH_TIMEOUT} s"},
         tests=["thm-4-10"],  # formerly conj-4-10
-        hypothesis="Theorem 4.10 (formerly Conjecture 4.10): under (S) and (AΔ), without (A1), every plan is still "
+        hypothesis="Theorem 4.4 (Conjecture 4.10 of revision 2): under (S) and (AΔ), without (A1), every plan is still "
                    "weakly dominated by an admissible partition. A counterexample can only sit in a gap where L < E.",
         explanation=f"{len(candidates)} of {TRIALS:,} instances have a forest gap; on the "
                     f"{len(candidates) - timeouts} the exhaustive search finished, {len(gaps)} gaps were tested "
                     f"and {len(cex)} contain a plan cheaper than E. A targeted search on tiny instances, "
-                    "independent of the written proof of Theorem 4.10.",
+                    "independent of the written proof of Theorem 4.4.",
         figures=figures, binaries=[C.ZENO, C.check_program("truth")],
     )
     result.write()

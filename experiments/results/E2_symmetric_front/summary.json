@@ -7,7 +7,7 @@
     "E2_symmetric_front/fronts_vs_exhaustive.png",
     "E2_symmetric_front/fronts_vs_exhaustive.svg"
   ],
-  "hypothesis": "Under (S) and (A1) every plan is weakly dominated by an admissible partition (Thm 4.7), so the front is the Pareto set of (E(T), 2T) (Cor 4.8), the set zeno computes.",
+  "hypothesis": "Under (S) and (A1) every plan is weakly dominated by an admissible partition (Thm 4.4), so the front is the Pareto set of (E(T), 2T) (Thm 4.5), the set zeno computes.",
   "metrics": {
     "mismatches": [],
     "oracle_compared": 1000,
@@ -38,7 +38,7 @@
     "truth": "1000 instances x 2 central regimes; n<=3, p<=3, t<=min(5,p+3), d in [1,6], c in [0,9]"
   },
   "tests": [
-    "thm-4-7",
+    "thm-4-10",
     "cor-4-8"
   ]
 }

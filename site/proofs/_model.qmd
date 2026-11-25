@@ -1,35 +1,51 @@
-## The model {#sec-model}
+## Model {#sec-model}
 
-The instance, the plans and the Pareto front, as fixed in §1 of the note. These definitions are the
-trusted interface of the formalization: every theorem below is about them.
+The instances, the plans, the rounding of rational and real times, the assumptions on central
+flights and the Pareto front, as fixed in §1 of the note. These definitions are the trusted
+interface of the formalization: every theorem below is about them.
 
-### Instances {#node-s1-1}
+### Definition 1.1 (instance) {#node-definition-1-1}
 
 ::: {.node-badge}
 [Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-* Cities: $C_I$ (initial) and $C_G$ (goal), the *hubs*, and central cities $1,\dots,n$.
-* Flights are undirected: an existing flight joins two distinct cities and has one duration, used in both
-  directions. $C_I$–$i$ lasts $d_i \ge 0$, $i$–$C_G$ lasts $\bar d_i \ge 0$, and a central flight $i$–$j$
-  ($i \ne j$), if it exists, lasts $d_{ij} = d_{ji} \ge 0$. There is no flight $C_I$–$C_G$.
-  $\mathrm{dur}(a,b)$ denotes the duration of the flight $a$–$b$.
-* Landing in central city $i$ costs $c_i \ge 0$; landing in a hub is free.
-* $p \ge 1$ planes and $t \ge p$ passengers start in $C_I$ at time 0. A plane carries at most one passenger.
-* Durations and times lie in an archimedean ordered field $\mathbb K$ ($\mathbb Q$ or $\mathbb R$), so that
-  $\lfloor\cdot\rfloor$ is defined. From §7 on, durations are integers.
+**Definition 1.1 (instance).** An instance has two *hubs*, $C_I$ (initial) and $C_G$ (goal), and
+central cities $1, \dots, n$. Durations are natural numbers. The flight between $C_I$ and $i$ lasts
+$d_i$ in either direction, the flight between $i$ and $C_G$ lasts $\bar d_i$, and for every ordered
+pair $(i, j)$ of central cities, $i = j$ included, the central flight from $i$ to $j$ lasts
+$d_c(i, j)$. No flight joins the two hubs. $\mathrm{dur}(a, b)$ is the duration of the flight from $a$
+to $b$. Landing in central city $i$ costs $c_i \in \mathbb N$; landing in a hub is free. There are
+$p$ planes and $t$ passengers, all in $C_I$ at time 0. A plane carries at most one passenger. Results
+assume $1 \le p \le t$ where they use it.
 
 ::: {.node-lean}
-Lean: [`Network` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L87-L92)
+Lean: [`Network` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L87-L92), [`Network.duration` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L96-L104)
 :::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §1.1
+theory note, §1.1 · ledger `def-instance`
 
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+The table $d_c$ is complete and directed. An instance without central flights is therefore not an
+instance of Definition 1.1: the results that need one quantify over the central tables that satisfy their
+hypotheses (Proposition 5.7), or use the flight graphs of Definition 5.8 (Example 5.9).
 
 ```{=html}
 </details>
@@ -39,7 +55,8 @@ Lean: [`Network` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** `Network` holds the durations `d`, `dbar` and an arbitrary table `dc` of central flights; costs are a separate argument `c : Fin n → ℕ`. Durations, costs and times are natural numbers (format v1); `Cert.check_sound_rat` extends the checker's soundness to rational times.
+*Lean:* `Network`, `Network.duration` (Plan.lean). The costs $c$ and the numbers $t$ and $p$ are
+separate arguments of every statement.
 
 **Lean** `ZenoFront.Network` [Lean definition]{.badge .ok}
 
@@ -52,7 +69,23 @@ structure Network (n : ℕ) where
   dc : Fin n → Fin n → ℕ
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
+
+**Lean** `ZenoFront.Network.duration` [Lean definition]{.badge .ok}
+
+```lean
+/-- The duration of the flight between two locations, if there is one. There is no flight
+between two hubs. -/
+def Network.duration (N : Network n) : Loc n → Loc n → Option ℕ
+  | .ci, .city i => some (N.d i)
+  | .city i, .ci => some (N.d i)
+  | .cg, .city i => some (N.dbar i)
+  | .city i, .cg => some (N.dbar i)
+  | .city i, .city j => some (N.dc i j)
+  | _, _ => none
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 96–104](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L96-L104){.lean-src}
 
 
 ```{=html}
@@ -61,67 +94,60 @@ structure Network (n : ℕ) where
 
 :::
 
-### Plans, cost and makespan {#node-s1-2}
+### Definition 1.2 (plan) {#node-definition-1-2}
 
 ::: {.node-badge}
 [Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Definition (plan).** A plan on a finite set $Q$ of planes (all $p$ planes unless stated otherwise)
-consists of
+**Definition 1.2 (plan).** A *leg* is a tuple (origin, destination, departure, arrival, passenger or
+none), with natural-number times. A *plan* gives each plane a list of legs. A list of legs is a
+*route from $x$ at time $\tau$* if its first leg leaves $x$ no earlier than $\tau$ and each later leg
+leaves where the previous one arrived, no earlier than that arrival. The plan is *feasible* if
 
-1. for every plane $k \in Q$, a *route*: a finite sequence of *legs* $(k,1),\dots,(k,\nu_k)$, where leg
-   $(k,j)$ uses an existing flight joining $v_{k,j-1}$ and $v_{k,j}$, flown from $v_{k,j-1}$ to $v_{k,j}$,
-   and departs at time $e_{k,j}$, with $v_{k,0} = C_I$, $e_{k,1} \ge 0$ and
-   $e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})$;
-2. for every passenger $\pi$, a *journey*: a non-empty sequence of legs whose first leg departs from $C_I$,
-   whose last leg arrives in $C_G$, and in which each leg departs from the city where the previous one
-   arrives, no earlier than that arrival, and, if both are legs of the same plane, at a later position of
-   its route;
-3. *capacity*: the journeys are pairwise disjoint, and none repeats a leg.
+1. every leg is a flight: its origin and destination are joined by a flight, and its arrival is its
+   departure plus the flight's duration;
+2. the legs of each plane form a route from $C_I$ at time 0 whose last leg arrives in $C_G$;
+3. for every passenger, the legs that carry it form, in some order, a route from $C_I$ at time 0 whose
+   last leg arrives in $C_G$.
 
-Below, "flight" also means a leg when no confusion is possible. The plan is *feasible* if every route ends in
-$C_G$ ($\nu_k \ge 1$ and $v_{k,\nu_k} = C_G$). Its *cost*
-$C = \sum_{k,j} c(v_{k,j})$ sums the landing costs of all flights (hubs are free). Its *makespan*
-$M = \max_k a_{k,\nu_k}$ is the time at which the last plane reaches $C_G$ for the last time. $\mathcal A$
-is the set of pairs $(C, M)$ of feasible plans.
+The *cost* $C$ of a plan is the sum of the landing costs of all its legs that land in a central city.
+Its *makespan* $M$ is the latest end of a route, the arrival of its last leg. The *flight time* $F_k$
+of plane $k$ is the sum of the durations of its legs. $\mathcal A$ is the set of points $(C, M)$ of
+the feasible plans.
 
-Waiting is implicit: a departure may be later than the preceding arrival, for planes and for passengers.
-Boarding and debarking are instantaneous: a passenger changing planes debarks when its flight arrives and
-boards when the next one departs, and the only constraint is the time inequality of item 2. Several planes
-may be in a city at once.
-
-*Sequence order.* "First" and "last" refer to positions in a journey or in a route. With zero durations
-several events can share a time; the sequences fix their order, and every argument below reads them this
-way.
-
-A plan is *event-ordered* if its legs have a total order $\prec$ that extends every route and every journey
-and along which departure times do not decrease. Lemma 6.8 and Corollary 6.10 use this notion, and
-Statement 1.2 relates it to PDDL; Theorem 6.9 does not need it. If every flight has a positive
-duration, every plan is event-ordered: in a route or a journey the next leg departs after the previous one
-arrives, hence strictly after it departs, so sorting legs by departure time extends both. Plans of the PDDL
-domain are event-ordered too (Statement 1.2). With zero durations a plan can fail to be: a passenger may ride
-a later leg of one plane and then an earlier leg of another at the same instant, in a cycle of dependencies
-that no execution in time realises. Such plans do not change the front (Corollary 6.10).
-
-The *flight time* of plane $k$ is $F_k = \sum_j \mathrm{dur}(f_{k,j})$. Its flights are sequential, so
-$F_k \le a_{k,\nu_k} \le M$.
-
-*Planes ending anywhere.* In the variant of Theorem 4.9, every plan counts (routes need not end in $C_G$ and
-may be empty), journeys still end in $C_G$, and the makespan $M'$ is the largest arrival time over all legs;
-there is at least one leg since $t \ge 1$. $\mathcal A'$ is the set of pairs $(C, M')$ of all plans.
+*Planes ending anywhere.* In this variant (PDDL problems without plane goals), item 2 only asks for a
+route from $C_I$ at time 0, possibly empty; item 3 is unchanged. The makespan is the latest arrival of
+a leg (0 for a plane without legs). $\mathcal A'$ is the set of points of the plans of the variant.
 
 ::: {.node-lean}
-Lean: [`Plan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L84-L85), [`Feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L155-L160), [`achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L48-L50)
+Lean: [`Leg` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L74-L82), [`Plan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L84-L85), [`Flies` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L106-L108), [`IsRoute` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L110-L114), [`PlaneFeasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L141-L146), [`Feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L155-L160), [`planCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L168-L169), [`planMakespan` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L171-L172), [`durSum` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L169-L170), [`achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L51-L53), [`PlaneFeasibleAnywhere` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L56-L60), [`FeasibleAnywhere` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L62-L68), [`achievableAnywhere` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L75-L77)
 :::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §1.2
+theory note, §1.2 · ledger `def-plan`
 
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+Waiting is implicit: a departure may be later than the preceding arrival, for planes and for
+passengers. A leg names at most one passenger, which is the capacity constraint. Boarding and
+debarking take no time, several planes may be in a city at once, and a passenger may change planes in
+any city.
 
 ```{=html}
 </details>
@@ -131,7 +157,25 @@ Lean: [`Plan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** A plan gives every plane a list of legs (`Leg`: from, to, departure, arrival, passenger). `Feasible` requires routes chained from `C_I` at time ≥ 0 and ending in `C_G`, legs of exact duration, and every passenger's legs ordered into a route from `C_I` to `C_G`; capacity one holds by construction, since a leg names at most one passenger.
+*Lean:* `Leg`, `Plan`, `Flies`, `IsRoute`, `PlaneFeasible`, `Feasible`, `planCost`, `planMakespan`
+(Plan.lean); `durSum` (PlanBounds.lean); `achievable` (Checker.lean); `PlaneFeasibleAnywhere`,
+`FeasibleAnywhere`, `achievableAnywhere` (Bridge.lean).
+
+**Lean** `ZenoFront.Leg` [Lean definition]{.badge .ok}
+
+```lean
+/-- A leg: a flight of one plane from `src` to `dst`, leaving at `dep` and arriving at `arr`,
+carrying passenger `pax` (or none). -/
+structure Leg (n t : ℕ) where
+  src : Loc n
+  dst : Loc n
+  dep : ℕ
+  arr : ℕ
+  pax : Option (Fin t)
+  deriving DecidableEq, Repr
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 74–82](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L74-L82){.lean-src}
 
 **Lean** `ZenoFront.Plan` [Lean definition]{.badge .ok}
 
@@ -140,7 +184,42 @@ Lean: [`Plan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4
 abbrev Plan (n t p : ℕ) := Fin p → List (Leg n t)
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 84–85](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L84-L85){.lean-src}
+
+**Lean** `ZenoFront.Flies` [Lean definition]{.badge .ok}
+
+```lean
+/-- A leg is a flight of the network, and lasts exactly the flight's duration. -/
+def Flies (N : Network n) (ℓ : Leg n t) : Prop :=
+  ∃ τ, N.duration ℓ.src ℓ.dst = some τ ∧ ℓ.arr = ℓ.dep + τ
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 106–108](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L106-L108){.lean-src}
+
+**Lean** `ZenoFront.IsRoute` [Lean definition]{.badge .ok}
+
+```lean
+/-- `IsRoute x τ legs`: starting at `x` at time `τ`, each leg leaves where the previous one
+arrived (or `x`), no earlier than that arrival (or `τ`). Waiting is allowed. -/
+def IsRoute : Loc n → ℕ → List (Leg n t) → Prop
+  | _, _, [] => True
+  | x, τ, ℓ :: rest => ℓ.src = x ∧ τ ≤ ℓ.dep ∧ IsRoute ℓ.dst ℓ.arr rest
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 110–114](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L110-L114){.lean-src}
+
+**Lean** `ZenoFront.PlaneFeasible` [Lean definition]{.badge .ok}
+
+```lean
+/-- A feasible plane: its legs are flights, they form a route from `C_I` at time `0`, and the
+plane ends in `C_G`. -/
+structure PlaneFeasible (N : Network n) (legs : List (Leg n t)) : Prop where
+  flies : ∀ ℓ ∈ legs, Flies N ℓ
+  route : IsRoute .ci 0 legs
+  ends : finalLoc .ci legs = .cg
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 141–146](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L141-L146){.lean-src}
 
 **Lean** `ZenoFront.Feasible` [Lean definition]{.badge .ok}
 
@@ -153,7 +232,34 @@ structure Feasible (N : Network n) (P : Plan n t p) : Prop where
     finalLoc .ci route = .cg
 ```
 
-[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
+[`lean/ZenoFront/Plan.lean`, lines 155–160](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L155-L160){.lean-src}
+
+**Lean** `ZenoFront.planCost` [Lean definition]{.badge .ok}
+
+```lean
+/-- The cost of a plan: the landing costs of all its legs. -/
+def planCost (c : Fin n → ℕ) (P : Plan n t p) : ℕ := ∑ k, ((P k).map (landCost c)).sum
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 168–169](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L168-L169){.lean-src}
+
+**Lean** `ZenoFront.planMakespan` [Lean definition]{.badge .ok}
+
+```lean
+/-- The makespan of a plan: the latest time a plane ends its route. -/
+def planMakespan (P : Plan n t p) : ℕ := Finset.univ.sup fun k => endTime 0 (P k)
+```
+
+[`lean/ZenoFront/Plan.lean`, lines 171–172](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Plan.lean#L171-L172){.lean-src}
+
+**Lean** `ZenoFront.durSum` [Lean definition]{.badge .ok}
+
+```lean
+/-- Total flight time of a list of legs. -/
+def durSum (legs : List (Leg n t)) : ℕ := (legs.map fun ℓ => ℓ.arr - ℓ.dep).sum
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 169–170](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L169-L170){.lean-src}
 
 **Lean** `ZenoFront.achievable` [Lean definition]{.badge .ok}
 
@@ -163,7 +269,43 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
   {x | ∃ P : Plan n t p, Feasible N P ∧ (planCost c P, planMakespan P) = x}
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 51–53](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L51-L53){.lean-src}
+
+**Lean** `ZenoFront.PlaneFeasibleAnywhere` [Lean definition]{.badge .ok}
+
+```lean
+/-- A plane of the variant: its legs are flights and form a route from `C_I` at time `0`. It may
+end anywhere. -/
+structure PlaneFeasibleAnywhere (N : Network n) (legs : List (Leg n t)) : Prop where
+  flies : ∀ ℓ ∈ legs, Flies N ℓ
+  route : IsRoute .ci 0 legs
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 56–60](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L56-L60){.lean-src}
+
+**Lean** `ZenoFront.FeasibleAnywhere` [Lean definition]{.badge .ok}
+
+```lean
+/-- A plan of the variant (PDDL without plane goals): every plane flies a route from `C_I` at
+time `0` and may end anywhere, and the legs carrying each passenger form, in some order, a route
+from `C_I` at time `0` that ends in `C_G`. Its makespan is `planMakespan`, the last arrival. -/
+structure FeasibleAnywhere (N : Network n) (P : Plan n t p) : Prop where
+  planes : ∀ k, PlaneFeasibleAnywhere N (P k)
+  pax : ∀ π, ∃ route : List (Leg n t), route.Perm (paxLegs P π) ∧ IsRoute .ci 0 route ∧
+    finalLoc .ci route = .cg
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 62–68](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L62-L68){.lean-src}
+
+**Lean** `ZenoFront.achievableAnywhere` [Lean definition]{.badge .ok}
+
+```lean
+/-- The (cost, makespan) pairs of the plans of the variant. -/
+def achievableAnywhere (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
+  {x | ∃ P : Plan n t p, FeasibleAnywhere N P ∧ (planCost c P, planMakespan P) = x}
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 75–77](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L75-L77){.lean-src}
 
 
 ```{=html}
@@ -172,67 +314,36 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
 
 :::
 
-### Statement 1.2 (PDDL correspondence) {#node-statement-1-2}
+### Lemma 1.3 (rounding times) {#node-lemma-1-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[machine-checked]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Statement 1.2 (PDDL correspondence, S).** A plan of the domain under ε-separation yields a plan of §1.2
-with the same cost and a makespan at most its `total-time`: each plane's `fly` actions in time order form
-its route, each person's flights between `board` and `debark` form its journey, and `libre` gives capacity
-one; ordering the `fly` actions by start time (ties by the plan's order of actions) shows that this plan is
-event-ordered. Conversely, an event-ordered plan of §1.2 with makespan $M$ yields PDDL plans with
-`total-time` at most $M + K\varepsilon$, where $K$ is its number of `fly`, `board` and `debark` actions:
-list the actions in the event order (each `board` just before its leg, each `debark` just after) and delay
-the $r$-th one by $r\varepsilon$. So the PDDL front tends to the front of event-ordered plans, which is
-$\mathcal F$ under (S) and (A1), and under (S) and (AΔ) (the plans of Theorem 4.1 are event-ordered, Lemma
-6.8(c); Corollaries 4.8 and 4.12), and under (A1-NS)
-(Corollary 6.10). The model's makespan is thus the PDDL makespan in the limit ε → 0, which is
-what ZenoSolver reports. Whether PDDL planners and VAL accept zero-duration actions is not checked here. This
-is argued, not formalised.
-
-```{=html}
-<details class="node-more"><summary>In the note</summary>
-```
-
-**Note** [sketch]{.badge .informal} · theory note, §1.3
-
-
-```{=html}
-</details>
-```
-
-:::
-
-### Assumptions {#node-s1-4}
-
-::: {.node-badge}
-[Lean definition]{.badge .ok}
-:::
-
-::: {.node-body}
-Used only where stated.
-
-* (S) symmetry: $d_i = \bar d_i$ for all $i$.
-* (A1-NS) $d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)$ for every existing central flight.
-* (AΔ) triangle inequality for the flights that exist: $\mathrm{dur}(a,b) \le \mathrm{dur}(a,x) + \mathrm{dur}(x,b)$
-  whenever the three flights exist.
-* (AΔ-path) for all central $i$ and $z$: $\bar d_i \le d_i + d_z + \bar d_z$ and
-  $d_i \le \bar d_i + \bar d_z + d_z$. A hub leg of $i$ is no longer than the detour through $z$ and the
-  other hub. (S) implies it, and (AΔ) implies it when the central flight $i$–$z$ exists.
+**Lemma 1.3 (rounding times).** Let $\mathbb K$ be an ordered ring with a floor function, such as
+$\mathbb Q$ or $\mathbb R$, and let a plan have departures and arrivals in $\mathbb K$ (and the
+instance's integer durations) and satisfy items 1–3 of Definition 1.2. Rounding every time down gives
+a feasible plan with natural-number times, the same cost and a makespan at most the original one.
+Conversely, a feasible plan with natural-number times, read in $\mathbb K$, satisfies items 1–3 with
+the same cost and makespan.
 
 ::: {.node-lean}
-Lean: [`Network.A1` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L51-L52), [`Network.A1NS` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L44-L46)
+Lean: [`QFeasible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L102-L106), [`QFeasible.floor` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L176-L191), [`qPlanCost_eq` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L194-L196), [`planMakespan_floor_le` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L224-L241), [`Feasible.toRat` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L274-L303)
 :::
 
 ```{=html}
-<details class="node-more"><summary>In the note</summary>
+<details class="node-more"><summary>Proof</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §1.4
+theory note, §1.2 · ledger `lem-rounding`
 
+*Proof.* A leg with arrival $a = e + \tau$, $\tau \in \mathbb N$, has $\lfloor a\rfloor = \lfloor e
+\rfloor + \tau$, so it stays a flight. Rounding down is monotone, so an inequality $a \le e'$ between
+an arrival and the next departure survives it, for planes and for passengers, in the same orders, and
+so does $0 \le e$ for the first departure. Locations and passengers do not change, so neither does the
+cost, and $\lfloor x\rfloor \le x$ bounds the new makespan by the old one. The converse holds because
+$\mathbb N \to \mathbb K$ preserves sums and order. $\square$
 
 ```{=html}
 </details>
@@ -242,7 +353,122 @@ Lean: [`Network.A1` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** (S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j`, `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`.
+*Lean:* `QFeasible`, `QFeasible.floor`, `qPlanCost_eq`, `planMakespan_floor_le`, `Feasible.toRat`
+(RationalPlans.lean, for every `FloorRing` $\mathbb K$).
+
+**Lean** `ZenoFront.QFeasible` [Lean definition]{.badge .ok}
+
+```lean
+/-- A feasible plan with times in `𝕂`. -/
+structure QFeasible (N : Network n) (P : QPlan 𝕂 n t p) : Prop where
+  planes : ∀ k, QPlaneFeasible N (P k)
+  pax : ∀ π, ∃ route : List (QLeg 𝕂 n t), route.Perm (qPaxLegs P π) ∧ QIsRoute .ci 0 route ∧
+    finalLoc .ci (route.map QLeg.floor) = .cg
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 102–106](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L102-L106){.lean-src}
+
+**Lean** `ZenoFront.QFeasible.floor` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Rounding down keeps feasibility.** -/
+theorem QFeasible.floor {N : Network n} {P : QPlan 𝕂 n t p} (hP : QFeasible N P) :
+    Feasible N (floorPlan P) := …
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 176–191](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L176-L191){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.qPlanCost_eq` [machine-checked]{.badge .ok}
+
+```lean
+theorem qPlanCost_eq (c : Fin n → ℕ) (P : QPlan 𝕂 n t p) :
+    planCost c (floorPlan P) = qPlanCost c P := …
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 194–196](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L194-L196){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.planMakespan_floor_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Rounding down does not increase the makespan.** -/
+theorem planMakespan_floor_le {N : Network n} {P : QPlan 𝕂 n t p} (hP : QFeasible N P) :
+    (planMakespan (floorPlan P) : 𝕂) ≤ qPlanMakespan P := …
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 224–241](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L224-L241){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Feasible.toRat` [machine-checked]{.badge .ok}
+
+```lean
+/-- **An integer plan is a plan with times in `𝕂`**, with the same cost and makespan. -/
+theorem Feasible.toRat {N : Network n} (c : Fin n → ℕ) {P : Plan n t p} (hP : Feasible N P) :
+    QFeasible N (ofPlan 𝕂 P) ∧ qPlanCost c (ofPlan 𝕂 P) = planCost c P ∧
+      qPlanMakespan (ofPlan 𝕂 P) = (planMakespan P : 𝕂) := …
+```
+
+[`lean/ZenoFront/RationalPlans.lean`, lines 274–303](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/RationalPlans.lean#L274-L303){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Definition 1.4 (assumptions) {#node-definition-1-4}
+
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
+
+::: {.node-body}
+**Definition 1.4 (assumptions).** Each is used only where a result states it.
+
+* (S) symmetry: $\bar d_i = d_i$ for all $i$.
+* (A1) central flights are useless: $d_i + d_j \le d_c(i, j)$ for all central $i, j$. This is the
+  EvoCOP 2015 assumption (stated there with $>$, under (S)).
+* (A1-NS) $\min(d_i + d_j,\ \bar d_i + \bar d_j) \le d_c(i, j)$ for all central $i, j$.
+* (AΔ) $\mathrm{dur}(a, b) \le \mathrm{dur}(a, x) + \mathrm{dur}(x, b)$ whenever $a \ne b$ and the
+  three flights exist.
+* (H) the hub triangles: $d_j \le d_i + d_c(i, j)$ and $d_i \le d_c(i, j) + d_j$ for all central $i, j$.
+
+::: {.node-lean}
+Lean: [`Network.A1` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Converse.lean#L34-L35), [`Network.A1NS` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NonSymmetric.lean#L41-L43), [`Network.ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L53-L59), [`Network.ATriHub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L61-L65)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+theory note, §1.4 · ledger `def-assumptions`
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
+
+::: {.content-visible unless-format="html"}
+*Remarks in the note.*
+:::
+
+(H) is (AΔ) on the triangles through $C_I$: $C_I \to i \to j$ against $C_I \to j$, and $i \to j \to
+C_I$ against $i \to C_I$. Under (S) these are also the triangles through $C_G$. In (AΔ), the
+condition $a \ne b$ leaves the flights $d_c(i, i)$ free.
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* the hypothesis `N.dbar = N.d`; `Network.A1` (Converse.lean); `Network.A1NS`
+(NonSymmetric.lean); `Network.ATri`, `Network.ATriHub` (TriSegments.lean).
 
 **Lean** `ZenoFront.Network.A1` [Lean definition]{.badge .ok}
 
@@ -251,7 +477,7 @@ Lean: [`Network.A1` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34
 def Network.A1 (N : Network n) : Prop := ∀ i j, N.d i + N.d j ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/Converse.lean`, lines 51–52](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Converse.lean#L51-L52){.lean-src}
+[`lean/ZenoFront/Converse.lean`, lines 34–35](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Converse.lean#L34-L35){.lean-src}
 
 **Lean** `ZenoFront.Network.A1NS` [Lean definition]{.badge .ok}
 
@@ -261,7 +487,33 @@ def Network.A1NS (N : Network n) : Prop :=
   ∀ i j, min (N.d i + N.d j) (N.dbar i + N.dbar j) ≤ N.dc i j
 ```
 
-[`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
+[`lean/ZenoFront/NonSymmetric.lean`, lines 41–43](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/NonSymmetric.lean#L41-L43){.lean-src}
+
+**Lean** `ZenoFront.Network.ATri` [Lean definition]{.badge .ok}
+
+```lean
+/-- **Assumption (AΔ)**, the triangle inequality for the flights that exist:
+`dur(a, b) ≤ dur(a, x) + dur(x, b)` whenever the flights `a–b`, `a–x` and `x–b` exist and
+`a ≠ b`. The note's flights join distinct locations; the condition `a ≠ b` leaves the Lean
+network's self-loops `dc i i` free (and `a = x` or `x = b` is trivial). -/
+def Network.ATri (N : Network n) : Prop :=
+  ∀ a x b : Loc n, a ≠ b → ∀ τab τax τxb : ℕ, N.duration a b = some τab →
+    N.duration a x = some τax → N.duration x b = some τxb → τab ≤ τax + τxb
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 53–59](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L53-L59){.lean-src}
+
+**Lean** `ZenoFront.Network.ATriHub` [Lean definition]{.badge .ok}
+
+```lean
+/-- (AΔ) on the triangles through `C_I`: `d_j ≤ d_i + dc i j` (`C_I → i → j` against `C_I → j`)
+and `d_i ≤ dc i j + d_j` (`i → j → C_I` against `i → C_I`). Under (S) these are also the
+triangles through `C_G`. This is all that Theorem 4.4 and its corollaries use. -/
+def Network.ATriHub (N : Network n) : Prop :=
+  ∀ i j : Fin n, N.d j ≤ N.d i + N.dc i j ∧ N.d i ≤ N.dc i j + N.d j
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 61–65](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L61-L65){.lean-src}
 
 
 ```{=html}
@@ -270,27 +522,87 @@ def Network.A1NS (N : Network n) : Prop :=
 
 :::
 
-### Fronts {#node-s1-5}
+### Lemma 1.5 (hub triangles) {#node-lemma-1-5}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 1.5 (hub triangles).** (A1) implies (H), and (AΔ) implies (H).
+
+::: {.node-lean}
+Lean: [`Network.A1.hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L72-L75), [`Network.ATri.hub` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L67-L70)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §1.4 · ledger `lem-hub-triangles`
+
+*Proof.* Under (A1), $d_j \le d_i + d_j \le d_i + d_c(i, j)$ and $d_i \le d_i + d_j \le d_c(i, j) +
+d_j$. Under (AΔ), take $(a, x, b) = (C_I, i, j)$ and $(a, x, b) = (i, j, C_I)$; in both $a \ne b$ and
+the three flights exist. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `Network.A1.hub`, `Network.ATri.hub` (TriSegments.lean).
+
+**Lean** `ZenoFront.Network.A1.hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- (A1) implies the triangles through a hub. -/
+theorem Network.A1.hub {N : Network n} (h : N.A1) : N.ATriHub := …
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 72–75](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L72-L75){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.Network.ATri.hub` [machine-checked]{.badge .ok}
+
+```lean
+/-- (AΔ) implies its triangles through a hub. -/
+theorem Network.ATri.hub {N : Network n} (h : N.ATri) : N.ATriHub := …
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 67–70](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/TriSegments.lean#L67-L70){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Definition 1.6 (fronts) {#node-definition-1-6}
 
 ::: {.node-badge}
 [Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-For points $y, z \in \mathbb K^2$ (cost, makespan), $y \preceq z$, *$y$ weakly dominates $z$*, if
-$y \le z$ componentwise. For $\mathcal S \subseteq \mathbb K^2$, $\mathrm{Min}\,\mathcal S$ is the set of
-$z \in \mathcal S$ such that no $y \in \mathcal S$ other than $z$ has $y \preceq z$. The *front* is
-$\mathcal F = \mathrm{Min}\,\mathcal A$.
+**Definition 1.6 (fronts).** Points (cost, makespan) of $\mathbb N^2$ are ordered componentwise, and
+$y$ *weakly dominates* $z$ if $y \le z$. For $\mathcal S \subseteq \mathbb N^2$, $\mathrm{Min}\,\mathcal
+S$ is the set of the minimal points of $\mathcal S$: the $z \in \mathcal S$ such that every $y \in
+\mathcal S$ with $y \le z$ is $z$. The *front* is $\mathcal F = \mathrm{Min}\,\mathcal A$. A list is the
+*Pareto front* of $\mathcal S$ if its points lie in $\mathcal S$, every point of $\mathcal S$ is weakly
+dominated by a listed point, and the listed points are pairwise incomparable.
 
 ::: {.node-lean}
-Lean: [`IsParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L52-L57)
+Lean: [`achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L51-L53), [`achievableAnywhere` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L75-L77), [`IsParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L55-L60)
 :::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §1.5
+theory note, §1.5 · ledger `def-front`
 
 
 ```{=html}
@@ -301,7 +613,28 @@ Lean: [`IsParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** `IsParetoFront S F`: the listed points are in `S`, every point of `S` is weakly dominated by a listed point, and the list is an antichain. `IsParetoFront.mem_iff_minimal` shows that it lists exactly the minimal elements of `S`.
+*Lean:* `achievable`, `IsParetoFront` (Checker.lean); `achievableAnywhere` (Bridge.lean); Mathlib's
+`Minimal`.
+
+**Lean** `ZenoFront.achievable` [Lean definition]{.badge .ok}
+
+```lean
+/-- The (cost, makespan) pairs of the feasible plans. -/
+def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
+  {x | ∃ P : Plan n t p, Feasible N P ∧ (planCost c P, planMakespan P) = x}
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 51–53](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L51-L53){.lean-src}
+
+**Lean** `ZenoFront.achievableAnywhere` [Lean definition]{.badge .ok}
+
+```lean
+/-- The (cost, makespan) pairs of the plans of the variant. -/
+def achievableAnywhere (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
+  {x | ∃ P : Plan n t p, FeasibleAnywhere N P ∧ (planCost c P, planMakespan P) = x}
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 75–77](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L75-L77){.lean-src}
 
 **Lean** `ZenoFront.IsParetoFront` [Lean definition]{.badge .ok}
 
@@ -314,7 +647,90 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
   antichain : F.Pairwise fun a b => ¬ a ≤ b ∧ ¬ b ≤ a
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
+[`lean/ZenoFront/Checker.lean`, lines 55–60](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L55-L60){.lean-src}
+
+
+```{=html}
+</details>
+```
+
+:::
+
+### Lemma 1.7 (dominating sets) {#node-lemma-1-7}
+
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
+
+::: {.node-body}
+**Lemma 1.7 (dominating sets).** (a) If every point of $\mathcal A$ is weakly dominated by a point of
+$\mathcal B$ and every point of $\mathcal B$ by a point of $\mathcal A$, then $\mathrm{Min}\,\mathcal A =
+\mathrm{Min}\,\mathcal B$; in particular when $\mathcal B \subseteq \mathcal A$ and every point of
+$\mathcal A$ is weakly dominated by a point of $\mathcal B$. (b) A list that is the Pareto front of
+$\mathcal S$ lists exactly the points of $\mathrm{Min}\,\mathcal S$.
+
+::: {.node-lean}
+Lean: [`minimal_iff_of_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L985-L989), [`minimal_iff_of_subset_of_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L480-L494), [`IsParetoFront.mem_iff_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L62-L79)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+theory note, §1.5 · ledger `lem-1-1`
+
+*Proof.* (a) Let $z \in \mathrm{Min}\,\mathcal A$. Some $b \in \mathcal B$ has $b \le z$, and some $a
+\in \mathcal A$ has $a \le b$; then $a = z$, so $b = z \in \mathcal B$. If $y \in \mathcal B$ and $y
+\le z$, some $a' \in \mathcal A$ has $a' \le y \le z$, so $a' = z$ and $y = z$. Hence $z \in
+\mathrm{Min}\,\mathcal B$, and the other inclusion is symmetric. If $\mathcal B \subseteq \mathcal A$,
+every point of $\mathcal B$ is dominated by itself in $\mathcal A$. (b) A listed point $x$ lies in
+$\mathcal S$; if $y \in \mathcal S$ and $y \le x$, a listed $x' \le y \le x$ exists, so $x' = x$ by
+incomparability, and $y = x$. Conversely, for $z \in \mathrm{Min}\,\mathcal S$ some listed $x \le z$ lies
+in $\mathcal S$, so $x = z$. $\square$
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+*Lean:* `minimal_iff_of_dominated` (Achievability.lean); `minimal_iff_of_subset_of_dominated`
+(Bridge.lean); `IsParetoFront.mem_iff_minimal` (Checker.lean).
+
+**Lean** `ZenoFront.minimal_iff_of_dominated` [machine-checked]{.badge .ok}
+
+```lean
+/-- Two sets that weakly dominate each other have the same minimal points. -/
+theorem minimal_iff_of_dominated {α : Type*} [PartialOrder α] {A B : Set α}
+    (hAB : ∀ y ∈ A, ∃ x ∈ B, x ≤ y) (hBA : ∀ y ∈ B, ∃ x ∈ A, x ≤ y) (x : α) :
+    Minimal (· ∈ A) x ↔ Minimal (· ∈ B) x := …
+```
+
+[`lean/ZenoFront/Achievability.lean`, lines 985–989](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Achievability.lean#L985-L989){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.minimal_iff_of_subset_of_dominated` [machine-checked]{.badge .ok}
+
+```lean
+/-- If `A ⊆ A′` and every point of `A′` is weakly dominated by a point of `A`, the two sets have
+the same minimal elements. -/
+theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' : Set α}
+    (hsub : A ⊆ A') (hdom : ∀ y ∈ A', ∃ x ∈ A, x ≤ y) (x : α) :
+    Minimal (· ∈ A) x ↔ Minimal (· ∈ A') x := …
+```
+
+[`lean/ZenoFront/Bridge.lean`, lines 480–494](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Bridge.lean#L480-L494){.lean-src} (statement only; the proof is elided)
+
+**Lean** `ZenoFront.IsParetoFront.mem_iff_minimal` [machine-checked]{.badge .ok}
+
+```lean
+/-- A Pareto front lists exactly the minimal elements. -/
+theorem IsParetoFront.mem_iff_minimal {α : Type*} [PartialOrder α] {S : Set α} {F : List α}
+    (h : IsParetoFront S F) (x : α) : x ∈ F ↔ Minimal (· ∈ S) x := …
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 62–79](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L62-L79){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -326,59 +742,29 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
 ### Notation {#node-notation}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
-**Notation.** $s = 2t - p$, so $s \ge p$ and $s \equiv p \pmod 2$; $\kappa = \lceil s/p\rceil$;
-$d_{\max} = \max_i d_i$. For multisets of central cities: $Y(i)$ is the multiplicity of $i$, $|Y|$ the size,
-$\mathrm{supp}\,Y$ the support, $Y + Z$ the sum, $Z \le Y$ inclusion and $Y - Z$ the difference for
-$Z \le Y$; $c(Y) = \sum_{w\in Y} c_w$, $\delta(Y) = \sum_{w\in Y} d_w$, $\bar\delta(Y) = \sum_{w\in Y} \bar d_w$,
-and under (S) the *load* $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over a finite set $Q$ of planes is a
-family $(X_k)_{k \in Q}$ (one group per plane, possibly empty) with $\sum_{k\in Q} X_k = X$. Unless stated
-otherwise $Q$ is the set of all $p$ planes, written $X_1,\dots,X_p$; definitions and results of §2 hold for
-any $Q$, with $p$ replaced by $|Q|$.
+**Notation.** $s = 2t - p$. For multisets of central cities: $Y(i)$ is the multiplicity of $i$, $|Y|$
+the size, $\mathrm{supp}\,Y$ the support, $Y + Z$ the sum and $Z \le Y$ inclusion; $c(Y) = \sum_{w \in
+Y} c_w$, $\delta(Y) = \sum_{w\in Y} d_w$, $\bar\delta(Y) = \sum_{w \in Y} \bar d_w$, and with $e_i =
+\min(d_i, \bar d_i)$, $e(Y) = \sum_{w \in Y} e_w$. A *partition* of $X$ over the $p$ planes is a
+family $X_1, \dots, X_p$ of groups, possibly empty, with $\sum_k X_k = X$; its *loads* are the
+$\delta(X_k)$. For a weight $w$ on the cities, $G_w[m][T]$ is the least $c(Y)$ over the multisets $Y$
+with $|Y| = m$ and $w(Y) \le T$ ($\infty$ if there is none), and $G = G_d$. $d_{\min}$, $d_{\max}$ and
+$c_{\min}$ are the least and largest durations and the least cost.
+
+::: {.node-lean}
+Lean: [`Instance.s` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L52-L53), [`Groups` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L65-L66), [`size` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L111-L112), [`load` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L70-L72), [`cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L74-L75), [`totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L114-L115), [`Network.emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L186-L188), [`oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59), [`minOf` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L83-L85)
+:::
 
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
-**Note** [definition]{.badge .informal} · theory note, §1.5
+theory note, §1.5
 
-
-```{=html}
-</details>
-```
-
-:::
-
-### Lemma 1.1 (dominating subset) {#node-lemma-1-1}
-
-::: {.node-badge}
-[parts in Lean]{.badge .informal} [Lean proves Min S = Min S′, even without finiteness; not that every point is dominated by a minimal one.]{.node-gap}
-:::
-
-::: {.node-body}
-**Lemma 1.1 (dominating subset).** Let $\mathcal S' \subseteq \mathcal S \subseteq \mathbb K^2$ with
-$\mathcal S'$ finite and every point of $\mathcal S$ weakly dominated by a point of $\mathcal S'$. Then
-$\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$, and every point of $\mathcal S$ is weakly dominated
-by a point of $\mathrm{Min}\,\mathcal S$.
-
-::: {.node-lean}
-Parts in Lean: [`minimal_iff_of_subset_of_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Bridge.lean#L508-L522)
-:::
-
-```{=html}
-<details class="node-more"><summary>Proof</summary>
-```
-
-**Note** [proof in the note]{.badge .informal} · theory note, §1.5
-
-*Proof.* Let $z \in \mathrm{Min}\,\mathcal S$. Some $y \in \mathcal S'$ has $y \preceq z$, so $y = z$, and
-$z$ is minimal in $\mathcal S' \subseteq \mathcal S$. Let $z \in \mathrm{Min}\,\mathcal S'$ and $y \in \mathcal S$
-with $y \preceq z$. Some $y' \in \mathcal S'$ has $y' \preceq y \preceq z$, so $y' = z$ and then $y = z$.
-Finally, for $z \in \mathcal S$, take $y \in \mathcal S'$ with $y \preceq z$ and a $\preceq$-minimal element
-of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{Min}\,\mathcal S' = \mathrm{Min}\,\mathcal S$. $\square$
 
 ```{=html}
 </details>
@@ -388,21 +774,92 @@ of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{M
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**In Lean.** The first claim, `Min S = Min S'`, is machine-checked without the finiteness hypothesis. The last claim (every point is dominated by a minimal one) uses finiteness and is not stated in Lean.
-
-**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
-
-*Part* `ZenoFront.minimal_iff_of_subset_of_dominated` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Instance.s` [Lean definition]{.badge .ok}
 
 ```lean
-/-- If `A ⊆ A′` and every point of `A′` is weakly dominated by a point of `A`, the two sets have
-the same minimal elements. -/
-theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' : Set α}
-    (hsub : A ⊆ A') (hdom : ∀ y ∈ A', ∃ x ∈ A, x ≤ y) (x : α) :
-    Minimal (· ∈ A) x ↔ Minimal (· ∈ A') x := …
+/-- The number of landings of a front plan, `s = 2t − p`. -/
+def Instance.s (I : Instance) : ℕ := 2 * I.t - I.p
 ```
 
-[`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Model.lean`, lines 52–53](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L52-L53){.lean-src}
+
+**Lean** `ZenoFront.Groups` [Lean definition]{.badge .ok}
+
+```lean
+/-- A grouping of landings: one multiset of central cities per plane. -/
+abbrev Groups (n p : ℕ) := Fin p → Multiset (Fin n)
+```
+
+[`lean/ZenoFront/Model.lean`, lines 65–66](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L65-L66){.lean-src}
+
+**Lean** `ZenoFront.size` [Lean definition]{.badge .ok}
+
+```lean
+/-- Total number of landings of a grouping, `Σ_k |X_k|`. -/
+def size (X : Groups n p) : ℕ := ∑ k, (X k).card
+```
+
+[`lean/ZenoFront/Model.lean`, lines 111–112](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L111-L112){.lean-src}
+
+**Lean** `ZenoFront.load` [Lean definition]{.badge .ok}
+
+```lean
+/-- The load `δ(Y) = Σ_{w ∈ Y} d w` of a multiset of landings. The flight time of a plane
+serving `Y` without central flights is `2 δ(Y)`. -/
+def load (d : Fin n → ℕ) (Y : Multiset (Fin n)) : ℕ := (Y.map d).sum
+```
+
+[`lean/ZenoFront/Model.lean`, lines 70–72](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L70-L72){.lean-src}
+
+**Lean** `ZenoFront.cost` [Lean definition]{.badge .ok}
+
+```lean
+/-- The cost `c(Y) = Σ_{w ∈ Y} c w` of a multiset of landings. -/
+def cost (c : Fin n → ℕ) (Y : Multiset (Fin n)) : ℕ := (Y.map c).sum
+```
+
+[`lean/ZenoFront/Model.lean`, lines 74–75](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L74-L75){.lean-src}
+
+**Lean** `ZenoFront.totalCost` [Lean definition]{.badge .ok}
+
+```lean
+/-- Total cost of a grouping, `c(X) = Σ_k c(X_k)`. -/
+def totalCost (c : Fin n → ℕ) (X : Groups n p) : ℕ := ∑ k, cost c (X k)
+```
+
+[`lean/ZenoFront/Model.lean`, lines 114–115](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L114-L115){.lean-src}
+
+**Lean** `ZenoFront.Network.emin` [Lean definition]{.badge .ok}
+
+```lean
+/-- The shorter hub flight of city `i`: `min(d_i, d̄_i)`. Every flight between a hub and `i`
+lasts at least this long. -/
+def Network.emin (N : Network n) (i : Fin n) : ℕ := min (N.d i) (N.dbar i)
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 186–188](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L186-L188){.lean-src}
+
+**Lean** `ZenoFront.oneplane` [Lean definition]{.badge .ok}
+
+```lean
+/-- `G[m][T]`, by the recursion of §6: `G[0][T] = 0` and
+`G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`. -/
+def oneplane : ℕ → ℕ → WithTop ℕ
+  | 0, _ => 0
+  | m + 1, T => oneplaneStep d c (oneplane m) T
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 55–59](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59){.lean-src}
+
+**Lean** `ZenoFront.minOf` [Lean definition]{.badge .ok}
+
+```lean
+/-- The least value of a function on `Fin n` (`0` if `n = 0`). -/
+def minOf (f : Fin n → ℕ) : ℕ :=
+  if h : 0 < n then univ.inf' ⟨⟨0, h⟩, mem_univ _⟩ f else 0
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 83–85](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L83-L85){.lean-src}
 
 
 ```{=html}

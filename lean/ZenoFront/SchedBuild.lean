@@ -4,29 +4,30 @@ Released under the license of the ZenoSolver repository.
 -/
 module
 
-public import ZenoFront.Exchange
+public import ZenoFront.Visits
 public import ZenoFront.LinkCount
 public import ZenoFront.SearchGap
 public import ZenoFront.Converse
+public import Mathlib.Tactic.Ring
 
 /-!
-# Steps 4–6 of Theorem 6.9: the scheduled configuration
+# Steps 4–6 of Theorem 5.3: the scheduled configuration
 
-From routes of visits (`VRoute`, after the exchanges of Step 2) and links between drop-off visits
-(`B`: entered from and left towards `C_I`) and pick-up visits (`B̄`: entered from and left towards
-`C_G`), with `a(B) ≤ e(B̄)` at the same city, this file builds a scheduled configuration
-(`Sched`, `toSched`): per plane, its linked `B` visits in route order are its drop-offs, its
-linked `B̄` visits its pick-ups, and crossings are taken among its `A` and `Ā` visits. The
-matching sends each pick-up to the drop-off it is linked to.
+From the visits of the planes (`PlanesOK`, as Step 2 leaves them, `Rewire.lean`) and links
+between drop-off visits (`B`: entered from and left towards `C_I`) and pick-up visits (`B̄`:
+entered from and left towards `C_G`), with `a(B) ≤ e(B̄)` at the same city, this file builds a
+scheduled configuration (`Sched`, `toSched`): per plane, its linked `B` visits in route order
+are its drop-offs, its linked `B̄` visits its pick-ups, and crossings are taken among its `A` and
+`Ā` visits. The matching sends each pick-up to the drop-off it is linked to.
 
 * `toSched_valid`: the configuration is valid.
 * `toSched_cost_le`: its cost is at most the landing cost of the legs.
-* `toSched_tmpl_le` (**Step 5**): its closed form (Lemma 6.3) is at most any bound `M` on the
+* `toSched_tmpl_le` (**Step 5**): its closed form (Lemma 5.5) is at most any bound `M` on the
   arrival times. A plane flies its earlier drop-offs before the linked one, so
   `Pre_u(j) + d_x ≤ a(B)`; after `e(B̄)` it flies to `C_G` and its later pick-ups by `M`, so
   `e(B̄) + d̄_x + Suf_v(l) ≤ M`; and `a(B) ≤ e(B̄)`. Role loads are at most the flight times.
-* `exists_sched` (**Steps 3–6**): with the hand-offs ordered as Step 2 leaves them, the links of
-  `exists_links` and Lemma 4.4's shrinking give a valid configuration with `2t − p` landings.
+* `exists_sched_of` (**Steps 3–6**): with the hand-offs ordered as Step 2 leaves them, the links
+  of `exists_links` and the shrinking of Step 6 give a valid configuration with `2t − p` landings.
 -/
 
 @[expose] public section
@@ -66,7 +67,7 @@ structure LocOK (N : Network n) (v : Visit n t K) : Prop where
 /-- What Steps 3–6 need of the visits of every plane, in the order of the configuration: the
 local facts; a drop-off (`C_I → x → C_I`) enters `x` after the flight time of the visits before
 it; a pick-up (`C_G → x → C_G`) is followed by the visits after it by `M`; the flight time is at
-most `M`; and `#A = #Ā + 1`. A route satisfies them (`VRoute.planesOK`). -/
+most `M`; and `#A = #Ā + 1`. The rewired visits satisfy them (`planesOK_withLoops`). -/
 structure PlanesOK (N : Network n) (M : ℕ) (R : Fin p → List (Visit n t K)) : Prop where
   loc : ∀ k, ∀ v ∈ R k, LocOK N v
   pre : ∀ k (m : ℕ) (hm : m < (R k).length), (R k)[m].1.leg.src = .ci →
@@ -102,132 +103,6 @@ theorem Loc.eq_ci_of_isCI {l : Loc n} (h : l.isCI = true) : l = .ci := by
 
 theorem Loc.eq_cg_of_isHub {l : Loc n} (h : l.isHub = true) (h' : l.isCI = false) : l = .cg := by
   cases l <;> simp_all
-
-/-! ### Along one route -/
-
-section Route
-
-variable [LinearOrder K] {N : Network n}
-
-/-- A visit's entry leg departs no earlier than the flight time of the earlier visits. -/
-theorem VChain.time_le_dep : ∀ {s : VState n K} {L : List (Visit n t K)}, VChain N s L →
-    ∀ (m : ℕ) (hm : m < L.length), s.2.1 + ((L.take m).map Visit.w).sum ≤ L[m].1.leg.dep
-  | _, [], _, m, hm => absurd hm (by simp)
-  | s, v :: L, ⟨hv, _⟩, 0, _ => by simpa using hv.time
-  | s, v :: L, ⟨hv, hL⟩, m + 1, hm => by
-    have ih := hL.time_le_dep m (by simpa using hm)
-    simp only [List.take_succ_cons, List.map_cons, List.sum_cons, List.getElem_cons_succ]
-    simp only [Visit.next] at ih
-    have h₁ := hv.time
-    have h₂ := hv.wait
-    have h₃ := hv.dep_le_arr₁
-    have h₄ := hv.dep_le_arr₂
-    have hw : v.w = (v.1.leg.arr - v.1.leg.dep) + (v.2.leg.arr - v.2.leg.dep) := rfl
-    omega
-
-/-- After a visit's exit leg arrives, the later visits fly by any bound on the arrivals. -/
-theorem VChain.arr_add_le {M : ℕ} : ∀ {s : VState n K} {L : List (Visit n t K)}, VChain N s L →
-    (∀ v ∈ L, v.2.leg.arr ≤ M) →
-    ∀ (m : ℕ) (hm : m < L.length), L[m].2.leg.arr + ((L.drop (m + 1)).map Visit.w).sum ≤ M
-  | _, [], _, _, m, hm => absurd hm (by simp)
-  | _, [v], _, hM, 0, _ => by simpa using hM v List.mem_cons_self
-  | _, v :: v' :: L, ⟨_, hL⟩, hM, 0, _ => by
-    have ih := hL.arr_add_le (fun w hw => hM w (List.mem_cons_of_mem _ hw)) 0 (by simp)
-    obtain ⟨hv', -⟩ := hL
-    simp only [List.getElem_cons_zero, List.drop_succ_cons, List.drop_zero, List.map_cons,
-      List.sum_cons] at ih ⊢
-    have h₁ := hv'.time
-    have h₂ := hv'.wait
-    have h₃ := hv'.dep_le_arr₁
-    have h₄ := hv'.dep_le_arr₂
-    simp only [Visit.next] at h₁
-    unfold Visit.w at ih ⊢
-    omega
-  | _, v :: L, ⟨_, hL⟩, hM, m + 1, hm => by
-    have ih := hL.arr_add_le (fun w hw => hM w (List.mem_cons_of_mem _ hw)) m
-      (by simpa using hm)
-    simpa using ih
-
-/-- A route flies its visits by any bound on the arrivals. -/
-theorem VChain.sum_w_le {M : ℕ} {s : VState n K} {L : List (Visit n t K)} (h : VChain N s L)
-    (hM : ∀ v ∈ L, v.2.leg.arr ≤ M) : (L.map Visit.w).sum ≤ M := by
-  cases L with
-  | nil => simp
-  | cons v L =>
-    have h₁ := h.arr_add_le hM 0 (by simp)
-    obtain ⟨hv, -⟩ := h
-    have h₂ := hv.wait
-    have h₃ := hv.dep_le_arr₁
-    have h₄ := hv.dep_le_arr₂
-    simp only [List.getElem_cons_zero, List.drop_succ_cons, List.drop_zero] at h₁
-    simp only [List.map_cons, List.sum_cons]
-    unfold Visit.w at h₁ ⊢
-    omega
-
-/-- The flight time of a visit at `x` is its role weight: `d_x` for a leg via `C_I`, `d̄_x` for a
-leg via `C_G`. -/
-theorem VOK.w_eq {s : VState n K} {v : Visit n t K} (h : VOK N s v) {x : Fin n}
-    (hx : v.1.leg.dst = .city x) :
-    v.w = (if v.1.leg.src.isCI then N.d x else N.dbar x) +
-      (if v.2.leg.dst.isCI then N.d x else N.dbar x) := by
-  obtain ⟨y, hy₁, hy₂⟩ := h.city
-  rw [hx] at hy₁
-  cases Loc.city.inj hy₁
-  obtain ⟨τ₁, hd₁, ha₁⟩ := h.flies₁
-  obtain ⟨τ₂, hd₂, ha₂⟩ := h.flies₂
-  have hub₁ := h.hub
-  have hub₂ := h.exit
-  unfold Visit.w
-  rw [hx] at hd₁
-  rw [hy₂] at hd₂
-  rcases hs : v.1.leg.src with _ | z | _ <;> rcases hd : v.2.leg.dst with _ | z' | _ <;>
-    simp_all [Network.duration, Loc.isCI]
-
-/-- `#A = #Ā + 1` on a route (Lemma 2.1). -/
-theorem VChain.countP_isA : ∀ {s : VState n K} {L : List (Visit n t K)}, VChain N s L →
-    L.countP Visit.isA + (vEnd s L).1.isCI.toNat = L.countP Visit.isAbar + s.1.isCI.toNat
-  | _, [], _ => by simp
-  | s, v :: L, ⟨hv, hL⟩ => by
-    have ih := hL.countP_isA
-    have key : (if v.isA = true then 1 else 0) + v.2.leg.dst.isCI.toNat =
-        (if v.isAbar = true then 1 else 0) + v.1.leg.src.isCI.toNat := by
-      have hub₁ := hv.hub
-      have hub₂ := hv.exit
-      rcases hs : v.1.leg.src with _ | z | _ <;> rcases hd : v.2.leg.dst with _ | z' | _ <;>
-        simp_all [Visit.isA, Visit.isAbar]
-    simp only [List.countP_cons, vEnd_cons]
-    rw [show v.next.1 = v.2.leg.dst from rfl] at ih
-    rw [← hv.src]
-    omega
-
-theorem VRoute.countP_isA {L : List (Visit n t K)} (h : VRoute N L) :
-    L.countP Visit.isA = L.countP Visit.isAbar + 1 := by
-  have := h.1.countP_isA
-  rw [h.2] at this
-  simpa [vStart] using this
-
-theorem VOK.loc {s : VState n K} {v : Visit n t K} (h : VOK N s v) : LocOK N v :=
-  ⟨h.hub, h.flies₁, h.flies₂, h.city, h.wait, h.exit⟩
-
-omit [LinearOrder K] in
-theorem PaxData.ends {R : Fin p → List (Visit n t K)} {ℓα ℓβ : Fin t → KLeg n t K}
-    [LinearOrder K] (h : PaxData R ℓα ℓβ) : PaxEnds ℓα ℓβ :=
-  ⟨h.paxα, h.paxβ, h.srcα, h.dstβ, h.city⟩
-
-/-- Routes satisfy what Steps 3–6 need, for any bound on the arrivals. -/
-theorem VRoute.planesOK {R : Fin p → List (Visit n t K)} (hR : ∀ k, VRoute N (R k)) {M : ℕ}
-    (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) : PlanesOK N M R := by
-  have hexit : ∀ k, ∀ v ∈ R k, v.2.leg.arr ≤ M := fun k v hv =>
-    hM _ (mem_allK.mpr ⟨k, v, hv, Or.inr rfl⟩)
-  refine ⟨fun k v hv => ?_, fun k m hm _ _ => ?_, fun k m hm _ _ => ?_,
-    fun k => (hR k).1.sum_w_le (hexit k), fun k => (hR k).countP_isA⟩
-  · obtain ⟨s, hs⟩ := (hR k).1.exists_vok v hv
-    exact hs.loc
-  · have := (hR k).1.time_le_dep m hm
-    simpa [vStart] using this
-  · exact (hR k).1.arr_add_le (hexit k) m hm
-
-end Route
 
 /-! ### Visits as nodes -/
 
@@ -643,7 +518,7 @@ theorem toSched_cost_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
   simp only [crossNodes] at h₁
   omega
 
-/-- **Step 5: the closed form** of the configuration (Lemma 6.3) is at most any bound `M` on the
+/-- **Step 5: the closed form** of the configuration (Lemma 5.5) is at most any bound `M` on the
 arrival times: role loads are at most the flight times, and each link's term is at most
 `a(B) + (M − e(B̄)) ≤ M`. -/
 theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤ crossCities x₀ R k)
@@ -777,7 +652,7 @@ theorem card_crossNodes (hpar : ∀ k, (R k).countP Visit.isA = (R k).countP Vis
       omega
   omega
 
-/-- **Steps 3–6 of Theorem 6.9**, on any visits of the planes with what the steps need
+/-- **Steps 3–6 of Theorem 5.3**, on any visits of the planes with what the steps need
 (`PlanesOK`). Take visits in which every passenger's hand-off is ordered in time (as Step 2 leaves
 them), and `p ≤ t`. Then some valid scheduled configuration has `2t − p` landings, cost at most
 the landing cost of the legs, and closed form at most `M`. -/
@@ -899,19 +774,6 @@ theorem exists_sched_of {M : ℕ} (hP : PlanesOK N M R) {ℓα ℓβ : Fin t →
   obtain ⟨hok, hty, htime⟩ := hLinks Λ hΛ
   exact ⟨toSched Λ x₀ Cr, toSched_valid Λ x₀ hok hodd, (toSched_size Λ x₀ hok).trans hsize,
     toSched_cost_le hR x₀ hty hCr c, toSched_tmpl_le hR x₀ hty hCr hok htime hP⟩
-
-/-- **Steps 3–6 of Theorem 6.9**, on routes of visits: some valid scheduled configuration has
-`2t − p` landings, cost at most the landing cost of the legs, and closed form at most `M`. -/
-theorem exists_sched [LinearOrder K] (hR : ∀ k, VRoute N (R k)) {ℓα ℓβ : Fin t → KLeg n t K}
-    (hpax : PaxData R ℓα ℓβ)
-    (hord : ∀ π, ∃ (u : Fin p) (i : Fin (R u).length) (v : Fin p) (j : Fin (R v).length),
-      (R u)[i].1 = ℓα π ∧ (R v)[j].2 = ℓβ π ∧
-      ((⟨u, i⟩ : (k : Fin p) × Fin (R k).length) ≠ ⟨v, j⟩ →
-        (R u)[i].2.leg.dep ≤ (R v)[j].1.leg.arr))
-    {M : ℕ} (hM : ∀ ℓ ∈ allK R, ℓ.leg.arr ≤ M) (hpt : p ≤ t) (x₀ : Fin n) (c : Fin n → ℕ) :
-    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧
-      S.cost c ≤ ((allK R).map fun ℓ => landCost c ℓ.leg).sum ∧ S.tmpl N.d N.dbar ≤ M :=
-  exists_sched_of (VRoute.planesOK hR hM) hpax.ends hord hpt x₀ c
 
 end Steps
 

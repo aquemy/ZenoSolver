@@ -211,7 +211,7 @@ def suites() -> None:
             rows.append(f"| `{name}` | `{args.replace('@DATA@/', '')}` | {size} |")
     (SITE / "instances" / "_golden.md").write_text("\n".join(rows) + "\n")
 
-    # Table 1 of EvoCOP 2015: -n N -t N -p 2 has (N - 1)^2 + 1 points (Theorem 10.1)
+    # Table 1 of EvoCOP 2015: -n N -t N -p 2 has (N - 1)^2 + 1 points (as the 2015 paper reports)
     rows = ["| $N$ | $(N-1)^2+1$ | `zeno` front size (`bench/baselines`) |", "|--:|--:|--:|"]
     for r in zeno:
         if r["name"].startswith("paper-table1/"):
