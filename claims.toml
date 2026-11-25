@@ -715,6 +715,15 @@ lean_partial = "ZenoFront.Cert2.rolesWith_le, ZenoFront.sum_roleLoad_eq_load_fil
 paper        = "revision 3 (planned)"
 created      = "2026-11-25"
 
+[claims.prop-lagrangian-bound]
+kind         = "proposition"
+statement    = "Proposition (`lagrangian` bound), new in revision 3: For every integer vector μ, the Lagrangian value at level T, the plane-by-plane relaxation in which a drop-off at i costs c_i + μ_i, a pick-up c_i − μ_i and every plane has an odd number of crossings within T, is at most the cost of every role configuration with S landings, all in the allowed cities, whose planes weigh at most T, a crossing at i weighing fill_i, a drop-off drop_i and a pick-up pick_i (d_i + d̄_i, 2d_i and 2d̄_i in the checker)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.LagData.value_le_totalCost"
+lean_partial = "ZenoFront.Cert2.lagWith_le"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 10. The linear family
 # ===========================================================================
