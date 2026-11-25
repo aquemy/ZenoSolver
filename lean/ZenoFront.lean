@@ -22,6 +22,8 @@ public import ZenoFront.LinkCount
 public import ZenoFront.SchedBuild
 public import ZenoFront.Rewire
 public import ZenoFront.DominationAll
+public import ZenoFront.Template
+public import ZenoFront.NSFront
 public import ZenoFront.SchedMap
 public import ZenoFront.Parse
 public import ZenoFront.Examples
