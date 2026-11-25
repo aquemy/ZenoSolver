@@ -292,8 +292,8 @@ created   = "2026-11-23"
 [claims.claim-5]
 kind         = "claim"
 statement    = "Section 5 (greedy counterexamples): the per-PPP greedy of both papers, longest flights first to the least-loaded plane, misses front points: for d = (6, 10), c = (40, 20), t = 5, p = 2 it flies the landings of the front point (260, 60) in makespan 68, and for d = (1, 3), c = (9, 5), t = 4, p = 2 it misses (42, 12)."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Examples.lptCounterexample_front"
+status       = "math.machine-checked"
+lean         = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt, ZenoFront.Greedy.evocop_lpt_noP3, ZenoFront.Greedy.arxiv_misses_p3First"
 paper        = "§5, doc/theory/exact-front.md"
 created      = "2026-11-23"
 
@@ -616,6 +616,7 @@ created   = "2026-11-23"
 kind      = "conjecture"
 statement = "Claim of EvoCOP 2015 (Algorithm 1) and arXiv:2304.14659 (§3.2): for a fixed multiset of landings (a PPP), the greedy that gives the longest flights first to the least-loaded plane schedules it optimally, so the fronts ZenoSolver computes are the true Pareto fronts."
 status    = "math.disproved"
+lean      = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt"
 paper     = "EvoCOP 2015 Alg. 1; arXiv:2304.14659 §3.2; doc/theory/exact-front.md §5"
 created   = "2026-11-23"
 
