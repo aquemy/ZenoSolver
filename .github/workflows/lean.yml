@@ -1,7 +1,8 @@
 name: Lean
 
 # Also runs on changes to the C++ solver, so that the end-to-end step catches any drift between
-# the certificates the solver writes and what the Lean checker accepts.
+# the certificates the solver writes and what the Lean checker accepts, and on changes to the claim
+# ledger and the theory note, which the ledger gate checks against the kernel.
 on:
   push:
     branches: [master]
@@ -12,6 +13,9 @@ on:
       - "tests/golden/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
+      - "claims.toml"
+      - "doc/theory/exact-front.md"
+      - "site/check_ledger.py"
       - ".github/workflows/lean.yml"
   pull_request:
     paths:
@@ -21,6 +25,9 @@ on:
       - "tests/golden/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
+      - "claims.toml"
+      - "doc/theory/exact-front.md"
+      - "site/check_ledger.py"
       - ".github/workflows/lean.yml"
 
 concurrency:
@@ -60,6 +67,14 @@ jobs:
       - name: Axiom audit
         working-directory: lean
         run: lake env lean scripts/CheckAxioms.lean
+
+      # The ledger gate (site/check_ledger.py): every claim of claims.toml that is not archived
+      # (`removed`) or an experiment is math.machine-checked or math.disproved, a machine-checked
+      # claim names its Lean, the kept claims are exactly the numbered results of the theory note,
+      # and every declaration named in `lean` or `lean_partial` exists and uses no axiom beyond
+      # the three standard ones (it generates and runs lean/scripts/LedgerNames.lean).
+      - name: Ledger gate
+        run: python3 site/check_ledger.py --lean
 
       # The compiled checker: the solver's certificates (relaxed and forest gaps) must be
       # accepted, and the corrupted ones rejected.
