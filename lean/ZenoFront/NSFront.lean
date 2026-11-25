@@ -35,6 +35,8 @@ matching (`RoleConfig.exists_sched`), so `m(cfg)` is attained.
 * `configPoints`, `RoleConfig.leastTmpl`: the note's `𝒦` and `m(cfg)`.
 * `minimal_achievable_iff_configPoints` (**Corollary 6.10, as in the note**): the front is
   `Min 𝒦`.
+* `schedulableDomination_template` (**Theorem 6.9, as in the note**): every feasible plan is
+  weakly dominated by a scheduled configuration whose template plan is no later.
 * `Feasible.exists_roleConfig_of_domination`: Theorem 6.1 in the form of
   `Feasible.exists_roleConfig_ns` (role loads at most the makespan), as a corollary of
   Theorem 6.9, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
@@ -294,5 +296,23 @@ theorem Feasible.exists_roleConfig_of_domination {N : Network n} (hA : N.A1NS) (
     fun k => ?_⟩
   rw [← hS.load_eq N k]
   exact (S.load_le_tmpl N.d N.dbar k).trans htmpl
+
+/-! ### Theorem 6.9 with the template plan -/
+
+/-- **Theorem 6.9 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
+feasible plan is weakly dominated by a valid scheduled configuration with `2t − p` landings
+(a role configuration with passenger count `t`, orders of its drop-offs and pick-ups and a link
+matching) of cost at most the plan's, whose template is a feasible plan of the same cost and of
+makespan at most the plan's: `schedulableDomination_all` bounds the closed form by the
+makespan, and the template's makespan is the closed form (Lemma 6.3). -/
+theorem schedulableDomination_template {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
+    (hpt : p ≤ t) {P : Plan n t p} (hP : Feasible N P) :
+    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
+      Feasible N (S.tmplPlan (t := t) N.d N.dbar) ∧
+      planCost c (S.tmplPlan (t := t) N.d N.dbar) = S.cost c ∧
+      planMakespan (S.tmplPlan (t := t) N.d N.dbar) ≤ planMakespan P := by
+  obtain ⟨S, hv, hsize, hcost, htmpl⟩ := schedulableDomination_all c hpt hA hP
+  obtain ⟨hT, hc, hm⟩ := S.tmplPlan_spec (t := t) (N := N) c hv hsize
+  exact ⟨S, hv, hsize, hcost, hT, hc, hm ▸ htmpl⟩
 
 end ZenoFront
