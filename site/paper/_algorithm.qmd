@@ -5,8 +5,8 @@ Computing the Pareto front exactly, its complexity, and the ZenoSolver with its 
 :::
 
 We now focus on finding the Pareto Optimal Plans from the lists of $2t - p$ cities, for the
-symmetric case: (S) holds throughout, and the statements about the front also need (A1) or, by
-{{< node "Corollary 4.12" >}}, (AΔ). This section corresponds to §7 to §9 of the
+symmetric case: (S) holds throughout, and the statements about the front also need the hub
+triangles (H), which (A1) and (AΔ) imply. This section corresponds to §6 to §8 of the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md). The
 [algorithm page](../solver/algorithm.qmd) of the Solver section describes how the implementation
 carries out each step.
@@ -18,85 +18,118 @@ cities in $X$ is uniquely defined by $c(X) = \sum_{i \in X} c_i$.
 
 **Makespan of a list**: The makespan of a list is that of the shortest schedule that uses its
 cities in a feasible way. Only the least largest load $M(X) = \min \max_k \ell(X_k)$ over the
-admissible partitions of $X$ matters: by Theorem 4.1 it is the makespan of a schedule that never
-waits, and by Corollary 4.8, under (A1) or (AΔ), the Pareto front is the Pareto set of the pairs
-$(c(X), M(X))$.
+admissible partitions of $X$ matters: by Theorem 4.1 it is the makespan of a plan, and by
+Theorem 4.5, under (H), the Pareto front is the Pareto set of the pairs $(c(X), M(X))$.
 
 The list $X$ does not hold any information about which plane will land in a particular city, and
 choosing the partition is the hard part.
 
 ::: {.statement}
-{{< node "Theorem 8.1" >}} Deciding $M(X) \le 2T$, with $d$, $X$, $p$ and $T$ as input, is
-strongly NP-complete.
+{{< node "Theorem 7.1" >}} **3-Partition reduction.** Let $a_1, \dots, a_{3m}$ and $B$ be natural
+numbers with $\sum_i a_i = mB$ and $B/4 < a_i < B/2$ for every $i$. In the symmetric instance with
+one city of duration $a_i$ for each $i$, $p = m$ planes and $t = 2m$ passengers, the list $X$ that
+lands once in every city has $M(X) \le 2B$ if and only if the $a_i$ split into $m$ triples of sum
+$B$.
 :::
 
 ::: {.sketch}
-*Sketch.* Reduce from 3-Partition: $3m$ cities of durations $a_i$, each once in $X$, $p = m$ and
-$t = 2m$. Every group is then odd by {{< node "Lemma 2.4" badge=false >}}, and groups of duration
-at most $B$ summing to $mB$ must be triples
-({{< node "Theorem 8.1" text="full proof" badge=false >}}).
+*Sketch.* Every city lies in one group, so by {{< node "Lemma 2.3" badge=false >}} the admissible
+partitions of $X$ are those into odd groups, and odd groups of duration at most $B$ summing to $mB$
+must be triples ({{< node "Theorem 7.1" text="full proof" badge=false >}}).
 :::
 
 ::: {.statement}
-{{< node "Proposition 8.2" >}} **Fixed $p$.** For $p = 2$ the problem stays NP-complete, even
-with positive durations. For every fixed $p$ it is solvable in time polynomial in $n$, $s$ and
-$T$, so for fixed $p$ it is weakly NP-complete.
+{{< node "Proposition 7.2" >}} **Partition reduction, $p = 2$.** Let $a_1, \dots, a_m$ be natural
+numbers with sum $2B$, $r \ge m$ odd and $K = B + 1$. In the symmetric instance with $2r$ cities,
+of durations $a_i + K$ for $i \le m$ and $K$ for the other $2r - m$, $p = 2$ and $t = r + 1$, the
+list $X$ that lands once in every city has $M(X) \le 2(B + rK)$ if and only if some sub-multiset
+of the $a_i$ sums to $B$. All durations are positive.
 :::
 
-In particular, no greedy distribution of the durations of a list into $p$ planes is optimal in
-general, unless P = NP. Distributing the longest durations first, each to the plane with the
-smallest current duration, misses front points ({{< node "§5" >}}). With two cities of durations
-6 and 10, two planes and five passengers, take the list of $2t - p = 8$ cities with three landings
-in the slow city and five in the fast one. The greedy gives each plane a pattern $A$ in the slow
-city first and ends with durations 52 and 68, while the groups $\{10, 10, 10\}$ and
-$\{6, 6, 6, 6, 6\}$, both odd and hence admissible, both last 60; the front point $(260, 60)$ of
-that instance is missed. The experiment [E10](#sec-e10) measures how often such a
-greedy is exact.
+*Remark (hardness, from the literature).* 3-Partition is strongly NP-complete and Partition is
+NP-complete [[GJ79](#ref-GJ79)]. The instance of Theorem 7.1 has the numbers $a_i$, $B$ and $m$
+of the 3-Partition instance, and both instances are written down in polynomial time. Granted these
+cited results, deciding $M(X) \le 2T$, with $d$, $X$, $p$ and $T$ as input, is strongly NP-hard
+when $p$ is part of the input, by Theorem 7.1, and stays NP-hard for $p = 2$, by Proposition 7.2.
+In particular, unless P = NP, no polynomial algorithm, such as a greedy distribution of the
+durations of a list into $p$ planes, computes $M(X)$ for every list $X$. The hardness results are
+cited, not formalised.
+
+The greedies of both earlier papers do miss front points. Both fix a list of landings, a *possibly
+Pareto-optimal plan* (PPP), and schedule it greedily, giving the longest durations first to the
+least-loaded plane: [[QS15](#ref-QS15)] in its Algorithm 1, the 2023 version of this paper in its
+§3.2. They state the greedy in two forms. *EvoCOP's greedy* $G_E$ takes a PPP of $t$ eastbound and
+$t - p$ westbound landings and a set $\beta$ of P3 patterns, landings common to both. Loop 1: while
+westbound landings outside $\beta$ remain, the least-loaded plane flies the longest remaining
+eastbound landing outside $\beta$ if it is in $C_I$, and the longest remaining westbound one
+otherwise. Loop 2: each remaining eastbound landing, longest first, goes to the least-loaded plane
+in $C_I$. Then each P3 pattern in $C_i$, longest first, adds $2d_i$ to each of the two least-loaded
+planes. The makespan of the PPP is the largest load, the least over the sets $\beta$. *The 2023
+greedy* $G_A$ takes a PPP of $k + p$ patterns $A$, $k$ patterns $\bar A$ and $t - p - k$ pairs of
+patterns $B$ and $\bar B$: each pair, longest first, adds $2d$ to the least-loaded plane; the $p$
+longest patterns $A$, in decreasing order, go to the least-loaded planes that have none yet; while
+crossings remain, the least-loaded plane whose next pattern ($\bar A$ after $A$, $A$ after $\bar A$)
+is still available takes the longest remaining one of that type; then the pairs are dealt again.
+The papers do not say how ties of "least-loaded" are broken.
+
+::: {.statement}
+{{< node "Proposition 4.8" >}} **The papers' greedies are not exact.** *(a)* For
+$d = \bar d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$ and every table of flights between central
+cities, $(260, 60) \in \mathcal F$, yet for every PPP of cost at most 260, $G_E$ (for every set
+$\beta$ and every tie-breaking) and $G_A$ (for every tie-breaking) give a makespan above 60. On the
+landings of $(260, 60)$, five in $C_1$ and three in $C_2$, loops 1 and 2 without P3 patterns end
+with the loads 52 and 68, and every $\beta$ gives at least 64.
+
+*(b)* For $d = \bar d = (1, 3)$, $c = (9, 5)$, $t = 4$, $p = 2$ and every table of flights between
+central cities, $(42, 12) \in \mathcal F$, and for every PPP of cost at most 42, $G_A$ gives a
+makespan above 12 for every tie-breaking. $G_E$ reaches $(42, 12)$: the PPP of eastbound landings
+$C_1, C_1, C_2, C_2$ and westbound landings $C_1, C_2$, of cost 42, with one P3 pattern in $C_2$,
+gets makespan 12 for every tie-breaking.
+:::
+
+In (a), the greedy gives each plane a pattern $A$ in the slow city $C_2$ first, while the groups
+$\{10, 10, 10\}$ and $\{6, 6, 6, 6, 6\}$, both odd and hence admissible, both last 60. The
+experiment [E10](#sec-e10) measures how often $G_E$ is exact.
 
 The method below never computes $M(X)$ for a fixed list. It sweeps the makespans instead, and
 computes for each one the least cost over all lists at once.
 
 ### Computing the Pareto front {#sec-breakpoints}
 
-Scale the durations to integers and divide them by their gcd $g$. For an integer *level*
-$T \ge 0$ let
+For an integer *level* $T \ge 0$ let
 $$E(T) = \min\{c(X) : |X| = 2t - p,\ X_1, \dots, X_p \text{ admissible},\ \delta(X_k) \le T \text{ for all } k\},$$
-the least cost of an admissible partition whose loads are all at most $2T$. $E$ is non-increasing,
-and the relaxation $L$ of {{< node "Lemma 3.4" >}} is the same minimisation without
-admissibility, so $L \le E$.
+the least cost of an admissible partition whose loads are all at most $2T$ ($\infty$ if there is
+none).
 
 ::: {.statement}
-{{< node "Proposition 7.1" >}} Under (S) and (A1),
-$$\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$$
-with $E(-1) = \infty$, makespans in units of $g$.
+{{< node "Lemma 6.2" >}} **The function $E$.** $E$ is non-increasing and attained when finite.
+With $1 \le p$, $E(T) = \infty$ for $T < d_{\min}\kappa$. A level $T$ at which $E$ drops
+($E(T) = C$ and $E(T') > C$ for every $T' < T$) has $T \le (2t - p)\,d_{\max}$.
+:::
+
+::: {.statement}
+{{< node "Proposition 6.3" >}} **Front = breakpoints of $E$.** Assume (S), (H) and $p \le t$.
+Then $(C, M) \in \mathcal F$ if and only if $M = 2T$ for some level $T$ with $E(T) = C$ and
+$E(T') > C$ for every $T' < T$.
 :::
 
 The Pareto front is read off the levels where $E$ drops, and only a bounded range of levels
-matters.
+matters. At both ends, every plan obeys a lower bound.
 
 ::: {.statement}
-{{< node "Proposition 7.10" >}} **Ends of the front.** Assume (S), and let
-$d_{\min} = \min_i d_i$, $c_{\min} = \min_i c_i$ and $d_{\rm cheap} = \min\{d_i : c_i = c_{\min}\}$.
-
-*(a)* Every plan has makespan at least $2 d_{\min}\kappa$, and some plan attains it.
-
-*(b)* Every plan costs at least $(2t - p)\,c_{\min}$, and $((2t - p)\,c_{\min},\ 2 d_{\rm cheap}\kappa)$
-is the cheapest point of $\mathcal F$.
-
-*(c)* With integer durations, $E(T) < \infty$ if and only if $T \ge T_{\rm lo} := d_{\min}\kappa$,
-and $E(T) = (2t - p)\,c_{\min}$ if and only if $T \ge T_{\rm hi} := d_{\rm cheap}\kappa$. The same
-holds for $L$.
+{{< node "Proposition 3.6" >}} **Lower bounds.** Let $p \le t$. Every feasible plan costs at least
+$(2t - p)\,c_{\min}$. Under (S) and $1 \le p$, every feasible plan has makespan at least
+$2 d_{\min}\kappa$.
 :::
 
 ::: {.sketch}
-*Sketch.* $p$ non-empty groups of total size $2t - p$ include one of size at least
-$\kappa = \lceil (2t - p)/p \rceil$, which gives both lower bounds through Lemma 3.4; they are
-attained by spreading $2t - p$ copies of one city over the planes, which is admissible by
-{{< node "Lemma 2.9" >}} ({{< node "Proposition 7.10" text="full proof" badge=false >}}).
+*Sketch.* The $p$ non-empty groups of Lemma 3.5 have $2t - p$ landings in all, and one of them has
+at least $\kappa = \lceil (2t - p)/p \rceil$
+({{< node "Proposition 3.6" text="full proof" badge=false >}}).
 :::
 
-On the [example instance](#fig-plan) ($2t - p = 4$, $\kappa = 2$,
-$d_{\min} = 2$, $d_{\rm cheap} = 5$), the levels run from $T_{\rm lo} = 4$ to $T_{\rm hi} = 10$:
+On the [example instance](#fig-plan) ($2t - p = 4$, $\kappa = 2$, $d_{\min} = 2$), $E$ is infinite
+below level 4, and it reaches the least cost $(2t - p)\,c_{\min} = 4$ at level 10:
 
 | $T$ | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|
@@ -105,122 +138,105 @@ $d_{\min} = 2$, $d_{\rm cheap} = 5$), the levels run from $T_{\rm lo} = 4$ to $T
 
 : $E$ on the example instance, computed by enumeration; $L = E$ at every level. Level 9 is not a breakpoint, so the front has no point of makespan 18. {#tbl-levels}
 
-A city dominated by another can be removed ({{< node "Proposition 7.9" >}}): if
-$d_{i'} \le d_i$ and $c_{i'} \le c_i$, removing $i$ changes neither $E$ nor $L$ at any level, nor
-the front. The kept cities have increasing durations and decreasing costs.
+A city dominated by another is never needed ({{< node "Proposition 6.5" >}}): if
+$d_{i'} \le d_i$ and $c_{i'} \le c_i$, replacing the landings in $C_i$ of an admissible partition by
+landings in $C_{i'}$ gives an admissible partition with the same group sizes and no larger cost or
+loads. The exact programs below use the non-dominated cities only.
 
 **One-plane table.** Everything is built from the cheapest group of a single plane.
 
 ::: {.statement}
-{{< node "Lemma 7.2" >}} Let $G[0][\tau] = 0$ for $\tau \ge 0$,
-$$G[m][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m-1][\tau - d_i]\big),$$
-and $G[m][\tau] = \infty$ for $\tau < 0$. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of total duration
-at most $\tau$.
+{{< node "Lemma 6.1" >}} Let $G[0][\tau] = 0$ and
+$$G[m + 1][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m][\tau - d_i]\big),$$
+$\infty$ over the empty set. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of
+total duration at most $\tau$, and it is $\infty$ if and only if there is none; the memoised table
+agrees with it.
 :::
 
 **Bounds.** Bounds on $E(T)$ combine *gadgets*, small sets of planes with their groups, by a
-knapsack over planes and landings. Single planes of any size give $L$. Single planes of odd size
-and *pairs*, two even planes linked by one $(B\bar B)$-pairing, give an upper bound $U$; adding
-*chains* of three planes, even, odd and even, gives $U_3$.
+knapsack over planes and landings. Single planes of any size give the relaxation $L$ of Lemma 3.5.
+Single planes of odd size and *pairs*, two even planes linked by one $(B\bar B)$-pairing in a
+non-dominated city, give an upper bound $U$.
 
 ::: {.statement}
-{{< node "Proposition 7.3" >}} $L(T) \le E(T) \le U_3(T) \le U(T)$.
+{{< node "Proposition 6.4" >}} **Bracket.** At every level $T$ of the table,
+$L(T) \le E(T) \le U(T)$, and where $L(T) = U(T)$, $E(T) = L(T)$.
 :::
 
-::: {.statement}
-{{< node "Proposition 7.4" >}} If $q_{\max} \le 2$, that is $p \le 2$ or $t \le p + 1$, then
-$E = U$. If $q_{\max} \le 3$, that is $p \le 3$ or $t \le p + 2$, then $E = U_3$.
-:::
-
-Every gadget with optimal groups is a tree of a link forest; when the trees of every link forest
-have at most two or three planes ({{< node "Corollary 2.7" >}}), the gadgets cover all of them.
-Pairs alone are not always enough: for three planes and the list of durations
-$\{4, 4, 2, 6, 6, 6, 7\}$, the groups $\{6, 6\}$, $\{4, 7\}$ and $\{4, 2, 6\}$ reach makespan 24,
-the two even groups sharing no city and being linked through the odd one, a chain; pairs reach
-only 26.
-
-**The link-forest dynamic program.** When the bracket $L \le E \le U_3$ does not close, $E(T)$ is
+**The link-forest dynamic program.** When the bracket $L \le E \le U$ does not close, $E(T)$ is
 computed exactly by building the trees of a link forest from the leaves up: a table of child
 items (a pairing with the subtree hanging from it), a table of subtrees hanging from a parent
 pairing, a table of rooted trees, and a knapsack that combines trees into a forest of $p$ planes
-and $2t - p$ landings, the free landings of each plane being filled from $G$. By Corollary 2.7,
-trees never need more than $q_{\max}$ planes.
+and $2t - p$ landings, the free landings of each plane being filled from $G$, and the labels of the
+links being the non-dominated cities.
 
 ::: {.statement}
-{{< node "Theorem 7.5" >}} The link-forest dynamic program returns $E(T)$. Given $G$, it takes
-$O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ time and $O(q_{\max} s T + n\,q_{\max} s + p s)$ memory
-per level, with $s = 2t - p$.
+{{< node "Theorem 6.7" >}} For $1 \le p$, the link-forest dynamic program returns $E(T)$ at every
+level $T$ of the table.
 :::
 
 ::: {.sketch}
 *Sketch.* Every finite entry is the cost of a structure satisfying (F1) and (F2), whose groups
 are admissible by {{< node "Lemma 2.6" >}}; conversely, the rooted link forest of an optimal
-partition is bounded below entry by entry
-({{< node "Theorem 7.5" text="full proof" badge=false >}}).
+partition, moved to the non-dominated cities by Proposition 6.5, is bounded below entry by entry
+({{< node "Theorem 6.7" text="full proof" badge=false >}}).
 :::
-
-Over the levels $[T_{\rm lo}, T_{\rm hi}]$, with $G$ built once in $O(n\,s\,T_{\rm hi})$, the
-whole front takes $O(n\,q_{\max}^2 s^2\,T_{\rm hi}(T_{\rm hi} - T_{\rm lo} + 1))$ time, which is
-pseudo-polynomial since $T_{\rm hi} \le d_{\max}\kappa$.
 
 **The σ-DP.** A second exact program works on parity matrices directly. By
-{{< node "Lemma 2.8" >}}, an admissible partition of $2t - p$ cities has a parity matrix touching
+{{< node "Lemma 2.7" >}}, an admissible partition of $2t - p$ cities has a parity matrix touching
 at most $w = \min(p - 1, t - p)$ cities. The *σ-graph* has nodes $(k, j, \sigma)$: $k$ planes
 processed, $j$ landings used, and $\sigma$ the set of cities marked an odd number of times so far,
-of size at most $w$. An arc adds a plane with $m$ landings and a set $\eta$ of marked cities,
-weighted by $c(\eta)$ plus the cheapest filler from $G$.
+of size at most $w$. An arc adds a plane with $m$ landings and a set $\eta$ of at most $w$ marked
+non-dominated cities, with $|\eta| + 1 \le m$, $|\eta| \equiv m + 1 \pmod 2$ and at most $w$ cities
+in $\sigma \triangle \eta$, weighted by $c(\eta)$ plus the cheapest filler from $G$.
 
 ::: {.statement}
-{{< node "Theorem 7.6" >}} **σ-DP.** The shortest path from $(0, 0, \emptyset)$ to
-$(p, 2t - p, \emptyset)$ in the σ-graph has weight $E(T)$.
+{{< node "Theorem 6.8" >}} **σ-DP.** Let $1 \le p \le t$. At every level $T$ of the table, the
+shortest path from $(0, 0, \emptyset)$ to $(p, 2t - p, \emptyset)$ in the σ-graph has weight
+$E(T)$.
 :::
 
-The σ-DP is polynomial in $n$ for fixed $w$; the link-forest program is the default otherwise.
-Replacing arc weights by finite Pareto sets of (cost, duration) pairs
-({{< node "Lemma 7.7" >}}) gives a variant that computes the whole front in one pass
-({{< node "Proposition 7.8" >}}); it helps when durations are large and the range of costs is
-narrow.
+The verified solver of the [Verification](#sec-verification) section chooses between the two
+exact programs by an estimate of their cost.
 
 **Constructing the plan.** For each front point, a partition attaining $E(T)$ is rebuilt from the
 choices of the exact program, a link forest is computed from it as in the proof of Lemma 2.6, and
 the plan is built as in {{< node "Theorem 4.1" >}}.
 
-**Complexity.**
+**Complexity.** The steps of the link-forest program are counted in Lean.
 
 ::: {.statement}
-{{< node "Corollary 8.3" >}} $E(T)$, and under (S) and (A1) the Pareto front, are computable in
-pseudo-polynomial time. So computing the front is not strongly NP-hard unless P = NP.
+{{< node "Theorem 7.3" >}} **Step count.** *(a)* At every level $T$, the link-forest program with
+a step counter returns the value of the program, which is $E(T)$ when $1 \le p$ and $T$ is a level
+of the table, in at most $P(n, t, p, T) = 30\,(n + 1)^2(p + 1)^2(t + 1)^2(T + 1)$ steps.
+*(b)* With $1 \le p \le t$, building $G$ once for the levels $0, \dots, T_{\rm top} = (2t - p)\,d_{\max}$
+and running the counted program at each of them returns the front of the verified solver in at
+most $(T_{\rm top} + 1)\,P(n, t, p, T_{\rm top})$ steps, the table included.
 :::
 
-Whether deciding $E(T) \le C$ is NP-hard, with $t$ written in unary as in PDDL, is open. The
-per-level costs of each step, with $\hat m = s - p + 1$ the largest group size and
-$N_w = \sum_{u \le \lfloor 3w/2 \rfloor} \binom{n}{u} 3^u$, are as follows.
-
-| Step | Time | Memory |
-|---|---|---|
-| One-plane table $G$, all levels | $O(n\,\hat m\,T_{\rm hi})$ | $O(\hat m\,T_{\rm hi})$ |
-| $L$ and $U$, per level | $O(p\,s^2 + n\,\hat m^2)$ | $O(p\,s + \hat m^2)$ |
-| $U_3$ chains, per level | $O(n^2\,\hat m\,s + p\,s^2)$ | $O(p\,s)$ |
-| Link-forest DP, per level | $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ | $O(q_{\max} s T + n\,q_{\max} s)$ |
-| σ-DP, per level | $O(p\,s\,\hat m\,N_w)$ | $O(s\sum_{u \le w}\binom{n}{u})$ per layer |
-| Plan for one point | $O(s + n + p)$, up to union-find | $O(s + n + p)$ |
-
-: Complexity of the steps, with $s = 2t - p$. For all levels, multiply by $T_{\rm hi} - T_{\rm lo} + 1$. {#tbl-complexity}
+A step is one iteration of a minimum loop, one cell of a table, one element scanned by a
+membership test, or one level of the scan. So $E(T)$ and the front take a number of steps
+polynomial in $n$, $t$, $p$ and the largest level $(2t - p)\,d_{\max}$: pseudo-polynomial in the
+durations, while computing $M(X)$ for a fixed list is as hard as 3-Partition (Theorem 7.1 and the
+remark above).
 
 ### ZenoSolver {#sec-zenosolver}
 
 ZenoSolver is a C++ software dedicated to generate and exactly solve MultiZenoTravel instances.
-ZenoSolver computes the true Pareto Front using the algorithm described in this section. It
-outputs the corresponding PDDL file, that can be directly used by most AI planners.
+ZenoSolver computes the Pareto Front using the algorithm described in this section, and returns
+it with a certificate, so that it need not be trusted. It outputs the corresponding PDDL file, that
+can be directly used by most AI planners.
 
 For a symmetric instance, it reduces the instance (gcd of the durations, dominated cities),
-computes $T_{\rm lo}$, $T_{\rm hi}$ and $G$, evaluates $L$ and $U$ on every level, refines with
-$U_3$ where they differ, and runs an exact program only on the levels the bracket leaves open. As
-$E$ is non-increasing, $E(a) = E(b)$ for $a < b$ fixes $E$ on $[a, b]$, which allows bisection
-over runs of open levels. A plan is then built and simulated for every front point. For a
-non-symmetric instance, it brackets the front between lower bounds and achieved plans, and closes
-the gaps by a search over role configurations, as described in the
-[non-symmetric section](#sec-ns-front).
+computes the range of levels and $G$, evaluates $L$ and $U$ on every level, and runs an exact
+program only on the levels the bracket leaves open. Some of its shortcuts are optimisations that
+this paper does not prove: it takes $U$ as exact when $p \le 2$ or $t \le p + 1$, adds an upper
+bound $U_3$ over chains of three planes, and builds link trees of at most $\min(p, t - p + 1)$
+planes; the certificate of each run checks the front it prints. As $E$ is non-increasing,
+$E(a) = E(b)$ for $a < b$ fixes $E$ on $[a, b]$, which allows bisection over runs of open levels.
+A plan is then built and simulated for every front point. For a non-symmetric instance, it
+brackets the front between lower bounds and achieved plans, and closes the gaps by a search over
+scheduled configurations, as described in the [non-symmetric section](#sec-ns-front).
 
 With each front, ZenoSolver can write a certificate that a checker verifies without trusting it,
 and the Lean development contains a solver of its own, proved correct
@@ -236,36 +252,43 @@ $M_1 < \dots < M_r$ and $C_1 > \dots > C_r$, a checker verifies four obligations
 
 1. every listed point has a plan, which the checker simulates: feasible, of cost $C_i$ and
    makespan $M_i$;
-2. no plan has makespan below $M_1$: the checker verifies $M_1 = 2 d_{\min}\kappa$;
+2. no plan has makespan below $M_1$: the checker verifies $M_1 = 2 d_{\min}\kappa$
+   (Proposition 3.6);
 3. for every $i < r$, every plan of makespan below $M_{i+1}$ costs at least $C_i$: the checker
    establishes a lower bound of at least $C_i$ at the level
-   $T^\star_i = \lfloor \lfloor (M_{i+1} - 1)/2 \rfloor / g \rfloor$;
-4. no plan costs less than $C_r$: the checker verifies $C_r = (2t - p)\,c_{\min}$.
+   $T^\star_i = \lfloor \lfloor (M_{i+1} - 1)/2 \rfloor / g \rfloor$, with $g$ the gcd of the
+   durations;
+4. no plan costs less than $C_r$: the checker verifies $C_r = (2t - p)\,c_{\min}$
+   (Proposition 3.6).
 
 ::: {.statement}
-{{< node "Theorem 9.1" >}} **End to end.** If obligations 1 to 4 hold, then
-$\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
+{{< node "Theorem 8.1" >}} **Obligations imply the front.** Let $\mathcal S$ be a set of points
+and $(C_1, M_1), \dots, (C_r, M_r)$, $r \ge 1$, with $M_1 < \dots < M_r$ and
+$C_1 > \dots > C_r$. If (1) every listed point is in $\mathcal S$, (2) every point of
+$\mathcal S$ has makespan at least $M_1$, (3) for $i < r$ every point of $\mathcal S$ with
+makespan below $M_{i+1}$ has cost at least $C_i$, and (4) every point of $\mathcal S$ has cost at
+least $C_r$, then the list is the Pareto front of $\mathcal S$.
 :::
 
 ::: {.sketch}
-*Sketch.* Every point of $\mathcal A$ lies at or after $M_1$, so it falls in some interval
-$[M_i, M_{i+1})$ or after $M_r$, where obligation 3 or 4 bounds its cost by $C_i$; the list is
-therefore a finite dominating subset, and {{< node "Lemma 1.1" badge=false >}} applies
-({{< node "Theorem 9.1" text="full proof" badge=false >}}).
+*Sketch.* Every point of $\mathcal S$ lies at or after $M_1$, so it falls in some interval
+$[M_i, M_{i+1})$ or after $M_r$, where obligation 3 or 4 bounds its cost by $C_i$; the listed
+points are pairwise incomparable ({{< node "Theorem 8.1" text="full proof" badge=false >}}).
+With $\mathcal S = \mathcal A$, {{< node "Lemma 1.7" badge=false >}} then gives
+$\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
 :::
 
-The work of the checker is obligation 3. A gap of kind `relaxed` recomputes $L(T^\star_i)$, which
-is sound under (S) alone by Lemma 3.4, whatever the flights between central cities. A gap of kind
-`forest` recomputes $E(T^\star_i)$ with the checker's own link-forest program, which is sound
-under (A1) by Theorem 4.7 and under (AΔ) by Theorem 4.10. On 400 random instances, all but 15 of
-5,277 gaps close with `relaxed`, so 386 of the 400 fronts are certified by the relaxation alone.
-Two further kinds are proved sound but are not part of the format: `gadget`, which recomputes $U$
-or $U_3$ where Proposition 7.4 makes them exact, and `sigma-potential`, a sparse dual certificate
-for the σ-DP built from {{< node "Lemma 9.2" >}} and {{< node "Lemma 9.3" >}}.
+The work of the checker is obligation 3. A gap of kind `relaxed` recomputes $L(T^\star_i)$, a
+lower bound under (S) alone by Lemma 3.5, whatever the flights between central cities. A gap of
+kind `forest` recomputes $E(T^\star_i)$ with the checker's own exact programs, a lower bound under
+(H) by Theorem 4.4. On 400 random instances, all but 15 of 5,277 gaps close with `relaxed`, so 386
+of the 400 fronts are certified by the relaxation alone.
 
-For non-symmetric instances the format has a version 2, whose gap kinds rest on the results of
-the [non-symmetric section](#sec-nonsymmetric): `relaxed`, `roles`, `lagrangian`, `balanced`, and
-`search` for the gaps that waiting leaves open. The
+For non-symmetric instances the format has a version 2, whose gap kinds rest on the results of the
+[non-symmetric section](#sec-nonsymmetric): `relaxed`, the relaxation of Lemma 3.5 with the weight
+$e$; `roles`, `lagrangian` and `balanced`, lower bounds on the role configurations
+({{< node "Proposition 8.3" >}}, {{< node "Proposition 8.4" >}}, {{< node "Proposition 8.5" >}});
+and `search`, for the gaps that waiting leaves open ({{< node "Proposition 8.6" >}}). The
 [certificate format](../solver/certificates.qmd) page describes the files.
 
 #### Verification {#sec-verification}
@@ -274,37 +297,51 @@ A certificate moves the trust from the solver to the checker, and the checker to
 Two checkers implement the obligations: `zeno check`, in C++, and `zeno-check`, compiled from
 Lean. Both print the assumptions a certificate relied on, among (S), (A1) or (AΔ), and (A1-NS).
 
-**The Lean checker.** Its soundness is the theorem `Cert.check_sound`: if `Cert.check` accepts a
-certificate of format version 1, the listed points are exactly the Pareto front of the instance,
-over every feasible plan. It holds for any flights between central cities when all gaps are
-`relaxed` (`Cert.check_sound_relaxed`), for flights satisfying (A1) through Theorem 4.7
-(`Cert.check_sound_A1`), and for flights satisfying (AΔ) through Theorem 4.10
-(`Cert.check_sound_ATri`); variants cover rational times and planes ending anywhere
-(`Cert.check_sound_rat`, `Cert.check_sound_anywhere`). For version 2, `Cert2.check_sound` holds
-for every table of central flights satisfying (A1-NS) when the certificate lists that
-assumption, and for every table otherwise ({{< node "Version 2 checker" >}}). On the 66
-certificates the C++ solver writes for the benchmark suite, up to 3.9 MB and 240,000 legs, the
-compiled Lean checker accepts every one, in 33 ms at the median and 2.3 s at most.
+**The Lean checker.** Its soundness is a theorem for each version of the format.
+
+::: {.statement}
+{{< node "Theorem 8.2" >}} **Version 1 checker.** If `Cert.check` accepts a certificate of format
+version 1, its points are the Pareto front of the feasible plans of its instance for every table
+of flights between central cities satisfying (H), and for every table if all its gaps are
+`relaxed`. The same holds for the plans with rational or real times (Lemma 1.3) and, for every
+table satisfying (H), for the plans whose planes end anywhere.
+:::
+
+In Lean, these are `Cert.check_sound_hub`, `Cert.check_sound_relaxed`, `Cert.check_sound_rat_hub`
+and `Cert.check_sound_anywhere_hub`, with the corollaries `Cert.check_sound_A1` under (A1) and
+`Cert.check_sound_ATri` under (AΔ).
+
+::: {.statement}
+{{< node "Theorem 8.7" >}} **Version 2 checker.** If `Cert2.check` accepts a certificate of format
+version 2, its points are the Pareto front of the feasible plans of its instance, for every table
+of flights between central cities that satisfies (A1-NS) if the certificate lists (A1-NS), and for
+every table otherwise.
+:::
+
+On the 66 certificates the C++ solver writes for the benchmark suite, up to 3.9 MB and 240,000
+legs, the compiled Lean checker accepts every one, in 33 ms at the median and 2.3 s at most.
 
 **The verified solver.** `zeno-front` is a solver of its own, written in Lean, with a proof that
-its output is the Pareto front ({{< node "Verified solver" >}}): `solveFront_isParetoFront` under
-(S) and (A1), and `solveFront_isParetoFront_ATri` under (S) and (AΔ), for $1 \le p \le t$. It
-finds the levels where $E$ drops by splitting intervals between $d_{\min}\kappa$ and
-$(2t - p)\,d_{\max}$, takes $L(T)$ wherever the bracket $L \le E \le U$ closes
-(`minCost_eq_of_bracket`), and otherwise runs the σ-DP or the
-link-forest program, whose exactness is `sigmaBoundAt_eq_minCost` (Theorem 7.6) and
-`treeBoundAt_eq_minCost` (Theorem 7.5). It solves the 66 instances of the benchmark suite, 0.04 s
-at the median and 10 s at most, and its fronts equal those of the C++ solver, which continuous
-integration checks on the golden instances.
+its output is the Pareto front.
+
+::: {.statement}
+{{< node "Theorem 6.9" >}} **Verified solver.** Assume (S), (H) and $1 \le p \le t$. The list
+`solveFront d c t p` is the Pareto front of the feasible plans.
+:::
+
+In Lean, this is `solveFront_isParetoFront_hub`, with the corollaries `solveFront_isParetoFront`
+under (A1) and `solveFront_isParetoFront_ATri` under (AΔ). The solver lists, by increasing
+makespan, the points $(E(T), 2T)$ at which $E$ drops, found by splitting intervals of the levels
+from $d_{\min}\kappa$ to $(2t - p)\,d_{\max}$; at each level it takes $L(T)$ where $L(T) = U(T)$
+(Proposition 6.4), and otherwise runs the link-forest program (Theorem 6.7) or the σ-DP
+(Theorem 6.8), whichever its cost estimate prefers. It solves the 66 instances of the benchmark
+suite, 0.04 s at the median and 10 s at most, and its fronts equal those of the C++ solver, which
+continuous integration checks on the golden instances.
 
 **What is trusted.** A machine-checked statement is a Lean theorem whose axioms are among
 `propext`, `Classical.choice` and `Quot.sound`, which an audit of every declaration reads when the
 site is built. The executables add the Lean compiler and the code that parses the files, which is
 not verified. The badges of this paper come from the claim ledger of the repository, which badges a
-statement machine-checked only when Lean proves every assertion of it, and from that audit. Among
-the results of the non-symmetric section, Theorems 6.1 and 6.9 have parts in Lean: the role loads
-bounded by the makespan, and schedulable domination on the template's closed form, the forms the
-checker uses; its examples and propositions, and those of the general section, are proved in the
-theory note or computed. The
-experiment [E8](#sec-e8) tests
-both checkers against thousands of corrupted certificates.
+statement machine-checked only when Lean proves every assertion of it, and from that audit. The
+C++ solver is not verified; its fronts are checked through certificates. The experiment
+[E8](#sec-e8) tests both checkers against thousands of corrupted certificates.
