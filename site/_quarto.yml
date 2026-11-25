@@ -13,6 +13,7 @@ project:
     # the paper, on one page; its sections are the partials paper/_*.qmd
     - paper/index.qmd
     - instances/index.qmd
+    - instances/evaluate.qmd
     - instances/model.qmd
     - instances/generator.qmd
     - instances/pddl.qmd
@@ -90,6 +91,7 @@ website:
       style: docked
       contents:
         - instances/index.qmd
+        - instances/evaluate.qmd
         - instances/model.qmd
         - instances/generator.qmd
         - instances/pddl.qmd

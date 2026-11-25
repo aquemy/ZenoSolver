@@ -5,7 +5,8 @@ subtitle: "The domain file, the problems zeno writes, and plane goals"
 
 MultiZenoTravel was designed as a benchmark for multi-objective temporal planners. `zeno pddl`
 writes any instance as a PDDL 2.1 problem for the domain in `pddl/`, with its exact front as
-comments, so that a planner's output can be scored against the true front.
+comments, so that a planner's output can be scored against the true front
+([Evaluate a planner](evaluate.qmd)).
 
 ## The domain
 

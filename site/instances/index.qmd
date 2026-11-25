@@ -21,6 +21,8 @@ The instances come from the regression tests (the golden instances), the benchma
 few metric instances whose cities are random points in the plane or on a sphere. How they are
 built is documented on the sub-pages:
 
+- [Evaluate a planner](evaluate.qmd): write the problems, run a planner, and score its runs
+  against the exact fronts.
 - [Model and data files](model.qmd): what an instance is, and the 2-line and 3-line data files.
 - [Generator](generator.qmd): the families `-C`, `-D`, `-E`, `-W`, and the scale options.
 - [PDDL](pddl.qmd): the domain file and the problems `zeno pddl` writes.

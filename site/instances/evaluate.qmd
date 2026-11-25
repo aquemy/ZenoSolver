@@ -1,0 +1,165 @@
+---
+title: "Evaluate a planner"
+subtitle: "Score a multi-objective planner against the exact Pareto fronts"
+description: "Write MultiZenoTravel problems with their exact fronts, run a multi-objective planner on them, and score its runs: points found, hypervolume, epsilon indicator, impossible points."
+---
+
+<!-- The sample output below is bench/tools/score_front.py run on tests/score/example.pddl (the
+     homepage example) and three runs: runs/a = tests/score/plan-20-14.ipc plus the points
+     "4 20" and "36 8"; runs/b.txt = "6 20, 20 14, 24 12, 40 8"; runs/c.txt = "3 20, 36 8".
+     Rerun it when the script's output changes. -->
+
+MultiZenoTravel was designed as a benchmark for multi-objective temporal planners
+[[KSV+13](#ref-KSV13-eval)]. Here its fronts are known exactly, so a planner's output can be scored against the
+true front rather than the best front any planner found. Three steps: write the problems, run the
+planner, score its runs with `bench/tools/score_front.py`.
+
+## 1. Write the problems {#problems}
+
+`zeno pddl` writes an instance as a PDDL 2.1 problem for the domain `pddl/multi-zeno-travel.pddl`,
+and for a symmetric instance it lists the exact front in the problem's trailing comments
+([PDDL](pddl.qmd)). Every instance of the golden and benchmark [suites](suites.qmd) is symmetric.
+
+A sensible order for planners is the 27 golden instances first: they are tiny ($t \le 5$), and
+their fronts are also confirmed by a brute-force oracle. Then `paper-table1`: $n = t$ and $p = 2$,
+the sizes of the original papers' Table 1. The other suites are sized for exact solvers, and go up
+to $n = 200$ cities and $t = 60$ passengers.
+
+```bash
+# From the repository root, after building zeno (Solver > Install).
+mkdir -p problems
+grep -v '^#' tests/golden/instances.txt | while IFS='|' read -r name args; do
+  [ -n "$name" ] || continue
+  build/release/zeno pddl ${args//@DATA@/tests/golden/data} -O "problems/golden-$name.pddl"
+done
+grep -v '^#' bench/instances/paper-table1.txt | while IFS='|' read -r name args; do
+  [ -n "$name" ] || continue
+  build/release/zeno pddl ${args//@DATA@/bench/instances/data} -O "problems/$name.pddl"
+done
+```
+
+That writes the 35 problems in well under a second. The loops are bash; under zsh, run them with
+`bash`.
+
+## 2. Run the planner {#run}
+
+The domain is PDDL 2.1 level 3, with durative actions and numeric fluents. Its metric minimises
+`total-time` and `total-cost` together. Keep the output of each run apart: a directory per run
+holding its plans in the IPC format (`0.001: (fly plane1 city0 city1) [2.000]`), or a file of
+`cost makespan` lines.
+
+Validate the plans with [VAL](https://github.com/KCL-Planning/VAL). The scorer reads the cost and
+the makespan of a plan; it does not check that the plan is valid.
+
+## 3. Score the runs {#score}
+
+```bash
+bench/tools/score_front.py problems/n5t5p2.pddl runs/n5t5p2/* --floor-makespan
+```
+
+The first argument holds the exact front: a problem file, or `cost makespan` lines such as the
+output of `zeno front`. Each further argument is one run, scored on its own:
+
+- a file of `cost makespan` lines;
+- an IPC plan, which counts as one point: its cost is the sum of the landing costs (`citythreat`)
+  of its `fly` actions, read from the problem, and its makespan is the end of its last action;
+- a directory, whose files are pooled into one run.
+
+On the homepage example (3 central cities, 3 passengers, 2 planes; front (4, 20), (14, 16),
+(20, 14), (24, 12), (30, 10), (36, 8)), three runs score as follows:
+
+```text
+$ bench/tools/score_front.py example.pddl runs/a runs/b.txt runs/c.txt --floor-makespan
+score_front: runs/c.txt: no plan achieves cost 3, makespan 20: check the plan with VAL, and how its makespan was measured
+run         points  found     hv      eps  impossible
+runs/a           3    3/6  0.8154  0.1875           0
+runs/b.txt       4    2/6  0.8252  0.1875           0
+runs/c.txt       2    1/6  0.2836  1.0000           1
+```
+
+- `runs/a` is a plan for (20, 14) and the two ends of the front: three exact points.
+- `runs/b.txt` finds two exact points, (20, 14) and (24, 12), and two dominated ones, (6, 20) and
+  (40, 8). It finds fewer exact points than `runs/a` but covers more of the front, so its
+  hypervolume is higher. The indicators measure different things; report them all.
+- `runs/c.txt` claims (3, 20), which is cheaper than the cheapest plan. No plan achieves it, so
+  either the plan is invalid or its cost or makespan was counted another way. The point is left
+  out of `hv` and `eps`, and the exit status is 1.
+
+`--json` prints one JSON object per run, to collect scores over a suite:
+
+```bash
+for p in problems/*.pddl; do
+  name=$(basename "$p" .pddl)
+  bench/tools/score_front.py "$p" runs/"$name"/* --floor-makespan --json
+done > scores.jsonl
+```
+
+## The indicators {#indicators}
+
+Let $F$ be the exact front and $A$ the points of a run, both as (cost, makespan) pairs.
+
+found
+: The number of points of $F$ that the run reaches: $|A \cap F|$, out of $|F|$.
+
+impossible
+: The points of $A$ that no point of $F$ weakly dominates. Since $F$ is exact, no plan achieves
+  them. Hypervolume and $\varepsilon$ are computed without them.
+
+Both other indicators work on normalized objectives. Cost and makespan are mapped to $[0, 1]$ by
+the ideal and nadir points of $F$:
+$$
+\hat c = \frac{c - c_{\min}(F)}{c_{\max}(F) - c_{\min}(F)},
+\qquad
+\hat M = \frac{M - M_{\min}(F)}{M_{\max}(F) - M_{\min}(F)},
+$$
+and a range of 0 (a front of one point) counts as 1.
+
+hv
+: The hypervolume of $A$ over that of $F$, with the reference point $(\rho, \rho)$:
+  $\mathrm{HV}(A) / \mathrm{HV}(F)$, where $\rho = 1 + 1/(|F| - 1)$, and $\rho = 2$ when $|F| = 1$.
+  It is 1 exactly when $A$ contains $F$. Points beyond the reference point add no volume.
+
+eps
+: The additive $\varepsilon$ indicator: the smallest shift $\varepsilon$ such that every point of
+  $F$ is weakly dominated by a point of $A$ moved by $\varepsilon$ in both objectives,
+  $$
+  I_{\varepsilon+}(A, F) = \max_{f \in F} \min_{a \in A} \max\bigl(\hat a_c - \hat f_c,\ \hat a_M - \hat f_M\bigr).
+  $$
+  It is 0 exactly when $A$ contains $F$, and infinite for an empty run.
+
+The reference point follows Ishibuchi et al. [[IISN18](#ref-IISN18-eval)]. For $|F|$ points evenly
+spread on a line, $\rho = 1 + 1/(|F| - 1)$ makes the volume that only an end of the front dominates
+equal to the volume that only a point between them dominates. A reference point at the nadir itself
+would give the two ends no volume of their own.
+`--ref` sets another $\rho$; state it with the results, since hypervolumes computed with different
+reference points cannot be compared.
+
+## Makespans of PDDL plans {#makespan}
+
+Durations are integers, and boarding and debarking take no time in the model, so a plan's makespan
+is an integer. PDDL 2.1 planners separate dependent actions by a small $\varepsilon$, so a plan with
+$k$ actions on its critical path reports $M + k\varepsilon$. `--floor-makespan` rounds makespans
+down, which recovers $M$ while $k\varepsilon < 1$. Without it, such a plan never reaches a point of
+the front exactly. The [PDDL page](pddl.qmd#semantics) gives the semantics in more detail.
+
+## What the fronts guarantee {#guarantee}
+
+The fronts are exact, not the best known ones. For each of the 66 instances of the benchmark
+suites, `zeno-check`, a certificate checker proved sound in Lean 4, accepts the certificate of its
+front ([results](../results.qmd), [certificates](../solver/certificates.qmd)). For each of the 27
+golden instances, `zeno check` accepts the certificate, and a brute-force oracle recomputes the
+front. A run with `hv = 1` has found the whole Pareto front of the instance.
+
+## References {#references .unnumbered}
+
+::: {.zs-refs}
+[KSV+13]{#ref-KSV13-eval} Mostepha Redouane Khouadjia, Marc Schoenauer, Vincent Vidal, Johann
+Dreo, and Pierre Savéant. Multi-objective AI planning: Evaluating DaE-YAHSP on a tunable
+benchmark. In *International Conference on Evolutionary Multi-Criterion Optimization*, pages 36–50.
+Springer, 2013.
+
+[IISN18]{#ref-IISN18-eval} Hisao Ishibuchi, Ryo Imada, Yu Setoguchi, and Yusuke Nojima. How to
+specify a reference point in hypervolume calculation for fair performance comparison.
+*Evolutionary Computation*, 26(3):411–440, 2018.
+[doi:10.1162/evco_a_00226](https://doi.org/10.1162/evco_a_00226).
+:::
