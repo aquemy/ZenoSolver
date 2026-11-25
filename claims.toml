@@ -1,30 +1,48 @@
 # claims.toml: the CKC claim registry for ZenoSolver.
 #
-# One entry per claim of the theory note doc/theory/exact-front.md, plus the claims of the
-# papers it corrects. The slug (table key) is what commit footers reference as `claim:<slug>` or
-# `conjecture:<slug>`. `status` is a CACHE of the effective status computed from the commit graph
+# One entry per numbered result of the theory note doc/theory/exact-front.md (revision 3), plus the
+# refuted claims of the papers it corrects, the archived results of revision 2 and the experiments.
+#
+# The slug (table key) is the claim's STABLE ID: commit footers reference it as `claim:<slug>` or
+# `conjecture:<slug>`, so it never changes, even when the note renumbers its results. `label` is the
+# CURRENT number of the result in the note ("Corollary 5.4"); everything user-visible (the site, the
+# blueprint, the claim graph) shows the label. `removed` ARCHIVES an entry: the result left the note,
+# the entry stays so that the history's footers still resolve, and the tools skip it.
+# doc/theory/revision-3-map.md maps the numbers of revision 2 to those of revision 3 (Table C).
+#
+# `status` is a CACHE of the effective status computed from the commit graph
 # (`claimgraph status . --claims claims.toml`); regenerate it, do not treat it as the source of
 # truth. The commits are the record: a status changes only by a new commit.
 #
-# Slugs: `<kind>-<number with dots as dashes>`, with the kind read from the note's own label:
+# Slugs: `<kind>-<number with dots as dashes>`, the number being the one the result had when it
+# entered the ledger (revision 2), with the kind read from that label:
 #   def  Definition    lem   Lemma        thm  Theorem       prop  Proposition
-#   cor  Corollary     conj  Conjecture   claim  Statement, or a statement located by its section
-# so Theorem 4.7 is thm-4-7, Conjecture 4.10 is conj-4-10, Statement 1.2 is claim-1-2, the greedy
-# counterexamples of section 5 are claim-5 and the end of section 6.2 is claim-6-2-end. The papers'
-# claims are paper-greedy-optimal, paper-no-harmful-waiting and
-# paper-general-graph-reduction. A statement the note does not
-# number gets a descriptive slug: claim-converse-s-only, the converse under (S) alone. Experiments
-# are exp-<id>, in the Experiments section at the end of this file.
+#   cor  Corollary     conj  Conjecture   claim  Statement, example, or a statement located by its section
+# so Theorem 6.1 of revision 2 is thm-6-1, labelled Corollary 5.4 in revision 3. A result new in
+# revision 3 gets a descriptive slug `<kind>-<description>`, the kind read from its label
+# (def-instance, lem-rounding, prop-dominance-ns, thm-verified-solver). The papers' claims are
+# paper-greedy-optimal, paper-no-harmful-waiting and paper-general-graph-reduction; the converse
+# under (S) alone is claim-converse-s-only. Experiments are exp-<id>, at the end of this file.
 #
 # Fields:
-#   kind          definition, lemma, theorem, proposition, corollary, conjecture or claim
-#   statement     one or two sentences. For a kernel-checked claim it may end with the "Lean form":
-#                 how the Lean statement encodes the note's (natural-number data, (S) as d̄ = d, ...).
+#   label         the current label in the note (kept results only; refuted claims and
+#                 experiments have none)
+#   removed       "<date>: <reason>", or "<date>: merged into <label> (<slug>)": archived
+#   kind          definition, lemma, theorem, proposition, corollary, conjecture, claim or experiment
+#   statement     one or a few sentences, the note's statement. For a kernel-checked claim it may end
+#                 with the "Lean form": how the Lean statement encodes the note's.
 #   status        cache of the effective status (legend below)
-#   lean          the Lean declarations whose kernel proof is the claim (math.machine-checked)
-#   lean_partial  Lean declarations that prove only part of a claim recorded as a written proof
+#   lean          the Lean declarations whose kernel proof is the claim (math.machine-checked), or
+#                 that refute it (math.disproved); for an archived entry, those that proved it when
+#                 it was archived (they may be deleted since)
+#   lean_partial  further Lean declarations that prove steps or parts of the claim
 #   paper         the locus in the note (or in the papers)
 #   created       the date the note first stated the claim
+#
+# The CI gate site/check_ledger.py (Lean workflow) checks that every claim without `removed`, other
+# than an experiment, is math.machine-checked or math.disproved, that every machine-checked claim
+# names its `lean`, and that every name in `lean` and `lean_partial` of such a claim exists in Lean
+# with no axiom beyond propext, Classical.choice and Quot.sound.
 #
 # Sources: the note doc/theory/exact-front.md; A. Quemy, M. Schoenauer, "True Pareto Fronts for
 # Multi-Objective AI Planning Instances", EvoCOP 2015, LNCS 9026 (hal-01109777); A. Quemy,
@@ -41,114 +59,120 @@
 # 1. Model
 # ===========================================================================
 
-[claims.lem-1-1]
-kind      = "lemma"
-statement = "Lemma 1.1 (dominating sets): (a) If every point of A is weakly dominated by a point of B and every point of B by a point of A, then Min A = Min B; in particular when B ⊆ A and B dominates A. (b) A list that is the Pareto front of S lists exactly Min S."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_iff_of_dominated, ZenoFront.minimal_iff_of_subset_of_dominated, ZenoFront.IsParetoFront.mem_iff_minimal"
-paper     = "Lemma 1.1, doc/theory/exact-front.md §1.5"
-created   = "2026-11-23"
-
-[claims.claim-1-2]
-kind      = "claim"
-statement = "Statement 1.2 (PDDL correspondence): a plan of the PDDL domain under ε-separation gives an event-ordered plan of §1.2 with the same cost and no larger makespan, and an event-ordered plan of makespan M gives PDDL plans of total-time at most M + Kε, so the PDDL front tends to the front of event-ordered plans as ε → 0."
-status    = "math.conjectured"
-paper     = "Statement 1.2, doc/theory/exact-front.md §1.3"
-created   = "2026-11-23"
-
-[claims.lem-rounding]
-kind      = "lemma"
-statement = "Lemma (rounding times), new in revision 3: Let a plan have times in ℚ or ℝ, integer durations, and satisfy Definition 1.2. Rounding every time down gives a feasible plan with natural-number times, the same cost and a makespan at most the original one; conversely an integer plan is such a plan with the same cost and makespan."
-status    = "math.machine-checked"
-lean      = "ZenoFront.QFeasible.floor, ZenoFront.qPlanCost_eq, ZenoFront.planMakespan_floor_le, ZenoFront.Feasible.toRat"
-paper     = "revision 3 (planned)"
-created   = "2026-11-25"
-
 [claims.def-instance]
+label     = "Definition 1.1"
 kind      = "definition"
-statement = "Definition (instance), new in revision 3: Central cities 1, …, n and hubs C_I, C_G; durations d_i (C_I–i) and d̄_i (i–C_G) in ℕ and a central duration dc(i, j) ∈ ℕ for every ordered pair of central cities, i = j included; no flight joins the two hubs. Landing in i costs c_i ∈ ℕ, hubs are free; p planes and t passengers start in C_I. Theorems assume 1 ≤ p ≤ t where they use it."
+statement = "Definition 1.1 (instance): Two hubs C_I (initial) and C_G (goal) and central cities 1, …, n. Durations are natural numbers: the flight between C_I and i lasts d_i in either direction, the flight between i and C_G lasts d̄_i, and for every ordered pair (i, j) of central cities, i = j included, the central flight from i to j lasts dc(i, j); no flight joins the two hubs. Landing in central city i costs c_i ∈ ℕ, landing in a hub is free. There are p planes and t passengers, all in C_I at time 0, and a plane carries at most one passenger. Results assume 1 ≤ p ≤ t where they use it."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Network, ZenoFront.Network.duration"
-paper     = "revision 3 (planned)"
+paper     = "Definition 1.1, doc/theory/exact-front.md §1.1"
 created   = "2026-11-25"
 
 [claims.def-plan]
+label     = "Definition 1.2"
 kind      = "definition"
-statement = "Definition (plan), new in revision 3: A plan gives each plane a list of legs (origin, destination, departure, arrival, passenger or none). It is feasible if every leg is a flight of exactly its duration, each plane's legs form a route from C_I (each leg leaves where the previous one arrived, no earlier, the first at time ≥ 0) ending in C_G, and for each passenger the legs naming it form, in some order, such a route from time 0 ending in C_G. Cost: the landing costs of all legs into central cities; makespan: the latest end of a route; in the variant with planes ending anywhere, routes need not end in C_G."
+statement = "Definition 1.2 (plan): A leg is a tuple (origin, destination, departure, arrival, passenger or none) with natural-number times, and a plan gives each plane a list of legs. It is feasible if (1) every leg is a flight, arriving at its departure plus the flight's duration; (2) the legs of each plane form a route from C_I at time 0 (each leg leaves where the previous one arrived, no earlier than that arrival) whose last leg arrives in C_G; (3) for every passenger, the legs that carry it form, in some order, such a route from C_I at time 0 ending in C_G. The cost is the sum of the landing costs of the legs into central cities, the makespan the latest end of a route, the flight time F_k of plane k the sum of the durations of its legs. In the variant with planes ending anywhere, item 2 only asks for a route from C_I at time 0, possibly empty, and the makespan is the latest arrival of a leg."
 status    = "math.machine-checked"
-lean      = "ZenoFront.Leg, ZenoFront.Plan, ZenoFront.Flies, ZenoFront.IsRoute, ZenoFront.PlaneFeasible, ZenoFront.Feasible, ZenoFront.planCost, ZenoFront.planMakespan, ZenoFront.PlaneFeasibleAnywhere, ZenoFront.FeasibleAnywhere"
-paper     = "revision 3 (planned)"
+lean      = "ZenoFront.Leg, ZenoFront.Plan, ZenoFront.Flies, ZenoFront.IsRoute, ZenoFront.PlaneFeasible, ZenoFront.Feasible, ZenoFront.planCost, ZenoFront.planMakespan, ZenoFront.durSum, ZenoFront.achievable, ZenoFront.PlaneFeasibleAnywhere, ZenoFront.FeasibleAnywhere, ZenoFront.achievableAnywhere"
+paper     = "Definition 1.2, doc/theory/exact-front.md §1.2"
+created   = "2026-11-25"
+
+[claims.lem-rounding]
+label     = "Lemma 1.3"
+kind      = "lemma"
+statement = "Lemma 1.3 (rounding times): Let 𝕂 be an ordered ring with a floor function, such as ℚ or ℝ, and let a plan have departures and arrivals in 𝕂 (and the instance's integer durations) and satisfy items 1–3 of Definition 1.2. Rounding every time down gives a feasible plan with natural-number times, the same cost and a makespan at most the original one. Conversely, a feasible plan with natural-number times, read in 𝕂, satisfies items 1–3 with the same cost and makespan."
+status    = "math.machine-checked"
+lean      = "ZenoFront.QFeasible, ZenoFront.QFeasible.floor, ZenoFront.qPlanCost_eq, ZenoFront.planMakespan_floor_le, ZenoFront.Feasible.toRat"
+paper     = "Lemma 1.3, doc/theory/exact-front.md §1.2"
 created   = "2026-11-25"
 
 [claims.def-assumptions]
+label     = "Definition 1.4"
 kind      = "definition"
-statement = "Definition (assumptions), new in revision 3: (S) d̄ = d. (A1) d_i + d_j ≤ dc(i, j). (A1-NS) min(d_i + d_j, d̄_i + d̄_j) ≤ dc(i, j). (AΔ) dur(a, b) ≤ dur(a, x) + dur(x, b) whenever a ≠ b and the three flights exist. (H) d_j ≤ d_i + dc(i, j) and d_i ≤ dc(i, j) + d_j for all central i, j (the triangles through C_I, and under (S) through C_G)."
+statement = "Definition 1.4 (assumptions): (S) d̄_i = d_i for all i. (A1) d_i + d_j ≤ dc(i, j) for all central i, j. (A1-NS) min(d_i + d_j, d̄_i + d̄_j) ≤ dc(i, j) for all central i, j. (AΔ) dur(a, b) ≤ dur(a, x) + dur(x, b) whenever a ≠ b and the three flights exist. (H) the hub triangles: d_j ≤ d_i + dc(i, j) and d_i ≤ dc(i, j) + d_j for all central i, j (the triangles through C_I, and under (S) through C_G)."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Network.A1, ZenoFront.Network.A1NS, ZenoFront.Network.ATri, ZenoFront.Network.ATriHub"
-paper     = "revision 3 (planned)"
+paper     = "Definition 1.4, doc/theory/exact-front.md §1.4"
 created   = "2026-11-25"
 
 [claims.lem-hub-triangles]
+label     = "Lemma 1.5"
 kind      = "lemma"
-statement = "Lemma (hub triangles), new in revision 3: (A1) implies (H), and (AΔ) implies (H)."
+statement = "Lemma 1.5 (hub triangles): (A1) implies (H), and (AΔ) implies (H)."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Network.A1.hub, ZenoFront.Network.ATri.hub"
-paper     = "revision 3 (planned)"
+paper     = "Lemma 1.5, doc/theory/exact-front.md §1.4"
 created   = "2026-11-25"
 
 [claims.def-front]
+label     = "Definition 1.6"
 kind      = "definition"
-statement = "Definition (fronts), new in revision 3: Points (cost, makespan) are ordered componentwise, and y weakly dominates z when y ≤ z. Min S is the set of minimal points of S; the front is F = Min A, A (A′) the points of the feasible plans (of the plans whose planes end anywhere). A list is the Pareto front of S if its points lie in S, weakly dominate every point of S and are pairwise incomparable."
+statement = "Definition 1.6 (fronts): Points (cost, makespan) of ℕ² are ordered componentwise, and y weakly dominates z if y ≤ z. Min S is the set of the minimal points of S; the front is F = Min A, A (A′) the set of the points of the feasible plans (of the plans whose planes end anywhere). A list is the Pareto front of S if its points lie in S, every point of S is weakly dominated by a listed point, and the listed points are pairwise incomparable."
 status    = "math.machine-checked"
 lean      = "ZenoFront.achievable, ZenoFront.achievableAnywhere, ZenoFront.IsParetoFront"
-paper     = "revision 3 (planned)"
+paper     = "Definition 1.6, doc/theory/exact-front.md §1.5"
 created   = "2026-11-25"
 
-# ===========================================================================
-# 2. Segments, admissible partitions, link forests
-# ===========================================================================
-
-[claims.lem-2-1]
+[claims.lem-1-1]
+label     = "Lemma 1.7"
 kind      = "lemma"
-statement = "Lemma 2.1 (crossings outnumber returns): On a route from C_I to C_G without central flights, the visits (a leg into a central city followed by the next leg, out of it into a hub) of type A (from C_I to C_G) number one more than those of type Ā (from C_G to C_I). On a closed walk of visits, from a hub back to it, they are equally many."
+statement = "Lemma 1.7 (dominating sets): (a) If every point of A is weakly dominated by a point of B and every point of B by a point of A, then Min A = Min B; in particular when B ⊆ A and every point of A is weakly dominated by a point of B. (b) A list that is the Pareto front of S lists exactly the points of Min S."
 status    = "math.machine-checked"
-lean      = "ZenoFront.TChain.countP_isA, ZenoFront.TRoute.countP_isA, ZenoFront.TLoop.countP_isA"
-paper     = "Lemma 2.1, doc/theory/exact-front.md §2"
+lean      = "ZenoFront.minimal_iff_of_dominated, ZenoFront.minimal_iff_of_subset_of_dominated, ZenoFront.IsParetoFront.mem_iff_minimal"
+paper     = "Lemma 1.7, doc/theory/exact-front.md §1.5"
 created   = "2026-11-23"
 
+# ===========================================================================
+# 2. Admissible partitions
+# ===========================================================================
+
 [claims.def-2-2]
+label     = "Definition 2.1"
 kind      = "definition"
-statement = "Definition 2.2 (admissible partitions): A partition of a multiset X over p planes is a family of groups X_1, …, X_p with Σ_k X_k = X. A parity matrix gives each plane k a set η_k of cities of X_k with |η_k| ≡ |X_k| + 1 (mod 2), every city lying in an even number of the η_k. The partition is admissible if it has a parity matrix."
+statement = "Definition 2.1 (admissible partition): A partition of a multiset X over p planes is a family of groups X_1, …, X_p with Σ_k X_k = X. A parity matrix gives every plane k a set η_k of central cities with (h1) η_k ⊆ supp X_k, (h2) |η_k| ≡ |X_k| + 1 (mod 2) and (h3) every city in an even number of the η_k. The partition is admissible if it has a parity matrix."
 status    = "math.machine-checked"
 lean      = "ZenoFront.IsParityWitness, ZenoFront.Admissible"
-paper     = "Def 2.2, doc/theory/exact-front.md §2"
+paper     = "Definition 2.1, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 [claims.lem-2-3]
+label     = "Lemma 2.2"
 kind      = "lemma"
-statement = "Lemma 2.3 (integer form): A partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ |X_k| + 1 (mod 2) for every plane k, and Σ_k h̃_{k,i} even for every city i."
+statement = "Lemma 2.2 (integer form): A partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i) for all k, i, Σ_i h̃_{k,i} ≡ |X_k| + 1 (mod 2) for every plane k, and Σ_k h̃_{k,i} even for every city i."
 status    = "math.machine-checked"
 lean      = "ZenoFront.admissible_iff_exists_natWitness"
-paper     = "Lemma 2.3, doc/theory/exact-front.md §2"
+paper     = "Lemma 2.2, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 [claims.lem-2-4]
+label     = "Lemma 2.3"
 kind      = "lemma"
-statement = "Lemma 2.4 (disjoint groups): if no city lies in two groups, a partition is admissible iff every group has an odd number of landings. Lean form: no city in two groups is ∀ i k k', i ∈ X k → i ∈ X k' → k = k'."
+statement = "Lemma 2.3 (disjoint groups): If no city lies in two groups, the partition is admissible iff every group has odd size. Lean form: no city in two groups is ∀ i k k', i ∈ X k → i ∈ X k' → k = k'."
 status    = "math.machine-checked"
 lean      = "ZenoFront.admissible_iff_odd_of_disjoint"
-paper     = "Lemma 2.4, doc/theory/exact-front.md §2"
+paper     = "Lemma 2.3, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
 [claims.lem-2-5]
+label     = "Lemma 2.4"
 kind      = "lemma"
-statement = "Lemma 2.5 (the row bound): For every parity matrix and plane k, |η_k| + 1 ≤ |X_k|. Hence the groups of an admissible partition are non-empty, and |X| ≡ p (mod 2)."
+statement = "Lemma 2.4 (row bound): For every parity matrix and plane k, |η_k| + 1 ≤ |X_k|. Hence the groups of an admissible partition are non-empty, and |X| ≡ p (mod 2)."
 status    = "math.machine-checked"
 lean      = "ZenoFront.IsParityWitness.card_add_one_le, ZenoFront.Admissible.card_pos, ZenoFront.IsParityWitness.size_mod_two"
-paper     = "Lemma 2.5, doc/theory/exact-front.md §2"
+paper     = "Lemma 2.4, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.def-link-forest]
+label     = "Definition 2.5"
+kind      = "definition"
+statement = "Definition 2.5 (link forest): A rooted link tree is a plane with a multiset of free landings and a list of children, each a rooted link tree hung from the plane by a link labelled with a central city. The group of a plane consists of its free landings, one copy of the label of each of its child links and one copy of the label of its parent link (none for a root). (F2): every plane has an odd number of free landings. A link forest of a partition is a list of rooted link trees satisfying (F2) whose groups are the groups of the partition, up to relabelling the planes."
+status    = "math.machine-checked"
+lean      = "ZenoFront.LTree, ZenoFront.LKids, ZenoFront.LTree.groups, ZenoFront.LTree.WF, ZenoFront.forestGroups"
+paper     = "Definition 2.5, doc/theory/exact-front.md §2"
+created   = "2026-11-25"
+
 [claims.lem-2-6]
+label        = "Lemma 2.6"
 kind         = "lemma"
 statement    = "Lemma 2.6 (link forests): A partition is admissible iff it has a link forest."
 status       = "math.machine-checked"
@@ -157,95 +181,510 @@ lean_partial = "ZenoFront.Admissible.exists_linkForest, ZenoFront.admissible_for
 paper        = "Lemma 2.6, doc/theory/exact-front.md §2"
 created      = "2026-11-23"
 
-[claims.cor-2-7]
-kind      = "corollary"
-statement = "Corollary 2.7: if |X| = s, every link forest has at most t − p edges, and each of its trees has at most q_max = min(p, t − p + 1) planes."
-status    = "math.proved-informal"
-paper     = "Cor 2.7, doc/theory/exact-front.md §2"
-created   = "2026-11-23"
-
 [claims.lem-2-8]
+label        = "Lemma 2.7"
 kind         = "lemma"
-statement    = "Lemma 2.8 (few touched cities): An admissible partition with |X| = s has a parity matrix whose sets η_k together contain at most min(p − 1, t − p) cities."
+statement    = "Lemma 2.7 (few touched cities): Let 1 ≤ p ≤ t. An admissible partition with |X| = s has a parity matrix that touches at most min(p − 1, t − p) cities (its sets η_k together contain at most that many cities)."
 status       = "math.machine-checked"
 lean         = "ZenoFront.Admissible.exists_card_touched_le"
 lean_partial = "ZenoFront.IsParityWitness.card_touched_le_of_minimal, ZenoFront.IsParityWitness.card_touched_le"
-paper        = "Lemma 2.8, doc/theory/exact-front.md §2"
+paper        = "Lemma 2.7, doc/theory/exact-front.md §2"
 created      = "2026-11-23"
 
-[claims.lem-2-9]
+# ===========================================================================
+# 3. Counting and bounds
+# ===========================================================================
+
+[claims.lem-2-1]
+label     = "Lemma 3.1"
 kind      = "lemma"
-statement = "Lemma 2.9 (shared city): non-empty groups with Σ_k |X_k| ≡ p (mod 2) form an admissible partition if some city belongs to every even group, in particular if all groups share a city or all even groups are equal."
-status    = "math.proved-informal"
-paper     = "Lemma 2.9, doc/theory/exact-front.md §2"
+statement = "Lemma 3.1 (crossings outnumber returns): On a route from C_I to C_G without central flights, the visits (a leg into a central city followed by the next leg, out of it into a hub) of type A (from C_I to C_G) number one more than those of type Ā (from C_G to C_I). On a closed walk of visits, from a hub back to it, they are equally many."
+status    = "math.machine-checked"
+lean      = "ZenoFront.TChain.countP_isA, ZenoFront.TRoute.countP_isA, ZenoFront.TLoop.countP_isA"
+paper     = "Lemma 3.1, doc/theory/exact-front.md §3"
 created   = "2026-11-23"
 
-[claims.def-link-forest]
-kind      = "definition"
-statement = "Definition (link forest), new in revision 3: A rooted link tree is a plane with a multiset of free landings and a list of children, each hung from it by a link labelled with a city; the group of a plane is its free landings, one copy of each child's label and one copy of its parent's label, so (F1) holds by construction. (F2): every plane has an odd number of free landings. A link forest of a partition is a list of such trees satisfying (F2) whose groups are the partition's groups, up to relabelling the planes."
-status    = "math.machine-checked"
-lean      = "ZenoFront.LTree, ZenoFront.LKids, ZenoFront.LTree.groups, ZenoFront.LTree.WF, ZenoFront.forestGroups"
-paper     = "revision 3 (planned)"
-created   = "2026-11-25"
-
-# ===========================================================================
-# 3. Lemmas valid in every setting
-# ===========================================================================
-
 [claims.lem-3-1]
+label        = "Lemma 3.2"
 kind         = "lemma"
-statement    = "Lemma 3.1 (chains): (a) In a feasible plan, and in a plan whose planes end anywhere, every passenger rides a chain: legs carrying it, the first leaving C_I, each leaving where the previous one arrived and no earlier, landing in central cities until the last, which arrives in C_G. (b) If the plan has no central flight, every passenger rides a leg C_I → x and then a leg x → C_G leaving no earlier than the first one arrives."
+statement    = "Lemma 3.2 (chains): (a) In a feasible plan, and in a plan whose planes end anywhere, every passenger rides a chain: legs of the plan that carry it, the first leaving C_I, each later one leaving where the previous one arrived and no earlier, all landing in central cities except the last, which arrives in C_G. (b) If the plan has no central flight, every passenger rides a leg C_I → x and then a leg x → C_G that leaves no earlier than the first one arrives."
 status       = "math.machine-checked"
 lean         = "ZenoFront.ToGoal, ZenoFront.Feasible.exists_chains, ZenoFront.FeasibleAnywhere.exists_chains, ZenoFront.exists_transfer_pw"
 lean_partial = "ZenoFront.exists_chain, ZenoFront.ToGoal.dst_ne_ci"
-paper        = "Lemma 3.1, doc/theory/exact-front.md §3"
-created      = "2026-11-23"
-
-[claims.lem-3-2]
-kind         = "lemma"
-statement    = "Lemma 3.2 (counting): In a feasible plan, 2t ≤ Σ_k h_k + p, where h_k is the number of hub arrivals (segments) of plane k."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Feasible.le_sum_hubArrivals"
-lean_partial = "ZenoFront.PlaneFeasible.ciDepartures_add_cgArrivals, ZenoFront.Feasible.le_ciDepartures, ZenoFront.Feasible.le_cgArrivals"
 paper        = "Lemma 3.2, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
-[claims.lem-3-3]
+[claims.lem-3-2]
+label        = "Lemma 3.3"
 kind         = "lemma"
-statement    = "Lemma 3.3 (segment durations): (a) A feasible plane has a multiset Z of central cities with |Z| equal to its number of hub arrivals, 2e(Z) ≤ its end time and c(Z) ≤ its landing cost. (b) Under (S) and (H) its route is the concatenation of its segments, one per hub arrival, each landing in a central city and flying at least 2d_y for every central city y it lands in; and a chain from a central city y ends at least d_y after it starts. (c) On a route without central flights every visit lasts its role weight (d_x + d̄_x for a crossing, 2d_x for a drop-off, 2d̄_x for a pick-up), and the visits of a route from a hub whose legs all arrive by M last at most M in total."
+statement    = "Lemma 3.3 (counting): In a feasible plan, 2t ≤ Σ_k h_k + p, where h_k is the number of hub arrivals (segments) of plane k."
 status       = "math.machine-checked"
-lean         = "ZenoFront.PlaneFeasible.exists_segments_emin, ZenoFront.PlaneFeasible.exists_segments_tri, ZenoFront.ToGoal.add_d_le_endTime, ZenoFront.Node.w_eq, ZenoFront.TChain.sum_w_le"
-lean_partial = "ZenoFront.PlaneFeasible.exists_segments, ZenoFront.segment_bound, ZenoFront.ToGoal.arr_add_d_le"
+lean         = "ZenoFront.Feasible.le_sum_hubArrivals"
+lean_partial = "ZenoFront.PlaneFeasible.ciDepartures_add_cgArrivals, ZenoFront.Feasible.le_ciDepartures, ZenoFront.Feasible.le_cgArrivals"
 paper        = "Lemma 3.3, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
+[claims.lem-3-3]
+label        = "Lemma 3.4"
+kind         = "lemma"
+statement    = "Lemma 3.4 (segment durations): (a) A feasible plane has a multiset Z of central cities with |Z| equal to its number of hub arrivals, 2e(Z) at most its end time and c(Z) at most its landing cost. (b) Assume (S) and (H). The route of a feasible plane is the concatenation of its segments, one per hub arrival; each lands in at least one central city and flies at least 2d_y for every central city y it lands in. A chain (Lemma 3.2(a)) ends at least d_y after any of its legs arrives in a central city y. (c) On a route without central flights every visit lasts its role weight (d_x + d̄_x for a crossing, 2d_x for a drop-off, 2d̄_x for a pick-up), and the visits of a route from a hub whose legs all arrive by M last at most M in total."
+status       = "math.machine-checked"
+lean         = "ZenoFront.PlaneFeasible.exists_segments_emin, ZenoFront.PlaneFeasible.exists_segments_tri, ZenoFront.ToGoal.add_d_le_endTime, ZenoFront.Node.w_eq, ZenoFront.TChain.sum_w_le"
+lean_partial = "ZenoFront.PlaneFeasible.exists_segments, ZenoFront.segment_bound, ZenoFront.ToGoal.arr_add_d_le"
+paper        = "Lemma 3.4, doc/theory/exact-front.md §3"
+created      = "2026-11-23"
+
 [claims.lem-3-4]
+label     = "Lemma 3.5"
 kind      = "lemma"
-statement = "Lemma 3.4 (relaxation): Let p ≤ t. Every feasible plan with cost C and makespan M has non-empty multisets Y_1, …, Y_p with Σ_k |Y_k| = s, c(Y_1 + ⋯ + Y_p) ≤ C and 2e(Y_k) ≤ M for every k; under (S), e = d. Hence C ≥ L_e(⌊M/2⌋), where L_e(T) is the least Σ_k min{c(Y) : |Y| = m_k, e(Y) ≤ T} over m_1, …, m_p ≥ 1 with Σ_k m_k = s (∞ if none)."
+statement = "Lemma 3.5 (relaxation): Let p ≤ t. Every feasible plan with cost C and makespan M has non-empty multisets Y_1, …, Y_p with Σ_k |Y_k| = s, c(Y_1 + ⋯ + Y_p) ≤ C and 2e(Y_k) ≤ M for every k, where e_i = min(d_i, d̄_i); under (S), e = d. Hence C ≥ L_e(⌊M/2⌋), where L_e(T) is the least Σ_k G_e[m_k][T] over m_1, …, m_p ≥ 1 with Σ_k m_k = s (∞ if none). Nothing is assumed on central flights."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Feasible.exists_relaxation_emin, ZenoFront.Feasible.relaxCost_le_planCost, ZenoFront.Network.emin_eq_of_sym"
-paper     = "Lemma 3.4, doc/theory/exact-front.md §3"
+paper     = "Lemma 3.5, doc/theory/exact-front.md §3"
 created   = "2026-11-23"
 
+[claims.prop-7-10]
+label        = "Proposition 3.6"
+kind         = "proposition"
+statement    = "Proposition 3.6 (lower bounds): Let p ≤ t. Every feasible plan costs at least s·c_min. Under (S) and 1 ≤ p, every feasible plan has makespan at least 2d_min⌈s/p⌉."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Feasible.minOf_le_cost_emin, ZenoFront.Feasible.minOf_le_makespan"
+lean_partial = "ZenoFront.minOf, ZenoFront.Feasible.minOf_le_cost"
+paper        = "Proposition 3.6, doc/theory/exact-front.md §3"
+created      = "2026-11-23"
+
 # ===========================================================================
-# 4. Symmetric case
+# 4. Symmetric front
 # ===========================================================================
 
 [claims.thm-4-1]
+label        = "Theorem 4.1"
 kind         = "theorem"
-statement    = "Theorem 4.1 (achievability): Assume (S) and p ≤ t. Every admissible partition X_1, …, X_p with |X| = 2t − p is flown by a feasible plan whose planes land exactly at the groups (up to relabelling the planes), of cost c(X) and makespan 2·max_k δ(X_k)."
+statement    = "Theorem 4.1 (achievability): Assume (S) and p ≤ t. For every central table, every admissible partition X_1, …, X_p with |X| = 2t − p is flown by a feasible plan whose planes land exactly at the groups (up to relabelling the planes), of cost c(X) and makespan 2·max_k δ(X_k)."
 status       = "math.machine-checked"
 lean         = "ZenoFront.Admissible.exists_plan"
 lean_partial = "ZenoFront.admissiblePoints_subset_achievable"
-paper        = "Thm 4.1, doc/theory/exact-front.md §4.1"
+paper        = "Theorem 4.1, doc/theory/exact-front.md §4"
 created      = "2026-11-23"
 
+[claims.lem-4-6]
+label        = "Lemma 4.2"
+kind         = "lemma"
+statement    = "Lemma 4.2 (adding a plane): An admissible partition of q planes with 2t − q landings, t ≥ q + 1, gives an admissible partition of q + 1 planes with 2t − q − 1 landings, no larger cost, and loads bounded by every bound on the old loads. Repeating, it gives one of p planes for every q ≤ p ≤ t."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Admissible.addPlane_of_size, ZenoFront.Admissible.addPlanes_le"
+lean_partial = "ZenoFront.Admissible.addPlane, ZenoFront.Admissible.addPlanes"
+paper        = "Lemma 4.2, doc/theory/exact-front.md §4"
+created      = "2026-11-23"
+
+[claims.lem-4-11]
+label     = "Lemma 4.3"
+kind      = "lemma"
+statement = "Lemma 4.3 (shrinking): If X is admissible with at least s landings, p ≤ s and s ≡ p (mod 2), some admissible Y with Y_k ≤ X_k for every k has exactly s landings. In particular two landings can be removed when |X| ≥ p + 2."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Admissible.exists_shrink, ZenoFront.Admissible.exists_remove_two"
+paper     = "Lemma 4.3, doc/theory/exact-front.md §4"
+created   = "2026-11-24"
+
+[claims.thm-4-10]
+label        = "Theorem 4.4"
+kind         = "theorem"
+statement    = "Theorem 4.4 (converse under (S) and (H)): Assume (S), (H) and p ≤ t. If every plane flies a route from C_I at time 0 to C_G (items 1 and 2 of Definition 1.2) and every passenger rides a chain (Lemma 3.2(a)) of legs of the plan, then some admissible partition X_1, …, X_p has |X| = 2t − p, c(X) at most the plan's cost and 2δ(X_k) ≤ F_k for every plane. In particular every feasible plan of makespan M gives such a partition, with 2δ(X_k) ≤ F_k ≤ M."
+status       = "math.machine-checked"
+lean         = "ZenoFront.exists_admissible_of_chains, ZenoFront.Feasible.exists_admissible_hub"
+lean_partial = "ZenoFront.Feasible.exists_admissible_ATri, ZenoFront.Feasible.exists_admissible_A1_flightTime, ZenoFront.exists_admissible_of_blocks"
+paper        = "Theorem 4.4, doc/theory/exact-front.md §4"
+created      = "2026-11-24"
+
+[claims.cor-4-8]
+label        = "Theorem 4.5"
+kind         = "corollary"
+statement    = "Theorem 4.5 (symmetric front, H1): Assume (S), (H) and p ≤ t. Let 𝒫 be the set of the points (c(X), 2·max_k δ(X_k)) of the admissible partitions X with |X| = 2t − p, M(X) the least 2·max_k δ(X_k) over the admissible partitions of a multiset X into p groups (0 if there is none), and 𝒳 the set of the points (c(X), M(X)) of the multisets of 2t − p landings that have an admissible partition. Then F = Min A′ = Min 𝒫 = Min 𝒳."
+status       = "math.machine-checked"
+lean         = "ZenoFront.minimal_achievable_iff_anywhere_hub, ZenoFront.minimal_achievable_iff_admissiblePoints_hub, ZenoFront.minimal_achievable_iff_multisetPoints_hub"
+lean_partial = "ZenoFront.minimal_admissiblePoints_iff_multisetPoints, ZenoFront.FeasibleAnywhere.exists_admissible_hub"
+paper        = "Theorem 4.5, doc/theory/exact-front.md §4"
+created      = "2026-11-23"
+
+[claims.claim-prop-i-landings]
+label     = "Example 4.6"
+kind      = "claim"
+statement = "Example 4.6 (an optimal plan with extra landings): Take n = 1, d_1 = d̄_1 = 1, c_1 = 0, t = 5 and p = 3, so s = 7, with any central table. The front is {(0, 6)}, and a feasible plan with 9 central landings attains (0, 6): every plane flies C_I → 1 → C_G → 1 → C_I → 1 → C_G from time 0, without waiting. So a Pareto-optimal plan need not have exactly 2t − p landings: Proposition I of both papers holds only in the sense of Theorem 4.5."
+status    = "math.machine-checked"
+lean      = "ZenoFront.PropI.cert_check, ZenoFront.PropI.front, ZenoFront.PropI.plan9, ZenoFront.PropI.centralLandings, ZenoFront.PropI.plan9_pareto"
+paper     = "Example 4.6, doc/theory/exact-front.md §4; EvoCOP 2015 and arXiv:2304.14659, Proposition I"
+created   = "2026-11-25"
+
+[claims.claim-4-13]
+label     = "Example 4.7"
+kind      = "claim"
+statement = "Example 4.7 ((H) cannot be dropped): Take d = d̄ = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6 and p = 3, so s = 9, and the symmetric central table dc(1, 2) = 1, dc(1, 3) = 5, dc(1, 4) = 6, dc(2, 3) = 3, dc(2, 4) = 6, dc(3, 4) = 1, dc(i, i) = 0. (S) holds and (H) fails (d_4 = 11 > d_3 + dc(3, 4) = 10). The plan of the note is feasible, of cost 260 and makespan 39, for every central table in which the flight 4 → 3 lasts 1, while every admissible partition of 9 landings with every δ(X_k) ≤ 19 costs at least 264. So no admissible partition has cost at most 260 and 2·max_k δ(X_k) ≤ 39: the conclusion of Theorem 4.4 fails for this plan, no point of 𝒫 weakly dominates (260, 39), and Min 𝒫, which solveFront lists, is not the Pareto front of the feasible plans."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Ex413.plan_feasible, ZenoFront.Ex413.plan_cost, ZenoFront.Ex413.plan_makespan, ZenoFront.Ex413.not_ATriHub, ZenoFront.Ex413.minCost_19, ZenoFront.Ex413.admissible_cost_ge, ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_admissible_le, ZenoFront.Ex413.not_isParetoFront"
+paper     = "Example 4.7, doc/theory/exact-front.md §4"
+created   = "2026-11-24"
+
+[claims.claim-5]
+label     = "Proposition 4.8"
+kind      = "claim"
+statement = "Proposition 4.8 (the papers' greedies are not exact): Let G_E be the per-PPP greedy of EvoCOP 2015 (Algorithm 1 and its Step 2) and G_A that of arXiv:2304.14659 (§3.2, with its Steps 2 and 3 read as in Counterexamples.lean). (a) For d = d̄ = (6, 10), c = (40, 20), t = 5, p = 2 and every central table, (260, 60) ∈ F, yet for every PPP of cost at most 260, G_E (for every set of P3 patterns and every tie-breaking) and G_A (for every tie-breaking) give a makespan above 60; on the landings of (260, 60), Algorithm 1 without P3 patterns ends with the loads 52 and 68. (b) For d = d̄ = (1, 3), c = (9, 5), t = 4, p = 2 and every central table, (42, 12) ∈ F, and for every PPP of cost at most 42, G_A gives a makespan above 12 for every tie-breaking, while G_E reaches (42, 12) with one P3 pattern at city 2, for every tie-breaking."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt, ZenoFront.Greedy.evocop_lpt_noP3, ZenoFront.Greedy.arxiv_misses_p3First, ZenoFront.Greedy.evocop_reaches_p3First"
+paper     = "Proposition 4.8, doc/theory/exact-front.md §4; EvoCOP 2015 Alg. 1; arXiv:2304.14659 §3.2"
+created   = "2026-11-23"
+
+# ===========================================================================
+# 5. Non-symmetric front
+# ===========================================================================
+
 [claims.def-4-2]
+label     = "Definition 5.1"
 kind      = "definition"
-statement = "Definition 4.2 (role configurations): A role configuration on p planes gives each plane multisets Dr_k (drop-offs), Pk_k (pick-ups) and Cr_k (crossings) of central cities, with |Cr_k| odd and Σ_k Dr_k = Σ_k Pk_k. Its groups are X_k = Dr_k + Pk_k + Cr_k, its cost is c(X), and the role load of plane k is λ_k = 2δ(Dr_k) + 2δ̄(Pk_k) + δ(Cr_k) + δ̄(Cr_k). The passenger count is read through the landings, |X| = 2t − p."
+statement = "Definition 5.1 (role configuration): A role configuration on p planes gives every plane k multisets Dr_k (drop-offs), Pk_k (pick-ups) and Cr_k (crossings) of central cities, with |Cr_k| odd and Σ_k Dr_k = Σ_k Pk_k (the balance). Its groups are X_k = Dr_k + Pk_k + Cr_k, its cost is c(X), and the role load of plane k is λ_k = 2δ(Dr_k) + 2δ̄(Pk_k) + δ(Cr_k) + δ̄(Cr_k). Passengers are counted through the landings: the configurations for t passengers are those with |X| = 2t − p."
 status    = "math.machine-checked"
 lean      = "ZenoFront.RoleConfig, ZenoFront.RoleConfig.groups, ZenoFront.RoleConfig.roleLoad"
-paper     = "Def 4.2, doc/theory/exact-front.md §4.2"
+paper     = "Definition 5.1, doc/theory/exact-front.md §5"
+created   = "2026-11-23"
+
+[claims.def-scheduled-config]
+label     = "Definition 5.2"
+kind      = "definition"
+statement = "Definition 5.2 (scheduled configuration, template value): A scheduled configuration S gives every plane k an ordered list Dr_k of drop-offs, an ordered list Pk_k of pick-ups and a multiset Cr_k of crossings, and maps every pick-up slot (v, l) to a drop-off slot mate(v, l) = (u, j). It is valid if every |Cr_k| is odd, the drop-off of mate(v, l) is at the city of Pk_v[l], mate is injective, and there are as many drop-offs as pick-ups in all. Its size, cost and role loads are those of Definition 5.1, read on the lists. Its template value is M_tmpl(S) = max(max_k λ_k, max over the links (u, j; v, l) at x of Pre_u(j) + d_x + d̄_x + Suf_v(l)), with Pre_u(j) = 2Σ_{j′<j} d(Dr_u[j′]) and Suf_v(l) = 2Σ_{l′>l} d̄(Pk_v[l′]). S schedules a role configuration if its lists and multisets are that configuration's drop-offs, pick-ups and crossings."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Sched, ZenoFront.Sched.Valid, ZenoFront.Sched.size, ZenoFront.Sched.cost, ZenoFront.Sched.load, ZenoFront.Sched.pre, ZenoFront.Sched.suf, ZenoFront.Sched.term, ZenoFront.Sched.tmpl"
+paper     = "Definition 5.2, doc/theory/exact-front.md §5"
+created   = "2026-11-25"
+
+[claims.thm-6-9]
+label        = "Theorem 5.3"
+kind         = "theorem"
+statement    = "Theorem 5.3 (schedulable domination): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a valid scheduled configuration S with |S| = 2t − p, c(S) ≤ C and M_tmpl(S) ≤ M. The template of S (Lemma 5.5) is then a feasible plan of cost c(S) and makespan M_tmpl(S) ≤ M."
+status       = "math.machine-checked"
+lean         = "ZenoFront.schedulableDomination_all, ZenoFront.schedulableDomination_template"
+lean_partial = "ZenoFront.Feasible.split, ZenoFront.exists_transfer_pw, ZenoFront.exists_rewired, ZenoFront.exists_links, ZenoFront.exists_sched_of"
+paper        = "Theorem 5.3, doc/theory/exact-front.md §5"
+created      = "2026-11-24"
+
+[claims.thm-6-1]
+label     = "Corollary 5.4"
+kind      = "theorem"
+statement = "Corollary 5.4 (role-load bound): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a role configuration with 2t − p landings, cost at most C and every λ_k ≤ M."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Feasible.exists_roleConfig_of_domination, ZenoFront.Sched.load_le_tmpl"
+paper     = "Corollary 5.4, doc/theory/exact-front.md §5"
+created   = "2026-11-23"
+
+[claims.lem-6-3]
+label     = "Lemma 5.5"
+kind      = "lemma"
+statement = "Lemma 5.5 (template plans): Let S be a valid scheduled configuration with |S| = 2t − p. Then p ≤ t, and for every network with these durations, whatever its central table, the template of S is a feasible plan of cost c(S) and makespan exactly M_tmpl(S). In the template every plane, from time 0, flies its drop-offs in order (C_I → x → C_I, leaving a new passenger in x), then its crossings (C_I → x → C_G carrying a new passenger and C_G → x → C_I empty, alternately, beginning and ending with the former), then its pick-ups in order (C_G → y → C_G, leaving y at the later of its arrival and the arrival of the passenger dropped by the matched drop-off, and carrying that passenger to C_G). Nothing is assumed on the durations; zero durations are allowed."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Sched.tmplPlan_spec"
+paper     = "Lemma 5.5, doc/theory/exact-front.md §5"
+created   = "2026-11-23"
+
+[claims.cor-6-10]
+label     = "Corollary 5.6"
+kind      = "corollary"
+statement = "Corollary 5.6 (non-symmetric front, H4): Assume (A1-NS) and p ≤ t. Let 𝒦_S be the set of the points (c(S), M_tmpl(S)) of the valid scheduled configurations S with |S| = 2t − p, and 𝒦 the set of the points (c(cfg), m(cfg)) of the role configurations with 2t − p landings, m(cfg) the least M_tmpl(S) over the valid S that schedule cfg (every role configuration has one, so m(cfg) is attained). Then F = Min 𝒦_S = Min 𝒦, and a list is the Pareto front of the feasible plans iff it is the Pareto front of 𝒦_S."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_achievable_iff_schedPoints, ZenoFront.minimal_achievable_iff_configPoints, ZenoFront.isParetoFront_achievable_iff_schedPoints"
+paper     = "Corollary 5.6, doc/theory/exact-front.md §5"
+created   = "2026-11-24"
+
+[claims.prop-6-5]
+label     = "Proposition 5.7"
+kind      = "proposition"
+statement = "Proposition 5.7 (harmful waiting): Take n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7 and p = 4, so s = 10, with any central table satisfying (A1-NS). (a) Some role configuration with 10 landings has cost 14 and every λ_k ≤ 72, and every role configuration with 10 landings and every λ_k ≤ 73 costs at least 14. (b) Every valid scheduled configuration with 10 landings and cost below 18 has M_tmpl > 73. (c) Every feasible plan of makespan at most 73 costs at least 18. So some role configuration with 10 landings has cost at most 14 and every λ_k ≤ 73, but no feasible plan has cost at most 14 and makespan at most 73."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Prop65.cfg14_load, ZenoFront.Prop65.cheapest_roleConfig, ZenoFront.Prop65.tmpl_gt_of_cost_lt, ZenoFront.Prop65.cost_ge_of_makespan_le, ZenoFront.Prop65.prop65, ZenoFront.Prop65.harmful_waiting"
+paper     = "Proposition 5.7, doc/theory/exact-front.md §5; arXiv:2304.14659"
+created   = "2026-11-23"
+
+[claims.claim-6-11]
+label     = "Example 5.9"
+kind      = "claim"
+statement = "Example 5.9 (the reduction misses the front): Let U be the path C_I–a–b–C_G with durations 1, 2 and 1 in both directions and no other flight, c_a = c_b = 1, t = 3 and p = 2. Then f(U) has the two cities (a, C_I a, a b C_G) and (b, C_I a b, b C_G), with (d, d̄, c) = (1, 3, 2) and (3, 1, 2). Its front is {(8, 10)}, as a flight graph, and also as an instance of Definition 1.1 for every central table satisfying (A1-NS). U has a feasible plan of cost 8 and makespan 8, so (8, 10) ∉ F_U and F_U ≠ F_{f(U)}."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Ex611.vcities_data, ZenoFront.Ex611.reduced_graph, ZenoFront.Ex611.reduced_c, ZenoFront.Ex611.reduced_front, ZenoFront.Ex611.reduced_front_network, ZenoFront.Ex611.plan_feasible, ZenoFront.Ex611.mem_gAchievable_U, ZenoFront.Ex611.fronts_differ"
+paper     = "Example 5.9, doc/theory/exact-front.md §5; arXiv:2304.14659 §2.4"
+created   = "2026-11-24"
+
+[claims.prop-6-7]
+label     = "Example 5.10"
+kind      = "proposition"
+statement = "Example 5.10 (the shuttle construction misses the front): Take n = 2, d = (1, 3), d̄ = (3, 1), c = (6, 1), t = 3, p = 2, and the central table dc(1, 2) = dc(2, 1) = 2, dc(1, 1) = dc(2, 2) = 0. (AΔ) holds and (A1-NS) fails. The instance has a feasible plan of cost 15 and makespan 8 (for every central table in which the flight 2 → 1 lasts 2), so its front has a point that weakly dominates (15, 8). In the augmented instance of arXiv:2304.14659 §3.3 as printed (one virtual city per ordered pair i ≠ j for the B Ā B̄ situation, per-pattern durations and costs), in both readings of its shuttle crossing, every configuration has a plane whose patterns last at least 10; so every point of the construction has makespan at least 10, (4, 10) is one, and the front of the construction is not the front of the instance."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Shuttle.net_ATri, ZenoFront.Shuttle.not_net_A1NS, ZenoFront.Shuttle.plan_feasible, ZenoFront.Shuttle.front_le, ZenoFront.Shuttle.load_ge, ZenoFront.Shuttle.points_ge, ZenoFront.Shuttle.mem_points, ZenoFront.Shuttle.shuttle_misses"
+paper     = "Example 5.10, doc/theory/exact-front.md §5; arXiv:2304.14659 §2.3, §3.3"
+created   = "2026-11-24"
+
+# ===========================================================================
+# 6. Algorithm
+# ===========================================================================
+
+[claims.lem-7-2]
+label        = "Lemma 6.1"
+kind         = "lemma"
+statement    = "Lemma 6.1 (one-plane table): Let G[0][T] = 0 and G[m + 1][T] = min over i with d_i ≤ T of c_i + G[m][T − d_i] (∞ over the empty set). Then G[m][T] is the least cost of a multiset of m cities with δ ≤ T, and it is ∞ iff there is none. The memoised table agrees with it."
+status       = "math.machine-checked"
+lean         = "ZenoFront.oneplane, ZenoFront.isLeast_oneplane, ZenoFront.oneplane_eq_top_iff, ZenoFront.oneplaneTable_getD"
+lean_partial = "ZenoFront.oneplane_le_cost"
+paper        = "Lemma 6.1, doc/theory/exact-front.md §6"
+created      = "2026-11-23"
+
+[claims.lem-min-cost]
+label     = "Lemma 6.2"
+kind      = "lemma"
+statement = "Lemma 6.2 (the function E): Let E(T) be the least cost of an admissible partition of 2t − p landings into p groups with every δ(X_k) ≤ T (∞ if there is none). E is non-increasing and attained when finite. With 1 ≤ p, E(T) = ∞ for T < d_min⌈s/p⌉. A level T at which E drops (E(T) = C and E(T′) > C for every T′ < T) has T ≤ (2t − p)·d_max."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minCost, ZenoFront.minCost_le, ZenoFront.minCost_attained, ZenoFront.minCost_antitone, ZenoFront.minCost_eq_top_of_lt, ZenoFront.breakpoint_le"
+paper     = "Lemma 6.2, doc/theory/exact-front.md §6"
+created   = "2026-11-25"
+
+[claims.prop-7-1]
+label     = "Proposition 6.3"
+kind      = "proposition"
+statement = "Proposition 6.3 (front = breakpoints of E): Assume (S), (H) and p ≤ t. Then (C, M) ∈ F iff M = 2T for some T with E(T) = C and E(T′) > C for every T′ < T."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_achievable_iff_minCost_hub"
+paper     = "Proposition 6.3, doc/theory/exact-front.md §6"
+created   = "2026-11-23"
+
+[claims.prop-7-3]
+label        = "Proposition 6.4"
+kind         = "proposition"
+statement    = "Proposition 6.4 (bracket): Let U₂(T) be the least cost of a partition of 2t − p landings, with every load at most T, whose link forest has trees of one or two planes: a single plane with an odd number of landings, or two planes linked at a city b in the image of domRep (Proposition 6.5), each with one copy of b and an odd number of free landings; the free landings come from the table of Lemma 6.1. At every level T ≤ Tmax, L(T) ≤ E(T) ≤ U₂(T), where L = L_d is the relaxation of Lemma 3.5 computed from the table of Lemma 6.1, and where L(T) = U₂(T), E(T) = L(T)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsBoundAt, ZenoFront.minCost_eq_of_bracket"
+lean_partial = "ZenoFront.pairsBoundAt, ZenoFront.relaxedBoundAt, ZenoFront.pairRows_attained"
+paper        = "Proposition 6.4, doc/theory/exact-front.md §6"
+created      = "2026-11-23"
+
+[claims.prop-7-9]
+label        = "Proposition 6.5"
+kind         = "proposition"
+statement    = "Proposition 6.5 (dominance, symmetric): For every map rep from cities to cities, replacing every landing of an admissible partition by its image gives an admissible partition with the same group sizes. The map domRep (scanning the cities in index order and moving to a city that dominates the current one in (d, c)) has d(domRep i) ≤ d_i and c(domRep i) ≤ c_i, so replacing every landing by its image under domRep does not raise the cost or the loads."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Admissible.map_dominated, ZenoFront.domRep_le"
+lean_partial = "ZenoFront.Admissible.map, ZenoFront.domRep"
+paper        = "Proposition 6.5, doc/theory/exact-front.md §6"
+created      = "2026-11-23"
+
+[claims.prop-dominance-ns]
+label        = "Proposition 6.6"
+kind         = "proposition"
+statement    = "Proposition 6.6 (dominance, non-symmetric): Let rep satisfy d(rep i) ≤ d_i, d̄(rep i) ≤ d̄_i and c(rep i) ≤ c_i for every i (domRep3, the first city in the order (d, d̄, c, index) among those that dominate i, is one). Replacing every city by its image maps a role configuration to one with the same number of landings, no larger cost and no larger role loads, and a valid scheduled configuration to a valid one with the same number of landings, no larger cost and no larger M_tmpl."
+status       = "math.machine-checked"
+lean         = "ZenoFront.RoleConfig.size_map, ZenoFront.RoleConfig.totalCost_map_le, ZenoFront.RoleConfig.roleLoad_map_le, ZenoFront.Sched.Valid.map, ZenoFront.Sched.size_map, ZenoFront.Sched.cost_map_le, ZenoFront.Sched.tmpl_map_le, ZenoFront.domRep3_le"
+lean_partial = "ZenoFront.domRep3, ZenoFront.RoleConfig.map, ZenoFront.Sched.map"
+paper        = "Proposition 6.6, doc/theory/exact-front.md §6"
+created      = "2026-11-25"
+
+[claims.thm-7-5]
+label        = "Theorem 6.7"
+kind         = "theorem"
+statement    = "Theorem 6.7 (link-forest DP): For 1 ≤ p and T ≤ Tmax, the link-forest DP (tables Ch, Sub, Root and For over rooted link trees of up to p planes, link labels in the image of domRep, free landings from the table of Lemma 6.1) has For[p][s] = E(T)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.treeBoundAt_eq_minCost"
+lean_partial = "ZenoFront.treeBoundAt_le_totalCost"
+paper        = "Theorem 6.7, doc/theory/exact-front.md §6"
+created      = "2026-11-23"
+
+[claims.thm-7-6]
+label        = "Theorem 6.8"
+kind         = "theorem"
+statement    = "Theorem 6.8 (σ-DP): Let 1 ≤ p ≤ t, w = min(p − 1, t − p) and T ≤ Tmax. The σ-DP over the planes in order, with states (k, j, σ), σ a set of at most w cities in the image of domRep, and plane options (m, H) of cost c(H) + G[m − |H|][T − δ(H)], has as least cost of a path from (0, 0, ∅) to (p, s, ∅) the value E(T)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.sigmaBoundAt_eq_minCost"
+lean_partial = "ZenoFront.sigmaBoundAt_le_totalCost"
+paper        = "Theorem 6.8, doc/theory/exact-front.md §6"
+created      = "2026-11-23"
+
+[claims.thm-verified-solver]
+label        = "Theorem 6.9"
+kind         = "theorem"
+statement    = "Theorem 6.9 (verified solver, H2): Assume (S), (H) and 1 ≤ p ≤ t. The list `solveFront d c t p` is the Pareto front of the feasible plans. The solver lists, by increasing makespan, the points (E(T), 2T) at which E drops, found by splitting intervals of the levels d_min⌈s/p⌉, …, (2t − p)·d_max; at each level it evaluates E(T) as L(T) where L(T) = U₂(T), and otherwise by the link-forest DP or the σ-DP."
+status       = "math.machine-checked"
+lean         = "ZenoFront.solveFront_isParetoFront_hub"
+lean_partial = "ZenoFront.solveFront, ZenoFront.solveFront_eq, ZenoFront.mem_solveFront_iff"
+paper        = "Theorem 6.9, doc/theory/exact-front.md §6"
+created      = "2026-11-25"
+
+# ===========================================================================
+# 7. Complexity
+# ===========================================================================
+
+[claims.thm-8-1]
+label     = "Theorem 7.1"
+kind      = "theorem"
+statement = "Theorem 7.1 (3-Partition reduction): Let a_1, …, a_{3m} and B be natural numbers with Σ_i a_i = mB and B/4 < a_i < B/2 for every i. In the symmetric instance with one city of duration a_i for each i, p = m planes and t = 2m passengers (so s = 3m), the multiset X that lands once at every city has M(X) ≤ 2B iff the a_i split into m triples of sum B. Lean form: M(X) is minMakespan; B/4 < a_i < B/2 is B < 4a_i and 2a_i < B; the split is an assignment of the indices to the m triples, each with three indices of sum B."
+status    = "math.machine-checked"
+lean      = "ZenoFront.threePartition_iff"
+paper     = "Theorem 7.1, doc/theory/exact-front.md §7"
+created   = "2026-11-23"
+
+[claims.prop-8-2]
+label     = "Proposition 7.2"
+kind      = "proposition"
+statement = "Proposition 7.2 (Partition reduction, p = 2): Let a_1, …, a_m be natural numbers with sum 2B, r ≥ m odd and K = B + 1. In the symmetric instance with 2r cities, of durations a_i + K for i ≤ m and K for the other 2r − m, p = 2 and t = r + 1 (so s = 2r), the multiset X that lands once at every city has M(X) ≤ 2(B + rK) iff some sub-multiset of the a_i sums to B. All durations are positive. Lean form: M(X) is minMakespan; the durations are partitionDur a r (B + 1); the sub-multiset is a set of indices."
+status    = "math.machine-checked"
+lean      = "ZenoFront.partition_iff"
+paper     = "Proposition 7.2, doc/theory/exact-front.md §7"
+created   = "2026-11-23"
+
+[claims.cor-8-3]
+label     = "Theorem 7.3"
+kind      = "corollary"
+statement = "Theorem 7.3 (step count): (a) At every level T, the link-forest DP of Theorem 6.7 with a step counter returns the value of the DP, which is E(T) when 1 ≤ p, T ≤ Tmax and the table is that of Lemma 6.1, in at most P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1) steps, whatever table it reads. (b) With 1 ≤ p ≤ t, building the one-plane table once for the levels 0, …, T_top = (2t − p)·d_max and running the counted DP at each of them returns `solveFront d c t p`, the list of Theorem 6.9, in at most (T_top + 1)·P(n, t, p, T_top) steps, the table included. Lean form: a step is one iteration of a minimum loop, one table cell, one element scanned by a membership test or one level of the scan; computing the n link labels costs n² steps, and testing them n² more."
+status    = "math.machine-checked"
+lean      = "ZenoFront.treeBoundSteps_value, ZenoFront.treeBoundSteps_eq_minCost, ZenoFront.treeBoundSteps_le, ZenoFront.scanSteps_fst, ZenoFront.scanSteps_le, ZenoFront.scanSteps_isParetoFront"
+paper     = "Theorem 7.3, doc/theory/exact-front.md §7"
+created   = "2026-11-23"
+
+# ===========================================================================
+# 8. Certificates
+# ===========================================================================
+
+[claims.thm-9-1]
+label     = "Theorem 8.1"
+kind      = "theorem"
+statement = "Theorem 8.1 (obligations imply the front): Let S ⊆ ℕ² and (C_1, M_1), …, (C_r, M_r), r ≥ 1, with M_1 < ⋯ < M_r and C_1 > ⋯ > C_r. If (1) every listed point is in S, (2) every point of S has makespan at least M_1, (3) for i < r every point of S with makespan below M_{i+1} has cost at least C_i, and (4) every point of S has cost at least C_r, then the list is the Pareto front of S."
+status    = "math.machine-checked"
+lean      = "ZenoFront.isParetoFront_of_obligations"
+paper     = "Theorem 8.1, doc/theory/exact-front.md §8"
+created   = "2026-11-23"
+
+[claims.thm-checker-v1]
+label        = "Theorem 8.2"
+kind         = "theorem"
+statement    = "Theorem 8.2 (v1 checker, H3): If `Cert.check` accepts a certificate of format v1, its points are the Pareto front of the feasible plans of its instance for every central table satisfying (H), and for every central table if all its gaps are `relaxed`. The same holds for the plans with times in any ordered ring with a floor function, such as ℚ or ℝ (Lemma 1.3), and, for every table satisfying (H), for the plans whose planes end anywhere."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Cert.check_sound_hub, ZenoFront.Cert.check_sound_rat_hub, ZenoFront.Cert.check_sound_anywhere_hub"
+lean_partial = "ZenoFront.Cert.check, ZenoFront.planOK_feasible"
+paper        = "Theorem 8.2, doc/theory/exact-front.md §8"
+created      = "2026-11-25"
+
+[claims.prop-roles-bound]
+label        = "Proposition 8.3"
+kind         = "proposition"
+statement    = "Proposition 8.3 (`roles` bound): At level T, the `roles` bound is the larger of (A) the plane-by-plane relaxation in which a plane's m landings contain an odd number of crossings, of weight d + d̄, the others weighing 2·min(d, d̄), all within T, combined over the planes as in Lemma 3.5, and (B) G_{d+d̄}[s][pT], the least cost of s landings of weight d + d̄ within pT. It is at most the cost of every role configuration with s landings and every λ_k ≤ T."
+status       = "math.machine-checked"
+lean         = "ZenoFront.rolesBoundAt_le_totalCost"
+lean_partial = "ZenoFront.Cert2.rolesWith_le, ZenoFront.sum_roleLoad_eq_load_fill"
+paper        = "Proposition 8.3, doc/theory/exact-front.md §8"
+created      = "2026-11-25"
+
+[claims.prop-lagrangian-bound]
+label        = "Proposition 8.4"
+kind         = "proposition"
+statement    = "Proposition 8.4 (`lagrangian` bound): For every integer vector μ, the Lagrangian value at level T (the plane-by-plane relaxation in which a drop-off at i costs c_i + μ_i, a pick-up c_i − μ_i, a crossing c_i, and every plane has an odd number of crossings and weighs at most T, combined over the planes by a program over group sizes, for a given number ℓ of landings) is at most the cost of every role configuration with ℓ landings, all in the allowed cities, whose planes weigh at most T, a crossing at i weighing fill_i, a drop-off drop_i and a pick-up pick_i (d_i + d̄_i, 2d_i and 2d̄_i in the checker)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.LagData.value_le_totalCost"
+lean_partial = "ZenoFront.Cert2.lagWith_le"
+paper        = "Proposition 8.4, doc/theory/exact-front.md §8"
+created      = "2026-11-25"
+
+[claims.prop-6-6]
+label        = "Proposition 8.5"
+kind         = "proposition"
+statement    = "Proposition 8.5 (`balanced` bound): At level T, the imbalance-vector program (planes in order; state: the landings used and the imbalance vector Σ(Dr − Pk) of the planes so far, of ℓ¹-norm at most t − p; a plane's option is its imbalance and an odd number of crossings, a drop-off and a pick-up at one city of one plane counting as two crossings there) has value at most the cost of every role configuration with s landings and every λ_k ≤ T, for the weights and the crossing table that the checker builds."
+status       = "math.machine-checked"
+lean         = "ZenoFront.BalData.value_le_totalCost, ZenoFront.Cert2.balWith_le"
+lean_partial = "ZenoFront.BalData.layers_dominate, ZenoFront.RoleConfig.norm_prefix_le"
+paper        = "Proposition 8.5, doc/theory/exact-front.md §8"
+created      = "2026-11-23"
+
+[claims.prop-search-complete]
+label        = "Proposition 8.6"
+kind         = "proposition"
+statement    = "Proposition 8.6 (`search` bound): If the exhaustive search over the scheduled configurations of cost below C (every ordered list of drop-offs, ordered list of pick-ups and multiset of crossings per plane, with an odd number of crossings and a role load at most T, and every matching of the pick-ups to drop-offs of the same city, self links included) reports the gap closed at level T, then every valid scheduled configuration with s landings and cost below C has M_tmpl > T."
+status       = "math.machine-checked"
+lean         = "ZenoFront.SearchData.closed_sound"
+lean_partial = "ZenoFront.Cert2.searchWith_le"
+paper        = "Proposition 8.6, doc/theory/exact-front.md §8"
+created      = "2026-11-25"
+
+[claims.thm-checker-v2]
+label        = "Theorem 8.7"
+kind         = "theorem"
+statement    = "Theorem 8.7 (v2 checker, H3): If `Cert2.check` accepts a certificate of format v2, its points are the Pareto front of the feasible plans of its instance, for every central table that satisfies (A1-NS) if the certificate lists `A1-NS`, and for every central table otherwise."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Cert2.check_sound"
+lean_partial = "ZenoFront.Cert2.check"
+paper        = "Theorem 8.7, doc/theory/exact-front.md §8"
+created      = "2026-11-25"
+
+# ===========================================================================
+# Refuted claims: of the 2015/2023 papers, and of revision 2 of the note
+# ===========================================================================
+
+[claims.claim-converse-s-only]
+kind      = "conjecture"
+statement = "The converse under (S) alone: without (H), every feasible plan is weakly dominated by an admissible partition of 2t − p landings, as in Theorem 4.4, so Theorem 4.5 holds under (S) alone."
+status    = "math.disproved"
+lean      = "ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_isParetoFront"
+paper     = "refuted by Example 4.7, doc/theory/exact-front.md §4"
+created   = "2026-11-23"
+
+[claims.conj-6-7]
+kind      = "conjecture"
+statement = "Claim of arXiv:2304.14659 (§2.3, §3.3; Conjecture 6.7 of revision 2 of the note): the augmented instance without central flights that adds one virtual city for every B Ā B̄ situation (a drop-off at i, a shuttle C_G → i → j → C_I carrying the passenger to j, a pick-up at j) has the front of the original instance."
+status    = "math.disproved"
+lean      = "ZenoFront.Shuttle.shuttle_misses"
+paper     = "arXiv:2304.14659 §2.3, §3.3; refuted by Example 5.10, doc/theory/exact-front.md §5"
+created   = "2026-11-23"
+
+[claims.paper-greedy-optimal]
+kind      = "conjecture"
+statement = "Claim of EvoCOP 2015 (Algorithm 1) and arXiv:2304.14659 (§3.2): for a fixed multiset of landings (a PPP), the greedy that gives the longest flights first to the least-loaded plane schedules it optimally, so the fronts ZenoSolver computes are the true Pareto fronts."
+status    = "math.disproved"
+lean      = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt"
+paper     = "EvoCOP 2015 Alg. 1; arXiv:2304.14659 §3.2; refuted by Proposition 4.8, doc/theory/exact-front.md §4"
+created   = "2026-11-23"
+
+[claims.paper-no-harmful-waiting]
+kind      = "conjecture"
+statement = "Assumption of arXiv:2304.14659 (Conjecture 6.5 of revision 2 of the note, without its (AΔ-path) hypothesis): every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations. Refuted by Proposition 5.7 (d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4, any central table satisfying (A1-NS))."
+status    = "math.disproved"
+lean      = "ZenoFront.Prop65.harmful_waiting"
+paper     = "arXiv:2304.14659; refuted by Proposition 5.7, doc/theory/exact-front.md §5"
+created   = "2026-11-23"
+
+[claims.paper-general-graph-reduction]
+kind      = "conjecture"
+statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
+status    = "math.disproved"
+lean      = "ZenoFront.Ex611.fronts_differ"
+paper     = "arXiv:2304.14659 §2.4; refuted by Example 5.9, doc/theory/exact-front.md §5"
+created   = "2026-11-24"
+
+# ===========================================================================
+# Archive: results of revision 2 removed or merged in revision 3
+# ===========================================================================
+
+[claims.claim-1-2]
+removed   = "2026-11-25: argued, never proved; no headline proof, certificate kind or solver step uses it (§1.3 stays as prose)"
+kind      = "claim"
+statement = "Statement 1.2 (PDDL correspondence): a plan of the PDDL domain under ε-separation gives an event-ordered plan of §1.2 with the same cost and no larger makespan, and an event-ordered plan of makespan M gives PDDL plans of total-time at most M + Kε, so the PDDL front tends to the front of event-ordered plans as ε → 0."
+status    = "math.conjectured"
+paper     = "Statement 1.2, doc/theory/exact-front.md §1.3 (revision 2)"
+created   = "2026-11-23"
+
+[claims.cor-2-7]
+removed   = "2026-11-25: the link-forest DP allows trees of up to p planes, so no kept proof needs the q_max cap"
+kind      = "corollary"
+statement = "Corollary 2.7: if |X| = s, every link forest has at most t − p edges, and each of its trees has at most q_max = min(p, t − p + 1) planes."
+status    = "math.proved-informal"
+paper     = "Cor 2.7, doc/theory/exact-front.md §2 (revision 2)"
+created   = "2026-11-23"
+
+[claims.lem-2-9]
+removed   = "2026-11-25: used only by the attainment halves of Proposition 7.10 and by Theorem 10.1, both removed"
+kind      = "lemma"
+statement = "Lemma 2.9 (shared city): non-empty groups with Σ_k |X_k| ≡ p (mod 2) form an admissible partition if some city belongs to every even group, in particular if all groups share a city or all even groups are equal."
+status    = "math.proved-informal"
+paper     = "Lemma 2.9, doc/theory/exact-front.md §2 (revision 2)"
 created   = "2026-11-23"
 
 [claims.lem-4-3]
@@ -255,7 +694,7 @@ statement    = "Lemma 4.3 (records give a configuration): Every feasible plan on
 status       = "math.machine-checked"
 lean         = "ZenoFront.Feasible.exists_roleConfig_records"
 lean_partial = "ZenoFront.recCities, ZenoFront.landingRecs"
-paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2"
+paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2 (revision 2)"
 created      = "2026-11-23"
 
 [claims.lem-4-4]
@@ -264,7 +703,7 @@ kind      = "lemma"
 statement = "Lemma 4.4 (shrinking role configurations): Let p ≤ s. A role configuration with s + 2N landings has one with exactly s landings whose drop-offs, pick-ups and crossings are sub-multisets of the old ones, so its cost, role loads and groups do not grow."
 status    = "math.machine-checked"
 lean      = "ZenoFront.RoleConfig.exists_shrink, ZenoFront.RoleConfig.roleLoad_mono, ZenoFront.cost_mono"
-paper     = "Lemma 4.4, doc/theory/exact-front.md §4.2"
+paper     = "Lemma 4.4, doc/theory/exact-front.md §4.2 (revision 2)"
 created   = "2026-11-23"
 
 [claims.lem-4-5]
@@ -273,556 +712,207 @@ kind      = "lemma"
 statement = "Lemma 4.5 (parity) [PAR]: for a role configuration on Q with passenger count t, the groups X_k = Dr_k + Pk_k + Cr_k form an admissible partition of a multiset of size 2t − |Q|, with the same cost. Lean form: admissibility of the groups, with the witness h_{k,i} = (Dr_k(i) + Pk_k(i)) mod 2 (RoleConfig.isParityWitness_witness); size and cost hold by definition."
 status    = "math.machine-checked"
 lean      = "ZenoFront.RoleConfig.admissible_groups"
-paper     = "Lemma 4.5, doc/theory/exact-front.md §4.2"
+paper     = "Lemma 4.5, doc/theory/exact-front.md §4.2 (revision 2)"
 created   = "2026-11-23"
 
-[claims.lem-4-6]
-kind         = "lemma"
-statement    = "Lemma 4.6 (adding a plane): An admissible partition of q planes with 2t − q landings, t ≥ q + 1, gives an admissible partition of q + 1 planes with 2t − q − 1 landings, no larger cost, and loads bounded by every bound on the old loads; repeating, one of p planes for any q ≤ p ≤ t."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Admissible.addPlane_of_size, ZenoFront.Admissible.addPlanes_le"
-lean_partial = "ZenoFront.Admissible.addPlane, ZenoFront.Admissible.addPlanes"
-paper        = "Lemma 4.6, doc/theory/exact-front.md §4.2"
-created      = "2026-11-23"
-
 [claims.thm-4-7]
+removed   = "2026-11-25: merged into Theorem 4.4 (thm-4-10)"
 kind      = "theorem"
 statement = "Theorem 4.7 (converse): under (S) and (A1), every feasible plan with cost C, makespan M and flight times F_k is dominated by an admissible partition X_1..X_p of a multiset X with |X| = s, c(X) ≤ C and ℓ(X_k) ≤ F_k ≤ M. Lean form: (A1) as Network.A1, F_k as durSum (P k)."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Feasible.exists_admissible_A1_flightTime"
-paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
+paper     = "Thm 4.7, doc/theory/exact-front.md §4.3 (revision 2)"
 created   = "2026-11-23"
 
-[claims.cor-4-8]
-kind         = "corollary"
-statement    = "Corollary 4.8 (the symmetric front): Assume (S), (H) and p ≤ t. The feasible plans, the plans whose planes end anywhere, the admissible partitions of 2t − p landings (points (c(X), 2·max_k δ(X_k))) and the multisets of 2t − p landings that have an admissible partition (points (c(X), M(X)), M(X) the least 2·max_k δ(X_k) over them) have the same minimal points: F = Min A′ = Min 𝒫 = Min 𝒳."
-status       = "math.machine-checked"
-lean         = "ZenoFront.minimal_achievable_iff_anywhere_hub, ZenoFront.minimal_achievable_iff_admissiblePoints_hub, ZenoFront.minimal_achievable_iff_multisetPoints_hub"
-lean_partial = "ZenoFront.minimal_admissiblePoints_iff_multisetPoints, ZenoFront.FeasibleAnywhere.exists_admissible_hub"
-paper        = "Cor 4.8, doc/theory/exact-front.md §4.4"
-created      = "2026-11-23"
-
 [claims.thm-4-9]
+removed   = "2026-11-25: merged into Theorem 4.5 (cor-4-8)"
 kind      = "theorem"
 statement = "Theorem 4.9 (bridge) [B3]: under (S) and (A1), the front of the variant in which planes may end anywhere and the makespan is the last arrival equals the front F. Lean form: an explicit p ≤ t."
 status    = "math.machine-checked"
 lean      = "ZenoFront.minimal_achievable_iff_anywhere_of_A1"
-paper     = "Thm 4.9, doc/theory/exact-front.md §4.5"
+paper     = "Thm 4.9, doc/theory/exact-front.md §4.5 (revision 2)"
 created   = "2026-11-23"
 
 [claims.conj-4-10]
+removed   = "2026-11-25: merged into Theorem 4.4 (thm-4-10)"
 kind      = "conjecture"
 statement = "Conjecture 4.10: Theorem 4.7 holds under (S) and (AΔ), without (A1); equivalently, every feasible plan is weakly dominated in (cost, makespan) by a simple feasible plan. Proved as Theorem 4.10 (thm-4-10)."
 status    = "math.proved-informal"
-paper     = "Conj 4.10, doc/theory/exact-front.md §4.6"
+paper     = "Conj 4.10, doc/theory/exact-front.md §4.6 (revision 2)"
 created   = "2026-11-23"
 
-[claims.thm-4-10]
-kind         = "theorem"
-statement    = "Theorem 4.10 (the converse under (S) and (H)): Assume (S), (H) and p ≤ t. If every plane flies from C_I to C_G and every passenger rides a chain (Lemma 3.2), some admissible partition X_1, …, X_p has |X| = 2t − p, c(X) at most the plan's cost and 2δ(X_k) ≤ F_k for every plane. In particular this holds for every feasible plan, where F_k ≤ M."
-status       = "math.machine-checked"
-lean         = "ZenoFront.exists_admissible_of_chains, ZenoFront.Feasible.exists_admissible_hub"
-lean_partial = "ZenoFront.Feasible.exists_admissible_ATri, ZenoFront.Feasible.exists_admissible_A1_flightTime, ZenoFront.exists_admissible_of_blocks"
-paper        = "Thm 4.10, doc/theory/exact-front.md §4.6"
-created      = "2026-11-24"
-
-[claims.lem-4-11]
-kind      = "lemma"
-statement = "Lemma 4.11 (shrinking): If X is admissible with at least s landings, p ≤ s and s ≡ p (mod 2), some admissible Y with Y_k ≤ X_k for every k has exactly s landings; in particular two landings can be removed when |X| ≥ p + 2."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Admissible.exists_shrink, ZenoFront.Admissible.exists_remove_two"
-paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
-created   = "2026-11-24"
-
 [claims.cor-4-12]
+removed      = "2026-11-25: merged into Theorem 4.5 (cor-4-8)"
 kind         = "corollary"
 statement    = "Corollary 4.12: under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1 and the front statements of Propositions 7.8 and 7.9 hold, and forest gaps (§9) are sound."
 status       = "math.proved-informal"
 lean_partial = "ZenoFront.minimal_achievable_iff_multisetPoints_ATri, ZenoFront.minimal_achievable_iff_anywhere_of_ATri, ZenoFront.minimal_achievable_iff_minCost_ATri, ZenoFront.solveFront_isParetoFront_ATri, ZenoFront.Cert.check_sound_ATri, ZenoFront.Cert.forestGapBound_le_ATri"
-paper        = "Cor 4.12, doc/theory/exact-front.md §4.6"
+paper        = "Cor 4.12, doc/theory/exact-front.md §4.6 (revision 2)"
 created      = "2026-11-24"
 
-[claims.claim-4-13]
-kind      = "claim"
-statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 (the checker's relaxation L(19)) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Ex413.plan_feasible, ZenoFront.Ex413.plan_cost, ZenoFront.Ex413.plan_makespan, ZenoFront.Ex413.not_A1, ZenoFront.Ex413.not_ATri, ZenoFront.Ex413.not_ATriHub, ZenoFront.Ex413.admissible_cost_ge, ZenoFront.Ex413.relaxedBound_19, ZenoFront.Ex413.admissible_front_consecutive, ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_admissible_le, ZenoFront.Ex413.not_isParetoFront"
-paper     = "Ex 4.13, doc/theory/exact-front.md §4.6"
-created   = "2026-11-24"
-
-[claims.claim-converse-s-only]
-kind      = "conjecture"
-statement = "The converse under (S) alone: without (A1) or (AΔ), every feasible plan is dominated by an admissible partition, as in Theorem 4.10, so Corollary 4.8 holds under (S) alone."
-status    = "math.disproved"
-lean      = "ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_isParetoFront"
-paper     = "status summary (§0, the (S)-only case), doc/theory/exact-front.md; refuted by Ex 4.13 (§4.6)"
-created   = "2026-11-23"
-
-[claims.claim-prop-i-landings]
-kind      = "claim"
-statement = "Remark after Corollary 4.8 (Proposition I of both papers holds only in the front sense): for n = 1, d_1 = 1, c_1 = 0, t = 5 and p = 3, the front is {(0, 6)}, and a feasible plan with 9 central landings, more than 2t − p = 7, attains (0, 6). So a Pareto-optimal plan can have more than 2t − p landings."
-status    = "math.machine-checked"
-lean      = "ZenoFront.PropI.front, ZenoFront.PropI.plan9_pareto"
-paper     = "remark after Cor 4.8, doc/theory/exact-front.md §4.4; EvoCOP 2015 and arXiv:2304.14659, Proposition I"
-created   = "2026-11-25"
-
-# ===========================================================================
-# 5. The per-PPP greedy of both papers is not exact
-# ===========================================================================
-
-[claims.claim-5]
-kind         = "claim"
-statement    = "Section 5 (greedy counterexamples), for the per-PPP greedies of EvoCOP 2015 (Algorithm 1 and its Step 2) and of arXiv:2304.14659 (§3.2, with its Steps 2 and 3 read as in Counterexamples.lean): (a) for d = (6, 10), c = (40, 20), t = 5, p = 2, the point (260, 60) is on the front for every central table, but for every PPP of cost at most 260, every set of P3 patterns and every tie-breaking of ArgMin, both greedies give a makespan above 60; on the landings of (260, 60), Algorithm 1 without P3 ends at (52, 68) whatever the ties. (b) For d = (1, 3), c = (9, 5), t = 4, p = 2, the point (42, 12) is on the front, and for every PPP of cost at most 42 and every tie-breaking the arXiv greedy gives a makespan above 12, while EvoCOP's greedy reaches (42, 12) with one P3 at city 2, whatever the ties."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt, ZenoFront.Greedy.evocop_lpt_noP3, ZenoFront.Greedy.arxiv_misses_p3First, ZenoFront.Greedy.evocop_reaches_p3First"
-paper        = "§5, doc/theory/exact-front.md"
-created      = "2026-11-23"
-
-# ===========================================================================
-# 6. Non-symmetric case
-# ===========================================================================
-
-[claims.thm-6-1]
-kind      = "theorem"
-statement = "Theorem 6.1 (the role-load bound): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a role configuration with 2t − p landings, cost at most C and every λ_k ≤ M."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_roleConfig_of_domination, ZenoFront.Sched.load_le_tmpl"
-paper     = "Thm 6.1, doc/theory/exact-front.md §6.1"
-created   = "2026-11-23"
-
 [claims.lem-6-2]
+removed   = "2026-11-25: L_NS is implemented nowhere; no kept proof uses it"
 kind      = "lemma"
 statement = "Lemma 6.2 (relaxed role loads): under (AΔ), every feasible plan with cost C and makespan M gives drop-off, pick-up and crossing multisets with |Cr_k| odd, balanced in total only, passenger count t, cost at most C and λ_k ≤ F_k ≤ M, so L_NS(T) bounds every plan of makespan at most T, shuttle triples included."
 status    = "math.proved-informal"
-paper     = "Lemma 6.2, doc/theory/exact-front.md §6.1"
-created   = "2026-11-23"
-
-[claims.lem-6-3]
-kind      = "lemma"
-statement = "Lemma 6.3 (template achievability) [N3]: for every central table and every valid scheduled configuration S with 2t − p landings (an odd number of crossings per plane, a matching sending every pick-up slot injectively to a drop-off slot of the same city, as many drop-offs as pick-ups), the template of S is a feasible plan of cost c(S) and makespan exactly M_tmpl(S) = max(max_k λ_k, max over the links (u, j; v, l) at x of Pre_u(j) + d_x + d̄_x + Suf_v(l)); p ≤ t follows from the hypotheses, and nothing is assumed on the durations."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Sched.tmplPlan_spec"
-paper     = "Lemma 6.3, doc/theory/exact-front.md §6.2"
+paper     = "Lemma 6.2, doc/theory/exact-front.md §6.1 (revision 2)"
 created   = "2026-11-23"
 
 [claims.cor-6-4]
+removed   = "2026-11-25: no code, certificate kind or headline proof uses it"
 kind      = "corollary"
 statement = "Corollary 6.4 (one pick-up never waits harmfully) [W1]: under (AΔ-path), if every plane has at most one pick-up, or every plane at most one drop-off, then M_tmpl = max_k λ_k for every order and matching."
 status    = "math.proved-informal"
-paper     = "Cor 6.4, doc/theory/exact-front.md §6.2"
-created   = "2026-11-23"
-
-[claims.prop-6-5]
-kind      = "proposition"
-statement = "Proposition 6.5 (harmful waiting): for n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4 and no central flights, (A1-NS) holds, the cheapest role configuration with every λ_k ≤ 73 costs 14, and no plan of makespan at most 73 costs less than 18."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Prop65.prop65, ZenoFront.Prop65.cost_ge_of_makespan_le_noCentral, ZenoFront.Prop65.harmful_waiting"
-paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
-created   = "2026-11-23"
-
-[claims.prop-6-6]
-kind         = "proposition"
-statement    = "Proposition 6.6 (the balanced bound): The imbalance-vector program at level T (planes in order; state: landings used and the imbalance vector Σ(Dr − Pk) so far, of ℓ¹-norm at most t − p) has value at most the cost of every role configuration with s landings and every λ_k ≤ T, for the weights and crossing table the checker builds."
-status       = "math.machine-checked"
-lean         = "ZenoFront.BalData.value_le_totalCost, ZenoFront.Cert2.balWith_le"
-lean_partial = "ZenoFront.BalData.layers_dominate, ZenoFront.RoleConfig.norm_prefix_le"
-paper        = "Prop 6.6, doc/theory/exact-front.md §6.3"
-created      = "2026-11-23"
-
-[claims.conj-6-7]
-kind      = "conjecture"
-statement = "Conjecture 6.7 (extended Proposition I): under (AΔ), the front equals the front of role configurations extended with shuttle triples, each adding exactly one landing, with exact makespans."
-status    = "math.disproved"
-paper     = "Conj 6.7, doc/theory/exact-front.md §6.4"
+paper     = "Cor 6.4, doc/theory/exact-front.md §6.2 (revision 2)"
 created   = "2026-11-23"
 
 [claims.lem-6-8]
+removed   = "2026-11-25: event orders leave the model: Theorem 5.3 covers every plan"
 kind      = "lemma"
 statement = "Lemma 6.8 (event order): (a) a plan is event-ordered iff its next-leg relation has no cycle; (b) in a simple plan with clean journeys, a cycle passes through a central city with d_x = d̄_x = 0; (c) templates of role configurations and the plans of Theorem 4.1 are event-ordered."
 status    = "math.proved-informal"
-paper     = "Lemma 6.8, doc/theory/exact-front.md §6.2"
+paper     = "Lemma 6.8, doc/theory/exact-front.md §6.2 (revision 2)"
 created   = "2026-11-24"
 
-[claims.thm-6-9]
-kind         = "theorem"
-statement    = "Theorem 6.9 (schedulable domination): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a valid scheduled configuration with 2t − p landings, cost at most C and M_tmpl ≤ M; its template plan is feasible, of cost at most C and makespan at most M."
-status       = "math.machine-checked"
-lean         = "ZenoFront.schedulableDomination_all, ZenoFront.schedulableDomination_template"
-lean_partial = "ZenoFront.Feasible.split, ZenoFront.exists_transfer_pw, ZenoFront.exists_rewired, ZenoFront.exists_links, ZenoFront.exists_sched_of"
-paper        = "Thm 6.9, doc/theory/exact-front.md §6.2"
-created      = "2026-11-24"
-
-[claims.cor-6-10]
-kind         = "corollary"
-statement    = "Corollary 6.10 (non-symmetric front): under (A1-NS) and p ≤ t, the front of the feasible plans is Min 𝒦_S = Min 𝒦, where 𝒦_S is the set of points (c(S), M_tmpl(S)) of the valid scheduled configurations S with 2t − p landings, and 𝒦 the set of points (c(cfg), m(cfg)) of the role configurations on the p planes with passenger count t, m(cfg) the least M_tmpl over orders and link matchings (attained, as every role configuration has one); a list is the Pareto front of the feasible plans iff it is that of 𝒦_S, and no event order or hypothesis on zero durations is needed."
-status       = "math.machine-checked"
-lean         = "ZenoFront.minimal_achievable_iff_configPoints, ZenoFront.minimal_achievable_iff_schedPoints"
-lean_partial = "ZenoFront.Cert2.check_sound"
-paper        = "Cor 6.10, doc/theory/exact-front.md §6.2"
-created      = "2026-11-24"
-
 [claims.claim-6-2-end]
+removed   = "2026-11-25: superseded: Theorem 5.3 holds for every plan"
 kind      = "claim"
 statement = "End of section 6.2: under (A1-NS), on instances with a city with d_x = d̄_x = 0, plans that are not event-ordered never beat the front of Corollary 6.10."
 status    = "math.proved-informal"
-paper     = "end of §6.2, doc/theory/exact-front.md"
-created   = "2026-11-24"
-
-[claims.prop-6-7]
-kind      = "proposition"
-statement = "Proposition 6.7 (the shuttle construction of arXiv:2304.14659 §3.3 misses the front): for n = 2, d = (1, 3), d̄ = (3, 1), a central flight of duration 2 between the two cities, c = (6, 1), t = 3 and p = 2, (AΔ) holds and (A1-NS) fails, and a feasible plan has cost 15 and makespan 8, so the front has a point of makespan at most 8. In the augmented instance of §3.3 as printed (the pick-up at the new city lasting 2d_j), whether or not the shuttle crossing is counted, every role configuration with per-pattern durations and t passengers has a plane whose patterns last at least 10, so every point of the construction has makespan at least 10 and its front is not the instance's front."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Shuttle.shuttle_misses, ZenoFront.Shuttle.load_ge, ZenoFront.Shuttle.plan_feasible, ZenoFront.Shuttle.not_net_A1NS"
-paper     = "Prop 6.7, doc/theory/exact-front.md §6.4"
+paper     = "end of §6.2, doc/theory/exact-front.md (revision 2)"
 created   = "2026-11-24"
 
 [claims.def-6-17]
+removed   = "2026-11-25: Example 5.10 defines the shuttle situation it needs, and Proposition 6.18, its other user, goes"
 kind      = "definition"
 statement = "Definition 6.17: a shuttle triple at (x, y) is a drop-off at x, a shuttle C_G → x → y → C_I carrying the dropped passenger to y, and a pick-up at y; a split crossing at (x, y) is a segment C_I → x → y → C_G with an empty central flight, which acts as a drop-off at x and a pick-up at y."
 status    = "math.proved-informal"
-paper     = "Def 6.17, doc/theory/exact-front.md §6.4"
+paper     = "Def 6.17, doc/theory/exact-front.md §6.4 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-18]
+removed   = "2026-11-25: computed by search only; no kept result uses it"
 kind      = "proposition"
 statement = "Proposition 6.18 (a)–(c), computed by exhaustive search: under (AΔ) without (A1-NS), segments with one central flight do not complete the front. (a) For n = 2, d = (1, 7), d̄ = (7, 1), d_12 = 6, t = 5, p = 2 the least makespan is 32, but 34 with at most three central landings per segment and 36 without central flights (the role configurations, by Corollary 6.10). (b) On a table without the flight 1–2, a front point needs a walk through a third city. (c) For d = (3, 8), d̄ = (8, 3), d_12 = 5, t = 7, p = 3 the least makespan 41 needs six central landings in a segment (43 with at most five). Part (d) is the separate record claim-6-18-d."
 status    = "math.proved-informal"
-paper     = "Prop 6.18 (a)–(c), doc/theory/exact-front.md §6.4"
+paper     = "Prop 6.18 (a)–(c), doc/theory/exact-front.md §6.4 (revision 2)"
 created   = "2026-11-24"
 
 [claims.claim-6-18-d]
+removed   = "2026-11-25: rests on the flow model only; no kept result uses it"
 kind      = "claim"
 statement = "Proposition 6.18(d): for n = 3, d = (7, 1, 3), d̄ = (2, 6, 6), c = (4, 7, 4), d_12 = 7, d_13 = 5, d_23 = 3, t = 7, p = 3, the point (73, 29) of the front (exhaustive search) is reached by no plan whose central flights all lie in crossings, so it needs central flights in segments of another type; the plan found uses a pick-up segment C_G → 3 → 1 → 3 → C_G. The class claim rests on the flow model restricted to segment classes, whose exactness has no written proof."
 status    = "math.conjectured"
-paper     = "Prop 6.18(d), doc/theory/exact-front.md §6.4"
+paper     = "Prop 6.18(d), doc/theory/exact-front.md §6.4 (revision 2)"
 created   = "2026-11-24"
 
 [claims.lem-6-19]
+removed   = "2026-11-25: no code, certificate kind or headline proof uses it"
 kind      = "lemma"
 statement = "Lemma 6.19 (cut bound): with Φ the least flight time of a sequence of flights from C_I to C_G, every feasible plan has Σ_k F_k ≥ (2t − p)Φ, hence makespan at least (2t − p)Φ/p; under (AΔ), Φ = min_x (d_x + d̄_x)."
 status    = "math.proved-informal"
-paper     = "Lemma 6.19, doc/theory/exact-front.md §6.4"
-created   = "2026-11-24"
-
-[claims.claim-6-11]
-kind      = "claim"
-statement = "Example 6.11 (the reduction misses the front): for the path U = C_I–a–b–C_G with durations 1, 2, 1, c_a = c_b = 1, t = 3 and p = 2, the reduced instance f(U) has the two cities (d, d̄, c) = (1, 3, 2) and (3, 1, 2) and the front {(8, 10)}, while U has a feasible plan of cost 8 and makespan 8. So F_U ≠ F_{f(U)}."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Ex611.vcities_data, ZenoFront.Ex611.reduced_graph, ZenoFront.Ex611.reduced_front, ZenoFront.Ex611.reduced_front_network, ZenoFront.Ex611.plan_feasible, ZenoFront.Ex611.fronts_differ"
-paper     = "Ex 6.11, doc/theory/exact-front.md §6.6"
+paper     = "Lemma 6.19, doc/theory/exact-front.md §6.4 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-12]
+removed   = "2026-11-25: general graphs are kept only for Example 5.9, which is proved by certificate without it"
 kind      = "proposition"
 statement = "Proposition 6.12 (the reduced front is attained): for every role configuration of the reduced clique instance f(U) with passenger count t, every order of its drop-offs and pick-ups and every link matching, the flight graph U has a feasible plan with the configuration's cost and the makespan M_tmpl of its template, so F_{f(U)} ⊆ A_U; no assumption on U is needed."
 status    = "math.proved-informal"
-paper     = "Prop 6.12, doc/theory/exact-front.md §6.6"
+paper     = "Prop 6.12, doc/theory/exact-front.md §6.6 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-13]
+removed   = "2026-11-25: general graphs are kept only for Example 5.9; only its dropped clause F_U = {(8, 8)} used it"
 kind      = "proposition"
 statement = "Proposition 6.13 (same least cost): when U has no edge C_I–C_G and κ* is the least ω of a path from C_I to C_G, every plan of U costs at least sκ*, the cheapest point (sκ*, M*) of F_{f(U)} costs exactly that, so U and f(U) have the same least cost and F_U = Min{(C, M) ∈ A_U : M ≤ M*}."
 status    = "math.proved-informal"
-paper     = "Prop 6.13, doc/theory/exact-front.md §6.6"
+paper     = "Prop 6.13, doc/theory/exact-front.md §6.6 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-14]
+removed   = "2026-11-25: general graphs are kept only for Example 5.9; its argument survives as Proposition 6.6"
 kind      = "proposition"
 statement = "Proposition 6.14 (dominated cities, Pareto paths): in a clique instance without central flights, removing a city v dominated by another (c, d and d̄ all no larger) keeps the front; in particular f(U) keeps its front restricted to pairs of non-dominated paths."
 status    = "math.proved-informal"
-paper     = "Prop 6.14, doc/theory/exact-front.md §6.6"
+paper     = "Prop 6.14, doc/theory/exact-front.md §6.6 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-15]
+removed   = "2026-11-25: general graphs are kept only for Example 5.9, which needs none of them"
 kind      = "proposition"
 statement = "Proposition 6.15 (where the reduction is exact): F_U = F_{f(U)} when (a) U is a clique instance satisfying (A1-NS), (b) p = 1, or (c) t = p."
 status    = "math.proved-informal"
-paper     = "Prop 6.15, doc/theory/exact-front.md §6.6"
+paper     = "Prop 6.15, doc/theory/exact-front.md §6.6 (revision 2)"
 created   = "2026-11-24"
 
 [claims.prop-6-16]
+removed   = "2026-11-25: general graphs are kept only for Example 5.9, which needs none of them"
 kind      = "proposition"
 statement = "Proposition 6.16 (time-expanded flows): with integer durations at least 1, the least cost of integer flows of p plane units and t passenger units through the time-expanded network up to time M is the least cost R(M) of a feasible plan of U with makespan at most M, and F_U = {(R(M), M) : 0 ≤ M ≤ M*, R(M) < R(M − 1)}."
 status    = "math.proved-informal"
-paper     = "Prop 6.16, doc/theory/exact-front.md §6.6"
+paper     = "Prop 6.16, doc/theory/exact-front.md §6.6 (revision 2)"
 created   = "2026-11-24"
 
-[claims.def-scheduled-config]
-kind      = "definition"
-statement = "Definition (scheduled configuration, template value), new in revision 3: A scheduled configuration gives each plane an ordered list of drop-offs, an ordered list of pick-ups and a multiset of crossings, and matches every pick-up slot to a drop-off slot; it is valid if every |Cr_k| is odd and the matching is a bijection between pick-up and drop-off slots of the same city. Its template value is M_tmpl = max(max_k λ_k, max over links (u, j; v, l) at x of Pre_u(j) + d_x + d̄_x + Suf_v(l)), with Pre_u(j) = 2Σ_{j′<j} d(Dr_u[j′]) and Suf_v(l) = 2Σ_{l′>l} d̄(Pk_v[l′])."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Sched, ZenoFront.Sched.Valid, ZenoFront.Sched.size, ZenoFront.Sched.cost, ZenoFront.Sched.load, ZenoFront.Sched.pre, ZenoFront.Sched.suf, ZenoFront.Sched.term, ZenoFront.Sched.tmpl"
-paper     = "revision 3 (planned)"
-created   = "2026-11-25"
-
-[claims.prop-dominance-ns]
-kind         = "proposition"
-statement    = "Proposition (dominance, non-symmetric), new in revision 3: Let rep satisfy d(rep i) ≤ d_i, d̄(rep i) ≤ d̄_i and c(rep i) ≤ c_i (domRep3 is one). Replacing every city by its representative maps a role configuration to one with the same number of landings, no larger cost and no larger role loads, and a valid scheduled configuration to a valid one with the same number of landings, no larger cost and no larger M_tmpl."
-status       = "math.machine-checked"
-lean         = "ZenoFront.RoleConfig.size_map, ZenoFront.RoleConfig.totalCost_map_le, ZenoFront.RoleConfig.roleLoad_map_le, ZenoFront.Sched.Valid.map, ZenoFront.Sched.size_map, ZenoFront.Sched.cost_map_le, ZenoFront.Sched.tmpl_map_le, ZenoFront.domRep3_le"
-lean_partial = "ZenoFront.domRep3, ZenoFront.RoleConfig.map, ZenoFront.Sched.map"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-# ===========================================================================
-# 7. Exact algorithm (symmetric case)
-# ===========================================================================
-
-[claims.prop-7-1]
-kind      = "proposition"
-statement = "Proposition 7.1 (front = breakpoints of E): Assume (S), (H) and p ≤ t. (C, M) ∈ F iff M = 2T for some T with E(T) = C and E(T′) > C for every T′ < T (original units)."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_achievable_iff_minCost_hub"
-paper     = "Prop 7.1, doc/theory/exact-front.md §7.1"
-created   = "2026-11-23"
-
-[claims.lem-7-2]
-kind         = "lemma"
-statement    = "Lemma 7.2 (the one-plane table): The table G[0][T] = 0, G[m + 1][T] = min over i with d_i ≤ T of c_i + G[m][T − d_i] (∞ over the empty set) gives the least cost of an m-multiset with δ ≤ T, and is ∞ iff there is none; its memoised version agrees with it."
-status       = "math.machine-checked"
-lean         = "ZenoFront.oneplane, ZenoFront.isLeast_oneplane, ZenoFront.oneplane_eq_top_iff, ZenoFront.oneplaneTable_getD"
-lean_partial = "ZenoFront.oneplane_le_cost"
-paper        = "Lemma 7.2, doc/theory/exact-front.md §7.2"
-created      = "2026-11-23"
-
-[claims.prop-7-3]
-kind         = "proposition"
-statement    = "Proposition 7.3 (bracket): Let E(T) be the least cost of an admissible partition of 2t − p landings into p groups with every load ≤ T (minCost). Let L(T) be the relaxation L_d of Lemma 3.5 at level T, read from the one-plane table of Lemma 6.1 (relaxedBoundAt), and U₂(T) the pairs bound, the value at level T of the pairs DP (pairsBoundAt): the cheapest forest it builds from trees of one or two planes (a single plane with an odd number of landings, or two planes linked at a representative city b, each with one copy of b and an odd number of free landings), every load ≤ T. Then L(T) ≤ E(T) at every level, E(T) ≤ U₂(T) at every level T ≤ Tmax of the table, and where L(T) = U₂(T), E(T) = L(T)."
-status       = "math.machine-checked"
-lean         = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsBoundAt, ZenoFront.minCost_eq_of_bracket"
-lean_partial = "ZenoFront.pairsBoundAt, ZenoFront.relaxedBoundAt, ZenoFront.pairRows_attained"
-paper        = "Prop 7.3, doc/theory/exact-front.md §7.3"
-created      = "2026-11-23"
-
 [claims.prop-7-4]
+removed   = "2026-11-25: the U and U₃ shortcuts are untrusted C++ optimisations, checked per run; the `gadget` kind was never built"
 kind      = "proposition"
 statement = "Proposition 7.4: if q_max ≤ 2 (p ≤ 2 or t ≤ p + 1) then E = U, and if q_max ≤ 3 (p ≤ 3 or t ≤ p + 2) then E = U_3."
 status    = "math.proved-informal"
-paper     = "Prop 7.4, doc/theory/exact-front.md §7.3"
+paper     = "Prop 7.4, doc/theory/exact-front.md §7.3 (revision 2)"
 created   = "2026-11-23"
 
-[claims.thm-7-5]
-kind         = "theorem"
-statement    = "Theorem 7.5 (the link-forest DP): For 1 ≤ p and T ≤ Tmax, the link-forest DP (tables Ch, Sub, Root and For over rooted link trees of up to p planes, labels among the non-dominated cities, free landings from G) equals E(T)."
-status       = "math.machine-checked"
-lean         = "ZenoFront.treeBoundAt_eq_minCost"
-lean_partial = "ZenoFront.treeBoundAt_le_totalCost"
-paper        = "Thm 7.5, doc/theory/exact-front.md §7.4"
-created      = "2026-11-23"
-
-[claims.thm-7-6]
-kind         = "theorem"
-statement    = "Theorem 7.6 (the σ-DP): For 1 ≤ p ≤ t and T ≤ Tmax, the σ-DP, whose states are sets of at most min(p − 1, t − p) non-dominated cities, equals E(T)."
-status       = "math.machine-checked"
-lean         = "ZenoFront.sigmaBoundAt_eq_minCost"
-lean_partial = "ZenoFront.sigmaBoundAt_le_totalCost"
-paper        = "Thm 7.6, doc/theory/exact-front.md §7.5"
-created      = "2026-11-23"
-
 [claims.lem-7-7]
+removed   = "2026-11-25: only the Pareto-set variant uses it, and no certificate kind, solver step or headline proof does"
 kind      = "lemma"
 statement = "Lemma 7.7 (Pareto sets): for a binary operation ⊗ on K² monotone in the product order and finite A, B, Min(A ⊗ B) = Min(Min A ⊗ Min B) and Min(A ∪ B) = Min(Min A ∪ Min B)."
 status    = "math.proved-informal"
-paper     = "Lemma 7.7, doc/theory/exact-front.md §7.5"
+paper     = "Lemma 7.7, doc/theory/exact-front.md §7.5 (revision 2)"
 created   = "2026-11-23"
 
 [claims.prop-7-8]
+removed   = "2026-11-25: no certificate kind, solver step or headline proof uses it"
 kind      = "proposition"
 statement = "Proposition 7.8 (Pareto-set variant) [PS]: with the σ-graph's arc weights replaced by finite Pareto sets of (cost, load) options combined by (c + c', max(τ, τ')), the set at (p, s, ∅) is the Pareto set of (c(X), max_k δ(X_k)) over admissible partitions with |X| = s and loads at most T_hi, the front points under (S) and (A1)."
 status    = "math.proved-informal"
-paper     = "Prop 7.8, doc/theory/exact-front.md §7.5"
-created   = "2026-11-23"
-
-[claims.prop-7-9]
-kind         = "proposition"
-statement    = "Proposition 7.9 (dominance, symmetric): Let rep map cities to cities with d(rep i) ≤ d_i and c(rep i) ≤ c_i (domRep, the first non-dominated representative, is one). Replacing every landing of an admissible partition by its representative gives an admissible partition with the same group sizes, no larger cost and no larger loads."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Admissible.map_dominated, ZenoFront.domRep_le"
-lean_partial = "ZenoFront.Admissible.map, ZenoFront.domRep"
-paper        = "Prop 7.9, doc/theory/exact-front.md §7.6"
-created      = "2026-11-23"
-
-[claims.prop-7-10]
-kind         = "proposition"
-statement    = "Proposition 7.10 (lower bounds): Let p ≤ t. Every feasible plan costs at least s·c_min. Under (S) and 1 ≤ p, every feasible plan has makespan at least 2d_min⌈s/p⌉."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Feasible.minOf_le_cost_emin, ZenoFront.Feasible.minOf_le_makespan"
-lean_partial = "ZenoFront.minOf, ZenoFront.Feasible.minOf_le_cost"
-paper        = "Prop 7.10, doc/theory/exact-front.md §7.6"
-created      = "2026-11-23"
-
-[claims.lem-min-cost]
-kind      = "lemma"
-statement = "Lemma (the function E), new in revision 3: Let E(T) be the least cost of an admissible partition of 2t − p landings into p groups with every δ(X_k) ≤ T (∞ if none). E is non-increasing and attained when finite; with 1 ≤ p, E(T) = ∞ for T < d_min⌈s/p⌉; and a level T at which E drops (E(T) = C < E(T′) for every T′ < T) has T ≤ (2t − p)·d_max."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minCost, ZenoFront.minCost_le, ZenoFront.minCost_attained, ZenoFront.minCost_antitone, ZenoFront.minCost_eq_top_of_lt, ZenoFront.breakpoint_le"
-paper     = "revision 3 (planned)"
-created   = "2026-11-25"
-
-[claims.thm-verified-solver]
-kind         = "theorem"
-statement    = "Theorem (verified solver), new in revision 3: Assume (S), (H) and 1 ≤ p ≤ t. The list `solveFront d c t p` is the Pareto front of the feasible plans."
-status       = "math.machine-checked"
-lean         = "ZenoFront.solveFront_isParetoFront_hub"
-lean_partial = "ZenoFront.solveFront, ZenoFront.solveFront_eq, ZenoFront.mem_solveFront_iff"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-# ===========================================================================
-# 8. Complexity
-# ===========================================================================
-
-[claims.thm-8-1]
-kind      = "theorem"
-statement = "Theorem 8.1 (3-Partition reduction): let a_1, …, a_{3m} and B be natural numbers with Σ_i a_i = mB and B/4 < a_i < B/2. In the symmetric instance with one city of duration a_i for each i, p = m and t = 2m, the multiset X that lands once at every city (|X| = 3m = 2t − p) has M(X) ≤ 2B iff the a_i split into m triples of sum B. Lean form: M(X) is minMakespan; B/4 < a_i < B/2 is B < 4a_i and 2a_i < B; the split is an assignment of the indices to the m triples, each with three indices of sum B."
-status    = "math.machine-checked"
-lean      = "ZenoFront.threePartition_iff"
-paper     = "Thm 8.1, doc/theory/exact-front.md §8"
-created   = "2026-11-23"
-
-[claims.prop-8-2]
-kind      = "proposition"
-statement = "Proposition 8.2 (Partition reduction, p = 2): let a_1, …, a_m be natural numbers with sum 2B, r ≥ m odd and K = B + 1. In the symmetric instance with 2r cities, of durations a_i + K for i ≤ m and K for the other 2r − m (all positive), p = 2 and t = r + 1, the multiset X that lands once at every city (|X| = 2r = 2t − p) has M(X) ≤ 2(B + rK) iff some sub-multiset of the a_i sums to B. Lean form: M(X) is minMakespan; the durations are partitionDur a r (B + 1); the sub-multiset is a set of indices."
-status    = "math.machine-checked"
-lean      = "ZenoFront.partition_iff"
-paper     = "Prop 8.2, doc/theory/exact-front.md §8"
-created   = "2026-11-23"
-
-[claims.cor-8-3]
-kind      = "corollary"
-statement = "Corollary 8.3 (step count of the link-forest DP): (a) the link-forest DP with a step counter returns, at every level T, the value of the checker's tree DP, which is E(T) for T ≤ Tmax when p ≥ 1, in at most P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1) steps; (b) building the one-plane table once and running the counted DP at every level 0, …, Tmax = (2t − p)·d_max gives, for 1 ≤ p ≤ t, the front of the verified solver (the Pareto front under (S) and (A1)) in at most (Tmax + 1)·P(n, t, p, Tmax) steps. Lean form: a step is one iteration of a minimum loop, one table cell, one label scanned by a membership test or one level of the scan, and the link labels cost 2n² steps."
-status    = "math.machine-checked"
-lean      = "ZenoFront.treeBoundSteps_value, ZenoFront.treeBoundSteps_eq_minCost, ZenoFront.treeBoundSteps_le, ZenoFront.scanSteps_fst, ZenoFront.scanSteps_le, ZenoFront.scanSteps_isParetoFront"
-paper     = "Cor 8.3, doc/theory/exact-front.md §8"
-created   = "2026-11-23"
-
-# ===========================================================================
-# 9. Certificates
-# ===========================================================================
-
-[claims.thm-9-1]
-kind      = "theorem"
-statement = "Theorem 9.1 (obligations imply the front): Let S ⊆ ℕ² and (C_1, M_1), …, (C_r, M_r), r ≥ 1, with M_1 < ⋯ < M_r and C_1 > ⋯ > C_r. If (1) every listed point is in S, (2) every point of S has makespan ≥ M_1, (3) for i < r every point of S with makespan < M_{i+1} has cost ≥ C_i, and (4) every point of S has cost ≥ C_r, then the list is the Pareto front of S."
-status    = "math.machine-checked"
-lean      = "ZenoFront.isParetoFront_of_obligations"
-paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+paper     = "Prop 7.8, doc/theory/exact-front.md §7.5 (revision 2)"
 created   = "2026-11-23"
 
 [claims.lem-9-2]
+removed   = "2026-11-25: the `sigma-potential` kind was never built"
 kind      = "lemma"
 statement = "Lemma 9.2 (potentials) [X2]: in a finite graph, a map V to K ∪ {∞} with V(target) ≤ 0 and V(u) ≤ wt(u, v) + V(v) on every arc gives V(source) at most the weight of every path from the source to the target."
 status    = "math.proved-informal"
-paper     = "Lemma 9.2, doc/theory/exact-front.md §9"
+paper     = "Lemma 9.2, doc/theory/exact-front.md §9 (revision 2)"
 created   = "2026-11-23"
 
 [claims.lem-9-3]
+removed   = "2026-11-25: the `sigma-potential` kind was never built"
 kind      = "lemma"
 statement = "Lemma 9.3 (default potentials): the potentials V_0 built from the one-plane table (L_rest when σ = ∅, max over a ∈ σ of L^a otherwise) satisfy V_0(target) = 0 and V_0(u) ≤ wt(u, v) + V_0(v) on every arc of the σ-graph."
 status    = "math.proved-informal"
-paper     = "Lemma 9.3, doc/theory/exact-front.md §9"
+paper     = "Lemma 9.3, doc/theory/exact-front.md §9 (revision 2)"
 created   = "2026-11-23"
 
-[claims.thm-checker-v1]
-kind         = "theorem"
-statement    = "Theorem (v1 checker), new in revision 3: If `Cert.check` accepts a format v1 certificate, its points are the Pareto front of the feasible plans of its instance for every central table satisfying (H), and for every central table if all its gaps are `relaxed`; the same holds for plans with rational times (Lemma 1.3) and, under (H), for planes ending anywhere."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Cert.check_sound_hub, ZenoFront.Cert.check_sound_rat_hub, ZenoFront.Cert.check_sound_anywhere_hub"
-lean_partial = "ZenoFront.Cert.check, ZenoFront.planOK_feasible"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-[claims.prop-roles-bound]
-kind         = "proposition"
-statement    = "Proposition (`roles` bound), new in revision 3: The roles bound at level T, the larger of (A) the plane-by-plane relaxation in which a plane's m landings contain an odd number of crossings of weight d + d̄, the others weighing 2·min(d, d̄), all within T, and (B) the least cost of s landings of weight d + d̄ within pT, is at most the cost of every role configuration with s landings and every λ_k ≤ T."
-status       = "math.machine-checked"
-lean         = "ZenoFront.rolesBoundAt_le_totalCost"
-lean_partial = "ZenoFront.Cert2.rolesWith_le, ZenoFront.sum_roleLoad_eq_load_fill"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-[claims.prop-lagrangian-bound]
-kind         = "proposition"
-statement    = "Proposition (`lagrangian` bound), new in revision 3: For every integer vector μ, the Lagrangian value at level T, the plane-by-plane relaxation in which a drop-off at i costs c_i + μ_i, a pick-up c_i − μ_i and every plane has an odd number of crossings within T, is at most the cost of every role configuration with S landings, all in the allowed cities, whose planes weigh at most T, a crossing at i weighing fill_i, a drop-off drop_i and a pick-up pick_i (d_i + d̄_i, 2d_i and 2d̄_i in the checker)."
-status       = "math.machine-checked"
-lean         = "ZenoFront.LagData.value_le_totalCost"
-lean_partial = "ZenoFront.Cert2.lagWith_le"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-[claims.prop-search-complete]
-kind         = "proposition"
-statement    = "Proposition (`search` bound), new in revision 3: If the exhaustive search over scheduled configurations of cost below C reports the gap closed at level T, every valid scheduled configuration with s landings and cost below C has M_tmpl > T."
-status       = "math.machine-checked"
-lean         = "ZenoFront.SearchData.closed_sound"
-lean_partial = "ZenoFront.Cert2.searchWith_le"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-[claims.thm-checker-v2]
-kind         = "theorem"
-statement    = "Theorem (v2 checker), new in revision 3: If `Cert2.check` accepts a format v2 certificate, its points are the Pareto front of the feasible plans of its instance for every central table that satisfies (A1-NS) if the certificate lists it, and for every central table otherwise."
-status       = "math.machine-checked"
-lean         = "ZenoFront.Cert2.check_sound"
-lean_partial = "ZenoFront.Cert2.check"
-paper        = "revision 3 (planned)"
-created      = "2026-11-25"
-
-# ===========================================================================
-# 10. The linear family
-# ===========================================================================
-
 [claims.thm-10-1]
+removed   = "2026-11-25: no claims about generator families (decision 3)"
 kind      = "theorem"
 statement = "Theorem 10.1 (linear family): under (S), with d_i = i and c_i = α − βi (β ≥ 0, α ≥ βn), L(T) = E(T) = αs − βΦ(T) for every T ≥ κ and ∞ below, with Φ(T) = (p − ρ) min(T, n q_0) + ρ min(T, n (q_0 + 1)), so the front is in closed form whatever the central flights."
 status    = "math.proved-informal"
-paper     = "Thm 10.1, doc/theory/exact-front.md §10"
+paper     = "Thm 10.1, doc/theory/exact-front.md §10 (revision 2)"
 created   = "2026-11-23"
 
 [claims.conj-10-2]
+removed   = "2026-11-25: no claims about generator families (decision 3)"
 kind      = "conjecture"
 statement = "Conjecture 10.2: on the linear family of Theorem 10.1, the papers' per-PPP greedy reaches the front."
 status    = "math.conjectured"
-paper     = "Conj 10.2, doc/theory/exact-front.md §10"
+paper     = "Conj 10.2, doc/theory/exact-front.md §10 (revision 2)"
 created   = "2026-11-23"
-
-# ===========================================================================
-# Claims of the two papers (refuted)
-# ===========================================================================
-
-[claims.paper-greedy-optimal]
-kind      = "conjecture"
-statement = "Claim of EvoCOP 2015 (Algorithm 1) and arXiv:2304.14659 (§3.2): for a fixed multiset of landings (a PPP), the greedy that gives the longest flights first to the least-loaded plane schedules it optimally, so the fronts ZenoSolver computes are the true Pareto fronts."
-status    = "math.disproved"
-lean      = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt"
-paper     = "EvoCOP 2015 Alg. 1; arXiv:2304.14659 §3.2; doc/theory/exact-front.md §5"
-created   = "2026-11-23"
-
-[claims.paper-no-harmful-waiting]
-kind      = "conjecture"
-statement = "Assumption of arXiv:2304.14659 (Conjecture 6.5 of the note, without its (AΔ-path) hypothesis): every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations. Refuted on the instance of Proposition 6.5 (d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4, no central flights)."
-status    = "math.disproved"
-lean      = "ZenoFront.Prop65.harmful_waiting"
-paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
-created   = "2026-11-23"
-
-[claims.paper-general-graph-reduction]
-kind      = "conjecture"
-statement = "Claim of arXiv:2304.14659 (§2.4): reducing an arbitrary flight graph U to the clique model f(U), with one virtual city for each central vertex i and pair of paths C_I → i and i → C_G, keeps the Pareto front: F_U = F_{f(U)}."
-status    = "math.disproved"
-lean      = "ZenoFront.Ex611.fronts_differ"
-paper     = "arXiv:2304.14659 §2.4; Ex 6.11, doc/theory/exact-front.md §6.6"
-created   = "2026-11-24"
 
 # ===========================================================================
 # Experiments
 # ===========================================================================
-#
-# The seeded validation campaign in experiments/ (experiments/README.md). Each experiment is
-# experiments/<EN_name>/run.py (seed 0) and writes its verdict, provenance and figures to
-# experiments/results/<EN_name>/. Extra fields: `tests` lists the claims an experiment bears on,
-# `refutes` those its evidence contradicts, `code` and `results` locate it. `status` uses the science
-# vocabulary: sci.supported (the evidence agrees with the claims tested; for a search, no
-# counterexample in the sample, which is not a proof) and sci.measured (a measurement).
 
 [claims.exp-e1-achievability]
 kind      = "experiment"
@@ -831,17 +921,17 @@ status    = "sci.supported"
 tests     = ["thm-4-1"]
 code      = "experiments/E1_achievability/run.py"
 results   = "experiments/results/E1_achievability"
-paper     = "Thm 4.1, doc/theory/exact-front.md §4.1"
+paper     = "Theorem 4.1, doc/theory/exact-front.md §4"
 created   = "2026-11-24"
 
 [claims.exp-e2-symmetric-front]
 kind      = "experiment"
 statement = "E2 (symmetric front): zeno's front equals the front of the exhaustive search over all plans (truth.cpp; central flights absent or useless, so (A1) holds) on 1,000 tiny instances in each regime, and the front of every role-configuration schedule (zenoOracle) on 1,000 instances with n ≤ 5, t ≤ 6: 3,000 comparisons, 0 mismatches."
 status    = "sci.supported"
-tests     = ["thm-4-7", "cor-4-8"]
+tests     = ["thm-4-10", "cor-4-8"]
 code      = "experiments/E2_symmetric_front/run.py"
 results   = "experiments/results/E2_symmetric_front"
-paper     = "Thm 4.7 and Cor 4.8, doc/theory/exact-front.md §4.3-4.4"
+paper     = "Theorems 4.4 and 4.5, doc/theory/exact-front.md §4"
 created   = "2026-11-24"
 
 [claims.exp-e3-forest-dp]
@@ -851,38 +941,38 @@ status    = "sci.supported"
 tests     = ["thm-7-5"]
 code      = "experiments/E3_forest_dp/run.py"
 results   = "experiments/results/E3_forest_dp"
-paper     = "Thm 7.5, doc/theory/exact-front.md §7.4"
+paper     = "Theorem 6.7, doc/theory/exact-front.md §6"
 created   = "2026-11-24"
 
 [claims.exp-e4-nonsymmetric-front]
 kind      = "experiment"
-statement = "E4 (non-symmetric front): the front of role-configuration schedules with exact waiting (config_front) equals the front of all plans (truth, central flights none or useless) in 1,190 comparisons and of all simple plans with up to s + 1 landings in 800, including 400 instances shaped like Prop 6.5; zeno closed its bracket on all 1,990 and matched, using the roles, lagrangian, balanced and search bounds."
+statement = "E4 (non-symmetric front): the front of role-configuration schedules with exact waiting (config_front) equals the front of all plans (truth, central flights none or useless) in 1,190 comparisons and of all simple plans with up to s + 1 landings in 800, including 400 instances shaped like Proposition 5.7; zeno closed its bracket on all 1,990 and matched, using the roles, lagrangian, balanced and search bounds."
 status    = "sci.supported"
 tests     = ["thm-6-1", "thm-6-9", "cor-6-10"]
 code      = "experiments/E4_nonsymmetric_front/run.py"
 results   = "experiments/results/E4_nonsymmetric_front"
-paper     = "Thm 6.1, Thm 6.9 and Cor 6.10, doc/theory/exact-front.md §6"
+paper     = "Theorem 5.3, Corollaries 5.4 and 5.6, doc/theory/exact-front.md §5"
 created   = "2026-11-24"
 
 [claims.exp-e5-harmful-waiting]
 kind      = "experiment"
-statement = "E5 (harmful waiting): on the instance of Proposition 6.5 the front with waiting ignored contains (14, 72) and (30, 50), while zeno, zenoOracle, config_front and simple_plans with exact waiting give the note's front, whose cheapest point within makespan 73 costs 18. Harmful waiting appears in 58 of 2.4 million random role configurations and changes the front of 9 of 150 instances shaped like Prop 6.5 (0 of 150 uniform)."
+statement = "E5 (harmful waiting): on the instance of Proposition 5.7 the front with waiting ignored contains (14, 72) and (30, 50), while zeno, zenoOracle, config_front and simple_plans with exact waiting give the note's front, whose cheapest point within makespan 73 costs 18. Harmful waiting appears in 58 of 2.4 million random role configurations and changes the front of 9 of 150 instances shaped like Proposition 5.7 (0 of 150 uniform)."
 status    = "sci.supported"
 tests     = ["prop-6-5"]
 refutes   = ["paper-no-harmful-waiting"]
 code      = "experiments/E5_harmful_waiting/run.py"
 results   = "experiments/results/E5_harmful_waiting"
-paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
+paper     = "Proposition 5.7, doc/theory/exact-front.md §5"
 created   = "2026-11-24"
 
 [claims.exp-e6-conj410-search]
 kind      = "experiment"
-statement = "E6 (converse without (A1), targeted search): of 100,000 random tiny symmetric instances, 231 have a certificate gap where L < E; with the shortest central flights the triangle inequality allows, the exhaustive search over all plans finds no plan cheaper than E in any of the 255 gaps (0 counterexamples). A search, not a proof; it stands independently of the proof of Theorem 4.10 (formerly Conjecture 4.10)."
+statement = "E6 (converse without (A1), targeted search): of 100,000 random tiny symmetric instances, 231 have a certificate gap where L < E; with the shortest central flights the triangle inequality allows, the exhaustive search over all plans finds no plan cheaper than E in any of the 255 gaps (0 counterexamples). A search, not a proof; it stands independently of the proof of Theorem 4.4."
 status    = "sci.supported"
 tests     = ["thm-4-10"]
 code      = "experiments/E6_conj410_search/run.py"
 results   = "experiments/results/E6_conj410_search"
-paper     = "Thm 4.10 (formerly Conj 4.10), doc/theory/exact-front.md §4.6"
+paper     = "Theorem 4.4, doc/theory/exact-front.md §4"
 created   = "2026-11-24"
 
 [claims.exp-e7-scaling]
@@ -892,7 +982,7 @@ status    = "sci.measured"
 tests     = ["cor-8-3"]
 code      = "experiments/E7_scaling/run.py"
 results   = "experiments/results/E7_scaling"
-paper     = "Thm 7.5 and Cor 8.3, doc/theory/exact-front.md §7.4 and §8"
+paper     = "Theorems 6.7 and 7.3, doc/theory/exact-front.md §6 and §7"
 created   = "2026-11-24"
 
 [claims.exp-e8-certificates]
@@ -902,26 +992,27 @@ status    = "sci.supported"
 tests     = ["thm-9-1"]
 code      = "experiments/E8_certificates/run.py"
 results   = "experiments/results/E8_certificates"
-paper     = "Thm 9.1, doc/theory/exact-front.md §9"
+paper     = "Theorem 8.1, doc/theory/exact-front.md §8"
 created   = "2026-11-24"
 
 [claims.exp-e9-linear-family]
+removed   = "2026-11-25: it tests Theorem 10.1, removed with §10 (no claims about generator families)"
 kind      = "experiment"
 statement = "E9 (linear family): on 303 generator instances (-C 3 -D 3) and 300 data files d_i = r0 i, c_i = α − βi (25 with β = 0), zeno's front equals the closed form of Theorem 10.1 point for point (92,550 points, fronts up to 1,939 points), no certificate needs the forest bound, and the note's sizes 1,090, 540 and 399 are reproduced."
 status    = "sci.supported"
 tests     = ["thm-10-1"]
 code      = "experiments/E9_linear_family/run.py"
 results   = "experiments/results/E9_linear_family"
-paper     = "Thm 10.1, doc/theory/exact-front.md §10"
+paper     = "Thm 10.1, doc/theory/exact-front.md §10 (revision 2)"
 created   = "2026-11-24"
 
 [claims.exp-e10-greedy-density]
 kind      = "experiment"
-statement = "E10 (greedy exactness density): the papers' per-PPP greedy (EvoCOP 2015 Alg. 1, reimplemented and validated: it misses (260, 60) on exactly the two golden instances where the 2016 solver failed) returns the exact front on 2,274 of 2,772 random and generator instances with n ≤ 8, t ≤ 10, p ≤ 6 (82.0%, 95% Wilson [80.6%, 83.4%]) and finds 93.9% of their front points; every miss has p ≥ 2 and t − p ≥ 3. On the linear family it is exact on 924 of 924 (95% Wilson [99.6%, 100%]): evidence for Conjecture 10.2, not a proof."
+statement = "E10 (greedy exactness density): the papers' per-PPP greedy (EvoCOP 2015 Alg. 1, reimplemented and validated: it misses (260, 60) on exactly the two golden instances where the 2016 solver failed) returns the exact front on 2,274 of 2,772 random and generator instances with n ≤ 8, t ≤ 10, p ≤ 6 (82.0%, 95% Wilson [80.6%, 83.4%]) and finds 93.9% of their front points; every miss has p ≥ 2 and t − p ≥ 3. On the linear family it is exact on 924 of 924 (95% Wilson [99.6%, 100%])."
 status    = "sci.supported"
-tests     = ["paper-greedy-optimal", "claim-5", "conj-10-2"]
+tests     = ["paper-greedy-optimal", "claim-5"]
 refutes   = ["paper-greedy-optimal"]
 code      = "experiments/E10_greedy_density/run.py"
 results   = "experiments/results/E10_greedy_density"
-paper     = "§5 and Conj 10.2, doc/theory/exact-front.md; EvoCOP 2015 Alg. 1"
+paper     = "Proposition 4.8, doc/theory/exact-front.md §4; EvoCOP 2015 Alg. 1"
 created   = "2026-11-24"
