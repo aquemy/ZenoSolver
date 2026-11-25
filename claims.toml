@@ -64,6 +64,14 @@ lean      = "ZenoFront.QFeasible.floor, ZenoFront.qPlanCost_eq, ZenoFront.planMa
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.def-instance]
+kind      = "definition"
+statement = "Definition (instance), new in revision 3: Central cities 1, …, n and hubs C_I, C_G; durations d_i (C_I–i) and d̄_i (i–C_G) in ℕ and a central duration dc(i, j) ∈ ℕ for every ordered pair of central cities, i = j included; no flight joins the two hubs. Landing in i costs c_i ∈ ℕ, hubs are free; p planes and t passengers start in C_I. Theorems assume 1 ≤ p ≤ t where they use it."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Network, ZenoFront.Network.duration"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
