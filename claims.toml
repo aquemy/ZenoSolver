@@ -72,6 +72,14 @@ lean      = "ZenoFront.Network, ZenoFront.Network.duration"
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.def-plan]
+kind      = "definition"
+statement = "Definition (plan), new in revision 3: A plan gives each plane a list of legs (origin, destination, departure, arrival, passenger or none). It is feasible if every leg is a flight of exactly its duration, each plane's legs form a route from C_I (each leg leaves where the previous one arrived, no earlier, the first at time ≥ 0) ending in C_G, and for each passenger the legs naming it form, in some order, such a route from time 0 ending in C_G. Cost: the landing costs of all legs into central cities; makespan: the latest end of a route; in the variant with planes ending anywhere, routes need not end in C_G."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Leg, ZenoFront.Plan, ZenoFront.Flies, ZenoFront.IsRoute, ZenoFront.PlaneFeasible, ZenoFront.Feasible, ZenoFront.planCost, ZenoFront.planMakespan, ZenoFront.PlaneFeasibleAnywhere, ZenoFront.FeasibleAnywhere"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
