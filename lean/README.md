@@ -134,7 +134,7 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 |---|---|---|
 | `ZenoFront/Model.lean` | Instance (`n` cities, `d c : Fin n → ℕ`, `t` passengers, `p` planes, `1 ≤ p ≤ t`), `s = 2t − p`, groupings `X : Fin p → Multiset (Fin n)`, load `δ`, cost | `Instance`, `Instance.s`, `Groups`, `load`, `cost`, `size`, `totalCost`, `maxLoad` |
 | `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.5, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
-| `ZenoFront/Roles.lean` | Role configurations, PAR (Lemma 4.5), the configuration of a parity witness | `RoleConfig`, `RoleConfig.groups`, `RoleConfig.admissible_groups`, `IsParityWitness.exists_roleConfig` |
+| `ZenoFront/Roles.lean` | Role configurations | `RoleConfig`, `RoleConfig.groups` |
 | `ZenoFront/SupportBound.lean` | Claim B′, `t − p` part | `touched`, `edgeCount` |
 | `ZenoFront/MinimalWitness.lean` | Claim B′, `p − 1` part, and the combined `min(p − 1, t − p)` bound | `edgeVec`, `coordSum` |
 | `ZenoFront/OnePlane.lean` | One-plane table `G[m][T]`: specification and memoised table | `oneplane`, `oneplaneTable` |
@@ -143,7 +143,7 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
 | `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
-| `ZenoFront/Converse.lean` | (A1), central landings, landing records, transfers, Lemma 4.3(b) | `Network.A1`, `routeLandings`, `landingRecs`, `Feasible.exists_roleConfig_records` |
+| `ZenoFront/Converse.lean` | (A1), the central landings of a route and their cost | `Network.A1`, `routeLandings`, `landCostSum_eq_cost` |
 | `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `Network.A1.hub`, `Network.ATri.hub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
 | `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
 | `ZenoFront/ConverseTri.lean` | Theorem 4.10, the one symmetric converse (under (S) and the triangles through a hub, so under (A1) and under (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_hub` |
@@ -162,7 +162,7 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check`, `Cert.check_sound_hub` |
 | `ZenoFront/RationalPlans.lean` | Plans with times in any `FloorRing` (`ℚ`, `ℝ`), rounding down (Lemma 1.3 of revision 3), soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
 | `ZenoFront/CheckerV2.lean` | Format v2 (non-symmetric): certificates, `check`, soundness | `Kind2`, `Cert2`, `Cert2.check`, `Cert2.check_sound` |
-| `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role weights of landing records, role shrinking (Lemma 4.4), Theorem 6.1 | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad`, `RoleConfig.exists_shrink`, `Feasible.exists_roleConfig_ns` |
+| `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role loads | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad` |
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
 | `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
@@ -200,13 +200,8 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 
 **Role configurations (`Roles.lean`)**
 
-* `RoleConfig.isParityWitness_witness`, `RoleConfig.admissible_groups` (**PAR**, Lemma 4.5):
-  `X_k = D_k + P_k + Cr_k` is admissible, with witness `h_{k,i} = (D_k(i) + P_k(i)) mod 2`.
-  Nothing uses it since the converse goes through Theorem 4.10; it is kept until revision 3
-  archives Lemma 4.5 (WP8).
-* `IsParityWitness.exists_roleConfig`: every witness `h` of `X` gives a role configuration with
-  grouping `X` and `D_k + P_k = h k`. `Admissible.exists_roleConfig`: every admissible grouping
-  is the grouping of a role configuration.
+* `RoleConfig`: per plane, drop-offs `D_k`, pick-ups `P_k` and an odd number of crossings `Cr_k`,
+  with `Σ_k D_k = Σ_k P_k`; `RoleConfig.groups` is `X_k = D_k + P_k + Cr_k`.
 
 **Claim B′ (`SupportBound.lean`, `MinimalWitness.lean`)**
 
@@ -286,20 +281,10 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 * `Admissible.addPlanes`: AP applied `m` times, from `q` to `q + m ≤ t` planes (step 4 of
   bridge B3).
 
-**Landing records and transfers (`Converse.lean`)**
+**Landings (`Converse.lean`)**
 
-* `countP_landingRecs_entry`, `countP_landingRecs_exit`, `PlaneFeasible.cntA_eq`: the landing
-  records of a route, each landing with its entry and exit hub (a central leg counts as passing
-  through `C_G`). Records entered from `C_I` are the legs `C_I → x`, records exited towards `C_G`
-  are the legs leaving `x` not towards `C_I`, and `#A = #Ā + 1` per plane (Lemma 2.1).
-* `exists_transfer` (**transfers**): every passenger route has a leg `C_I → x` followed by a leg
-  leaving `x` not towards `C_I`.
-* `Feasible.exists_roleConfig_records` (**Lemma 4.3(b)**, direct selection): every feasible plan
-  with `p ≤ t` gives a role configuration whose groups are sub-multisets of the records and have at
-  least `2t − p` landings. All `A` and `Ā` records are crossings, and each city gets
-  `min(#B, #B̄)` drop-off/pick-up pairs. The count `passengers at x ≤ #A_x + min(#B_x, #B̄_x)`
-  comes from two injections: passengers into records entered from `C_I`, and passengers into
-  records exited towards `C_G`. Theorem 6.1 uses it.
+* `routeLandings`, `landCostSum_eq_cost`: the central landings of a route, and its landing cost
+  as their cost.
 
 **(AΔ) and the segment bound (`TriSegments.lean`)**
 
@@ -536,12 +521,10 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not for
 * `Feasible.split`: under (A1-NS), splitting every central flight `a → b` into `a → h → b`
   (`h` the hub of the shorter detour) keeps a plan feasible, with the same cost, no larger
   makespan and no central flight.
-* `roleW_landingRecs_le`: on a route without central flights, each landing's two legs last
-  exactly its role weight (crossing `d + d̄`, drop-off `2d`, pick-up `2d̄`).
-* `Feasible.exists_roleConfig_records`: direct selection (Lemma 4.3(b)). `RoleConfig.exists_shrink`: Lemma 4.4 in role form.
-* `Feasible.exists_roleConfig_ns` (**Theorem 6.1**): under (A1-NS), every feasible plan gives a
-  role configuration on the `p` planes with passenger count `t`, cost at most the plan's and
-  every role load at most its makespan.
+* `Feasible.exists_roleConfig_of_domination` (**Theorem 6.1**, `NSFront.lean`): under (A1-NS),
+  every feasible plan gives a role configuration on the `p` planes with passenger count `t`, cost
+  at most the plan's and every role load at most its makespan. It is a corollary of Theorem 6.9:
+  every role load is at most the closed form `M_tmpl` (`Sched.load_le_tmpl`).
 * `rolesBoundAt_le_totalCost`: the role relaxation is a lower bound on such configurations. It
   takes the larger of two bounds. Per plane: an odd number of crossings, other landings at
   `2 min(d, d̄)`. All planes: the role loads add up to the crossing weight of all landings, by the
@@ -627,8 +610,6 @@ among them.
   an inclusion-minimal witness (`card_touched_le_of_minimal_subset`).
 * **Role configuration.** Three multisets per plane: drop-offs `D_k`, pick-ups `P_k` and
   crossings `Cr_k`, with `|Cr_k|` odd and `Σ_k D_k = Σ_k P_k` as multisets (per-city balance).
-  `IsParityWitness.exists_roleConfig` produces `D_k + P_k = h k`, so every city appears at most
-  once in `D_k + P_k`.
 * **Infinity.** The tables use `WithTop ℕ`, with `⊤ = ∞`. `ℕ∞` is not used because its lattice
   instance is not computable. The C++ table must agree on `G[0][T] = 0` and
   `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`, the minimum over no city being `∞`.
@@ -771,7 +752,7 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] Format v2: parser, non-symmetric Lemma R (`relaxed`), and soundness for every table of
       central flights (`Cert2.check_sound`).
-- [x] Role model with role loads; N1 (Theorem 6.1, `Feasible.exists_roleConfig_ns`); the
+- [x] Role model with role loads; N1 (Theorem 6.1, `Feasible.exists_roleConfig_of_domination`); the
       `roles` and `lagrangian` bounds.
 - [x] `balanced` (`BalData.value_le_totalCost`). The Lean checker accepts all 150
       certificates of random small non-symmetric instances, with the C++ checker's verdicts and

@@ -24,8 +24,8 @@ larger of two bounds:
   (`sum_roleLoad_eq_load_fill`). With every load at most `T`, all `s` landings weigh at most
   `p · T`, and cost at least the one-plane entry `G_fill[s][p · T]`.
 
-With Theorem 6.1 (`Feasible.exists_roleConfig_ns`), this bounds the cost of every feasible plan
-under (A1-NS).
+With Theorem 6.1 (`Feasible.exists_roleConfig_of_domination`), this bounds the cost of every
+feasible plan under (A1-NS).
 
 ## Main results
 

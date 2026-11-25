@@ -37,9 +37,8 @@ matching (`RoleConfig.exists_sched`), so `m(cfg)` is attained.
   `Min 𝒦`.
 * `schedulableDomination_template` (**Theorem 6.9, as in the note**): every feasible plan is
   weakly dominated by a scheduled configuration whose template plan is no later.
-* `Feasible.exists_roleConfig_of_domination`: Theorem 6.1 in the form of
-  `Feasible.exists_roleConfig_ns` (role loads at most the makespan), as a corollary of
-  Theorem 6.9, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
+* `Feasible.exists_roleConfig_of_domination` (**Theorem 6.1**): role loads at most the
+  makespan, as a corollary of Theorem 6.9, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
 -/
 
 @[expose] public section
@@ -284,8 +283,7 @@ theorem Sched.load_le_tmpl (S : Sched n p) (d db : Fin n → ℕ) (k : Fin p) :
 /-- **Theorem 6.1 as a corollary of Theorem 6.9.** Under (A1-NS), with `p ≤ t`, every feasible
 plan gives a role configuration on the `p` planes with `2t − p` landings, cost at most the
 plan's, and every role load at most the makespan: the role configuration of the scheduled
-configuration of `schedulableDomination_all`, whose role loads are at most its closed form.
-This is the statement of `Feasible.exists_roleConfig_ns`. -/
+configuration of `schedulableDomination_all`, whose role loads are at most its closed form. -/
 theorem Feasible.exists_roleConfig_of_domination {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
     {P : Plan n t p} (hP : Feasible N P) (hpt : p ≤ t) :
     ∃ cfg : RoleConfig n p, size cfg.groups = 2 * t - p ∧

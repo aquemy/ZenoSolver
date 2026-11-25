@@ -110,9 +110,9 @@ created   = "2026-11-25"
 
 [claims.lem-2-1]
 kind      = "lemma"
-statement = "Lemma 2.1 (crossings outnumber returns): Record every central landing of a route with whether its incoming leg leaves C_I and whether its outgoing leg arrives in C_I (a central outgoing leg counts as towards C_G). On a route from C_I to C_G, the records of type A (from C_I, not back to C_I) number one more than those of type Ā (not from C_I, back to C_I). On a route without central flights the records are its segments."
+statement = "Lemma 2.1 (crossings outnumber returns): On a route from C_I to C_G without central flights, the visits (a leg into a central city followed by the next leg, out of it into a hub) of type A (from C_I to C_G) number one more than those of type Ā (from C_G to C_I). On a closed walk of visits, from a hub back to it, they are equally many."
 status    = "math.machine-checked"
-lean      = "ZenoFront.landingRecs, ZenoFront.cntA, ZenoFront.cntAbar, ZenoFront.PlaneFeasible.cntA_eq, ZenoFront.TRoute.countP_isA"
+lean      = "ZenoFront.TChain.countP_isA, ZenoFront.TRoute.countP_isA, ZenoFront.TLoop.countP_isA"
 paper     = "Lemma 2.1, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
@@ -212,10 +212,10 @@ created      = "2026-11-23"
 
 [claims.lem-3-3]
 kind         = "lemma"
-statement    = "Lemma 3.3 (segment durations): (a) A feasible plane has a multiset Z of central cities with |Z| equal to its number of hub arrivals, 2e(Z) ≤ its end time and c(Z) ≤ its landing cost. (b) Under (S) and (H) its route is the concatenation of its segments, one per hub arrival, each landing in a central city and flying at least 2d_y for every central city y it lands in; and a chain from a central city y ends at least d_y after it starts. (c) On a route without central flights the two legs of a central landing at x last its role weight, d_x + d̄_x for a crossing, 2d_x for a drop-off and 2d̄_x for a pick-up, so the role weights sum to at most the flight time."
+statement    = "Lemma 3.3 (segment durations): (a) A feasible plane has a multiset Z of central cities with |Z| equal to its number of hub arrivals, 2e(Z) ≤ its end time and c(Z) ≤ its landing cost. (b) Under (S) and (H) its route is the concatenation of its segments, one per hub arrival, each landing in a central city and flying at least 2d_y for every central city y it lands in; and a chain from a central city y ends at least d_y after it starts. (c) On a route without central flights every visit lasts its role weight (d_x + d̄_x for a crossing, 2d_x for a drop-off, 2d̄_x for a pick-up), and the visits of a route from a hub whose legs all arrive by M last at most M in total."
 status       = "math.machine-checked"
-lean         = "ZenoFront.PlaneFeasible.exists_segments_emin, ZenoFront.PlaneFeasible.exists_segments_tri, ZenoFront.ToGoal.add_d_le_endTime, ZenoFront.roleW_landingRecs_le, ZenoFront.Node.w_eq"
-lean_partial = "ZenoFront.PlaneFeasible.exists_segments, ZenoFront.segment_bound, ZenoFront.ToGoal.arr_add_d_le, ZenoFront.TChain.sum_w_le"
+lean         = "ZenoFront.PlaneFeasible.exists_segments_emin, ZenoFront.PlaneFeasible.exists_segments_tri, ZenoFront.ToGoal.add_d_le_endTime, ZenoFront.Node.w_eq, ZenoFront.TChain.sum_w_le"
+lean_partial = "ZenoFront.PlaneFeasible.exists_segments, ZenoFront.segment_bound, ZenoFront.ToGoal.arr_add_d_le"
 paper        = "Lemma 3.3, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
@@ -249,6 +249,7 @@ paper     = "Def 4.2, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.lem-4-3]
+removed      = "2026-11-25: Corollary 5.4 now follows from Theorem 5.3, and no kept proof uses it; its Lean is deleted"
 kind         = "lemma"
 statement    = "Lemma 4.3 (records give a configuration): Every feasible plan on p planes gives a role configuration with at least 2t − p landings whose drop-offs and pick-ups are cities of landing records (Lemma 3.1) of type B (from and back to C_I) and B̄ (neither) of their plane, and whose crossings are exactly the cities of its records of type A and Ā."
 status       = "math.machine-checked"
@@ -258,6 +259,7 @@ paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2"
 created      = "2026-11-23"
 
 [claims.lem-4-4]
+removed   = "2026-11-25: Corollary 5.4 now follows from Theorem 5.3, which shrinks inside its proof; its Lean is deleted"
 kind      = "lemma"
 statement = "Lemma 4.4 (shrinking role configurations): Let p ≤ s. A role configuration with s + 2N landings has one with exactly s landings whose drop-offs, pick-ups and crossings are sub-multisets of the old ones, so its cost, role loads and groups do not grow."
 status    = "math.machine-checked"
@@ -266,6 +268,7 @@ paper     = "Lemma 4.4, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.lem-4-5]
+removed   = "2026-11-25: used only by the role-route proof of Theorem 4.7, replaced by Theorem 4.4; its Lean is deleted"
 kind      = "lemma"
 statement = "Lemma 4.5 (parity) [PAR]: for a role configuration on Q with passenger count t, the groups X_k = Dr_k + Pk_k + Cr_k form an admissible partition of a multiset of size 2t − |Q|, with the same cost. Lean form: admissibility of the groups, with the witness h_{k,i} = (Dr_k(i) + Pk_k(i)) mod 2 (RoleConfig.isParityWitness_witness); size and cost hold by definition."
 status    = "math.machine-checked"
@@ -383,7 +386,7 @@ created      = "2026-11-23"
 kind      = "theorem"
 statement = "Theorem 6.1 (the role-load bound): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a role configuration with 2t − p landings, cost at most C and every λ_k ≤ M."
 status    = "math.machine-checked"
-lean      = "ZenoFront.Feasible.exists_roleConfig_of_domination, ZenoFront.Feasible.exists_roleConfig_ns"
+lean      = "ZenoFront.Feasible.exists_roleConfig_of_domination, ZenoFront.Sched.load_le_tmpl"
 paper     = "Thm 6.1, doc/theory/exact-front.md §6.1"
 created   = "2026-11-23"
 

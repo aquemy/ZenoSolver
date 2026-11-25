@@ -9,6 +9,7 @@ public import ZenoFront.BalancedBound
 public import ZenoFront.SearchGap
 public import ZenoFront.SchedMap
 public import ZenoFront.DominationAll
+public import ZenoFront.NSFront
 
 /-!
 # The checker for certificate format v2 (non-symmetric instances)
@@ -24,7 +25,7 @@ This file verifies:
   `2 min(d_i, d̄_i)` per landing (`Feasible.exists_relaxation_emin`); a segment starts and ends
   with hub flights, each lasting at least `min(d, d̄)` of its city;
 * `roles` (gaps and fastest point), under (A1-NS), which the certificate must list: Theorem 6.1
-  (`Feasible.exists_roleConfig_ns`) and the role relaxation (`rolesBoundAt_le_totalCost`), at
+  (`Feasible.exists_roleConfig_of_domination`, from Theorem 6.9) and the role relaxation (`rolesBoundAt_le_totalCost`), at
   levels `⌊(M − 1)/g⌋` for the gcd `g` of all durations;
 * `lagrangian μ` gaps, under (A1-NS): the decoupled per-plane bound at the listed multipliers
   (`LagData.value_le_totalCost`), over the representatives of the cities (`domRep3`);
@@ -345,7 +346,7 @@ theorem exists_repConfig {dc : Fin C.n → Fin C.n → ℕ} (hA : (C.network dc)
       totalCost C.c cfg.groups ≤ planCost C.c P ∧
       (∀ k, ∀ i ∈ cfg.groups k, i ∈ C.reps3) ∧
       ∀ k, cfg.roleLoad ⟨C.dR, C.dbR, dc⟩ k ≤ (M - 1) / C.rolesScale := by
-  obtain ⟨cfg, hsize, hcost, hload⟩ := hP.exists_roleConfig_ns hA C.c hpt
+  obtain ⟨cfg, hsize, hcost, hload⟩ := hP.exists_roleConfig_of_domination hA C.c hpt
   have hrep := domRep3_le C.d C.dbar C.c
   have hcfg : ∀ k, ∀ i ∈ (cfg.map (domRep3 C.d C.dbar C.c)).groups k, i ∈ C.reps3 :=
     fun k i hi => by
