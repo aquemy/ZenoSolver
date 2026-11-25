@@ -401,6 +401,15 @@ lean      = "ZenoFront.Prop65.cfg14_load, ZenoFront.Prop65.cheapest_roleConfig, 
 paper     = "Proposition 5.7, doc/theory/exact-front.md §5; arXiv:2304.14659"
 created   = "2026-11-23"
 
+[claims.def-flight-graph]
+label     = "Definition 5.8"
+kind      = "definition"
+statement = "Definition 5.8 (flight graphs, the reduction): A flight graph U has the hubs C_I, C_G, central vertices 1, …, n, an optional duration dur_U(a, b) ∈ ℕ for every ordered pair of locations, and landing costs c_i. Its plans, feasibility, cost and makespan are those of Definition 1.2 with the flights of U; A_U is the set of the points of its feasible plans and F_U = Min A_U. A network of Definition 1.1 is the flight graph of all its flights; the clique instance without central flights with hub durations d, d̄ is the flight graph of its hub flights only. For a walk x_0, …, x_m of U, φ is the sum of its durations and ω = Σ_{j≥1} c(x_j) the cost of its landings after the first vertex (hubs free). The reduction f(U) of arXiv:2304.14659 §2.4 is the clique instance without central flights, with the same t and p, that has one city v = (i, w, e) for every central vertex i, every simple path w from C_I to i and every simple path e from i to C_G, with d_v = φ(w), d̄_v = φ(e) and c_v = ω(w) + ω(e)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.FlightGraph, ZenoFront.GFlies, ZenoFront.GFeasible, ZenoFront.gAchievable, ZenoFront.Network.toGraph, ZenoFront.cliqueGraph, ZenoFront.simplePaths, ZenoFront.pathDur, ZenoFront.pathCost, ZenoFront.VCity, ZenoFront.vcities, ZenoFront.Reduced.graph, ZenoFront.Reduced.c"
+paper     = "Definition 5.8, doc/theory/exact-front.md §5; arXiv:2304.14659 §2.4"
+created   = "2026-11-25"
+
 [claims.claim-6-11]
 label     = "Example 5.9"
 kind      = "claim"
