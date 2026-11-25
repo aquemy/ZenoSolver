@@ -13,7 +13,8 @@
 # Fields of a node:
 #   section   the id of its [[section]].
 #   label     the note's label ("Theorem 4.5"), unique; the `node` shortcode links by it.
-#   kind      "notation" for the Notation paragraph (no claim, no badge); omitted otherwise.
+#   kind      "notation" for the Notation paragraph (no claim: badged "Lean definition" from the
+#             kernel when its `lean` definitions are axiom-clean); omitted otherwise.
 #   lean      the declarations the note's *Lean:* paragraph names. The ledger's `lean` is listed as
 #             the node's Lean; these, with the ledger's `lean_partial`, as further declarations.
 #   title     optional heading override.
@@ -72,6 +73,7 @@ lean = ["ZenoFront.minimal_iff_of_dominated", "ZenoFront.minimal_iff_of_subset_o
 section = "model"
 label = "Notation"
 kind = "notation"
+lean = ["ZenoFront.Instance.s", "ZenoFront.Groups", "ZenoFront.size", "ZenoFront.load", "ZenoFront.cost", "ZenoFront.totalCost", "ZenoFront.Network.emin", "ZenoFront.oneplane", "ZenoFront.minOf"]
 
 [[section]]
 id = "admissibility"

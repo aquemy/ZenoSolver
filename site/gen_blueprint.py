@@ -573,7 +573,13 @@ class Blueprint:
         the note's *Lean:* paragraph (the registry's `lean`) are further declarations."""
         label = node["label"]
         if node.get("kind") == "notation":
-            return "notation", [], []
+            # no claim: badged by the kernel from the Lean definitions of the notation
+            whole = node.get("lean", [])
+            if not whole:
+                return "notation", [], []
+            if kernel_status([self.decl(n) for n in whole]) != "ok":
+                raise SystemExit(f"blueprint: the definitions of {label} are not axiom-clean")
+            return "definition", whole, []
         claim = self.ledger[label]
         whole, parts = names_of(claim.get("lean")), names_of(claim.get("lean_partial"))
         further = list(dict.fromkeys(n for n in parts + node.get("lean", []) if n not in whole))
@@ -711,7 +717,9 @@ class Blueprint:
         n, checked, partial, ndefs, ldefs = self.counts()
         text = f"**{checked} of {n} results are machine-checked"
         text += f"; {partial} more have parts in Lean" if partial else ""
-        text += (f", and all {ndefs} definitions are stated in Lean.**" if ldefs == ndefs else
+        notation = all(r["lean_key"] == "definition" for r in self.rows if r["label"] == "Notation")
+        text += (f", and all {ndefs} definitions" + (" and the notation" if notation else "")
+                 + " are stated in Lean.**" if ldefs == ndefs else
                  f", and {ldefs} of the {ndefs} definitions are stated in Lean.**")
         path.write_text(text + "\n", encoding="utf-8")
 
