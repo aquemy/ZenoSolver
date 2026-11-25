@@ -379,9 +379,10 @@ created   = "2026-11-24"
 
 [claims.thm-6-9]
 kind         = "theorem"
-statement    = "Theorem 6.9 (schedulable domination) [SD]: under (A1-NS), every feasible plan with cost C and makespan M is dominated by a role configuration on all p planes with passenger count t and cost at most C, with orders and a link matching whose template has makespan at most M; no event order, (AΔ) or (AΔ-path) is needed."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.schedulableDomination_all"
+statement    = "Theorem 6.9 (schedulable domination): Assume (A1-NS) and p ≤ t. Every feasible plan with cost C and makespan M gives a valid scheduled configuration with 2t − p landings, cost at most C and M_tmpl ≤ M."
+status       = "math.machine-checked"
+lean         = "ZenoFront.schedulableDomination_all"
+lean_partial = "ZenoFront.Feasible.split, ZenoFront.exists_transfer_pw, ZenoFront.exists_rewired, ZenoFront.exists_links, ZenoFront.exists_sched_of"
 paper        = "Thm 6.9, doc/theory/exact-front.md §6.2"
 created      = "2026-11-24"
 
