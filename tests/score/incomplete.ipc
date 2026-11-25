@@ -1,0 +1,5 @@
+; two planes fly to city 3 and stop there: no passenger reaches C_G
+0: (board person1 plane1 city0)
+0: (board person2 plane2 city0)
+0.001: (fly plane1 city0 city3)
+0.001: (fly plane2 city0 city3)

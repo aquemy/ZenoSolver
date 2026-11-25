@@ -33,20 +33,24 @@
     <lastmod>2026-11-25T13:00:54.882Z</lastmod>
   </url>
   <url>
-    <loc>https://quemy.info/ZenoSolver/instances/index.html</loc>
-    <lastmod>2026-11-25T13:00:54.882Z</lastmod>
+    <loc>https://quemy.info/ZenoSolver/instances/evaluate.html</loc>
+    <lastmod>2026-11-25T13:43:17.378Z</lastmod>
+  </url>
+  <url>
+    <loc>https://quemy.info/ZenoSolver/paper/index.html</loc>
+    <lastmod>2026-11-25T13:00:54.889Z</lastmod>
+  </url>
+  <url>
+    <loc>https://quemy.info/ZenoSolver/index.html</loc>
+    <lastmod>2026-11-25T13:43:27.718Z</lastmod>
   </url>
   <url>
     <loc>https://quemy.info/ZenoSolver/problem.html</loc>
     <lastmod>2026-11-25T13:00:54.889Z</lastmod>
   </url>
   <url>
-    <loc>https://quemy.info/ZenoSolver/index.html</loc>
-    <lastmod>2026-11-25T13:03:42.459Z</lastmod>
-  </url>
-  <url>
-    <loc>https://quemy.info/ZenoSolver/paper/index.html</loc>
-    <lastmod>2026-11-25T13:00:54.889Z</lastmod>
+    <loc>https://quemy.info/ZenoSolver/instances/index.html</loc>
+    <lastmod>2026-11-25T13:43:27.718Z</lastmod>
   </url>
   <url>
     <loc>https://quemy.info/ZenoSolver/instances/model.html</loc>
@@ -54,7 +58,7 @@
   </url>
   <url>
     <loc>https://quemy.info/ZenoSolver/instances/pddl.html</loc>
-    <lastmod>2026-11-25T13:00:54.883Z</lastmod>
+    <lastmod>2026-11-25T13:43:27.718Z</lastmod>
   </url>
   <url>
     <loc>https://quemy.info/ZenoSolver/instances/known-fronts.html</loc>

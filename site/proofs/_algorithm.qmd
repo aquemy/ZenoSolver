@@ -16,7 +16,7 @@ on them.
 $E(-1) = \infty$, makespans in units of $g$.
 
 ::: {.node-lean}
-Parts in Lean: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L209-L268)
+Parts in Lean: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L209-L268)
 :::
 
 ```{=html}
@@ -54,7 +54,7 @@ theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : �
         ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
 
 **Related declarations.** The ledger does not list these for the statement.
 
@@ -69,7 +69,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x := …
 ```
 
-[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Achievability.lean`, lines 1030–1037](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Achievability.lean#L1030-L1037){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -88,7 +88,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 **Lemma 7.2.** $G[m][\tau] = \min\{c(Y) : |Y| = m,\ \delta(Y) \le \tau\}$, and $G$ is non-increasing in $\tau$.
 
 ::: {.node-lean}
-Parts in Lean: [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/OnePlane.lean#L125-L139)
+Parts in Lean: [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/OnePlane.lean#L125-L139)
 :::
 
 ```{=html}
@@ -121,7 +121,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
       (oneplane d c m T) := …
 ```
 
-[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/OnePlane.lean`, lines 125–139](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/OnePlane.lean#L125-L139){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -140,7 +140,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
 **Proposition 7.3.** $L(T) \le E(T) \le U_3(T) \le U(T)$.
 
 ::: {.node-lean}
-Parts in Lean: [`relaxedBoundAt_le_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L284-L289), [`minCost_le_pairsBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L260-L282)
+Parts in Lean: [`relaxedBoundAt_le_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/PairBound.lean#L284-L289), [`minCost_le_pairsBoundAt` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/PairBound.lean#L260-L282)
 :::
 
 ```{=html}
@@ -176,7 +176,7 @@ theorem relaxedBoundAt_le_minCost (d c : Fin n → ℕ) {t p Tmax T : ℕ} :
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PairBound.lean`, lines 284–289](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/PairBound.lean#L284-L289){.lean-src} (statement only; the proof is elided)
 
 *Part* `ZenoFront.minCost_le_pairsBoundAt` [machine-checked]{.badge .ok}
 
@@ -188,7 +188,7 @@ theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T
       pairsBoundAt d c p (2 * t - p) Tmax (oneplaneTable d c Tmax (2 * t - p)) T := …
 ```
 
-[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/PairBound.lean`, lines 260–282](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/PairBound.lean#L260-L282){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -235,7 +235,7 @@ corresponding $G$ value (Lemma 7.2). So the forest costs at least some combinati
 $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ time and $O(q_{\max} s T + n q_{\max} s + p s)$ memory per level.
 
 ::: {.node-lean}
-Parts in Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L488-L514)
+Parts in Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/TreeExact.lean#L488-L514)
 :::
 
 ```{=html}
@@ -307,7 +307,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/TreeExact.lean`, lines 488–514](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/TreeExact.lean#L488-L514){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -327,7 +327,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 weight $E(T)$.
 
 ::: {.node-lean}
-Parts in Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L143-L190)
+Parts in Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L143-L190)
 :::
 
 ```{=html}
@@ -390,7 +390,7 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
       minCost d c t p T := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 143–190](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L143-L190){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 143–190](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L143-L190){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -536,7 +536,7 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
     d (domRep d c i) ≤ d i ∧ c (domRep d c i) ≤ c i := …
 ```
 
-[`lean/ZenoFront/AdmissibleBound.lean`, lines 182–199](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/AdmissibleBound.lean#L182-L199){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/AdmissibleBound.lean`, lines 182–199](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/AdmissibleBound.lean#L182-L199){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -569,7 +569,7 @@ No assumption on central flights is needed, and zero durations and ties are cove
 point is not in closed form; under (A1) or (AΔ) it is $E(T_{\rm lo})$ (Proposition 7.1, Corollary 4.12).
 
 ::: {.node-lean}
-Parts in Lean: [`Feasible.minOf_le_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L110-L124), [`Feasible.minOf_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L126-L133)
+Parts in Lean: [`Feasible.minOf_le_makespan` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L110-L124), [`Feasible.minOf_le_cost` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L126-L133)
 :::
 
 ```{=html}
@@ -631,7 +631,7 @@ theorem Feasible.minOf_le_makespan {N : Network n} (hS : N.dbar = N.d) (c : Fin 
     2 * minOf N.d * ((2 * t - p + p - 1) / p) ≤ planMakespan P := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 110–124](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L110-L124){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 110–124](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L110-L124){.lean-src} (statement only; the proof is elided)
 
 *Part* `ZenoFront.Feasible.minOf_le_cost` [machine-checked]{.badge .ok}
 
@@ -642,7 +642,7 @@ theorem Feasible.minOf_le_cost {N : Network n} (hS : N.dbar = N.d) (c : Fin n �
     (2 * t - p) * minOf c ≤ planCost c P := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 126–133](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L126-L133){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 126–133](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L126-L133){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -665,7 +665,7 @@ $L(T) \le E(T) \le U_2(T)$ closes, and otherwise runs the link-forest DP or the 
 estimated cheaper. `lake exe zeno-front FILE` runs it.
 
 ::: {.node-lean}
-Lean: [`solveFront_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L414-L449)
+Lean: [`solveFront_isParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L414-L449)
 :::
 
 ```{=html}
@@ -685,7 +685,7 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …
 ```
 
-[`lean/ZenoFront/Solver.lean`, lines 414–449](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Solver.lean#L414-L449){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Solver.lean`, lines 414–449](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Solver.lean#L414-L449){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}

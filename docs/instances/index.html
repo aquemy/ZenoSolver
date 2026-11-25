@@ -66,7 +66,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../instances/model.html" rel="next">
+<link href="../instances/evaluate.html" rel="next">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -407,6 +407,12 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../instances/evaluate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluate a planner</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../instances/model.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Model and data files</span></a>
   </div>
@@ -500,6 +506,7 @@ window.Quarto = {
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">build/release/zeno</span> <span class="at">-n</span> 10 <span class="at">-t</span> 8 <span class="at">-p</span> 3 <span class="at">-C</span> 3 <span class="at">-D</span> 3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The instances come from the regression tests (the golden instances), the benchmark suites, and a few metric instances whose cities are random points in the plane or on a sphere. How they are built is documented on the sub-pages:</p>
 <ul>
+<li><a href="../instances/evaluate.html">Evaluate a planner</a>: write the problems, run a planner, and score its runs against the exact fronts.</li>
 <li><a href="../instances/model.html">Model and data files</a>: what an instance is, and the 2-line and 3-line data files.</li>
 <li><a href="../instances/generator.html">Generator</a>: the families <code>-C</code>, <code>-D</code>, <code>-E</code>, <code>-W</code>, and the scale options.</li>
 <li><a href="../instances/pddl.html">PDDL</a>: the domain file and the problems <code>zeno pddl</code> writes.</li>
@@ -1020,8 +1027,8 @@ window.Quarto = {
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../instances/model.html" class="pagination-link" aria-label="Model and data files">
-        <span class="nav-page-text">Model and data files</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../instances/evaluate.html" class="pagination-link" aria-label="Evaluate a planner">
+        <span class="nav-page-text">Evaluate a planner</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

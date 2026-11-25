@@ -139,7 +139,7 @@ css: [styles/problem.css, styles/home.css]
     </a></li>
     <li><a class="route" href="instances/index.html">
       <span class="route-name">Instances<span class="arrow" aria-hidden="true">→</span></span>
-      <span class="route-text">The data format, the generator, PDDL files, the benchmark suites and fronts known in closed form.</span>
+      <span class="route-text">The benchmark suites with their fronts plotted, the PDDL problems, and how to score a planner against the exact fronts.</span>
       <span class="route-fact">66 suite instances</span>
     </a></li>
     <li><a class="route" href="solver/install.html">
