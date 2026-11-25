@@ -471,43 +471,43 @@ window.Quarto = {
 </header>
 
 
-<p>The blueprint follows the theory note <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md"><code>doc/theory/exact-front.md</code></a> and links each result to the Lean declarations of <code>lean/ZenoFront</code> that formalise it. A result is <span class="badge ok">machine-checked</span> when they cover its whole statement and use no axiom beyond <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, and <span class="badge informal">informal</span> otherwise. Each node opens on its statement; its proof, its remarks and its Lean source are folded under it. The blueprint is also a <a href="blueprint.pdf">PDF</a>.</p>
-<p><strong>23 of 53 results are machine-checked; 13 more have parts in Lean.</strong></p>
+<p>The blueprint follows the theory note <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md"><code>doc/theory/exact-front.md</code></a> and links each result to the Lean declarations of <code>lean/ZenoFront</code> that formalise it. The badges follow the claim ledger <a href="https://github.com/aquemy/ZenoSolver/blob/master/claims.toml"><code>claims.toml</code></a>: a result is <span class="badge ok">machine-checked</span> when Lean proves every assertion of it with no axiom beyond <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, <span class="badge informal">parts in Lean</span> when Lean proves part of it (one line says what is missing), and <span class="badge informal">informal</span> otherwise. Each node opens on its statement; its proof, its remarks and its Lean source are folded under it. The blueprint is also a <a href="blueprint.pdf">PDF</a>.</p>
+<p><strong>11 of 53 results are machine-checked; 22 more have parts in Lean.</strong></p>
 <section id="main-results" class="level2">
 <h2 class="anchored" data-anchor-id="main-results">Main results</h2>
 <div class="main-results">
 <dl>
 <dt><strong>The front theorem</strong> · <a href="#node-corollary-4-8">Corollary 4.8</a> <span class="badge ok">machine-checked</span></dt>
 <dd>
-Under (S) and (A1), the Pareto front is the set of minimal points <span class="math inline">\((c(X), M(X))\)</span> over the multisets <span class="math inline">\(X\)</span> of <span class="math inline">\(s = 2t - p\)</span> central landings, where <span class="math inline">\(M(X)\)</span> is the least largest load of an admissible partition of <span class="math inline">\(X\)</span>. With <a href="#node-theorem-4-1">Theorem 4.1</a> <span class="badge ok">machine-checked</span> (achievability, without waiting), <a href="#node-theorem-4-7">Theorem 4.7</a> <span class="badge ok">machine-checked</span> (the converse under (A1)) and <a href="#node-theorem-4-10">Theorem 4.10</a> <span class="badge ok">machine-checked</span> (the converse under (AΔ)).
+Under (S) and (A1), the Pareto front is the set of minimal points <span class="math inline">\((c(X), M(X))\)</span> over the multisets <span class="math inline">\(X\)</span> of <span class="math inline">\(s = 2t - p\)</span> central landings, where <span class="math inline">\(M(X)\)</span> is the least largest load of an admissible partition of <span class="math inline">\(X\)</span>. With <a href="#node-theorem-4-1">Theorem 4.1</a> <span class="badge informal">parts in Lean</span> (achievability; Lean builds the plan with its cost and makespan, the part the front theorem uses), <a href="#node-theorem-4-7">Theorem 4.7</a> <span class="badge ok">machine-checked</span> (the converse under (A1)) and <a href="#node-theorem-4-10">Theorem 4.10</a> <span class="badge ok">machine-checked</span> (the converse under (AΔ)).
 </dd>
-<dt><strong>Role configurations bound every non-symmetric plan</strong> · <a href="#node-theorem-6-1">Theorem 6.1</a> <span class="badge ok">machine-checked</span></dt>
+<dt><strong>Role configurations bound every non-symmetric plan</strong> · <a href="#node-theorem-6-1">Theorem 6.1</a> <span class="badge informal">parts in Lean</span></dt>
 <dd>
-Under (A1-NS), every feasible plan has a role configuration with <span class="math inline">\(t\)</span> passengers, no larger cost, and role loads no larger than the flight times of its planes.
+Under (A1-NS), every feasible plan has a role configuration with <span class="math inline">\(t\)</span> passengers, no larger cost and every role load at most the plan’s makespan: the form Lean proves, and the one the checker uses.
 </dd>
-<dt><strong>Schedulable domination</strong> · <a href="#node-theorem-6-9">Theorem 6.9</a> <span class="badge ok">machine-checked</span></dt>
+<dt><strong>Schedulable domination</strong> · <a href="#node-theorem-6-9">Theorem 6.9</a> <span class="badge informal">parts in Lean</span></dt>
 <dd>
-Under (A1-NS), every feasible plan is matched by a role configuration of no larger cost whose template schedule is no longer, so the search over role configurations finds the non-symmetric front.
+Under (A1-NS), every feasible plan is matched by a role configuration of no larger cost with orders and a link matching whose template has makespan at most the plan’s. Lean proves the bound on the template’s closed form; that the closed form is the template’s makespan is Lemma 6.3, written only.
 </dd>
-<dt><strong>The link-forest DP is exact</strong> · <a href="#node-theorem-7-5">Theorem 7.5</a> <span class="badge ok">machine-checked</span></dt>
+<dt><strong>The link-forest DP is exact</strong> · <a href="#node-theorem-7-5">Theorem 7.5</a> <span class="badge informal">parts in Lean</span></dt>
 <dd>
-The dynamic program over link forests computes <span class="math inline">\(E(T)\)</span>, the least cost of an admissible partition whose loads are all at most <span class="math inline">\(T\)</span>.
+The dynamic program over link forests computes <span class="math inline">\(E(T)\)</span>, the least cost of an admissible partition whose loads are all at most <span class="math inline">\(T\)</span>. Lean proves this equality, not the DP’s time and memory bounds.
 </dd>
-<dt><strong>The σ-DP is exact</strong> · <a href="#node-theorem-7-6">Theorem 7.6</a> <span class="badge ok">machine-checked</span></dt>
+<dt><strong>The σ-DP is exact</strong> · <a href="#node-theorem-7-6">Theorem 7.6</a> <span class="badge informal">parts in Lean</span></dt>
 <dd>
-A shortest path over parity states also computes <span class="math inline">\(E(T)\)</span>, without building link forests.
+A shortest path over parity states also computes <span class="math inline">\(E(T)\)</span>. Lean proves it for the σ-DP on the non-dominated cities, the form the solver runs.
 </dd>
 <dt><a href="#node-verified-solver"><strong>The verified solver</strong></a> <span class="badge ok">machine-checked</span></dt>
 <dd>
 Under (S) and (A1), with <span class="math inline">\(1 \le p \le t\)</span>, <code>solveFront</code> returns exactly the Pareto front; <code>lake exe zeno-front</code> runs it.
 </dd>
-<dt><strong>Certificates are sound</strong> · <a href="#node-theorem-9-1">Theorem 9.1</a> <span class="badge ok">machine-checked</span></dt>
+<dt><strong>Certificates are sound</strong> · <a href="#node-theorem-9-1">Theorem 9.1</a> <span class="badge informal">parts in Lean</span></dt>
 <dd>
-If a certificate’s four obligations hold, its points are exactly the Pareto front, and the Lean checker that tests them is proved sound.
+If a certificate’s four obligations hold, its points are exactly the Pareto front. Lean proves it for the gap bounds its own checker supports, so a certificate that the Lean checker accepts lists exactly the front.
 </dd>
 <dt><a href="#node-version-2-checker"><strong>The non-symmetric checker is sound</strong></a> <span class="badge ok">machine-checked</span></dt>
 <dd>
-For non-symmetric instances, a version 2 certificate that <code>Cert2.check</code> accepts lists exactly the Pareto front.
+For non-symmetric instances, a version 2 certificate that <code>Cert2.check</code> accepts lists exactly the Pareto front, under (A1-NS) when it uses a gap kind other than <code>relaxed</code>.
 </dd>
 </dl>
 </div>
@@ -681,7 +681,7 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
 <section id="node-lemma-1-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-1-1">Lemma 1.1 (dominating subset)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves Min S = Min S′, even without finiteness; not that every point is dominated by a minimal one.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 1.1 (dominating subset).</strong> Let <span class="math inline">\(\mathcal S' \subseteq \mathcal S \subseteq \mathbb K^2\)</span> with <span class="math inline">\(\mathcal S'\)</span> finite and every point of <span class="math inline">\(\mathcal S\)</span> weakly dominated by a point of <span class="math inline">\(\mathcal S'\)</span>. Then <span class="math inline">\(\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'\)</span>, and every point of <span class="math inline">\(\mathcal S\)</span> is weakly dominated by a point of <span class="math inline">\(\mathrm{Min}\,\mathcal S\)</span>.</p>
@@ -694,7 +694,7 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The first claim, <code>Min S = Min S'</code>, is machine-checked without the finiteness hypothesis. The last claim (every point is dominated by a minimal one) uses finiteness and is not stated in Lean.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.minimal_iff_of_subset_of_dominated</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- If `A ⊆ A′` and every point of `A′` is weakly dominated by a point of `A`, the two sets have
 the same minimal elements. -/
@@ -712,7 +712,7 @@ theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' 
 <section id="node-lemma-2-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-2-1">Lemma 2.1</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean counts landing records by hub, not segments; on routes with central flights the two differ.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 2.1.</strong> On every route from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span>, <span class="math inline">\(\#A - \#\bar A = 1\)</span>.</p>
@@ -725,7 +725,7 @@ theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' 
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The Lean lemma is the count on a route after Step 1 of Theorem 4.7, read off the legs (<code>#A = #Ā + 1</code>).</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.PlaneFeasible.cntA_eq</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- `#A = #Ā + 1` for every plane (Lemma 2.1 after Step 1). -/
 theorem cntA_eq (h : PlaneFeasible N legs) :
@@ -748,14 +748,20 @@ theorem cntA_eq (h : PlaneFeasible N legs) :
 </ul>
 <p>The partition is <em>admissible</em> if it has a parity matrix. Write <span class="math inline">\(\eta_k = \{i : h_{k,i} = 1\}\)</span>, so that <span class="math inline">\(|\eta_k| = h_k\)</span>, and <span class="math inline">\(Z(h) = \bigcup_k \eta_k\)</span> for the cities that <span class="math inline">\(h\)</span> <em>touches</em>. A plane with <span class="math inline">\(|X_k|\)</span> even is an <em>even plane</em>. An empty group would need <span class="math inline">\(h_k = 0 \equiv 1\)</span> by (h1)–(h2), so admissible partitions have non-empty groups. Admissibility is decidable by enumerating <span class="math inline">\(h\)</span> on the support of the groups. This definition replaces the component form of the first version (Lemma 2.4 shows they agree), and is the one to formalise.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L52-L62"><code>IsParityWitness</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66"><code>Admissible</code> ↗</a></p>
+<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66"><code>Admissible</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>In the note</summary>
 <p><strong>Note</strong> <span class="badge informal">definition</span> · theory note, §2</p>
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> <code>IsParityWitness X h</code> is (h1)–(h3) with <code>h k : Finset (Fin n)</code>, one set of cities per plane; <code>Admissible X</code> is <code>∃ h, IsParityWitness X h</code>, decidable through <code>witnessCandidates</code>.</p>
-<p><strong>Lean</strong> <code>ZenoFront.IsParityWitness</code> <span class="badge ok">Lean definition</span></p>
+<p><strong>Lean</strong> <code>ZenoFront.Admissible</code> <span class="badge ok">Lean definition</span></p>
+<pre class="lean"><code>/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
+the component condition by Lemma 2.4). -/
+def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66" class="lean-src"><code>lean/ZenoFront/Admissible.lean</code>, lines 64–66</a></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.IsParityWitness</code> <span class="badge ok">Lean definition</span></p>
 <pre class="lean"><code>/-- `h` is a *parity witness* for the grouping `X` (Claim A of the note): `h k` is a set of
 cities of `X k` whose size has the parity of `|X k| + 1`, and every city lies in an even number
 of the sets `h k`. Equivalently, `{(k, i) | i ∈ h k}` is a `T`-join of the plane–city graph,
@@ -768,11 +774,6 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   /-- Every city has even degree. -/
   col : ∀ i, Even #{k | i ∈ h k}</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L52-L62" class="lean-src"><code>lean/ZenoFront/Admissible.lean</code>, lines 52–62</a></p>
-<p><strong>Lean</strong> <code>ZenoFront.Admissible</code> <span class="badge ok">Lean definition</span></p>
-<pre class="lean"><code>/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
-the component condition by Lemma 2.4). -/
-def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66" class="lean-src"><code>lean/ZenoFront/Admissible.lean</code>, lines 64–66</a></p>
 </details>
 </div>
 </section>
@@ -864,12 +865,12 @@ inductive LTree (n : ℕ) : Type where
 <section id="node-lemma-2-6" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-2-6">Lemma 2.6 (link forest)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves admissible ⇔ a link forest exists; not that the forest can have at most one edge of each label at each plane.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 2.6 (link forest) [LF].</strong> A partition is admissible if and only if it has a link forest. An admissible partition has a link forest with at most one edge of each label at each plane.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L516-L541"><code>admissible_iff_exists_linkForest</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L516-L541"><code>admissible_iff_exists_linkForest</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §2 · <strong>Uses</strong> <a href="#node-lemma-2-3">2.3</a>, <a href="#node-lemma-2-4">2.4</a></p>
@@ -879,7 +880,8 @@ inductive LTree (n : ℕ) : Type where
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> “If” (<code>admissible_forestPartition</code>) builds the witness from the cities with an odd number of links at a plane. “Only if” (<code>Admissible.exists_linkForest</code>) removes a leaf and recurses on the planes: a witness with the fewest edges has a plane with exactly one city, by the rank bound of Lemma 2.8(b). It does not go through the spanning-forest construction of the note’s proof, which needs Lemma 2.4.</p>
-<p><strong>Lean</strong> <code>ZenoFront.admissible_iff_exists_linkForest</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.admissible_iff_exists_linkForest</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Lemma 2.6 (link forest).** A grouping is admissible iff its groups are, as a multiset, the
 groups of a forest of rooted link trees in which every plane keeps an odd number of free
 landings. -/
@@ -905,7 +907,7 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
 <section id="node-lemma-2-8" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-2-8">Lemma 2.8 (few touched cities)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves (a), (c) and the bound of (b); not that a parity matrix with the fewest entries has an acyclic support.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 2.8 (few touched cities) [B′].</strong> Let <span class="math inline">\(X_1,\dots,X_p\)</span> be admissible with <span class="math inline">\(|X| = s\)</span>.</p>
@@ -915,7 +917,7 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
 <li><p>So some parity matrix touches at most <span class="math inline">\(w := \min(p-1,\ t-p)\)</span> cities, and it has <span class="math inline">\(h_k \le \min(|X_k| - 1,\ w)\)</span> for every <span class="math inline">\(k\)</span>.</p></li>
 </ol>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106"><code>IsParityWitness.card_touched_le</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210"><code>IsParityWitness.card_touched_le_of_minimal</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254"><code>Admissible.exists_card_touched_le</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254"><code>Admissible.exists_card_touched_le</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106"><code>IsParityWitness.card_touched_le</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210"><code>IsParityWitness.card_touched_le_of_minimal</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §2 · <strong>Hypotheses</strong> <span class="math inline">\(\lvert X\rvert = s\)</span> · <strong>Uses</strong> <a href="#node-lemma-2-5">2.5</a></p>
@@ -927,26 +929,27 @@ theorem admissible_iff_exists_linkForest {P : ℕ} (X : Groups n P) :
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Part (b) is proved over <code>ZMod 2</code>: if the edge vectors <code>e_k + e_i</code> of a witness are linearly dependent, removing an even subgraph gives a witness with fewer edges (<code>IsParityWitness.exists_edgeCount_lt</code>); independent edge vectors satisfy <code>#edges + 1 ≤ p + #touched</code>.</p>
-<p><strong>Lean</strong> <code>ZenoFront.IsParityWitness.card_touched_le</code> <span class="badge ok">machine-checked</span></p>
-<pre class="lean"><code>/-- **Claim B′, `t − p` part.** With `Σ_k |X_k| = s = 2t − p`, every parity witness touches at
-most `t − p` cities. -/
-theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Finset (Fin I.n)}
-    (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106" class="lean-src"><code>lean/ZenoFront/SupportBound.lean</code>, lines 100–106</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.IsParityWitness.card_touched_le_of_minimal</code> <span class="badge ok">machine-checked</span></p>
-<pre class="lean"><code>/-- **Claim B′, `p − 1` part.** A parity witness with the fewest edges touches at most `p − 1`
-cities. -/
-theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
-    (hmin : ∀ h', IsParityWitness X h' → edgeCount h ≤ edgeCount h') :
-    (touched h).card ≤ p - 1 := …</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210" class="lean-src"><code>lean/ZenoFront/MinimalWitness.lean</code>, lines 197–210</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.Admissible.exists_card_touched_le</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Admissible.exists_card_touched_le</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Claim B′.** With `Σ_k |X_k| = s = 2t − p`, an admissible grouping has a parity witness
 touching at most `min(p − 1, t − p)` cities (any witness with the fewest edges will do). -/
 theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
     (hX : Admissible X) (hs : size X = I.s) :
     ∃ h, IsParityWitness X h ∧ (touched h).card ≤ min (I.p - 1) (I.t - I.p) := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254" class="lean-src"><code>lean/ZenoFront/MinimalWitness.lean</code>, lines 248–254</a> (statement only; the proof is elided)</p>
+<p><em>Part</em> <code>ZenoFront.IsParityWitness.card_touched_le</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>/-- **Claim B′, `t − p` part.** With `Σ_k |X_k| = s = 2t − p`, every parity witness touches at
+most `t − p` cities. -/
+theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Finset (Fin I.n)}
+    (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106" class="lean-src"><code>lean/ZenoFront/SupportBound.lean</code>, lines 100–106</a> (statement only; the proof is elided)</p>
+<p><em>Part</em> <code>ZenoFront.IsParityWitness.card_touched_le_of_minimal</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>/-- **Claim B′, `p − 1` part.** A parity witness with the fewest edges touches at most `p − 1`
+cities. -/
+theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
+    (hmin : ∀ h', IsParityWitness X h' → edgeCount h ≤ edgeCount h') :
+    (touched h).card ≤ p - 1 := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210" class="lean-src"><code>lean/ZenoFront/MinimalWitness.lean</code>, lines 197–210</a> (statement only; the proof is elided)</p>
 </details>
 </div>
 </section>
@@ -970,7 +973,7 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
 <section id="node-lemma-3-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-3-1">Lemma 3.1 (cleaning)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean extracts the legs a cleaned journey keeps; it does not rewrite the journeys.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 3.1 (cleaning).</strong> Every plan can be changed, keeping all routes (hence cost, makespan and flight times), so that every journey is <em>clean</em>: its first flight is its only flight departing from <span class="math inline">\(C_I\)</span>, and its last flight is its only flight arriving in <span class="math inline">\(C_G\)</span>. A clean journey has no flight arriving in <span class="math inline">\(C_I\)</span> and none departing from <span class="math inline">\(C_G\)</span>.</p>
@@ -983,7 +986,7 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Lean does not rewrite journeys: <code>exists_transfer</code> extracts, from every passenger’s route, the leg <code>C_I → x</code> followed by a leg leaving <code>x</code> not towards <code>C_I</code> that the cleaned journey would keep.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.exists_transfer</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Step 2.** A route from `C_I` to `C_G` has a leg `C_I → x` followed, later, by a leg leaving
 `x` that does not arrive at `C_I`: the last departure from `C_I` and the next leg. -/
@@ -999,12 +1002,12 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 <section id="node-lemma-3-2" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-3-2">Lemma 3.2 (counting)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves the segment count; not its consequence, at least s central landings.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 3.2 (counting).</strong> A feasible plan has at least <span class="math inline">\(s = 2t - p\)</span> segments, hence at least <span class="math inline">\(s\)</span> landings in central cities.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165"><code>Feasible.le_sum_hubArrivals</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165"><code>Feasible.le_sum_hubArrivals</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §3</p>
@@ -1015,7 +1018,8 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Leg counting along each route: <code>#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]</code>, and every passenger leaves <code>C_I</code> and reaches <code>C_G</code> on its own leg.</p>
-<p><strong>Lean</strong> <code>ZenoFront.Feasible.le_sum_hubArrivals</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Feasible.le_sum_hubArrivals</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Counting.** A feasible plan has at least `2t − p` segments: `2t ≤ Σ_k #hub arrivals + p`. -/
 theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasible N P) :
     2 * t ≤ ∑ k, hubArrivals (P k) + p := …</code></pre>
@@ -1026,7 +1030,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 <section id="node-lemma-3-3" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-3-3">Lemma 3.3 (segment durations)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves (a) and (c) only in the forms other proofs use: (a) inside the segment decomposition, (c) on routes without central flights.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 3.3 (segment durations).</strong> Let a segment <span class="math inline">\(\gamma\)</span> visit the central cities <span class="math inline">\(x_1,\dots,x_m\)</span> in this order.</p>
@@ -1036,7 +1040,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 <li><p>A simple segment at <span class="math inline">\(x\)</span> lasts exactly <span class="math inline">\(d_x + \bar d_x\)</span> (types <span class="math inline">\(A\)</span>, <span class="math inline">\(\bar A\)</span>), <span class="math inline">\(2d_x\)</span> (<span class="math inline">\(B\)</span>) or <span class="math inline">\(2\bar d_x\)</span> (<span class="math inline">\(\bar B\)</span>).</p></li>
 </ol>
 <div class="node-lean">
-<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394"><code>PlaneFeasible.exists_segments</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276"><code>segment_bound</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309"><code>roleW_landingRecs_le</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394"><code>PlaneFeasible.exists_segments</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309"><code>roleW_landingRecs_le</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §3 · <strong>Hypotheses</strong> (S) or (AΔ)</p>
@@ -1044,7 +1048,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Part (a) is used inside <code>PlaneFeasible.exists_segments</code> (one landing per segment, <code>2 δ(Z) ≤</code> the plane’s end time); part (b) under (S) and (AΔ) is <code>segment_bound</code> (<code>F(γ) ≥ 2 d_x</code>); part (c) is <code>roleW_landingRecs_le</code> on routes without central flights.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.PlaneFeasible.exists_segments</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Segments of a plane**, under (S): `2 δ(Z) ≤` the plane's end time. -/
 theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ)
@@ -1052,14 +1056,6 @@ theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : F
     ∃ Z : Multiset (Fin n), Z.card = hubArrivals legs ∧ 2 * load N.d Z ≤ endTime 0 legs ∧
       cost c Z ≤ landCostSum c legs := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394" class="lean-src"><code>lean/ZenoFront/PlanBounds.lean</code>, lines 389–394</a> (statement only; the proof is elided)</p>
-<p><em>Part</em> <code>ZenoFront.segment_bound</code> <span class="badge ok">machine-checked</span></p>
-<pre class="lean"><code>`2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
-theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
-    {γ : List (Leg n t)} {h : Loc n} {τ : ℕ} (hh : h.isHub = true) (hr : IsRoute h τ γ)
-    (hf : ∀ ℓ ∈ γ, Flies N ℓ) (hone : hubArrivals γ = 1) {ℓ : Leg n t}
-    (hlast : γ.getLast? = some ℓ) (hℓ : ℓ.dst.isHub = true) :
-    ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276" class="lean-src"><code>lean/ZenoFront/TriSegments.lean</code>, lines 248–276</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac"><code>6c6fdb8</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
 <p><em>Part</em> <code>ZenoFront.roleW_landingRecs_le</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Role weights on a route without central flights**: the role weights of its landing
 records add up to at most its flight time. -/
@@ -1068,26 +1064,36 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
       ((landingRecs legs).map (roleW N)).sum ≤ durSum legs
   …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309" class="lean-src"><code>lean/ZenoFront/NonSymmetric.lean</code>, lines 264–309</a> (statement only; the proof is elided)</p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.segment_bound</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>`2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
+theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    {γ : List (Leg n t)} {h : Loc n} {τ : ℕ} (hh : h.isHub = true) (hr : IsRoute h τ γ)
+    (hf : ∀ ℓ ∈ γ, Flies N ℓ) (hone : hubArrivals γ = 1) {ℓ : Leg n t}
+    (hlast : γ.getLast? = some ℓ) (hℓ : ℓ.dst.isHub = true) :
+    ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276" class="lean-src"><code>lean/ZenoFront/TriSegments.lean</code>, lines 248–276</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac"><code>6c6fdb8</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
 </details>
 </div>
 </section>
 <section id="node-lemma-3-4" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-3-4">Lemma 3.4 (relaxation)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean bounds every group by the makespan, not by its plane’s flight time.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 3.4 (relaxation) [R].</strong> Assume (S). For every feasible plan with cost <span class="math inline">\(C\)</span> and makespan <span class="math inline">\(M\)</span> there are non-empty multisets <span class="math inline">\(Y_1,\dots,Y_p\)</span> with <span class="math inline">\(\sum_k |Y_k| = s\)</span>, <span class="math inline">\(c(Y_1 + \dots + Y_p) \le C\)</span>, and <span class="math inline">\(\ell(Y_k) \le F_k \le M\)</span> for every <span class="math inline">\(k\)</span>. Hence, with integer durations, <span class="math inline">\(C \ge L(\lfloor M/2\rfloor)\)</span>, where <span class="math display">\[L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = s,\ Y_k \ne \emptyset \text{ and } \delta(Y_k) \le T\ \forall k\Big\}
 \quad(\min\emptyset = \infty).\]</span> No assumption on central flights is needed.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403"><code>Feasible.exists_relaxation</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89"><code>relaxCost_oneplane_le_totalCost</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403"><code>Feasible.exists_relaxation</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89"><code>relaxCost_oneplane_le_totalCost</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §3 · <strong>Hypotheses</strong> (S) · <strong>Uses</strong> <a href="#node-lemma-3-2">3.2</a>, <a href="#node-lemma-3-3">3.3</a></p>
 <p><em>Proof.</em> For a segment <span class="math inline">\(\gamma\)</span>, let <span class="math inline">\(x^\star(\gamma)\)</span> be whichever of its first and last central cities has the smaller <span class="math inline">\(d\)</span>. By Lemma 3.3(a), <span class="math inline">\(F(\gamma) \ge 2d_{x^\star(\gamma)}\)</span>. Every route goes from <span class="math inline">\(C_I\)</span> to <span class="math inline">\(C_G\)</span>, so every plane has a segment, and by Lemma 3.2 the plan has at least <span class="math inline">\(s \ge p\)</span> segments. Choose one segment per plane and any <span class="math inline">\(s - p\)</span> others, and let <span class="math inline">\(Y_k\)</span> collect <span class="math inline">\(x^\star(\gamma)\)</span> over the chosen segments <span class="math inline">\(\gamma\)</span> of plane <span class="math inline">\(k\)</span>. Different segments have different landings, and <span class="math inline">\(x^\star(\gamma)\)</span> is a landing of <span class="math inline">\(\gamma\)</span>, so <span class="math inline">\(c(Y) \le C\)</span>. Also <span class="math inline">\(\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M\)</span>. With integer durations, <span class="math inline">\(\delta(Y_k)\)</span> is an integer at most <span class="math inline">\(M/2\)</span>. <span class="math inline">\(\square\)</span></p>
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
-<p><strong>Lean</strong> <code>ZenoFront.Feasible.exists_relaxation</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Feasible.exists_relaxation</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Lemma R** (relaxation). Under (S), whatever the central flights, a feasible plan with
 `1 ≤ p ≤ t` yields `p` non-empty groups of landings, of total size `s = 2t − p`, with
 `2 δ(Y_k) ≤` the makespan for every plane and total cost at most the plan's cost. -/
@@ -1096,7 +1102,7 @@ theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin 
     ∃ Y : Groups n p, (∀ k, 1 ≤ (Y k).card) ∧ size Y = 2 * t - p ∧
       (∀ k, 2 * load N.d (Y k) ≤ planMakespan P) ∧ totalCost c Y ≤ planCost c P := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403" class="lean-src"><code>lean/ZenoFront/PlanBounds.lean</code>, lines 396–403</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.relaxCost_oneplane_le_totalCost</code> <span class="badge ok">machine-checked</span></p>
+<p><em>Part</em> <code>ZenoFront.relaxCost_oneplane_le_totalCost</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The relaxation is a lower bound.** For every grouping into `p` non-empty groups of total
 size `s` and loads at most `T`, `L(T) = relaxCost (G[·][T]) p s ≤ Σ_k c(Y_k)`. -/
 theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : Groups n p)
@@ -1113,12 +1119,12 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
 <section id="node-theorem-4-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-4-1">Theorem 4.1</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean builds the plan with cost c(X) and makespan max ℓ(X_k); not that plane k flies ℓ(X_k), picks up at most once and uses no central flight.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 4.1.</strong> Assume (S). For every multiset <span class="math inline">\(X\)</span> with <span class="math inline">\(|X| = s\)</span> and every admissible partition <span class="math inline">\(X_1,\dots,X_p\)</span> of <span class="math inline">\(X\)</span>, there is a feasible plan whose central landings are exactly <span class="math inline">\(X\)</span> (so of cost <span class="math inline">\(c(X)\)</span>), in which plane <span class="math inline">\(k\)</span> flies for <span class="math inline">\(\ell(X_k)\)</span> and picks up at most one passenger, and whose makespan is <span class="math inline">\(\max_k \ell(X_k)\)</span>. The plan uses no central flight, so no assumption on them is needed.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L805-L920"><code>Admissible.exists_plan</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L805-L920"><code>Admissible.exists_plan</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.1 · <strong>Hypotheses</strong> (S) · <strong>Uses</strong> <a href="#node-lemma-2-6">2.6</a></p>
@@ -1134,7 +1140,8 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The plan is built on a rooted link forest (<code>LTree.routes</code>): each plane drops off its children’s passengers, crosses its free landings, then picks up its parent’s passenger.</p>
-<p><strong>Lean</strong> <code>ZenoFront.Admissible.exists_plan</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Admissible.exists_plan</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Theorem 4.1 (achievability).** Under (S), with `p ≤ t`, every admissible partition `X` of
 `2t − p` landings is achieved by a feasible plan whose planes land exactly at the groups of `X`
 (up to relabelling the planes), so of cost `c(X)`, and whose makespan is `max_k 2 δ(X_k)`. The
@@ -1184,7 +1191,7 @@ structure RoleConfig (n p : ℕ) where
 <section id="node-lemma-4-3" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-4-3">Lemma 4.3 (direct selection)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves part (b), on landing records; part (a) is not stated.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 4.3 (direct selection) [DS].</strong> (a) In a simple plan with clean journeys, whether or not its routes end in <span class="math inline">\(C_G\)</span>, every journey consists of exactly two flights, <span class="math inline">\(C_I \to x\)</span> and then <span class="math inline">\(x \to C_G\)</span>, for a central city <span class="math inline">\(x\)</span>.</p>
@@ -1207,7 +1214,7 @@ structure RoleConfig (n p : ℕ) where
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.Feasible.exists_roleConfig_records</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Direct selection on landing records (Lemma 4.3(b)).** Every feasible plan with `p ≤ t`
 gives a role configuration whose drop-offs, pick-ups and crossings are the cities of landing
@@ -1267,23 +1274,24 @@ theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} 
 <div class="node-body">
 <p><strong>Lemma 4.5 (parity) [PAR].</strong> For a role configuration on <span class="math inline">\(Q\)</span> with passenger count <span class="math inline">\(t\)</span>, the groups <span class="math inline">\(X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k\)</span>, <span class="math inline">\(k \in Q\)</span>, form an admissible partition (Definition 2.2 with the planes of <span class="math inline">\(Q\)</span>) of a multiset of size <span class="math inline">\(2t - |Q|\)</span>, with the same cost.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L81-L106"><code>RoleConfig.isParityWitness_witness</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109"><code>RoleConfig.admissible_groups</code> ↗</a></p>
+<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109"><code>RoleConfig.admissible_groups</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.2 · <strong>Uses</strong> <a href="#node-definition-2-2">2.2</a></p>
 <p><em>Proof.</em> Put <span class="math inline">\(h_{k,i} = (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) \bmod 2\)</span>. (h1): <span class="math inline">\(h_{k,i} = 1\)</span> forces <span class="math inline">\(X_k(i) \ge 1\)</span>. (h2): <span class="math inline">\(h_k \equiv |\mathrm{Dr}_k| + |\mathrm{Pk}_k| = |X_k| - |\mathrm{Cr}_k| \equiv |X_k| + 1\)</span>. (h3): <span class="math inline">\(\sum_k h_{k,i} \equiv \sum_k (\mathrm{Dr}_k(i) + \mathrm{Pk}_k(i)) = 2\sum_k \mathrm{Dr}_k(i) \equiv 0\)</span> by the balance. The size is that of Definition 4.2. <span class="math inline">\(\square\)</span></p>
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
-<p><strong>Lean</strong> <code>ZenoFront.RoleConfig.isParityWitness_witness</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Lean</strong> <code>ZenoFront.RoleConfig.admissible_groups</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>/-- **PAR**, admissibility form. -/
+theorem admissible_groups : Admissible R.groups := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109" class="lean-src"><code>lean/ZenoFront/Roles.lean</code>, lines 108–109</a> (statement only; the proof is elided)</p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.RoleConfig.isParityWitness_witness</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **PAR.** The grouping of a role configuration is admissible, with witness
 `h_{k,i} = (D_k(i) + P_k(i)) mod 2`. -/
 theorem isParityWitness_witness : IsParityWitness R.groups R.witness
   …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L81-L106" class="lean-src"><code>lean/ZenoFront/Roles.lean</code>, lines 81–106</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.RoleConfig.admissible_groups</code> <span class="badge ok">machine-checked</span></p>
-<pre class="lean"><code>/-- **PAR**, admissibility form. -/
-theorem admissible_groups : Admissible R.groups := …</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109" class="lean-src"><code>lean/ZenoFront/Roles.lean</code>, lines 108–109</a> (statement only; the proof is elided)</p>
 </details>
 </div>
 </section>
@@ -1295,7 +1303,7 @@ theorem admissible_groups : Admissible R.groups := …</code></pre>
 <div class="node-body">
 <p><strong>Lemma 4.6 (adding a plane) [AP].</strong> Let <span class="math inline">\((X_k)_{k \in Q}\)</span> be admissible with <span class="math inline">\(q = |Q|\)</span>, <span class="math inline">\(\sum_k |X_k| = 2t - q\)</span> and <span class="math inline">\(t \ge q + 1\)</span>, and let <span class="math inline">\(\star \notin Q\)</span> be a further plane. Then some admissible partition <span class="math inline">\((Y_k)_{k \in Q \cup \{\star\}}\)</span> has <span class="math inline">\(\sum_k |Y_k| = 2t - q - 1\)</span>, <span class="math inline">\(c(Y) \le c(X)\)</span> and <span class="math inline">\(\max_k \delta(Y_k) \le \max_k \delta(X_k)\)</span>. This corrects case (b) of the first version’s Lemma 4.4, where the support has <span class="math inline">\(2(t-q)\)</span> entries, not <span class="math inline">\(t - q\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L45-L101"><code>Admissible.addPlane</code> ↗</a></p>
+<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L103-L110"><code>Admissible.addPlane_of_size</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.2 · <strong>Uses</strong> <a href="#node-lemma-2-5">2.5</a></p>
@@ -1304,7 +1312,16 @@ theorem admissible_groups : Admissible R.groups := …</code></pre>
 <p><em>Case (b): every <span class="math inline">\(f_k = 1\)</span>.</em> Then <span class="math inline">\(2t - q = \sum_k (h_k + 1)\)</span>, so <span class="math inline">\(\sum_k h_k = 2(t-q) \ge 2\)</span>. Some city <span class="math inline">\(i\)</span> has a non-zero column, which is even, so <span class="math inline">\(h_{u,i} = h_{v,i} = 1\)</span> for two planes <span class="math inline">\(u \ne v\)</span>. Set <span class="math inline">\(Y_u = X_u - \{i\}\)</span>, <span class="math inline">\(Y_v = X_v - \{i\}\)</span> and <span class="math inline">\(Y_\star = \{i\}\)</span>, set <span class="math inline">\(h_{u,i} = h_{v,i} := 0\)</span>, and give plane <span class="math inline">\(\star\)</span> a zero row. (h1) holds for <span class="math inline">\(j \ne i\)</span>, as <span class="math inline">\(Y_u(j) = X_u(j)\)</span>. (h2) holds for <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>, whose group size and row sum both drop by one, and for <span class="math inline">\(\star\)</span>. Column <span class="math inline">\(i\)</span> drops by 2. <span class="math inline">\(|Y_u| = h_u \ge 1\)</span> (old <span class="math inline">\(h_u\)</span>), <span class="math inline">\(\delta(Y_\star) = d_i \le \delta(X_u)\)</span>, and <span class="math inline">\(c(Y) = c(X) - c_i\)</span>. <span class="math inline">\(\square\)</span></p>
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
-<p><strong>Lean</strong> <code>ZenoFront.Admissible.addPlane</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Lean</strong> <code>ZenoFront.Admissible.addPlane_of_size</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>/-- **Lemma 4.6 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
+grouping has `2t − q − 1` landings. -/
+theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible X)
+    (hsize : size X = 2 * t - q) (ht : q + 1 ≤ t) (d c : Fin n → ℕ) :
+    ∃ Y : Groups n (q + 1), Admissible Y ∧ size Y = 2 * t - (q + 1) ∧
+      totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L103-L110" class="lean-src"><code>lean/ZenoFront/AddPlane.lean</code>, lines 103–110</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/29959222a988419aae27bf7c75c06325a3d56809"><code>2995922</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.Admissible.addPlane</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Lemma 4.6 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
 landings gives an admissible grouping of `q + 1` planes with one landing less, no larger cost,
 and loads bounded by every bound on the old loads. -/
@@ -1324,7 +1341,7 @@ theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤
 <div class="node-body">
 <p><strong>Theorem 4.7 (converse).</strong> Assume (S) and (A1). For every feasible plan with cost <span class="math inline">\(C\)</span>, makespan <span class="math inline">\(M\)</span> and flight times <span class="math inline">\(F_k\)</span>, there is an admissible partition <span class="math inline">\(X_1,\dots,X_p\)</span> of a multiset <span class="math inline">\(X\)</span> with <span class="math inline">\(|X| = s\)</span>, <span class="math inline">\(c(X) \le C\)</span> and <span class="math inline">\(\ell(X_k) \le F_k \le M\)</span> for every <span class="math inline">\(k\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637"><code>Feasible.exists_admissible_A1_flightTime</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Converse.lean#L676-L683"><code>Feasible.exists_admissible</code> ↗</a></p>
+<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637"><code>Feasible.exists_admissible_A1_flightTime</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.3 · <strong>Hypotheses</strong> (S), (A1) · <strong>Uses</strong> <a href="#node-lemma-3-1">3.1</a>, <a href="#node-lemma-4-3">4.3</a>–<a href="#node-lemma-4-5">4.5</a></p>
@@ -1345,7 +1362,8 @@ theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = 
       (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
       totalCost c X ≤ planCost c P := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637" class="lean-src"><code>lean/ZenoFront/ConverseTri.lean</code>, lines 631–637</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600"><code>ee385d0</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
-<p><strong>Lean</strong> <code>ZenoFront.Feasible.exists_admissible</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.Feasible.exists_admissible</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
 dominated by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
 `2 δ(X_k) ≤` the makespan for every plane, and total cost at most the plan's cost. -/
@@ -1391,7 +1409,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 <div class="node-body">
 <p><strong>Theorem 4.9 (bridge) [B3].</strong> Assume (S) and (A1). The front <span class="math inline">\(\mathrm{Min}\,\mathcal A'\)</span> of the variant in which planes may end anywhere and the makespan is the last arrival time (§1.2) equals <span class="math inline">\(\mathcal F\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935"><code>minimal_achievable_iff_anywhere_of_A1</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Bridge.lean#L395-L504"><code>FeasibleAnywhere.exists_admissible</code> ↗</a></p>
+<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935"><code>minimal_achievable_iff_anywhere_of_A1</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.5 · <strong>Hypotheses</strong> (S), (A1) · <strong>Uses</strong> <a href="#node-lemma-1-1">1.1</a>, <a href="#node-lemma-3-1">3.1</a>, <a href="#node-theorem-4-1">4.1</a>, <a href="#node-lemma-4-3">4.3</a>–<a href="#node-corollary-4-8">4.8</a></p>
@@ -1411,7 +1429,8 @@ theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d
     (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935" class="lean-src"><code>lean/ZenoFront/Achievability.lean</code>, lines 930–935</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.FeasibleAnywhere.exists_admissible</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.FeasibleAnywhere.exists_admissible</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Theorem 4.9 (bridge B3), converse direction.** Under (S) and (A1), with `p ≤ t`, every
 plan whose planes may end anywhere is weakly dominated by an admissible partition: some
 admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan (the last arrival)
@@ -1463,8 +1482,8 @@ theorem Feasible.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d) (hA 
       (∀ k, 2 * load N.d (X k) ≤ durSum (P k) ∧ durSum (P k) ≤ planMakespan P) ∧
       totalCost c X ≤ planCost c P := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L612-L618" class="lean-src"><code>lean/ZenoFront/ConverseTri.lean</code>, lines 612–618</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7"><code>e1ee5c4</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
-<p><em>Part</em> <code>ZenoFront.exists_admissible_of_blocks</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.exists_admissible_of_blocks</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>landings. -/
 theorem exists_admissible_of_blocks {n p : ℕ} (d : Fin n → ℕ)
     (blocks : Fin p → List (List (Fin n))) (hne : ∀ k, ∀ γ ∈ blocks k, γ ≠ [])
@@ -1514,12 +1533,12 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
 <section id="node-corollary-4-12" class="level3">
 <h3 class="anchored" data-anchor-id="node-corollary-4-12">Corollary 4.12</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves it for Corollary 4.8, Theorem 4.9, the solver and the checker; not for Propositions 7.8 and 7.9, nor for Proposition 7.1 with rescaling.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Corollary 4.12.</strong> Under (S) and (AΔ), Corollary 4.8, Theorem 4.9, Proposition 7.1, the front statements of Propositions 7.8 and 7.9 hold, and <code>forest</code> gaps (§9) are sound.</p>
 <div class="node-lean">
-<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L437-L442"><code>minimal_achievable_iff_multisetPoints_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L413-L422"><code>minimal_achievable_iff_anywhere_of_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L453-L460"><code>minimal_achievable_iff_minCost_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496"><code>solveFront_isParetoFront_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521"><code>Cert.forestGapBound_le_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547"><code>Cert.check_sound_ATri</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L437-L442"><code>minimal_achievable_iff_multisetPoints_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L413-L422"><code>minimal_achievable_iff_anywhere_of_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L453-L460"><code>minimal_achievable_iff_minCost_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496"><code>solveFront_isParetoFront_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547"><code>Cert.check_sound_ATri</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521"><code>Cert.forestGapBound_le_ATri</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §4.6 · <strong>Hypotheses</strong> (S), (AΔ) · <strong>Uses</strong> <a href="#node-lemma-1-1">1.1</a>, <a href="#node-lemma-3-1">3.1</a>, <a href="#node-lemma-3-3">3.3</a>, <a href="#node-theorem-4-1">4.1</a>, <a href="#node-lemma-4-6">4.6</a>, <a href="#node-corollary-4-8">4.8</a>, <a href="#node-theorem-4-9">4.9</a>, <a href="#node-theorem-4-10">4.10</a>, <a href="#node-proposition-7-1">7.1</a>, <a href="#node-proposition-7-8">7.8</a>, <a href="#node-proposition-7-9">7.9</a></p>
@@ -1528,7 +1547,7 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Under (S) and (AΔ), Lean proves Corollary 4.8 (<code>minimal_achievable_iff_multisetPoints_ATri</code>), Theorem 4.9 (<code>minimal_achievable_iff_anywhere_of_ATri</code>), Proposition 7.1 (<code>minimal_achievable_iff_minCost_ATri</code>), the verified solver and the soundness of <code>forest</code> gaps and of the checker. The front statements of Propositions 7.8 and 7.9 are not stated in Lean, so the corollary as a whole keeps the note’s status.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.minimal_achievable_iff_multisetPoints_ATri</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>admissible partition. -/
 theorem minimal_achievable_iff_multisetPoints_ATri {N : Network n} (hS : N.dbar = N.d)
@@ -1557,6 +1576,12 @@ theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : 
     (c : Fin n → ℕ) (hp : 1 ≤ p) (hpt : p ≤ t) :
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496" class="lean-src"><code>lean/ZenoFront/FrontTri.lean</code>, lines 462–496</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7"><code>c6ab63a</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
+<p><em>Part</em> <code>ZenoFront.Cert.check_sound_ATri</code> <span class="badge ok">machine-checked</span></p>
+<pre class="lean"><code>satisfies (AΔ), whatever the gap kinds. -/
+theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …</code></pre>
+<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547" class="lean-src"><code>lean/ZenoFront/FrontTri.lean</code>, lines 525–547</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7"><code>0d3ed68</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
 <p><em>Part</em> <code>ZenoFront.Cert.forestGapBound_le_ATri</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- The forest gap bound is sound under (AΔ): a feasible plan with makespan below `M` costs at
 least `forestGapBound M`. This is where Theorem 4.10 is used. -/
@@ -1565,28 +1590,22 @@ theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar =
     (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P &lt; M) :
     C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521" class="lean-src"><code>lean/ZenoFront/FrontTri.lean</code>, lines 504–521</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7"><code>0d3ed68</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
-<p><em>Part</em> <code>ZenoFront.Cert.check_sound_ATri</code> <span class="badge ok">machine-checked</span></p>
-<pre class="lean"><code>satisfies (AΔ), whatever the gap kinds. -/
-theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : (C.network dc).ATri) :
-    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …</code></pre>
-<p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547" class="lean-src"><code>lean/ZenoFront/FrontTri.lean</code>, lines 525–547</a> (statement only; the proof is elided). Axioms from the CI-audited commit footer of <a href="https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7"><code>0d3ed68</code></a> (<code>#print axioms</code> output, re-checked by CI on every push), not from a local Lean run</p>
 </details>
 </div>
 </section>
 </section>
 <section id="sec-nonsymmetric" class="level2">
 <h2 class="anchored" data-anchor-id="sec-nonsymmetric">Non-symmetric case</h2>
-<p>Different durations to the two hubs (§6). Waiting can now be harmful (theory note, <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations" title="In the theory note, §6.2">Proposition 6.5</a>), so role loads alone do not give the front; under (A1-NS) it is characterised by <em>schedulable domination</em> (Theorem 6.9), machine-checked for every plan. (A1-NS) is needed: under (AΔ) alone, short central flights can beat every role configuration (theory note, <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights" title="In the theory note, §6.4">Proposition 6.7</a>), and only the cut bound of Lemma 6.19 holds without any assumption.</p>
+<p>Different durations to the two hubs (§6). Waiting can now be harmful (theory note, <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations" title="In the theory note, §6.2">Proposition 6.5</a>), so role loads alone do not give the front; under (A1-NS) it is characterised by <em>schedulable domination</em> (Theorem 6.9), which Lean proves for every plan on the template’s closed form. (A1-NS) is needed: under (AΔ) alone, short central flights can beat every role configuration (theory note, <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights" title="In the theory note, §6.4">Proposition 6.7</a>), and only the cut bound of Lemma 6.19 holds without any assumption.</p>
 <section id="node-theorem-6-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-6-1">Theorem 6.1 (converse to role configurations)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean bounds every role load by the makespan, not by its plane’s flight time.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 6.1 (converse to role configurations) [N1].</strong> Assume (A1-NS). For every feasible plan with cost <span class="math inline">\(C\)</span> and makespan <span class="math inline">\(M\)</span> there is a role configuration on all <span class="math inline">\(p\)</span> planes with passenger count <span class="math inline">\(t\)</span>, cost at most <span class="math inline">\(C\)</span> and <span class="math inline">\(\lambda_k \le F_k \le M\)</span> for every <span class="math inline">\(k\)</span>. (AΔ) is not needed.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L474-L517"><code>Feasible.exists_roleConfig_ns</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L474-L517"><code>Feasible.exists_roleConfig_ns</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §6.1 · <strong>Hypotheses</strong> (A1-NS) · <strong>Uses</strong> <a href="#node-lemma-3-1">3.1</a>, <a href="#node-lemma-4-3">4.3</a>, <a href="#node-lemma-4-4">4.4</a></p>
@@ -1594,7 +1613,8 @@ theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Central flights are split through the hub of the shorter detour (<code>Feasible.split</code>), which keeps the plan feasible with the same cost and no larger makespan.</p>
-<p><strong>Lean</strong> <code>ZenoFront.Feasible.exists_roleConfig_ns</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Feasible.exists_roleConfig_ns</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Theorem 6.1 (converse to role configurations).** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a role configuration on the `p` planes with `2t − p` landings (passenger
 count `t`), cost at most the plan's, and every role load at most the makespan. -/
@@ -1626,9 +1646,6 @@ theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n �
 </div>
 <div class="node-body">
 <p><strong>Lemma 6.3 (template) [N3].</strong> The template is a schedule, and its makespan is <span class="math display">\[M_{\rm tmpl} = \max\Big(\max_k \lambda_k,\ \max_{(u,j;\,v,l) \in \mathcal L \text{ at } i}\ \mathrm{Pre}_u(j) + d_i + \bar d_i + \mathrm{Suf}_v(l)\Big).\]</span> Every schedule of the same configuration, orders and matching has makespan at least <span class="math inline">\(M_{\rm tmpl}\)</span>. So the least makespan of a role configuration is the minimum of <span class="math inline">\(M_{\rm tmpl}\)</span> over orders and matchings. No assumption on durations is needed.</p>
-<div class="node-lean">
-<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L90-L92"><code>Sched.tmpl</code> ↗</a></p>
-</div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §6.2 · <strong>Uses</strong> <a href="#node-lemma-3-3">3.3</a></p>
 <p><em>Proof.</em> <em>Lower bound.</em> In any such schedule, plane <span class="math inline">\(u\)</span> starts its <span class="math inline">\(j\)</span>-th drop-off after flying its earlier drop-offs, so this drop-off reaches <span class="math inline">\(i\)</span> no earlier than <span class="math inline">\(\mathrm{Pre}_u(j) + d_i\)</span>. The linked pick-up of <span class="math inline">\(v\)</span> leaves <span class="math inline">\(i\)</span> no earlier, flies <span class="math inline">\(\bar d_i\)</span> to <span class="math inline">\(C_G\)</span>, and <span class="math inline">\(v\)</span> then still flies its later pick-ups, at least <span class="math inline">\(\mathrm{Suf}_v(l)\)</span>. Also every plane flies <span class="math inline">\(\lambda_k\)</span> (Lemma 3.3(c)), so it finishes no earlier than <span class="math inline">\(\lambda_k\)</span>.</p>
@@ -1636,8 +1653,8 @@ theorem Feasible.exists_roleConfig_ns {N : Network n} (hA : N.A1NS) (c : Fin n �
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> <code>Sched.tmpl</code> is the closed form. Lean does not prove that the template is optimal for fixed orders and matching: soundness only needs Theorem 6.9, which bounds the closed form directly.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
-<p><em>Part</em> <code>ZenoFront.Sched.tmpl</code> <span class="badge ok">Lean definition</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.Sched.tmpl</code> <span class="badge ok">Lean definition</span></p>
 <pre class="lean"><code>/-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
 def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k =&gt; S.load d db k) (univ.sup fun v =&gt; univ.sup fun l =&gt; S.term d db v l)</code></pre>
@@ -1664,7 +1681,7 @@ def tmpl (d db : Fin n → ℕ) : ℕ :=
 <section id="node-proposition-6-6" class="level3">
 <h3 class="anchored" data-anchor-id="node-proposition-6-6">Proposition 6.6 (imbalance-vector DP)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves that the DP is at most the cost of every balanced configuration, the direction the checker uses; not equality.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Proposition 6.6 (imbalance-vector DP) [N5].</strong> Process the planes in order, with states <span class="math inline">\((k, j, v)\)</span>: <span class="math inline">\(k\)</span> planes processed, <span class="math inline">\(j\)</span> landings used, and <span class="math inline">\(v = \sum_{k' \le k} (\mathrm{Dr}_{k'} - \mathrm{Pk}_{k'}) \in \mathbb Z^n\)</span> the imbalance. A plane option is a triple <span class="math inline">\((\mathrm{Dr}, \mathrm{Pk}, r)\)</span> with <span class="math inline">\(r\)</span> odd, of weight <span class="math inline">\(c(\mathrm{Dr}) + c(\mathrm{Pk}) + G^{\rm cr}[r][T - 2\delta(\mathrm{Dr}) - 2\bar\delta(\mathrm{Pk})]\)</span>; it adds <span class="math inline">\(|\mathrm{Dr}| + |\mathrm{Pk}| + r\)</span> to <span class="math inline">\(j\)</span> and <span class="math inline">\(\mathrm{Dr} - \mathrm{Pk}\)</span> to <span class="math inline">\(v\)</span>. With states restricted to <span class="math inline">\(\|v\|_1 \le t - p\)</span>, the shortest path from <span class="math inline">\((0, 0, 0)\)</span> to <span class="math inline">\((p, s, 0)\)</span> has weight <span class="math inline">\(E_{\rm NS}(T)\)</span>. There are at most <span class="math inline">\((p+1)(s+1)\sum_{u \le t-p} 2^u \binom{n}{u}\binom{t-p}{u}\)</span> states, a polynomial in <span class="math inline">\(n\)</span> and <span class="math inline">\(s\)</span> for fixed <span class="math inline">\(t - p\)</span>.</p>
@@ -1677,7 +1694,7 @@ def tmpl (d db : Fin n → ℕ) : ℕ :=
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The lower-bound direction (the DP is at most the cost of every balanced configuration), which is all the checker’s <code>balanced</code> kind needs.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.BalData.value_le_totalCost</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The `balanced` program is a lower bound** on the cost of every balanced role configuration
 with `s` landings and role loads at most `T`, for durations `dR`, `dbR` (scaled) when the program
@@ -1723,9 +1740,6 @@ theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
 <li><p>In a simple plan with clean journeys, a cycle of the next-leg relation passes through a central city <span class="math inline">\(x\)</span> with <span class="math inline">\(d_x = \bar d_x = 0\)</span>.</p></li>
 <li><p>The template of a role configuration (§6.2), and the plan of Theorem 4.1, are event-ordered.</p></li>
 </ol>
-<div class="node-lean">
-<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L104-L114"><code>EventOrdered</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/EventOrderCheck.lean#L134-L158"><code>EventOrdered.of_eoOK</code> ↗</a></p>
-</div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §6.2 · <strong>Uses</strong> <a href="#node-lemma-4-3">4.3</a>(a)</p>
 <p><em>Proof.</em> (a) An event order extends the relation, so the relation has no cycle. Conversely, along the relation departure times do not decrease, since the next leg departs no earlier than the previous one arrives; sorting the legs by departure time, ties broken by a topological order of the acyclic relation, gives an event order.</p>
@@ -1736,8 +1750,8 @@ theorem BalData.value_le_totalCost (D : BalData n) (dR dbR : Fin n → ℕ)
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> <code>EventOrdered</code> is the definition; <code>EventOrdered.of_eoOK</code> proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
-<p><em>Part</em> <code>ZenoFront.EventOrdered</code> <span class="badge ok">Lean definition</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.EventOrdered</code> <span class="badge ok">Lean definition</span></p>
 <pre class="lean"><code>/-- **Event-ordered plans** (§1.2 of the note). The legs have a total order (`rank`, injective)
 that extends every route and some journey of every passenger, and along which departure times
 do not decrease. Every plan with positive durations is event-ordered, and so is every PDDL plan.
@@ -1750,7 +1764,7 @@ def EventOrdered (P : Plan n t p) : Prop :=
       IsRoute .ci 0 (js.map (legAt P)) ∧ finalLoc .ci (js.map (legAt P)) = .cg ∧
       js.Pairwise fun x y =&gt; rank x &lt; rank y</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L104-L114" class="lean-src"><code>lean/ZenoFront/SearchGap.lean</code>, lines 104–114</a></p>
-<p><em>Part</em> <code>ZenoFront.EventOrdered.of_eoOK</code> <span class="badge ok">machine-checked</span></p>
+<p><em>Related</em> <code>ZenoFront.EventOrdered.of_eoOK</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The test is sound**: a plan it accepts is event-ordered. -/
 theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered P := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/EventOrderCheck.lean#L134-L158" class="lean-src"><code>lean/ZenoFront/EventOrderCheck.lean</code>, lines 134–158</a> (statement only; the proof is elided)</p>
@@ -1760,12 +1774,12 @@ theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered
 <section id="node-theorem-6-9" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-6-9">Theorem 6.9 (schedulable domination)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template’s makespan is Lemma 6.3, written only.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 6.9 (schedulable domination) [SD].</strong> Assume (A1-NS). Let a feasible plan have cost <span class="math inline">\(C\)</span> and makespan <span class="math inline">\(M\)</span>. Then there are a role configuration on all <span class="math inline">\(p\)</span> planes with passenger count <span class="math inline">\(t\)</span> and cost at most <span class="math inline">\(C\)</span>, orders of its drop-offs and pick-ups, and a link matching whose template has makespan at most <span class="math inline">\(M\)</span>. Neither an event order, nor (AΔ), nor (AΔ-path) is needed.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/DominationAll.lean#L345-L473"><code>schedulableDomination_all</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/DominationAll.lean#L345-L473"><code>schedulableDomination_all</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §6.2 · <strong>Hypotheses</strong> (A1-NS) · <strong>Uses</strong> <a href="#node-lemma-2-1">2.1</a>, <a href="#node-lemma-3-1">3.1</a>, <a href="#node-lemma-3-3">3.3</a>, <a href="#node-lemma-4-3">4.3</a>(a), <a href="#node-lemma-4-4">4.4</a>, <a href="#node-theorem-6-1">6.1</a>, <a href="#node-lemma-6-3">6.3</a></p>
@@ -1793,7 +1807,8 @@ theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Step 2 works on visits by time (<code>exists_rewired</code>): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (<code>withLoops</code>). <code>not_schedulableDomination</code> shows that the hypothesis <code>p ≤ t</code> is needed.</p>
-<p><strong>Lean</strong> <code>ZenoFront.schedulableDomination_all</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.schedulableDomination_all</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
 plan's and closed form at most its makespan. No event order and no hypothesis on zero durations
@@ -1809,7 +1824,7 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
 <section id="node-corollary-6-10" class="level3">
 <h3 class="anchored" data-anchor-id="node-corollary-6-10">Corollary 6.10 (non-symmetric front)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean uses it only inside the version 2 checker (<code>Cert2.check_sound_EO</code>); the corollary is not stated.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Corollary 6.10 (non-symmetric front).</strong> Assume (A1-NS). Let <span class="math inline">\(m(\mathrm{cfg})\)</span> be the least makespan of a role configuration (§6.2), let <span class="math display">\[\mathcal K = \{(c(\mathrm{cfg}),\ m(\mathrm{cfg})) : \mathrm{cfg} \text{ a role configuration on the } p \text{ planes with passenger count } t\},\]</span> and let <span class="math inline">\(\mathcal A_{\rm eo} \subseteq \mathcal A\)</span> be the set of points of feasible event-ordered plans. Then <span class="math inline">\(\mathcal F = \mathrm{Min}\,\mathcal A_{\rm eo} = \mathrm{Min}\,\mathcal K\)</span>: a feasible plan with cost at most <span class="math inline">\(C\)</span> and makespan at most <span class="math inline">\(M\)</span> exists iff some configuration has cost at most <span class="math inline">\(C\)</span> and least makespan at most <span class="math inline">\(M\)</span>, and then an event-ordered plan does too.</p>
@@ -1825,7 +1840,7 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: <code>Cert2.check_sound</code> for all plans and, when a certificate lists <code>EO</code>, <code>Cert2.check_sound_EO</code> for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.Cert2.check_sound_EO</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Soundness over event-ordered plans**, when some city has `d = d̄ = 0` and the certificate
 lists `EO`: the listed plans are event-ordered (`eoOK`), so the listed points are also the front
@@ -1845,12 +1860,12 @@ theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
 <section id="node-proposition-7-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-proposition-7-1">Proposition 7.1</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves it in the original units; the rescaling by g is not formalised.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Proposition 7.1.</strong> Under (S) and (A1), <span class="math inline">\(\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) &lt; E(T-1)\}\)</span> with <span class="math inline">\(E(-1) = \infty\)</span>, makespans in units of <span class="math inline">\(g\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268"><code>minimal_admissiblePoints_iff</code> ↗</a>, <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L1030-L1037"><code>minimal_achievable_iff_multisetPoints</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268"><code>minimal_admissiblePoints_iff</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §7.1 · <strong>Hypotheses</strong> (S), (A1) · <strong>Uses</strong> <a href="#node-corollary-4-8">4.8</a></p>
@@ -1858,7 +1873,8 @@ theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> <code>minimal_admissiblePoints_iff</code>: <code>(C, 2T)</code> is a minimal admissible point iff <code>E(T) = C</code> and <code>E(T') &gt; C</code> for every <code>T' &lt; T</code>; with Corollary 4.8 this is the proposition.</p>
-<p><strong>Lean</strong> <code>ZenoFront.minimal_admissiblePoints_iff</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.minimal_admissiblePoints_iff</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The minimal admissible points**: `(C, M)` is minimal iff `M = 2T` with `E(T) = C` and
 `E(T') &gt; C` for every `T' &lt; T` (the breakpoints of `E`). -/
 theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : ℕ} (C M : ℕ) :
@@ -1866,7 +1882,8 @@ theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : �
       ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
         ∀ T' &lt; T, (C : WithTop ℕ) &lt; minCost N.d c t p T' := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268" class="lean-src"><code>lean/ZenoFront/Solver.lean</code>, lines 209–268</a> (statement only; the proof is elided)</p>
-<p><strong>Lean</strong> <code>ZenoFront.minimal_achievable_iff_multisetPoints</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.minimal_achievable_iff_multisetPoints</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
 `p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the multisets of `2t − p`
 landings that have an admissible partition. -/
@@ -1880,19 +1897,20 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 <section id="node-lemma-7-2" class="level3">
 <h3 class="anchored" data-anchor-id="node-lemma-7-2">Lemma 7.2</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves that G is the least cost and when it is infinite; not that G is non-increasing in τ.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Lemma 7.2.</strong> <span class="math inline">\(G[m][\tau] = \min\{c(Y) : |Y| = m,\ \delta(Y) \le \tau\}\)</span>, and <span class="math inline">\(G\)</span> is non-increasing in <span class="math inline">\(\tau\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/OnePlane.lean#L125-L139"><code>isLeast_oneplane</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/OnePlane.lean#L125-L139"><code>isLeast_oneplane</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §7.2</p>
 <p><em>Proof.</em> Induction on <span class="math inline">\(m\)</span>: removing an element <span class="math inline">\(i\)</span> of an optimal <span class="math inline">\(Y\)</span> leaves an <span class="math inline">\((m-1)\)</span>-multiset within <span class="math inline">\(\tau - d_i\)</span>, and adding <span class="math inline">\(i\)</span> to such a multiset gives an <span class="math inline">\(m\)</span>-multiset within <span class="math inline">\(\tau\)</span>. <span class="math inline">\(\square\)</span></p>
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
-<p><strong>Lean</strong> <code>ZenoFront.isLeast_oneplane</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.isLeast_oneplane</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Specification of the one-plane table.** When some multiset of `m` cities has load at most
 `T`, `G[m][T]` is the least cost of such a multiset. (Otherwise `G[m][T] = ∞`, by
 `oneplane_eq_top_iff`.) -/
@@ -1906,7 +1924,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
 <section id="node-proposition-7-3" class="level3">
 <h3 class="anchored" data-anchor-id="node-proposition-7-3">Proposition 7.3</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves L ≤ E ≤ U₂; the chains bound U₃ is not formalised.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Proposition 7.3.</strong> <span class="math inline">\(L(T) \le E(T) \le U_3(T) \le U(T)\)</span>.</p>
@@ -1919,7 +1937,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Lean proves <code>L(T) ≤ E(T) ≤ U₂(T)</code>, with <code>U₂</code> the pairs bound used by <code>zeno-front</code>. The chains bound <code>U₃</code> is not formalized.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.relaxedBoundAt_le_minCost</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **`L(T) ≤ E(T)`**: the relaxation is at most the cost of every admissible partition. -/
 theorem relaxedBoundAt_le_minCost (d c : Fin n → ℕ) {t p Tmax T : ℕ} :
@@ -1952,12 +1970,12 @@ theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T
 <section id="node-theorem-7-5" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-7-5">Theorem 7.5</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves that the DP equals E(T); not its time and memory bounds.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 7.5.</strong> <span class="math inline">\(\mathrm{For}[p][s] = E(T)\)</span>. Given <span class="math inline">\(G\)</span>, the computation takes <span class="math inline">\(O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)\)</span> time and <span class="math inline">\(O(q_{\max} s T + n q_{\max} s + p s)\)</span> memory per level.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L488-L514"><code>treeBoundAt_eq_minCost</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L488-L514"><code>treeBoundAt_eq_minCost</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §7.4 · <strong>Uses</strong> <a href="#node-lemma-2-6">2.6</a>, <a href="#node-corollary-2-7">2.7</a>, <a href="#node-lemma-7-2">7.2</a></p>
@@ -1971,7 +1989,8 @@ theorem minCost_le_pairsBoundAt (d c : Fin n → ℕ) {t p Tmax T : ℕ} (hT : T
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Exactness of the link-forest DP (<code>For ≥ E</code> and <code>For ≤ E</code>); the complexity statement is not formalized.</p>
-<p><strong>Lean</strong> <code>ZenoFront.treeBoundAt_eq_minCost</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.treeBoundAt_eq_minCost</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The tree DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the tree-DP bound of the
 checker (`treeBoundAt`) is `E(T)`: it is at most the cost of every admissible partition
 (`treeBoundAt_le_totalCost`), and every finite value is the cost of one. -/
@@ -1986,12 +2005,12 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 <section id="node-theorem-7-6" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-7-6">Theorem 7.6 (σ-DP)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves that the σ-DP equals E(T) when it runs on the non-dominated cities only.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 7.6 (σ-DP) [Claim C].</strong> The shortest path from <span class="math inline">\((0, 0, \emptyset)\)</span> to <span class="math inline">\((p, s, \emptyset)\)</span> has weight <span class="math inline">\(E(T)\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L143-L190"><code>sigmaBoundAt_eq_minCost</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L143-L190"><code>sigmaBoundAt_eq_minCost</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §7.5 · <strong>Uses</strong> <a href="#node-definition-2-2">2.2</a>, <a href="#node-lemma-2-8">2.8</a>, <a href="#node-lemma-7-2">7.2</a></p>
@@ -2003,7 +2022,8 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The σ-DP’s states are restricted to subsets of the non-dominated cities of size at most <code>min(p − 1, t − p)</code> (Lemma 2.8); every finite value is attained by groups whose witness sets form a parity witness, so no link forest is needed.</p>
-<p><strong>Lean</strong> <code>ZenoFront.sigmaBoundAt_eq_minCost</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.sigmaBoundAt_eq_minCost</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **The σ-DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the bound the checker
 computes (`sigmaBoundAt`) is `E(T)`: it is at most the cost of every admissible partition
 (`sigmaBoundAt_le_totalCost`), and every finite value is the cost of one. -/
@@ -2051,9 +2071,6 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
 </div>
 <div class="node-body">
 <p><strong>Proposition 7.9 (dominance) [DOM].</strong> Let <span class="math inline">\(i \ne i'\)</span> with <span class="math inline">\(d_{i'} \le d_i\)</span> and <span class="math inline">\(c_{i'} \le c_i\)</span>. Removing city <span class="math inline">\(i\)</span> leaves <span class="math inline">\(E(T)\)</span> and <span class="math inline">\(L(T)\)</span> unchanged at every <span class="math inline">\(T\)</span>. Under (S) and (A1), it leaves the front unchanged.</p>
-<div class="node-lean">
-<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AdmissibleBound.lean#L182-L199"><code>domRep_le</code> ↗</a></p>
-</div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §7.6 · <strong>Hypotheses</strong> — ; fronts: (S), (A1) · <strong>Uses</strong> <a href="#node-definition-2-2">2.2</a>, <a href="#node-proposition-7-1">7.1</a></p>
 <p><em>Proof.</em> Removing a city can only raise <span class="math inline">\(E\)</span> and <span class="math inline">\(L\)</span>. Conversely, in an optimal <span class="math inline">\(X\)</span> and its groups, replace every copy of <span class="math inline">\(i\)</span> by <span class="math inline">\(i'\)</span>: costs and durations do not increase. Nothing else is needed for <span class="math inline">\(L\)</span>. For <span class="math inline">\(E\)</span>, set <span class="math inline">\(h'_{k,i'} = (h_{k,i} + h_{k,i'}) \bmod 2\)</span> and <span class="math inline">\(h'_{k,i} = 0\)</span>. Row sums keep their parity, column <span class="math inline">\(i'\)</span> is the sum of two even columns, and <span class="math inline">\(h'_{k,i'} = 1\)</span> means <span class="math inline">\(X_k\)</span> contained <span class="math inline">\(i\)</span> or <span class="math inline">\(i'\)</span>, so the new group contains <span class="math inline">\(i'\)</span>. The instance without <span class="math inline">\(i\)</span> still satisfies (S) and (A1), and Proposition 7.1 expresses both fronts through <span class="math inline">\(E\)</span>. <span class="math inline">\(\square\)</span></p>
@@ -2063,8 +2080,8 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> Merging cities into non-dominated representatives keeps the bounds valid (<code>domRep_le</code>); the front statement is not formalized.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
-<p><em>Part</em> <code>ZenoFront.domRep_le</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Related declarations.</strong> The ledger does not list these for the statement.</p>
+<p><em>Related</em> <code>ZenoFront.domRep_le</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
     d (domRep d c i) ≤ d i ∧ c (domRep d c i) ≤ c i := …</code></pre>
 <p><a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AdmissibleBound.lean#L182-L199" class="lean-src"><code>lean/ZenoFront/AdmissibleBound.lean</code>, lines 182–199</a> (statement only; the proof is elided)</p>
@@ -2074,7 +2091,7 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
 <section id="node-proposition-7-10" class="level3">
 <h3 class="anchored" data-anchor-id="node-proposition-7-10">Proposition 7.10 (ends of the front)</h3>
 <div class="node-badge">
-<p><span class="badge informal">informal</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves the two lower bounds; not that they are attained.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Proposition 7.10 (ends of the front) [END].</strong> Assume (S). Let <span class="math inline">\(d_{\min} = \min_i d_i\)</span>, <span class="math inline">\(c_{\min} = \min_i c_i\)</span> and <span class="math inline">\(d_{\rm cheap} = \min\{d_i : c_i = c_{\min}\}\)</span>.</p>
@@ -2101,7 +2118,7 @@ theorem sigmaBoundAt_eq_minCost (d c : Fin n → ℕ) {t Tmax T : ℕ} (hp : 1 �
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> The two lower bounds the checker uses (obligations 2 and 4): every plan has makespan at least <code>2 d_min ⌈s/p⌉</code> and cost at least <code>s c_min</code>. The attainment half is not formalized.</p>
-<p><strong>Formalised parts.</strong> These declarations cover part of the statement; the node keeps the status of the note.</p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
 <p><em>Part</em> <code>ZenoFront.Feasible.minOf_le_makespan</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Obligation 2.** Under (S), every feasible plan has makespan at least
 `2 · d_min · ⌈s/p⌉`. -/
@@ -2191,12 +2208,12 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
 <section id="node-theorem-9-1" class="level3">
 <h3 class="anchored" data-anchor-id="node-theorem-9-1">Theorem 9.1 (end to end)</h3>
 <div class="node-badge">
-<p><span class="badge ok">machine-checked</span></p>
+<p><span class="badge informal">parts in Lean</span> <span class="node-gap">Lean proves it for the gap bounds its own checker supports (relaxed, and forest under (A1)); not for the potentials of Lemmas 9.2 and 9.3.</span></p>
 </div>
 <div class="node-body">
 <p><strong>Theorem 9.1 (end to end) [X3].</strong> If obligations 1–4 hold, then <span class="math inline">\(\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}\)</span>.</p>
 <div class="node-lean">
-<p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404"><code>Cert.check_sound</code> ↗</a></p>
+<p>Parts in Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404"><code>Cert.check_sound</code> ↗</a></p>
 </div>
 <details class="node-more"><summary>Proof</summary>
 <p><strong>Note</strong> <span class="badge informal">proof in the note</span> · theory note, §9 · <strong>Uses</strong> <a href="#node-lemma-1-1">1.1</a></p>
@@ -2204,7 +2221,8 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
 </details>
 <details class="node-more"><summary>Lean statement and source</summary>
 <p><strong>In Lean.</strong> <code>Cert.check_sound</code>: if <code>check</code> accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are <code>relaxed</code>. <code>Cert.check_sound_rat</code> extends it to plans with rational times and <code>Cert.check_sound_anywhere</code> to planes ending anywhere.</p>
-<p><strong>Lean</strong> <code>ZenoFront.Cert.check_sound</code> <span class="badge ok">machine-checked</span></p>
+<p><strong>Formalised parts.</strong> These declarations prove part of the statement; the ledger records the statement as a written proof.</p>
+<p><em>Part</em> <code>ZenoFront.Cert.check_sound</code> <span class="badge ok">machine-checked</span></p>
 <pre class="lean"><code>/-- **Soundness of the checker.** If `check` accepts a certificate, its points are exactly the
 Pareto front of the instance (every point is achieved by a feasible plan, every feasible plan is
 weakly dominated by a point, and the points are pairwise incomparable) for every table `dc` of
@@ -2222,7 +2240,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 <p><span class="badge ok">machine-checked</span></p>
 </div>
 <div class="node-body">
-<p>For non-symmetric instances (certificate format version 2): if <code>Cert2.check</code> accepts, the listed points are exactly the Pareto front of every feasible plan. Gap kinds <code>relaxed</code> (no assumption), <code>roles</code>, <code>lagrangian</code>, <code>balanced</code> (under (A1-NS), through Theorem 6.1) and <code>search</code> (under (A1-NS), through Theorem 6.9 for every plan) are verified.</p>
+<p>For non-symmetric instances (certificate format version 2): if <code>Cert2.check</code> accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights that satisfies (A1-NS) if the certificate lists it, and for every table otherwise. Gap kinds <code>relaxed</code> (no assumption), <code>roles</code>, <code>lagrangian</code>, <code>balanced</code> (under (A1-NS), through the Lean form of Theorem 6.1) and <code>search</code> (under (A1-NS), through the Lean form of Theorem 6.9) are verified.</p>
 <div class="node-lean">
 <p>Lean: <a href="https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/CheckerV2.lean#L486-L576"><code>Cert2.check_sound</code> ↗</a></p>
 </div>
@@ -2304,7 +2322,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Status of every node</h2>
-<p>The blueprint has <strong>61 nodes</strong>. <strong>23</strong> are machine-checked theorems and <strong>7</strong> are Lean definitions. <strong>13</strong> have formalised parts, and <strong>18</strong> are not in Lean. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>. These counts are from the last local Lean audit; 12 declarations added since then are badged from the <code>#print axioms</code> footers of their commits, which CI re-checks on every push.</p>
+<p>The blueprint has <strong>61 nodes</strong>. <strong>11</strong> are machine-checked and <strong>7</strong> are Lean definitions. <strong>22</strong> have parts in Lean, and <strong>21</strong> are not in Lean. These badges follow the claim ledger <a href="https://github.com/aquemy/ZenoSolver/blob/master/claims.toml"><code>claims.toml</code></a>: a statement is machine-checked only if Lean proves every assertion of it. The library has 3,675 declarations (2,112 theorems) in 42 modules (Lean <code>v4.36.0</code>, Mathlib <code>v4.36.0</code>). Apart from <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>, no declaration uses another axiom: no <code>sorry</code> and no <code>native_decide</code>. These counts are from the last local Lean audit; 12 declarations added since then are badged from the <code>#print axioms</code> footers of their commits, which CI re-checks on every push.</p>
 <p>The <em>Note</em> column gives the status of the proof written in the note: <span class="badge informal">proof in the note</span>, <span class="badge informal">sketch</span> or <span class="badge informal">definition</span>. Refuted conjectures, counterexamples and the reduction of general flight graphs are left to the note.</p>
 <details class="node-more"><summary>The status table</summary>
 <table class="caption-top table">
@@ -2348,12 +2366,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="odd">
 <td><a href="#node-lemma-1-1">Lemma 1.1 (dominating subset)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-2-1">Lemma 2.1</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2383,7 +2401,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-2-6">Lemma 2.6 (link forest)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2393,7 +2411,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-2-8">Lemma 2.8 (few touched cities)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2403,27 +2421,27 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-3-1">Lemma 3.1 (cleaning)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
 <td><a href="#node-lemma-3-2">Lemma 3.2 (counting)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-3-3">Lemma 3.3 (segment durations)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
 <td><a href="#node-lemma-3-4">Lemma 3.4 (relaxation)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-theorem-4-1">Theorem 4.1</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2433,7 +2451,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-4-3">Lemma 4.3 (direct selection)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2478,12 +2496,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="odd">
 <td><a href="#node-corollary-4-12">Corollary 4.12</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-theorem-6-1">Theorem 6.1 (converse to role configurations)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2493,7 +2511,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-6-3">Lemma 6.3 (template)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">informal</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2503,7 +2521,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-proposition-6-6">Proposition 6.6 (imbalance-vector DP)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2513,32 +2531,32 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-6-8">Lemma 6.8 (event order)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">informal</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
 <td><a href="#node-theorem-6-9">Theorem 6.9 (schedulable domination)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-corollary-6-10">Corollary 6.10 (non-symmetric front)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
 <td><a href="#node-proposition-7-1">Proposition 7.1</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-lemma-7-2">Lemma 7.2</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
 <td><a href="#node-proposition-7-3">Proposition 7.3</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
@@ -2548,12 +2566,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="odd">
 <td><a href="#node-theorem-7-5">Theorem 7.5</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-theorem-7-6">Theorem 7.6 (σ-DP)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2568,12 +2586,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="odd">
 <td><a href="#node-proposition-7-9">Proposition 7.9 (dominance)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">informal</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
 <td><a href="#node-proposition-7-10">Proposition 7.10 (ends of the front)</a></td>
-<td><span class="badge informal">informal</span> (parts in Lean)</td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="odd">
@@ -2598,7 +2616,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 </tr>
 <tr class="odd">
 <td><a href="#node-theorem-9-1">Theorem 9.1 (end to end)</a></td>
-<td><span class="badge ok">machine-checked</span></td>
+<td><span class="badge informal">parts in Lean</span></td>
 <td><span class="badge informal">proof in the note</span></td>
 </tr>
 <tr class="even">
