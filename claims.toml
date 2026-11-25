@@ -274,7 +274,8 @@ created      = "2026-11-24"
 [claims.claim-4-13]
 kind      = "claim"
 statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 = L(19) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.Ex413.plan_feasible, ZenoFront.Ex413.plan_cost, ZenoFront.Ex413.plan_makespan, ZenoFront.Ex413.not_A1, ZenoFront.Ex413.not_ATri, ZenoFront.Ex413.not_ATriHub, ZenoFront.Ex413.admissible_cost_ge, ZenoFront.Ex413.relaxedBound_19, ZenoFront.Ex413.admissible_front_consecutive, ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_admissible_le, ZenoFront.Ex413.not_isParetoFront"
 paper     = "Ex 4.13, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
@@ -282,6 +283,7 @@ created   = "2026-11-24"
 kind      = "conjecture"
 statement = "The converse under (S) alone: without (A1) or (AΔ), every feasible plan is dominated by an admissible partition, as in Theorem 4.10, so Corollary 4.8 holds under (S) alone."
 status    = "math.disproved"
+lean      = "ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_isParetoFront"
 paper     = "status summary (§0, the (S)-only case), doc/theory/exact-front.md; refuted by Ex 4.13 (§4.6)"
 created   = "2026-11-23"
 

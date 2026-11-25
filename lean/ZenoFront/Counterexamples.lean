@@ -5,6 +5,9 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Examples
+public import ZenoFront.Graph
+public import ZenoFront.Solver
+public import ZenoFront.TriSegments
 
 /-!
 # The counterexamples of the theory note, checked by the kernel
@@ -49,12 +52,24 @@ The papers leave some choices open. The definitions here take:
 On the 27 golden instances (`tests/golden/instances.txt`), `evocopPoints` gives the front of the
 2016 `zenoSolver`, and `arxivPoints` that of `zenoSolver_noDuplicate` on 25 of them.
 
+## Example 4.13: the triangles through a hub cannot be dropped
+
+On `d = d̄ = (2, 3, 9, 11)`, `c = (50, 44, 17, 0)`, `t = 6`, `p = 3`, with a central flight of
+duration 1 between cities 3 and 4, a plan of cost 260 and makespan 39 flies that central flight
+(`Ex413.plan_feasible`). The checker of format v1 accepts hub flights only, so the plan is
+simulated on its duration table (`planOKDur`, `Graph.lean`). Every admissible partition of 9
+landings with loads `δ(X_k) ≤ 19` costs at least 264 (`Ex413.minCost_19`), so no admissible point
+weakly dominates `(260, 39)` (`Ex413.not_admissible_le`). The conclusion of Theorem 4.10 and
+Corollary 4.8 fail there (`Ex413.no_admissible_partition`, `Ex413.not_isParetoFront`).
+
 ## Main results
 
 * `ZenoFront.Greedy.evocop_misses_lpt`, `ZenoFront.Greedy.arxiv_misses_lpt`: neither greedy reaches
   the front point `(260, 60)` of the `lpt` instance.
 * `ZenoFront.Greedy.arxiv_misses_p3First`: the arXiv greedy does not reach the front point
   `(42, 12)` of the `p3First` instance.
+* `ZenoFront.Ex413.plan_feasible`, `ZenoFront.Ex413.not_admissible_le`,
+  `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
 -/
 
 @[expose] public section
@@ -364,5 +379,156 @@ theorem arxiv_misses_p3First (dc : Fin 2 → Fin 2 → ℕ) :
   ⟨((p3First_front dc).mem_iff_minimal _).mp (by decide), by decide +kernel⟩
 
 end Greedy
+
+/-! ### Example 4.13: without (A1) and (AΔ), a plan beats the admissible partitions -/
+
+namespace Ex413
+
+/-- The hub durations of Example 4.13, `d = d̄ = (2, 3, 9, 11)` (cities numbered from `0` here). -/
+def d : Fin 4 → ℕ := ![2, 3, 9, 11]
+
+/-- The landing costs of Example 4.13, `c = (50, 44, 17, 0)`. -/
+def c : Fin 4 → ℕ := ![50, 44, 17, 0]
+
+/-- The central flights of Example 4.13: `d₁₂ = 1`, `d₁₃ = 5`, `d₁₄ = 6`, `d₂₃ = 3`, `d₂₄ = 6`,
+`d₃₄ = 1` in the note's numbering. The diagonal is never flown. -/
+def dc : Fin 4 → Fin 4 → ℕ := ![![0, 1, 5, 6], ![1, 0, 3, 6], ![5, 3, 0, 1], ![6, 6, 1, 0]]
+
+/-- The network of Example 4.13: symmetric hub durations and the central flights `dc`. -/
+def net : Network 4 := ⟨d, d, dc⟩
+
+/-- The plan of Example 4.13 (passengers numbered from `0`). Plane 1 crosses at city 1, picks up
+at city 4 the passenger that plane 3 dropped there, then crosses back and forth at city 2;
+plane 2 crosses at city 2 twice and at city 4; plane 3 drops a passenger at city 4, flies the
+central flight `4 → 3` back towards `C_I`, and crosses at city 3. -/
+def plan : Plan 4 6 3 :=
+  ![[⟨.ci, .city 0, 0, 2, some 0⟩, ⟨.city 0, .cg, 2, 4, some 0⟩,
+      ⟨.cg, .city 3, 4, 15, none⟩, ⟨.city 3, .cg, 15, 26, some 1⟩,
+      ⟨.cg, .city 1, 26, 29, none⟩, ⟨.city 1, .ci, 29, 32, none⟩,
+      ⟨.ci, .city 1, 32, 35, some 2⟩, ⟨.city 1, .cg, 35, 38, some 2⟩],
+    [⟨.ci, .city 1, 0, 3, some 3⟩, ⟨.city 1, .cg, 3, 6, some 3⟩,
+      ⟨.cg, .city 1, 6, 9, none⟩, ⟨.city 1, .ci, 9, 12, none⟩,
+      ⟨.ci, .city 3, 12, 23, some 4⟩, ⟨.city 3, .cg, 23, 34, some 4⟩],
+    [⟨.ci, .city 3, 0, 11, some 1⟩, ⟨.city 3, .city 2, 11, 12, none⟩, ⟨.city 2, .ci, 12, 21, none⟩,
+      ⟨.ci, .city 2, 21, 30, some 5⟩, ⟨.city 2, .cg, 30, 39, some 5⟩]]
+
+/-- The flights the plan uses: the hub flights, and the central flight between cities 4 and 3. -/
+def usedGraph : FlightGraph 4 :=
+  ⟨fun a b => match a, b with
+    | .city i, .city j => if i = 3 ∧ j = 2 then some 1 else none
+    | a, b => Network.duration ⟨d, d, fun _ _ => 0⟩ a b⟩
+
+/-- The plan is feasible on the flights it uses. -/
+theorem plan_feasible_used : GFeasible usedGraph plan :=
+  gFeasible_of_planOKDur (by decide +kernel)
+
+/-- **The plan is feasible** in every network with the hub durations `d` (symmetric) and a
+central flight of duration 1 from city 4 to city 3, whatever the other central flights. -/
+theorem plan_feasible (dc' : Fin 4 → Fin 4 → ℕ) (h : dc' 3 2 = 1) :
+    Feasible ⟨d, d, dc'⟩ plan := by
+  refine (feasible_iff_gFeasible _ _).mpr (plan_feasible_used.mono fun a b τ hab => ?_)
+  cases a <;> cases b <;> simp only [usedGraph, Network.toGraph, Network.duration] at hab ⊢ <;>
+    try exact hab
+  rename_i i j
+  split_ifs at hab with hij
+  · obtain ⟨rfl, rfl⟩ := hij
+    rw [h]
+    exact hab
+
+/-- The plan is feasible in the network of Example 4.13. -/
+theorem plan_feasible_net : Feasible net plan := plan_feasible dc rfl
+
+/-- The plan costs 260. -/
+theorem plan_cost : planCost c plan = 260 := by decide +kernel
+
+/-- The plan has makespan 39. -/
+theorem plan_makespan : planMakespan plan = 39 := by decide +kernel
+
+/-- The central flights violate (A1): `d₃ + d₄ = 20 > 1 = d₃₄`. -/
+theorem not_A1 : ¬ net.A1 := fun h => absurd (h 3 2) (by decide)
+
+/-- The central flights violate (AΔ): `d₄ = 11 > 10 = d₃ + d₃₄`. -/
+theorem not_ATri : ¬ net.ATri := fun h =>
+  absurd (h .ci (.city 2) (.city 3) (by decide) 11 9 1 rfl rfl rfl) (by decide)
+
+/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.10 uses. -/
+theorem not_ATriHub : ¬ net.ATriHub := fun h => absurd (h 2 3).1 (by decide)
+
+set_option maxRecDepth 100000 in
+/-- `E(19) = 264`, by the link-forest DP in the kernel. -/
+theorem minCost_19 : minCost d c 6 3 19 = 264 := by
+  rw [← treeBoundAt_eq_minCost d c (p := 3) (t := 6) (Tmax := 19) (by decide) le_rfl]
+  decide +kernel
+
+/-- Every admissible partition of `2t − p = 9` landings with every `δ(X_k) ≤ 19` costs at least
+264. -/
+theorem admissible_cost_ge (X : Groups 4 3) (hX : Admissible X) (hsize : size X = 2 * 6 - 3)
+    (hload : ∀ k, load d (X k) ≤ 19) : 264 ≤ totalCost c X := by
+  have h := minCost_le d c (t := 6) hX hsize hload
+  rw [minCost_19] at h
+  exact_mod_cast h
+
+set_option maxRecDepth 100000 in
+/-- The relaxation `L(19)` of the checker (`relaxedBoundAt`, a lower bound on every plan of
+makespan below 40 by Lemma 3.4) is 260, the plan's cost. -/
+theorem relaxedBound_19 : relaxedBoundAt 3 9 19 (oneplaneTable d c 19 9) 19 = 260 := by
+  decide +kernel
+
+/-- **The conclusion of Theorem 4.10 fails for the plan**: no admissible partition of
+`2t − p = 9` landings costs at most 260 with every load `ℓ(X_k) = 2δ(X_k)` at most 39. -/
+theorem no_admissible_partition :
+    ¬ ∃ X : Groups 4 3, Admissible X ∧ size X = 2 * 6 - 3 ∧ totalCost c X ≤ planCost c plan ∧
+      ∀ k, 2 * load d (X k) ≤ planMakespan plan := by
+  rintro ⟨X, hX, hsize, hcost, hload⟩
+  rw [plan_cost] at hcost
+  rw [plan_makespan] at hload
+  have h := minCost_le d c (t := 6) hX hsize (T := 19) fun k => by have := hload k; omega
+  rw [minCost_19] at h
+  have h' : ((264 : ℕ) : WithTop ℕ) ≤ ((260 : ℕ) : WithTop ℕ) :=
+    h.trans (WithTop.coe_le_coe.mpr hcost)
+  exact absurd (WithTop.coe_le_coe.mp h') (by decide)
+
+/-- **No admissible point weakly dominates the plan's point `(260, 39)`.** -/
+theorem not_admissible_le : ∀ x ∈ admissiblePoints net c 6 3, ¬ x ≤ (260, 39) := by
+  rintro x ⟨X, hX, hsize, rfl⟩ hle
+  refine no_admissible_partition ⟨X, hX, hsize, ?_, fun k => ?_⟩
+  · rw [plan_cost]
+    exact (Prod.le_def.mp hle).1
+  · rw [plan_makespan]
+    exact (Nat.mul_le_mul_left 2 (load_le_maxLoad d X k)).trans (Prod.le_def.mp hle).2
+
+set_option maxRecDepth 100000 in
+/-- **The front of admissible partitions** of Example 4.13, computed by the verified solver in the
+kernel. Its consecutive points `(264, 34)` and `(228, 40)` surround the plan's makespan 39. -/
+theorem admissible_front : solveFront d c 6 3 =
+    [(450, 12), (432, 14), (414, 16), (396, 18), (393, 20), (364, 22), (352, 24), (332, 26),
+      (314, 28), (300, 30), (282, 32), (264, 34), (228, 40), (222, 42), (182, 44), (176, 46),
+      (150, 48), (132, 50), (102, 58), (51, 62), (0, 66)] := by
+  decide +kernel
+
+/-- The solver's points are the minimal admissible points (`mem_solveFront_iff`); so `(264, 34)`
+and `(228, 40)` are on the front of admissible partitions, and no point of it has a makespan
+strictly between 34 and 40. -/
+theorem admissible_front_consecutive :
+    Minimal (· ∈ admissiblePoints net c 6 3) (264, 34) ∧
+      Minimal (· ∈ admissiblePoints net c 6 3) (228, 40) ∧
+      ∀ x, Minimal (· ∈ admissiblePoints net c 6 3) x → ¬ (34 < x.2 ∧ x.2 < 40) := by
+  have h := fun x => (mem_solveFront_iff net c (p := 3) (t := 6) (by decide) (by decide) x).symm
+  change ∀ x, Minimal (· ∈ admissiblePoints net c 6 3) x ↔ x ∈ solveFront d c 6 3 at h
+  simp only [h, admissible_front]
+  decide
+
+/-- **Corollary 4.8 fails for Example 4.13**: the front of admissible partitions, which the solver
+computes, is not the Pareto front of the feasible plans, since it does not dominate the plan's
+point `(260, 39)`. -/
+theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront d c 6 3) := by
+  intro hF
+  obtain ⟨x, hx, hle⟩ := hF.dominates (planCost c plan, planMakespan plan)
+    ⟨plan, plan_feasible_net, rfl⟩
+  rw [plan_cost, plan_makespan] at hle
+  have hmin := (mem_solveFront_iff net c (p := 3) (t := 6) (by decide) (by decide) x).mp hx
+  exact not_admissible_le x hmin.prop hle
+
+end Ex413
 
 end ZenoFront

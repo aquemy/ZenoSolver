@@ -46,3 +46,4 @@ public import ZenoFront.TreeBound
 public import ZenoFront.RationalPlans
 public import ZenoFront.FrontTri
 public import ZenoFront.Counterexamples
+public import ZenoFront.Graph
