@@ -629,6 +629,14 @@ lean_partial = "ZenoFront.minOf, ZenoFront.Feasible.minOf_le_cost"
 paper        = "Prop 7.10, doc/theory/exact-front.md §7.6"
 created      = "2026-11-23"
 
+[claims.lem-min-cost]
+kind      = "lemma"
+statement = "Lemma (the function E), new in revision 3: Let E(T) be the least cost of an admissible partition of 2t − p landings into p groups with every δ(X_k) ≤ T (∞ if none). E is non-increasing and attained when finite; with 1 ≤ p, E(T) = ∞ for T < d_min⌈s/p⌉; and a level T at which E drops (E(T) = C < E(T′) for every T′ < T) has T ≤ (2t − p)·d_max."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minCost, ZenoFront.minCost_le, ZenoFront.minCost_attained, ZenoFront.minCost_antitone, ZenoFront.minCost_eq_top_of_lt, ZenoFront.breakpoint_le"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 8. Complexity
 # ===========================================================================
