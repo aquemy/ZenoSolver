@@ -8,9 +8,9 @@ public import ZenoFront.SearchGap
 public import ZenoFront.Achievability
 
 /-!
-# Template plans (Lemma 6.3, achievability)
+# Template plans (Lemma 5.5, achievability)
 
-The *template* of a scheduled configuration `S` (§6.2 of the note, `runTemplate` in
+The *template* of a scheduled configuration `S` (§5 of the note, `runTemplate` in
 `src/zeno/ns_search.cpp`) is the plan in which every plane `k`, from time `0`,
 
 1. flies its drop-offs in order, `C_I → x → C_I`, the first leg carrying a new passenger
@@ -34,7 +34,7 @@ journey per passenger, plus empty legs (`pax_of_units`).
 
 ## Main results
 
-* `Sched.tmplPlan_spec` (**Lemma 6.3, achievability**): for every valid scheduled configuration
+* `Sched.tmplPlan_spec` (**Lemma 5.5, achievability**): for every valid scheduled configuration
   with `2t − p` landings, the template is a feasible plan of cost `c(S)` and makespan exactly
   `M_tmpl = S.tmpl d d̄`. No assumption on the durations (zero durations included) and none on
   central flights (the template flies none) is needed; `p ≤ t` follows from the hypotheses
@@ -167,7 +167,7 @@ def pickBlock (k : Fin p) (l : Fin (S.picks k).length) : List (Leg n t) :=
 def pickPart (k : Fin p) : List (Leg n t) :=
   (List.finRange (S.picks k).length).flatMap (S.pickBlock d db k)
 
-/-- **The template plan** of a scheduled configuration (§6.2 of the note). -/
+/-- **The template plan** of a scheduled configuration (§5 of the note). -/
 def tmplPlan : Plan n t p := fun k => S.dropPart d k ++ S.crossPart d db k ++ S.pickPart d db k
 
 end Sched
@@ -652,7 +652,7 @@ theorem landCost_tmplPlan (c : Fin n → ℕ) (k : Fin p) :
     S.landCost_pickPart, landCost_tCrossLegs, S.sum_crossList, ZenoFront.cost]
   ring
 
-/-! ### Lemma 6.3 -/
+/-! ### Lemma 5.5 -/
 
 variable {S}
 
@@ -705,7 +705,7 @@ theorem Valid.slot_bijective (hv : S.Valid) : Function.Bijective hv.slot := by
   · simp only [Fintype.card_sigma, Fintype.card_fin]
     exact hv.count.symm
 
-/-- **Lemma 6.3 (template), achievability.** For every valid scheduled configuration with
+/-- **Lemma 5.5 (template), achievability.** For every valid scheduled configuration with
 `2t − p` landings, the template is a feasible plan whose cost is the configuration's and whose
 makespan is the closed form `M_tmpl`. Nothing is assumed on the durations (zero durations
 included) or on the central flights, which the template does not use. -/
@@ -821,7 +821,7 @@ theorem tmplPlan_spec {N : Network n} (c : Fin n → ℕ) (hv : S.Valid)
     exact Finset.sup_sup (f := fun k => S.load N.d N.dbar k)
       (g := fun v => univ.sup fun l => S.term N.d N.dbar v l)
 
-/-- **Lemma 6.3, existence form.** Every valid scheduled configuration with `2t − p` landings
+/-- **Lemma 5.5, existence form.** Every valid scheduled configuration with `2t − p` landings
 has a feasible plan of the same cost whose makespan is `M_tmpl`. -/
 theorem exists_plan {N : Network n} (c : Fin n → ℕ) (hv : S.Valid) (hsize : S.size = 2 * t - p) :
     ∃ P : Plan n t p, Feasible N P ∧ planCost c P = S.cost c ∧

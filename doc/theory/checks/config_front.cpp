@@ -1,6 +1,6 @@
 // Front of role-configuration schedules: the Pareto set of (cost, exact makespan) over balanced role
 // configurations with exactly s = 2t - p landings, each scheduled with its best orders and matching
-// (doc/theory/exact-front.md, §6.2). Uses the brute-force oracle of the tests (tests/oracle/bruteForce.hpp),
+// (doc/theory/exact-front.md, §5). Uses the brute-force oracle of the tests (tests/oracle/bruteForce.hpp),
 // whose tasks East/West/Open/Close are crossings, drop-offs and pick-ups, simulated with exact waiting.
 //
 // Comparing this front with the exhaustive search over all plans (truth.cpp) tests schedulable domination.

@@ -5,7 +5,7 @@ which shares no code with the solver) replays it against the plan semantics of
 doc/certificate-format.md and recomputes its cost and makespan. Theorem 4.1 says an admissible
 partition yields a plan whose makespan is its largest load, so under (S) every point must be reached
 exactly. Non-symmetric instances are replayed too (their achieved points come from template schedules,
-Lemma 6.3), and reported separately.
+Lemma 5.5), and reported separately.
 
 Pass: every plan is feasible and has exactly the cost and makespan of its front point.
 """

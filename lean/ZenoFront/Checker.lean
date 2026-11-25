@@ -32,7 +32,7 @@ Pareto front of the (cost, makespan) pairs of the feasible plans of the instance
 achieved, every feasible plan is weakly dominated by a listed point, and the points are pairwise
 incomparable) for every table of central flight durations satisfying the triangles through a hub
 (`Network.ATriHub`), and for every table at all if every gap is `relaxed`
-(`Cert.check_sound_relaxed`). The `forest` gaps use Theorem 4.10
+(`Cert.check_sound_relaxed`). The `forest` gaps use Theorem 4.4
 (`Feasible.exists_admissible_hub`). Under (A1) this is `Cert.check_sound`, under (AΔ)
 `Cert.check_sound_ATri`. `IsParetoFront.mem_iff_minimal` restates it as "a pair is listed iff it
 is a minimal achievable pair".
@@ -241,7 +241,7 @@ theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y 
   have hc := isChain_of_gapsOK bound y F gs hb h
   exists_le_of_chain y F hc.1 hc.2 hh hl
 
-/-- **Theorem 9.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
+/-- **Theorem 8.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
 `F = (C_1, M_1), …, (C_r, M_r)`, `r ≥ 1`, with `M_1 < ⋯ < M_r` and `C_1 > ⋯ > C_r`. If (1) every
 listed point is in `S`, (2) every point of `S` has makespan at least `M_1`, (3) for `i < r` every
 point of `S` with makespan below `M_{i+1}` costs at least `C_i`, and (4) every point of `S` costs at
@@ -384,7 +384,7 @@ theorem gapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d) (hpt 
   omega
 
 /-- The forest gap bound is sound under the triangles through a hub: a feasible plan with
-makespan below `M` costs at least `forestGapBound M`. This is where the converse (Theorem 4.10) is
+makespan below `M` costs at least `forestGapBound M`. This is where the converse (Theorem 4.4) is
 used. -/
 theorem forestGapBound_le_hub {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
     (hL : (C.network dc).ATriHub) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}

@@ -137,7 +137,7 @@ $\square$
 **Lean** `ZenoFront.Admissible.addPlane_of_size` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 4.6 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
+/-- **Lemma 4.2 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
 grouping has `2t − q − 1` landings. -/
 theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible X)
     (hsize : size X = 2 * t - q) (ht : q + 1 ≤ t) (d c : Fin n → ℕ) :
@@ -150,7 +150,7 @@ theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible 
 **Lean** `ZenoFront.Admissible.addPlanes_le` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 4.6 (AP)** from `q` to `p` planes, `q ≤ p ≤ t`. -/
+/-- **Lemma 4.2 (AP)** from `q` to `p` planes, `q ≤ p ≤ t`. -/
 theorem Admissible.addPlanes_le {q : ℕ} (d c : Fin n → ℕ) {X : Groups n q} (hX : Admissible X)
     (hqp : q ≤ p) (hpt : p ≤ t) (hsize : size X = 2 * t - q) :
     ∃ Y : Groups n p, Admissible Y ∧ size Y = 2 * t - p ∧ totalCost c Y ≤ totalCost c X ∧
@@ -210,7 +210,7 @@ keep a parity matrix. $\square$
 **Lean** `ZenoFront.Admissible.exists_shrink` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Shrinking** (partition form of Lemma 4.4, SH): an admissible grouping with at least
+/-- **Shrinking** (Lemma 4.3): an admissible grouping with at least
 `s` landings, where `p ≤ s` and `s ≡ p (mod 2)`, contains an admissible grouping with exactly
 `s` landings. -/
 theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} (hps : p ≤ s)
@@ -223,7 +223,7 @@ theorem Admissible.exists_shrink {X : Groups n p} (hX : Admissible X) {s : ℕ} 
 **Lean** `ZenoFront.Admissible.exists_remove_two` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 4.11 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
+/-- **Lemma 4.3 (shrinking).** An admissible partition with `|X| ≥ p + 2` stays admissible after
 removing two landings, each new group a sub-multiset of the old one. This is SH
 (`Admissible.exists_shrink`) with `s = |X| − 2`, whose parity hypothesis holds by
 `IsParityWitness.size_mod_two`. -/
@@ -358,7 +358,7 @@ segments, their landings and which planes share which cities.
 **Lean** `ZenoFront.exists_admissible_of_chains` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 4.10 from chains.** Under (S) and (AΔ) on the triangles through a hub, with
+/-- **Theorem 4.4 from chains.** Under (S) and (AΔ) on the triangles through a hub, with
 `p ≤ t`: if every plane flies from `C_I` to `C_G` and every passenger rides a chain from `C_I`
 (legs of the plan carrying it), some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
 `2 δ(X_k) ≤ F_k` (the plane's flight time) for every plane, and total cost at most the plan's
@@ -376,7 +376,7 @@ theorem exists_admissible_of_chains {N : Network n} (hS : N.dbar = N.d) (hL : N.
 **Lean** `ZenoFront.Feasible.exists_admissible_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 4.10 under the triangles through a hub.** Under (S) and `ATriHub`, with `p ≤ t`,
+/-- **Theorem 4.4 under the triangles through a hub.** Under (S) and `ATriHub`, with `p ≤ t`,
 every feasible plan gives an admissible `X_1, …, X_p` with `Σ_k |X_k| = 2t − p`,
 `2 δ(X_k) ≤ F_k ≤ M` for every plane and `c(X) ≤ C`. -/
 theorem Feasible.exists_admissible_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
@@ -464,7 +464,7 @@ applies. $\square$
 **Lean** `ZenoFront.minimal_achievable_iff_anywhere_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 4.9 (bridge B3).** Under (S) and the triangles through a hub, with `p ≤ t`, the
+/-- **Theorem 4.5 (bridge B3).** Under (S) and the triangles through a hub, with `p ≤ t`, the
 feasible plans and the plans whose planes end anywhere have the same minimal (cost, makespan)
 pairs. -/
 theorem minimal_achievable_iff_anywhere_hub {N : Network n} (hS : N.dbar = N.d)
@@ -477,7 +477,7 @@ theorem minimal_achievable_iff_anywhere_hub {N : Network n} (hS : N.dbar = N.d)
 **Lean** `ZenoFront.minimal_achievable_iff_admissiblePoints_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 4.8 (front characterisation), partition form.** Under (S) and the triangles
+/-- **Theorem 4.5 (front characterisation), partition form.** Under (S) and the triangles
 through a hub, with `p ≤ t`, the front of the feasible plans is the set of minimal admissible
 points. -/
 theorem minimal_achievable_iff_admissiblePoints_hub {N : Network n} (hS : N.dbar = N.d)
@@ -490,7 +490,7 @@ theorem minimal_achievable_iff_admissiblePoints_hub {N : Network n} (hS : N.dbar
 **Lean** `ZenoFront.minimal_achievable_iff_multisetPoints_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and the triangles
+/-- **Theorem 4.5 (front characterisation), as in the note.** Under (S) and the triangles
 through a hub, with `p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the
 multisets of `2t − p` landings that have an admissible partition. -/
 theorem minimal_achievable_iff_multisetPoints_hub {N : Network n} (hS : N.dbar = N.d)
@@ -733,7 +733,7 @@ theorem plan_makespan : planMakespan plan = 39 := …
 **Lean** `ZenoFront.Ex413.not_ATriHub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.10 uses. -/
+/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.4 uses. -/
 theorem not_ATriHub : ¬ net.ATriHub := …
 ```
 
@@ -762,7 +762,7 @@ theorem admissible_cost_ge (X : Groups 4 3) (hX : Admissible X) (hsize : size X 
 **Lean** `ZenoFront.Ex413.no_admissible_partition` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **The conclusion of Theorem 4.10 fails for the plan**: no admissible partition of
+/-- **The conclusion of Theorem 4.4 fails for the plan**: no admissible partition of
 `2t − p = 9` landings costs at most 260 with every load `ℓ(X_k) = 2δ(X_k)` at most 39. -/
 theorem no_admissible_partition :
     ¬ ∃ X : Groups 4 3, Admissible X ∧ size X = 2 * 6 - 3 ∧ totalCost c X ≤ planCost c plan ∧
@@ -783,7 +783,7 @@ theorem not_admissible_le : ∀ x ∈ admissiblePoints net c 6 3, ¬ x ≤ (260,
 **Lean** `ZenoFront.Ex413.not_isParetoFront` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 4.8 fails for Example 4.13**: the front of admissible partitions, which the solver
+/-- **Theorem 4.5 fails for Example 4.7**: the front of admissible partitions, which the solver
 computes, is not the Pareto front of the feasible plans, since it does not dominate the plan's
 point `(260, 39)`. -/
 theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront d c 6 3) := …
@@ -883,7 +883,7 @@ theorem arxiv_misses_lpt (dc : Fin 2 → Fin 2 → ℕ) :
 **Lean** `ZenoFront.Greedy.evocop_lpt_noP3` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **§5 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
+/-- **§4 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
 every plane a crossing of 20 first and ends with the private makespans `(52, 68)`, in some order,
 whatever the tie-breaking. -/
 theorem evocop_lpt_noP3 :
@@ -896,7 +896,7 @@ theorem evocop_lpt_noP3 :
 **Lean** `ZenoFront.Greedy.arxiv_misses_p3First` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **The greedy of arXiv §3.2 is not exact (§5).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
+/-- **The greedy of arXiv §3.2 is not exact (§4).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
 the point `(42, 12)` is Pareto-optimal among all feasible plans, whatever the central flights, but
 for every PPP `(a, ā, b)` of cost at most 42 and every tie-breaking, the four steps (with Steps 2
 and 3 read as in the module documentation) give a makespan above 12. -/

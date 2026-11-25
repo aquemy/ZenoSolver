@@ -11,9 +11,9 @@ public import ZenoFront.Shrink
 # Landings of a route, and assumption (A1)
 
 The central landings of a list of legs and their cost, assumption (A1) of the note (§1.4), and
-small lemmas on legs and counts shared by the converses: Theorem 4.10
+small lemmas on legs and counts shared by the converses: Theorem 4.4
 (`Feasible.exists_admissible_hub`, `ConverseTri.lean`), which also covers (A1)
-(`Network.A1.hub`), and Theorem 6.9 (`schedulableDomination_all`, `DominationAll.lean`).
+(`Network.A1.hub`), and Theorem 5.3 (`schedulableDomination_all`, `DominationAll.lean`).
 
 ## Main results
 

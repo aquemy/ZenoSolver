@@ -9,9 +9,9 @@ public import Mathlib.Data.ZMod.Basic
 public import Mathlib.Logic.Relation
 
 /-!
-# The combinatorial core of Theorem 4.10
+# The combinatorial core of Theorem 4.4
 
-The proof of Theorem 4.10 (§4.6 of `doc/theory/exact-front.md`) uses no timing: only the planes,
+The proof of Theorem 4.4 (§4 of `doc/theory/exact-front.md`) uses no timing: only the planes,
 their segments, the central landings of each segment and which planes share which cities. This
 file proves its combinatorial part on abstract data (`TriCore.Data`):
 
@@ -37,7 +37,7 @@ says that landing `e` pays an end of block `γ` at the city of `e`.
   city become one link `(γ₁, γ₃)` at `e₁`'s city, paid by `e₁`. This keeps every end within `R`
   (`d(e₁) ≤ d(e₂) ≤ R(γ₃)`), every city's number of ends even, every plane's number of ends mod 2,
   and the claim of the note: no `z γ` pays an end of another block. It removes two ends.
-* **Selection** (Step 5, Lemma 2.3). When every block has at most one end, a block with an end
+* **Selection** (Step 5, Lemma 2.2). When every block has at most one end, a block with an end
   takes the end's city and landing, and a block without one takes `z γ`. The cities with an odd
   number of ends at a plane form a parity witness.
 -/
@@ -50,7 +50,7 @@ open Finset
 
 namespace TriCore
 
-/-- The abstract data of Theorem 4.10: landings in cities and in blocks, blocks in planes, and in
+/-- The abstract data of Theorem 4.4: landings in cities and in blocks, blocks in planes, and in
 each block a landing of largest duration. -/
 structure Data (n p : ℕ) (Λ B : Type*) where
   /-- The durations. -/
@@ -534,7 +534,7 @@ theorem card_odd_mod_two {ι : Type*} (s : Finset ι) (f : ι → ℕ) :
   omega
 
 open Classical in
-/-- **The selection** (Steps 2, 3 and 5 of Theorem 4.10). If every class of connected planes has
+/-- **The selection** (Steps 2, 3 and 5 of Theorem 4.4). If every class of connected planes has
 an even number of planes with an even number of blocks, every block `γ` gets a city `x γ` within
 `R(γ)` and a landing `pay γ` in it, `pay` injective, and the groups `X_k = {x γ | γ ∈ k}` are
 admissible. -/
@@ -746,7 +746,7 @@ theorem mem_flatten_iff_sigma {n : ℕ} (L : List (List (Fin n))) (y : Fin n) :
     exact ⟨L[j], List.getElem_mem _, List.getElem_mem _⟩
 
 open Classical in
-/-- **The combinatorial core of Theorem 4.10, list form.** Let every plane `k` have a list of
+/-- **The combinatorial core of Theorem 4.4, list form.** Let every plane `k` have a list of
 blocks, each a non-empty list of cities (its landings). If, in every class of planes connected
 by shared cities, the number of planes with an even number of blocks is even, there is an
 admissible partition with one landing per block (`|X_k| = #blocks of k`), with

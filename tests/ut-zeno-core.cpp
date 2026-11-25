@@ -554,9 +554,9 @@ void testBracketCertificates(std::mt19937& rng, int trials)
     std::cout << "ut-zeno-core: " << written << " non-symmetric certificates checked\n";
 }
 
-// Proposition 6.5 of the theory note: harmful waiting. The role-load bound
+// Proposition 5.7 of the theory note: harmful waiting. The role-load bound
 // stays below the true front in two gaps; only the exhaustive search over role
-// configurations (Corollary 6.10) closes them. The bracket must equal the
+// configurations (Corollary 5.6) closes them. The bracket must equal the
 // oracle's front, and close those gaps by search.
 void testHarmfulWaiting()
 {
@@ -598,7 +598,7 @@ zeno::FlightTable table(int n, const std::function<zeno::Time(int, int)>& flight
     return t;
 }
 
-// Example 4.13 of the theory note: central flights that satisfy neither (A1)
+// Example 4.7 of the theory note: central flights that satisfy neither (A1)
 // nor (AΔ), on which a plan beats the front of admissible partitions.
 zeno::Instance example413()
 {
@@ -665,7 +665,7 @@ void testFlights()
 
     const auto example = example413();
     f = zeno::checkFlights(example);
-    check(!f.a1 && !f.triangle && !f.exactSymmetric(), "Example 4.13: neither (A1) nor (AΔ)");
+    check(!f.a1 && !f.triangle && !f.exactSymmetric(), "Example 4.7: neither (A1) nor (AΔ)");
     zeno::Instance one = in;
     one.d = one.dbar = {3};
     one.c = {1};
@@ -706,11 +706,11 @@ void testFlightCertificates()
     const auto result = zeno::solveFront(in, options);
     const auto gaps = zeno::symmetricGaps(in, result.front);
     const auto has = [](const zeno::Certificate& c, const std::string& a) { return std::ranges::find(c.assumptions, a) != c.assumptions.end(); };
-    check(std::ranges::count(gaps, zeno::GapBound::Forest) >= 1, "Example 4.13 has a forest gap");
+    check(std::ranges::count(gaps, zeno::GapBound::Forest) >= 1, "Example 4.7 has a forest gap");
     bool gap3440 = false;
     for(std::size_t i = 0; i + 1 < result.front.size(); ++i)
         gap3440 = gap3440 || (result.front[i].cost == 264 && result.front[i].makespan == 34 && result.front[i + 1].makespan == 40 && gaps[i] == zeno::GapBound::Forest);
-    check(gap3440, "Example 4.13: the gap between (264, 34) and (228, 40) needs the forest bound");
+    check(gap3440, "Example 4.7: the gap between (264, 34) and (228, 40) needs the forest bound");
 
     // The default table satisfies (A1): the token A1, which the Lean checker reads.
     zeno::Certificate cert = zeno::makeCertificate(in, result);
@@ -742,7 +742,7 @@ void testFlightCertificates()
     bad.assumptions = {"S", "AD"};
     check(!zeno::checkCertificate(bad).ok, "an unknown token does not stand for A1|AD");
 
-    // Example 4.13's table: no certificate with a forest gap.
+    // Example 4.7's table: no certificate with a forest gap.
     bool threw = false;
     try
     {
@@ -774,9 +774,9 @@ void testFlightCertificates()
     ns.t = 7;
     ns.p = 4;
     const auto bracket = zeno::solveBracket(ns, options);
-    check(bracket.exact() && !bracket.assumptions().empty(), "Proposition 6.5: an exact bracket that needs A1-NS");
+    check(bracket.exact() && !bracket.assumptions().empty(), "Proposition 5.7: an exact bracket that needs A1-NS");
     zeno::Certificate nsCert = zeno::makeBracketCertificate(ns, bracket);
-    check(nsCert.assumptions == std::vector<std::string>{"A1-NS"} && zeno::checkCertificate(nsCert).ok, "Proposition 6.5: the v2 certificate lists A1-NS only and is accepted");
+    check(nsCert.assumptions == std::vector<std::string>{"A1-NS"} && zeno::checkCertificate(nsCert).ok, "Proposition 5.7: the v2 certificate lists A1-NS only and is accepted");
     nsCert.assumptions.push_back("EO");
     check(!zeno::checkCertificate(nsCert).ok, "an unknown assumption (EO) is rejected");
     ns.central = zeno::FlightTable{{0, 5}, {5, 0}};

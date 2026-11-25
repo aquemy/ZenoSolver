@@ -12,7 +12,7 @@ when the site is built (`site/gen_pages.py`). None is typed by hand.
 
 - **Golden fronts.** `zeno` reproduces all 27 fronts of the brute-force oracle
   ([golden suite](instances/suites.qmd#golden)), including instances on which a greedy schedule of
-  the landings is not optimal ({{< node "§5" >}}).
+  the landings is not optimal ({{< node "Proposition 4.8" >}}).
 - **Every level.** `ut-zeno-core` compares the value of every level, the bracket order
   $L \le E \le U_3 \le U$ and the front with an independent enumeration oracle on random instances.
 - **Non-symmetric.** On 1,800 tiny random non-symmetric instances, every bracket closes and equals
@@ -54,7 +54,7 @@ number of levels the breakpoint search evaluates, and the time, grow only with i
 
 The `rejected/` certificates of the test set are corrupted on purpose, so their rejection is the
 expected verdict. The one rejected random version 2 certificate is the
-{{< node "Proposition 6.5" >}} instance (`v2-random/prop65`); `bench/README.md`
+{{< node "Proposition 5.7" >}} instance (`v2-random/prop65`); `bench/README.md`
 notes that it needs the `search` kind. The certificate `zeno` writes today for that instance closes
 two gaps with `search`, and `zeno-check` accepts it ([Lean tools](solver/lean.qmd#zeno-check)).
 

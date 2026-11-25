@@ -1,11 +1,11 @@
-// Search for counterexamples to Conjecture 6.5 (no harmful waiting) of
+// Search for counterexamples to no harmful waiting (Conjecture 6.5 of revision 2, refuted by Proposition 5.7) of
 // doc/theory/exact-front.md: a balanced role configuration whose every
 // schedule (drop-offs first, crossings, pick-ups last, any orders of the
 // drop-offs and of the pick-ups on each plane, any matching of drop-offs to
 // pick-ups in each city) has makespan above max_k lambda_k, under the path
 // triangle inequality (dbar_i <= d_i + d_z + dbar_z).
 //
-// Lemma 6.3 makes the template schedule (drops first, picks last) optimal for
+// Lemma 5.5 makes the template schedule (drops first, picks last) optimal for
 // fixed orders and matching, so the search over orders and matchings is
 // exhaustive over schedules.
 //

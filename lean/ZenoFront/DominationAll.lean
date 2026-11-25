@@ -9,11 +9,11 @@ public import ZenoFront.NonSymmetric
 public import ZenoFront.Bridge
 
 /-!
-# Theorem 6.9 for every plan
+# Theorem 5.3 for every plan
 
-**Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
+**Theorem 5.3 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
-plan's and closed form (Lemma 6.3) at most its makespan (`schedulableDomination_all`). No event
+plan's and closed form (Lemma 5.5) at most its makespan (`schedulableDomination_all`). No event
 order and no hypothesis on zero durations is needed, so it covers instances with a city of
 `d = d̄ = 0` too.
 
@@ -404,7 +404,7 @@ theorem tChain_pairs {N : Network n} : ∀ (L : List (KLeg n t K)) (s : TState n
       (fun m hm => hf m (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hm))) (by simpa using hfin)
     exact ⟨⟨hvok, h₁⟩, h₂, by simp [pairs, h₃]⟩
 
-/-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
+/-- **Theorem 5.3 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
 plan's and closed form at most its makespan. No event order and no hypothesis on zero durations
 is needed. -/

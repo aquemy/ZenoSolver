@@ -14,7 +14,7 @@
 
 namespace zeno
 {
-/// A template schedule (Lemma 6.3 of the theory note): per plane, its
+/// A template schedule (Lemma 5.5 of the theory note): per plane, its
 /// drop-offs in order, its crossings, its pick-ups in order, and for pick-up l
 /// of plane k the drop-off (plane, position) whose passenger it collects.
 struct TemplateSchedule
@@ -43,7 +43,7 @@ struct ExactSchedule
 /// each plane and every matching of drop-offs to pick-ups in each city (no
 /// plane collects its own passenger), the pick-ups of each plane in order of
 /// release (passenger available minus the flight to the city), which is
-/// optimal for fixed drop-offs and matching. By Lemma 6.3 the template is
+/// optimal for fixed drop-offs and matching. By Lemma 5.5 the template is
 /// optimal for fixed orders and matching, so with `complete` the absence of
 /// a result proves that the configuration's least makespan is >= below.
 /// Gives up (complete = false) after `budget` steps or at `deadline`.
@@ -63,14 +63,14 @@ struct GapSearch
     std::size_t configurations = 0; ///< configurations scheduled
 };
 
-/// Exact search of a gap of the non-symmetric bracket (Corollary 6.10): every
+/// Exact search of a gap of the non-symmetric bracket (Corollary 5.6): every
 /// role configuration of cost < costBelow whose plane loads fit in level T,
 /// each with exactSchedule against makespanBelow. Planes are enumerated in a
 /// canonical order (as a multiset of plane contents), crossings only at the
 /// Pareto points of the crossing table (cheaper and shorter crossings never
 /// hurt a template), pruned with the role relaxation on the remaining planes.
 /// Closed is a proof under (A1-NS) for every feasible plan, also when a city
-/// has d = dbar = 0 (Theorem 6.9; Corollary 6.10).
+/// has d = dbar = 0 (Theorem 5.3; Corollary 5.6).
 /// Stops (Incomplete) after `budget` steps or at `deadline`.
 [[nodiscard]] GapSearch searchGap(const Instance& instance, const ReducedInstance& r, const OnePlaneTable& fill, const RoleRelaxation& roles,
                                   Time T, Cost costBelow, Time makespanBelow, std::size_t budget = 20'000'000,

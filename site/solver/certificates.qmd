@@ -5,7 +5,7 @@ subtitle: "What a front certificate proves, its syntax, and versions 1 and 2"
 
 A certificate lists one plan per front point and one lower bound per gap between consecutive
 points. A checker that verifies its four obligations has proved that the list is the Pareto front,
-without trusting the solver ([Theorem 9.1](../proofs.qmd#node-theorem-9-1)). `zeno --certificate
+without trusting the solver ([Theorem 8.1](../proofs.qmd#node-theorem-8-1)). `zeno --certificate
 FILE` writes one, `zeno check FILE` verifies it ([command line](cli.qmd#check)), and so does the
 Lean checker `zeno-check`, whose acceptance is backed by a kernel-checked soundness theorem
 ([Lean tools](lean.qmd#zeno-check)).

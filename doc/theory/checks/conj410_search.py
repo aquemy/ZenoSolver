@@ -1,4 +1,4 @@
-"""Targeted search for counterexamples to Conjecture 4.10 (the converse without A1).
+"""Targeted search for counterexamples to Conjecture 4.10 of revision 2 (now Theorem 4.4).
 
 Under symmetric durations, central flights may only beat the front of
 admissible partitions (E) where the relaxation L, which needs no assumption on

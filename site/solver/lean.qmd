@@ -24,7 +24,7 @@ It reads a certificate of either [version](certificates.qmd) and prints one of t
   accepted: the 9 points are the Pareto front of all feasible plans (version 2, fastest relaxed, 0 roles, 0 lagrangian, 6 balanced and 2 search gap(s), the others relaxed: for every central flight table satisfying A1-NS; ZenoFront.Cert2.check_sound)
   ```
 
-  (the second is the instance of {{< node "Proposition 6.5" >}});
+  (the second is the instance of {{< node "Proposition 5.7" >}});
 - `rejected: <reason>` (exit code 1): the file is malformed or an obligation fails.
 
 Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
@@ -34,8 +34,8 @@ What it verifies:
 
 | Version | Gap kinds | Fastest point | Soundness theorem |
 |---|---|---|---|
-| 1 (symmetric) | `relaxed`, `forest` | closed form $2 d_{\min} \lceil s/p \rceil$ | [`Cert.check_sound`](../proofs.qmd#node-theorem-9-1): if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times, `Cert.check_sound_anywhere` to planes ending anywhere (PDDL without plane goals). |
-| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on `schedulableDomination_all`, the Lean form of [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan. |
+| 1 (symmetric) | `relaxed`, `forest` | closed form $2 d_{\min} \lceil s/p \rceil$ | [`Cert.check_sound`](../proofs.qmd#node-theorem-8-2): if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times, `Cert.check_sound_anywhere` to planes ending anywhere (PDDL without plane goals). |
+| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-theorem-8-7): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on `schedulableDomination_all`, the Lean form of [Theorem 5.3](../proofs.qmd#node-theorem-5-3) for every plan. |
 
 For `forest` gaps the Lean checker computes $E$ with the σ-DP over the non-dominated cities, or with
 the tree DP when it estimates that cheaper (`useTreeDP`); it proves only the lower-bound direction,
@@ -60,12 +60,12 @@ lake exe zeno-front inst.cert
 ```
 
 The front is `ZenoFront.solveFront d c t p`. By
-[`solveFront_isParetoFront`](../proofs.qmd#node-verified-solver), under (S) and (A1) with
-$1 \le p \le t$, it is exactly the Pareto front of the feasible plans. The solver finds the levels
+[`solveFront_isParetoFront_hub`](../proofs.qmd#node-theorem-6-9), under (S) and the hub triangles
+(H), so under (A1) and under (AΔ), with $1 \le p \le t$, it is exactly the Pareto front of the feasible plans. The solver finds the levels
 where $E$ drops by splitting intervals between $d_{\min}\lceil s/p\rceil$ and $(2t-p)\,d_{\max}$.
 At each level it takes $L(T)$ when the bracket $L(T) \le E(T) \le U_2(T)$ closes, and otherwise runs
 the link-forest DP or the σ-DP, whichever is estimated cheaper. Both are proved equal to $E(T)$
-([Theorem 7.5](../proofs.qmd#node-theorem-7-5), [Theorem 7.6](../proofs.qmd#node-theorem-7-6)).
+([Theorem 6.7](../proofs.qmd#node-theorem-6-7), [Theorem 6.8](../proofs.qmd#node-theorem-6-8)).
 
 It is slower than `zeno`, but it needs no certificate and no trust in the C++ code. On the 66
 suite instances it finishes every one within 60 s with the same front as `zeno front`
@@ -83,8 +83,8 @@ What a verdict of `zeno-check`, or a front of `zeno-front`, relies on:
    declarations.
 2. **The definitions.** A theorem is only as good as the match between its definitions and the
    intended mathematics. For the checker these are `Feasible`, `planCost`, `planMakespan`,
-   `achievable` and `IsParetoFront` ([§1.2](../proofs.qmd#node-s1-2),
-   [§1.5](../proofs.qmd#node-s1-5)). Plans may fly central-to-central legs of any duration `dc`,
+   `achievable` and `IsParetoFront` ([§1.2](../proofs.qmd#node-definition-1-2),
+   [§1.5](../proofs.qmd#node-definition-1-6)). Plans may fly central-to-central legs of any duration `dc`,
    wait anywhere and hand passengers over anywhere; planes must end in $C_G$ in `Cert.check_sound`
    (`Cert.check_sound_anywhere` lifts this for version 1); `forest` gaps assume (A1) on `dc`, and
    the version 2 kinds other than `relaxed` assume (A1-NS).
@@ -96,7 +96,7 @@ What a verdict of `zeno-check`, or a front of `zeno-front`, relies on:
    verdict also trusts the Lean compiler and runtime, not only the kernel. To avoid that, a
    certificate can be checked by the kernel with `decide +kernel`, as
    `lean/ZenoFront/Examples.lean` does for two small certificates
-   ({{< node "§5" >}}). That is practical for small certificates only.
+   ({{< node "Proposition 4.8" >}}). That is practical for small certificates only.
 
 The listed plans of a certificate are re-simulated by the checker, so a solver bug in building
 plans can only cause a rejection. [Theorem 4.1](../proofs.qmd#node-theorem-4-1), the

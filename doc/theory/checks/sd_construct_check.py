@@ -1,5 +1,5 @@
-"""Check the construction in the proof of Theorem 6.9 (schedulable domination) on random simple plans
-with clean journeys (doc/theory/exact-front.md, §6.2). For each plan:
+"""Check the construction in the proof of Theorem 5.3 (schedulable domination) on random simple plans
+with clean journeys (doc/theory/exact-front.md, §5). For each plan:
   1. exchange futures while some hand-off overlaps (both planes in the city at a common moment, in event
      order); check that routes stay valid, cost, leg times and makespan are unchanged, and that the number
      of journeys spread over two segments drops;

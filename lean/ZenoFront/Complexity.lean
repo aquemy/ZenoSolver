@@ -7,7 +7,7 @@ module
 public import ZenoFront.Solver
 
 /-!
-# Complexity (§8): two reductions and the step count of the link-forest DP
+# Complexity (§7): two reductions and the step count of the link-forest DP
 
 `M(X)` is `minMakespan d p X` (`Achievability.lean`): the least `2 max_k δ(X_k)` over the
 admissible partitions of the multiset `X` into `p` groups. Deciding `M(X) ≤ 2T` is strongly
@@ -18,21 +18,21 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited by the n
 
 ## Main results
 
-* `admissible_iff_odd_of_disjoint` (**Lemma 2.4, disjoint groups**): if no city lies in two
+* `admissible_iff_odd_of_disjoint` (**Lemma 2.3, disjoint groups**): if no city lies in two
   groups, a partition is admissible iff every group has an odd number of landings.
-* `threePartition_iff` (**Theorem 8.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
+* `threePartition_iff` (**Theorem 7.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
   `B/4 < a_i < B/2`, the instance with durations `a_i` and `p = m` planes (`t = 2m`) has
   `M(X) ≤ 2B`, for `X` every city once, iff the `a_i` split into `m` triples of sum `B`.
-* `partition_iff` (**Proposition 8.2**, the NP-hard half): for `a_1, …, a_m` with sum `2B`,
+* `partition_iff` (**Proposition 7.2**, the NP-hard half): for `a_1, …, a_m` with sum `2B`,
   `r ≥ m` odd and `K = B + 1`, the instance with `2r` cities of durations `a_i + K` and `K`
   (`partitionDur`), `p = 2` (`t = r + 1`) has `M(X) ≤ 2(B + rK)` iff some sub-multiset of the
   `a_i` sums to `B`.
-* `treeBoundSteps`, `treeBoundSteps_value`, `treeBoundSteps_le` (**Corollary 8.3 (a)**, the
-  complexity clause of Theorem 7.5): the link-forest DP with a step counter returns the value of
+* `treeBoundSteps`, `treeBoundSteps_value`, `treeBoundSteps_le` (**Theorem 7.3 (a)**, the
+  complexity clause of Theorem 6.7): the link-forest DP with a step counter returns the value of
   `treeBoundAt` (`E(T)` at every level `T ≤ Tmax`, `treeBoundSteps_eq_minCost`) in at most
   `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps (`stepBound`).
 * `scanSteps`, `scanSteps_fst`, `scanSteps_le`, `scanSteps_isParetoFront`
-  (**Corollary 8.3 (b)**): scanning the levels `0, …, Tmax = (2t − p) · d_max` with it gives the
+  (**Theorem 7.3 (b)**): scanning the levels `0, …, Tmax = (2t − p) · d_max` with it gives the
   front of the verified solver (the Pareto front under (S) and (A1)) in at most
   `(Tmax + 1) · P(n, t, p, Tmax)` steps, the one-plane table included.
 
@@ -68,9 +68,9 @@ open Finset
 
 variable {n p : ℕ}
 
-/-! ### Lemma 2.4: disjoint groups -/
+/-! ### Lemma 2.3: disjoint groups -/
 
-/-- **Lemma 2.4 (disjoint groups).** If no city lies in two groups, a partition is admissible iff
+/-- **Lemma 2.3 (disjoint groups).** If no city lies in two groups, a partition is admissible iff
 every group has an odd number of landings. A parity witness can only use a city at the one plane
 that lands there, so every city has degree `0` and the witness is empty; then the row condition
 says `|X_k| + 1` is even. -/
@@ -128,7 +128,7 @@ theorem card_groupsOf (g : Fin n → Fin p) (k : Fin p) :
 theorem load_groupsOf (d : Fin n → ℕ) (g : Fin n → Fin p) (k : Fin p) :
     load d (groupsOf g k) = ∑ i with g i = k, d i := rfl
 
-/-- `groupsOf g` is admissible when every plane gets an odd number of cities (Lemma 2.4). -/
+/-- `groupsOf g` is admissible when every plane gets an odd number of cities (Lemma 2.3). -/
 theorem admissible_groupsOf {g : Fin n → Fin p} (hg : ∀ k, Odd #{i | g i = k}) :
     Admissible (groupsOf g) := by
   refine (admissible_iff_odd_of_disjoint fun i k k' hk hk' => ?_).mpr hg
@@ -206,7 +206,7 @@ theorem minMakespan_le_iff {d : Fin n → ℕ} {Y : Multiset (Fin n)}
     have h₂ := (maxLoad_le_iff d X T).mpr hload
     omega
 
-/-! ### Theorem 8.1: the 3-Partition reduction -/
+/-! ### Theorem 7.1: the 3-Partition reduction -/
 
 /-- `3m` cities split into `m` triples: city `i` goes to plane `i mod m`, through
 `Fin 3 × Fin m ≃ Fin (3m)`. -/
@@ -216,7 +216,7 @@ theorem exists_triples (m : ℕ) : ∃ g : Fin (3 * m) → Fin m, ∀ k, #{i | g
     fun i => by simp [eq_comm]]
   simp
 
-/-- **Theorem 8.1 (the 3-Partition reduction).** Let `a_1, …, a_{3m}` and `B` be natural numbers
+/-- **Theorem 7.1 (the 3-Partition reduction).** Let `a_1, …, a_{3m}` and `B` be natural numbers
 with `Σ_i a_i = mB` and `B/4 < a_i < B/2` (which make every `a_i`, and `B` when `m ≥ 1`,
 positive). In the symmetric instance with one city of duration `a_i` for each `i`, `p = m` planes
 (and `t = 2m` passengers, so `s = 3m`), the multiset `X` that lands once at every city has
@@ -260,13 +260,13 @@ theorem threePartition_iff {m B : ℕ} (a : Fin (3 * m) → ℕ) (hsum : ∑ i, 
     exact ⟨groupsOf g, admissible_groupsOf fun k => by rw [(hg k).1]; decide, landings_groupsOf g,
       fun k => by rw [load_groupsOf, (hg k).2]⟩
 
-/-- The multiset of Theorem 8.1 has `3m = 2t − p` landings, for `t = 2m` and `p = m`. -/
+/-- The multiset of Theorem 7.1 has `3m = 2t − p` landings, for `t = 2m` and `p = m`. -/
 theorem threePartition_card (m : ℕ) :
     (univ.val : Multiset (Fin (3 * m))).card = 2 * (2 * m) - m := by
   rw [Finset.card_val, Finset.card_univ, Fintype.card_fin]
   omega
 
-/-! ### Proposition 8.2: the Partition reduction for two planes -/
+/-! ### Proposition 7.2: the Partition reduction for two planes -/
 
 /-- The items of the Partition reduction, padded with zeros: `a_i` for `i < m` and `0` for the
 other cities. -/
@@ -320,7 +320,7 @@ theorem admissible_halves {r : ℕ} (hr : Odd r) {G : Finset (Fin (2 * r))} (hG 
   · simp only [Fin.mk_one, filter_halves_one, Finset.card_compl, Fintype.card_fin, hG]
     rwa [show 2 * r - r = r by omega]
 
-/-- **Proposition 8.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
+/-- **Proposition 7.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
 numbers with sum `2B`, `r ≥ m` odd and `K = B + 1`. In the symmetric instance with `2r` cities,
 of durations `a_i + K` for `i ≤ m` and `K` for the other `2r − m` (all positive,
 `partitionDur_pos`), `p = 2` planes (and `t = r + 1` passengers, so `s = 2r`), the multiset `X`
@@ -422,7 +422,7 @@ theorem partition_iff {m r B : ℕ} (a : Fin m → ℕ) (hsum : ∑ i, a i = 2 *
       have : 2 * r * K = r * K + r * K := by ring
       omega
 
-/-- The multiset of Proposition 8.2 has `2r = 2t − p` landings, for `t = r + 1` and `p = 2`. -/
+/-- The multiset of Proposition 7.2 has `2r = 2t − p` landings, for `t = r + 1` and `p = 2`. -/
 theorem partition_card (r : ℕ) :
     (univ.val : Multiset (Fin (2 * r))).card = 2 * (r + 1) - 2 := by
   rw [Finset.card_val, Finset.card_univ, Fintype.card_fin]
@@ -890,7 +890,7 @@ theorem valueC_snd_le (hR : D.reps.length ≤ n) (P : ℕ) :
 
 end TreeData
 
-/-! ### Corollary 8.3 (a): one level -/
+/-! ### Theorem 7.3 (a): one level -/
 
 /-- The link labels with a step counter: the representative of every city (`n` scans of the `n`
 cities, `domRep`), then one membership test per city in the list of the `n` representatives. It
@@ -919,7 +919,7 @@ def treeBoundSteps (d c : Fin n → ℕ) (p s Tmax : ℕ) (table : Array (Array 
     (v.1, R.2 + v.2)
   else (0, 0)
 
-/-- **Corollary 8.3 (a), value.** The counted DP returns the value of `treeBoundAt`. -/
+/-- **Theorem 7.3 (a), value.** The counted DP returns the value of `treeBoundAt`. -/
 theorem treeBoundSteps_value (d c : Fin n → ℕ) (p s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
     (T : ℕ) : (treeBoundSteps d c p s Tmax table T).1 = treeBoundAt d c p s Tmax table T := by
   unfold treeBoundSteps treeBoundAt
@@ -959,7 +959,7 @@ theorem treeBoundSteps_le_levelBound (d c : Fin n → ℕ) (p s Tmax : ℕ)
     omega
   · exact Nat.zero_le _
 
-/-- The polynomial of Corollary 8.3: `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)`. -/
+/-- The polynomial of Theorem 7.3: `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)`. -/
 def stepBound (n t p T : ℕ) : ℕ := 30 * (n + 1) ^ 2 * (p + 1) ^ 2 * (t + 1) ^ 2 * (T + 1)
 
 theorem levelBound_le (n t p T : ℕ) :
@@ -985,7 +985,7 @@ theorem levelBound_le (n t p T : ℕ) :
     ring
   omega
 
-/-- **Corollary 8.3 (a), steps.** At every level, the counted link-forest DP of an instance with
+/-- **Theorem 7.3 (a), steps.** At every level, the counted link-forest DP of an instance with
 `n` cities, `t` passengers and `p` planes (`s = 2t − p` landings) takes at most
 `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps, whatever the one-plane table. -/
 theorem treeBoundSteps_le (d c : Fin n → ℕ) (t p Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
@@ -993,7 +993,7 @@ theorem treeBoundSteps_le (d c : Fin n → ℕ) (t p Tmax : ℕ) (table : Array 
   (treeBoundSteps_le_levelBound d c p _ Tmax table T).trans
     ((Nat.le_add_right _ _).trans (levelBound_le n t p T))
 
-/-! ### Corollary 8.3 (b): the scan of every level -/
+/-! ### Theorem 7.3 (b): the scan of every level -/
 
 /-- `minFin` with a step counter. -/
 def minFinC (f : Fin n → WithTop ℕ × ℕ) : WithTop ℕ × ℕ :=
@@ -1096,7 +1096,7 @@ def scanSteps (d c : Fin n → ℕ) (t p : ℕ) : List (ℕ × ℕ) × ℕ :=
   let r := scanFrontC (fun T => treeBoundSteps d c p s Tmax G.1 T) 0 (Tmax + 1) ⊤
   (r.1, G.2 + r.2)
 
-/-- **Corollary 8.3 (b), value.** With `1 ≤ p ≤ t`, the scan returns the front of the verified
+/-- **Theorem 7.3 (b), value.** With `1 ≤ p ≤ t`, the scan returns the front of the verified
 solver (`solveFront_eq`): the breakpoints of `E`, which under (S) and (A1) are the Pareto front
 (`scanSteps_isParetoFront`). -/
 theorem scanSteps_fst (d c : Fin n → ℕ) {t p : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
@@ -1106,7 +1106,7 @@ theorem scanSteps_fst (d c : Fin n → ℕ) {t p : ℕ} (hp : 1 ≤ p) (hpt : p 
   refine scanFront_congr 0 _ ⊤ fun T _ hT => ?_
   exact treeBoundSteps_eq_minCost d c hp (by omega)
 
-/-- **Corollary 8.3 (b), steps.** The scan of the levels `0, …, (2t − p) · d_max` takes at most
+/-- **Theorem 7.3 (b), steps.** The scan of the levels `0, …, (2t − p) · d_max` takes at most
 `((2t − p) · d_max + 1) · P(n, t, p, (2t − p) · d_max)` steps, the one-plane table included. -/
 theorem scanSteps_le (d c : Fin n → ℕ) (t p : ℕ) :
     (scanSteps d c t p).2 ≤

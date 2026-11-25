@@ -3,14 +3,14 @@
 `ZenoFront` is a Lean 4 / Mathlib library about the exact Pareto front of symmetric
 MultiZenoTravel. The informal proofs are in
 [`doc/theory/exact-front.md`](../doc/theory/exact-front.md); the statements follow the IDs of
-the proof review and of the note (Claim A, Claim B′, G, R, Theorem 4.10).
+the proof review and of the note (Claim A, Claim B′, G, R, Theorem 4.4).
 
 It has three parts:
 
 * **the combinatorial core** (no time, no plans): admissibility, role configurations, the
   support bound, the one-plane table, shrinking and merging partitions;
 * **the plan theory**: plan semantics with arbitrary central flights, counting, Lemma R, and the
-  converse under (S) and the triangles through a hub (Theorem 4.10, which covers (A1) and (AΔ)):
+  converse under (S) and the triangles through a hub (Theorem 4.4, which covers (A1) and (AΔ)):
   every feasible plan is weakly dominated by an admissible partition;
 * **a verified checker for front certificates** (format v1 of
   [`doc/certificate-format.md`](../doc/certificate-format.md)), for `relaxed` and `forest` gaps.
@@ -118,13 +118,13 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   * a truncated file;
   * version 2: `roles` gaps without `A1-NS`, `S` listed for non-symmetric durations, a missing
     point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak,
-    the Proposition 6.5 instance without its point (14, 74), where the search finds a cheaper
+    the Proposition 5.7 instance without its point (14, 74), where the search finds a cheaper
     schedule, an unknown assumption (`EO`).
 
 The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
 `roles`, `lagrangian`, `balanced` and `search` bounds; `v2-search-prop65.cert` is the
-Proposition 6.5 instance, whose two `search` gaps close harmful waiting, and
-`v2-search-zero-city.cert` an instance with a city of `d = d̄ = 0`, accepted since Theorem 6.9
+Proposition 5.7 instance, whose two `search` gaps close harmful waiting, and
+`v2-search-zero-city.cert` an instance with a city of `d = d̄ = 0`, accepted since Theorem 5.3
 holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certificate listing
 `EO`, an assumption the format does not know). The C++ checker agrees with every verdict.
 
@@ -133,7 +133,7 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 | File | Content | Main declarations |
 |---|---|---|
 | `ZenoFront/Model.lean` | Instance (`n` cities, `d c : Fin n → ℕ`, `t` passengers, `p` planes, `1 ≤ p ≤ t`), `s = 2t − p`, groupings `X : Fin p → Multiset (Fin n)`, load `δ`, cost | `Instance`, `Instance.s`, `Groups`, `load`, `cost`, `size`, `totalCost`, `maxLoad` |
-| `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.5, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
+| `ZenoFront/Admissible.lean` | Admissibility as Claim A (parity witnesses), decision procedure, Lemma 2.4, examples | `IsParityWitness`, `Admissible`, `witnessCandidates` |
 | `ZenoFront/Roles.lean` | Role configurations | `RoleConfig`, `RoleConfig.groups` |
 | `ZenoFront/SupportBound.lean` | Claim B′, `t − p` part | `touched`, `edgeCount` |
 | `ZenoFront/MinimalWitness.lean` | Claim B′, `p − 1` part, and the combined `min(p − 1, t − p)` bound | `edgeVec`, `coordSum` |
@@ -142,36 +142,36 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 | `ZenoFront/PlanBounds.lean` | Counting, segments, trimming, Lemma R | `hubArrivals`, `ciDepartures`, `cgArrivals` |
 | `ZenoFront/Relaxation.lean` | The relaxation `L(T)`, memoised, and gcd scaling | `relaxCost`, `relaxRow`, `relaxedBoundAt`, `durationScale`, `scaledDurations` |
 | `ZenoFront/Shrink.lean` | Shrinking an admissible partition to `s` landings (SH, partition form); merging cities | `Admissible.exists_shrink`, `Admissible.map` |
-| `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.6, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
+| `ZenoFront/AddPlane.lean` | Adding a plane (Lemma 4.2, AP) | `Admissible.addPlane`, `Admissible.addPlanes` |
 | `ZenoFront/Converse.lean` | (A1), the central landings of a route and their cost | `Network.A1`, `routeLandings`, `landCostSum_eq_cost` |
-| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.3(b) under (S)); Lemma 4.11 | `Network.ATri`, `Network.ATriHub`, `Network.A1.hub`, `Network.ATri.hub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
-| `ZenoFront/TriCore.lean` | Theorem 4.10, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
-| `ZenoFront/ConverseTri.lean` | Theorem 4.10, the one symmetric converse (under (S) and the triangles through a hub, so under (A1) and under (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_hub` |
-| `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.9): the variant's plans, cutting routes after their last chain leg, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutTri`, `FeasibleAnywhere.exists_admissible_hub`, `Cert.check_sound_anywhere_hub` |
+| `ZenoFront/TriSegments.lean` | (AΔ) and its triangles through a hub; the segment bound (Lemma 3.4(b) under (S)); Lemma 4.3 | `Network.ATri`, `Network.ATriHub`, `Network.A1.hub`, `Network.ATri.hub`, `segment_bound`, `PlaneFeasible.exists_segments_tri`, `Admissible.exists_remove_two` |
+| `ZenoFront/TriCore.lean` | Theorem 4.4, Steps 2–5 on abstract data: the `T`-join of the plane–city graph, re-pairing ends with their payments, the selection and its parity witness | `TriCore.Data`, `TriCore.exists_tjoin`, `TriCore.Inv.step`, `TriCore.exists_selection`, `exists_admissible_of_blocks` |
+| `ZenoFront/ConverseTri.lean` | Theorem 4.4, the one symmetric converse (under (S) and the triangles through a hub, so under (A1) and under (AΔ)): passengers' chains, counting per sharing class, merging segments, the per-plane bound `ℓ(X_k) ≤ F_k` | `ToGoal`, `Feasible.exists_chains`, `exists_merge`, `exists_admissible_of_chains`, `Feasible.exists_admissible_hub` |
+| `ZenoFront/Bridge.lean` | Planes ending anywhere (bridge B3, Theorem 4.5): the variant's plans, cutting routes after their last chain leg, the converse, the checker's soundness for the variant | `FeasibleAnywhere`, `cutTri`, `FeasibleAnywhere.exists_admissible_hub`, `Cert.check_sound_anywhere_hub` |
 | `ZenoFront/MinCost.lean` | `E(T)`, the least cost of an admissible partition with loads `≤ T` | `minCost`, `minCost_antitone`, `minCost_attained` |
 | `ZenoFront/TreeExact.lean` | Lemma 2.6 "if" and the iff; the link-forest DP is exact | `admissible_iff_exists_linkForest`, `admissible_forestPartition`, `treeBoundAt_eq_minCost` |
 | `ZenoFront/PairBound.lean` | The bracket `L(T) ≤ E(T) ≤ U₂(T)`: the pairs bound (forests of single planes and linked pairs), attained | `pairsBoundAt`, `minCost_le_pairsBoundAt`, `minCost_eq_of_bracket` |
 | `ZenoFront/Breakpoints.lean` | The breakpoints of a non-increasing function: the scan of every level, and interval splitting, proved equal | `scanFront`, `splitFront`, `breakpoints_eq_scanFront` |
-| `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E` (Proposition 7.1), the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `minimal_achievable_iff_minCost_hub`, `solveFront`, `solveFront_isParetoFront_hub` |
-| `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.9, Corollary 4.8) | `Admissible.exists_plan`, `minimal_achievable_iff_anywhere_hub`, `minimal_achievable_iff_multisetPoints_hub` |
+| `ZenoFront/Solver.lean` | `E(T)`, the exactness of the σ-DP, the front from the breakpoints of `E` (Proposition 6.3), the verified solver | `minCost`, `sigmaBoundAt_eq_minCost`, `minimal_achievable_iff_minCost_hub`, `solveFront`, `solveFront_isParetoFront_hub` |
+| `ZenoFront/Achievability.lean` | Theorem 4.1 (achievability): the plan of an admissible partition, built on a rooted link forest; the fronts (Theorem 4.5, for planes ending in `C_G` and anywhere) | `Admissible.exists_plan`, `minimal_achievable_iff_anywhere_hub`, `minimal_achievable_iff_multisetPoints_hub` |
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
-| `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
-| `ZenoFront/Complexity.lean` | §8: Lemma 2.4 for disjoint groups, the 3-Partition and Partition reductions for `M(X)`, the link-forest DP and the scan of every level with a step counter (Corollary 8.3) | `admissible_iff_odd_of_disjoint`, `threePartition_iff`, `partition_iff`, `treeBoundSteps`, `treeBoundSteps_le`, `scanSteps_le` |
+| `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 6.7, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
+| `ZenoFront/Complexity.lean` | §7: Lemma 2.3 for disjoint groups, the 3-Partition and Partition reductions for `M(X)`, the link-forest DP and the scan of every level with a step counter (Theorem 7.3) | `admissible_iff_odd_of_disjoint`, `threePartition_iff`, `partition_iff`, `treeBoundSteps`, `treeBoundSteps_le`, `scanSteps_le` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check`, `Cert.check_sound_hub` |
-| `ZenoFront/RationalPlans.lean` | Plans with times in any `FloorRing` (`ℚ`, `ℝ`), rounding down (Lemma 1.3 of revision 3), soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
+| `ZenoFront/RationalPlans.lean` | Plans with times in any `FloorRing` (`ℚ`, `ℝ`), rounding down (Lemma 1.3), soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
 | `ZenoFront/CheckerV2.lean` | Format v2 (non-symmetric): certificates, `check`, soundness | `Kind2`, `Cert2`, `Cert2.check`, `Cert2.check_sound` |
 | `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role loads | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad` |
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
 | `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
-| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, the exhaustive `search` and the completeness of its enumeration | `Sched`, `Sched.tmpl`, `SearchData.closed`, `SearchData.closed_sound` |
-| `ZenoFront/Visits.lean` | Theorem 6.9, Steps 2–6: the visits of the planes, their legs, the visits that carry their passenger through | `KLeg`, `Visit`, `legsOf`, `allK`, `isThrough`, `throughCount` |
-| `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
-| `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched_of` |
-| `ZenoFront/Rewire.lean` | Theorem 6.9, Step 2 for every plan: visits by time, exchanges, cuts into zero-time loops, splices | `TRoute`, `TLoop`, `tExchange_step`, `tCut_step`, `tSplice_step`, `exists_rewired` |
-| `ZenoFront/DominationAll.lean` | Theorem 6.9 for every plan: Step 1, loops attached to one plane, Steps 3–6 | `exists_transfer_pw`, `withLoops`, `planesOK_withLoops`, `schedulableDomination_all` |
+| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 5.5, the exhaustive `search` and the completeness of its enumeration | `Sched`, `Sched.tmpl`, `SearchData.closed`, `SearchData.closed_sound` |
+| `ZenoFront/Visits.lean` | Theorem 5.3, Steps 2–6: the visits of the planes, their legs, the visits that carry their passenger through | `KLeg`, `Visit`, `legsOf`, `allK`, `isThrough`, `throughCount` |
+| `ZenoFront/LinkCount.lean` | Theorem 5.3, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
+| `ZenoFront/SchedBuild.lean` | Theorem 5.3, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched_of` |
+| `ZenoFront/Rewire.lean` | Theorem 5.3, Step 2 for every plan: visits by time, exchanges, cuts into zero-time loops, splices | `TRoute`, `TLoop`, `tExchange_step`, `tCut_step`, `tSplice_step`, `exists_rewired` |
+| `ZenoFront/DominationAll.lean` | Theorem 5.3 for every plan: Step 1, loops attached to one plane, Steps 3–6 | `exists_transfer_pw`, `withLoops`, `planesOK_withLoops`, `schedulableDomination_all` |
 | `ZenoFront/SchedMap.lean` | Scheduled configurations on representatives, rescaled | `Sched.map`, `Sched.tmpl_map_le`, `Sched.mul_tmpl_map_le` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
@@ -183,7 +183,7 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 
 **Admissibility (`Admissible.lean`)**
 
-* `IsParityWitness.card_add_one_le`: Lemma 2.5, `|h k| + 1 ≤ |X_k|` for every witness (forest
+* `IsParityWitness.card_add_one_le`: Lemma 2.4, `|h k| + 1 ≤ |X_k|` for every witness (forest
   or not).
 * `IsParityWitness.sum_card_add_le`: `Σ_k |h k| + p ≤ Σ_k |X_k|`.
 * `Admissible.card_pos`: every group of an admissible grouping is non-empty.
@@ -191,12 +191,13 @@ All of these are proved without `sorry`, and the kernel checks every one of them
 * `admissible_iff_exists_mem_witnessCandidates`: the decision procedure is correct.
 * Examples, checked by `decide`:
   * a lone even plane is inadmissible;
-  * two even planes with disjoint supports are inadmissible (the situation of the §8 hardness
-    proof), while the same landings split into odd groups are admissible;
+  * two even planes with disjoint supports are inadmissible (the situation of the hardness
+    proofs of §7), while the same landings split into odd groups are admissible;
   * two even planes sharing a city are admissible;
   * an even plane linked only to an odd plane is inadmissible;
   * an empty group is inadmissible;
-  * the §7 "pairs are not enough" partition `{6,6} | {4,7} | {4,2,6}` is admissible.
+  * the partition `{6,6} | {4,7} | {4,2,6}` (revision 2 used it to show that pairs are not
+    enough) is admissible.
 
 **Role configurations (`Roles.lean`)**
 
@@ -245,7 +246,7 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
   `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`.
 * `Feasible.le_ciDepartures`, `Feasible.le_cgArrivals`: every passenger leaves `C_I` and
   reaches `C_G` on its own leg (capacity one), so each count is at least `t`.
-* `Feasible.le_sum_hubArrivals` (**counting**, Lemma 3.2): `2t ≤ Σ_k #segments_k + p`.
+* `Feasible.le_sum_hubArrivals` (**counting**, Lemma 3.3): `2t ≤ Σ_k #segments_k + p`.
 * `PlaneFeasible.exists_segments`: under (S), one landing per segment gives a multiset `Z` with
   `|Z| = #segments`, `2 δ(Z) ≤` the plane's end time, and `c(Z) ≤` its landing cost.
 * `exists_trim`: groups that are all non-empty, with total size at least `s ≥ p`, can be trimmed
@@ -273,7 +274,7 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
 
 **Adding a plane (`AddPlane.lean`)**
 
-* `Admissible.addPlane`, `Admissible.addPlane_of_size` (**Lemma 4.6, AP**): an admissible
+* `Admissible.addPlane`, `Admissible.addPlane_of_size` (**Lemma 4.2, AP**): an admissible
   grouping of `q` planes with `2t − q` landings, `t ≥ q + 1`, gives an admissible grouping of
   `q + 1` planes with `2t − q − 1` landings, no larger cost, and loads within every bound on the
   old ones. One shrinking step removes two landings, and one of them becomes the new plane's
@@ -292,15 +293,15 @@ Every statement holds for every feasible plan, for any table `dc` of central fli
   exist and `a ≠ b` (the note has no flight `i → i`; the Lean network's `dc i i` is left free).
   `Network.ATriHub`: its triangles through a hub, `d_j ≤ d_i + dc i j` and
   `d_i ≤ dc i j + d_j`. Both (AΔ) (`Network.ATri.hub`) and (A1) (`Network.A1.hub`) imply it.
-* `segment_bound` (**the segment bound**, Lemma 3.3(b) under (S)): under (S) and `ATriHub`, a
+* `segment_bound` (**the segment bound**, Lemma 3.4(b) under (S)): under (S) and `ATriHub`, a
   segment (a route from a hub whose only hub arrival is its last leg) flies at least `2 d_x` for
   every central city `x` it lands in.
 * `PlaneFeasible.exists_segments_tri`: a feasible plane's route is the concatenation of its
   segments, one per hub arrival, each landing at least once and satisfying the segment bound.
-* `Admissible.exists_remove_two` (**Lemma 4.11**): an admissible partition with `|X| ≥ p + 2`
+* `Admissible.exists_remove_two` (**Lemma 4.3**): an admissible partition with `|X| ≥ p + 2`
   stays admissible after removing two landings, each group a sub-multiset of the old one.
 
-**Theorem 4.10, Steps 2–5 (`TriCore.lean`)**
+**Theorem 4.4, Steps 2–5 (`TriCore.lean`)**
 
 The data: landings in cities and in blocks (segments), blocks in planes, and in each block a
 landing `z γ` of largest duration `R(γ)`. An end of a block is recorded by the landing that pays
@@ -315,14 +316,14 @@ it.
   delete `e₂, e₃` if they are both `γ`'s). Every end stays within `R`, every city keeps an even
   number of ends, every plane its number of ends mod 2, and no `z γ` pays another block's end (the
   note's claim). `TriCore.Inv.exists_final`: until every block has at most one end.
-* `TriCore.exists_selection` (**Step 5, Lemma 2.3**): a block takes its end's city and landing, or
+* `TriCore.exists_selection` (**Step 5, Lemma 2.2**): a block takes its end's city and landing, or
   `z γ`; the landings are distinct, and the cities with an odd number of ends at a plane form a
   parity witness.
 * `exists_admissible_of_blocks`: the same with blocks as lists of cities. If every class has an
   even number of planes with an even number of blocks, some admissible partition has one city per
   block, `δ(X_k) ≤ Σ_γ max_{x ∈ γ} d_x`, and landings at most the blocks' landings.
 
-**Theorem 4.10, the one symmetric converse (`ConverseTri.lean`)**
+**Theorem 4.4, the one symmetric converse (`ConverseTri.lean`)**
 
 Every symmetric result rests on this converse. Each is stated once, under (S) and the triangles
 through a hub (`Network.ATriHub`, name suffix `_hub`); its forms under (A1) and under (AΔ) are
@@ -332,29 +333,29 @@ cites (`_ATri` for (AΔ)).
 * `Feasible.exists_chains`: every passenger rides a *chain* (`ToGoal`), its last departure from
   `C_I` and its legs up to the next arrival in `C_G`, which meet in central cities. So a chain stays
   in one class of planes connected by shared cities.
-* `exists_merge` (**Step 1**): counting (Lemma 3.2) in each class `K` gives `2 t_K ≤ σ_K + q_K`.
+* `exists_merge` (**Step 1**): counting (Lemma 3.3) in each class `K` gives `2 t_K ≤ σ_K + q_K`.
   Merging two segments of one plane in each class with `σ_K + q_K` odd leaves an even number of
   planes with an even number of blocks in every class, and at least `2t − p` blocks. A merged block
   still flies at least `2 d_x` for each of its landings.
-* `exists_admissible_of_chains`: Theorem 4.10 for planes that end in `C_G` and passengers that
+* `exists_admissible_of_chains`: Theorem 4.4 for planes that end in `C_G` and passengers that
   ride chains, with `2 δ(X_k) ≤ F_k` (`durSum`, the flight time).
-* `Feasible.exists_admissible_hub` (**Theorem 4.10**): under (S) and `ATriHub`, with `p ≤ t` (a
+* `Feasible.exists_admissible_hub` (**Theorem 4.4**): under (S) and `ATriHub`, with `p ≤ t` (a
   plan on any number `p ≤ t` of planes, the note's set `Q` with `t ≥ |Q|`), every feasible plan
   gives an admissible partition with `Σ_k |X_k| = 2t − p`, `ℓ(X_k) = 2 δ(X_k) ≤ F_k ≤ M` for every
   plane, and `c(X) ≤ C`. `Feasible.exists_admissible_ATri`: the same under (AΔ).
-* `Feasible.exists_admissible_A1_flightTime` (**Theorem 4.7**): the same under (A1).
+* `Feasible.exists_admissible_A1_flightTime` (**Theorem 4.4**): the same under (A1).
 
 **Planes ending anywhere (`Bridge.lean`)**
 
 * `Feasible.anywhere`, `achievable_subset_achievableAnywhere`: a feasible plan is a plan of the
   variant (`FeasibleAnywhere`: planes may end anywhere, the makespan is the last arrival), with
   the same cost and makespan.
-* `FeasibleAnywhere.exists_admissible_hub` (**Theorem 4.9, converse direction**): under (S) and
+* `FeasibleAnywhere.exists_admissible_hub` (**Theorem 4.5, converse direction**): under (S) and
   `ATriHub`, with `p ≤ t`, every plan whose planes may end anywhere gives an admissible partition
   with `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤ M′` and `c(X) ≤ C`. Every route is cut after its last leg
   on a passenger's chain, and an empty flight `b → C_G` is appended when that leg lands in `b`
   (`cutTri`). The rest of the chain from `b` lasts at least `d̄_b` (`ToGoal.arr_add_d_le`, the
-  second use of the triangles through a hub), so the flight arrives by `M′`. Theorem 4.10 from
+  second use of the triangles through a hub), so the flight arrives by `M′`. Theorem 4.4 from
   chains then applies to the planes that are not idle, and AP to the idle ones
   (`Admissible.addPlanes_le`). Under (A1): `FeasibleAnywhere.exists_admissible`; under (AΔ):
   `FeasibleAnywhere.exists_admissible_ATri`.
@@ -371,11 +372,11 @@ cites (`_ATri` for (AΔ)).
   groups (up to relabelling the planes), so it costs `c(X)`, and its makespan is
   `max_k 2 δ(X_k)`. On a rooted link forest, each plane drops off its children's passengers,
   crosses its free landings, then picks up its parent's passenger (`LTree.routes`).
-* `minimal_achievable_iff_anywhere_hub` (**Theorem 4.9**): under (S) and `ATriHub`, the two
+* `minimal_achievable_iff_anywhere_hub` (**Theorem 4.5**): under (S) and `ATriHub`, the two
   fronts are equal on every instance (`minimal_achievable_iff_anywhere_of_A1`,
   `minimal_achievable_iff_anywhere_of_ATri`).
 * `minimal_achievable_iff_admissiblePoints_hub`, `minimal_achievable_iff_multisetPoints_hub`
-  (**Corollary 4.8**): under (S) and `ATriHub`, the front is `Min 𝒳`, with `𝒳` the points
+  (**Theorem 4.5**): under (S) and `ATriHub`, the front is `Min 𝒳`, with `𝒳` the points
   `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition
   (`minimal_achievable_iff_multisetPoints` under (A1), `minimal_achievable_iff_multisetPoints_ATri`
   under (AΔ)). `minimal_achievableAnywhere_iff_admissiblePoints_hub` is the same for planes ending
@@ -402,7 +403,7 @@ cites (`_ATri` for (AΔ)).
   two meet, both are `E(T)`.
 * `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and
   `E(T') > C` for every `T' < T`. `breakpoint_le`: then `T ≤ (2t − p) · d_max`.
-* `minimal_achievable_iff_minCost_hub` (**Proposition 7.1**, integer levels): under (S) and
+* `minimal_achievable_iff_minCost_hub` (**Proposition 6.3**, integer levels): under (S) and
   `ATriHub`, `(C, M)` is on the front iff `M = 2T`, `E(T) = C` and `E(T') > C` for every `T' < T`
   (`minimal_achievable_iff_minCost_ATri` under (AΔ)).
 * `solveFront_isParetoFront_hub` (**the solver is correct**): under (S) and `ATriHub`, with
@@ -425,7 +426,7 @@ cites (`_ATri` for (AΔ)).
 * `domRep_le`: cities are merged into non-dominated representatives (no slower, no more
   expensive). This keeps the bound valid and makes the city set small: at most 4 cities on the
   samples.
-* `Admissible.map_dominated` (**Proposition 7.9**): relabelling an admissible grouping by any map
+* `Admissible.map_dominated` (**Proposition 6.5**): relabelling an admissible grouping by any map
   to no slower and no more expensive cities keeps it admissible, with the same group sizes, no
   larger cost and no larger load on any plane.
 * `mem_smallSubsetList`: the σ-DP's states are the subsets of the non-dominated cities of size
@@ -451,12 +452,12 @@ cites (`_ATri` for (AΔ)).
 * `buildLayers_getD`: a table built layer by layer, each layer read from the earlier ones,
   unfolds to its defining formula.
 * `TreeData.chM_le`, `subM_le`, `rootM_le`, `forM_le`: one step of each table `Ch`, `Sub`,
-  `Root`, `For` (§7.4).
+  `Root`, `For` (§6).
 * `LKids.chM_le`, `LTree.subM_le`, `LTree.rootM_le`, `forM_le_forest`: by induction on the
   rooted link trees, child items, subtrees, trees and forests cost at least their table entry.
   The free landings of a plane, of odd size, cost at least the one-plane entry for the budget
   the links leave.
-* `TreeData.value_le_totalCost`, `treeBoundAt_le_totalCost` (**Theorem 7.5, `For ≤ E`**): the
+* `TreeData.value_le_totalCost`, `treeBoundAt_le_totalCost` (**Theorem 6.7, `For ≤ E`**): the
   tree DP is at most the cost of every admissible partition into `p` groups of total size `s`
   with loads `≤ T`. The converse (`For ≥ E`) is in `TreeExact.lean` (`treeBoundAt_eq_minCost`).
 * `forestBoundAt_le_totalCost`: the bound the checker computes (tree DP or σ-DP, chosen by
@@ -466,23 +467,23 @@ cites (`_ATri` for (AΔ)).
 
 The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not formalised.
 
-* `admissible_iff_odd_of_disjoint` (**Lemma 2.4, disjoint groups**): if no city lies in two
+* `admissible_iff_odd_of_disjoint` (**Lemma 2.3, disjoint groups**): if no city lies in two
   groups, a partition is admissible iff every group has an odd number of landings.
 * `minMakespan_le_iff`: `M(Y) ≤ 2T` iff some admissible partition of `Y` has all loads `≤ T`,
   when `Y` has an admissible partition.
-* `threePartition_iff` (**Theorem 8.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
+* `threePartition_iff` (**Theorem 7.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
   `B/4 < a_i < B/2`, the instance with durations `a_i` and `p = m` planes has `M(X) ≤ 2B`, for
   `X` every city once, iff the `a_i` split into `m` triples of sum `B`.
-* `partition_iff` (**Proposition 8.2**, NP-hard half): for `a_1, …, a_m` with sum `2B`, `r ≥ m`
+* `partition_iff` (**Proposition 7.2**, NP-hard half): for `a_1, …, a_m` with sum `2B`, `r ≥ m`
   odd and `K = B + 1`, the instance with `2r` cities of durations `a_i + K` (`i ≤ m`) and `K`
   (`partitionDur`, all positive) and `p = 2` has `M(X) ≤ 2(B + rK)` iff some sub-multiset of
   the `a_i` sums to `B`.
-* `treeBoundSteps_value`, `treeBoundSteps_eq_minCost`, `treeBoundSteps_le` (**Corollary 8.3 (a)**):
+* `treeBoundSteps_value`, `treeBoundSteps_eq_minCost`, `treeBoundSteps_le` (**Theorem 7.3 (a)**):
   the link-forest DP with a step counter (`treeBoundSteps`: the functions of `TreeBound.lean` with
   counted loops) returns `treeBoundAt`, so `E(T)` for `T ≤ Tmax`, in at most
   `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps (`stepBound`). A step is an
   iteration of a minimum loop or a table cell; the cost model is in the module docstring.
-* `scanSteps_fst`, `scanSteps_le`, `scanSteps_isParetoFront` (**Corollary 8.3 (b)**): the one-plane
+* `scanSteps_fst`, `scanSteps_le`, `scanSteps_isParetoFront` (**Theorem 7.3 (b)**): the one-plane
   table and the DP at every level `0, …, Tmax = (2t − p) · d_max` give `solveFront` (the Pareto
   front under (S) and (A1)) in at most `(Tmax + 1) · P(n, t, p, Tmax)` steps.
 
@@ -499,7 +500,7 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not for
   costs at least the relaxed bound at the gap level of `M`, for every `dc`.
 * `Cert.forestGapBound_le_hub` (**obligation 3**, `forest`): under `ATriHub`, a feasible plan
   with makespan below `M` costs at least the forest bound at the gap level of `M`. The proof
-  chains Theorem 4.10 and `forestBoundAt_le_totalCost` (`Cert.forestGapBound_le` under (A1),
+  chains Theorem 4.4 and `forestBoundAt_le_totalCost` (`Cert.forestGapBound_le` under (A1),
   `Cert.forestGapBound_le_ATri` under (AΔ)).
 * `exists_le_of_gapsOK`: the domination argument along the front.
 * `Cert.check_sound_hub` (**soundness**): `C.check = true` implies
@@ -521,9 +522,9 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not for
 * `Feasible.split`: under (A1-NS), splitting every central flight `a → b` into `a → h → b`
   (`h` the hub of the shorter detour) keeps a plan feasible, with the same cost, no larger
   makespan and no central flight.
-* `Feasible.exists_roleConfig_of_domination` (**Theorem 6.1**, `NSFront.lean`): under (A1-NS),
+* `Feasible.exists_roleConfig_of_domination` (**Corollary 5.4**, `NSFront.lean`): under (A1-NS),
   every feasible plan gives a role configuration on the `p` planes with passenger count `t`, cost
-  at most the plan's and every role load at most its makespan. It is a corollary of Theorem 6.9:
+  at most the plan's and every role load at most its makespan. It is a corollary of Theorem 5.3:
   every role load is at most the closed form `M_tmpl` (`Sched.load_le_tmpl`).
 * `rolesBoundAt_le_totalCost`: the role relaxation is a lower bound on such configurations. It
   takes the larger of two bounds. Per plane: an odd number of crossings, other landings at
@@ -546,7 +547,7 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not for
     of makespan 0.
 
   It rejects `forest`.
-* `schedulableDomination_all` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible
+* `schedulableDomination_all` (**Theorem 5.3**): under (A1-NS), with `p ≤ t`, every feasible
   plan gives a valid scheduled configuration with `2t − p` landings, cost at most the plan's and
   closed form at most its makespan, with no event order and no hypothesis on zero durations.
   Step 1 splits central flights (`Feasible.split`) and finds every passenger's two flights
@@ -555,7 +556,7 @@ The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not for
   a loop back into a route. Steps 3–6 select links along the hand-offs (`exists_links`), bound
   the closed form and shrink, with the remaining loops attached to one plane (`withLoops`,
   `planesOK_withLoops`, `exists_sched_of`).
-* `Cert2.searchWith_le` (**`search`**): Theorem 6.9, the configuration mapped to representatives
+* `Cert2.searchWith_le` (**`search`**): Theorem 5.3, the configuration mapped to representatives
   (`Sched.map`, `Sched.mul_tmpl_map_le`), and the completeness of the search
   (`SearchData.closed_sound`): a closed search below `M` with cost bound `C'` rules out every
   feasible plan faster than `M` and cheaper than `C'` (`schedulableDomination_all`).
@@ -594,7 +595,7 @@ among them.
   duration between a hub and city `i`.
 * **Load and makespan.** The load of a group is `δ(Y) = Σ_{w ∈ Y} d w`. The makespan of the
   plan built from it is `2 δ`. Every `T` in the DP and the table is a **half-makespan** (a bound
-  on `δ`), as in §7 of the note.
+  on `δ`), as in §6 of the note.
 * **Grouping (partition).** A grouping is one multiset of city indices per plane. Order within a
   group is irrelevant; a group may repeat a city. Groups are not required to be non-empty:
   admissibility implies it (`Admissible.card_pos`). Nothing in the definition ties the grouping
@@ -604,7 +605,7 @@ among them.
   * `|h k| ≡ |X_k| + 1 (mod 2)`;
   * every city in an even number of the `h k`.
 
-  It is the `T`-join of Lemma 2.4, as a 0/1 matrix. It need not be a forest. A witness found by
+  It is the parity matrix of Definition 2.1, a `T`-join of the plane–city graph. It need not be a forest. A witness found by
   the σ-DP is fine as a certificate of admissibility, but Theorem 4.1's plan construction needs
   a forest. A certificate that wants the `min(p − 1, t − p)` bound on touched cities should send
   an inclusion-minimal witness (`card_touched_le_of_minimal_subset`).
@@ -689,7 +690,7 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] SH in partition form (`Admissible.exists_shrink`); the role-configuration form is not
       needed.
-- [x] AP (add a plane, Lemma 4.6; `Admissible.addPlane`, `Admissible.addPlanes`).
+- [x] AP (add a plane, Lemma 4.2; `Admissible.addPlane`, `Admissible.addPlanes`).
 - [x] The σ-DP as a lower bound on `E(T)` (`sigmaBoundAt_le_totalCost`).
 - [x] The σ-DP's state bound `|σ| ≤ min(p − 1, t − p)` from Claim B′ (`smallSubsetList`).
 - [x] The σ-DP's other direction (`DP ≥ E`, so the DP is exact; `sigmaBoundAt_eq_minCost`).
@@ -698,13 +699,14 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [ ] Bellman-potential soundness: potentials with `φ(src) ≤ 0` and `φ(v) ≤ φ(u) + w(u, v)` on
       every arc bound `E(T)` from below (sparse certificates).
 - [ ] Executable admissibility check (union–find on the plane–city graph) proved equal to
-      `Admissible`. This needs Lemma 2.4 (component form ⇔ parity witness).
+      `Admissible`. This needs the component form of admissibility, which revision 3 of the
+      note no longer states (Lemma 2.3 keeps disjoint groups only).
 
 **P2, plan semantics and the relaxation.**
 
 - [x] Route-based plans with `ℕ` times (`Plan.lean`), matching format v1, with arbitrary
       central flights.
-- [x] Counting (Lemma 3.2) by leg counting (`Feasible.le_sum_hubArrivals`).
+- [x] Counting (Lemma 3.3) by leg counting (`Feasible.le_sum_hubArrivals`).
 - [x] Segments and the endpoint bound under (S) (`PlaneFeasible.exists_segments`).
 - [x] Lemma R (`Feasible.exists_relaxation`), and `L` as a DP proved a lower bound.
 - [x] Primal checker (`planOK_feasible`) and the end-to-end checker, with a parser and
@@ -713,23 +715,22 @@ needed for soundness: the plan of every listed point is checked by simulation.
 - [ ] Completeness of the simulation: the greedy passenger walk finds a route whenever the
       C++ one does. Only soundness is proved.
 
-**P3, Theorem 4.10 (the converse under (S) + the triangles through a hub).**
+**P3, Theorem 4.4 (the converse under (S) + the triangles through a hub).**
 
-- [x] (AΔ), the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`) and Lemma 4.11
+- [x] (AΔ), the segment bound `F(γ) ≥ 2 d_x` (`segment_bound`) and Lemma 4.3
       (`Admissible.exists_remove_two`).
-- [x] Theorem 4.10: sharing components, links, re-pairing, Lemma 2.3, with `ℓ(X_k) ≤ F_k`
-      (`Feasible.exists_admissible_hub`). Theorem 4.7 under (A1)
-      (`Feasible.exists_admissible_A1_flightTime`) and Theorem 4.10 under (AΔ)
-      (`Feasible.exists_admissible_ATri`) are corollaries; the first route to Theorem 4.7 (Step 1,
+- [x] Theorem 4.4: sharing components, links, re-pairing, Lemma 2.2, with `ℓ(X_k) ≤ F_k`
+      (`Feasible.exists_admissible_hub`). Theorem 4.4 under (A1)
+      (`Feasible.exists_admissible_A1_flightTime`) and Theorem 4.4 under (AΔ)
+      (`Feasible.exists_admissible_ATri`) are corollaries; the first route to Theorem 4.4 (Step 1,
       cleaning, PAR) is removed.
-- [x] Fronts: Corollary 4.8, Theorem 4.9, Proposition 7.1 and the solver, each stated once under
+- [x] Fronts: Theorem 4.5 (both variants), Proposition 6.3 and the solver, each stated once under
       the triangles through a hub (`minimal_achievable_iff_multisetPoints_hub`,
       `minimal_achievable_iff_anywhere_hub`, `minimal_achievable_iff_minCost_hub`,
       `solveFront_isParetoFront_hub`), with their (A1) and (AΔ) forms as corollaries.
 - [x] Front theorem X3 for `forest` gaps: the checker is sound for every `dc` satisfying the
       triangles through a hub (`Cert.check_sound_hub`; `Cert.check_sound_A1`,
       `Cert.check_sound_ATri`).
-- [ ] The front statements of Propositions 7.8 and 7.9.
 
 **P4.**
 
@@ -739,10 +740,10 @@ needed for soundness: the plan of every listed point is checked by simulation.
       `Cert.check_sound_anywhere_hub`). On every instance, with Theorem 4.1:
       `minimal_achievable_iff_anywhere_hub`.
 - [x] Theorem 4.1: links, schedule with drop-offs first and at most one pick-up per plane,
-      makespan = largest load (`Admissible.exists_plan`), and Corollary 4.8. Not needed by the
+      makespan = largest load (`Admissible.exists_plan`), and Theorem 4.5. Not needed by the
       checker.
 - [x] Link-forest lemma (2.6, both directions; `admissible_iff_exists_linkForest`) and the
-      tree DP (Theorem 7.5), exact (`treeBoundAt_le_totalCost`, `treeBoundAt_eq_minCost`).
+      tree DP (Theorem 6.7), exact (`treeBoundAt_le_totalCost`, `treeBoundAt_eq_minCost`).
 - [ ] Pareto staircases over `τ` in the tree DP, as in `src/zeno/forest.cpp`. The dense tables
       take seconds when many cities survive the merge (table above); the C++ checker takes
       milliseconds.
@@ -752,18 +753,17 @@ needed for soundness: the plan of every listed point is checked by simulation.
 
 - [x] Format v2: parser, non-symmetric Lemma R (`relaxed`), and soundness for every table of
       central flights (`Cert2.check_sound`).
-- [x] Role model with role loads; N1 (Theorem 6.1, `Feasible.exists_roleConfig_of_domination`); the
+- [x] Role model with role loads; N1 (Corollary 5.4, `Feasible.exists_roleConfig_of_domination`); the
       `roles` and `lagrangian` bounds.
 - [x] `balanced` (`BalData.value_le_totalCost`). The Lean checker accepts all 150
       certificates of random small non-symmetric instances, with the C++ checker's verdicts and
       bound values.
 - [x] `search`, layer 1: the exhaustive search and the completeness of its enumeration
-      (`SearchData.closed_sound`). It closes both `search` gaps of the Proposition 6.5 instance.
-- [x] Theorem 6.9 for every plan, for `p ≤ t` (`schedulableDomination_all`), including plans
-      that are not event-ordered on instances with a city of `d = d̄ = 0` (the case left open at
-      the end of §6.2 of the note). Lemma 6.3's optimality is not needed for soundness:
-      Theorem 6.9 bounds the closed form directly.
+      (`SearchData.closed_sound`). It closes both `search` gaps of the Proposition 5.7 instance.
+- [x] Theorem 5.3 for every plan, for `p ≤ t` (`schedulableDomination_all`), including plans
+      that are not event-ordered on instances with a city of `d = d̄ = 0` (the case revision 2 of
+      the note left open). Lemma 5.5's optimality is not needed for soundness:
+      Theorem 5.3 bounds the closed form directly.
 - [x] `search` gaps and `fastest search` in `Cert2.check_sound` (`Cert2.searchWith_le`), over
       every feasible plan.
-- [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
-      is proved.
+- [ ] Simulation with waiting.

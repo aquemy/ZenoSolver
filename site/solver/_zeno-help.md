@@ -8,11 +8,11 @@ usage: zeno [front] [instance options] [solver options]
 front     Pareto front (cost, makespan) as "cost makespan" lines by
           increasing cost (the default command). Exact for symmetric
           instances whose central flights satisfy (A1) or the triangle
-          inequality (AΔ) (Theorem 4.10, Corollary 4.12; in Lean,
+          inequality (AΔ) (Theorems 4.4 and 4.5; in Lean,
           solveFront_isParetoFront_ATri): the default table satisfies (A1),
           --metric tables (AΔ). With a central-flight table,
           stderr says which holds, or warns that the front may not be exact
-          (Example 4.13). For non-symmetric instances: achieved points
+          (Example 4.7). For non-symmetric instances: achieved points
           (simulated plans) and, on stderr, which gaps a lower bound
           certifies
 check     verify a front certificate (doc/certificate-format.md) and print
@@ -61,7 +61,7 @@ Metric instances (every flight lasts the distance between its ends):
                          rounded, then every duration becomes its shortest
                          path over the flights, so the table satisfies the
                          triangle inequality (AΔ) exactly. With --hubs same
-                         the front is exact (Theorem 4.10, Corollary 4.12)
+                         the front is exact (Theorems 4.4 and 4.5)
   -d -D -E -W -l -m do not apply. `zeno generate` writes the table as the
   "central" block of the data file.
 

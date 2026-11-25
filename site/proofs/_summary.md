@@ -7,7 +7,7 @@
 | [Lemma 1.5 (hub triangles)](#node-lemma-1-5) | [machine-checked]{.badge .ok} | §1.4 | `lem-hub-triangles` |
 | [Definition 1.6 (fronts)](#node-definition-1-6) | [Lean definition]{.badge .ok} | §1.5 | `def-front` |
 | [Lemma 1.7 (dominating sets)](#node-lemma-1-7) | [machine-checked]{.badge .ok} | §1.5 | `lem-1-1` |
-| [Notation](#node-notation) | [notation]{.badge .informal} | §1.5 |  |
+| [Notation](#node-notation) | [Lean definition]{.badge .ok} | §1.5 |  |
 | [Definition 2.1 (admissible partition)](#node-definition-2-1) | [Lean definition]{.badge .ok} | §2 | `def-2-2` |
 | [Lemma 2.2 (integer form)](#node-lemma-2-2) | [machine-checked]{.badge .ok} | §2 | `lem-2-3` |
 | [Lemma 2.3 (disjoint groups)](#node-lemma-2-3) | [machine-checked]{.badge .ok} | §2 | `lem-2-4` |

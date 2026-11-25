@@ -1,6 +1,6 @@
-"""E8, certificates (Theorem 9.1): an accepted certificate always states the true front.
+"""E8, certificates (Theorem 8.1): an accepted certificate always states the true front.
 
-Theorem 9.1: if a certificate's four obligations hold (plans reach their points, nothing faster than
+Theorem 8.1: if a certificate's four obligations hold (plans reach their points, nothing faster than
 the first point, nothing cheaper inside a gap, nothing cheaper than the last point), its list is the
 Pareto front. Two checkers verify the obligations: the C++ reference `zeno check` and the Lean
 `zeno-check`, whose soundness is proved in Lean. Three tests:
@@ -345,7 +345,7 @@ def main() -> int:
                         "(n<=3, p<=3, t<=p+3, d, dbar in [1,15]) instances",
                "mutants": f"{len(MUTATIONS)} mutation kinds per accepted certificate, where applicable"},
         tests=["thm-9-1"],
-        hypothesis="Theorem 9.1: a certificate whose obligations 1-4 hold lists exactly the Pareto front; a sound "
+        hypothesis="Theorem 8.1: a certificate whose obligations 1-4 hold lists exactly the Pareto front; a sound "
                    "checker therefore never accepts a false front.",
         explanation=f"{sum(t['mutants'] for t in table.values())} mutants; {sum(t['must_reject'] for t in table.values())} "
                     f"had to be rejected and {len(unsound)} were accepted. The checkers disagree on {len(disagree)} "

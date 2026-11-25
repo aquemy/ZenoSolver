@@ -13,7 +13,7 @@ public import Mathlib.Data.Finset.Lattice.Fold
 /-!
 # The one-plane table `G[m][T]`
 
-Step 1 of the exact algorithm (`doc/theory/exact-front.md`, §7): `G[m][T]` is the cheapest cost
+Step 1 of the exact algorithm (`doc/theory/exact-front.md`, §6): `G[m][T]` is the cheapest cost
 of a multiset of `m` cities with load `δ ≤ T`, or `∞` when there is none. It satisfies
 
 * `G[0][T] = 0`;
@@ -52,7 +52,7 @@ complete it with the best entry of the previous row `g` at budget `T − d i`. -
 def oneplaneStep (g : ℕ → WithTop ℕ) (T : ℕ) : WithTop ℕ :=
   univ.inf fun i => if d i ≤ T then (c i : WithTop ℕ) + g (T - d i) else ⊤
 
-/-- `G[m][T]`, by the recursion of §7: `G[0][T] = 0` and
+/-- `G[m][T]`, by the recursion of §6: `G[0][T] = 0` and
 `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`. -/
 def oneplane : ℕ → ℕ → WithTop ℕ
   | 0, _ => 0
@@ -242,7 +242,7 @@ theorem oneplaneTable_getD {mMax Tmax m T : ℕ} (hm : m ≤ mMax) (hT : T ≤ T
 
 /-! ### Example
 
-Durations `d = (1, 3)` and costs `c = (9, 5)` (the second example of §5 of the note). -/
+Durations `d = (1, 3)` and costs `c = (9, 5)` (the second example of §4 of the note). -/
 
 /-- `G[2][4] = 14`: `{0, 1}` (load `4`, cost `14`) is the only pair of load `≤ 4` besides
 `{0, 0}` (cost `18`). -/

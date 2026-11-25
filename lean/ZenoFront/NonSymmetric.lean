@@ -12,14 +12,14 @@ public import ZenoFront.Converse
 **(A1-NS).** A central flight is no shorter than a detour through one of the hubs:
 `dc a b ≥ min(d_a + d_b, d̄_a + d̄_b)` (`Network.A1NS`).
 
-**Splitting** (`Feasible.split`, Step 1 of Theorem 6.9). Replace every central flight `a → b` by
+**Splitting** (`Feasible.split`, Step 1 of Theorem 5.3). Replace every central flight `a → b` by
 `a → h → b`, `h` the hub of the shorter detour (`splitLeg`). By (A1-NS) the plane reaches `b` no
 later, and waits there; a passenger on board stays on board through `h`. The plan stays
 feasible, has the same cost and no larger makespan, and has no central flight.
 
 **Role loads** (`RoleConfig.roleLoad`). The role load of plane `k` of a role configuration is
 `2 δ(Dr_k) + 2 δ̄(Pk_k) + δ(Cr_k) + δ̄(Cr_k)`: a drop-off at `x` weighs `2 d_x`, a pick-up
-`2 d̄_x`, a crossing `d_x + d̄_x`. Theorem 6.1 bounds them by the makespan
+`2 d̄_x`, a crossing `d_x + d̄_x`. Corollary 5.4 bounds them by the makespan
 (`Feasible.exists_roleConfig_of_domination`, `NSFront.lean`).
 
 ## Main results
@@ -211,7 +211,7 @@ theorem filter_flatMap_split (π : Fin t) : ∀ {l : List (Leg n t)}, (∀ ℓ �
     · rw [List.filter_eq_nil_iff.mpr fun m hm => by simp [hpax m hm, hℓ]]
       simp [hℓ]
 
-/-- **Step 1 of Theorem 6.9.** Under (A1-NS), splitting every central flight keeps a plan
+/-- **Step 1 of Theorem 5.3.** Under (A1-NS), splitting every central flight keeps a plan
 feasible, with the same cost, no larger makespan, and no central flight. -/
 theorem Feasible.split {P : Plan n t p} (hP : Feasible N P) :
     Feasible N (splitPlan N P) ∧ (∀ c, planCost c (splitPlan N P) = planCost c P) ∧

@@ -433,7 +433,7 @@ theorem Feasible.exists_relaxation_emin {N : Network n} (c : Fin n → ℕ)
 **Lean** `ZenoFront.Feasible.relaxCost_le_planCost` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 3.4 (relaxation), the bound.** With `p ≤ t`, every feasible plan of makespan `M` costs
+/-- **Lemma 3.5 (relaxation), the bound.** With `p ≤ t`, every feasible plan of makespan `M` costs
 at least `L_e(⌊M/2⌋) = relaxCost (G_e[·][⌊M/2⌋]) p s`, the relaxation for the weight
 `e = min(d, d̄)` (`Network.emin`; under (S), `e = d` by `Network.emin_eq_of_sym`). No assumption is
 made on central flights. The groups are those of `Feasible.exists_relaxation_emin`: one landing

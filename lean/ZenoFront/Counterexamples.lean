@@ -38,7 +38,7 @@ The `lpt` instance is `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`. Its exact
 `(260, 60)` (`Examples.lptCounterexample_front`). For every PPP of cost at most 260, every set of
 P3 patterns and every way to break the ties of `ArgMin`, both greedies give a makespan above 60
 (`evocop_misses_lpt`, `arxiv_misses_lpt`). On the landings of `(260, 60)`, EvoCOP's Algorithm 1
-without P3 ends at `(52, 68)`, whatever the ties (`evocop_lpt_noP3`), as §5 of the note says. With
+without P3 ends at `(52, 68)`, whatever the ties (`evocop_lpt_noP3`), as §4 of the note says. With
 its best `β`, EvoCOP's greedy reaches 64 (`evocop_lpt_ppp`).
 
 The `p3First` instance is `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`. Its exact front contains
@@ -64,22 +64,22 @@ The papers leave some choices open:
 On the 27 golden instances (`tests/golden/instances.txt`), `evocopPoints` gives the front of the
 2016 `zenoSolver`, and `arxivPoints` that of `zenoSolver_noDuplicate` on 25 of them.
 
-## Example 4.13: the triangles through a hub cannot be dropped
+## Example 4.7: the triangles through a hub cannot be dropped
 
 On `d = d̄ = (2, 3, 9, 11)`, `c = (50, 44, 17, 0)`, `t = 6`, `p = 3`, with a central flight of
 duration 1 between cities 3 and 4, a plan of cost 260 and makespan 39 flies that central flight
 (`Ex413.plan_feasible`). The checker of format v1 accepts hub flights only, so the plan is
 simulated on its duration table (`planOKDur`, `Graph.lean`). Every admissible partition of 9
 landings with loads `δ(X_k) ≤ 19` costs at least 264 (`Ex413.minCost_19`), so no admissible point
-weakly dominates `(260, 39)` (`Ex413.not_admissible_le`). The conclusion of Theorem 4.10 and
-Corollary 4.8 fail there (`Ex413.no_admissible_partition`, `Ex413.not_isParetoFront`).
+weakly dominates `(260, 39)` (`Ex413.not_admissible_le`). The conclusion of Theorem 4.4 and
+Theorem 4.5 fail there (`Ex413.no_admissible_partition`, `Ex413.not_isParetoFront`).
 
-## Proposition 6.5: harmful waiting
+## Proposition 5.7: harmful waiting
 
 On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, the cheapest role configuration
 with every role load at most 73 costs 14 (`Prop65.cheapest_roleConfig`, through the `roles` bound).
 Yet no feasible plan of makespan at most 73 costs less than 18, for every table of central flights
-satisfying (A1-NS) (`Prop65.cost_ge_of_makespan_le`). The proof is Theorem 6.9 and the exhaustive
+satisfying (A1-NS) (`Prop65.cost_ge_of_makespan_le`). The proof is Theorem 5.3 and the exhaustive
 search of a `search` gap (`SearchData.closed_sound`). The kernel decides that search in eight
 pieces, split by the option of the first plane, so that no declaration needs more than a few
 gigabytes. The test certificate `v2-search-prop65.cert` also uses `balanced` gaps, whose bound uses
@@ -87,7 +87,7 @@ gigabytes. The test certificate `v2-search-prop65.cert` also uses `balanced` gap
 exhausts memory. So only the gap below makespan 74 is proved here, which is all the statement
 needs.
 
-## Example 6.11: the reduction of arXiv §2.4 misses the front
+## Example 5.9: the reduction of arXiv §2.4 misses the front
 
 On the path `U = C_I – a – b – C_G` with durations 1, 2, 1, `c_a = c_b = 1`, `t = 3`, `p = 2`, the
 reduction `f` of `Graph.lean` gives the clique instance with `d = (1, 3)`, `d̄ = (3, 1)`, `c = (2, 2)`
@@ -95,7 +95,7 @@ reduction `f` of `Graph.lean` gives the clique instance with `d = (1, 3)`, `d̄ 
 is `{(8, 10)}` (`Ex611.reduced_front`). `U` has a plan of cost 8 and makespan 8 (`Ex611.plan`), so
 the two fronts differ (`Ex611.fronts_differ`).
 
-## Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front
+## Example 5.10: the shuttle construction of arXiv §3.3 misses the front
 
 For each `B Ā B̄` situation through two central cities `i` and `j`, arXiv:2304.14659 §3.3 adds a
 virtual city whose patterns have their own durations and costs (`Shuttle.shuttleCity`,
@@ -126,11 +126,11 @@ with 9 central landings, more than `2t − p = 7`, attains it (`PropI.plan9_pare
 * `ZenoFront.Greedy.arxiv_misses_p3First`: the arXiv greedy does not reach the front point
   `(42, 12)` of the `p3First` instance; `ZenoFront.Greedy.evocop_reaches_p3First`: EvoCOP's does.
 * `ZenoFront.Ex413.plan_feasible`, `ZenoFront.Ex413.not_admissible_le`,
-  `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
-* `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
-* `ZenoFront.Ex611.reduced_front`, `ZenoFront.Ex611.fronts_differ`: Example 6.11.
+  `ZenoFront.Ex413.not_isParetoFront`: Example 4.7.
+* `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 5.7.
+* `ZenoFront.Ex611.reduced_front`, `ZenoFront.Ex611.fronts_differ`: Example 5.9.
 * `ZenoFront.PropI.plan9_pareto`: a Pareto-optimal plan with more than `2t − p` landings.
-* `ZenoFront.Shuttle.shuttle_misses`: Proposition 6.7.
+* `ZenoFront.Shuttle.shuttle_misses`: Example 5.10.
 -/
 
 @[expose] public section
@@ -422,7 +422,7 @@ def arxivCost {n : ℕ} (c : Fin n → ℕ) (x : List ℕ × List ℕ × List �
 is 260. -/
 theorem lpt_ppp_cost : costOf ![40, 20] [3, 2] + costOf ![40, 20] [2, 1] = 260 := by decide +kernel
 
-/-- **§5 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
+/-- **§4 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
 every plane a crossing of 20 first and ends with the private makespans `(52, 68)`, in some order,
 whatever the tie-breaking. -/
 theorem evocop_lpt_noP3 :
@@ -550,7 +550,7 @@ theorem evocop_p3First_front : paretoMin (evocopPoints ![1, 3] ![9, 5] 4 2) =
 theorem arxiv_p3First_front : paretoMin (arxivPoints ![1, 3] ![9, 5] 4 2) =
     [(30, 18), (38, 14), (46, 10), (50, 8), (54, 6)] := by decide +kernel
 
-/-- **The greedy of arXiv §3.2 is not exact (§5).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
+/-- **The greedy of arXiv §3.2 is not exact (§4).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
 the point `(42, 12)` is Pareto-optimal among all feasible plans, whatever the central flights, but
 for every PPP `(a, ā, b)` of cost at most 42 and every tie-breaking, the four steps (with Steps 2
 and 3 read as in the module documentation) give a makespan above 12. -/
@@ -562,24 +562,24 @@ theorem arxiv_misses_p3First (dc : Fin 2 → Fin 2 → ℕ) :
 
 end Greedy
 
-/-! ### Example 4.13: without (A1) and (AΔ), a plan beats the admissible partitions -/
+/-! ### Example 4.7: without (A1) and (AΔ), a plan beats the admissible partitions -/
 
 namespace Ex413
 
-/-- The hub durations of Example 4.13, `d = d̄ = (2, 3, 9, 11)` (cities numbered from `0` here). -/
+/-- The hub durations of Example 4.7, `d = d̄ = (2, 3, 9, 11)` (cities numbered from `0` here). -/
 def d : Fin 4 → ℕ := ![2, 3, 9, 11]
 
-/-- The landing costs of Example 4.13, `c = (50, 44, 17, 0)`. -/
+/-- The landing costs of Example 4.7, `c = (50, 44, 17, 0)`. -/
 def c : Fin 4 → ℕ := ![50, 44, 17, 0]
 
-/-- The central flights of Example 4.13: `d₁₂ = 1`, `d₁₃ = 5`, `d₁₄ = 6`, `d₂₃ = 3`, `d₂₄ = 6`,
+/-- The central flights of Example 4.7: `d₁₂ = 1`, `d₁₃ = 5`, `d₁₄ = 6`, `d₂₃ = 3`, `d₂₄ = 6`,
 `d₃₄ = 1` in the note's numbering. The diagonal is never flown. -/
 def dc : Fin 4 → Fin 4 → ℕ := ![![0, 1, 5, 6], ![1, 0, 3, 6], ![5, 3, 0, 1], ![6, 6, 1, 0]]
 
-/-- The network of Example 4.13: symmetric hub durations and the central flights `dc`. -/
+/-- The network of Example 4.7: symmetric hub durations and the central flights `dc`. -/
 def net : Network 4 := ⟨d, d, dc⟩
 
-/-- The plan of Example 4.13 (passengers numbered from `0`). Plane 1 crosses at city 1, picks up
+/-- The plan of Example 4.7 (passengers numbered from `0`). Plane 1 crosses at city 1, picks up
 at city 4 the passenger that plane 3 dropped there, then crosses back and forth at city 2;
 plane 2 crosses at city 2 twice and at city 4; plane 3 drops a passenger at city 4, flies the
 central flight `4 → 3` back towards `C_I`, and crosses at city 3. -/
@@ -617,7 +617,7 @@ theorem plan_feasible (dc' : Fin 4 → Fin 4 → ℕ) (h : dc' 3 2 = 1) :
     rw [h]
     exact hab
 
-/-- The plan is feasible in the network of Example 4.13. -/
+/-- The plan is feasible in the network of Example 4.7. -/
 theorem plan_feasible_net : Feasible net plan := plan_feasible dc rfl
 
 /-- The plan costs 260. -/
@@ -633,7 +633,7 @@ theorem not_A1 : ¬ net.A1 := fun h => absurd (h 3 2) (by decide)
 theorem not_ATri : ¬ net.ATri := fun h =>
   absurd (h .ci (.city 2) (.city 3) (by decide) 11 9 1 rfl rfl rfl) (by decide)
 
-/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.10 uses. -/
+/-- They violate even the triangles through a hub (`ATriHub`), all that Theorem 4.4 uses. -/
 theorem not_ATriHub : ¬ net.ATriHub := fun h => absurd (h 2 3).1 (by decide)
 
 set_option maxRecDepth 100000 in
@@ -652,11 +652,11 @@ theorem admissible_cost_ge (X : Groups 4 3) (hX : Admissible X) (hsize : size X 
 
 set_option maxRecDepth 100000 in
 /-- The relaxation `L(19)` of the checker (`relaxedBoundAt`, a lower bound on every plan of
-makespan below 40 by Lemma 3.4) is 260, the plan's cost. -/
+makespan below 40 by Lemma 3.5) is 260, the plan's cost. -/
 theorem relaxedBound_19 : relaxedBoundAt 3 9 19 (oneplaneTable d c 19 9) 19 = 260 := by
   decide +kernel
 
-/-- **The conclusion of Theorem 4.10 fails for the plan**: no admissible partition of
+/-- **The conclusion of Theorem 4.4 fails for the plan**: no admissible partition of
 `2t − p = 9` landings costs at most 260 with every load `ℓ(X_k) = 2δ(X_k)` at most 39. -/
 theorem no_admissible_partition :
     ¬ ∃ X : Groups 4 3, Admissible X ∧ size X = 2 * 6 - 3 ∧ totalCost c X ≤ planCost c plan ∧
@@ -680,7 +680,7 @@ theorem not_admissible_le : ∀ x ∈ admissiblePoints net c 6 3, ¬ x ≤ (260,
     exact (Nat.mul_le_mul_left 2 (load_le_maxLoad d X k)).trans (Prod.le_def.mp hle).2
 
 set_option maxRecDepth 100000 in
-/-- **The front of admissible partitions** of Example 4.13, computed by the verified solver in the
+/-- **The front of admissible partitions** of Example 4.7, computed by the verified solver in the
 kernel. Its consecutive points `(264, 34)` and `(228, 40)` surround the plan's makespan 39. -/
 theorem admissible_front : solveFront d c 6 3 =
     [(450, 12), (432, 14), (414, 16), (396, 18), (393, 20), (364, 22), (352, 24), (332, 26),
@@ -700,7 +700,7 @@ theorem admissible_front_consecutive :
   simp only [h, admissible_front]
   decide
 
-/-- **Corollary 4.8 fails for Example 4.13**: the front of admissible partitions, which the solver
+/-- **Theorem 4.5 fails for Example 4.7**: the front of admissible partitions, which the solver
 computes, is not the Pareto front of the feasible plans, since it does not dominate the plan's
 point `(260, 39)`. -/
 theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront d c 6 3) := by
@@ -713,11 +713,11 @@ theorem not_isParetoFront : ¬ IsParetoFront (achievable net c 6 3) (solveFront 
 
 end Ex413
 
-/-! ### Proposition 6.5: harmful waiting -/
+/-! ### Proposition 5.7: harmful waiting -/
 
 namespace Prop65
 
-/-- The durations to `C_I` of Proposition 6.5, `d = (3, 19)`. -/
+/-- The durations to `C_I` of Proposition 5.7, `d = (3, 19)`. -/
 def d : Fin 2 → ℕ := ![3, 19]
 
 /-- The durations to `C_G`, `d̄ = (3, 11)`. -/
@@ -870,7 +870,7 @@ set_option maxRecDepth 100000 in
 theorem search73_83 : (opts73.drop 83).all (firstOK search73 opts73) = true := by decide +kernel
 
 /-- **The search is closed**: no valid scheduled configuration of cost below 18 has a closed form
-(the template makespan of Lemma 6.3) at most 73. -/
+(the template makespan of Lemma 5.5) at most 73. -/
 theorem search73_closed : search73.closed = true := by
   rw [search73_closed_eq, opts73_eq]
   exact all_drop_of_take _ _ 0 4 search73_0 <| all_drop_of_take _ _ 4 1 search73_4 <|
@@ -886,7 +886,7 @@ theorem tmpl_gt_of_cost_lt (S : Sched 2 4) (hS : S.Valid) (hsize : S.size = 10)
     (show ((S.cost c : ℕ) : WithTop ℕ) < ((18 : ℕ) : WithTop ℕ) by exact_mod_cast hcost)
 
 /-- **No plan of makespan at most 73 costs less than 18**, for every table of central flights
-satisfying (A1-NS): Theorem 6.9 turns the plan into a valid scheduled configuration, of cost at
+satisfying (A1-NS): Theorem 5.3 turns the plan into a valid scheduled configuration, of cost at
 most the plan's and closed form at most its makespan. -/
 theorem cost_ge_of_makespan_le (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS)
     {P : Plan 2 7 4} (hP : Feasible ⟨d, db, dc⟩ P) (hM : planMakespan P ≤ 73) :
@@ -904,7 +904,7 @@ theorem cost_ge_of_makespan_le_noCentral {P : Plan 2 7 4}
     18 ≤ planCost c P :=
   cost_ge_of_makespan_le _ a1ns_of_long (hP.feasible_of_clique _) hM
 
-/-- **Proposition 6.5.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
+/-- **Proposition 5.7.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
 central flights satisfying (A1-NS), the cheapest role configuration with `2t − p = 10` landings and
 every role load at most 73 costs 14, and no feasible plan of makespan at most 73 costs less than
 18. -/
@@ -917,7 +917,7 @@ theorem prop65 (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2
   ⟨(cheapest_roleConfig dc).1, (cheapest_roleConfig dc).2,
     fun _ ⟨_, hP, hx⟩ hM => by subst hx; exact cost_ge_of_makespan_le dc hA hP hM⟩
 
-/-- **No harmful waiting is false** (Conjecture 6.5 of the note). The configuration `cfg14` has
+/-- **No harmful waiting is false** (Proposition 5.7 of the note). The configuration `cfg14` has
 role loads at most 72, but every valid scheduled configuration of its cost waits: whatever the
 orders and the matching, its template makespan exceeds 73. In front form: some role configuration
 has cost 14 and role loads at most 73, but no feasible plan has cost at most 14 and makespan at
@@ -934,11 +934,11 @@ theorem harmful_waiting (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : 
 
 end Prop65
 
-/-! ### Example 6.11: the reduction of arXiv §2.4 misses the front -/
+/-! ### Example 5.9: the reduction of arXiv §2.4 misses the front -/
 
 namespace Ex611
 
-/-- The path `C_I – a – b – C_G` of Example 6.11, with durations 1, 2, 1 (`a`, `b` are the
+/-- The path `C_I – a – b – C_G` of Example 5.9, with durations 1, 2, 1 (`a`, `b` are the
 central vertices 0 and 1). -/
 def U : FlightGraph 2 :=
   ⟨fun x y =>
@@ -981,7 +981,7 @@ theorem reduced_c : (Reduced.c U c : Fin 2 → ℕ) = ![2, 2] := by
   funext v
   fin_cases v <;> decide +kernel
 
-/-- The plan of Example 6.11 in `U` (passengers numbered from `0`). Plane 1 flies
+/-- The plan of Example 5.9 in `U` (passengers numbered from `0`). Plane 1 flies
 `C_I a b a b C_G`: it drops passenger 1 at `b` at time 3, flies the central edge back to `a` and
 picks passenger 2 up there at time 5. -/
 def plan : Plan 2 3 2 :=
@@ -1005,7 +1005,7 @@ theorem mem_gAchievable_U : ((8, 8) : ℕ × ℕ) ∈ gAchievable U c 3 2 :=
   ⟨plan, plan_feasible, by rw [plan_cost, plan_makespan]⟩
 
 /-- The certificate of the front of `f(U)`, as written by `zeno front --certificate`, with the
-fastest point closed by the `search` kind (Theorem 6.9). -/
+fastest point closed by the `search` kind (Theorem 5.3). -/
 def reducedCert : Cert2 where
   n := 2
   t := 3
@@ -1055,7 +1055,7 @@ theorem reduced_makespan_ge : ∀ x ∈ gAchievable (Reduced.graph U) (Reduced.c
     rw [List.mem_singleton.mp hy] at hle
     exact (Prod.le_def.mp hle).2
 
-/-- **The reduction misses the front (Example 6.11).** `(8, 10)` is Pareto-optimal for `f(U)` but
+/-- **The reduction misses the front (Example 5.9).** `(8, 10)` is Pareto-optimal for `f(U)` but
 not for `U`, which has the plan `(8, 8)`. So the fronts of `U` and `f(U)` differ, against the claim
 of arXiv §2.4. -/
 theorem fronts_differ :
@@ -1136,7 +1136,7 @@ theorem plan9_pareto (dc : Fin 1 → Fin 1 → ℕ) :
 
 end PropI
 
-/-! ### Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front -/
+/-! ### Example 5.10: the shuttle construction of arXiv §3.3 misses the front -/
 
 namespace Shuttle
 
@@ -1224,7 +1224,7 @@ def points {m : ℕ} (C : Fin m → TCity) (shuttle : Bool) (t p : ℕ) : Set (�
   {x | ∃ cfg : TConfig p m, cfg.Valid C shuttle t ∧ cfg.size = 2 * t - p ∧
     cfg.cost C = x.1 ∧ ∀ k, cfg.load C k ≤ x.2}
 
-/-! #### The instance of Proposition 6.7 -/
+/-! #### The instance of Example 5.10 -/
 
 /-- The durations to `C_I`, `d = (1, 3)`. -/
 def d : Fin 2 → ℕ := ![1, 3]
@@ -1255,7 +1255,7 @@ theorem net_ATri : net.ATri := by
 /-- (A1-NS) fails: `d_12 = 2 < 4 = min(d_1 + d_2, d̄_1 + d̄_2)`. -/
 theorem not_net_A1NS : ¬ net.A1NS := fun h => absurd (h 0 1) (by decide)
 
-/-- The plan of Proposition 6.7 (passengers numbered from `0`). Plane 1 leaves passenger 0 in
+/-- The plan of Example 5.10 (passengers numbered from `0`). Plane 1 leaves passenger 0 in
 city 1, carries passenger 1 across city 2, and picks passenger 2 up in city 2. Plane 2 flies the
 split crossing `C_I → 2 → 1 → C_G`: it leaves passenger 2 in city 2, flies the central flight
 empty, and carries passenger 0 from city 1. -/
@@ -1352,7 +1352,7 @@ theorem mem_points (shuttle : Bool) : ((4, 10) : ℕ × ℕ) ∈ points cities s
   ⟨cfg4, ⟨by decide +kernel, by decide +kernel, by decide +kernel, fun _ => by decide +kernel⟩,
     by decide +kernel, by decide +kernel, by decide +kernel⟩
 
-/-- **Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front.** On
+/-- **Example 5.10: the shuttle construction of arXiv §3.3 misses the front.** On
 `d = (1, 3)`, `d̄ = (3, 1)`, a central flight of duration 2, `c = (6, 1)`, `t = 3`, `p = 2`, (AΔ)
 holds, the front of the instance has a point of makespan at most 8, and every point of the
 augmented instance, as printed, has makespan at least 10, whether or not the shuttle is counted.

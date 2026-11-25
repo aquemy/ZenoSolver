@@ -7,11 +7,11 @@ module
 public import ZenoFront.Shrink
 
 /-!
-# Adding a plane (Lemma 4.6, AP)
+# Adding a plane (Lemma 4.2, AP)
 
-**Lemma 4.6 (AP).** An admissible grouping of `q` planes with `2t − q` landings, `t ≥ q + 1`,
+**Lemma 4.2 (AP).** An admissible grouping of `q` planes with `2t − q` landings, `t ≥ q + 1`,
 becomes an admissible grouping of `q + 1` planes with `2t − q − 1` landings, of no larger cost
-and no larger largest load. This is the step of bridge B3 (Theorem 4.9) that gives the idle
+and no larger largest load. This is the step of bridge B3 (Theorem 4.5) that gives the idle
 planes of a plan whose planes may end anywhere a group of their own.
 
 The proof reuses the shrinking step (`IsParityWitness.exists_shrink_step`): it removes two
@@ -22,8 +22,8 @@ the cost drops by the other removed landing.
 
 ## Main results
 
-* `ZenoFront.Admissible.addPlane`: Lemma 4.6.
-* `ZenoFront.Admissible.addPlanes`: Lemma 4.6 applied `m` times, from `q` to `q + m ≤ t` planes.
+* `ZenoFront.Admissible.addPlane`: Lemma 4.2.
+* `ZenoFront.Admissible.addPlanes`: Lemma 4.2 applied `m` times, from `q` to `q + m ≤ t` planes.
 -/
 
 @[expose] public section
@@ -42,7 +42,7 @@ theorem totalCost_snoc (c : Fin n → ℕ) (X : Groups n q) (Y : Multiset (Fin n
     totalCost c (Fin.snoc (α := fun _ => Multiset (Fin n)) X Y) = totalCost c X + cost c Y := by
   simp [totalCost, Fin.sum_univ_castSucc]
 
-/-- **Lemma 4.6 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
+/-- **Lemma 4.2 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
 landings gives an admissible grouping of `q + 1` planes with one landing less, no larger cost,
 and loads bounded by every bound on the old loads. -/
 theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤ size X)
@@ -100,7 +100,7 @@ theorem Admissible.addPlane {X : Groups n q} (hX : Admissible X) (hq : q + 2 ≤
       simpa [hY'] using this.trans (hT k₀)
     · simpa [hY'] using (load_mono d (hle j)).trans (hT j)
 
-/-- **Lemma 4.6 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
+/-- **Lemma 4.2 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
 grouping has `2t − q − 1` landings. -/
 theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible X)
     (hsize : size X = 2 * t - q) (ht : q + 1 ≤ t) (d c : Fin n → ℕ) :
@@ -109,7 +109,7 @@ theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible 
   obtain ⟨Y, hY, hs, hc, hl⟩ := hX.addPlane (by omega) d c
   exact ⟨Y, hY, by omega, hc, hl⟩
 
-/-- **Lemma 4.6 applied `m` times**: from `q` planes to `q + m ≤ t` planes, `2t − (q + m)`
+/-- **Lemma 4.2 applied `m` times**: from `q` planes to `q + m ≤ t` planes, `2t − (q + m)`
 landings, no larger cost and no larger largest load. -/
 theorem Admissible.addPlanes {t : ℕ} (d c : Fin n → ℕ) : ∀ (m : ℕ) {X : Groups n q},
     Admissible X → size X = 2 * t - q → q + m ≤ t →

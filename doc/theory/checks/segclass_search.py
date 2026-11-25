@@ -1,8 +1,8 @@
-"""Which segments with central flights does the non-symmetric front need under (AΔ)? (§6.4, Conj 6.7)
+"""Which segments with central flights does the non-symmetric front need under (AΔ)? (§6.4 of revision 2; Example 5.10)
 
 On random tiny non-symmetric instances whose central table satisfies (AΔ) but not (A1-NS), compare the
 front of all plans with the fronts of plans restricted to segment classes (`bin/segclass_truth`):
-  none      simple plans, i.e. role configurations (Cor 6.10)
+  none      simple plans, i.e. role configurations (Cor 5.6)
   GI2       plus shuttles C_G -> i -> j -> C_I (the B-Abar-Bbar shuttle triples of the arXiv paper)
   IG2       plus crossings C_I -> i -> j -> C_G with one central flight
   IG2e      plus split crossings: the same with an empty central flight

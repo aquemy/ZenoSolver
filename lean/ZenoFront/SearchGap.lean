@@ -14,14 +14,14 @@ public import Mathlib.Data.Multiset.Sort
 
 A `search` gap of a certificate claims that no role configuration of cost below `C_i` has a
 schedule finishing before `M_{i+1}` (`searchGap` and `exactSchedule` in
-`src/zeno/ns_search.cpp`). By Theorem 6.9 (schedulable domination) of the theory note this rules
+`src/zeno/ns_search.cpp`). By Theorem 5.3 (schedulable domination) of the theory note this rules
 out every feasible plan (`schedulableDomination_all`, `DominationAll.lean`). This file has the
 search and its statement:
 
 * `Sched`: a *scheduled configuration*. Per plane it has an ordered list of drop-offs, an ordered
   list of pick-ups and a multiset of crossings, and a *matching* `mate` from pick-up slots
   `(v, l)` to drop-off slots `(u, j)` of the same city.
-* `Sched.tmpl`: the closed form of Lemma 6.3. It is the maximum of the role loads and of
+* `Sched.tmpl`: the closed form of Lemma 5.5. It is the maximum of the role loads and of
   `Pre_u(j) + d_x + d̄_x + Suf_v(l)` over the links, in scaled units.
 * `SearchData.closed`: an executable search over every scheduled configuration of cost below the
   bound. It enumerates every drop-off order, pick-up order, crossing multiset and matching (self
@@ -39,7 +39,7 @@ open Finset
 
 variable {n t p : ℕ}
 
-/-! ### Scheduled configurations and the closed form of Lemma 6.3 -/
+/-! ### Scheduled configurations and the closed form of Lemma 5.5 -/
 
 /-- A scheduled role configuration: drop-offs and pick-ups in order, crossings, and the matching
 from each pick-up slot `(v, l)` to the drop-off slot `(u, j)` whose passenger it collects. -/
@@ -86,7 +86,7 @@ def suf (db : Fin n → ℕ) (v : Fin p) (l : ℕ) : ℕ := 2 * (((S.picks v).dr
 def term (d db : Fin n → ℕ) (v : Fin p) (l : Fin (S.picks v).length) : ℕ :=
   S.pre d (S.mate v l).1 (S.mate v l).2 + d (S.picks v)[l] + db (S.picks v)[l] + S.suf db v l
 
-/-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
+/-- **The closed form of Lemma 5.5**: the largest role load and link term. -/
 def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
 

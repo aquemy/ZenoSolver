@@ -7,9 +7,9 @@ module
 public import ZenoFront.PlanBounds
 
 /-!
-# Visits: the data of Theorem 6.9, Steps 2–6
+# Visits: the data of Theorem 5.3, Steps 2–6
 
-Theorem 6.9 (schedulable domination) works on a plan without central flights, seen as the
+Theorem 5.3 (schedulable domination) works on a plan without central flights, seen as the
 *visits* of its planes. This file has the data that Step 2 (`exists_rewired`, `Rewire.lean`) and
 Steps 3–6 (`exists_sched_of`, `SchedBuild.lean`) share.
 

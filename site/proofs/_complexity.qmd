@@ -48,7 +48,7 @@ $\square$
 **Lean** `ZenoFront.threePartition_iff` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 8.1 (the 3-Partition reduction).** Let `a_1, …, a_{3m}` and `B` be natural numbers
+/-- **Theorem 7.1 (the 3-Partition reduction).** Let `a_1, …, a_{3m}` and `B` be natural numbers
 with `Σ_i a_i = mB` and `B/4 < a_i < B/2` (which make every `a_i`, and `B` when `m ≥ 1`,
 positive). In the symmetric instance with one city of duration `a_i` for each `i`, `p = m` planes
 (and `t = 2m` passengers, so `s = 3m`), the multiset `X` that lands once at every city has
@@ -120,7 +120,7 @@ $\square$
 **Lean** `ZenoFront.partition_iff` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Proposition 8.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
+/-- **Proposition 7.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
 numbers with sum `2B`, `r ≥ m` odd and `K = B + 1`. In the symmetric instance with `2r` cities,
 of durations `a_i + K` for `i ≤ m` and `K` for the other `2r − m` (all positive,
 `partitionDur_pos`), `p = 2` planes (and `t = r + 1` passengers, so `s = 2r`), the multiset `X`
@@ -225,7 +225,7 @@ formalised.
 **Lean** `ZenoFront.treeBoundSteps_value` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 8.3 (a), value.** The counted DP returns the value of `treeBoundAt`. -/
+/-- **Theorem 7.3 (a), value.** The counted DP returns the value of `treeBoundAt`. -/
 theorem treeBoundSteps_value (d c : Fin n → ℕ) (p s Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
     (T : ℕ) : (treeBoundSteps d c p s Tmax table T).1 = treeBoundAt d c p s Tmax table T := …
 ```
@@ -247,7 +247,7 @@ theorem treeBoundSteps_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp :
 **Lean** `ZenoFront.treeBoundSteps_le` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 8.3 (a), steps.** At every level, the counted link-forest DP of an instance with
+/-- **Theorem 7.3 (a), steps.** At every level, the counted link-forest DP of an instance with
 `n` cities, `t` passengers and `p` planes (`s = 2t − p` landings) takes at most
 `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps, whatever the one-plane table. -/
 theorem treeBoundSteps_le (d c : Fin n → ℕ) (t p Tmax : ℕ) (table : Array (Array (WithTop ℕ)))
@@ -259,7 +259,7 @@ theorem treeBoundSteps_le (d c : Fin n → ℕ) (t p Tmax : ℕ) (table : Array 
 **Lean** `ZenoFront.scanSteps_fst` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 8.3 (b), value.** With `1 ≤ p ≤ t`, the scan returns the front of the verified
+/-- **Theorem 7.3 (b), value.** With `1 ≤ p ≤ t`, the scan returns the front of the verified
 solver (`solveFront_eq`): the breakpoints of `E`, which under (S) and (A1) are the Pareto front
 (`scanSteps_isParetoFront`). -/
 theorem scanSteps_fst (d c : Fin n → ℕ) {t p : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
@@ -271,7 +271,7 @@ theorem scanSteps_fst (d c : Fin n → ℕ) {t p : ℕ} (hp : 1 ≤ p) (hpt : p 
 **Lean** `ZenoFront.scanSteps_le` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 8.3 (b), steps.** The scan of the levels `0, …, (2t − p) · d_max` takes at most
+/-- **Theorem 7.3 (b), steps.** The scan of the levels `0, …, (2t − p) · d_max` takes at most
 `((2t − p) · d_max + 1) · P(n, t, p, (2t − p) · d_max)` steps, the one-plane table included. -/
 theorem scanSteps_le (d c : Fin n → ℕ) (t p : ℕ) :
     (scanSteps d c t p).2 ≤

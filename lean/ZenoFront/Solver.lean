@@ -35,8 +35,8 @@ particular under (A1) (`solveFront_isParetoFront`) and under (AΔ) (`solveFront_
   (`minCost_eq_top_of_lt`). The breakpoints are the points of the scan of every level
   (`scanFront`, `mem_scanFront`). The solver finds them by splitting intervals between those two
   levels (`breakpoints`, `Breakpoints.lean`), which gives the same list (`solveFront_eq`).
-  Corollary 4.8 (`minimal_achievable_iff_admissiblePoints_hub`) turns the minimal admissible
-  points into the front (Proposition 7.1, `minimal_achievable_iff_minCost_hub`).
+  Theorem 4.5 (`minimal_achievable_iff_admissiblePoints_hub`) turns the minimal admissible
+  points into the front (Proposition 6.3, `minimal_achievable_iff_minCost_hub`).
 
 The tables that do not depend on the level (the subsets of non-dominated cities, their
 symmetric differences, and the one-plane table) are computed once (`sigmaAt`).
@@ -413,7 +413,7 @@ theorem mem_solveFront_iff (N : Network n) (c : Fin n → ℕ) {t : ℕ} (hp : 1
     exact ⟨T, Nat.zero_le _, by omega, hM, hE, WithTop.coe_lt_top C,
       fun T' _ hT' => hlt T' hT'⟩
 
-/-- **Proposition 7.1 (the front from `E`).** Under (S) and the triangles through a hub, with
+/-- **Proposition 6.3 (the front from `E`).** Under (S) and the triangles through a hub, with
 `p ≤ t`, a pair `(C, M)` is on the front iff `M = 2T` with `E(T) = C` and `E(T') > C` for every
 `T' < T`: the front is the set of breakpoints of `E`. -/
 theorem minimal_achievable_iff_minCost_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
@@ -424,7 +424,7 @@ theorem minimal_achievable_iff_minCost_hub {N : Network n} (hS : N.dbar = N.d) (
   (minimal_achievable_iff_admissiblePoints_hub hS hL c hpt (C, M)).trans
     (minimal_admissiblePoints_iff N c C M)
 
-/-- **Proposition 7.1 under (AΔ).** -/
+/-- **Proposition 6.3 under (AΔ).** -/
 theorem minimal_achievable_iff_minCost_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
     (c : Fin n → ℕ) {t : ℕ} (hpt : p ≤ t) (C M : ℕ) :
     Minimal (· ∈ achievable N c t p) (C, M) ↔

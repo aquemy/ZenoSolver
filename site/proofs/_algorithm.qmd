@@ -61,7 +61,7 @@ Lemma 6.1 holds for any durations $d$; with a weight $w$ in their place it gives
 **Lean** `ZenoFront.oneplane` [Lean definition]{.badge .ok}
 
 ```lean
-/-- `G[m][T]`, by the recursion of §7: `G[0][T] = 0` and
+/-- `G[m][T]`, by the recursion of §6: `G[0][T] = 0` and
 `G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`. -/
 def oneplane : ℕ → ℕ → WithTop ℕ
   | 0, _ => 0
@@ -268,7 +268,7 @@ under (AΔ): `minimal_achievable_iff_minCost_ATri` (Solver.lean).
 **Lean** `ZenoFront.minimal_achievable_iff_minCost_hub` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Proposition 7.1 (the front from `E`).** Under (S) and the triangles through a hub, with
+/-- **Proposition 6.3 (the front from `E`).** Under (S) and the triangles through a hub, with
 `p ≤ t`, a pair `(C, M)` is on the front iff `M = 2T` with `E(T) = C` and `E(T') > C` for every
 `T' < T`: the front is the set of breakpoints of `E`. -/
 theorem minimal_achievable_iff_minCost_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
@@ -422,7 +422,7 @@ $i$ and moves only to cities that dominate $i$. Costs and loads are sums over th
 **Lean** `ZenoFront.Admissible.map_dominated` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Proposition 7.9 (dominance, symmetric).** Let `rep` send every city to one that is no slower
+/-- **Proposition 6.5 (dominance, symmetric).** Let `rep` send every city to one that is no slower
 and no more expensive (`domRep` is one, `domRep_le`). Relabelling the landings of an admissible
 grouping by `rep` gives an admissible grouping with the same group sizes, no larger cost and no
 larger load on any plane. -/

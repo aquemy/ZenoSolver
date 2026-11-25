@@ -48,7 +48,7 @@ $p = 1$ (durations $(2, 1)$, costs $(1, 2)$):
 The goal requires every **plane** to end in $C_G$ as well as every person. Problem files written
 before plane goals were added (pull request #9) only constrain the persons: planes may end
 anywhere, and the makespan is the last arrival. For symmetric instances under (A1) that variant
-has the same front ([Theorem 4.9](../proofs.qmd#node-theorem-4-9), machine-checked), so the fronts
+has the same front ([Theorem 4.5](../proofs.qmd#node-theorem-4-5), machine-checked), so the fronts
 in old files remain valid. The Lean checker covers it too, for certificates of version 1
 (`Cert.check_sound_anywhere`).
 
@@ -57,9 +57,11 @@ in old files remain valid. The Lean checker covers it too, for certificates of v
 `board` and `debark` take no time in the model. Under the ε-separation of PDDL 2.1, a planner's
 plan with $k$ actions on its critical path ends at $M + O(k\varepsilon)$, where $M$ is the sum of
 the flight durations on that path. ZenoSolver reports $M$, the makespan in the limit
-$\varepsilon \to 0$. [Statement 1.2](../proofs.qmd#node-statement-1-2) of the note argues the
-correspondence in both directions (a sketch, not formalised). Plans of the domain are event-ordered,
-and for those the front is the same ([Corollary 6.10](../proofs.qmd#node-corollary-6-10)).
+$\varepsilon \to 0$. Revision 2 of the note argued the correspondence in both directions (its
+Statement 1.2, a sketch); revision 3 removed it, and §1.3 of the note now describes the encoding and
+claims nothing about PDDL plans. The fronts of the note are those of the plans of its model
+([Theorem 4.5](../proofs.qmd#node-theorem-4-5), [Corollary 5.6](../proofs.qmd#node-corollary-5-6)),
+a model that abstracts the domain (§1.3 of the note).
 Whether PDDL planners and VAL accept zero-duration actions is not checked.
 
 ## Size

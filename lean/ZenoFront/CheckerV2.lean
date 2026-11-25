@@ -24,8 +24,8 @@ This file verifies:
 * `relaxed` (gaps and fastest point), with **no assumption**: Lemma R with the weight
   `2 min(d_i, d̄_i)` per landing (`Feasible.exists_relaxation_emin`); a segment starts and ends
   with hub flights, each lasting at least `min(d, d̄)` of its city;
-* `roles` (gaps and fastest point), under (A1-NS), which the certificate must list: Theorem 6.1
-  (`Feasible.exists_roleConfig_of_domination`, from Theorem 6.9) and the role relaxation (`rolesBoundAt_le_totalCost`), at
+* `roles` (gaps and fastest point), under (A1-NS), which the certificate must list: Corollary 5.4
+  (`Feasible.exists_roleConfig_of_domination`, from Theorem 5.3) and the role relaxation (`rolesBoundAt_le_totalCost`), at
   levels `⌊(M − 1)/g⌋` for the gcd `g` of all durations;
 * `lagrangian μ` gaps, under (A1-NS): the decoupled per-plane bound at the listed multipliers
   (`LagData.value_le_totalCost`), over the representatives of the cities (`domRep3`);
@@ -33,7 +33,7 @@ This file verifies:
   configurations (`BalData.value_le_totalCost`), rerun at the gap's level;
 * `search` (gaps and fastest point), under (A1-NS): the exhaustive search over scheduled
   configurations of cost below the previous point's (`SearchData.closed_sound`), on the
-  representatives, at the gap's level. Theorem 6.9 (`schedulableDomination_all`) turns every
+  representatives, at the gap's level. Theorem 5.3 (`schedulableDomination_all`) turns every
   feasible plan into such a configuration, also on instances with a city of `d = d̄ = 0`;
 * `fastest closed` for symmetric durations, as in v1.
 
@@ -337,7 +337,7 @@ theorem roleLoad_scaled {dc : Fin C.n → Fin C.n → ℕ} (cfg : RoleConfig C.n
       fun i hi => C.dbar_eq_mul (hmem i (by simp [hi]))]
   ring
 
-/-- Theorem 6.1, then the configuration mapped to representatives, with role loads in units of
+/-- Corollary 5.4, then the configuration mapped to representatives, with role loads in units of
 `rolesScale` at most the level of `M`. -/
 theorem exists_repConfig {dc : Fin C.n → Fin C.n → ℕ} (hA : (C.network dc).A1NS)
     (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p} (hP : Feasible (C.network dc) P) {M : ℕ}
@@ -420,7 +420,7 @@ theorem balWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contai
 
 /-- **The `search` bound is a lower bound** under (A1-NS): if the search below `M` finds no
 configuration cheaper than `C'` (the previous point's cost) with a schedule faster than `M`,
-every feasible plan with makespan below `M` costs at least `C'`. Theorem 6.9, for every plan,
+every feasible plan with makespan below `M` costs at least `C'`. Theorem 5.3, for every plan,
 turns the plan into a valid scheduled configuration with `s` landings, cost at most the plan's
 and closed form at most its makespan; on the representatives, in units of `rolesScale`, its
 closed form is at most the level of `M`, which the search rules out. -/

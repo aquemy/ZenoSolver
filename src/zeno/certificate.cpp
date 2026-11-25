@@ -220,12 +220,12 @@ Certificate makeCertificate(const Instance& instance, const SolveResult& result)
     cert.assumptions = {"S"};
     if(std::ranges::find(cert.gaps, GapBound::Forest) != cert.gaps.end())
     {
-        // Theorem 4.7 under (A1), Theorem 4.10 and Corollary 4.12 under (AΔ). The
+        // Theorems 4.4 and 4.5, under the hub triangles that (A1) and (AΔ) imply. The
         // Lean checker reads the token "A1" for forest gaps, and its soundness
         // covers both (Cert.check_sound_A1, Cert.check_sound_ATri).
         if(!checkFlights(instance).exactSymmetric())
             throw std::invalid_argument("no certificate: some gaps need the forest bound, which needs central flights that satisfy (A1) or (AΔ) "
-                                        "(Theorems 4.7 and 4.10), and these satisfy neither (Example 4.13)");
+                                        "(Theorem 4.4), and these satisfy neither (Example 4.7)");
         cert.assumptions.push_back("A1");
     }
     return cert;
@@ -270,7 +270,7 @@ Certificate makeBracketCertificate(const Instance& instance, const BracketResult
     }
     cert.fastest = kind(result.fastestProof);
     if(needsA1 && !checkFlights(instance).a1ns)
-        throw std::invalid_argument("no certificate: some bounds need (A1-NS) (Theorem 6.1), which the central flights violate");
+        throw std::invalid_argument("no certificate: some bounds need (A1-NS) (Corollary 5.4), which the central flights violate");
     if(instance.symmetric())
         cert.assumptions.push_back("S");
     if(needsA1)
@@ -492,7 +492,7 @@ CertificateCheck checkCertificate(const Certificate& cert)
 
     const LevelBounds bounds(in, f.back().makespan);
     bool usedA1 = false, usedA1NS = false;
-    // The search proof (Corollary 6.10) needs A1-NS. Theorem 6.9 covers every
+    // The search proof (Corollary 5.6) needs A1-NS. Theorem 5.3 covers every
     // plan, also with cities where d = dbar = 0.
     const auto searchAllowed = [&](std::string& why) {
         if(!assumed("A1-NS"))
@@ -509,8 +509,8 @@ CertificateCheck checkCertificate(const Certificate& cert)
         {
             case GapBound::Relaxed: return bounds.relaxed(T);
             case GapBound::Forest:
-                // Sound under (S) and (A1) (Theorem 4.7) or (S) and (AΔ) (Theorem 4.10,
-                // Corollary 4.12). Certificates list "A1" (read by the Lean checker
+                // Sound under (S) and (A1) or (S) and (AΔ), which imply the hub
+                // triangles of Theorem 4.4. Certificates list "A1" (read by the Lean checker
                 // too); "A1|AD" spells out the same scope and is accepted as well.
                 if(!in.symmetric() || (!assumed("A1") && !assumed(kA1OrTriangle)))
                 {

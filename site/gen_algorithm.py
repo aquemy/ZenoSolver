@@ -5,12 +5,12 @@ The page follows one worked example, the instance of the Problem page (site/prob
 n = 3, t = 3, p = 2), and contrasts it with a second instance whose bracket leaves levels open.
 For both, this script recomputes from the definitions of doc/theory/exact-front.md:
 
-- the one-plane table G (Lemma 7.2);
-- per level T, the relaxation L (Lemma 3.4), the pairs and chains bounds U and U3 (§7.3, from
-  their gadgets and from the link-forest DP with trees of at most 2 and 3 planes), E by the
-  link-forest DP (Theorem 7.5), by the sigma-DP (Theorem 7.6), and by brute force over all
-  multisets and partitions, with the parity matrix of Definition 2.2 deciding admissibility;
-- the breakpoints of E (Proposition 7.1), the certificate gap kinds (§9), and the levels the
+- the one-plane table G (Lemma 6.1);
+- per level T, the relaxation L (Lemma 3.5), the pairs bound U (Proposition 6.4) and the chains
+  bound U3 of the C++ solver (checked here; the note states nothing about U3), from their gadgets and from the link-forest DP with trees of at most 2 and 3 planes), E by the
+  link-forest DP (Theorem 6.7), by the sigma-DP (Theorem 6.8), and by brute force over all
+  multisets and partitions, with the parity matrix of Definition 2.1 deciding admissibility;
+- the breakpoints of E (Proposition 6.3), the certificate gap kinds (§8), and the levels the
   breakpoint search of include/zeno/breakpoints.hpp evaluates.
 
 It checks that these agree with each other and with `zeno`: the breakpoints of E are the front
@@ -53,7 +53,7 @@ CONTRAST = {"n": 3, "t": 4, "p": 2, "d": [3, 5, 7], "c": [10, 5, 1]}
 
 
 class Instance:
-    """A symmetric instance with integer durations, divided by their gcd g (§7.1)."""
+    """A symmetric instance with integer durations, divided by their gcd g (§6)."""
 
     def __init__(self, n: int, t: int, p: int, d: list[int], c: list[int]):
         assert len(d) == len(c) == n and 1 <= p <= t
@@ -63,15 +63,15 @@ class Instance:
         self.s = 2 * t - p                     # landings (Notation)
         self.kappa = -(-self.s // p)           # ceil(s / p)
         self.mhat = self.s - p + 1             # largest group
-        self.qmax = min(p, t - p + 1)          # Corollary 2.7
-        self.w = min(p - 1, t - p)             # Lemma 2.8(c)
+        self.qmax = min(p, t - p + 1)          # the C++ DP's cap on the planes of a tree
+        self.w = min(p - 1, t - p)             # Lemma 2.7, Theorem 6.8
         cheap = min(range(n), key=lambda i: (self.c[i], self.d[i]))
-        self.T_lo = min(self.d) * self.kappa   # Proposition 7.10
+        self.T_lo = min(self.d) * self.kappa   # Proposition 3.6
         self.T_hi = self.d[cheap] * self.kappa
         self.cheapest_cost = self.s * self.c[cheap]
 
     def dominated(self) -> list[int]:
-        """Cities that Proposition 7.9 removes (dominated by, or equal to an earlier, city)."""
+        """Cities that Proposition 6.5 removes (dominated by, or equal to an earlier, city)."""
         out = []
         for i in range(self.n):
             for j in range(self.n):
@@ -83,7 +83,7 @@ class Instance:
 
 
 def one_plane_table(inst: Instance, M: int, Tmax: int):
-    """G[m][tau] of Lemma 7.2, with the city of the first optimal choice of each cell."""
+    """G[m][tau] of Lemma 6.1, with the city of the first optimal choice of each cell."""
     G = [[INF] * (Tmax + 1) for _ in range(M + 1)]
     pred = [[None] * (Tmax + 1) for _ in range(M + 1)]
     G[0] = [0] * (Tmax + 1)
@@ -115,7 +115,7 @@ def witness(inst: Instance, G, pred, m: int, tau: int) -> list[int]:
 
 
 def knapsack(inst: Instance, gadgets) -> float:
-    """For[p][s] over gadgets (q planes, j landings, cost), §7.3."""
+    """For[p][s] over gadgets (q planes, j landings, cost), §6."""
     F = {(0, 0): 0}
     for P in range(1, inst.p + 1):
         for J in range(1, inst.s + 1):
@@ -129,12 +129,12 @@ def knapsack(inst: Instance, gadgets) -> float:
 
 
 def relaxed_bound(inst: Instance, g, T: int) -> float:
-    """L(T): single planes of any size, no admissibility (Lemma 3.4, §7.3)."""
+    """L(T): single planes of any size, no admissibility (Lemma 3.5, §6)."""
     return knapsack(inst, [(1, m, g(m, T)) for m in range(1, inst.mhat + 1)])
 
 
 def gadget_bound(inst: Instance, g, T: int, chains: bool) -> float:
-    """U(T) (single odd planes and pairs) or U3(T) (also chains), §7.3."""
+    """U(T) (single odd planes and pairs) or U3(T) (also chains), §6."""
     n, mh, d, c = inst.n, inst.mhat, inst.d, inst.c
     gs = [(1, m, g(m, T)) for m in range(1, mh + 1, 2)]
     for a in range(2, mh + 1, 2):
@@ -153,7 +153,7 @@ def gadget_bound(inst: Instance, g, T: int, chains: bool) -> float:
 
 
 def forest_dp(inst: Instance, g, T: int, Q: int):
-    """The link-forest DP of Theorem 7.5 with trees of at most Q planes, dense in tau.
+    """The link-forest DP of Theorem 6.7 with trees of at most Q planes, dense in tau.
 
     Returns (For[p][s], tables) with tables Ch[q][(tau, j)], Sub[(a, q, j)], Root[(q, j)]."""
     n, s, d, c = inst.n, inst.s, inst.d, inst.c
@@ -197,7 +197,7 @@ def forest_dp(inst: Instance, g, T: int, Q: int):
 
 
 def sigma_dp(inst: Instance, g, T: int) -> float:
-    """The sigma-DP of Theorem 7.6: planes in order, sigma = the cities of odd column so far."""
+    """The sigma-DP of Theorem 6.8: planes in order, sigma = the cities of odd column so far."""
     n, s, w, d, c = inst.n, inst.s, inst.w, inst.d, inst.c
     sets = [frozenset(x) for u in range(w + 1) for x in itertools.combinations(range(n), u)]
     layer = {(0, frozenset()): 0}
@@ -221,7 +221,7 @@ def sigma_dp(inst: Instance, g, T: int) -> float:
 
 
 def parity_matrix(groups, n: int):
-    """A parity matrix of Definition 2.2 for the groups, as one set of cities per plane, or None.
+    """A parity matrix of Definition 2.1 for the groups, as one set of cities per plane, or None.
 
     (h1) a row marks only cities of its group; (h2) row k has |X_k| + 1 entries mod 2;
     (h3) every column is even."""
@@ -390,16 +390,18 @@ def solve(zeno: str, spec: dict, dat: Path, label: str):
         E, _ = forest_dp(inst, g, T, inst.qmax)
         assert forest_dp(inst, g, T, 2)[0] == U, (label, T, "U = forest DP with trees of <= 2 planes")
         assert forest_dp(inst, g, T, 3)[0] == U3, (label, T, "U3 = forest DP with trees of <= 3 planes")
-        assert sigma_dp(inst, g, T) == E, (label, T, "Theorem 7.6: the sigma-DP gives E")
-        assert E_bf[T][0] == E, (label, T, "Theorem 7.5: the forest DP gives E (brute force)")
+        assert sigma_dp(inst, g, T) == E, (label, T, "Theorem 6.8: the sigma-DP gives E")
+        assert E_bf[T][0] == E, (label, T, "Theorem 6.7: the forest DP gives E (brute force)")
         assert L_bf[T][0] == L, (label, T, "L is the cheapest partition, admissible or not")
-        assert L <= E <= U3 <= U, (label, T, "Proposition 7.3")
+        assert L <= E <= U3 <= U, (label, T, "Proposition 6.4")
+        # The C++ shortcuts E = U (q_max <= 2) and E = U3 (q_max <= 3): checked here on the page's
+        # instances, and per run by the certificates; the note claims nothing about them.
         if inst.qmax <= 2:
-            assert E == U, (label, T, "Proposition 7.4")
+            assert E == U, (label, T, "E = U when q_max <= 2")
         if inst.qmax <= 3:
-            assert E == U3, (label, T, "Proposition 7.4")
+            assert E == U3, (label, T, "E = U3 when q_max <= 3")
         assert (E < INF) == (T >= inst.T_lo) and (E == inst.cheapest_cost) == (T >= inst.T_hi), \
-            (label, T, "Proposition 7.10(c)")
+            (label, T, "E is infinite below T_lo (Lemma 6.2) and cheapest from T_hi on")
         in_range = inst.T_lo <= T <= inst.T_hi
         how = None
         if in_range:
@@ -413,7 +415,7 @@ def solve(zeno: str, spec: dict, dat: Path, label: str):
         })
         E_prev = E
 
-    # Proposition 7.1: the front is the set of breakpoints (E(T), 2gT).
+    # Proposition 6.3: the front is the set of breakpoints (E(T), 2gT).
     ours = [(r["E"], r["makespan"]) for r in rows if r["breakpoint"]]
     assert ours == front, (label, "the breakpoints of E are the front zeno prints", ours, front)
     # The bracket closes the levels --stats counts (q_max <= 2: the others are settled by pairs).
@@ -423,7 +425,7 @@ def solve(zeno: str, spec: dict, dat: Path, label: str):
         assert settled.get("pairs") == counts["pairs"], (label, settled, counts)
     assert not inst.dominated(), (label, "the page says that the reduction removes no city")
 
-    # §9: gap i is `relaxed` when L at level T*_i = T_{i+1} - 1 reaches C_i, `forest` otherwise.
+    # §8: gap i is `relaxed` when L at level T*_i = T_{i+1} - 1 reaches C_i, `forest` otherwise.
     by_T = {r["T"]: r for r in rows}
     gaps = []
     for (C_i, M_i), (C_next, M_next) in zip(front, front[1:]):

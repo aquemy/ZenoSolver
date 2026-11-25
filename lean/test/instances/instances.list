@@ -1,11 +1,11 @@
 # Random instances for the end-to-end check (lean/test/e2e.sh): <name>|<zeno arguments>.
 # @DATA@ expands to lean/test/instances. The r* instances with a forest gap in their
-# certificate exercise the converse (Theorem 4.7) and the sigma-DP bound. tree12 (12
+# certificate exercise the converse (Theorem 4.4) and the sigma-DP bound. tree12 (12
 # non-dominated cities, two forest gaps) exercises the link-forest tree DP.
 # The v2* instances are non-symmetric (3-line data files: d, dbar, c): their version 2
 # certificates exercise the relaxed, roles, lagrangian and balanced bounds under A1-NS.
-# v2p65 is the Proposition 6.5 instance, whose search gaps close harmful waiting (Theorem 6.9);
-# v2z0 has a city with d = dbar = 0, which Theorem 6.9 covers like any other instance.
+# v2p65 is the Proposition 5.7 instance, whose search gaps close harmful waiting (Theorem 5.3);
+# v2z0 has a city with d = dbar = 0, which Theorem 5.3 covers like any other instance.
 r155|-n 8 -t 11 -p 2 -d @DATA@/r155.dat
 r169|-n 7 -t 7 -p 4 -d @DATA@/r169.dat
 r225|-n 10 -t 15 -p 7 -d @DATA@/r225.dat

@@ -7,12 +7,12 @@ module
 public import ZenoFront.SchedBuild
 
 /-!
-# Step 2 of Theorem 6.9: exchanges, cuts and splices
+# Step 2 of Theorem 5.3: exchanges, cuts and splices
 
-Step 2 of Theorem 6.9 rearranges the visits of the planes until every hand-off is ordered in time.
+Step 2 of Theorem 5.3 rearranges the visits of the planes until every hand-off is ordered in time.
 Exchanging futures alone does not suffice: a passenger can be handed backwards on one plane, but
 only at an instant and at a city with `d = d̄ = 0` (the route and the journey squeeze every leg
-between its two flights to one time). This file proves Step 2 for every plan (§6.2 of the note),
+between its two flights to one time). This file proves Step 2 for every plan (§5 of the note),
 with routes ordered by time only (`TRoute`) and *loops*: closed chains of visits whose legs all
 depart and arrive at one time `τ` (`TLoop`).
 
@@ -651,7 +651,7 @@ theorem sum_loops_append {β : Type*} [AddCommMonoid β] (f : ℕ × List (Visit
     ((Q₁ ++ q :: Q₂).map f).sum = (Q₁.map f).sum + f q + (Q₂.map f).sum := by
   simp [add_assoc]
 
-/-- **Step 2 of Theorem 6.9.** From routes and loops, exchanges, cuts and splices give routes and
+/-- **Step 2 of Theorem 5.3.** From routes and loops, exchanges, cuts and splices give routes and
 loops with the same legs in which every passenger is carried through, or every visit entered by
 its first flight is left no later than every visit left by its second flight is entered. -/
 theorem exists_rewired {N : Network n} {ℓα ℓβ : Fin t → KLeg n t K} :

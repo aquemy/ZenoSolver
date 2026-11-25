@@ -36,7 +36,7 @@ struct RoleConfig
 /// crossings. ||Delta||_1 <= t - p because a configuration has at most t - p
 /// links. Under assumption A1-NS every plan is weakly dominated by a role
 /// configuration with the same cost and a load bound equal to its makespan
-/// (Theorem 6.1), so the value is a lower bound on the cost of every plan of
+/// (Corollary 5.4), so the value is a lower bound on the cost of every plan of
 /// makespan <= makespanPerLevel * T.
 ///
 /// The state space grows like (2n)^(t-p); the program gives up (complete()
@@ -87,7 +87,7 @@ private:
     std::size_t final_ = 0;
 };
 
-/// Role relaxation at level T (under A1-NS, Theorem 6.1): every plane flies
+/// Role relaxation at level T (under A1-NS, Corollary 5.4): every plane flies
 /// an odd number >= 1 of crossings (weight fill) and its other landings weigh
 /// at least min(drop, pick); and as drop-offs and pick-ups pair up city by
 /// city, all planes' loads add up to fill(X), so the largest is at least

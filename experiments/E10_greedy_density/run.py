@@ -1,7 +1,7 @@
 """E10, greedy exactness density: how often the papers' per-PPP greedy returns the exact front.
 
 Both papers claim their per-PPP greedy (EvoCOP 2015, Algorithm 1) is optimal (`paper-greedy-optimal`,
-refuted in §5 of the theory note). `greedy.cpp` reimplements it from the 2016 `zenoSolver` (commit
+refuted in §4 of the theory note). `greedy.cpp` reimplements it from the 2016 `zenoSolver` (commit
 84ca92a), sharing no code with the exact solver. This experiment measures, as a function of n, t and p:
 
 * the share of instances on which the greedy front equals the exact front (`zeno`), with Wilson 95%
@@ -10,8 +10,9 @@ refuted in §5 of the theory note). `greedy.cpp` reimplements it from the 2016 `
 
 It samples random data files (uniform and anti-correlated costs) and the generator's families
 (-C/-D in 1..5). The linear family (-C 3 -D 3, and data files d_i = r0 i, c_i = alpha - beta i) is
-reported separately: Conjecture 10.2 says the greedy is exact on it (`conj-10-2`, open). A sample with
-no miss on it is evidence for the conjecture, not a proof.
+reported separately: revision 2 of the note conjectured that the greedy is exact on it (Conjecture
+10.2, removed in revision 3 with every claim about generator families). A sample with no miss on it
+is evidence, not a proof.
 
 Validation first: on the 27 golden instances the reimplementation must differ from the golden front
 exactly on `lpt-counterexample` and `n3t5p2-C1D4r10`, the two pairs on which the 2016 solver failed
@@ -266,10 +267,10 @@ def main() -> int:
                "linear": "-C 3 -D 3 with -r in {1,10}; data files d_i = r0 i (r0 in 1..5), c_i = alpha - beta i "
                          "(beta in 0..5, alpha in [beta n, beta n + 30])",
                "timeout_s": TIMEOUT},
-        tests=["paper-greedy-optimal", "claim-5", "conj-10-2"],
+        tests=["paper-greedy-optimal", "claim-5"],
         refutes=["paper-greedy-optimal"] if k_nl < n_nl else [],
-        hypothesis="The papers claim their per-PPP greedy is optimal; §5 refutes it with two counterexamples. "
-                   "Conjecture 10.2 says it is exact on the linear family.",
+        hypothesis="The papers claim their per-PPP greedy is optimal; §4 refutes it with two counterexamples. "
+                   "Revision 2 of the note conjectured it exact on the linear family (Conjecture 10.2).",
         explanation=f"Outside the linear family the greedy is exact on {k_nl:,} of {n_nl:,} instances "
                     f"({k_nl / n_nl:.1%}, 95% CI {ci_nl[0]:.1%}-{ci_nl[1]:.1%}) and finds "
                     f"{sum(r['right'] for _, _, r in nonlin) / sum(r['front'] for _, _, r in nonlin):.1%} of the front "
@@ -279,8 +280,8 @@ def main() -> int:
                     +
                     f"On the linear family it is exact on {k_l} of {n_l} "
                     f"(95% CI {ci_l[0]:.1%}-{ci_l[1]:.1%})"
-                    + (": evidence for Conjecture 10.2, not a proof." if k_l == n_l
-                       else ", so Conjecture 10.2 is refuted by the listed misses."),
+                    + (": evidence, not a proof." if k_l == n_l
+                       else "; the listed misses refute revision 2's Conjecture 10.2."),
         figures=figures, binaries=[GREEDY, C.ZENO],
     )
     result.write()

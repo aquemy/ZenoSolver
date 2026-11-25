@@ -51,8 +51,8 @@
 "Notation": {
 "anchor": "node-notation",
 "title": "Notation",
-"lean": "notation",
-"class": "informal",
+"lean": "Lean definition",
+"class": "ok",
 "where": "§1.5"
 },
 "Definition 2.1": {

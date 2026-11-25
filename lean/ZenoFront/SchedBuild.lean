@@ -11,7 +11,7 @@ public import ZenoFront.Converse
 public import Mathlib.Tactic.Ring
 
 /-!
-# Steps 4–6 of Theorem 6.9: the scheduled configuration
+# Steps 4–6 of Theorem 5.3: the scheduled configuration
 
 From the visits of the planes (`PlanesOK`, as Step 2 leaves them, `Rewire.lean`) and links
 between drop-off visits (`B`: entered from and left towards `C_I`) and pick-up visits (`B̄`:
@@ -22,12 +22,12 @@ are its drop-offs, its linked `B̄` visits its pick-ups, and crossings are taken
 
 * `toSched_valid`: the configuration is valid.
 * `toSched_cost_le`: its cost is at most the landing cost of the legs.
-* `toSched_tmpl_le` (**Step 5**): its closed form (Lemma 6.3) is at most any bound `M` on the
+* `toSched_tmpl_le` (**Step 5**): its closed form (Lemma 5.5) is at most any bound `M` on the
   arrival times. A plane flies its earlier drop-offs before the linked one, so
   `Pre_u(j) + d_x ≤ a(B)`; after `e(B̄)` it flies to `C_G` and its later pick-ups by `M`, so
   `e(B̄) + d̄_x + Suf_v(l) ≤ M`; and `a(B) ≤ e(B̄)`. Role loads are at most the flight times.
 * `exists_sched_of` (**Steps 3–6**): with the hand-offs ordered as Step 2 leaves them, the links
-  of `exists_links` and Lemma 4.4's shrinking give a valid configuration with `2t − p` landings.
+  of `exists_links` and the shrinking of Step 6 give a valid configuration with `2t − p` landings.
 -/
 
 @[expose] public section
@@ -518,7 +518,7 @@ theorem toSched_cost_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤
   simp only [crossNodes] at h₁
   omega
 
-/-- **Step 5: the closed form** of the configuration (Lemma 6.3) is at most any bound `M` on the
+/-- **Step 5: the closed form** of the configuration (Lemma 5.5) is at most any bound `M` on the
 arrival times: role loads are at most the flight times, and each link's term is at most
 `a(B) + (M − e(B̄)) ≤ M`. -/
 theorem toSched_tmpl_le {Cr : Fin p → Multiset (Fin n)} (hCr : ∀ k, Cr k ≤ crossCities x₀ R k)
@@ -652,7 +652,7 @@ theorem card_crossNodes (hpar : ∀ k, (R k).countP Visit.isA = (R k).countP Vis
       omega
   omega
 
-/-- **Steps 3–6 of Theorem 6.9**, on any visits of the planes with what the steps need
+/-- **Steps 3–6 of Theorem 5.3**, on any visits of the planes with what the steps need
 (`PlanesOK`). Take visits in which every passenger's hand-off is ordered in time (as Step 2 leaves
 them), and `p ≤ t`. Then some valid scheduled configuration has `2t − p` landings, cost at most
 the landing cost of the legs, and closed form at most `M`. -/

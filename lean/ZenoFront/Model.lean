@@ -18,14 +18,14 @@ This file fixes the data the combinatorial core of the exact front works with
 * a one-way duration `d i : ℕ` between a hub (`C_I` or `C_G`) and city `i` (symmetric case (S),
   so the same value serves both hubs), and a landing cost `c i : ℕ`;
 * `t` passengers and `p` planes with `1 ≤ p ≤ t`;
-* `s = 2t − p`, the number of landings of a front plan (Lemma 3.2 of the note).
+* `s = 2t − p`, the number of landings of a front plan (Lemma 3.3 of the note).
 
 A *grouping* `X : Fin p → Multiset (Fin n)` assigns a multiset of landings to every plane.
 The load of a group is `δ(Y) = Σ_{w ∈ Y} d w` (the makespan of a plane flying `Y` is `2 δ(Y)`,
 which is the note's `ℓ(Y)`), and its cost is `c(Y) = Σ_{w ∈ Y} c w`.
 
 Times and costs are natural numbers here: the exact algorithm works on integer durations
-(after scaling, §7 of the note).
+(after scaling, §6 of the note).
 -/
 
 @[expose] public section

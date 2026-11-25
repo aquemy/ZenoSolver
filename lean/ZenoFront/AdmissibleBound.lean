@@ -14,7 +14,7 @@ public import Mathlib.Data.List.GetD
 
 `E(T)`, the least cost of an admissible partition into `p` groups of total size `s` with loads at
 most `T`, is the bound behind the `forest` gaps of certificate format v1. The C++ solver computes
-it with the link-forest DP. Here it is computed by the σ-DP of Claim C (§7.5 of the note), and
+it with the link-forest DP. Here it is computed by the σ-DP of Claim C (§6 of the note), and
 only the direction needed by the checker is proved: the DP is **at most** the cost of every such
 partition (`sigmaBoundAt_le_totalCost`).
 
@@ -25,7 +25,7 @@ partition (`sigmaBoundAt_le_totalCost`).
   (`sigmaDP_le`).
 * To keep the state space small, cities are first merged into non-dominated representatives
   (`domRep`): merging keeps admissibility (`Admissible.map`) and lowers neither cost nor loads
-  (`Admissible.map_dominated`, Proposition 7.9).
+  (`Admissible.map_dominated`, Proposition 6.5).
   `H` and `σ` then range over subsets of the representatives `R`.
 * The memoised version (`sigmaTable`) indexes the subsets of `R` by their position in a list.
 -/
@@ -199,7 +199,7 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
       · exact hb
   exact this _ i ⟨le_rfl, le_rfl⟩
 
-/-- **Proposition 7.9 (dominance, symmetric).** Let `rep` send every city to one that is no slower
+/-- **Proposition 6.5 (dominance, symmetric).** Let `rep` send every city to one that is no slower
 and no more expensive (`domRep` is one, `domRep_le`). Relabelling the landings of an admissible
 grouping by `rep` gives an admissible grouping with the same group sizes, no larger cost and no
 larger load on any plane. -/

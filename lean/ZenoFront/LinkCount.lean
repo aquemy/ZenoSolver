@@ -8,7 +8,7 @@ public import Mathlib.Data.Finset.Card
 public import Mathlib.Data.Finset.Prod
 
 /-!
-# Steps 3–4 of Theorem 6.9: links along the hand-offs
+# Steps 3–4 of Theorem 5.3: links along the hand-offs
 
 After the exchanges of Step 2, the hand-offs of a plan at a city form *arrows* between its
 visits: an arrow `γ → γ'` for each passenger that arrives with the entry leg of `γ` and leaves

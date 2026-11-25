@@ -2,7 +2,7 @@
 
 For a symmetric instance, E(T) is the cheapest admissible partition of the
 s = 2t - p landings into p non-empty groups whose durations each sum to at
-most T (Corollary 4.8 of doc/theory/exact-front.md). This script states that
+most T (Theorem 4.5 of doc/theory/exact-front.md). This script states that
 problem directly as a CP-SAT model, with admissibility by Claim A (a 0/1
 parity matrix h: h[k][i] <= x[k][i], each row of parity |X_k| + 1, each column
 even), and checks zeno's front against it: every front point (C, M) must have

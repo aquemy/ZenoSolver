@@ -14,12 +14,12 @@ A *role configuration* gives every plane `k` three multisets of landings:
 * `drop k` (`D_k`): drop-off halves, `C_I → i → C_I` carrying a passenger to `i`;
 * `pick k` (`P_k`): pick-up halves, `C_G → i → C_G` carrying a passenger from `i`;
 * `cross k` (`Cr_k`): crossings `C_I → i → C_G` or `C_G → i → C_I`, an odd number of them
-  (every plane makes one more crossing towards `C_G` than back, Lemma 2.1 of the note);
+  (every plane makes one more crossing towards `C_G` than back, Lemma 3.1 of the note);
 
 and every city receives as many drop-offs as pick-ups: `Σ_k D_k = Σ_k P_k`.
 
 This is the abstraction of a plan used by the non-symmetric results: every feasible plan gives
-one under (A1-NS) (Theorem 6.1, `Feasible.exists_roleConfig_of_domination`, from Theorem 6.9),
+one under (A1-NS) (Corollary 5.4, `Feasible.exists_roleConfig_of_domination`, from Theorem 5.3),
 and the bounds of the v2 checker are lower bounds on the cost of role configurations. Its
 grouping is `X_k = D_k + P_k + Cr_k`.
 

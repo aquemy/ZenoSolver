@@ -1,7 +1,7 @@
-"""E2, the symmetric front (Theorem 4.7 and Corollary 4.8): no plan beats the admissible-partition front.
+"""E2, the symmetric front (Theorems 4.4 and 4.5): no plan beats the admissible-partition front.
 
-Under (S) and (A1), Theorem 4.7 says every feasible plan is weakly dominated by an admissible
-partition, and Corollary 4.8 that the front is the Pareto set of (E(T), 2T). `zeno` computes that
+Under (S) and (A1), Theorem 4.4 says every feasible plan is weakly dominated by an admissible
+partition, and Theorem 4.5 that the front is the Pareto set of (E(T), 2T). `zeno` computes that
 set. Two exhaustive references, written independently of the solver, compute the true front:
 
 * `truth` (doc/theory/checks/truth.cpp): breadth-first search over ALL plans of the planning
@@ -125,9 +125,9 @@ def main() -> int:
                "oracle": f"{N_ORACLE} instances; n<=5, p<=4, p<t<=6 (t<=5 when n>=4, the oracle needs t>p), "
                          "d in [1,20], c in [0,30], half anti-correlated",
                "timeouts_s": {"truth": TRUTH_TIMEOUT, "oracle": ORACLE_TIMEOUT}},
-        tests=["thm-4-7", "cor-4-8"],
-        hypothesis="Under (S) and (A1) every plan is weakly dominated by an admissible partition (Thm 4.7), so "
-                   "the front is the Pareto set of (E(T), 2T) (Cor 4.8), the set zeno computes.",
+        tests=["thm-4-10", "cor-4-8"],
+        hypothesis="Under (S) and (A1) every plan is weakly dominated by an admissible partition (Thm 4.4), so "
+                   "the front is the Pareto set of (E(T), 2T) (Thm 4.5), the set zeno computes.",
         explanation=f"{stats['truth-none']['compared'] + stats['truth-a1']['compared']} comparisons against all "
                     f"plans and {stats['oracle']['compared']} against the oracle; {total_mismatch} differ. "
                     "Agreement with the all-plans search is the direct test of the converse: no plan with "

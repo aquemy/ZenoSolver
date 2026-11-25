@@ -8,16 +8,16 @@ public import ZenoFront.Template
 public import ZenoFront.DominationAll
 
 /-!
-# The non-symmetric front for all plans (Corollary 6.10)
+# The non-symmetric front for all plans (Corollary 5.6)
 
-**Corollary 6.10.** Under (A1-NS), with `p ≤ t`, the front of the feasible plans is the set of
+**Corollary 5.6.** Under (A1-NS), with `p ≤ t`, the front of the feasible plans is the set of
 minimal points `(c(S), M_tmpl(S))` over the valid scheduled configurations `S` with `2t − p`
 landings: role configurations with passenger count `t`, together with orders of their drop-offs
 and pick-ups and a link matching. The two halves:
 
-* every such point is the point of a feasible plan, the template (Lemma 6.3,
+* every such point is the point of a feasible plan, the template (Lemma 5.5,
   `Sched.tmplPlan_spec`);
-* every feasible plan is weakly dominated by such a point (Theorem 6.9,
+* every feasible plan is weakly dominated by such a point (Theorem 5.3,
   `schedulableDomination_all`).
 
 No event order and no hypothesis on zero durations is needed. Forgetting orders and matchings,
@@ -28,17 +28,17 @@ matching (`RoleConfig.exists_sched`), so `m(cfg)` is attained.
 ## Main results
 
 * `schedPoints`: the points `(c(S), M_tmpl(S))`.
-* `minimal_achievable_iff_schedPoints` (**Corollary 6.10**): the minimal achievable points are
+* `minimal_achievable_iff_schedPoints` (**Corollary 5.6**): the minimal achievable points are
   the minimal points of `schedPoints`.
 * `isParetoFront_achievable_iff_schedPoints`: a list is the Pareto front of the feasible plans
   iff it is the Pareto front of `schedPoints`.
 * `configPoints`, `RoleConfig.leastTmpl`: the note's `𝒦` and `m(cfg)`.
-* `minimal_achievable_iff_configPoints` (**Corollary 6.10, as in the note**): the front is
+* `minimal_achievable_iff_configPoints` (**Corollary 5.6, as in the note**): the front is
   `Min 𝒦`.
-* `schedulableDomination_template` (**Theorem 6.9, as in the note**): every feasible plan is
+* `schedulableDomination_template` (**Theorem 5.3, as in the note**): every feasible plan is
   weakly dominated by a scheduled configuration whose template plan is no later.
-* `Feasible.exists_roleConfig_of_domination` (**Theorem 6.1**): role loads at most the
-  makespan, as a corollary of Theorem 6.9, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
+* `Feasible.exists_roleConfig_of_domination` (**Corollary 5.4**): role loads at most the
+  makespan, as a corollary of Theorem 5.3, since every role load is at most `M_tmpl` (`Sched.load_le_tmpl`).
 -/
 
 @[expose] public section
@@ -70,7 +70,7 @@ configurations with `2t − p` landings. -/
 def schedPoints (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
   {x | ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ (S.cost c, S.tmpl N.d N.dbar) = x}
 
-/-- Every point of `schedPoints` is the point of a feasible plan, its template (Lemma 6.3). -/
+/-- Every point of `schedPoints` is the point of a feasible plan, its template (Lemma 5.5). -/
 theorem schedPoints_subset_achievable (N : Network n) (c : Fin n → ℕ) :
     schedPoints N c t p ⊆ achievable N c t p := by
   rintro x ⟨S, hv, hsize, rfl⟩
@@ -78,14 +78,14 @@ theorem schedPoints_subset_achievable (N : Network n) (c : Fin n → ℕ) :
   exact ⟨_, hP, by rw [hc, hm]⟩
 
 /-- Under (A1-NS), with `p ≤ t`, every feasible plan is weakly dominated by a point of
-`schedPoints` (Theorem 6.9). -/
+`schedPoints` (Theorem 5.3). -/
 theorem achievable_dominated_schedPoints {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
     (hpt : p ≤ t) : ∀ y ∈ achievable N c t p, ∃ x ∈ schedPoints N c t p, x ≤ y := by
   rintro y ⟨P, hP, rfl⟩
   obtain ⟨S, hv, hsize, hcost, htmpl⟩ := schedulableDomination_all c hpt hA hP
   exact ⟨_, ⟨S, hv, hsize, rfl⟩, Prod.le_def.mpr ⟨hcost, htmpl⟩⟩
 
-/-- **Corollary 6.10 (non-symmetric front), for all plans.** Under (A1-NS), with `p ≤ t`, the
+/-- **Corollary 5.6 (non-symmetric front), for all plans.** Under (A1-NS), with `p ≤ t`, the
 minimal (cost, makespan) points of the feasible plans are the minimal points
 `(c(S), M_tmpl(S))` of the valid scheduled configurations with `2t − p` landings. -/
 theorem minimal_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
@@ -94,7 +94,7 @@ theorem minimal_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS) (c : Fi
   (minimal_iff_of_subset_of_dominated (schedPoints_subset_achievable N c)
     (achievable_dominated_schedPoints hA c hpt) x).symm
 
-/-- **Corollary 6.10, Pareto-front form.** Under (A1-NS), with `p ≤ t`, a list of points is the
+/-- **Corollary 5.6, Pareto-front form.** Under (A1-NS), with `p ≤ t`, a list of points is the
 Pareto front of the feasible plans iff it is the Pareto front of `schedPoints`. -/
 theorem isParetoFront_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS)
     (c : Fin n → ℕ) (hpt : p ≤ t) (F : List (ℕ × ℕ)) :
@@ -228,7 +228,7 @@ theorem RoleConfig.exists_sched (R : RoleConfig n p) :
 
 /-! ### Role configurations and their least makespans -/
 
-/-- The least makespan `m(cfg)` of a role configuration (§6.2 of the note): the least `M_tmpl`
+/-- The least makespan `m(cfg)` of a role configuration (§5 of the note): the least `M_tmpl`
 over the orders of its drop-offs and pick-ups and its link matchings. There is at least one
 (`RoleConfig.exists_sched`), and the least one is attained (`RoleConfig.exists_leastTmpl`). -/
 noncomputable def RoleConfig.leastTmpl (N : Network n) (R : RoleConfig n p) : ℕ :=
@@ -264,7 +264,7 @@ theorem minimal_schedPoints_iff_configPoints (N : Network n) (c : Fin n → ℕ)
     exact ⟨_, ⟨S, hv, by rw [hS.size_eq, hsize], rfl⟩,
       Prod.le_def.mpr ⟨(hS.cost_eq c).le, hm.le⟩⟩
 
-/-- **Corollary 6.10 (non-symmetric front), as in the note.** Under (A1-NS), with `p ≤ t`, the
+/-- **Corollary 5.6 (non-symmetric front), as in the note.** Under (A1-NS), with `p ≤ t`, the
 front of the feasible plans is `Min 𝒦`, with `𝒦` the points `(c(cfg), m(cfg))` of the role
 configurations on the `p` planes with passenger count `t`, `m(cfg)` the least `M_tmpl` over
 their orders and link matchings. -/
@@ -273,14 +273,14 @@ theorem minimal_achievable_iff_configPoints {N : Network n} (hA : N.A1NS) (c : F
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ configPoints N c t p) x :=
   (minimal_achievable_iff_schedPoints hA c hpt x).trans (minimal_schedPoints_iff_configPoints N c x)
 
-/-! ### Theorem 6.1 from Theorem 6.9 -/
+/-! ### Corollary 5.4 from Theorem 5.3 -/
 
 /-- Every role load is at most the closed form. -/
 theorem Sched.load_le_tmpl (S : Sched n p) (d db : Fin n → ℕ) (k : Fin p) :
     S.load d db k ≤ S.tmpl d db :=
   (Finset.le_sup (f := fun k => S.load d db k) (Finset.mem_univ k)).trans (le_max_left _ _)
 
-/-- **Theorem 6.1 as a corollary of Theorem 6.9.** Under (A1-NS), with `p ≤ t`, every feasible
+/-- **Corollary 5.4 as a corollary of Theorem 5.3.** Under (A1-NS), with `p ≤ t`, every feasible
 plan gives a role configuration on the `p` planes with `2t − p` landings, cost at most the
 plan's, and every role load at most the makespan: the role configuration of the scheduled
 configuration of `schedulableDomination_all`, whose role loads are at most its closed form. -/
@@ -295,14 +295,14 @@ theorem Feasible.exists_roleConfig_of_domination {N : Network n} (hA : N.A1NS) (
   rw [← hS.load_eq N k]
   exact (S.load_le_tmpl N.d N.dbar k).trans htmpl
 
-/-! ### Theorem 6.9 with the template plan -/
+/-! ### Theorem 5.3 with the template plan -/
 
-/-- **Theorem 6.9 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
+/-- **Theorem 5.3 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
 feasible plan is weakly dominated by a valid scheduled configuration with `2t − p` landings
 (a role configuration with passenger count `t`, orders of its drop-offs and pick-ups and a link
 matching) of cost at most the plan's, whose template is a feasible plan of the same cost and of
 makespan at most the plan's: `schedulableDomination_all` bounds the closed form by the
-makespan, and the template's makespan is the closed form (Lemma 6.3). -/
+makespan, and the template's makespan is the closed form (Lemma 5.5). -/
 theorem schedulableDomination_template {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
     (hpt : p ≤ t) {P : Plan n t p} (hP : Feasible N P) :
     ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧

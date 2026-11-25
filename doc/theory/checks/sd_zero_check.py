@@ -1,5 +1,5 @@
-"""Schedulable domination (Theorem 6.9) without the event order, on instances with cities of
-d_x = dbar_x = 0 (the open case at the end of §6.2 of doc/theory/exact-front.md).
+"""Schedulable domination (Theorem 5.3) without the event order, on instances with cities of
+d_x = dbar_x = 0 (the case that revision 2 of doc/theory/exact-front.md left open).
 
 Random simple plans with clean journeys (after Step 1 every plan is one, whatever its event order)
 on instances with zero-duration cities, and passengers matched to a leg C_I -> x and a later leg

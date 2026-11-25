@@ -2,12 +2,12 @@
   "claim": "exp-e6-conj410-search",
   "criterion": "no plan with the shortest central flights the triangle inequality allows lies inside a forest gap (L < E) and costs less than E (0 counterexamples); a targeted search, not a proof",
   "experiment": "E6_conj410_search",
-  "explanation": "231 of 100,000 instances have a forest gap; on the 231 the exhaustive search finished, 255 gaps were tested and 0 contain a plan cheaper than E. A targeted search on tiny instances, independent of the written proof of Theorem 4.10.",
+  "explanation": "231 of 100,000 instances have a forest gap; on the 231 the exhaustive search finished, 255 gaps were tested and 0 contain a plan cheaper than E. A targeted search on tiny instances, independent of the written proof of Theorem 4.4.",
   "figures": [
     "E6_conj410_search/conj410_gaps.png",
     "E6_conj410_search/conj410_gaps.svg"
   ],
-  "hypothesis": "Theorem 4.10 (formerly Conjecture 4.10): under (S) and (A\u0394), without (A1), every plan is still weakly dominated by an admissible partition. A counterexample can only sit in a gap where L < E.",
+  "hypothesis": "Theorem 4.4 (Conjecture 4.10 of revision 2): under (S) and (A\u0394), without (A1), every plan is still weakly dominated by an admissible partition. A counterexample can only sit in a gap where L < E.",
   "metrics": {
     "counterexample_list": [],
     "counterexamples": 0,

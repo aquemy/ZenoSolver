@@ -7,7 +7,7 @@
     "E8_certificates/certificate_mutants.png",
     "E8_certificates/certificate_mutants.svg"
   ],
-  "hypothesis": "Theorem 9.1: a certificate whose obligations 1-4 hold lists exactly the Pareto front; a sound checker therefore never accepts a false front.",
+  "hypothesis": "Theorem 8.1: a certificate whose obligations 1-4 hold lists exactly the Pareto front; a sound checker therefore never accepts a false front.",
   "metrics": {
     "checker_disagreements": 0,
     "corpus_files": 41,

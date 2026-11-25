@@ -508,7 +508,7 @@ def Network.ATri (N : Network n) : Prop :=
 ```lean
 /-- (AΔ) on the triangles through `C_I`: `d_j ≤ d_i + dc i j` (`C_I → i → j` against `C_I → j`)
 and `d_i ≤ dc i j + d_j` (`i → j → C_I` against `i → C_I`). Under (S) these are also the
-triangles through `C_G`. This is all that Theorem 4.10 and its corollaries use. -/
+triangles through `C_G`. This is all that Theorem 4.4 and its corollaries use. -/
 def Network.ATriHub (N : Network n) : Prop :=
   ∀ i j : Fin n, N.d j ≤ N.d i + N.dc i j ∧ N.d i ≤ N.dc i j + N.d j
 ```
@@ -742,7 +742,7 @@ theorem IsParetoFront.mem_iff_minimal {α : Type*} [PartialOrder α] {S : Set α
 ### Notation {#node-notation}
 
 ::: {.node-badge}
-[notation]{.badge .informal}
+[Lean definition]{.badge .ok}
 :::
 
 ::: {.node-body}
@@ -755,11 +755,111 @@ $\delta(X_k)$. For a weight $w$ on the cities, $G_w[m][T]$ is the least $c(Y)$ o
 with $|Y| = m$ and $w(Y) \le T$ ($\infty$ if there is none), and $G = G_d$. $d_{\min}$, $d_{\max}$ and
 $c_{\min}$ are the least and largest durations and the least cost.
 
+::: {.node-lean}
+Lean: [`Instance.s` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L52-L53), [`Groups` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L65-L66), [`size` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L111-L112), [`load` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L70-L72), [`cost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L74-L75), [`totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L114-L115), [`Network.emin` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L186-L188), [`oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59), [`minOf` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L83-L85)
+:::
+
 ```{=html}
 <details class="node-more"><summary>In the note</summary>
 ```
 
 theory note, §1.5
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
+**Lean** `ZenoFront.Instance.s` [Lean definition]{.badge .ok}
+
+```lean
+/-- The number of landings of a front plan, `s = 2t − p`. -/
+def Instance.s (I : Instance) : ℕ := 2 * I.t - I.p
+```
+
+[`lean/ZenoFront/Model.lean`, lines 52–53](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L52-L53){.lean-src}
+
+**Lean** `ZenoFront.Groups` [Lean definition]{.badge .ok}
+
+```lean
+/-- A grouping of landings: one multiset of central cities per plane. -/
+abbrev Groups (n p : ℕ) := Fin p → Multiset (Fin n)
+```
+
+[`lean/ZenoFront/Model.lean`, lines 65–66](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L65-L66){.lean-src}
+
+**Lean** `ZenoFront.size` [Lean definition]{.badge .ok}
+
+```lean
+/-- Total number of landings of a grouping, `Σ_k |X_k|`. -/
+def size (X : Groups n p) : ℕ := ∑ k, (X k).card
+```
+
+[`lean/ZenoFront/Model.lean`, lines 111–112](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L111-L112){.lean-src}
+
+**Lean** `ZenoFront.load` [Lean definition]{.badge .ok}
+
+```lean
+/-- The load `δ(Y) = Σ_{w ∈ Y} d w` of a multiset of landings. The flight time of a plane
+serving `Y` without central flights is `2 δ(Y)`. -/
+def load (d : Fin n → ℕ) (Y : Multiset (Fin n)) : ℕ := (Y.map d).sum
+```
+
+[`lean/ZenoFront/Model.lean`, lines 70–72](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L70-L72){.lean-src}
+
+**Lean** `ZenoFront.cost` [Lean definition]{.badge .ok}
+
+```lean
+/-- The cost `c(Y) = Σ_{w ∈ Y} c w` of a multiset of landings. -/
+def cost (c : Fin n → ℕ) (Y : Multiset (Fin n)) : ℕ := (Y.map c).sum
+```
+
+[`lean/ZenoFront/Model.lean`, lines 74–75](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L74-L75){.lean-src}
+
+**Lean** `ZenoFront.totalCost` [Lean definition]{.badge .ok}
+
+```lean
+/-- Total cost of a grouping, `c(X) = Σ_k c(X_k)`. -/
+def totalCost (c : Fin n → ℕ) (X : Groups n p) : ℕ := ∑ k, cost c (X k)
+```
+
+[`lean/ZenoFront/Model.lean`, lines 114–115](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Model.lean#L114-L115){.lean-src}
+
+**Lean** `ZenoFront.Network.emin` [Lean definition]{.badge .ok}
+
+```lean
+/-- The shorter hub flight of city `i`: `min(d_i, d̄_i)`. Every flight between a hub and `i`
+lasts at least this long. -/
+def Network.emin (N : Network n) (i : Fin n) : ℕ := min (N.d i) (N.dbar i)
+```
+
+[`lean/ZenoFront/PlanBounds.lean`, lines 186–188](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/PlanBounds.lean#L186-L188){.lean-src}
+
+**Lean** `ZenoFront.oneplane` [Lean definition]{.badge .ok}
+
+```lean
+/-- `G[m][T]`, by the recursion of §6: `G[0][T] = 0` and
+`G[m + 1][T] = min_{i : d_i ≤ T} (c_i + G[m][T − d_i])`. -/
+def oneplane : ℕ → ℕ → WithTop ℕ
+  | 0, _ => 0
+  | m + 1, T => oneplaneStep d c (oneplane m) T
+```
+
+[`lean/ZenoFront/OnePlane.lean`, lines 55–59](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/OnePlane.lean#L55-L59){.lean-src}
+
+**Lean** `ZenoFront.minOf` [Lean definition]{.badge .ok}
+
+```lean
+/-- The least value of a function on `Fin n` (`0` if `n = 0`). -/
+def minOf (f : Fin n → ℕ) : ℕ :=
+  if h : 0 < n then univ.inf' ⟨⟨0, h⟩, mem_univ _⟩ f else 0
+```
+
+[`lean/ZenoFront/Checker.lean`, lines 83–85](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Checker.lean#L83-L85){.lean-src}
 
 
 ```{=html}

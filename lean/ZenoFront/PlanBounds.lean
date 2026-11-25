@@ -16,7 +16,7 @@ This file proves the lower bounds behind certificate obligations 2, 3 (`relaxed`
 for **every** feasible plan, whatever the central flights (`dc` is arbitrary), under symmetric
 durations (S), `d̄ = d`.
 
-* **Counting** (Lemma 3.2 of the note, leg-counting proof). Along a plane's route from `C_I` to
+* **Counting** (Lemma 3.3 of the note, leg-counting proof). Along a plane's route from `C_I` to
   `C_G`, `#departures from C_I + #arrivals at C_G = #hub arrivals + 1`. Every passenger leaves
   `C_I` on a leg and reaches `C_G` on a leg, and a leg carries one passenger, so summed over the
   planes, `#hub arrivals ≥ 2t − p = s`.

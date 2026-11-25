@@ -1,4 +1,4 @@
-"""Full-pipeline check of Theorem 6.9 (schedulable domination) and Lemma 6.8 of doc/theory/exact-front.md,
+"""Full-pipeline check of Theorem 5.3 (schedulable domination) and Lemma 6.8 of revision 2 of doc/theory/exact-front.md,
 zero durations allowed. General plans with central flights under (A1-NS), multi-leg journeys, a random event
 order with ties. Step 1 (split central flights and clean, with the note's sort key), Step 2 (exchanges, with
 the plan re-validated after each, including the same-plane route-order condition), Step 3 (arrows, e <= a,

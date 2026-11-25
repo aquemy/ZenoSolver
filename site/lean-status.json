@@ -19,7 +19,7 @@
      4
     ],
     "start": [
-     65,
+     66,
      0
     ]
    }
@@ -2493,6 +2493,46 @@
     ]
    }
   },
+  "ZenoFront.Groups": {
+   "axioms": [],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.Groups",
+   "range": {
+    "end": [
+     66,
+     51
+    ],
+    "name": [
+     66,
+     7
+    ],
+    "start": [
+     65,
+     0
+    ]
+   }
+  },
+  "ZenoFront.Instance.s": {
+   "axioms": [],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.Instance.s",
+   "range": {
+    "end": [
+     53,
+     50
+    ],
+    "name": [
+     53,
+     4
+    ],
+    "start": [
+     52,
+     0
+    ]
+   }
+  },
   "ZenoFront.IsParetoFront": {
    "axioms": [],
    "kind": "structure",
@@ -2548,15 +2588,15 @@
    "name": "ZenoFront.IsParityWitness",
    "range": {
     "end": [
-     63,
+     64,
      32
     ],
     "name": [
-     57,
+     58,
      10
     ],
     "start": [
-     53,
+     54,
      0
     ]
    }
@@ -6234,6 +6274,29 @@
     ]
    }
   },
+  "ZenoFront.cost": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.cost",
+   "range": {
+    "end": [
+     75,
+     68
+    ],
+    "name": [
+     75,
+     4
+    ],
+    "start": [
+     74,
+     0
+    ]
+   }
+  },
   "ZenoFront.cutTri": {
    "axioms": [
     "propext"
@@ -7014,6 +7077,29 @@
     ],
     "start": [
      185,
+     0
+    ]
+   }
+  },
+  "ZenoFront.load": {
+   "axioms": [
+    "propext",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.load",
+   "range": {
+    "end": [
+     72,
+     68
+    ],
+    "name": [
+     72,
+     4
+    ],
+    "start": [
+     70,
      0
     ]
    }
@@ -8932,6 +9018,30 @@
     ]
    }
   },
+  "ZenoFront.size": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.size",
+   "range": {
+    "end": [
+     112,
+     48
+    ],
+    "name": [
+     112,
+     4
+    ],
+    "start": [
+     111,
+     0
+    ]
+   }
+  },
   "ZenoFront.solveFront": {
    "axioms": [
     "propext",
@@ -9310,6 +9420,30 @@
     ],
     "start": [
      344,
+     0
+    ]
+   }
+  },
+  "ZenoFront.totalCost": {
+   "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+   ],
+   "kind": "def",
+   "module": "ZenoFront.Model",
+   "name": "ZenoFront.totalCost",
+   "range": {
+    "end": [
+     115,
+     71
+    ],
+    "name": [
+     115,
+     4
+    ],
+    "start": [
+     114,
      0
     ]
    }

@@ -22,7 +22,7 @@ The partition is *admissible* if it has a parity matrix. The matrix *touches* th
 \bigcup_k \eta_k$, and its *entries* are the pairs $(k, i)$ with $i \in \eta_k$.
 
 ::: {.node-lean}
-Lean: [`IsParityWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L53-L63), [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L65-L67)
+Lean: [`IsParityWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L54-L64), [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L66-L67)
 :::
 
 ```{=html}
@@ -73,17 +73,16 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
   col : ∀ i, Even #{k | i ∈ h k}
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 53–63](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L53-L63){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 54–64](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L54-L64){.lean-src}
 
 **Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
 
 ```lean
-/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
-the component condition by Lemma 2.4). -/
+/-- A grouping is *admissible* if it has a parity witness (Definition 2.1 of the note). -/
 def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
 ```
 
-[`lean/ZenoFront/Admissible.lean`, lines 65–67](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L65-L67){.lean-src}
+[`lean/ZenoFront/Admissible.lean`, lines 66–67](https://github.com/aquemy/ZenoSolver/blob/master/lean/ZenoFront/Admissible.lean#L66-L67){.lean-src}
 
 
 ```{=html}
@@ -131,7 +130,7 @@ $\eta_k = \{i : \tilde h_{k,i} \text{ odd}\}$. An odd $\tilde h_{k,i}$ is at lea
 **Lean** `ZenoFront.admissible_iff_exists_natWitness` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 2.3 (integer form).** A grouping is admissible iff some matrix `w` of naturals has
+/-- **Lemma 2.2 (integer form).** A grouping is admissible iff some matrix `w` of naturals has
 `w k i ≤ X_k(i)` (the multiplicity of `i` in `X_k`), `Σ_i w k i ≡ |X_k| + 1 (mod 2)` for every
 plane `k`, and `Σ_k w k i` even for every city `i`. A parity witness is such a matrix with entries
 `0` and `1`; conversely the entries of odd value of a matrix form a parity witness. -/
@@ -190,7 +189,7 @@ take a parity matrix. A city lies in at most one group, hence by (h1) in at most
 **Lean** `ZenoFront.admissible_iff_odd_of_disjoint` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 2.4 (disjoint groups).** If no city lies in two groups, a partition is admissible iff
+/-- **Lemma 2.3 (disjoint groups).** If no city lies in two groups, a partition is admissible iff
 every group has an odd number of landings. A parity witness can only use a city at the one plane
 that lands there, so every city has degree `0` and the witness is empty; then the row condition
 says `|X_k| + 1` is even. -/
@@ -245,7 +244,7 @@ theory note, §2 · ledger `lem-2-5`
 **Lean** `ZenoFront.IsParityWitness.card_add_one_le` [machine-checked]{.badge .ok}
 
 ```lean
-/-- Lemma 2.5 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
+/-- Lemma 2.4 of the note: a plane has `T`-join degree at most `|X_k| − 1`. It holds for every
 `T`-join, not only for forests: `|h k| ≤ |supp X_k| ≤ |X_k|`, and equality is excluded by
 parity. -/
 theorem card_add_one_le (hw : IsParityWitness X h) (k : Fin p) :

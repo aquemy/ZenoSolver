@@ -45,12 +45,16 @@ proofs and scientific findings. Spec: https://conventional-knowledge-commits.org
 
 ### The claim ledger
 
-`claims.toml` lists every claim of the theory note `doc/theory/exact-front.md`, the two claims of
-the papers it corrects, and the experiments. Slugs are `<kind>-<number with dots as dashes>`,
-with the kind read from the note's own label: `def`, `lem`, `thm`, `prop`, `cor`, `conj`, or
-`claim` for a Statement or a statement located by its section. Theorem 4.7 is `thm-4-7` and the
-end of §6.2 is `claim-6-2-end`. A statement the note does not number gets a descriptive slug, as
-`claim-converse-s-only`. Experiments are `exp-<id>`. The file's header gives the fields.
+`claims.toml` lists every numbered result of the theory note `doc/theory/exact-front.md`, the
+claims of the papers it corrects, the results that earlier revisions of the note had and the
+current one removed (archived with `removed`), and the experiments. The slug is a claim's stable
+ID, the one commit footers cite; the note's current number is its `label`. Slugs are
+`<kind>-<number with dots as dashes>` with the number the result had when it entered the ledger:
+`def`, `lem`, `thm`, `prop`, `cor`, `conj`, or `claim` for a statement located by its section, so
+Corollary 5.4 of revision 3 is `thm-6-1` (Theorem 6.1 of revision 2). A result new to the note,
+or one the note does not number, gets a descriptive slug, as `lem-rounding` or
+`claim-converse-s-only`. Experiments are `exp-<id>`. The file's header gives the fields, and
+`site/check_ledger.py` (run by CI) checks that every kept claim is machine-checked or disproved.
 
 How each kind of record is written here:
 
@@ -117,7 +121,7 @@ nodes without a status and carry no claim.
 A kernel-checked theorem:
 
 ```
-formalize(lean): Theorem 4.10, every plan is dominated by an admissible partition
+formalize(lean): Theorem 4.4, every plan is dominated by an admissible partition
 
 Lean form: under the triangles through a hub (Network.ATriHub), which (AΔ) and (A1) imply.
 
@@ -131,7 +135,7 @@ Depends-On: claim:lem-4-11
 A written proof:
 
 ```
-proof(theory): Lemma 3.1, every plan can be cleaned
+proof(theory): Lemma 3.2, every passenger rides a chain
 
 Claim-ID: lem-3-1
 Status: math.proved-informal

@@ -241,7 +241,7 @@ def term (d db : Fin n → ℕ) (v : Fin p) (l : Fin (S.picks v).length) : ℕ :
 **Lean** `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
 
 ```lean
-/-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
+/-- **The closed form of Lemma 5.5**: the largest role load and link term. -/
 def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
 ```
@@ -399,7 +399,7 @@ happen at one instant.
 **Lean** `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
+/-- **Theorem 5.3 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
 plan's and closed form at most its makespan. No event order and no hypothesis on zero durations
 is needed. -/
@@ -414,12 +414,12 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
 **Lean** `ZenoFront.schedulableDomination_template` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 6.9 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
+/-- **Theorem 5.3 (schedulable domination), as in the note.** Under (A1-NS), with `p ≤ t`, every
 feasible plan is weakly dominated by a valid scheduled configuration with `2t − p` landings
 (a role configuration with passenger count `t`, orders of its drop-offs and pick-ups and a link
 matching) of cost at most the plan's, whose template is a feasible plan of the same cost and of
 makespan at most the plan's: `schedulableDomination_all` bounds the closed form by the
-makespan, and the template's makespan is the closed form (Lemma 6.3). -/
+makespan, and the template's makespan is the closed form (Lemma 5.5). -/
 theorem schedulableDomination_template {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
     (hpt : p ≤ t) {P : Plan n t p} (hP : Feasible N P) :
     ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
@@ -480,7 +480,7 @@ $M_{\rm tmpl}(S) \le M$. $\square$
 **Lean** `ZenoFront.Feasible.exists_roleConfig_of_domination` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 6.1 as a corollary of Theorem 6.9.** Under (A1-NS), with `p ≤ t`, every feasible
+/-- **Corollary 5.4 as a corollary of Theorem 5.3.** Under (A1-NS), with `p ≤ t`, every feasible
 plan gives a role configuration on the `p` planes with `2t − p` landings, cost at most the
 plan's, and every role load at most the makespan: the role configuration of the scheduled
 configuration of `schedulableDomination_all`, whose role loads are at most its closed form. -/
@@ -583,7 +583,7 @@ cost is $c(S)$. $\square$
 **Lean** `ZenoFront.Sched.tmplPlan_spec` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Lemma 6.3 (template), achievability.** For every valid scheduled configuration with
+/-- **Lemma 5.5 (template), achievability.** For every valid scheduled configuration with
 `2t − p` landings, the template is a feasible plan whose cost is the configuration's and whose
 makespan is the closed form `M_tmpl`. Nothing is assumed on the durations (zero durations
 included) or on the central flights, which the template does not use. -/
@@ -661,7 +661,7 @@ configuration it schedules, which has the same cost and $m(\mathrm{cfg}) \le M_{
 **Lean** `ZenoFront.minimal_achievable_iff_schedPoints` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 6.10 (non-symmetric front), for all plans.** Under (A1-NS), with `p ≤ t`, the
+/-- **Corollary 5.6 (non-symmetric front), for all plans.** Under (A1-NS), with `p ≤ t`, the
 minimal (cost, makespan) points of the feasible plans are the minimal points
 `(c(S), M_tmpl(S))` of the valid scheduled configurations with `2t − p` landings. -/
 theorem minimal_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS) (c : Fin n → ℕ)
@@ -674,7 +674,7 @@ theorem minimal_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS) (c : Fi
 **Lean** `ZenoFront.minimal_achievable_iff_configPoints` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 6.10 (non-symmetric front), as in the note.** Under (A1-NS), with `p ≤ t`, the
+/-- **Corollary 5.6 (non-symmetric front), as in the note.** Under (A1-NS), with `p ≤ t`, the
 front of the feasible plans is `Min 𝒦`, with `𝒦` the points `(c(cfg), m(cfg))` of the role
 configurations on the `p` planes with passenger count `t`, `m(cfg)` the least `M_tmpl` over
 their orders and link matchings. -/
@@ -688,7 +688,7 @@ theorem minimal_achievable_iff_configPoints {N : Network n} (hA : N.A1NS) (c : F
 **Lean** `ZenoFront.isParetoFront_achievable_iff_schedPoints` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Corollary 6.10, Pareto-front form.** Under (A1-NS), with `p ≤ t`, a list of points is the
+/-- **Corollary 5.6, Pareto-front form.** Under (A1-NS), with `p ≤ t`, a list of points is the
 Pareto front of the feasible plans iff it is the Pareto front of `schedPoints`. -/
 theorem isParetoFront_achievable_iff_schedPoints {N : Network n} (hA : N.A1NS)
     (c : Fin n → ℕ) (hpt : p ≤ t) (F : List (ℕ × ℕ)) :
@@ -795,7 +795,7 @@ theorem tmpl_gt_of_cost_lt (S : Sched 2 4) (hS : S.Valid) (hsize : S.size = 10)
 
 ```lean
 /-- **No plan of makespan at most 73 costs less than 18**, for every table of central flights
-satisfying (A1-NS): Theorem 6.9 turns the plan into a valid scheduled configuration, of cost at
+satisfying (A1-NS): Theorem 5.3 turns the plan into a valid scheduled configuration, of cost at
 most the plan's and closed form at most its makespan. -/
 theorem cost_ge_of_makespan_le (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2).A1NS)
     {P : Plan 2 7 4} (hP : Feasible ⟨d, db, dc⟩ P) (hM : planMakespan P ≤ 73) :
@@ -807,7 +807,7 @@ theorem cost_ge_of_makespan_le (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, d
 **Lean** `ZenoFront.Prop65.prop65` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Proposition 6.5.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
+/-- **Proposition 5.7.** On `d = (3, 19)`, `d̄ = (3, 11)`, `c = (5, 1)`, `t = 7`, `p = 4`, with
 central flights satisfying (A1-NS), the cheapest role configuration with `2t − p = 10` landings and
 every role load at most 73 costs 14, and no feasible plan of makespan at most 73 costs less than
 18. -/
@@ -824,7 +824,7 @@ theorem prop65 (dc : Fin 2 → Fin 2 → ℕ) (hA : (⟨d, db, dc⟩ : Network 2
 **Lean** `ZenoFront.Prop65.harmful_waiting` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **No harmful waiting is false** (Conjecture 6.5 of the note). The configuration `cfg14` has
+/-- **No harmful waiting is false** (Proposition 5.7 of the note). The configuration `cfg14` has
 role loads at most 72, but every valid scheduled configuration of its cost waits: whatever the
 orders and the matching, its template makespan exceeds 73. In front form: some role configuration
 has cost 14 and role loads at most 73, but no feasible plan has cost at most 14 and makespan at
@@ -1016,7 +1016,7 @@ structure VCity (n : ℕ) where
 **Lean** `ZenoFront.vcities` [Lean definition]{.badge .ok}
 
 ```lean
-/-- **The reduction f of arXiv §2.4** (as in Example 6.11 of the note): one virtual city for every
+/-- **The reduction f of arXiv §2.4** (as in Example 5.9 of the note): one virtual city for every
 central vertex `i`, every simple path `w` from `C_I` to `i` and every simple path `e` from `i` to
 `C_G`. -/
 def vcities (U : FlightGraph n) : List (VCity n) :=
@@ -1200,7 +1200,7 @@ theorem mem_gAchievable_U : ((8, 8) : ℕ × ℕ) ∈ gAchievable U c 3 2 := …
 **Lean** `ZenoFront.Ex611.fronts_differ` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **The reduction misses the front (Example 6.11).** `(8, 10)` is Pareto-optimal for `f(U)` but
+/-- **The reduction misses the front (Example 5.9).** `(8, 10)` is Pareto-optimal for `f(U)` but
 not for `U`, which has the plan `(8, 8)`. So the fronts of `U` and `f(U)` differ, against the claim
 of arXiv §2.4. -/
 theorem fronts_differ :
@@ -1387,7 +1387,7 @@ theorem mem_points (shuttle : Bool) : ((4, 10) : ℕ × ℕ) ∈ points cities s
 **Lean** `ZenoFront.Shuttle.shuttle_misses` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front.** On
+/-- **Example 5.10: the shuttle construction of arXiv §3.3 misses the front.** On
 `d = (1, 3)`, `d̄ = (3, 1)`, a central flight of duration 2, `c = (6, 1)`, `t = 3`, `p = 2`, (AΔ)
 holds, the front of the instance has a point of makespan at most 8, and every point of the
 augmented instance, as printed, has makespan at least 10, whether or not the shuttle is counted.

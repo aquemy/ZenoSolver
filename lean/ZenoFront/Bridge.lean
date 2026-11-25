@@ -8,14 +8,14 @@ public import ZenoFront.AddPlane
 public import ZenoFront.Checker
 
 /-!
-# Planes ending anywhere (Theorem 4.9, bridge B3)
+# Planes ending anywhere (Theorem 4.5, bridge B3)
 
 The format's semantics (`Feasible`) makes every plane end in `C_G`. The PDDL semantics without
 plane goals lets planes end anywhere, and the makespan is the last arrival (`FeasibleAnywhere`;
 `planMakespan` already is the latest arrival of a plane, `0` for a plane that never flies).
 Passengers must still reach `C_G`.
 
-**Theorem 4.9, converse direction.** Under (S) and the triangles through a hub
+**Theorem 4.5, converse direction.** Under (S) and the triangles through a hub
 (`Network.ATriHub`), every plan of the variant with cost `C` and makespan `M′` is weakly dominated
 by an admissible partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`,
 `2 δ(X_k) ≤ M′` for every plane and `c(X) ≤ C` (`FeasibleAnywhere.exists_admissible_hub`; under
@@ -26,14 +26,14 @@ The proof cuts every route after its last leg on a passenger's chain (`cutTri`).
 lands in a central city `b` at time `a`, an empty flight `b → C_G` leaving at `a` is appended.
 This is the second use of the triangles through a hub: the rest of the chain from `b` lasts at
 least `d̄_b`, so the appended flight arrives by the makespan (`ToGoal.arr_add_d_le`). The planes
-that are not idle then end in `C_G` with every chain intact, and Theorem 4.10 from chains
-(`exists_admissible_of_chains`) applies to them. Lemma 4.6 (AP) adds the idle planes
+that are not idle then end in `C_G` with every chain intact, and Theorem 4.4 from chains
+(`exists_admissible_of_chains`) applies to them. Lemma 4.2 (AP) adds the idle planes
 (`Admissible.addPlanes_le`).
 
 ## Main results
 
 * `ZenoFront.FeasibleAnywhere`, `ZenoFront.achievableAnywhere`: the variant and its points.
-* `ZenoFront.FeasibleAnywhere.exists_admissible_hub`: **Theorem 4.9**, converse direction.
+* `ZenoFront.FeasibleAnywhere.exists_admissible_hub`: **Theorem 4.5**, converse direction.
 * `ZenoFront.Cert.check_sound_anywhere_hub`: if `check` accepts a certificate (format v1), its
   points are the Pareto front of the variant too, for every table `dc` satisfying the triangles
   through a hub; with `Cert.check_sound_hub`, the two fronts are equal on every certified
@@ -348,7 +348,7 @@ end cutTri
 
 /-! ### Adding the idle planes -/
 
-/-- **Lemma 4.6 (AP)** from `q` to `p` planes, `q ≤ p ≤ t`. -/
+/-- **Lemma 4.2 (AP)** from `q` to `p` planes, `q ≤ p ≤ t`. -/
 theorem Admissible.addPlanes_le {q : ℕ} (d c : Fin n → ℕ) {X : Groups n q} (hX : Admissible X)
     (hqp : q ≤ p) (hpt : p ≤ t) (hsize : size X = 2 * t - q) :
     ∃ Y : Groups n p, Admissible Y ∧ size Y = 2 * t - p ∧ totalCost c Y ≤ totalCost c X ∧
@@ -356,7 +356,7 @@ theorem Admissible.addPlanes_le {q : ℕ} (d c : Fin n → ℕ) {X : Groups n q}
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hqp
   exact hX.addPlanes d c m hsize hpt
 
-/-! ### Theorem 4.9 -/
+/-! ### Theorem 4.5 -/
 
 /-- **The passengers' chains**, for planes ending anywhere. -/
 theorem FeasibleAnywhere.exists_chains {N : Network n} {P : Plan n t p}
@@ -376,7 +376,7 @@ theorem FeasibleAnywhere.exists_chains {N : Network n} {P : Plan n t p}
   exact ⟨c, hg, fun ℓ hℓ => hmem ℓ (hc ℓ hℓ)⟩
 
 open Classical in
-/-- **Theorem 4.9 (bridge B3), converse direction.** Under (S) and the triangles through a hub,
+/-- **Theorem 4.5 (bridge B3), converse direction.** Under (S) and the triangles through a hub,
 with `p ≤ t`, every plan whose planes may end anywhere is weakly dominated by an admissible
 partition: some admissible `X_1, …, X_p` has `Σ_k |X_k| = 2t − p`, `2 δ(X_k) ≤` the makespan
 (the last arrival) for every plane, and total cost at most the plan's cost. -/
@@ -455,20 +455,20 @@ theorem FeasibleAnywhere.exists_admissible_hub {N : Network n} (hS : N.dbar = N.
           Finset.sum_le_sum fun k _ => landCostSum_cutTri_le c (P k)
       _ ≤ ∑ k, landCostSum c (P k) := Finset.sum_le_sum_of_subset (subset_univ Q)
       _ = planCost c P := rfl
-  -- Lemma 4.6 (AP), once per idle plane.
+  -- Lemma 4.2 (AP), once per idle plane.
   obtain ⟨Y, hY, hYsize, hYcost, hYload⟩ := hX.addPlanes_le N.d c hqp hpt hXsize
   refine ⟨Y, hY, hYsize, fun k => ?_, hYcost.trans (hXcost.trans hcost)⟩
   have := hYload (planMakespan P / 2) (fun i => by have := hXload' i; omega) k
   omega
 
-/-- **Theorem 4.9, converse direction, under (A1).** -/
+/-- **Theorem 4.5, converse direction, under (A1).** -/
 theorem FeasibleAnywhere.exists_admissible {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
     (c : Fin n → ℕ) {P : Plan n t p} (hP : FeasibleAnywhere N P) (hpt : p ≤ t) :
     ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧
       (∀ k, 2 * load N.d (X k) ≤ planMakespan P) ∧ totalCost c X ≤ planCost c P :=
   hP.exists_admissible_hub hS hA1.hub c hpt
 
-/-- **Theorem 4.9, converse direction, under (AΔ).** -/
+/-- **Theorem 4.5, converse direction, under (AΔ).** -/
 theorem FeasibleAnywhere.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d)
     (hA : N.ATri) (c : Fin n → ℕ) {P : Plan n t p} (hP : FeasibleAnywhere N P) (hpt : p ≤ t) :
     ∃ X : Groups n p, Admissible X ∧ size X = 2 * t - p ∧

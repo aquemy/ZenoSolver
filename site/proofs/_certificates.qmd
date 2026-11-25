@@ -72,7 +72,7 @@ verifies:
 **Lean** `ZenoFront.isParetoFront_of_obligations` [machine-checked]{.badge .ok}
 
 ```lean
-/-- **Theorem 9.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
+/-- **Theorem 8.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
 `F = (C_1, M_1), …, (C_r, M_r)`, `r ≥ 1`, with `M_1 < ⋯ < M_r` and `C_1 > ⋯ > C_r`. If (1) every
 listed point is in `S`, (2) every point of `S` has makespan at least `M_1`, (3) for `i < r` every
 point of `S` with makespan below `M_{i+1}` costs at least `C_i`, and (4) every point of `S` costs at

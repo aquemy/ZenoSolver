@@ -10,7 +10,7 @@ public import ZenoFront.TreeBound
 /-!
 # The link-forest DP is exact
 
-The link-forest DP of the checker (`TreeBound.lean`, Theorem 7.5) is a lower bound on `E(T)`
+The link-forest DP of the checker (`TreeBound.lean`, Theorem 6.7) is a lower bound on `E(T)`
 (`treeBoundAt_le_totalCost`). This file proves the other direction: every finite value of the DP
 is the cost of an admissible partition with loads at most `T`. So the DP is `E(T)`
 (`treeBoundAt_eq_minCost`). Its cost is polynomial in the number of non-dominated cities, unlike

@@ -11,22 +11,24 @@ exhaustive oracle. They are the natural test cases for a planner or another solv
 With the default options (`-C 3 -D 3`) and `-r r`, the generator builds $d_i = r\,(n + 1 - i)$ and
 $c_i = r\,i$ for $i = 1, \dots, n$; numbering the cities by increasing duration, $d_i = r\,i$ and
 $c_i = r\,(n + 1 - i)$. Cost is affine and decreasing in duration, and the order of the cities does
-not matter to the front. [Theorem 10.1](../proofs.qmd#node-theorem-10-1) of the note gives the front
-in closed form. Let $s = 2t - p$, $\kappa = \lceil s/p \rceil$, $q_0 = \lfloor s/p \rfloor$,
+not matter to the front. Revision 2 of the theory note gave the front in closed form (its Theorem
+10.1, with a written proof). Revision 3 removed it with every claim about generator families, so the
+formula is not part of the machine-checked theory; it agrees with `zeno` on the 603 instances of
+experiment E9. Let $s = 2t - p$, $\kappa = \lceil s/p \rceil$, $q_0 = \lfloor s/p \rfloor$,
 $\rho = s - p q_0$, and
 $$\Phi(T) = (p - \rho)\min(T,\ n q_0) + \rho \min(T,\ n(q_0 + 1)).$$
 Then the front is
 $$\mathcal F = \big\{\big(r\,((n+1)\,s - \Phi(T)),\ 2rT\big) : \kappa \le T \le n\kappa\big\},$$
-with **$(n - 1)\kappa + 1$ points**, every $T$ in the range being a breakpoint. The theorem needs
-only (S): the front is the same **whatever the central flights**, and every certificate of this
-family has only `relaxed` gaps. In general, the theorem covers $d_i = i$ and
+with **$(n - 1)\kappa + 1$ points**, every $T$ in the range being a breakpoint. The written proof
+needs only (S): the front is the same **whatever the central flights**, and every certificate of
+this family has only `relaxed` gaps. In general, the formula covers $d_i = i$ and
 $c_i = \alpha - \beta i$ with $\beta > 0$ and $\alpha \ge \beta n$.
 
 The same in Python, by increasing cost as `zeno` prints it:
 
 ```python
 def linear_front(n, t, p, r=1):
-    """Front of zeno -n n -t t -p p -r r (default generator), Theorem 10.1."""
+    """Front of zeno -n n -t t -p p -r r (default generator), by the closed form above."""
     s = 2 * t - p
     q0, rho = divmod(s, p)
     kappa = -(-s // p)
@@ -62,19 +64,22 @@ $$(N-1)^2 + 1 \text{ points}.$$
   With $d = (5, 7, 9, 11)$, $c_i = 24 - 2d_i$, $t = 7$ and $p = 4$, $L(20) = 80 < E(20) = 84$.
 - **The other generator families** (log, sqrt, $2^i$, staircase) have no closed form. On them the
   front needs the general algorithm, and a greedy schedule of the landings can miss points.
-  Whether such a greedy is exact on the linear family is open
-  ({{< node "Conjecture 10.2" >}}); it agreed on 115 small instances.
+  Whether such a greedy is exact on the linear family is open (revision 2 of the note conjectured
+  it); it agreed on 115 small instances.
 
 ## The ends of every front {#ends}
 
-Whatever the family, under (S), [Proposition 7.10](../proofs.qmd#node-proposition-7-10) fixes the
-two ends of the front:
+Whatever the family, under (S), [Proposition 3.6](../proofs.qmd#node-proposition-3-6) bounds the
+two ends of the front: every plan has makespan at least $2\,d_{\min}\,\kappa$ and costs at least
+$s\,c_{\min}$. Certificates rely on both bounds (obligations 2 and 4 of the
+[format](../solver/certificates.qmd)). Both are attained:
 
 - the fastest makespan is $M_1 = 2\,d_{\min}\,\kappa$;
 - the cheapest cost is $s\,c_{\min}$, reached first at makespan $2\,d_{\rm cheap}\,\kappa$, where
   $d_{\rm cheap}$ is the shortest duration among the cheapest cities.
 
-Certificates rely on both (obligations 2 and 4 of the [format](../solver/certificates.qmd)).
+Revision 2 of the note proved the attainment; revision 3 keeps only the bounds, and every
+certificate checks its end points against them.
 
 ## Small instances with checked fronts {#checked}
 
@@ -83,13 +88,12 @@ Certificates rely on both (obligations 2 and 4 of the [format](../solver/certifi
 - **The LPT counterexample**, $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$: six points, (160, 80),
   (200, 72), (240, 64), (260, 60), (280, 56) and (320, 48). A greedy schedule misses (260, 60). This
   front is proved in Lean by the kernel alone, for every table of central flights
-  (`Examples.lptCounterexample_front`, {{< node "§5" >}}).
-- **Proposition 6.5**, non-symmetric: $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$,
-  $p = 4$, no central flights. The front is (10, 90), (14, 74), (18, 68), (22, 66), (26, 52),
+  (`Examples.lptCounterexample_front`, {{< node "Proposition 4.8" >}}).
+- **Proposition 5.7**, non-symmetric: $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$,
+  $p = 4$, with any central flights satisfying (A1-NS). The front is (10, 90), (14, 74), (18, 68), (22, 66), (26, 52),
   (34, 42), (38, 36), (42, 30), (50, 18), as (cost, makespan). An exhaustive search over all plans
   (937 million states) gives the same front. It is the instance on which waiting is harmful: the
   role-load bound alone stays below the front, and two of its gaps are closed only by the `search`
-  kind ({{< node "Proposition 6.5" >}}).
+  kind ({{< node "Proposition 5.7" >}}).
 - **Zero costs**, $n = 1$, $d_1 = 1$, $c_1 = 0$, $t = 5$, $p = 3$: the front is the single point
-  (0, 6), and plans with more than $s$ landings also reach it (the remark under
-  [Corollary 4.8](../proofs.qmd#node-corollary-4-8)).
+  (0, 6), and plans with more than $s$ landings also reach it ({{< node "Example 4.6" >}}).

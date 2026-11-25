@@ -14,7 +14,7 @@ public import Mathlib.Algebra.GCDMonoid.Nat
 # The relaxation `L(T)`
 
 `L(T)` is the cheapest way to give `p` planes non-empty groups of landings of total size `s`,
-each group of load at most `T`, ignoring admissibility (§7 of the note, step 2, and the
+each group of load at most `T`, ignoring admissibility (§6 of the note, step 2, and the
 `relaxed` gap bound of certificate format v1). It is a DP over the planes on top of the
 one-plane table:
 
@@ -30,7 +30,7 @@ With `G m = G[m][T]`, `relaxCost G p s` is a lower bound on the cost of every su
 * `ZenoFront.relaxCost_oneplane_le_totalCost`: `L(T) ≤ Σ_k c(Y_k)` for every grouping into `p`
   non-empty groups of total size `s` and loads `≤ T`.
 * `ZenoFront.relaxRow_getD`: the memoised rows agree with `relaxCost`.
-* `ZenoFront.Feasible.relaxCost_le_planCost`: **Lemma 3.4**, every feasible plan of makespan `M`
+* `ZenoFront.Feasible.relaxCost_le_planCost`: **Lemma 3.5**, every feasible plan of makespan `M`
   costs at least `L_e(⌊M/2⌋)`, for the weight `e = min(d, d̄)`.
 * `ZenoFront.relaxedBoundAt_le_totalCost`: the bound the checker computes is a lower bound.
 * `ZenoFront.load_eq_scale_mul`: loads in original units are `scale ×` loads in scaled units.
@@ -92,7 +92,7 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
   exact this
 
 variable {t : ℕ} in
-/-- **Lemma 3.4 (relaxation), the bound.** With `p ≤ t`, every feasible plan of makespan `M` costs
+/-- **Lemma 3.5 (relaxation), the bound.** With `p ≤ t`, every feasible plan of makespan `M` costs
 at least `L_e(⌊M/2⌋) = relaxCost (G_e[·][⌊M/2⌋]) p s`, the relaxation for the weight
 `e = min(d, d̄)` (`Network.emin`; under (S), `e = d` by `Network.emin_eq_of_sym`). No assumption is
 made on central flights. The groups are those of `Feasible.exists_relaxation_emin`: one landing

@@ -9,7 +9,7 @@ public import ZenoFront.Checker
 /-!
 # Flight graphs
 
-The model of §6.6 of the theory note. A *flight graph* is a duration table on the locations `C_I`,
+The model of §5 of the theory note. A *flight graph* is a duration table on the locations `C_I`,
 the central vertices and `C_G`, with `none` where there is no flight. Plans, feasibility, cost and
 makespan are those of `Plan.lean`, with the table's flights: legs (`Leg`), routes (`IsRoute`),
 plans (`Plan`) and costs are reused as they are.
@@ -238,7 +238,7 @@ structure VCity (n : ℕ) where
   e : List (Loc n)
   deriving DecidableEq, Repr
 
-/-- **The reduction f of arXiv §2.4** (as in Example 6.11 of the note): one virtual city for every
+/-- **The reduction f of arXiv §2.4** (as in Example 5.9 of the note): one virtual city for every
 central vertex `i`, every simple path `w` from `C_I` to `i` and every simple path `e` from `i` to
 `C_G`. -/
 def vcities (U : FlightGraph n) : List (VCity n) :=
