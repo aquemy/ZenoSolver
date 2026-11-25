@@ -39,6 +39,7 @@ The component form of Lemma 2.4 is not formalised yet (see `lean/README.md`).
 * `ZenoFront.IsParityWitness.card_add_one_le`: Lemma 2.5, `|h k| + 1 ≤ |X_k|`.
 * `ZenoFront.Admissible.card_pos`: every group of an admissible grouping is non-empty.
 * `ZenoFront.IsParityWitness.sum_card_add_le`: `Σ_k |h k| + p ≤ Σ_k |X_k|`.
+* `ZenoFront.admissible_iff_exists_natWitness`: Lemma 2.3, the integer form of admissibility.
 -/
 
 @[expose] public section
@@ -128,6 +129,46 @@ theorem Admissible.p_le_size {X : Groups n p} (hX : Admissible X) : p ≤ size X
   obtain ⟨h, hw⟩ := hX
   have := hw.sum_card_add_le
   omega
+
+/-! ### The integer form (Lemma 2.3) -/
+
+/-- The number of points where `f` is odd has the parity of the sum of `f`. -/
+theorem card_filter_odd_mod_two {ι : Type*} (s : Finset ι) (f : ι → ℕ) :
+    #{x ∈ s | Odd (f x)} % 2 = (∑ x ∈ s, f x) % 2 := by
+  have := Finset.even_sum_iff_even_card_odd (s := s) f
+  rw [Nat.even_iff, Nat.even_iff] at this
+  omega
+
+/-- **Lemma 2.3 (integer form).** A grouping is admissible iff some matrix `w` of naturals has
+`w k i ≤ X_k(i)` (the multiplicity of `i` in `X_k`), `Σ_i w k i ≡ |X_k| + 1 (mod 2)` for every
+plane `k`, and `Σ_k w k i` even for every city `i`. A parity witness is such a matrix with entries
+`0` and `1`; conversely the entries of odd value of a matrix form a parity witness. -/
+theorem admissible_iff_exists_natWitness (X : Groups n p) :
+    Admissible X ↔ ∃ w : Fin p → Fin n → ℕ, (∀ k i, w k i ≤ (X k).count i) ∧
+      (∀ k, (∑ i, w k i) % 2 = ((X k).card + 1) % 2) ∧ ∀ i, Even (∑ k, w k i) := by
+  constructor
+  · rintro ⟨h, hw⟩
+    refine ⟨fun k i => if i ∈ h k then 1 else 0, fun k i => ?_, fun k => ?_, fun i => ?_⟩
+    · dsimp only
+      split_ifs with hi
+      · exact Multiset.one_le_count_iff_mem.mpr (Multiset.mem_toFinset.mp (hw.subset k hi))
+      · exact Nat.zero_le _
+    · rw [← Finset.card_filter, Finset.filter_mem_eq_inter, Finset.univ_inter]
+      exact hw.row k
+    · rw [← Finset.card_filter]
+      exact hw.col i
+  · rintro ⟨w, hle, hrow, hcol⟩
+    refine ⟨fun k => {i | Odd (w k i)}, fun k i hi => ?_, fun k => ?_, fun i => ?_⟩
+    · have hodd : Odd (w k i) := (Finset.mem_filter.mp hi).2
+      exact Multiset.mem_toFinset.mpr
+        (Multiset.one_le_count_iff_mem.mp (hodd.pos.trans_le (hle k i)))
+    · rw [card_filter_odd_mod_two, hrow k]
+    · have h₁ : #{k | i ∈ ({j | Odd (w k j)} : Finset (Fin n))} = #{k | Odd (w k i)} := by
+        congr 1
+        ext k
+        simp
+      rw [h₁, Nat.even_iff, card_filter_odd_mod_two, ← Nat.even_iff]
+      exact hcol i
 
 /-! ### Examples
 

@@ -77,8 +77,9 @@ struct CertificateCheck
     std::vector<std::string> relied; ///< assumptions the accepted obligations needed
 };
 
-/// Reference checker: verifies the four obligations of the format. It uses
-/// the library's dynamic programs for the gap bounds, so it is a consistency
-/// check of the solver, not an independent proof; the Lean checker is.
+/// Reference checker: verifies the four obligations of the format, and rejects
+/// an assumption other than "S", "A1", "A1|AD" and "A1-NS". It uses the
+/// library's dynamic programs for the gap bounds, so it is a consistency check
+/// of the solver, not an independent proof; the Lean checker is.
 [[nodiscard]] CertificateCheck checkCertificate(const Certificate& certificate);
 } // namespace zeno

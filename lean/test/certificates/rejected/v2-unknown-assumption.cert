@@ -1,12 +1,11 @@
-# search gaps on an instance with a city of d = dbar = 0, without assumption EO: Theorem 6.9
-# holds for every plan, so the Lean checker needs no event order (the C++ checker still asks
-# for EO and rejects this file)
+# the zero-city certificate listing EO, an assumption the format no longer knows: both checkers
+# reject it
 zeno-certificate 2
 instance 2 7 4
 d 0 19
 dbar 0 11
 c 9 1
-assume A1-NS
+assume A1-NS EO
 front 7
 90 0
 58 30

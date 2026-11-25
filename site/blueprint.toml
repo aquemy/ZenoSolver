@@ -222,7 +222,7 @@ section = "symmetric"
 label = "Lemma 4.3"
 gap = "Lean proves part (b), on landing records; part (a) is not stated."
 leaves = ["ZenoFront.Feasible.exists_roleConfig_records"]
-covers = "Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement."
+covers = "Part (b), on the landing records of a feasible plan; it is used by Theorem 6.1. Part (a) is not a separate Lean statement."
 
 [[node]]
 section = "symmetric"
@@ -242,8 +242,8 @@ lean = ["ZenoFront.Admissible.addPlane"]
 [[node]]
 section = "symmetric"
 label = "Theorem 4.7"
-lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime", "ZenoFront.Feasible.exists_admissible"]
-covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`, obtained through the proof of Theorem 4.10, which covers (A1). `Feasible.exists_admissible` is the first proof, in makespan form (`2 δ(X_k) ≤ M`): Step 1, cleaning, direct selection, shrinking and PAR without rewriting the plan."
+lean = ["ZenoFront.Feasible.exists_admissible_A1_flightTime"]
+covers = "`Feasible.exists_admissible_A1_flightTime` is the whole statement, with the per-plane bound `ℓ(X_k) ≤ F_k ≤ M`. It is a corollary of Theorem 4.10 (`Feasible.exists_admissible_hub`), since (A1) implies the triangles through a hub (`Network.A1.hub`)."
 
 [[node]]
 section = "symmetric"
@@ -258,9 +258,9 @@ lean = ["ZenoFront.minimal_achievable_iff_anywhere_of_A1", "ZenoFront.FeasibleAn
 [[node]]
 section = "symmetric"
 label = "Theorem 4.10"
-lean = ["ZenoFront.Feasible.exists_admissible_ATri"]
+lean = ["ZenoFront.Feasible.exists_admissible_ATri", "ZenoFront.Feasible.exists_admissible_hub"]
 leaves = ["ZenoFront.exists_admissible_of_blocks"]
-covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
+covers = "`Feasible.exists_admissible_ATri` states the theorem for plans of `p ≤ t` planes, which covers its form for any set `Q` of planes. It is the case (AΔ) of `Feasible.exists_admissible_hub`, which assumes only the triangles through a hub. Steps 2–5 of the proof (links, re-pairing and Lemma 2.3) are `exists_admissible_of_blocks`."
 
 [[node]]
 section = "symmetric"
@@ -321,22 +321,20 @@ label = "Lemma 6.19"
 [[node]]
 section = "nonsymmetric"
 label = "Lemma 6.8"
-leaves = ["ZenoFront.EventOrdered", "ZenoFront.EventOrdered.of_eoOK"]
-covers = "`EventOrdered` is the definition; `EventOrdered.of_eoOK` proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them."
 
 [[node]]
 section = "nonsymmetric"
 label = "Theorem 6.9"
 gap = "Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template's makespan is Lemma 6.3, written only."
 lean = ["ZenoFront.schedulableDomination_all"]
-covers = "Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`). `not_schedulableDomination` shows that the hypothesis `p ≤ t` is needed."
+covers = "Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`)."
 
 [[node]]
 section = "nonsymmetric"
 label = "Corollary 6.10"
-gap = "Lean uses it only inside the version 2 checker (`Cert2.check_sound_EO`); the corollary is not stated."
-leaves = ["ZenoFront.Cert2.check_sound_EO"]
-covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement."
+gap = "Lean uses it only inside the version 2 checker (`Cert2.check_sound`); the corollary is not stated."
+leaves = ["ZenoFront.Cert2.check_sound"]
+covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` gives the front of every feasible plan on each certified instance. The corollary itself, for every instance, is not a Lean statement."
 
 [[section]]
 id = "algorithm"

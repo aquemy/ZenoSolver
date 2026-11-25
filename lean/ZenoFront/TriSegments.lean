@@ -4,7 +4,7 @@ Released under the license of the ZenoSolver repository.
 -/
 module
 
-public import ZenoFront.Achievability
+public import ZenoFront.Converse
 
 /-!
 # The triangle inequality (AΔ) and the segment bound
@@ -16,10 +16,11 @@ network also has a central flight `i → i` (`dc i i`), which the note does not;
 the note has. Central durations may also differ by direction (`dc i j ≠ dc j i`); (AΔ) is then
 read on the directed durations.
 
-The proofs of Theorem 4.10 and Corollary 4.12 use (AΔ) only on the triangles through a hub:
-under (S), `d_j ≤ d_i + dc i j` (through `C_I → i → j`) and `d_i ≤ dc i j + d_j` (through
-`i → j → C_I`). This is `Network.ATriHub`. It follows from (AΔ) (`Network.ATri.hub`) and from (A1)
-(`Network.A1.hub`).
+The proof of Theorem 4.10, and so every symmetric result built on it (the fronts, the solver
+and the checkers), uses (AΔ) only on the triangles through a hub: under (S),
+`d_j ≤ d_i + dc i j` (through `C_I → i → j`) and `d_i ≤ dc i j + d_j` (through `i → j → C_I`).
+This is `Network.ATriHub`. It follows from (AΔ) (`Network.ATri.hub`) and from (A1)
+(`Network.A1.hub`), so each of those results is stated once, under `ATriHub`.
 
 **Lemma 3.3(b) under (S), the segment bound.** Under (S) and `ATriHub`, a segment `γ` of a route
 (the legs between two hub arrivals) flies at least `2 d_x` for every central city `x` it lands
@@ -59,7 +60,7 @@ def Network.ATri (N : Network n) : Prop :=
 
 /-- (AΔ) on the triangles through `C_I`: `d_j ≤ d_i + dc i j` (`C_I → i → j` against `C_I → j`)
 and `d_i ≤ dc i j + d_j` (`i → j → C_I` against `i → C_I`). Under (S) these are also the
-triangles through `C_G`. This is all that Theorem 4.10 and Corollary 4.12 use. -/
+triangles through `C_G`. This is all that Theorem 4.10 and its corollaries use. -/
 def Network.ATriHub (N : Network n) : Prop :=
   ∀ i j : Fin n, N.d j ≤ N.d i + N.dc i j ∧ N.d i ≤ N.dc i j + N.d j
 

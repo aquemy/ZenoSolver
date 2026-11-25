@@ -9,10 +9,11 @@ import ZenoFront.Parse
 optional `zeno-certificate` line first, and anything after `c` ignored) and prints its Pareto
 front as `cost makespan` lines by increasing cost, as `zeno front` does.
 
-The front is `ZenoFront.solveFront d c t p`. By `ZenoFront.solveFront_isParetoFront`, it is the
-exact Pareto front of the feasible plans when `d = dbar` (S), `1 ≤ p ≤ t`, and for every table of
-central flights satisfying (A1). The parser and this wrapper are not verified: the theorem is
-about the parsed values.
+The front is `ZenoFront.solveFront d c t p`. By `ZenoFront.solveFront_isParetoFront_hub`, it is
+the exact Pareto front of the feasible plans when `d = dbar` (S), `1 ≤ p ≤ t`, and for every
+table of central flights satisfying the triangles through a hub, in particular (A1)
+(`solveFront_isParetoFront`) and (AΔ) (`solveFront_isParetoFront_ATri`). The parser and this
+wrapper are not verified: the theorem is about the parsed values.
 -/
 
 open ZenoFront Parse

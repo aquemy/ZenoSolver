@@ -7,7 +7,7 @@ module
 public import ZenoFront.PlanBounds
 public import ZenoFront.Relaxation
 public import ZenoFront.Simulate
-public import ZenoFront.Converse
+public import ZenoFront.ConverseTri
 public import ZenoFront.TreeBound
 
 /-!
@@ -27,12 +27,15 @@ obligations of the format, mirroring `checkCertificate` in `src/zeno/certificate
 plus the header (`1 ≤ n`, `1 ≤ p ≤ t`, symmetric durations, assumption `S` listed) and strict
 monotonicity of the points.
 
-**Soundness** (`Cert.check_sound`): if `check` accepts, the listed points are exactly the Pareto
-front of the (cost, makespan) pairs of the feasible plans of the instance (every point is
+**Soundness** (`Cert.check_sound_hub`): if `check` accepts, the listed points are exactly the
+Pareto front of the (cost, makespan) pairs of the feasible plans of the instance (every point is
 achieved, every feasible plan is weakly dominated by a listed point, and the points are pairwise
-incomparable) for every table of central flight durations satisfying (A1), and for every table
-at all if every gap is `relaxed` (`Cert.check_sound_relaxed`). `IsParetoFront.mem_iff_minimal`
-restates this as "a pair is listed iff it is a minimal achievable pair".
+incomparable) for every table of central flight durations satisfying the triangles through a hub
+(`Network.ATriHub`), and for every table at all if every gap is `relaxed`
+(`Cert.check_sound_relaxed`). The `forest` gaps use Theorem 4.10
+(`Feasible.exists_admissible_hub`). Under (A1) this is `Cert.check_sound`, under (AΔ)
+`Cert.check_sound_ATri`. `IsParetoFront.mem_iff_minimal` restates it as "a pair is listed iff it
+is a minimal achievable pair".
 -/
 
 @[expose] public section
@@ -189,33 +192,75 @@ def gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) : List (ℕ × ℕ) 
     decide ((x.1 : WithTop ℕ) ≤ bound g y.2) && gapsOK bound (y :: rest) gs
   | _, _ => false
 
-/-- The domination argument: if, for every named bound `g`, `bound g M` is a lower bound on the
-cost of `y` whenever `y`'s makespan is below `M`, the first point is at least as fast as `y`, and
-the last at least as cheap, then some listed point weakly dominates `y`. -/
-theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
-    ∀ (F : List (ℕ × ℕ)) (gs : List κ),
-      (∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) → gapsOK bound F gs = true →
-      (∀ x ∈ F.head?, x.2 ≤ y.2) → (∀ x ∈ F.getLast?, x.1 ≤ y.1) → ∃ x ∈ F, x ≤ y
-  | [], _, _, h, _, _ => by simp [gapsOK] at h
-  | [x], [], _, _, hh, hl => by
+/-- **The domination argument along a front.** For a point `y`, if every consecutive pair
+`(x, z)` of the list has `C_x ≤ y.1` as soon as `y` is faster than `z`, the first point is at least
+as fast as `y` and the last at least as cheap, then some listed point weakly dominates `y`. -/
+theorem exists_le_of_chain (y : ℕ × ℕ) : ∀ F : List (ℕ × ℕ), F ≠ [] →
+    F.IsChain (fun x z => y.2 < z.2 → x.1 ≤ y.1) → (∀ x ∈ F.head?, x.2 ≤ y.2) →
+      (∀ x ∈ F.getLast?, x.1 ≤ y.1) → ∃ x ∈ F, x ≤ y
+  | [], h, _, _, _ => absurd rfl h
+  | [x], _, _, hh, hl => by
     simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq',
       List.getLast?_singleton] at hh hl
     exact ⟨x, List.mem_singleton_self x, Prod.le_def.mpr ⟨hl, hh⟩⟩
-  | [_], _ :: _, _, h, _, _ => by simp [gapsOK] at h
-  | _ :: _ :: _, [], _, h, _, _ => by simp [gapsOK] at h
-  | x :: z :: rest, g :: gs, hb, h, hh, hl => by
-    simp only [gapsOK, Bool.and_eq_true, decide_eq_true_eq] at h
+  | x :: z :: rest, _, hc, hh, hl => by
+    rw [List.isChain_cons_cons] at hc
     simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq'] at hh
     by_cases hz : y.2 < z.2
-    · have h₁ : (x.1 : WithTop ℕ) ≤ y.1 := h.1.trans (hb g List.mem_cons_self z.2 hz)
-      exact ⟨x, List.mem_cons_self, Prod.le_def.mpr ⟨WithTop.coe_le_coe.mp h₁, hh⟩⟩
-    · have hl' : ∀ x' ∈ (z :: rest).getLast?, x'.1 ≤ y.1 := by
-        rw [List.getLast?_cons_cons] at hl
-        exact hl
-      obtain ⟨x', hx', hle⟩ := exists_le_of_gapsOK bound y (z :: rest) gs
-        (fun g' hg' => hb g' (List.mem_cons_of_mem _ hg')) h.2
-        (by simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq']; omega) hl'
+    · exact ⟨x, List.mem_cons_self, Prod.le_def.mpr ⟨hc.1 hz, hh⟩⟩
+    · rw [List.getLast?_cons_cons] at hl
+      obtain ⟨x', hx', hle⟩ := exists_le_of_chain y (z :: rest) (List.cons_ne_nil _ _) hc.2
+        (by simp only [List.head?_cons, Option.mem_def, Option.some.injEq, forall_eq']; omega) hl
       exact ⟨x', List.mem_cons_of_mem _ hx', hle⟩
+
+/-- The gaps give the chain of `exists_le_of_chain`: if `bound g M` is a lower bound on the cost
+of `y` whenever `y`'s makespan is below `M`, every consecutive pair `(x, z)` has `C_x ≤ y.1` as
+soon as `y` is faster than `z`. -/
+theorem isChain_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ) :
+    ∀ (F : List (ℕ × ℕ)) (gs : List κ),
+      (∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) → gapsOK bound F gs = true →
+      F ≠ [] ∧ F.IsChain (fun x z => y.2 < z.2 → x.1 ≤ y.1)
+  | [], _, _, h => by simp [gapsOK] at h
+  | [_], [], _, _ => ⟨List.cons_ne_nil _ _, List.IsChain.singleton _⟩
+  | [_], _ :: _, _, h => by simp [gapsOK] at h
+  | _ :: _ :: _, [], _, h => by simp [gapsOK] at h
+  | x :: z :: rest, g :: gs, hb, h => by
+    simp only [gapsOK, Bool.and_eq_true, decide_eq_true_eq] at h
+    refine ⟨List.cons_ne_nil _ _, List.isChain_cons_cons.mpr ⟨fun hz => ?_,
+      (isChain_of_gapsOK bound y (z :: rest) gs (fun g' hg' => hb g' (List.mem_cons_of_mem _ hg'))
+        h.2).2⟩⟩
+    exact WithTop.coe_le_coe.mp (h.1.trans (hb g List.mem_cons_self z.2 hz))
+
+/-- The domination argument of the checker: if, for every named bound `g`, `bound g M` is a lower
+bound on the cost of `y` whenever `y`'s makespan is below `M`, the first point is at least as fast
+as `y`, and the last at least as cheap, then some listed point weakly dominates `y`. -/
+theorem exists_le_of_gapsOK {κ : Type} (bound : κ → ℕ → WithTop ℕ) (y : ℕ × ℕ)
+    (F : List (ℕ × ℕ)) (gs : List κ)
+    (hb : ∀ g ∈ gs, ∀ M, y.2 < M → bound g M ≤ (y.1 : WithTop ℕ)) (h : gapsOK bound F gs = true)
+    (hh : ∀ x ∈ F.head?, x.2 ≤ y.2) (hl : ∀ x ∈ F.getLast?, x.1 ≤ y.1) : ∃ x ∈ F, x ≤ y :=
+  have hc := isChain_of_gapsOK bound y F gs hb h
+  exists_le_of_chain y F hc.1 hc.2 hh hl
+
+/-- **Theorem 9.1 (obligations imply the front).** Let `S` be a set of (cost, makespan) points and
+`F = (C_1, M_1), …, (C_r, M_r)`, `r ≥ 1`, with `M_1 < ⋯ < M_r` and `C_1 > ⋯ > C_r`. If (1) every
+listed point is in `S`, (2) every point of `S` has makespan at least `M_1`, (3) for `i < r` every
+point of `S` with makespan below `M_{i+1}` costs at least `C_i`, and (4) every point of `S` costs at
+least `C_r`, then `F` is the Pareto front of `S`. -/
+theorem isParetoFront_of_obligations {S : Set (ℕ × ℕ)} {F : List (ℕ × ℕ)} (hne : F ≠ [])
+    (hmono : F.IsChain fun a b => a.2 < b.2 ∧ b.1 < a.1) (h₁ : ∀ x ∈ F, x ∈ S)
+    (h₂ : ∀ x ∈ F.head?, ∀ y ∈ S, x.2 ≤ y.2)
+    (h₃ : F.IsChain fun x z => ∀ y ∈ S, y.2 < z.2 → x.1 ≤ y.1)
+    (h₄ : ∀ x ∈ F.getLast?, ∀ y ∈ S, x.1 ≤ y.1) : IsParetoFront S F := by
+  refine ⟨h₁, fun y hy => ?_, ?_⟩
+  · exact exists_le_of_chain y F hne (h₃.imp fun x z h => h y hy) (fun x hx => h₂ x hx y hy)
+      fun x hx => h₄ x hx y hy
+  · have : Trans (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1)
+        (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1) (fun a b : ℕ × ℕ => a.2 < b.2 ∧ b.1 < a.1) :=
+      ⟨fun hab hbc => ⟨hab.1.trans hbc.1, hbc.2.trans hab.2⟩⟩
+    refine hmono.pairwise.imp fun {a b} hab =>
+      ⟨fun hle => ?_, fun hle => ?_⟩
+    · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
+    · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
 
 theorem exists_mem_zip_of_mem {α β : Type*} : ∀ {l₁ : List α} {l₂ : List β},
     l₁.length = l₂.length → ∀ {b : β}, b ∈ l₂ → ∃ a, (a, b) ∈ l₁.zip l₂
@@ -338,30 +383,46 @@ theorem gapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d) (hpt 
   rw [Nat.le_div_iff_mul_le Nat.two_pos]
   omega
 
-/-- The forest gap bound is sound under (A1): a feasible plan with makespan below `M` costs at
-least `forestGapBound M`. This is where the converse (Theorem 4.7) is used. -/
-theorem forestGapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
-    (hA1 : (C.network dc).A1) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+/-- The forest gap bound is sound under the triangles through a hub: a feasible plan with
+makespan below `M` costs at least `forestGapBound M`. This is where the converse (Theorem 4.10) is
+used. -/
+theorem forestGapBound_le_hub {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
+    (hL : (C.network dc).ATriHub) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
     (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
     C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) := by
   unfold forestGapBound
   split_ifs
-  · obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible (c := C.c) hS hA1 hpt
+  · obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_hub (c := C.c) hS hL hpt
     refine (forestBoundAt_le_totalCost (scaledDurations C.d) C.c hp hpt hX hsize fun k => ?_).trans
       (WithTop.coe_le_coe.mpr hcost)
     apply load_scaled_le_of_load_le
-    have := hload k
+    have := (hload k).1.trans (hload k).2
     change 2 * load C.d (X k) ≤ planMakespan P at this
     rw [Nat.le_div_iff_mul_le Nat.two_pos]
     omega
   · exact bot_le
 
+/-- The forest gap bound is sound under (A1). -/
+theorem forestGapBound_le {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
+    (hA1 : (C.network dc).A1) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) :=
+  C.forestGapBound_le_hub hS hA1.hub hp hpt hP hM
+
+/-- The forest gap bound is sound under (AΔ). -/
+theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar = C.d)
+    (hA : (C.network dc).ATri) (hp : 1 ≤ C.p) (hpt : C.p ≤ C.t) {P : Plan C.n C.t C.p}
+    (hP : Feasible (C.network dc) P) {M : ℕ} (hM : planMakespan P < M) :
+    C.forestGapBound C.table M ≤ (planCost C.c P : WithTop ℕ) :=
+  C.forestGapBound_le_hub hS hA.hub hp hpt hP hM
+
 /-- **Soundness of the checker.** If `check` accepts a certificate, its points are exactly the
 Pareto front of the instance (every point is achieved by a feasible plan, every feasible plan is
 weakly dominated by a point, and the points are pairwise incomparable) for every table `dc` of
-central flight durations that satisfies (A1), or for every table if all gaps are `relaxed`. -/
-theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+central flight durations that satisfies the triangles through a hub, or for every table if all
+gaps are `relaxed`. -/
+theorem check_sound_hub (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).ATriHub ∨ ∀ g ∈ C.gaps, g = .relaxed) :
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := by
   simp only [check, Bool.and_eq_true] at h
   obtain ⟨⟨⟨⟨⟨hhead, hmono⟩, hplans⟩, hfirst⟩, hlast⟩, hgaps⟩ := h
@@ -383,8 +444,8 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     · cases g with
       | relaxed => exact C.gapBound_le hS' hpt hP hM
       | forest =>
-        rcases hdc with hA1 | hrel
-        · exact C.forestGapBound_le hS' hA1 hp hpt hP hM
+        rcases hdc with hL | hrel
+        · exact C.forestGapBound_le_hub hS' hL hp hpt hP hM
         · exact absurd (hrel _ hg) (by decide)
     · simp only [firstOK] at hfirst
       rw [Option.mem_def] at hx
@@ -403,6 +464,12 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
     · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
 
+/-- **Soundness of the checker under (A1)**, or for every table if all gaps are `relaxed`. -/
+theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
+  C.check_sound_hub h dc (hdc.imp_left Network.A1.hub)
+
 /-- **Soundness under (A1).** If `check` accepts, the points are the Pareto front for every
 table of central flight durations satisfying (A1), whatever the gap kinds. -/
 theorem check_sound_A1 (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
@@ -414,7 +481,15 @@ points are the Pareto front for **every** table of central flight durations (no 
 theorem check_sound_relaxed (h : C.check = true) (hrel : ∀ g ∈ C.gaps, g = .relaxed)
     (dc : Fin C.n → Fin C.n → ℕ) :
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
-  C.check_sound h dc (Or.inr hrel)
+  C.check_sound_hub h dc (Or.inr hrel)
+
+/-- **Soundness of the checker under (AΔ).** If `check` accepts a certificate, its points are
+exactly the Pareto front of the instance for every table `dc` of central flight durations that
+satisfies (AΔ), whatever the gap kinds. -/
+theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
+  C.check_sound_hub h dc (Or.inl hA.hub)
 
 /-- **Soundness, minimal-elements form.** If `check` accepts, a pair is listed iff it is a
 minimal (cost, makespan) pair of a feasible plan, for every table of central flight durations
@@ -423,6 +498,13 @@ theorem check_sound_minimal (h : C.check = true) (dc : Fin C.n → Fin C.n → �
     (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) (x : ℕ × ℕ) :
     x ∈ C.front ↔ Minimal (· ∈ achievable (C.network dc) C.c C.t C.p) x :=
   (C.check_sound h dc hdc).mem_iff_minimal x
+
+/-- **Soundness under (AΔ), minimal-elements form.** If `check` accepts, a pair is listed iff it
+is a minimal (cost, makespan) pair of a feasible plan, for every table satisfying (AΔ). -/
+theorem check_sound_minimal_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) (x : ℕ × ℕ) :
+    x ∈ C.front ↔ Minimal (· ∈ achievable (C.network dc) C.c C.t C.p) x :=
+  (C.check_sound_ATri h dc hA).mem_iff_minimal x
 
 end Cert
 
