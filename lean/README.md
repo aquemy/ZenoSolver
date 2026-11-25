@@ -159,7 +159,7 @@ holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certific
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check`, `Cert.check_sound_hub` |
-| `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
+| `ZenoFront/RationalPlans.lean` | Plans with times in any `FloorRing` (`ℚ`, `ℝ`), rounding down (Lemma 1.3 of revision 3), soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat_hub` |
 | `ZenoFront/CheckerV2.lean` | Format v2 (non-symmetric): certificates, `check`, soundness | `Kind2`, `Cert2`, `Cert2.check`, `Cert2.check_sound` |
 | `ZenoFront/NonSymmetric.lean` | (A1-NS), splitting central flights, role weights of landing records, role shrinking (Lemma 4.4), Theorem 6.1 | `Network.A1NS`, `Feasible.split`, `RoleConfig.roleLoad`, `RoleConfig.exists_shrink`, `Feasible.exists_roleConfig_ns` |
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
@@ -555,17 +555,21 @@ cites (`_ATri` for (AΔ)).
   prefix's then have norm at most `t − p` (`norm_delta_le`, `norm_prefix_le`), so the program's
   restriction to such options and states loses nothing.
 
-**Rational times (`RationalPlans.lean`)**
+**Rational and real times (`RationalPlans.lean`)**
 
-* `QFeasible.floor`: a feasible plan with rational departure and arrival times, every time
+Times lie in any ordered ring with a floor function `𝕂` (`QLeg 𝕂`, `QPlan 𝕂`), `ℚ` and `ℝ`
+among them.
+
+* `QFeasible.floor`: a feasible plan with departure and arrival times in `𝕂`, every time
   rounded down, is a feasible plan with integer times. Durations are integers, so
   `arr = dep + d` gives `⌊arr⌋ = ⌊dep⌋ + d`, and every `arrival ≤ next departure` survives.
 * `planMakespan_floor_le`, `qPlanCost_eq`: the rounded plan has the same cost and no larger
-  makespan. `Feasible.toRat`: an integer plan is a rational one, with the same cost and
-  makespan.
-* `Cert.check_sound_rat`: if `check` accepts, the listed points are exactly the Pareto front of
-  the (cost, makespan) pairs of the feasible plans **with rational times**, under the same
-  hypotheses on `dc` as `check_sound`.
+  makespan. `Feasible.toRat`: an integer plan is a plan with times in `𝕂`, with the same cost
+  and makespan.
+* `Cert.check_sound_rat_hub` (and `Cert.check_sound_rat`, `Cert.check_sound_rat_ATri`): if
+  `check` accepts, the listed points are exactly the Pareto front of the (cost, makespan) pairs
+  of the feasible plans **with times in `𝕂`**, under the same hypotheses on `dc` as
+  `check_sound_hub`.
 * `Examples.lptCounterexample_front`: checked by the kernel alone (`decide +kernel`, about
   1.5 s). For every `dc`, the Pareto front of `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` is
   `(320, 48), (280, 56), (260, 60), (240, 64), (200, 72), (160, 80)`. This includes the point
@@ -645,7 +649,7 @@ cites (`_ATri` for (AΔ)).
   definition to the note and the format.
 * **Plan semantics.** The certificate's plans have natural-number times, as in format v1.
   `Cert.check_sound` quantifies over every plan with integer times, and `Cert.check_sound_rat`
-  over every plan with rational times; the fronts coincide. Durations are the instance's
+  over every plan with times in `ℚ`, `ℝ` or any other `FloorRing`; the fronts coincide. Durations are the instance's
   integers in both.
   * Plans may fly central–central legs of any duration `dc`, may wait anywhere and may hand
     passengers over anywhere.

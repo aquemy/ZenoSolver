@@ -73,13 +73,6 @@ theorem card_groups (k : Fin p) :
     (R.groups k).card = (R.drop k).card + (R.pick k).card + (R.cross k).card := by
   simp [groups]
 
-/-- The parity of the number of odd terms of a sum of naturals is the parity of the sum. -/
-private theorem card_filter_odd_mod_two {ι : Type*} (s : Finset ι) (f : ι → ℕ) :
-    #{x ∈ s | Odd (f x)} % 2 = (∑ x ∈ s, f x) % 2 := by
-  have := Finset.even_sum_iff_even_card_odd (s := s) f
-  rw [Nat.even_iff, Nat.even_iff] at this
-  omega
-
 /-- **PAR (Lemma 4.5).** The grouping of a role configuration is admissible, with witness
 `h_{k,i} = (D_k(i) + P_k(i)) mod 2`. Kept until revision 3 archives Lemma 4.5 (WP8). -/
 theorem isParityWitness_witness : IsParityWitness R.groups R.witness where

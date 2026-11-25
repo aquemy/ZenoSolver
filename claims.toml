@@ -79,7 +79,8 @@ created   = "2026-11-23"
 [claims.lem-2-3]
 kind      = "lemma"
 statement = "Lemma 2.3 (integer form) [A′]: a partition is admissible iff some h̃ ∈ ℕ^{p×n} has h̃_{k,i} ≤ X_k(i), Σ_i h̃_{k,i} ≡ |X_k| + 1 for every plane k and Σ_k h̃_{k,i} ≡ 0 for every city i (mod 2)."
-status    = "math.proved-informal"
+status    = "math.machine-checked"
+lean      = "ZenoFront.admissible_iff_exists_natWitness"
 paper     = "Lemma 2.3, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
@@ -159,8 +160,8 @@ created      = "2026-11-23"
 [claims.lem-3-4]
 kind         = "lemma"
 statement    = "Lemma 3.4 (relaxation) [R]: under (S), every feasible plan with cost C and makespan M has non-empty multisets Y_1..Y_p with Σ_k |Y_k| = s, c(Y) ≤ C and ℓ(Y_k) ≤ F_k ≤ M, hence C ≥ L(⌊M/2⌋) with integer durations; no assumption on central flights is needed."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.exists_relaxation, ZenoFront.relaxCost_oneplane_le_totalCost"
+status       = "math.machine-checked"
+lean         = "ZenoFront.Feasible.exists_relaxation_emin, ZenoFront.Feasible.relaxCost_le_planCost, ZenoFront.Network.emin_eq_of_sym"
 paper        = "Lemma 3.4, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
@@ -466,8 +467,8 @@ created   = "2026-11-24"
 [claims.prop-7-1]
 kind         = "proposition"
 statement    = "Proposition 7.1: under (S) and (A1), F = {(E(T), 2T) : T ∈ ℕ, E(T) < E(T − 1)}, with E(−1) = ∞ and makespans in units of g."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.minimal_admissiblePoints_iff"
+status       = "math.machine-checked"
+lean         = "ZenoFront.minimal_achievable_iff_minCost_hub"
 paper        = "Prop 7.1, doc/theory/exact-front.md §7.1"
 created      = "2026-11-23"
 
@@ -571,8 +572,8 @@ created   = "2026-11-23"
 [claims.thm-9-1]
 kind         = "theorem"
 statement    = "Theorem 9.1 (end to end) [X3]: if a certificate's four obligations hold (a simulated plan for every point, no plan faster than the first, a lower bound on every gap, no plan cheaper than the last), its points are exactly the front F."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Cert.check_sound"
+status       = "math.machine-checked"
+lean         = "ZenoFront.isParetoFront_of_obligations"
 paper        = "Thm 9.1, doc/theory/exact-front.md §9"
 created      = "2026-11-23"
 
