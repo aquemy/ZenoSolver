@@ -25,8 +25,11 @@ integer plan is a rational plan with the same cost and makespan (`Feasible.toRat
 ## Main results
 
 * `ZenoFront.QFeasible.floor`, `ZenoFront.planMakespan_floor_le`: rounding a rational plan down.
-* `ZenoFront.Cert.check_sound_rat`: if `check` accepts, the listed points are exactly the Pareto
-  front of the (cost, makespan) pairs of the feasible plans **with rational times**.
+* `ZenoFront.Cert.check_sound_rat_hub`: if `check` accepts, the listed points are exactly the
+  Pareto front of the (cost, makespan) pairs of the feasible plans **with rational times**, for
+  every table of central flight durations satisfying the triangles through a hub (or every table
+  if all gaps are `relaxed`); under (A1) `Cert.check_sound_rat`, under (AΔ)
+  `Cert.check_sound_rat_ATri`.
 -/
 
 @[expose] public section
@@ -286,13 +289,13 @@ variable (C : Cert)
 
 /-- **Soundness for plans with rational times.** If `check` accepts, the listed points are
 exactly the Pareto front of the (cost, makespan) pairs of the feasible plans with rational times,
-for every table of central flight durations satisfying (A1), or every table if all gaps are
-`relaxed`. -/
-theorem check_sound_rat (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+for every table of central flight durations satisfying the triangles through a hub, or every
+table if all gaps are `relaxed`. -/
+theorem check_sound_rat_hub (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).ATriHub ∨ ∀ g ∈ C.gaps, g = .relaxed) :
     IsParetoFront (achievableQ (C.network dc) C.c C.t C.p)
       (C.front.map fun x => (x.1, (x.2 : ℚ))) := by
-  have H := C.check_sound h dc hdc
+  have H := C.check_sound_hub h dc hdc
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · obtain ⟨x', hx', rfl⟩ := List.mem_map.mp hx
     obtain ⟨P, hP, hPx⟩ := H.achieved x' hx'
@@ -315,6 +318,21 @@ theorem check_sound_rat (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     · obtain ⟨h₁, h₂⟩ := Prod.le_def.mp hle
       simp only at h₁ h₂
       exact Prod.le_def.mpr ⟨h₁, by exact_mod_cast h₂⟩
+
+/-- **Soundness for plans with rational times, under (A1)**, or for every table if all gaps are
+`relaxed`. -/
+theorem check_sound_rat (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hdc : (C.network dc).A1 ∨ ∀ g ∈ C.gaps, g = .relaxed) :
+    IsParetoFront (achievableQ (C.network dc) C.c C.t C.p)
+      (C.front.map fun x => (x.1, (x.2 : ℚ))) :=
+  C.check_sound_rat_hub h dc (hdc.imp_left Network.A1.hub)
+
+/-- **Soundness for plans with rational times, under (AΔ).** -/
+theorem check_sound_rat_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievableQ (C.network dc) C.c C.t C.p)
+      (C.front.map fun x => (x.1, (x.2 : ℚ))) :=
+  C.check_sound_rat_hub h dc (Or.inl hA.hub)
 
 end Cert
 

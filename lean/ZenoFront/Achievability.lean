@@ -35,13 +35,20 @@ each passenger rides exactly its journey.
 
 ## Fronts
 
-* `admissibleAchievable`: Theorem 4.1 in the form `AdmissibleAchievable` of `Bridge.lean`.
-* `minimal_achievable_iff_anywhere_of_A1` (**Theorem 4.9**): under (S) and (A1), the front of
-  the plans whose planes end anywhere is the front of the feasible plans, on every instance.
-* `minimal_achievable_iff_admissiblePoints`, `minimal_achievable_iff_multisetPoints`
-  (**Corollary 4.8**): under (S) and (A1), the front is `Min 𝒳`, with `𝒳` the points
-  `(c(X), M(X))` of the multisets of `2t − p` landings that have an admissible partition, `M(X)`
-  the least `2 max_k δ(X_k)` over their admissible partitions.
+Theorem 4.1 and the converse under (S) and the triangles through a hub (Theorem 4.10,
+`Feasible.exists_admissible_hub`, and Theorem 4.9's converse direction,
+`FeasibleAnywhere.exists_admissible_hub`) give the fronts. Each is stated once under
+`Network.ATriHub`; the forms under (A1) and (AΔ) are corollaries (`Network.A1.hub`,
+`Network.ATri.hub`).
+
+* `minimal_achievable_iff_anywhere_hub` (**Theorem 4.9**): the front of the plans whose planes
+  end anywhere is the front of the feasible plans, on every instance
+  (`minimal_achievable_iff_anywhere_of_A1`, `minimal_achievable_iff_anywhere_of_ATri`).
+* `minimal_achievable_iff_admissiblePoints_hub`, `minimal_achievable_iff_multisetPoints_hub`
+  (**Corollary 4.8**): the front is `Min 𝒳`, with `𝒳` the points `(c(X), M(X))` of the
+  multisets of `2t − p` landings that have an admissible partition, `M(X)` the least
+  `2 max_k δ(X_k)` over their admissible partitions (`minimal_achievable_iff_multisetPoints`,
+  `minimal_achievable_iff_multisetPoints_ATri`).
 -/
 
 @[expose] public section
@@ -919,20 +926,46 @@ theorem Admissible.exists_plan {N : Network n} (hS : N.dbar = N.d) {p : ℕ} (hp
         (maxLoad_le_iff _ _ _).mpr fun k => by have := hk k; omega
       omega
 
-/-- **Theorem 4.1**, as the hypothesis of `minimal_achievable_iff_anywhere`. -/
-theorem admissibleAchievable {N : Network n} (hS : N.dbar = N.d) (c : Fin n → ℕ) {p : ℕ}
-    (hpt : p ≤ t) : AdmissibleAchievable N c t p := fun _ hX hsize => by
-  obtain ⟨P, hP, -, hc, hm⟩ := hX.exists_plan hS hpt c hsize
-  exact ⟨P, hP, hc.le, hm.le⟩
-
 /-! ### Fronts -/
 
-/-- **Theorem 4.9 (bridge B3).** Under (S) and (A1), with `p ≤ t`, the feasible plans and the
-plans whose planes end anywhere have the same minimal (cost, makespan) pairs. -/
+/-- **Theorem 4.9, plan form.** Under (S) and the triangles through a hub, with `p ≤ t`, every
+plan of the variant is weakly dominated by a feasible plan: Theorem 4.9's converse direction,
+then Theorem 4.1. -/
+theorem FeasibleAnywhere.exists_feasible_le_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} {P : Plan n t p} (hP : FeasibleAnywhere N P)
+    (hpt : p ≤ t) :
+    ∃ P' : Plan n t p, Feasible N P' ∧ planCost c P' ≤ planCost c P ∧
+      planMakespan P' ≤ planMakespan P := by
+  obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_hub hS hL c hpt
+  obtain ⟨P', hP', -, hc, hm⟩ := hX.exists_plan hS hpt c hsize
+  refine ⟨P', hP', hc.le.trans hcost, hm.le.trans ?_⟩
+  have : maxLoad N.d X ≤ planMakespan P / 2 :=
+    (maxLoad_le_iff _ _ _).mpr fun k => by have := hload k; omega
+  omega
+
+/-- **Theorem 4.9 (bridge B3).** Under (S) and the triangles through a hub, with `p ≤ t`, the
+feasible plans and the plans whose planes end anywhere have the same minimal (cost, makespan)
+pairs. -/
+theorem minimal_achievable_iff_anywhere_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x := by
+  refine minimal_iff_of_subset_of_dominated (achievable_subset_achievableAnywhere N c t p)
+    (fun y hy => ?_) x
+  obtain ⟨P, hP, rfl⟩ := hy
+  obtain ⟨P', hP', hc, hm⟩ := hP.exists_feasible_le_hub hS hL c hpt
+  exact ⟨_, ⟨P', hP', rfl⟩, Prod.le_def.mpr ⟨hc, hm⟩⟩
+
+/-- **Theorem 4.9 (bridge B3) under (A1).** -/
 theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
     (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x :=
-  minimal_achievable_iff_anywhere hS hA1 (admissibleAchievable hS c hpt) hpt x
+  minimal_achievable_iff_anywhere_hub hS hA1.hub c hpt x
+
+/-- **Theorem 4.9 (bridge B3) under (AΔ).** -/
+theorem minimal_achievable_iff_anywhere_of_ATri {N : Network n} (hS : N.dbar = N.d)
+    (hA : N.ATri) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ achievableAnywhere N c t p) x :=
+  minimal_achievable_iff_anywhere_hub hS hA.hub c hpt x
 
 /-- If every point of `A` is weakly dominated by a point of `B`, minimal points of `A` are minimal
 points of `B` as soon as every point of `B` is also weakly dominated by a point of `A`. -/
@@ -978,24 +1011,50 @@ theorem admissiblePoint_le {N : Network n} {c : Fin n → ℕ} {p : ℕ} {X : Gr
   change 2 * maxLoad N.d X ≤ M
   omega
 
-/-- **Corollary 4.8 (front characterisation), partition form.** Under (S) and (A1), with
-`p ≤ t`, the front of the feasible plans is the set of minimal admissible points. -/
-theorem minimal_achievable_iff_admissiblePoints {N : Network n} (hS : N.dbar = N.d)
-    (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+/-- **Corollary 4.8 (front characterisation), partition form.** Under (S) and the triangles
+through a hub, with `p ≤ t`, the front of the feasible plans is the set of minimal admissible
+points. -/
+theorem minimal_achievable_iff_admissiblePoints_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x := by
   refine minimal_iff_of_dominated (fun y hy => ?_)
     (fun y hy => ⟨y, admissiblePoints_subset_achievable hS c hpt hy, le_rfl⟩) x
   obtain ⟨P, hP, rfl⟩ := hy
-  obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible hS hA1 c hpt
-  exact admissiblePoint_le hX hsize hload hcost
+  obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_hub hS hL c hpt
+  exact admissiblePoint_le hX hsize (fun k => (hload k).1.trans (hload k).2) hcost
 
-/-- **Corollary 4.8 for planes ending anywhere.** Under (S) and (A1), with `p ≤ t`, the front of
-the plans whose planes end anywhere is the set of minimal admissible points. -/
+/-- **Corollary 4.8, partition form, under (A1).** -/
+theorem minimal_achievable_iff_admissiblePoints {N : Network n} (hS : N.dbar = N.d)
+    (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x :=
+  minimal_achievable_iff_admissiblePoints_hub hS hA1.hub c hpt x
+
+/-- **Corollary 4.8, partition form, under (AΔ).** -/
+theorem minimal_achievable_iff_admissiblePoints_ATri {N : Network n} (hS : N.dbar = N.d)
+    (hA : N.ATri) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x :=
+  minimal_achievable_iff_admissiblePoints_hub hS hA.hub c hpt x
+
+/-- **Corollary 4.8 for planes ending anywhere.** Under (S) and the triangles through a hub, with
+`p ≤ t`, the front of the plans whose planes end anywhere is the set of minimal admissible
+points. -/
+theorem minimal_achievableAnywhere_iff_admissiblePoints_hub {N : Network n}
+    (hS : N.dbar = N.d) (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievableAnywhere N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x :=
+  (minimal_achievable_iff_anywhere_hub hS hL c hpt x).symm.trans
+    (minimal_achievable_iff_admissiblePoints_hub hS hL c hpt x)
+
+/-- **Corollary 4.8 for planes ending anywhere, under (A1).** -/
 theorem minimal_achievableAnywhere_iff_admissiblePoints {N : Network n} (hS : N.dbar = N.d)
     (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievableAnywhere N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x :=
-  (minimal_achievable_iff_anywhere_of_A1 hS hA1 c hpt x).symm.trans
-    (minimal_achievable_iff_admissiblePoints hS hA1 c hpt x)
+  minimal_achievableAnywhere_iff_admissiblePoints_hub hS hA1.hub c hpt x
+
+/-- **Corollary 4.8 for planes ending anywhere, under (AΔ).** -/
+theorem minimal_achievableAnywhere_iff_admissiblePoints_ATri {N : Network n}
+    (hS : N.dbar = N.d) (hA : N.ATri) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievableAnywhere N c t p) x ↔ Minimal (· ∈ admissiblePoints N c t p) x :=
+  minimal_achievableAnywhere_iff_admissiblePoints_hub hS hA.hub c hpt x
 
 /-- `M(Y)`: the least `2 max_k δ(X_k)` over the admissible partitions `X` of the multiset `Y`
 (`0` if there is none). -/
@@ -1027,13 +1086,27 @@ theorem minimal_admissiblePoints_iff_multisetPoints (N : Network n) (c : Fin n �
     · rw [totalCost_eq_cost_landings, hXY]
     · exact hXm.le
 
-/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
-`p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the multisets of `2t − p`
-landings that have an admissible partition. -/
+/-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and the triangles
+through a hub, with `p ≤ t`, the front is `Min 𝒳`, with `𝒳` the points `(c(Y), M(Y))` of the
+multisets of `2t − p` landings that have an admissible partition. -/
+theorem minimal_achievable_iff_multisetPoints_hub {N : Network n} (hS : N.dbar = N.d)
+    (hL : N.ATriHub) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x :=
+  (minimal_achievable_iff_admissiblePoints_hub hS hL c hpt x).trans
+    (minimal_admissiblePoints_iff_multisetPoints N c x)
+
+/-- **Corollary 4.8 (front characterisation) under (A1).** Under (S) and (A1), with `p ≤ t`, the
+front is `Min 𝒳`. -/
 theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d)
     (hA1 : N.A1) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
     Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x :=
-  (minimal_achievable_iff_admissiblePoints hS hA1 c hpt x).trans
-    (minimal_admissiblePoints_iff_multisetPoints N c x)
+  minimal_achievable_iff_multisetPoints_hub hS hA1.hub c hpt x
+
+/-- **Corollary 4.8 (front characterisation) under (AΔ).** Under (S) and (AΔ), with `p ≤ t`, the
+front is `Min 𝒳`. -/
+theorem minimal_achievable_iff_multisetPoints_ATri {N : Network n} (hS : N.dbar = N.d)
+    (hA : N.ATri) (c : Fin n → ℕ) {p : ℕ} (hpt : p ≤ t) (x : ℕ × ℕ) :
+    Minimal (· ∈ achievable N c t p) x ↔ Minimal (· ∈ multisetPoints N c t p) x :=
+  minimal_achievable_iff_multisetPoints_hub hS hA.hub c hpt x
 
 end ZenoFront

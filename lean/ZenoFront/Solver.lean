@@ -15,8 +15,10 @@ public import ZenoFront.Breakpoints
 # A verified solver for the symmetric front
 
 `solveFront d c t p` computes the Pareto front of a symmetric instance with no certificate, and
-`solveFront_isParetoFront` proves that, under (S) and (A1) with `1 ≤ p ≤ t`, its output is exactly
-the front of the feasible plans. `lake exe zeno-front FILE` runs it (`ZenoFrontMain.lean`).
+`solveFront_isParetoFront_hub` proves that, under (S) and the triangles through a hub
+(`Network.ATriHub`) with `1 ≤ p ≤ t`, its output is exactly the front of the feasible plans; in
+particular under (A1) (`solveFront_isParetoFront`) and under (AΔ) (`solveFront_isParetoFront_ATri`).
+`lake exe zeno-front FILE` runs it (`ZenoFrontMain.lean`).
 
 * **`E(T)`** (`minCost`): the least cost of an admissible partition of `2t − p` landings into
   `p` groups with all loads `≤ T`. It is non-increasing (`minCost_antitone`) and attained when
@@ -33,8 +35,8 @@ the front of the feasible plans. `lake exe zeno-front FILE` runs it (`ZenoFrontM
   (`minCost_eq_top_of_lt`). The breakpoints are the points of the scan of every level
   (`scanFront`, `mem_scanFront`). The solver finds them by splitting intervals between those two
   levels (`breakpoints`, `Breakpoints.lean`), which gives the same list (`solveFront_eq`).
-  Corollary 4.8 (`minimal_achievable_iff_admissiblePoints`) turns the minimal admissible points
-  into the front.
+  Corollary 4.8 (`minimal_achievable_iff_admissiblePoints_hub`) turns the minimal admissible
+  points into the front (Proposition 7.1, `minimal_achievable_iff_minCost_hub`).
 
 The tables that do not depend on the level (the subsets of non-dominated cities, their
 symmetric differences, and the one-plane table) are computed once (`sigmaAt`).
@@ -411,20 +413,42 @@ theorem mem_solveFront_iff (N : Network n) (c : Fin n → ℕ) {t : ℕ} (hp : 1
     exact ⟨T, Nat.zero_le _, by omega, hM, hE, WithTop.coe_lt_top C,
       fun T' _ hT' => hlt T' hT'⟩
 
-/-- **The solver is correct.** Under (S) and (A1), with `1 ≤ p ≤ t`, `solveFront` is the Pareto
-front of the (cost, makespan) pairs of the feasible plans: every listed point is achieved, every
-feasible plan is weakly dominated by a listed point, and the points are pairwise incomparable. -/
-theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+/-- **Proposition 7.1 (the front from `E`).** Under (S) and the triangles through a hub, with
+`p ≤ t`, a pair `(C, M)` is on the front iff `M = 2T` with `E(T) = C` and `E(T') > C` for every
+`T' < T`: the front is the set of breakpoints of `E`. -/
+theorem minimal_achievable_iff_minCost_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    (c : Fin n → ℕ) {t : ℕ} (hpt : p ≤ t) (C M : ℕ) :
+    Minimal (· ∈ achievable N c t p) (C, M) ↔
+      ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
+        ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' :=
+  (minimal_achievable_iff_admissiblePoints_hub hS hL c hpt (C, M)).trans
+    (minimal_admissiblePoints_iff N c C M)
+
+/-- **Proposition 7.1 under (AΔ).** -/
+theorem minimal_achievable_iff_minCost_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
+    (c : Fin n → ℕ) {t : ℕ} (hpt : p ≤ t) (C M : ℕ) :
+    Minimal (· ∈ achievable N c t p) (C, M) ↔
+      ∃ T, M = 2 * T ∧ minCost N.d c t p T = C ∧
+        ∀ T' < T, (C : WithTop ℕ) < minCost N.d c t p T' :=
+  minimal_achievable_iff_minCost_hub hS hA.hub c hpt C M
+
+/-- **The solver is correct.** Under (S) and the triangles through a hub, with `1 ≤ p ≤ t`,
+`solveFront` is the Pareto front of the (cost, makespan) pairs of the feasible plans: every
+listed point is achieved, every feasible plan is weakly dominated by a listed point, and the
+points are pairwise incomparable. -/
+theorem solveFront_isParetoFront_hub {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
     (c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
     IsParetoFront (achievable N c t p) (solveFront N.d c t p) := by
   classical
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
-  · exact ((minimal_achievable_iff_admissiblePoints hS hA1 c hpt x).mpr
+  · exact ((minimal_achievable_iff_admissiblePoints_hub hS hL c hpt x).mpr
       ((mem_solveFront_iff N c hp hpt x).mp hx)).prop
   · obtain ⟨P, hP, rfl⟩ := hy
-    obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible hS hA1 c hpt
+    obtain ⟨X, hX, hsize, hload, hcost⟩ := hP.exists_admissible_hub hS hL c hpt
     set T := planMakespan P / 2 with hTdef
-    have hXT : ∀ k, load N.d (X k) ≤ T := fun k => by have := hload k; omega
+    have hXT : ∀ k, load N.d (X k) ≤ T := fun k => by
+      have := (hload k).1.trans (hload k).2
+      omega
     have hET : minCost N.d c t p T ≤ planCost c P :=
       (minCost_le N.d c hX hsize hXT).trans (WithTop.coe_le_coe.mpr hcost)
     obtain ⟨C₀, hC₀⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_le_ne_top WithTop.coe_ne_top hET)
@@ -447,5 +471,19 @@ theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1
     exact (scanFront_pairwise _ 0 _ ⊤).2.imp fun {a b} hab =>
       ⟨fun hle => absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2),
         fun hle => absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)⟩
+
+/-- **The solver is correct under (A1).** Under (S) and (A1), with `1 ≤ p ≤ t`, `solveFront` is
+the Pareto front of the (cost, makespan) pairs of the feasible plans. -/
+theorem solveFront_isParetoFront {N : Network n} (hS : N.dbar = N.d) (hA1 : N.A1)
+    (c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
+    IsParetoFront (achievable N c t p) (solveFront N.d c t p) :=
+  solveFront_isParetoFront_hub hS hA1.hub c hp hpt
+
+/-- **The solver is correct under (AΔ).** Under (S) and (AΔ), with `1 ≤ p ≤ t`, `solveFront` is
+the Pareto front of the (cost, makespan) pairs of the feasible plans. -/
+theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : N.ATri)
+    (c : Fin n → ℕ) {t : ℕ} (hp : 1 ≤ p) (hpt : p ≤ t) :
+    IsParetoFront (achievable N c t p) (solveFront N.d c t p) :=
+  solveFront_isParetoFront_hub hS hA.hub c hp hpt
 
 end ZenoFront

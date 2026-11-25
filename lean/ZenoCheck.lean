@@ -6,12 +6,14 @@ import ZenoFront.Parse
 `lake exe zeno-check FILE` parses a certificate (format v1 or v2), runs the verified checker
 (`ZenoFront.Cert.check` or `ZenoFront.Cert2.check`), and prints
 
-* `accepted: …` (exit code 0) when the checker returns `true`. By `ZenoFront.Cert.check_sound`,
-  the listed points of a v1 certificate are then the exact Pareto front of the instance: for every
-  table of central flight durations if all gaps are `relaxed`, and for every table satisfying
-  (A1) otherwise. By `ZenoFront.Cert2.check_sound`, those of a v2 certificate are the exact front
-  of every feasible plan, for every table; when some city has `d = d̄ = 0` and the certificate
-  lists `EO`, also of every event-ordered one (`Cert2.check_sound_EO`);
+* `accepted: …` (exit code 0) when the checker returns `true`. By
+  `ZenoFront.Cert.check_sound_hub`, the listed points of a v1 certificate are then the exact
+  Pareto front of the instance: for every table of central flight durations if all gaps are
+  `relaxed`, and for every table satisfying the triangles through a hub otherwise, in particular
+  (A1) (`Cert.check_sound`) and (AΔ) (`Cert.check_sound_ATri`). By `ZenoFront.Cert2.check_sound`,
+  those of a v2 certificate are the exact front of every feasible plan, for every table; when
+  some city has `d = d̄ = 0` and the certificate lists `EO`, also of every event-ordered one
+  (`Cert2.check_sound_EO`);
 * `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails.
 
 Only the `accepted` verdict is backed by the theorem; the reasons are diagnostics recomputed
@@ -177,9 +179,9 @@ def main (args : List String) : IO UInt32 := do
     if C.check then
       let forest := (C.gaps.filter (· = .forest)).length
       let scope := if forest = 0 then "all gaps relaxed: for every central flight table"
-        else s!"{forest} forest gap(s): for every central flight table satisfying A1"
+        else s!"{forest} forest gap(s): for every central flight table satisfying A1 or AΔ"
       IO.println s!"accepted: the {C.front.length} points are the Pareto front ({scope}; \
-        ZenoFront.Cert.check_sound)"
+        ZenoFront.Cert.check_sound_hub)"
       return 0
     IO.println s!"rejected: {(reasons C).getD 0 "an obligation fails"}"
     return 1
