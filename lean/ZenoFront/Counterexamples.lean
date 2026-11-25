@@ -33,24 +33,31 @@ symmetric durations:
   `k + p` crossings `A`, `k` crossings `Ā` and `t − p − k` drop-off/pick-up pairs `B B̄`.
 
 The `lpt` instance is `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`. Its exact front contains
-`(260, 60)` (`Examples.lptCounterexample_front`). No PPP of cost at most 260 gets a greedy makespan
-at most 60, for either greedy (`evocop_misses_lpt`, `arxiv_misses_lpt`). On the landings of
-`(260, 60)`, EvoCOP's Algorithm 1 without P3 ends at `(52, 68)` (`evocop_lpt_noP3`), as §5 of the
-note says. With its best `β`, EvoCOP's greedy reaches 64 (`evocop_lpt_ppp`).
+`(260, 60)` (`Examples.lptCounterexample_front`). For every PPP of cost at most 260, every set of
+P3 patterns and every way to break the ties of `ArgMin`, both greedies give a makespan above 60
+(`evocop_misses_lpt`, `arxiv_misses_lpt`). On the landings of `(260, 60)`, EvoCOP's Algorithm 1
+without P3 ends at `(52, 68)`, whatever the ties (`evocop_lpt_noP3`), as §5 of the note says. With
+its best `β`, EvoCOP's greedy reaches 64 (`evocop_lpt_ppp`).
 
 The `p3First` instance is `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`. Its exact front contains
-`(42, 12)` (`p3First_front`). No PPP of cost at most 42 gets an arXiv makespan at most 12
-(`arxiv_misses_p3First`). EvoCOP's greedy finds that point (`evocop_p3First_front`).
+`(42, 12)` (`p3First_front`). For every PPP of cost at most 42 and every tie-breaking, the arXiv
+greedy gives a makespan above 12 (`arxiv_misses_p3First`). EvoCOP's greedy reaches `(42, 12)`,
+with one P3 at city 2, whatever the ties (`evocop_reaches_p3First`).
 
-The papers leave some choices open. The definitions here take:
+The papers leave some choices open:
 
-* ties of `ArgMin` to the smallest plane index (EvoCOP's worked example on p. 7 agrees);
-* in EvoCOP's Step 2, for `p = 1`, both halves of a P3 to the single plane;
-* in arXiv Step 2, the `p` largest crossings in decreasing order, each to the least-loaded plane
+* the ties of `ArgMin`: every tie-breaking is covered (`minIdxs`, `evocopLoadsAll`,
+  `arxivLoadsAll`). `evocopLoads` and `arxivLoads` break ties towards the first plane, as the 2016
+  C++ does (EvoCOP's worked example on p. 7 agrees); they serve the cross-check below;
+* the P3 patterns `β` of a PPP: every sub-multiset of `e ∩ w` is covered;
+* in EvoCOP's Step 2, for `p = 1`, both halves of a P3 go to the single plane (`p = 2` in both
+  instances);
+* in arXiv Step 2, the `p` largest crossings go in decreasing order, each to the least-loaded plane
   that has none yet ("each plane must receive one");
-* in arXiv Step 3, the least-loaded plane among those whose next pattern (`Ā` after `A`, `A` after
-  `Ā`) is still available. Read literally ("while it remains some elements in `a` and `ā`, select
-  the plane with the minimal duration"), the step can stop or get stuck with crossings left over.
+* in arXiv Step 3, the plane is the least loaded among those whose next pattern (`Ā` after `A`,
+  `A` after `Ā`) is still available. Read literally ("while it remains some elements in `a` and
+  `ā`, select the plane with the minimal duration"), the step can stop or get stuck with crossings
+  left over.
 
 On the 27 golden instances (`tests/golden/instances.txt`), `evocopPoints` gives the front of the
 2016 `zenoSolver`, and `arxivPoints` that of `zenoSolver_noDuplicate` on 25 of them.
@@ -97,7 +104,7 @@ with 9 central landings, more than `2t − p = 7`, attains it (`PropI.plan9_pare
 * `ZenoFront.Greedy.evocop_misses_lpt`, `ZenoFront.Greedy.arxiv_misses_lpt`: neither greedy reaches
   the front point `(260, 60)` of the `lpt` instance.
 * `ZenoFront.Greedy.arxiv_misses_p3First`: the arXiv greedy does not reach the front point
-  `(42, 12)` of the `p3First` instance.
+  `(42, 12)` of the `p3First` instance; `ZenoFront.Greedy.evocop_reaches_p3First`: EvoCOP's does.
 * `ZenoFront.Ex413.plan_feasible`, `ZenoFront.Ex413.not_admissible_le`,
   `ZenoFront.Ex413.not_isParetoFront`: Example 4.13.
 * `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
@@ -292,6 +299,101 @@ def insertByCost (x : ℕ × ℕ) : List (ℕ × ℕ) → List (ℕ × ℕ)
 def paretoMin (S : List (ℕ × ℕ)) : List (ℕ × ℕ) :=
   ((S.filter fun x => S.all fun y => !leB y x || y == x).dedup).foldr insertByCost []
 
+/-! ### Every way to break the ties of `ArgMin`
+
+The papers do not say how `ArgMin` breaks ties. The functions below follow every choice: they
+return the list of all the outcomes, one per sequence of tie-breaking choices. The theorems on the
+two instances are stated over all of them. -/
+
+/-- The planes that `ok` accepts and whose load is the least among them: every value `ArgMin`
+can take. -/
+def minIdxs (D : List ℕ) (ok : ℕ → Bool) : List ℕ :=
+  let cand := (List.range D.length).filter ok
+  match (cand.map fun k => D.getD k 0).min? with
+  | none => []
+  | some m => cand.filter fun k => D.getD k 0 = m
+
+/-- `loop1` under every tie-breaking. -/
+def loop1All : ℕ → List ℕ → List Bool → List ℕ → List ℕ → List (List ℕ × List Bool × List ℕ)
+  | 0, D, S, es, _ => [(D, S, es)]
+  | _ + 1, D, S, es, [] => [(D, S, es)]
+  | f + 1, D, S, es, w :: ws =>
+    (minIdxs D fun _ => true).flatMap fun k =>
+      if S.getD k true then
+        match es with
+        | [] => [(D, S, es)]
+        | e :: es' => loop1All f (addAt D k (2 * e)) (S.set k false) es' (w :: ws)
+      else loop1All f (addAt D k (2 * w)) (S.set k true) es ws
+
+/-- `loop2` under every tie-breaking. -/
+def loop2All : List ℕ → List Bool → List ℕ → List (List ℕ)
+  | D, _, [] => [D]
+  | D, S, e :: es =>
+    let ks := minIdxs D fun k => S.getD k false
+    if ks.isEmpty then [D]
+    else ks.flatMap fun k => loop2All (addAt D k (2 * e)) (S.set k false) es
+
+/-- `p3Step` under every choice of the two least-loaded planes. -/
+def p3StepAll : List ℕ → List ℕ → List (List ℕ)
+  | D, [] => [D]
+  | D, b :: bs =>
+    (minIdxs D fun _ => true).flatMap fun k₁ =>
+      let ks := minIdxs D fun k => k != k₁
+      if ks.isEmpty then p3StepAll (addAt D k₁ (4 * b)) bs
+      else ks.flatMap fun k₂ => p3StepAll (addAt (addAt D k₁ (2 * b)) k₂ (2 * b)) bs
+
+/-- The private makespans of EvoCOP 2015's two steps, under every tie-breaking. -/
+def evocopLoadsAll (p : ℕ) (es ws bs : List ℕ) : List (List ℕ) :=
+  (loop1All (es.length + ws.length) (List.replicate p 0) (List.replicate p true) es ws).flatMap
+    fun r => (loop2All r.1 r.2.1 r.2.2).flatMap fun D => p3StepAll D bs
+
+/-- Every makespan EvoCOP 2015's two steps can give the PPP `(e, w)` (counts): for every
+sub-multiset `β` of `e ∩ w` (the P3 patterns) and every tie-breaking. -/
+def evocopMakespansAll {n : ℕ} (d : Fin n → ℕ) (p : ℕ) (e w : List ℕ) : List ℕ :=
+  (subVecs (vmin e w)).flatMap fun β =>
+    (evocopLoadsAll p (durs d (vsub e β)) (durs d (vsub w β)) (durs d β)).map maxLoad
+
+/-- `pairStep` under every tie-breaking. -/
+def pairStepAll : List ℕ → List ℕ → List (List ℕ)
+  | D, [] => [D]
+  | D, b :: bs => (minIdxs D fun _ => true).flatMap fun k => pairStepAll (addAt D k (2 * b)) bs
+
+/-- `firstStep` under every tie-breaking. -/
+def firstStepAll : List ℕ → List Bool → List ℕ → List (List ℕ)
+  | D, _, [] => [D]
+  | D, got, a :: as =>
+    let ks := minIdxs D fun k => !got.getD k true
+    if ks.isEmpty then [D]
+    else ks.flatMap fun k => firstStepAll (addAt D k (2 * a)) (got.set k true) as
+
+/-- `altStep` under every tie-breaking. -/
+def altStepAll : ℕ → List ℕ → List Bool → List ℕ → List ℕ → List (List ℕ)
+  | 0, D, _, _, _ => [D]
+  | f + 1, D, next, as, abs =>
+    let ks := minIdxs D fun k => if next.getD k true then !abs.isEmpty else !as.isEmpty
+    if ks.isEmpty then [D]
+    else ks.flatMap fun k =>
+      if next.getD k true then
+        altStepAll f (addAt D k (2 * abs.headD 0)) (next.set k false) as abs.tail
+      else altStepAll f (addAt D k (2 * as.headD 0)) (next.set k true) as.tail abs
+
+/-- The plane loads of the four steps of arXiv §3.2, under every tie-breaking. -/
+def arxivLoadsAll (p : ℕ) (as abs bs : List ℕ) : List (List ℕ) :=
+  (pairStepAll (List.replicate p 0) bs).flatMap fun D =>
+    (firstStepAll D (List.replicate p false) (as.take p)).flatMap fun D =>
+      (altStepAll ((as.drop p).length + abs.length) D (List.replicate p true) (as.drop p)
+        abs).flatMap fun D => pairStepAll D bs
+
+/-- Every makespan the four steps of arXiv §3.2 can give the PPP `x = (a, ā, b)` (counts), under
+every tie-breaking. -/
+def arxivMakespansAll {n : ℕ} (d : Fin n → ℕ) (p : ℕ) (x : List ℕ × List ℕ × List ℕ) :
+    List ℕ :=
+  (arxivLoadsAll p (durs d x.1) (durs d x.2.1) (durs d x.2.2)).map maxLoad
+
+/-- The cost of the PPP `(a, ā, b)` of arXiv §3.1: `c(a) + c(ā) + 2 c(b)`. -/
+def arxivCost {n : ℕ} (c : Fin n → ℕ) (x : List ℕ × List ℕ × List ℕ) : ℕ :=
+  costOf c x.1 + costOf c x.2.1 + 2 * costOf c x.2.2
+
 /-! ### The `lpt` instance: `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2` -/
 
 /-- The landings of the front point `(260, 60)` as a PPP: eastbound `e` = three landings in city 1
@@ -300,13 +402,24 @@ is 260. -/
 theorem lpt_ppp_cost : costOf ![40, 20] [3, 2] + costOf ![40, 20] [2, 1] = 260 := by decide +kernel
 
 /-- **§5 of the note.** On the landings of `(260, 60)`, EvoCOP's Algorithm 1 without P3 gives
-every plane a crossing of 20 first and ends with the private makespans `(52, 68)`. -/
+every plane a crossing of 20 first and ends with the private makespans `(52, 68)`, in some order,
+whatever the tie-breaking. -/
 theorem evocop_lpt_noP3 :
+    ∀ D ∈ evocopLoadsAll 2 (durs ![6, 10] [3, 2]) (durs ![6, 10] [2, 1]) [],
+      D = [52, 68] ∨ D = [68, 52] := by
+  decide +kernel
+
+/-- With ties broken towards the first plane, the private makespans are `(52, 68)`. -/
+theorem evocop_lpt_noP3_first :
     evocopLoads 2 (durs ![6, 10] [3, 2]) (durs ![6, 10] [2, 1]) [] = [52, 68] := by decide +kernel
 
 /-- With its best set of P3 patterns, EvoCOP's greedy schedules the landings of `(260, 60)` in 64,
-still above 60. -/
-theorem evocop_lpt_ppp : evocopMakespan ![6, 10] 2 [3, 2] [2, 1] = 64 := by decide +kernel
+still above 60, whatever the tie-breaking. -/
+theorem evocop_lpt_ppp : ∀ m ∈ evocopMakespansAll ![6, 10] 2 [3, 2] [2, 1], 64 ≤ m := by
+  decide +kernel
+
+/-- With ties broken towards the first plane, the best set of P3 patterns gives 64. -/
+theorem evocop_lpt_ppp_first : evocopMakespan ![6, 10] 2 [3, 2] [2, 1] = 64 := by decide +kernel
 
 /-- The front EvoCOP's algorithm returns on the `lpt` instance. -/
 theorem evocop_lpt_front : paretoMin (evocopPoints ![6, 10] ![40, 20] 5 2) =
@@ -317,19 +430,23 @@ theorem arxiv_lpt_front : paretoMin (arxivPoints ![6, 10] ![40, 20] 5 2) =
     [(160, 80), (200, 72), (240, 64), (280, 56), (320, 48)] := by decide +kernel
 
 /-- **EvoCOP's greedy is not exact (§5).** On `d = (6, 10)`, `c = (40, 20)`, `t = 5`, `p = 2`, the
-point `(260, 60)` is Pareto-optimal among all feasible plans, whatever the central flights, but no
-PPP of EvoCOP's algorithm reaches cost at most 260 and makespan at most 60. -/
+point `(260, 60)` is Pareto-optimal among all feasible plans, whatever the central flights, but for
+every PPP `(e, w)` of cost at most 260, every set `β` of P3 patterns and every tie-breaking,
+EvoCOP's two steps give a makespan above 60. -/
 theorem evocop_misses_lpt (dc : Fin 2 → Fin 2 → ℕ) :
     Minimal (· ∈ achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2) (260, 60) ∧
-      ∀ x ∈ evocopPoints ![6, 10] ![40, 20] 5 2, ¬ (x.1 ≤ 260 ∧ x.2 ≤ 60) :=
+      ∀ e ∈ vecs 2 5, ∀ w ∈ vecs 2 (5 - 2), costOf ![40, 20] e + costOf ![40, 20] w ≤ 260 →
+        ∀ m ∈ evocopMakespansAll ![6, 10] 2 e w, 60 < m :=
   ⟨((Examples.lptCounterexample_front dc).mem_iff_minimal _).mp (by decide),
     by decide +kernel⟩
 
-/-- **The greedy of arXiv §3.2 is not exact.** On the same instance, no PPP `(a, ā, b)` reaches cost
-at most 260 and makespan at most 60 with the four steps. -/
+/-- **The greedy of arXiv §3.2 is not exact.** On the same instance, for every PPP `(a, ā, b)` of
+cost at most 260 and every tie-breaking, the four steps (with Steps 2 and 3 read as in the module
+documentation) give a makespan above 60. -/
 theorem arxiv_misses_lpt (dc : Fin 2 → Fin 2 → ℕ) :
     Minimal (· ∈ achievable ⟨![6, 10], ![6, 10], dc⟩ ![40, 20] 5 2) (260, 60) ∧
-      ∀ x ∈ arxivPoints ![6, 10] ![40, 20] 5 2, ¬ (x.1 ≤ 260 ∧ x.2 ≤ 60) :=
+      ∀ x ∈ triples 2 5 2, arxivCost ![40, 20] x ≤ 260 →
+        ∀ m ∈ arxivMakespansAll ![6, 10] 2 x, 60 < m :=
   ⟨((Examples.lptCounterexample_front dc).mem_iff_minimal _).mp (by decide),
     by decide +kernel⟩
 
@@ -395,7 +512,16 @@ theorem p3First_front (dc : Fin 2 → Fin 2 → ℕ) :
       [(54, 6), (50, 8), (46, 10), (42, 12), (38, 14), (30, 18)] :=
   p3FirstCert.check_sound_relaxed p3FirstCert_check (by decide) dc
 
-/-- EvoCOP's algorithm finds the front of the `p3First` instance. -/
+/-- **EvoCOP's greedy reaches `(42, 12)`** on the `p3First` instance: the PPP `e = (1, 1, 2, 2)`,
+`w = (1, 2)` of cost 42 with one P3 at city 2 gets makespan 12 whatever the tie-breaking. -/
+theorem evocop_reaches_p3First :
+    costOf ![9, 5] [2, 2] + costOf ![9, 5] [1, 1] = 42 ∧
+      ∀ D ∈ evocopLoadsAll 2 (durs ![1, 3] (vsub [2, 2] [0, 1])) (durs ![1, 3] (vsub [1, 1] [0, 1]))
+        (durs ![1, 3] [0, 1]), maxLoad D = 12 := by
+  decide +kernel
+
+/-- EvoCOP's algorithm, with ties broken towards the first plane, finds the front of the
+`p3First` instance. -/
 theorem evocop_p3First_front : paretoMin (evocopPoints ![1, 3] ![9, 5] 4 2) =
     [(30, 18), (38, 14), (42, 12), (46, 10), (50, 8), (54, 6)] := by decide +kernel
 
@@ -405,10 +531,12 @@ theorem arxiv_p3First_front : paretoMin (arxivPoints ![1, 3] ![9, 5] 4 2) =
 
 /-- **The greedy of arXiv §3.2 is not exact (§5).** On `d = (1, 3)`, `c = (9, 5)`, `t = 4`, `p = 2`,
 the point `(42, 12)` is Pareto-optimal among all feasible plans, whatever the central flights, but
-no PPP `(a, ā, b)` reaches cost at most 42 and makespan at most 12 with the four steps. -/
+for every PPP `(a, ā, b)` of cost at most 42 and every tie-breaking, the four steps (with Steps 2
+and 3 read as in the module documentation) give a makespan above 12. -/
 theorem arxiv_misses_p3First (dc : Fin 2 → Fin 2 → ℕ) :
     Minimal (· ∈ achievable ⟨![1, 3], ![1, 3], dc⟩ ![9, 5] 4 2) (42, 12) ∧
-      ∀ x ∈ arxivPoints ![1, 3] ![9, 5] 4 2, ¬ (x.1 ≤ 42 ∧ x.2 ≤ 12) :=
+      ∀ x ∈ triples 2 4 2, arxivCost ![9, 5] x ≤ 42 →
+        ∀ m ∈ arxivMakespansAll ![1, 3] 2 x, 12 < m :=
   ⟨((p3First_front dc).mem_iff_minimal _).mp (by decide), by decide +kernel⟩
 
 end Greedy
