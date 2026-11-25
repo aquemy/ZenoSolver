@@ -358,9 +358,10 @@ created   = "2026-11-23"
 
 [claims.prop-6-6]
 kind         = "proposition"
-statement    = "Proposition 6.6 (imbalance-vector DP) [N5]: the DP over planes with states (k, j, v), v the imbalance vector restricted to ‖v‖₁ ≤ t − p, has shortest path from (0, 0, 0) to (p, s, 0) of weight E_NS(T), the least cost of a role configuration with role loads at most T."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.BalData.value_le_totalCost"
+statement    = "Proposition 6.6 (the balanced bound): The imbalance-vector program at level T (planes in order; state: landings used and the imbalance vector Σ(Dr − Pk) so far, of ℓ¹-norm at most t − p) has value at most the cost of every role configuration with s landings and every λ_k ≤ T, for the weights and crossing table the checker builds."
+status       = "math.machine-checked"
+lean         = "ZenoFront.BalData.value_le_totalCost, ZenoFront.Cert2.balWith_le"
+lean_partial = "ZenoFront.BalData.layers_dominate, ZenoFront.RoleConfig.norm_prefix_le"
 paper        = "Prop 6.6, doc/theory/exact-front.md §6.3"
 created      = "2026-11-23"
 
