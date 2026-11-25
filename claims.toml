@@ -706,6 +706,15 @@ lean_partial = "ZenoFront.Cert.check, ZenoFront.planOK_feasible"
 paper        = "revision 3 (planned)"
 created      = "2026-11-25"
 
+[claims.prop-roles-bound]
+kind         = "proposition"
+statement    = "Proposition (`roles` bound), new in revision 3: The roles bound at level T, the larger of (A) the plane-by-plane relaxation in which a plane's m landings contain an odd number of crossings of weight d + d̄, the others weighing 2·min(d, d̄), all within T, and (B) the least cost of s landings of weight d + d̄ within pT, is at most the cost of every role configuration with s landings and every λ_k ≤ T."
+status       = "math.machine-checked"
+lean         = "ZenoFront.rolesBoundAt_le_totalCost"
+lean_partial = "ZenoFront.Cert2.rolesWith_le, ZenoFront.sum_roleLoad_eq_load_fill"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 10. The linear family
 # ===========================================================================
