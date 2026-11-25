@@ -332,8 +332,10 @@ ul.task-list li input[type="checkbox"] {
       build/release/zeno -n 3 -t 3 -p 2 -d site/problem/example.dat
   - 66 of 66, slowest 61 ms (zeno); 66 of 66 with the same front (zeno-front); 66 of 66 accepted
     (zeno-check): site/_results-summary.md, written by gen_pages.py from the committed baselines.
-  - 23 machine-checked theorems and 7 Lean definitions: site/_blueprint-stats.md, written by
-    gen_blueprint.py. The build regenerates both files; these numbers do not follow by themselves. -->
+  - The Lean tally (machine-checked results, results with parts in Lean, Lean definitions) is
+    site/_home-lean.md, written by gen_blueprint.py from the claim ledger claims.toml at every
+    build; it is included below and is not edited by hand.
+  The build regenerates the other files too; the numbers quoted here do not follow by themselves. -->
 <div class="zs-home">
 
 <section class="home-hero" aria-labelledby="home-title">
@@ -481,15 +483,15 @@ ul.task-list li input[type="checkbox"] {
 <section aria-labelledby="home-lean">
   <h2 class="home-section" id="home-lean">The theory in Lean 4</h2>
   <div class="home-lean">
-    <div class="lean-count">
-      <svg class="waffle waffle-short" viewbox="0 0 130 20" role="img" aria-label="23 squares, one per machine-checked theorem">
-        <rect width="130" height="9" fill="url(#hw-on)"></rect>
-        <rect y="11" width="119" height="9" fill="url(#hw-on)"></rect>
-      </svg>
-      <p class="tally-figure tally-big">23</p>
-      <p class="tally-text">theorems of the theory are <span class="nobr">machine-checked</span> in Lean 4, and 7 of its definitions are stated in Lean.</p>
-      <p class="lean-trust">No <code>sorry</code>, no <code>native_decide</code>, and no axiom beyond <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>.</p>
-    </div>
+<!-- Written by site/gen_blueprint.py from the claim ledger; do not edit. -->
+<div class="lean-count">
+  <svg class="waffle waffle-short" viewbox="0 0 130 9" role="img" aria-label="11 squares, one per machine-checked result">
+    <rect y="0" width="119" height="9" fill="url(#hw-on)"></rect>
+  </svg>
+  <p class="tally-figure tally-big">11</p>
+  <p class="tally-text">results of the theory are <span class="nobr">machine-checked</span> in Lean 4, 22 more have parts in Lean, and 7 of its definitions are stated in Lean.</p>
+  <p class="lean-trust">No <code>sorry</code>, no <code>native_decide</code>, and no axiom beyond <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>.</p>
+</div>
     <ul class="home-ledger">
       <li>
         <a class="ledger-ref" href="proofs.html#node-corollary-4-8">Cor. 4.8</a>
@@ -509,7 +511,7 @@ ul.task-list li input[type="checkbox"] {
       </li>
     </ul>
   </div>
-  <p class="home-note">Every statement, with its Lean declaration and a status read from <code>#print axioms</code>: <a href="proofs.html">the blueprint</a></p>
+  <p class="home-note">Every statement, with its Lean declarations and a status from the claim ledger and <code>#print axioms</code>: <a href="proofs.html">the blueprint</a></p>
 </section>
 
 </div>

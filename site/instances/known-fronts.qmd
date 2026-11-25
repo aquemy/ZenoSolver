@@ -63,7 +63,7 @@ $$(N-1)^2 + 1 \text{ points}.$$
 - **The other generator families** (log, sqrt, $2^i$, staircase) have no closed form. On them the
   front needs the general algorithm, and a greedy schedule of the landings can miss points.
   Whether such a greedy is exact on the linear family is open
-  ([Conjecture 10.2](../proofs.qmd#node-conjecture-10-2)); it agreed on 115 small instances.
+  ({{< node "Conjecture 10.2" >}}); it agreed on 115 small instances.
 
 ## The ends of every front {#ends}
 
@@ -83,13 +83,13 @@ Certificates rely on both (obligations 2 and 4 of the [format](../solver/certifi
 - **The LPT counterexample**, $d = (6, 10)$, $c = (40, 20)$, $t = 5$, $p = 2$: six points, (160, 80),
   (200, 72), (240, 64), (260, 60), (280, 56) and (320, 48). A greedy schedule misses (260, 60). This
   front is proved in Lean by the kernel alone, for every table of central flights
-  (`Examples.lptCounterexample_front`, [§5](../proofs.qmd#node-s5)).
+  (`Examples.lptCounterexample_front`, {{< node "§5" >}}).
 - **Proposition 6.5**, non-symmetric: $d = (3, 19)$, $\bar d = (3, 11)$, $c = (5, 1)$, $t = 7$,
   $p = 4$, no central flights. The front is (10, 90), (14, 74), (18, 68), (22, 66), (26, 52),
   (34, 42), (38, 36), (42, 30), (50, 18), as (cost, makespan). An exhaustive search over all plans
   (937 million states) gives the same front. It is the instance on which waiting is harmful: the
   role-load bound alone stays below the front, and two of its gaps are closed only by the `search`
-  kind ([Proposition 6.5](../proofs.qmd#node-proposition-6-5)).
+  kind ({{< node "Proposition 6.5" >}}).
 - **Zero costs**, $n = 1$, $d_1 = 1$, $c_1 = 0$, $t = 5$, $p = 3$: the front is the single point
   (0, 6), and plans with more than $s$ landings also reach it (the remark under
   [Corollary 4.8](../proofs.qmd#node-corollary-4-8)).

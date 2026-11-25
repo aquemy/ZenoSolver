@@ -30,7 +30,54 @@ main p code, main li code, main dt code, main dd code {
   overflow-x: auto;
   border-left: 3px solid var(--zs-rule);
   padding: 0.2em 0 0.2em 1em;
-  margin: 0.8em 0 1.4em;
+  margin: 0.4em 0 1.4em;
+}
+
+/* Under a node's title, its one badge; under its statement, the line naming its Lean
+   declarations. The proof, the remarks and the Lean source are closed <details>. */
+.node-badge {
+  margin-top: -0.4em;
+}
+.node-gap {
+  font-size: 0.9em;
+  color: var(--zs-ink-2);
+  margin-left: 0.3em;
+}
+.node-lean {
+  font-size: 0.9em;
+  color: var(--zs-ink-2);
+  margin: -0.3em 0 0.5em;
+}
+.node-lean a {
+  color: inherit;
+}
+details.node-more {
+  margin: 0.25em 0;
+}
+details.node-more > summary {
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--zs-ink-2);
+  width: fit-content;
+}
+details.node-more > summary:hover {
+  color: var(--zs-ink);
+}
+details.node-more[open] {
+  margin-bottom: 0.8em;
+}
+details.node-more[open] > summary {
+  margin-bottom: 0.5em;
+}
+
+/* The main results at the top of the blueprint. */
+.main-results dt {
+  font-weight: 400;
+  margin-top: 0.9em;
+}
+.main-results dd {
+  margin-left: 1.2em;
+  margin-bottom: 0;
 }
 
 /* Wide display equations scroll in their own box on narrow screens. */

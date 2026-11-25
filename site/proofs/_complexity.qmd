@@ -5,28 +5,19 @@ dynamic programs are pseudo-polynomial. None of it is formalized.
 
 ### Theorem 8.1 {#node-theorem-8-1}
 
-**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** $p$ in the input · **Uses** [2.4](#node-lemma-2-4)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §8).
-
 **Theorem 8.1.** Deciding $M(X) \le 2T$, with $d$, $X$, $p$ and $T$ as input, is strongly NP-complete.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* Membership: guess the partition and a parity matrix, and check Definition 2.2. Hardness, from
-3-Partition, which is strongly NP-complete: given integers $a_1,\dots,a_{3m}$ with $B/4 < a_i < B/2$ and
-$\sum_i a_i = mB$, can they be split into $m$ triples of sum $B$? Take $3m$ cities with $d_i = a_i$, $p = m$
-and $t = 2m$ (so $s = 3m$), $X$ containing every city once, and $T = B$. Each city lies in one group, so every
-component of $H$ is one plane with its cities, and admissibility makes every group odd (Lemma 2.4). A
-3-partition gives $m$ triples, odd groups of duration $B$. Conversely, groups of duration at most $B$ summing
-to $mB$ all have duration exactly $B$; a group of one or two items has duration below $B$ and one of four or
-more above $B$, so all groups are triples. The numbers are those of the 3-Partition instance, so the reduction
-preserves strong NP-hardness. $\square$
-:::
-:::
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
 
-::: {.content-visible unless-format="html"}
+**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Hypotheses** $p$ in the input · **Uses** [2.4](#node-lemma-2-4)
+
 *Proof.* Membership: guess the partition and a parity matrix, and check Definition 2.2. Hardness, from
 3-Partition, which is strongly NP-complete: given integers $a_1,\dots,a_{3m}$ with $B/4 < a_i < B/2$ and
 $\sum_i a_i = mB$, can they be split into $m$ triples of sum $B$? Take $3m$ cities with $d_i = a_i$, $p = m$
@@ -36,23 +27,30 @@ component of $H$ is one plane with its cities, and admissibility makes every gro
 to $mB$ all have duration exactly $B$; a group of one or two items has duration below $B$ and one of four or
 more above $B$, so all groups are triples. The numbers are those of the 3-Partition instance, so the reduction
 preserves strong NP-hardness. $\square$
-:::
+
+```{=html}
+</details>
+```
 
 :::
 
 ### Proposition 8.2 (fixed $p$) {#node-proposition-8-2}
 
-**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [2.2](#node-definition-2-2), [2.4](#node-lemma-2-4)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §8).
-
 **Proposition 8.2 (fixed $p$).** For $p = 2$ the problem stays NP-complete, even with positive durations. For
 every fixed $p$ it is solvable in time polynomial in $n$, $s$ and $T$. So for fixed $p$ it is weakly
 NP-complete.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Uses** [2.2](#node-definition-2-2), [2.4](#node-lemma-2-4)
+
 *Proof.* Hardness, from Partition: given $a_1,\dots,a_m$ with sum $2B$, is there a subset of sum $B$? Choose an
 odd $r \ge m$, add $2r - m$ zero items, and give each of the $2r$ items its own city of duration $a_i + K$,
 with $K = B + 1$. Let $p = 2$, $t = r + 1$ (so $s = 2r$) and $T = B + rK$. Distinct cities make both groups
@@ -66,36 +64,33 @@ $[0, T]$), the parities of $|X_k|$ and of $h_k$, and whether each group is non-e
 For city $i$, choose how its $X(i)$ copies split among the planes ($O(s^{p-1})$ ways), and an even set of
 planes that received a copy, on which $h_{k,i} = 1$ (at most $2^{p-1}$ ways). Conditions (h1) and (h3) are
 local to the city, and (h2) is checked at the end. The time is $O(n\,(T+1)^p\, 8^p\, s^{p-1}\, 2^p)$. $\square$
-:::
-:::
 
-::: {.content-visible unless-format="html"}
-*Proof.* Hardness, from Partition: given $a_1,\dots,a_m$ with sum $2B$, is there a subset of sum $B$? Choose an
-odd $r \ge m$, add $2r - m$ zero items, and give each of the $2r$ items its own city of duration $a_i + K$,
-with $K = B + 1$. Let $p = 2$, $t = r + 1$ (so $s = 2r$) and $T = B + rK$. Distinct cities make both groups
-odd (Lemma 2.4). If a subset of sum $B$ exists, pad both sides with zero items to $r$ items each, which
-$r \ge m$ allows: two odd groups of duration $B + rK$. Conversely, the two groups have duration exactly
-$B + rK$ each, since they sum to $2B + 2rK$. A group with $r + 1$ items or more has duration at least
-$(r+1)K > B + rK$, so both groups have $r$ items, and the original items of one of them sum to $B$.
-
-Algorithm for fixed $p$: process the cities one at a time, with states made of the group durations (each in
-$[0, T]$), the parities of $|X_k|$ and of $h_k$, and whether each group is non-empty: $(T+1)^p 8^p$ states.
-For city $i$, choose how its $X(i)$ copies split among the planes ($O(s^{p-1})$ ways), and an even set of
-planes that received a copy, on which $h_{k,i} = 1$ (at most $2^{p-1}$ ways). Conditions (h1) and (h3) are
-local to the city, and (h2) is checked at the end. The time is $O(n\,(T+1)^p\, 8^p\, s^{p-1}\, 2^p)$. $\square$
-:::
+```{=html}
+</details>
+```
 
 :::
 
 ### Corollary 8.3 {#node-corollary-8-3}
 
-**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [7.5](#node-theorem-7-5)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §8).
-
 **Corollary 8.3.** $E(T)$, and under (S) and (A1) the front, are computable in pseudo-polynomial time
 (Theorem 7.5). So computing the front is not strongly NP-hard unless P = NP. Whether deciding $E(T) \le C$ is
 NP-hard, with $t$ in unary as in PDDL, is not established here.
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §8 · **Uses** [7.5](#node-theorem-7-5)
+
+
+```{=html}
+</details>
+```
 
 :::

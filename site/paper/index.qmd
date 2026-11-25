@@ -249,9 +249,10 @@ Finally, [Conclusion and Perspectives](#sec-conclusion) closes with the open pro
 **Statements, proofs and formal status.** Results keep the numbering of the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md), which
 gives every proof in full. Each cited result links to its entry in the
-[blueprint](../proofs.qmd) and carries a badge derived from the Lean kernel: *machine-checked*
-when the whole statement is proved in Lean, *Lean definition* for a definition, and *informal*
-when the proof is written but not formalised. Here, proofs are sketched in a few sentences. A
+[blueprint](../proofs.qmd) and carries a badge from the claim ledger of the repository:
+*machine-checked* when Lean proves every assertion of the statement, *parts in Lean* when it proves
+part of it, *Lean definition* for a definition, and *informal* when the proof is written but not
+formalised. Here, proofs are sketched in a few sentences. A
 gentler introduction to the problem, on a small example, is on the [Problem](../problem.qmd)
 page.
 :::

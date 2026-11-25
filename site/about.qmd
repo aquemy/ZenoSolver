@@ -17,12 +17,16 @@ and the experiments. All are the work of **Alexandre Quemy**, in the repository
 
 {{< include _blueprint-stats.md >}}
 
-The blueprint's badges are computed when the site is built, from `collectAxioms` on the Lean
-declarations each node lists. A node is badged machine-checked only if the declarations that
-formalise its **whole** statement are axiom-clean theorems. Declarations covering only part of a
-statement are listed under it, with their own badges, and the node keeps the note's status. The
-generator stops if a declaration is missing or a label is not found in the note. The same badges
-appear next to every theorem cited in the [paper](paper/index.qmd).
+The blueprint's badges are computed when the site is built, from the claim ledger
+[`claims.toml`](https://github.com/aquemy/ZenoSolver/blob/master/claims.toml) and from
+`collectAxioms` on the Lean declarations. A statement is badged machine-checked only if the ledger
+records it so, which requires Lean to prove **every** assertion of it, and only if those
+declarations are axiom-clean theorems. When Lean proves part of a statement, the node is badged
+*parts in Lean*, lists those declarations, and says in one line what they miss. The generator stops
+if a declaration is missing, a label is not found in the note, or a machine-checked claim has an
+unclean declaration, and the claim graph's build checks that the ledger's cached statuses are the
+ones its history gives. The same badges appear next to every theorem cited in the
+[paper](paper/index.qmd).
 
 The compiled tools add trust in the Lean compiler and in an unverified parser
 ([trust base](solver/lean.qmd#trust)).

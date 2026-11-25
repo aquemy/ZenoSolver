@@ -18,8 +18,7 @@ quoted on the pages).
 
 from __future__ import annotations
 
-import json
-import subprocess
+import tomllib
 from collections import Counter
 from pathlib import Path
 
@@ -122,47 +121,16 @@ def history_table(frames: list[dict]) -> str:
     return "\n".join(rows) + "\n"
 
 
-KIND_SLUG = {"Definition": "def", "Lemma": "lem", "Theorem": "thm", "Proposition": "prop",
-             "Corollary": "cor", "Conjecture": "conj", "Statement": "claim"}
-STANDARD_AXIOMS = {"propext", "Classical.choice", "Quot.sound"}
-
-
-def claim_slug(label: str) -> str | None:
-    """The claims.toml slug of a blueprint label (Theorem 4.7 -> thm-4-7, §5 -> claim-5)."""
-    if label.startswith("§") and label[1:].isdigit():
-        return f"claim-{label[1:]}"
-    parts = label.split(" ", 1)
-    if len(parts) == 2 and parts[0] in KIND_SLUG and parts[1][:1].isdigit():
-        return f"{KIND_SLUG[parts[0]]}-{parts[1].split(' ')[0].replace('.', '-')}"
-    return None
-
-
-def divergence(nodes: list[dict]) -> str:
-    """Claims the ledger counts as machine-checked while the blueprint does not badge them so,
-    because the Lean declaration covers only part of the note's statement."""
-    import tomllib
-
-    registry = tomllib.loads((SITE / "blueprint.toml").read_text(encoding="utf-8"))
-    lean = json.loads((SITE / "lean-status.json").read_text(encoding="utf-8"))["decls"]
-    status = {n["id"]: n["effective_status"] for n in nodes}
-    rows = []
-    for node in registry["node"]:
-        slug = claim_slug(node["label"])
-        if not slug or status.get(slug) != "math.machine-checked":
-            continue
-        names = node.get("lean", [])
-        if names and all(set(lean[n]["axioms"]) <= STANDARD_AXIOMS for n in names):
-            continue
-        anchor = "node-" + "".join(c if c.isalnum() else "-" for c in node["label"].lower()).strip("-")
-        anchor = "-".join(filter(None, anchor.split("-")))
-        rows.append(f"[{node['label']}](proofs.qmd#{anchor}) (`{slug}`)")
-    if not rows:
-        return ""
-    return ("::: {.callout-note appearance=\"simple\"}\n**Where the graph and the blueprint differ.** "
-            "The ledger counts " + ", ".join(rows) + " as machine-checked: its entry records the Lean "
-            "form, which is narrower than the note's statement. The blueprint badges a node "
-            "machine-checked only when its Lean covers the whole statement, so it lists these "
-            "declarations as formalised parts and keeps the note's status.\n:::\n")
+def check_status_cache(nodes: list[dict]) -> None:
+    """The blueprint's badges read the `status` field of claims.toml, a cache of the effective
+    status. Fail if the history gives any claim another status, so the badges cannot drift."""
+    cache = {slug: entry.get("status")
+             for slug, entry in tomllib.loads((ROOT / "claims.toml").read_text(encoding="utf-8"))["claims"].items()}
+    stale = sorted(f"{n['id']} (cache {cache[n['id']]}, history {n['effective_status']})"
+                   for n in nodes if n["id"] in cache and cache[n["id"]] != n["effective_status"])
+    if stale:
+        raise SystemExit("graph: the status cache of claims.toml disagrees with the history for "
+                         + ", ".join(stale) + "; regenerate it with `claimgraph status`")
 
 
 def main() -> None:
@@ -212,7 +180,7 @@ def main() -> None:
         f"{len(history) - len(dated):,} commits of the history (features, fixes, documentation) are left "
         "out.\n",
         encoding="utf-8")
-    (SITE / "_graph-divergence.md").write_text(divergence(nodes), encoding="utf-8")
+    check_status_cache(nodes)
     sizes = {p.name: p.stat().st_size for p in OUT.iterdir()}
     print(f"graph: {len(graph.nodes)} claims, {len(frames)} frames, {sizes}")
 

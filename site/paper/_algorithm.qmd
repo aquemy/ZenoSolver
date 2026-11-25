@@ -300,8 +300,11 @@ integration checks on the golden instances.
 **What is trusted.** A machine-checked statement is a Lean theorem whose axioms are among
 `propext`, `Classical.choice` and `Quot.sound`, which an audit of every declaration reads when the
 site is built. The executables add the Lean compiler and the code that parses the files, which is
-not verified. The badges of this paper come from that audit. Among the results of the
-non-symmetric section, Theorems 6.1 and 6.9 are machine-checked as well; its examples and
-propositions, and those of the general section, are proved in the theory note or computed. The
+not verified. The badges of this paper come from the claim ledger of the repository, which badges a
+statement machine-checked only when Lean proves every assertion of it, and from that audit. Among
+the results of the non-symmetric section, Theorems 6.1 and 6.9 have parts in Lean: the role loads
+bounded by the makespan, and schedulable domination on the template's closed form, the forms the
+checker uses; its examples and propositions, and those of the general section, are proved in the
+theory note or computed. The
 experiment [E8](#sec-e8) tests
 both checkers against thousands of corrupted certificates.

@@ -54,7 +54,7 @@ growing like $(2n)^{t-p}$, and the gap search enumerates role configurations wit
 matching. Both stop at limits (2,000,000 states and 50,000,000 transitions per level, 20,000,000
 search steps per gap, 30 s of gap refinement; [`SolveOptions`](../solver/cli.qmd#limits)). Beyond
 them `zeno` reports the open gaps with their lower bounds instead of an exact front. The instance of
-[Proposition 6.5](../proofs.qmd#node-proposition-6-5) ($n = 2$, $t = 7$, $p = 4$) closes in a few
+{{< node "Proposition 6.5" >}} ($n = 2$, $t = 7$, $p = 4$) closes in a few
 milliseconds. Keep $t - p$ small for exact non-symmetric fronts.
 
 ## The Lean tools

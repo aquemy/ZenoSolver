@@ -469,12 +469,12 @@ window.Quarto = {
 <p><strong>2 lines, symmetric:</strong> durations, then costs.</p>
 <pre class="text"><code>6 10
 40 20</code></pre>
-<p>This is <code>tests/golden/data/lpt-counterexample.dat</code>: <span class="math inline">\(d = (6, 10)\)</span>, <span class="math inline">\(c = (40, 20)\)</span>. With <code>-n 2 -t 5 -p 2</code> it is the smallest instance on which a greedy schedule of the landings misses a front point (<a href="../proofs.html#node-s5">§5</a>).</p>
+<p>This is <code>tests/golden/data/lpt-counterexample.dat</code>: <span class="math inline">\(d = (6, 10)\)</span>, <span class="math inline">\(c = (40, 20)\)</span>. With <code>-n 2 -t 5 -p 2</code> it is the smallest instance on which a greedy schedule of the landings misses a front point (<a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#5-why-the-per-ppp-greedy-of-both-papers-is-not-exact" title="In the theory note, §5">§5</a>).</p>
 <p><strong>3 lines, possibly non-symmetric:</strong> <span class="math inline">\(C_I\)</span>-side durations <span class="math inline">\(d\)</span>, <span class="math inline">\(C_G\)</span>-side durations <span class="math inline">\(\bar d\)</span>, costs.</p>
 <pre class="text"><code>3 19
 3 11
 5 1</code></pre>
-<p>This is the instance of <a href="../proofs.html#node-proposition-6-5">Proposition 6.5</a> (<code>zeno -n 2 -t 7 -p 4 -d prop65.dat</code>), on which waiting is harmful. A 3-line file with equal first and second lines is symmetric.</p>
+<p>This is the instance of <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations" title="In the theory note, §6.2">Proposition 6.5</a> (<code>zeno -n 2 -t 7 -p 4 -d prop65.dat</code>), on which waiting is harmful. A 3-line file with equal first and second lines is symmetric.</p>
 <p>Reading rules (<code>src/zeno/legacy_input.cpp</code>):</p>
 <ul>
 <li>tokens are separated by whitespace, and every non-blank line must have exactly <span class="math inline">\(n\)</span> of them; blank lines are skipped, so a trailing newline or blank line is harmless (the golden instance <code>trailing-newline</code> checks it);</li>

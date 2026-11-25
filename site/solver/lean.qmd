@@ -24,7 +24,7 @@ It reads a certificate of either [version](certificates.qmd) and prints one of t
   accepted: the 9 points are the Pareto front of all feasible plans (version 2, fastest relaxed, 0 roles, 0 lagrangian, 6 balanced and 2 search gap(s), the others relaxed: for every central flight table satisfying A1-NS; ZenoFront.Cert2.check_sound)
   ```
 
-  (the second is the instance of [Proposition 6.5](../proofs.qmd#node-proposition-6-5));
+  (the second is the instance of {{< node "Proposition 6.5" >}});
 - `rejected: <reason>` (exit code 1): the file is malformed or an obligation fails.
 
 Only `accepted` is backed by the theorem. The reasons are diagnostics, recomputed outside the
@@ -35,7 +35,7 @@ What it verifies:
 | Version | Gap kinds | Fastest point | Soundness theorem |
 |---|---|---|---|
 | 1 (symmetric) | `relaxed`, `forest` | closed form $2 d_{\min} \lceil s/p \rceil$ | [`Cert.check_sound`](../proofs.qmd#node-theorem-9-1): if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times, `Cert.check_sound_anywhere` to planes ending anywhere (PDDL without plane goals). |
-| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan (`schedulableDomination_all`). When a certificate lists `EO`, the checker also tests that every listed plan is event-ordered (`Cert2.check_sound_EO`). |
+| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on `schedulableDomination_all`, the Lean form of [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan. When a certificate lists `EO`, the checker also tests that every listed plan is event-ordered (`Cert2.check_sound_EO`). |
 
 For `forest` gaps the Lean checker computes $E$ with the σ-DP over the non-dominated cities, or with
 the tree DP when it estimates that cheaper (`useTreeDP`); it proves only the lower-bound direction,
@@ -96,12 +96,13 @@ What a verdict of `zeno-check`, or a front of `zeno-front`, relies on:
    verdict also trusts the Lean compiler and runtime, not only the kernel. To avoid that, a
    certificate can be checked by the kernel with `decide +kernel`, as
    `lean/ZenoFront/Examples.lean` does for two small certificates
-   ([§5](../proofs.qmd#node-s5)). That is practical for small certificates only.
+   ({{< node "§5" >}}). That is practical for small certificates only.
 
 The listed plans of a certificate are re-simulated by the checker, so a solver bug in building
 plans can only cause a rejection. [Theorem 4.1](../proofs.qmd#node-theorem-4-1), the
-achievability construction, is not needed for soundness. It is machine-checked anyway, and it is
-what makes `zeno-front`'s points achievable.
+achievability construction, is not needed for soundness. Its Lean form, `Admissible.exists_plan`
+(a plan of cost $c(X)$ and makespan $\max_k \ell(X_k)$), is machine-checked anyway, and it is what
+makes `zeno-front`'s points achievable.
 
 ## Timings
 

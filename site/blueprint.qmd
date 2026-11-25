@@ -37,6 +37,7 @@ format:
           \newunicodechar{≥}{\zs@sym{\geq}{"2265}}
           \newunicodechar{≤}{\zs@sym{\leq}{"2264}}
           \newunicodechar{≠}{\zs@sym{\neq}{"2260}}
+          \newunicodechar{↗}{\zs@sym{\nearrow}{"2197}}
           \makeatother
     code-overflow: wrap
 ---
@@ -44,11 +45,21 @@ format:
 This document is the PDF form of the blueprint at <https://quemy.info/ZenoSolver/proofs.html>. It
 follows the theory note `doc/theory/exact-front.md` of the ZenoSolver repository
 (<https://github.com/aquemy/ZenoSolver>) statement by statement: the statement, the note's proof,
-and the Lean declarations of `lean/ZenoFront` with their status. *Machine-checked* means that
-every declaration formalising the statement uses no axiom beyond `propext`, `Classical.choice` and
-`Quot.sound`; *Lean definition* marks definitions; *informal* means the statement is not in Lean.
+and the Lean declarations of `lean/ZenoFront` with their status. The status follows the claim
+ledger `claims.toml`: *machine-checked* means that Lean proves every assertion of the statement,
+with no axiom beyond `propext`, `Classical.choice` and `Quot.sound`; *parts in Lean* that it proves
+part of it, and a line says what is missing; *Lean definition* marks definitions; *informal* means
+the statement is not in Lean.
 
 {{< include _blueprint-stats.md >}}
+
+{{< include proofs/_progress.md >}}
+
+## Main results {#main-results}
+
+{{< include proofs/_main.md >}}
+
+## Status of every node {#summary}
 
 {{< include proofs/_summary.md >}}
 
