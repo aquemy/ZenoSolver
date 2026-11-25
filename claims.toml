@@ -80,6 +80,14 @@ lean      = "ZenoFront.Leg, ZenoFront.Plan, ZenoFront.Flies, ZenoFront.IsRoute, 
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.def-assumptions]
+kind      = "definition"
+statement = "Definition (assumptions), new in revision 3: (S) d̄ = d. (A1) d_i + d_j ≤ dc(i, j). (A1-NS) min(d_i + d_j, d̄_i + d̄_j) ≤ dc(i, j). (AΔ) dur(a, b) ≤ dur(a, x) + dur(x, b) whenever a ≠ b and the three flights exist. (H) d_j ≤ d_i + dc(i, j) and d_i ≤ dc(i, j) + d_j for all central i, j (the triangles through C_I, and under (S) through C_G)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Network.A1, ZenoFront.Network.A1NS, ZenoFront.Network.ATri, ZenoFront.Network.ATriHub"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
