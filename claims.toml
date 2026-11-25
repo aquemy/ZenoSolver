@@ -109,9 +109,10 @@ created   = "2026-11-23"
 
 [claims.lem-2-6]
 kind         = "lemma"
-statement    = "Lemma 2.6 (link forest) [LF]: a partition is admissible iff it has a link forest, and an admissible partition has one with at most one edge of each label at each plane."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.admissible_iff_exists_linkForest"
+statement    = "Lemma 2.6 (link forests): A partition is admissible iff it has a link forest."
+status       = "math.machine-checked"
+lean         = "ZenoFront.admissible_iff_exists_linkForest"
+lean_partial = "ZenoFront.Admissible.exists_linkForest, ZenoFront.admissible_forestPartition"
 paper        = "Lemma 2.6, doc/theory/exact-front.md §2"
 created      = "2026-11-23"
 
