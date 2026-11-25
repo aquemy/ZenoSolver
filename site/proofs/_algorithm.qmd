@@ -8,7 +8,7 @@ on them.
 ### Proposition 7.1 {#node-proposition-7-1}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves it in the original units; the rescaling by g is not formalised.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -16,7 +16,7 @@ on them.
 $E(-1) = \infty$, makespans in units of $g$.
 
 ::: {.node-lean}
-Lean: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268), [`minimal_achievable_iff_multisetPoints` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L1030-L1037)
+Parts in Lean: [`minimal_admissiblePoints_iff` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268)
 :::
 
 ```{=html}
@@ -41,7 +41,9 @@ $M(Y) = 2T$ (otherwise $c(Y) \ge E(T-1) > E(T)$), and then $c(Y) = E(T)$. $\squa
 
 **In Lean.** `minimal_admissiblePoints_iff`: `(C, 2T)` is a minimal admissible point iff `E(T) = C` and `E(T') > C` for every `T' < T`; with Corollary 4.8 this is the proposition.
 
-**Lean** `ZenoFront.minimal_admissiblePoints_iff` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.minimal_admissiblePoints_iff` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The minimal admissible points**: `(C, M)` is minimal iff `M = 2T` with `E(T) = C` and
@@ -54,7 +56,9 @@ theorem minimal_admissiblePoints_iff (N : Network n) (c : Fin n → ℕ) {t : �
 
 [`lean/ZenoFront/Solver.lean`, lines 209–268](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L209-L268){.lean-src} (statement only; the proof is elided)
 
-**Lean** `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.minimal_achievable_iff_multisetPoints` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Corollary 4.8 (front characterisation), as in the note.** Under (S) and (A1), with
@@ -77,14 +81,14 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 ### Lemma 7.2 {#node-lemma-7-2}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves that G is the least cost and when it is infinite; not that G is non-increasing in τ.]{.node-gap}
 :::
 
 ::: {.node-body}
 **Lemma 7.2.** $G[m][\tau] = \min\{c(Y) : |Y| = m,\ \delta(Y) \le \tau\}$, and $G$ is non-increasing in $\tau$.
 
 ::: {.node-lean}
-Lean: [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/OnePlane.lean#L125-L139)
+Parts in Lean: [`isLeast_oneplane` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/OnePlane.lean#L125-L139)
 :::
 
 ```{=html}
@@ -104,7 +108,9 @@ $\tau - d_i$, and adding $i$ to such a multiset gives an $m$-multiset within $\t
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.isLeast_oneplane` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.isLeast_oneplane` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Specification of the one-plane table.** When some multiset of `m` cities has load at most
@@ -127,7 +133,7 @@ theorem isLeast_oneplane {m T : ℕ} (hne : ∃ Y : Multiset (Fin n), Y.card = m
 ### Proposition 7.3 {#node-proposition-7-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves L ≤ E ≤ U₂; the chains bound U₃ is not formalised.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -159,7 +165,7 @@ Lemma 2.6. $\square$
 
 **In Lean.** Lean proves `L(T) ≤ E(T) ≤ U₂(T)`, with `U₂` the pairs bound used by `zeno-front`. The chains bound `U₃` is not formalized.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.relaxedBoundAt_le_minCost` [machine-checked]{.badge .ok}
 
@@ -221,7 +227,7 @@ corresponding $G$ value (Lemma 7.2). So the forest costs at least some combinati
 ### Theorem 7.5 {#node-theorem-7-5}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves that the DP equals E(T); not its time and memory bounds.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -229,7 +235,7 @@ corresponding $G$ value (Lemma 7.2). So the forest costs at least some combinati
 $O(n\,q_{\max}^2 s^2 T + p\,q_{\max} s^2)$ time and $O(q_{\max} s T + n q_{\max} s + p s)$ memory per level.
 
 ::: {.node-lean}
-Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L488-L514)
+Parts in Lean: [`treeBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L488-L514)
 :::
 
 ```{=html}
@@ -287,7 +293,9 @@ pseudo-polynomial, since $T_{\rm hi} \le d_{\max}\kappa$.
 
 **In Lean.** Exactness of the link-forest DP (`For ≥ E` and `For ≤ E`); the complexity statement is not formalized.
 
-**Lean** `ZenoFront.treeBoundAt_eq_minCost` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.treeBoundAt_eq_minCost` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The tree DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the tree-DP bound of the
@@ -311,7 +319,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 ### Theorem 7.6 (σ-DP) {#node-theorem-7-6}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves that the σ-DP equals E(T) when it runs on the non-dominated cities only.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -319,7 +327,7 @@ theorem treeBoundAt_eq_minCost (d c : Fin n → ℕ) {p t Tmax T : ℕ} (hp : 1 
 weight $E(T)$.
 
 ::: {.node-lean}
-Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L143-L190)
+Parts in Lean: [`sigmaBoundAt_eq_minCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Solver.lean#L143-L190)
 :::
 
 ```{=html}
@@ -368,7 +376,9 @@ the default otherwise.
 
 **In Lean.** The σ-DP's states are restricted to subsets of the non-dominated cities of size at most `min(p − 1, t − p)` (Lemma 2.8); every finite value is attained by groups whose witness sets form a parity witness, so no link forest is needed.
 
-**Lean** `ZenoFront.sigmaBoundAt_eq_minCost` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.sigmaBoundAt_eq_minCost` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The σ-DP is exact.** At a level `T ≤ Tmax`, with `1 ≤ p ≤ t`, the bound the checker
@@ -480,10 +490,6 @@ the cost range is narrow.
 **Proposition 7.9 (dominance) [DOM].** Let $i \ne i'$ with $d_{i'} \le d_i$ and $c_{i'} \le c_i$. Removing
 city $i$ leaves $E(T)$ and $L(T)$ unchanged at every $T$. Under (S) and (A1), it leaves the front unchanged.
 
-::: {.node-lean}
-Parts in Lean: [`domRep_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AdmissibleBound.lean#L182-L199)
-:::
-
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
@@ -521,9 +527,9 @@ Applied repeatedly: keep one city per class of equal $(d, c)$, and drop every ci
 
 **In Lean.** Merging cities into non-dominated representatives keeps the bounds valid (`domRep_le`); the front statement is not formalized.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Related declarations.** The ledger does not list these for the statement.
 
-*Part* `ZenoFront.domRep_le` [machine-checked]{.badge .ok}
+*Related* `ZenoFront.domRep_le` [machine-checked]{.badge .ok}
 
 ```lean
 theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
@@ -542,7 +548,7 @@ theorem domRep_le (d c : Fin n → ℕ) (i : Fin n) :
 ### Proposition 7.10 (ends of the front) {#node-proposition-7-10}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves the two lower bounds; not that they are attained.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -613,7 +619,7 @@ shorter than $[0, d_{\max}\hat m]$.
 
 **In Lean.** The two lower bounds the checker uses (obligations 2 and 4): every plan has makespan at least `2 d_min ⌈s/p⌉` and cost at least `s c_min`. The attainment half is not formalized.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.Feasible.minOf_le_makespan` [machine-checked]{.badge .ok}
 

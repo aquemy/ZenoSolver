@@ -35,7 +35,7 @@ What it verifies:
 | Version | Gap kinds | Fastest point | Soundness theorem |
 |---|---|---|---|
 | 1 (symmetric) | `relaxed`, `forest` | closed form $2 d_{\min} \lceil s/p \rceil$ | [`Cert.check_sound`](../proofs.qmd#node-theorem-9-1): if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times, `Cert.check_sound_anywhere` to planes ending anywhere (PDDL without plane goals). |
-| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan (`schedulableDomination_all`). When a certificate lists `EO`, the checker also tests that every listed plan is event-ordered (`Cert2.check_sound_EO`). |
+| 2 (non-symmetric) | `relaxed`, `roles`, `lagrangian`, `balanced`, `search` | `closed`, `relaxed`, `roles`, `balanced`, `search` | [`Cert2.check_sound`](../proofs.qmd#node-version-2-checker): the same for every feasible plan; under (A1-NS) when a kind other than `relaxed` is used. `search` rests on `schedulableDomination_all`, the Lean form of [Theorem 6.9](../proofs.qmd#node-theorem-6-9) for every plan. When a certificate lists `EO`, the checker also tests that every listed plan is event-ordered (`Cert2.check_sound_EO`). |
 
 For `forest` gaps the Lean checker computes $E$ with the σ-DP over the non-dominated cities, or with
 the tree DP when it estimates that cheaper (`useTreeDP`); it proves only the lower-bound direction,
@@ -100,8 +100,9 @@ What a verdict of `zeno-check`, or a front of `zeno-front`, relies on:
 
 The listed plans of a certificate are re-simulated by the checker, so a solver bug in building
 plans can only cause a rejection. [Theorem 4.1](../proofs.qmd#node-theorem-4-1), the
-achievability construction, is not needed for soundness. It is machine-checked anyway, and it is
-what makes `zeno-front`'s points achievable.
+achievability construction, is not needed for soundness. Its Lean form, `Admissible.exists_plan`
+(a plan of cost $c(X)$ and makespan $\max_k \ell(X_k)$), is machine-checked anyway, and it is what
+makes `zeno-front`'s points achievable.
 
 ## Timings
 

@@ -44,14 +44,14 @@
 "Lemma 1.1": {
 "anchor": "node-lemma-1-1",
 "title": "Lemma 1.1 (dominating subset)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
 "Lemma 2.1": {
 "anchor": "node-lemma-2-1",
 "title": "Lemma 2.1",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
@@ -93,8 +93,8 @@
 "Lemma 2.6": {
 "anchor": "node-lemma-2-6",
 "title": "Lemma 2.6 (link forest)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Corollary 2.7": {
@@ -107,8 +107,8 @@
 "Lemma 2.8": {
 "anchor": "node-lemma-2-8",
 "title": "Lemma 2.8 (few touched cities)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Lemma 2.9": {
@@ -121,36 +121,36 @@
 "Lemma 3.1": {
 "anchor": "node-lemma-3-1",
 "title": "Lemma 3.1 (cleaning)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
 "Lemma 3.2": {
 "anchor": "node-lemma-3-2",
 "title": "Lemma 3.2 (counting)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Lemma 3.3": {
 "anchor": "node-lemma-3-3",
 "title": "Lemma 3.3 (segment durations)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
 "Lemma 3.4": {
 "anchor": "node-lemma-3-4",
 "title": "Lemma 3.4 (relaxation)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Theorem 4.1": {
 "anchor": "node-theorem-4-1",
 "title": "Theorem 4.1",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Definition 4.2": {
@@ -163,7 +163,7 @@
 "Lemma 4.3": {
 "anchor": "node-lemma-4-3",
 "title": "Lemma 4.3 (direct selection)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
@@ -226,15 +226,15 @@
 "Corollary 4.12": {
 "anchor": "node-corollary-4-12",
 "title": "Corollary 4.12",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
 "Theorem 6.1": {
 "anchor": "node-theorem-6-1",
 "title": "Theorem 6.1 (converse to role configurations)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Lemma 6.2": {
@@ -247,7 +247,7 @@
 "Lemma 6.3": {
 "anchor": "node-lemma-6-3",
 "title": "Lemma 6.3 (template)",
-"lean": "informal, parts in Lean",
+"lean": "informal",
 "class": "informal",
 "note": "P"
 },
@@ -261,7 +261,7 @@
 "Proposition 6.6": {
 "anchor": "node-proposition-6-6",
 "title": "Proposition 6.6 (imbalance-vector DP)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
@@ -275,42 +275,42 @@
 "Lemma 6.8": {
 "anchor": "node-lemma-6-8",
 "title": "Lemma 6.8 (event order)",
-"lean": "informal, parts in Lean",
+"lean": "informal",
 "class": "informal",
 "note": "P"
 },
 "Theorem 6.9": {
 "anchor": "node-theorem-6-9",
 "title": "Theorem 6.9 (schedulable domination)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Corollary 6.10": {
 "anchor": "node-corollary-6-10",
 "title": "Corollary 6.10 (non-symmetric front)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
 "Proposition 7.1": {
 "anchor": "node-proposition-7-1",
 "title": "Proposition 7.1",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Lemma 7.2": {
 "anchor": "node-lemma-7-2",
 "title": "Lemma 7.2",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Proposition 7.3": {
 "anchor": "node-proposition-7-3",
 "title": "Proposition 7.3",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
@@ -324,15 +324,15 @@
 "Theorem 7.5": {
 "anchor": "node-theorem-7-5",
 "title": "Theorem 7.5",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Theorem 7.6": {
 "anchor": "node-theorem-7-6",
 "title": "Theorem 7.6 (σ-DP)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Lemma 7.7": {
@@ -352,14 +352,14 @@
 "Proposition 7.9": {
 "anchor": "node-proposition-7-9",
 "title": "Proposition 7.9 (dominance)",
-"lean": "informal, parts in Lean",
+"lean": "informal",
 "class": "informal",
 "note": "P"
 },
 "Proposition 7.10": {
 "anchor": "node-proposition-7-10",
 "title": "Proposition 7.10 (ends of the front)",
-"lean": "informal, parts in Lean",
+"lean": "parts in Lean",
 "class": "informal",
 "note": "P"
 },
@@ -394,8 +394,8 @@
 "Theorem 9.1": {
 "anchor": "node-theorem-9-1",
 "title": "Theorem 9.1 (end to end)",
-"lean": "machine-checked",
-"class": "ok",
+"lean": "parts in Lean",
+"class": "informal",
 "note": "P"
 },
 "Version 2 checker": {

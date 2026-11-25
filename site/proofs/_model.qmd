@@ -355,7 +355,7 @@ any $Q$, with $p$ replaced by $|Q|$.
 ### Lemma 1.1 (dominating subset) {#node-lemma-1-1}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves Min S = Min S′, even without finiteness; not that every point is dominated by a minimal one.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -390,7 +390,7 @@ of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{M
 
 **In Lean.** The first claim, `Min S = Min S'`, is machine-checked without the finiteness hypothesis. The last claim (every point is dominated by a minimal one) uses finiteness and is not stated in Lean.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.minimal_iff_of_subset_of_dominated` [machine-checked]{.badge .ok}
 

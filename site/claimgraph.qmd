@@ -34,7 +34,8 @@ The statuses are those of the ledger:
 - **disproved**: refuted by a counterexample, like the conjecture that shuttle triples complete
   the non-symmetric front (Conjecture 6.7), or a converse under (S) alone (Example 4.13).
 
-{{< include _graph-divergence.md >}}
+The blueprint's badges follow the same statuses: its build fails if the status cached in
+`claims.toml` differs from the one this history gives.
 
 ## How it is built
 

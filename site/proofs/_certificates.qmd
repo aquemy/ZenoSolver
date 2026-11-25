@@ -6,14 +6,14 @@ that the list is the front. The Lean checker is the executable form of Theorem 9
 ### Theorem 9.1 (end to end) {#node-theorem-9-1}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves it for the gap bounds its own checker supports (relaxed, and forest under (A1)); not for the potentials of Lemmas 9.2 and 9.3.]{.node-gap}
 :::
 
 ::: {.node-body}
 **Theorem 9.1 (end to end) [X3].** If obligations 1–4 hold, then $\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
 
 ::: {.node-lean}
-Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404)
+Parts in Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404)
 :::
 
 ```{=html}
@@ -38,7 +38,9 @@ coordinates. $\square$
 
 **In Lean.** `Cert.check_sound`: if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times and `Cert.check_sound_anywhere` to planes ending anywhere.
 
-**Lean** `ZenoFront.Cert.check_sound` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.Cert.check_sound` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Soundness of the checker.** If `check` accepts a certificate, its points are exactly the
@@ -67,9 +69,10 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 
 ::: {.node-body}
 For non-symmetric instances (certificate format version 2): if `Cert2.check` accepts, the listed
-points are exactly the Pareto front of every feasible plan. Gap kinds `relaxed` (no assumption),
-`roles`, `lagrangian`, `balanced` (under (A1-NS), through Theorem 6.1) and `search` (under (A1-NS),
-through Theorem 6.9 for every plan) are verified.
+points are exactly the Pareto front of every feasible plan, for every table of central flights
+that satisfies (A1-NS) if the certificate lists it, and for every table otherwise. Gap kinds
+`relaxed` (no assumption), `roles`, `lagrangian`, `balanced` (under (A1-NS), through the Lean form
+of Theorem 6.1) and `search` (under (A1-NS), through the Lean form of Theorem 6.9) are verified.
 
 ::: {.node-lean}
 Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/CheckerV2.lean#L486-L576)

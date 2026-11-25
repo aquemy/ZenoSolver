@@ -6,7 +6,7 @@ the relaxation $L$ that the checker uses without any assumption on central fligh
 ### Lemma 3.1 (cleaning) {#node-lemma-3-1}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean extracts the legs a cleaned journey keeps; it does not rewrite the journeys.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -41,7 +41,7 @@ arriving in $C_G$ other than the last. $\square$
 
 **In Lean.** Lean does not rewrite journeys: `exists_transfer` extracts, from every passenger's route, the leg `C_I → x` followed by a leg leaving `x` not towards `C_I` that the cleaned journey would keep.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.exists_transfer` [machine-checked]{.badge .ok}
 
@@ -67,7 +67,7 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 ### Lemma 3.2 (counting) {#node-lemma-3-2}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves the segment count; not its consequence, at least s central landings.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -75,7 +75,7 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 central cities.
 
 ::: {.node-lean}
-Lean: [`Feasible.le_sum_hubArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165)
+Parts in Lean: [`Feasible.le_sum_hubArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165)
 :::
 
 ```{=html}
@@ -117,7 +117,9 @@ No cleaning and no segment types are needed.
 
 **In Lean.** Leg counting along each route: `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`, and every passenger leaves `C_I` and reaches `C_G` on its own leg.
 
-**Lean** `ZenoFront.Feasible.le_sum_hubArrivals` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.Feasible.le_sum_hubArrivals` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Counting.** A feasible plan has at least `2t − p` segments: `2t ≤ Σ_k #hub arrivals + p`. -/
@@ -137,7 +139,7 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 ### Lemma 3.3 (segment durations) {#node-lemma-3-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves (a) and (c) only in the forms other proofs use: (a) inside the segment decomposition, (c) on routes without central flights.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -153,7 +155,7 @@ $F(\gamma) \ge 2d_{x_j}$ for $B$ and $F(\gamma) \ge 2\bar d_{x_j}$ for $\bar B$.
 ($\bar B$).
 
 ::: {.node-lean}
-Parts in Lean: [`PlaneFeasible.exists_segments` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394), [`segment_bound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276), [`roleW_landingRecs_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309)
+Parts in Lean: [`PlaneFeasible.exists_segments` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394), [`roleW_landingRecs_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309)
 :::
 
 ```{=html}
@@ -178,7 +180,7 @@ last hub. $\square$
 
 **In Lean.** Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (b) under (S) and (AΔ) is `segment_bound` (`F(γ) ≥ 2 d_x`); part (c) is `roleW_landingRecs_le` on routes without central flights.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.PlaneFeasible.exists_segments` [machine-checked]{.badge .ok}
 
@@ -191,19 +193,6 @@ theorem PlaneFeasible.exists_segments {N : Network n} (hS : N.dbar = N.d) (c : F
 ```
 
 [`lean/ZenoFront/PlanBounds.lean`, lines 389–394](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394){.lean-src} (statement only; the proof is elided)
-
-*Part* `ZenoFront.segment_bound` [machine-checked]{.badge .ok}
-
-```lean
-`2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
-theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
-    {γ : List (Leg n t)} {h : Loc n} {τ : ℕ} (hh : h.isHub = true) (hr : IsRoute h τ γ)
-    (hf : ∀ ℓ ∈ γ, Flies N ℓ) (hone : hubArrivals γ = 1) {ℓ : Leg n t}
-    (hlast : γ.getLast? = some ℓ) (hℓ : ℓ.dst.isHub = true) :
-    ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …
-```
-
-[`lean/ZenoFront/TriSegments.lean`, lines 248–276](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`6c6fdb8`](https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 *Part* `ZenoFront.roleW_landingRecs_le` [machine-checked]{.badge .ok}
 
@@ -218,6 +207,21 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
 
 [`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
 
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.segment_bound` [machine-checked]{.badge .ok}
+
+```lean
+`2 d_y` for every central city `y` it lands in: `2 d_y ≤ F(γ)`. -/
+theorem segment_bound {N : Network n} (hS : N.dbar = N.d) (hL : N.ATriHub)
+    {γ : List (Leg n t)} {h : Loc n} {τ : ℕ} (hh : h.isHub = true) (hr : IsRoute h τ γ)
+    (hf : ∀ ℓ ∈ γ, Flies N ℓ) (hone : hubArrivals γ = 1) {ℓ : Leg n t}
+    (hlast : γ.getLast? = some ℓ) (hℓ : ℓ.dst.isHub = true) :
+    ∀ y ∈ landList γ, 2 * N.d y ≤ durSum γ := …
+```
+
+[`lean/ZenoFront/TriSegments.lean`, lines 248–276](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`6c6fdb8`](https://github.com/aquemy/ZenoSolver/commit/6c6fdb8534cb15b2ca23eb04514ed4d6fc75c9ac) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+
 
 ```{=html}
 </details>
@@ -228,7 +232,7 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
 ### Lemma 3.4 (relaxation) {#node-lemma-3-4}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean bounds every group by the makespan, not by its plane's flight time.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -240,7 +244,7 @@ $$L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = s,\ Y_k \ne \emptyset \t
 No assumption on central flights is needed.
 
 ::: {.node-lean}
-Lean: [`Feasible.exists_relaxation` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403), [`relaxCost_oneplane_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89)
+Parts in Lean: [`Feasible.exists_relaxation` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403), [`relaxCost_oneplane_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89)
 :::
 
 ```{=html}
@@ -265,7 +269,9 @@ With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.Feasible.exists_relaxation` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.Feasible.exists_relaxation` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Lemma R** (relaxation). Under (S), whatever the central flights, a feasible plan with
@@ -279,7 +285,7 @@ theorem Feasible.exists_relaxation {N : Network n} (hS : N.dbar = N.d) (c : Fin 
 
 [`lean/ZenoFront/PlanBounds.lean`, lines 396–403](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403){.lean-src} (statement only; the proof is elided)
 
-**Lean** `ZenoFront.relaxCost_oneplane_le_totalCost` [machine-checked]{.badge .ok}
+*Part* `ZenoFront.relaxCost_oneplane_le_totalCost` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The relaxation is a lower bound.** For every grouping into `p` non-empty groups of total

@@ -7,10 +7,13 @@ toc-depth: 3
 
 The blueprint follows the theory note
 [`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
-and links each result to the Lean declarations of `lean/ZenoFront` that formalise it. A result is
-[machine-checked]{.badge .ok} when they cover its whole statement and use no axiom beyond
-`propext`, `Classical.choice` and `Quot.sound`, and [informal]{.badge .informal} otherwise. Each
-node opens on its statement; its proof, its remarks and its Lean source are folded under it. The
+and links each result to the Lean declarations of `lean/ZenoFront` that formalise it. The badges
+follow the claim ledger
+[`claims.toml`](https://github.com/aquemy/ZenoSolver/blob/master/claims.toml): a result is
+[machine-checked]{.badge .ok} when Lean proves every assertion of it with no axiom beyond
+`propext`, `Classical.choice` and `Quot.sound`, [parts in Lean]{.badge .informal} when Lean proves
+part of it (one line says what is missing), and [informal]{.badge .informal} otherwise. Each node
+opens on its statement; its proof, its remarks and its Lean source are folded under it. The
 blueprint is also a [PDF](blueprint.pdf).
 
 {{< include proofs/_progress.md >}}

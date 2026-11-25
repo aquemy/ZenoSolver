@@ -2,14 +2,14 @@
 
 Different durations to the two hubs (§6). Waiting can now be harmful (theory note,
 {{< node "Proposition 6.5" >}}), so role loads alone do not give the front; under (A1-NS) it is
-characterised by *schedulable domination* (Theorem 6.9), machine-checked for every plan. (A1-NS) is
-needed: under (AΔ) alone, short central flights can beat every role configuration (theory note,
+characterised by *schedulable domination* (Theorem 6.9), which Lean proves for every plan on the
+template's closed form. (A1-NS) is needed: under (AΔ) alone, short central flights can beat every role configuration (theory note,
 {{< node "Proposition 6.7" >}}), and only the cut bound of Lemma 6.19 holds without any assumption.
 
 ### Theorem 6.1 (converse to role configurations) {#node-theorem-6-1}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean bounds every role load by the makespan, not by its plane's flight time.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -18,7 +18,7 @@ and makespan $M$ there is a role configuration on all $p$ planes with passenger 
 and $\lambda_k \le F_k \le M$ for every $k$. (AΔ) is not needed.
 
 ::: {.node-lean}
-Lean: [`Feasible.exists_roleConfig_ns` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L474-L517)
+Parts in Lean: [`Feasible.exists_roleConfig_ns` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L474-L517)
 :::
 
 ```{=html}
@@ -43,7 +43,9 @@ more, and no $F_k$ increases. Lemmas 4.3(b) and 4.4 conclude. $\square$
 
 **In Lean.** Central flights are split through the hub of the shorter detour (`Feasible.split`), which keeps the plan feasible with the same cost and no larger makespan.
 
-**Lean** `ZenoFront.Feasible.exists_roleConfig_ns` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.Feasible.exists_roleConfig_ns` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 6.1 (converse to role configurations).** Under (A1-NS), with `p ≤ t`, every
@@ -113,10 +115,6 @@ Every schedule of the same configuration, orders and matching has makespan at le
 least makespan of a role configuration is the minimum of $M_{\rm tmpl}$ over orders and matchings. No
 assumption on durations is needed.
 
-::: {.node-lean}
-Parts in Lean: [`Sched.tmpl` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L90-L92)
-:::
-
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
@@ -147,9 +145,9 @@ without pick-ups finish at $\lambda_k$. The passenger count is $t$, so every pas
 
 **In Lean.** `Sched.tmpl` is the closed form. Lean does not prove that the template is optimal for fixed orders and matching: soundness only needs Theorem 6.9, which bounds the closed form directly.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Related declarations.** The ledger does not list these for the statement.
 
-*Part* `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
+*Related* `ZenoFront.Sched.tmpl` [Lean definition]{.badge .ok}
 
 ```lean
 /-- **The closed form of Lemma 6.3**: the largest role load and link term. -/
@@ -215,7 +213,7 @@ makespan above the largest load. Under (AΔ-path) a single pick-up never does.
 ### Proposition 6.6 (imbalance-vector DP) {#node-proposition-6-6}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves that the DP is at most the cost of every balanced configuration, the direction the checker uses; not equality.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -259,7 +257,7 @@ cities, signs, and positive values summing to at most $t - p$. $\square$
 
 **In Lean.** The lower-bound direction (the DP is at most the cost of every balanced configuration), which is all the checker's `balanced` kind needs.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.BalData.value_le_totalCost` [machine-checked]{.badge .ok}
 
@@ -368,10 +366,6 @@ with $d_x = \bar d_x = 0$.
 
 (c) The template of a role configuration (§6.2), and the plan of Theorem 4.1, are event-ordered.
 
-::: {.node-lean}
-Parts in Lean: [`EventOrdered` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L104-L114), [`EventOrdered.of_eoOK` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/EventOrderCheck.lean#L134-L158)
-:::
-
 ```{=html}
 <details class="node-more"><summary>Proof</summary>
 ```
@@ -404,9 +398,9 @@ route, which is impossible. The plan of Theorem 4.1 has the same three phases. $
 
 **In Lean.** `EventOrdered` is the definition; `EventOrdered.of_eoOK` proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Related declarations.** The ledger does not list these for the statement.
 
-*Part* `ZenoFront.EventOrdered` [Lean definition]{.badge .ok}
+*Related* `ZenoFront.EventOrdered` [Lean definition]{.badge .ok}
 
 ```lean
 /-- **Event-ordered plans** (§1.2 of the note). The legs have a total order (`rank`, injective)
@@ -424,7 +418,7 @@ def EventOrdered (P : Plan n t p) : Prop :=
 
 [`lean/ZenoFront/SearchGap.lean`, lines 104–114](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SearchGap.lean#L104-L114){.lean-src}
 
-*Part* `ZenoFront.EventOrdered.of_eoOK` [machine-checked]{.badge .ok}
+*Related* `ZenoFront.EventOrdered.of_eoOK` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **The test is sound**: a plan it accepts is event-ordered. -/
@@ -443,7 +437,7 @@ theorem EventOrdered.of_eoOK {P : Plan n t p} (h : eoOK P = true) : EventOrdered
 ### Theorem 6.9 (schedulable domination) {#node-theorem-6-9}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template's makespan is Lemma 6.3, written only.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -453,7 +447,7 @@ orders of its drop-offs and pick-ups, and a link matching whose template has mak
 event order, nor (AΔ), nor (AΔ-path) is needed.
 
 ::: {.node-lean}
-Lean: [`schedulableDomination_all` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/DominationAll.lean#L345-L473)
+Parts in Lean: [`schedulableDomination_all` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/DominationAll.lean#L345-L473)
 :::
 
 ```{=html}
@@ -580,7 +574,9 @@ steps 3 to 6 on random plans of this kind (§11).
 
 **In Lean.** Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`). `not_schedulableDomination` shows that the hypothesis `p ≤ t` is needed.
 
-**Lean** `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.schedulableDomination_all` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
@@ -605,7 +601,7 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
 ### Corollary 6.10 (non-symmetric front) {#node-corollary-6-10}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean uses it only inside the version 2 checker (`Cert2.check_sound_EO`); the corollary is not stated.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -658,7 +654,7 @@ counterpart, and they do not beat the front either.
 
 **In Lean.** The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.Cert2.check_sound_EO` [machine-checked]{.badge .ok}
 

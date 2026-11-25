@@ -8,7 +8,7 @@ flights is needed (theory note, {{< node "Example 4.13" >}}).
 ### Theorem 4.1 {#node-theorem-4-1}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean builds the plan with cost c(X) and makespan max ℓ(X_k); not that plane k flies ℓ(X_k), picks up at most once and uses no central flight.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -18,7 +18,7 @@ in which plane $k$ flies for $\ell(X_k)$ and picks up at most one passenger, and
 $\max_k \ell(X_k)$. The plan uses no central flight, so no assumption on them is needed.
 
 ::: {.node-lean}
-Lean: [`Admissible.exists_plan` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L805-L920)
+Parts in Lean: [`Admissible.exists_plan` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L805-L920)
 :::
 
 ```{=html}
@@ -66,7 +66,9 @@ are exactly $X$. $\square$
 
 **In Lean.** The plan is built on a rooted link forest (`LTree.routes`): each plane drops off its children's passengers, crosses its free landings, then picks up its parent's passenger.
 
-**Lean** `ZenoFront.Admissible.exists_plan` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.Admissible.exists_plan` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 4.1 (achievability).** Under (S), with `p ≤ t`, every admissible partition `X` of
@@ -167,7 +169,7 @@ structure RoleConfig (n p : ℕ) where
 ### Lemma 4.3 (direct selection) {#node-lemma-4-3}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves part (b), on landing records; part (a) is not stated.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -242,7 +244,7 @@ most $C$. $\square$
 
 **In Lean.** Part (b), on the landing records of a feasible plan; it is shared by Theorems 4.7 and 6.1. Part (a) is not a separate Lean statement.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.Feasible.exists_roleConfig_records` [machine-checked]{.badge .ok}
 
@@ -349,7 +351,7 @@ $X_k = \mathrm{Dr}_k + \mathrm{Pk}_k + \mathrm{Cr}_k$, $k \in Q$, form an admiss
 with the planes of $Q$) of a multiset of size $2t - |Q|$, with the same cost.
 
 ::: {.node-lean}
-Lean: [`RoleConfig.isParityWitness_witness` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L81-L106), [`RoleConfig.admissible_groups` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109)
+Lean: [`RoleConfig.admissible_groups` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109)
 :::
 
 ```{=html}
@@ -371,7 +373,18 @@ by the balance. The size is that of Definition 4.2. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.RoleConfig.isParityWitness_witness` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
+
+```lean
+/-- **PAR**, admissibility form. -/
+theorem admissible_groups : Admissible R.groups := …
+```
+
+[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
+
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.RoleConfig.isParityWitness_witness` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **PAR.** The grouping of a role configuration is admissible, with witness
@@ -381,15 +394,6 @@ theorem isParityWitness_witness : IsParityWitness R.groups R.witness
 ```
 
 [`lean/ZenoFront/Roles.lean`, lines 81–106](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L81-L106){.lean-src} (statement only; the proof is elided)
-
-**Lean** `ZenoFront.RoleConfig.admissible_groups` [machine-checked]{.badge .ok}
-
-```lean
-/-- **PAR**, admissibility form. -/
-theorem admissible_groups : Admissible R.groups := …
-```
-
-[`lean/ZenoFront/Roles.lean`, lines 108–109](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Roles.lean#L108-L109){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -412,7 +416,7 @@ $\max_k \delta(Y_k) \le \max_k \delta(X_k)$. This corrects case (b) of the first
 the support has $2(t-q)$ entries, not $t - q$.
 
 ::: {.node-lean}
-Lean: [`Admissible.addPlane` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L45-L101)
+Lean: [`Admissible.addPlane_of_size` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L103-L110)
 :::
 
 ```{=html}
@@ -446,7 +450,22 @@ $\delta(Y_\star) = d_i \le \delta(X_u)$, and $c(Y) = c(X) - c_i$. $\square$
 <details class="node-more"><summary>Lean statement and source</summary>
 ```
 
-**Lean** `ZenoFront.Admissible.addPlane` [machine-checked]{.badge .ok}
+**Lean** `ZenoFront.Admissible.addPlane_of_size` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Lemma 4.6 (AP), as in the note**: with `Σ_k |X_k| = 2t − q` and `t ≥ q + 1`, the new
+grouping has `2t − q − 1` landings. -/
+theorem Admissible.addPlane_of_size {t : ℕ} {X : Groups n q} (hX : Admissible X)
+    (hsize : size X = 2 * t - q) (ht : q + 1 ≤ t) (d c : Fin n → ℕ) :
+    ∃ Y : Groups n (q + 1), Admissible Y ∧ size Y = 2 * t - (q + 1) ∧
+      totalCost c Y ≤ totalCost c X ∧ ∀ T, (∀ k, load d (X k) ≤ T) → ∀ k, load d (Y k) ≤ T := …
+```
+
+[`lean/ZenoFront/AddPlane.lean`, lines 103–110](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/AddPlane.lean#L103-L110){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`2995922`](https://github.com/aquemy/ZenoSolver/commit/29959222a988419aae27bf7c75c06325a3d56809) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.Admissible.addPlane` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Lemma 4.6 (AP), general form.** An admissible grouping of `q` planes with at least `q + 2`
@@ -479,7 +498,7 @@ times $F_k$, there is an admissible partition $X_1,\dots,X_p$ of a multiset $X$ 
 and $\ell(X_k) \le F_k \le M$ for every $k$.
 
 ::: {.node-lean}
-Lean: [`Feasible.exists_admissible_A1_flightTime` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637), [`Feasible.exists_admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Converse.lean#L676-L683)
+Lean: [`Feasible.exists_admissible_A1_flightTime` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637)
 :::
 
 ```{=html}
@@ -539,7 +558,9 @@ theorem Feasible.exists_admissible_A1_flightTime {N : Network n} (hS : N.dbar = 
 
 [`lean/ZenoFront/ConverseTri.lean`, lines 631–637](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L631-L637){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`ee385d0`](https://github.com/aquemy/ZenoSolver/commit/ee385d07211b69fe19b403b5e3d84286beec2600) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
-**Lean** `ZenoFront.Feasible.exists_admissible` [machine-checked]{.badge .ok}
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.Feasible.exists_admissible` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 4.7 (converse).** Under (S) and (A1), with `p ≤ t`, every feasible plan is weakly
@@ -626,7 +647,7 @@ theorem minimal_achievable_iff_multisetPoints {N : Network n} (hS : N.dbar = N.d
 which planes may end anywhere and the makespan is the last arrival time (§1.2) equals $\mathcal F$.
 
 ::: {.node-lean}
-Lean: [`minimal_achievable_iff_anywhere_of_A1` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935), [`FeasibleAnywhere.exists_admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Bridge.lean#L395-L504)
+Lean: [`minimal_achievable_iff_anywhere_of_A1` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935)
 :::
 
 ```{=html}
@@ -682,7 +703,9 @@ theorem minimal_achievable_iff_anywhere_of_A1 {N : Network n} (hS : N.dbar = N.d
 
 [`lean/ZenoFront/Achievability.lean`, lines 930–935](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Achievability.lean#L930-L935){.lean-src} (statement only; the proof is elided)
 
-**Lean** `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.FeasibleAnywhere.exists_admissible` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Theorem 4.9 (bridge B3), converse direction.** Under (S) and (A1), with `p ≤ t`, every
@@ -846,9 +869,9 @@ theorem Feasible.exists_admissible_ATri {N : Network n} (hS : N.dbar = N.d) (hA 
 
 [`lean/ZenoFront/ConverseTri.lean`, lines 612–618](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/ConverseTri.lean#L612-L618){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`e1ee5c4`](https://github.com/aquemy/ZenoSolver/commit/e1ee5c4ca52dc1bafe9ee0b9761d8313593c06b7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Related declarations.** The ledger does not list these for the statement.
 
-*Part* `ZenoFront.exists_admissible_of_blocks` [machine-checked]{.badge .ok}
+*Related* `ZenoFront.exists_admissible_of_blocks` [machine-checked]{.badge .ok}
 
 ```lean
 landings. -/
@@ -962,7 +985,7 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
 ### Corollary 4.12 {#node-corollary-4-12}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean proves it for Corollary 4.8, Theorem 4.9, the solver and the checker; not for Propositions 7.8 and 7.9, nor for Proposition 7.1 with rescaling.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -970,7 +993,7 @@ theorem Admissible.exists_remove_two {X : Groups n p} (hX : Admissible X)
 Propositions 7.8 and 7.9 hold, and `forest` gaps (§9) are sound.
 
 ::: {.node-lean}
-Parts in Lean: [`minimal_achievable_iff_multisetPoints_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L437-L442), [`minimal_achievable_iff_anywhere_of_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L413-L422), [`minimal_achievable_iff_minCost_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L453-L460), [`solveFront_isParetoFront_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496), [`Cert.forestGapBound_le_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521), [`Cert.check_sound_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547)
+Parts in Lean: [`minimal_achievable_iff_multisetPoints_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L437-L442), [`minimal_achievable_iff_anywhere_of_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L413-L422), [`minimal_achievable_iff_minCost_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L453-L460), [`solveFront_isParetoFront_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496), [`Cert.check_sound_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547), [`Cert.forestGapBound_le_ATri` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521)
 :::
 
 ```{=html}
@@ -1006,7 +1029,7 @@ most $M'$. Item 4 is unchanged. $\square$
 
 **In Lean.** Under (S) and (AΔ), Lean proves Corollary 4.8 (`minimal_achievable_iff_multisetPoints_ATri`), Theorem 4.9 (`minimal_achievable_iff_anywhere_of_ATri`), Proposition 7.1 (`minimal_achievable_iff_minCost_ATri`), the verified solver and the soundness of `forest` gaps and of the checker. The front statements of Propositions 7.8 and 7.9 are not stated in Lean, so the corollary as a whole keeps the note's status.
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.minimal_achievable_iff_multisetPoints_ATri` [machine-checked]{.badge .ok}
 
@@ -1056,6 +1079,17 @@ theorem solveFront_isParetoFront_ATri {N : Network n} (hS : N.dbar = N.d) (hA : 
 
 [`lean/ZenoFront/FrontTri.lean`, lines 462–496](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L462-L496){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`c6ab63a`](https://github.com/aquemy/ZenoSolver/commit/c6ab63a9bde9de51ea16679b29926ab16ed5bed7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
+*Part* `ZenoFront.Cert.check_sound_ATri` [machine-checked]{.badge .ok}
+
+```lean
+satisfies (AΔ), whatever the gap kinds. -/
+theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
+    (hA : (C.network dc).ATri) :
+    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
+```
+
+[`lean/ZenoFront/FrontTri.lean`, lines 525–547](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
+
 *Part* `ZenoFront.Cert.forestGapBound_le_ATri` [machine-checked]{.badge .ok}
 
 ```lean
@@ -1068,17 +1102,6 @@ theorem forestGapBound_le_ATri {dc : Fin C.n → Fin C.n → ℕ} (hS : C.dbar =
 ```
 
 [`lean/ZenoFront/FrontTri.lean`, lines 504–521](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L504-L521){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
-
-*Part* `ZenoFront.Cert.check_sound_ATri` [machine-checked]{.badge .ok}
-
-```lean
-satisfies (AΔ), whatever the gap kinds. -/
-theorem check_sound_ATri (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : (C.network dc).ATri) :
-    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
-```
-
-[`lean/ZenoFront/FrontTri.lean`, lines 525–547](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/FrontTri.lean#L525-L547){.lean-src} (statement only; the proof is elided). Axioms from the CI-audited commit footer of [`0d3ed68`](https://github.com/aquemy/ZenoSolver/commit/0d3ed68ab5675f0b5c28e0f40ac1339f1c7b73d7) (`#print axioms` output, re-checked by CI on every push), not from a local Lean run
 
 
 ```{=html}

@@ -7,7 +7,7 @@ plane-city incidence graph. It is what makes the front computable without fixing
 ### Lemma 2.1 {#node-lemma-2-1}
 
 ::: {.node-badge}
-[informal]{.badge .informal}
+[parts in Lean]{.badge .informal} [Lean counts landing records by hub, not segments; on routes with central flights the two differ.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -36,7 +36,7 @@ changes are $A, \bar A, \dots, A$. $\square$
 
 **In Lean.** The Lean lemma is the count on a route after Step 1 of Theorem 4.7, read off the legs (`#A = #Ā + 1`).
 
-**Formalised parts.** These declarations cover part of the statement; the node keeps the status of the note.
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
 *Part* `ZenoFront.PlaneFeasible.cntA_eq` [machine-checked]{.badge .ok}
 
@@ -77,7 +77,7 @@ definition replaces the component form of the first version (Lemma 2.4 shows the
 formalise.
 
 ::: {.node-lean}
-Lean: [`IsParityWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L52-L62), [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66)
+Lean: [`Admissible` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66)
 :::
 
 ```{=html}
@@ -97,7 +97,19 @@ Lean: [`IsParityWitness` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69f
 
 **In Lean.** `IsParityWitness X h` is (h1)–(h3) with `h k : Finset (Fin n)`, one set of cities per plane; `Admissible X` is `∃ h, IsParityWitness X h`, decidable through `witnessCandidates`.
 
-**Lean** `ZenoFront.IsParityWitness` [Lean definition]{.badge .ok}
+**Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
+
+```lean
+/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
+the component condition by Lemma 2.4). -/
+def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
+```
+
+[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
+
+**Related declarations.** The ledger does not list these for the statement.
+
+*Related* `ZenoFront.IsParityWitness` [Lean definition]{.badge .ok}
 
 ```lean
 /-- `h` is a *parity witness* for the grouping `X` (Claim A of the note): `h k` is a set of
@@ -114,16 +126,6 @@ structure IsParityWitness (X : Groups n p) (h : Fin p → Finset (Fin n)) : Prop
 ```
 
 [`lean/ZenoFront/Admissible.lean`, lines 52–62](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L52-L62){.lean-src}
-
-**Lean** `ZenoFront.Admissible` [Lean definition]{.badge .ok}
-
-```lean
-/-- A grouping is *admissible* if it has a parity witness (Claim A of the note, equivalent to
-the component condition by Lemma 2.4). -/
-def Admissible (X : Groups n p) : Prop := ∃ h, IsParityWitness X h
-```
-
-[`lean/ZenoFront/Admissible.lean`, lines 64–66](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Admissible.lean#L64-L66){.lean-src}
 
 
 ```{=html}
@@ -314,7 +316,7 @@ inductive LTree (n : ℕ) : Type where
 ### Lemma 2.6 (link forest) {#node-lemma-2-6}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves admissible ⇔ a link forest exists; not that the forest can have at most one edge of each label at each plane.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -322,7 +324,7 @@ inductive LTree (n : ℕ) : Type where
 admissible partition has a link forest with at most one edge of each label at each plane.
 
 ::: {.node-lean}
-Lean: [`admissible_iff_exists_linkForest` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L516-L541)
+Parts in Lean: [`admissible_iff_exists_linkForest` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TreeExact.lean#L516-L541)
 :::
 
 ```{=html}
@@ -363,7 +365,9 @@ vertex of the walk farthest from the root of its tree, both neighbours on the wa
 
 **In Lean.** "If" (`admissible_forestPartition`) builds the witness from the cities with an odd number of links at a plane. "Only if" (`Admissible.exists_linkForest`) removes a leaf and recurses on the planes: a witness with the fewest edges has a plane with exactly one city, by the rank bound of Lemma 2.8(b). It does not go through the spanning-forest construction of the note's proof, which needs Lemma 2.4.
 
-**Lean** `ZenoFront.admissible_iff_exists_linkForest` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
+
+*Part* `ZenoFront.admissible_iff_exists_linkForest` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Lemma 2.6 (link forest).** A grouping is admissible iff its groups are, as a multiset, the
@@ -410,7 +414,7 @@ A tree with $q$ planes has $q - 1$ edges, so $q - 1 \le t - p$. $\square$
 ### Lemma 2.8 (few touched cities) {#node-lemma-2-8}
 
 ::: {.node-badge}
-[machine-checked]{.badge .ok}
+[parts in Lean]{.badge .informal} [Lean proves (a), (c) and the bound of (b); not that a parity matrix with the fewest entries has an acyclic support.]{.node-gap}
 :::
 
 ::: {.node-body}
@@ -425,7 +429,7 @@ touches at most $p - 1$ cities.
 $h_k \le \min(|X_k| - 1,\ w)$ for every $k$.
 
 ::: {.node-lean}
-Lean: [`IsParityWitness.card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106), [`IsParityWitness.card_touched_le_of_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210), [`Admissible.exists_card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254)
+Parts in Lean: [`Admissible.exists_card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254), [`IsParityWitness.card_touched_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106), [`IsParityWitness.card_touched_le_of_minimal` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210)
 :::
 
 ```{=html}
@@ -456,30 +460,9 @@ so $2|Z| \le |J| \le |P'| + |Z| - 1$, and $|Z| \le |P'| - 1 \le p - 1$.
 
 **In Lean.** Part (b) is proved over `ZMod 2`: if the edge vectors `e_k + e_i` of a witness are linearly dependent, removing an even subgraph gives a witness with fewer edges (`IsParityWitness.exists_edgeCount_lt`); independent edge vectors satisfy `#edges + 1 ≤ p + #touched`.
 
-**Lean** `ZenoFront.IsParityWitness.card_touched_le` [machine-checked]{.badge .ok}
+**Formalised parts.** These declarations prove part of the statement; the ledger records the statement as a written proof.
 
-```lean
-/-- **Claim B′, `t − p` part.** With `Σ_k |X_k| = s = 2t − p`, every parity witness touches at
-most `t − p` cities. -/
-theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Finset (Fin I.n)}
-    (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …
-```
-
-[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
-
-**Lean** `ZenoFront.IsParityWitness.card_touched_le_of_minimal` [machine-checked]{.badge .ok}
-
-```lean
-/-- **Claim B′, `p − 1` part.** A parity witness with the fewest edges touches at most `p − 1`
-cities. -/
-theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
-    (hmin : ∀ h', IsParityWitness X h' → edgeCount h ≤ edgeCount h') :
-    (touched h).card ≤ p - 1 := …
-```
-
-[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
-
-**Lean** `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
+*Part* `ZenoFront.Admissible.exists_card_touched_le` [machine-checked]{.badge .ok}
 
 ```lean
 /-- **Claim B′.** With `Σ_k |X_k| = s = 2t − p`, an admissible grouping has a parity witness
@@ -490,6 +473,29 @@ theorem Admissible.exists_card_touched_le (I : Instance) {X : Groups I.n I.p}
 ```
 
 [`lean/ZenoFront/MinimalWitness.lean`, lines 248–254](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L248-L254){.lean-src} (statement only; the proof is elided)
+
+*Part* `ZenoFront.IsParityWitness.card_touched_le` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Claim B′, `t − p` part.** With `Σ_k |X_k| = s = 2t − p`, every parity witness touches at
+most `t − p` cities. -/
+theorem card_touched_le (I : Instance) {X : Groups I.n I.p} {h : Fin I.p → Finset (Fin I.n)}
+    (hw : IsParityWitness X h) (hs : size X = I.s) : (touched h).card ≤ I.t - I.p := …
+```
+
+[`lean/ZenoFront/SupportBound.lean`, lines 100–106](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/SupportBound.lean#L100-L106){.lean-src} (statement only; the proof is elided)
+
+*Part* `ZenoFront.IsParityWitness.card_touched_le_of_minimal` [machine-checked]{.badge .ok}
+
+```lean
+/-- **Claim B′, `p − 1` part.** A parity witness with the fewest edges touches at most `p − 1`
+cities. -/
+theorem card_touched_le_of_minimal (hw : IsParityWitness X h)
+    (hmin : ∀ h', IsParityWitness X h' → edgeCount h ≤ edgeCount h') :
+    (touched h).card ≤ p - 1 := …
+```
+
+[`lean/ZenoFront/MinimalWitness.lean`, lines 197–210](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/MinimalWitness.lean#L197-L210){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}

@@ -38,6 +38,11 @@ main p code, main li code, main dt code, main dd code {
 .node-badge {
   margin-top: -0.4em;
 }
+.node-gap {
+  font-size: 0.9em;
+  color: var(--zs-ink-2);
+  margin-left: 0.3em;
+}
 .node-lean {
   font-size: 0.9em;
   color: var(--zs-ink-2);
