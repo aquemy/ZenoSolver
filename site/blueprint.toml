@@ -321,22 +321,20 @@ label = "Lemma 6.19"
 [[node]]
 section = "nonsymmetric"
 label = "Lemma 6.8"
-leaves = ["ZenoFront.EventOrdered", "ZenoFront.EventOrdered.of_eoOK"]
-covers = "`EventOrdered` is the definition; `EventOrdered.of_eoOK` proves sound a computable test for the order (departure, phase, plane, position). Parts (a)–(c) are not stated in Lean: Theorem 6.9 for every plan does not need them."
 
 [[node]]
 section = "nonsymmetric"
 label = "Theorem 6.9"
 gap = "Lean bounds the closed form of Lemma 6.3 by the makespan; that it is the template's makespan is Lemma 6.3, written only."
 lean = ["ZenoFront.schedulableDomination_all"]
-covers = "Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`). `not_schedulableDomination` shows that the hypothesis `p ≤ t` is needed."
+covers = "Step 2 works on visits by time (`exists_rewired`): it exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits, and splices such a loop back into a route. Steps 3–6 run with the remaining loops attached to one plane (`withLoops`)."
 
 [[node]]
 section = "nonsymmetric"
 label = "Corollary 6.10"
-gap = "Lean uses it only inside the version 2 checker (`Cert2.check_sound_EO`); the corollary is not stated."
-leaves = ["ZenoFront.Cert2.check_sound_EO"]
-covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` for all plans and, when a certificate lists `EO`, `Cert2.check_sound_EO` for the event-ordered ones. The corollary itself, for every instance, is not a Lean statement."
+gap = "Lean uses it only inside the version 2 checker (`Cert2.check_sound`); the corollary is not stated."
+leaves = ["ZenoFront.Cert2.check_sound"]
+covers = "The domination half is Theorem 6.9 (machine-checked). Lean uses it through the checker: `Cert2.check_sound` gives the front of every feasible plan on each certified instance. The corollary itself, for every instance, is not a Lean statement."
 
 [[section]]
 id = "algorithm"

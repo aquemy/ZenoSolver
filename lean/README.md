@@ -119,14 +119,14 @@ Timings on an Apple-silicon laptop (M4 Max), for the compiled checker
   * version 2: `roles` gaps without `A1-NS`, `S` listed for non-symmetric durations, a missing
     point closed by no `roles` bound, `lagrangian` multipliers at which the bound is too weak,
     the Proposition 6.5 instance without its point (14, 74), where the search finds a cheaper
-    schedule.
+    schedule, an unknown assumption (`EO`).
 
 The `v2-*` certificates are version 2 certificates of non-symmetric instances (`relaxed`,
 `roles`, `lagrangian`, `balanced` and `search` bounds; `v2-search-prop65.cert` is the
 Proposition 6.5 instance, whose two `search` gaps close harmful waiting, and
-`v2-search-eo.cert` an instance with a city of `d = d̄ = 0`, which lists `EO`;
-`v2-search-no-eo.cert` is the same instance without it, accepted since Theorem 6.9 holds for every
-plan). The C++ checker agrees with every verdict.
+`v2-search-zero-city.cert` an instance with a city of `d = d̄ = 0`, accepted since Theorem 6.9
+holds for every plan; `rejected/v2-unknown-assumption.cert` is the same certificate listing
+`EO`, an assumption the format does not know). The C++ checker agrees with every verdict.
 
 ## Contents
 
@@ -165,15 +165,13 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/RoleBound.lean` | The `roles` bound (role relaxation), memoised | `roleLayers`, `rolesBoundAt`, `rolesBoundAt_le_totalCost` |
 | `ZenoFront/LagrangianBound.lean` | The `lagrangian` bound at given multipliers; representatives of cities | `LagData`, `LagData.value_le_totalCost`, `domRep3`, `RoleConfig.map` |
 | `ZenoFront/BalancedBound.lean` | The `balanced` program (DP over planes on the imbalance vector), lower-bound direction | `BalData`, `BalData.layers_dominate`, `BalData.value_le_totalCost` |
-| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, event-ordered plans, the exhaustive `search` and the completeness of its enumeration | `Sched`, `Sched.tmpl`, `EventOrdered`, `SchedulableDomination`, `SearchData.closed`, `SearchData.closed_sound` |
-| `ZenoFront/Exchange.lean` | Theorem 6.9, Step 2: routes of visits with event keys, exchanging futures while a hand-off overlaps | `KLeg`, `Visit`, `VRoute`, `PaxData`, `exchange_step`, `exists_ordered_handoffs` |
+| `ZenoFront/SearchGap.lean` | Scheduled configurations, the closed form of Lemma 6.3, the exhaustive `search` and the completeness of its enumeration | `Sched`, `Sched.tmpl`, `SearchData.closed`, `SearchData.closed_sound` |
+| `ZenoFront/Visits.lean` | Theorem 6.9, Steps 2–6: the visits of the planes, their legs, the visits that carry their passenger through | `KLeg`, `Visit`, `legsOf`, `allK`, `isThrough`, `throughCount` |
 | `ZenoFront/LinkCount.lean` | Theorem 6.9, Steps 3–4: links along the hand-offs, the passenger count | `exists_links` |
-| `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched` |
-| `ZenoFront/Domination.lean` | Theorem 6.9: Step 1 and the event keys (event-ordered, or no city with `d = d̄ = 0`); the counterexample for `p > t` | `exists_transfer_pw`, `nzKeys`, `eoKeys`, `schedulableDomination`, `not_schedulableDomination` |
+| `ZenoFront/SchedBuild.lean` | Theorem 6.9, Steps 4–6: the scheduled configuration of the links, its closed form, shrinking | `toSched`, `toSched_valid`, `toSched_tmpl_le`, `exists_sched_of` |
 | `ZenoFront/Rewire.lean` | Theorem 6.9, Step 2 for every plan: visits by time, exchanges, cuts into zero-time loops, splices | `TRoute`, `TLoop`, `tExchange_step`, `tCut_step`, `tSplice_step`, `exists_rewired` |
-| `ZenoFront/DominationAll.lean` | Theorem 6.9 for every plan: loops attached to one plane, Steps 3–6 | `withLoops`, `planesOK_withLoops`, `schedulableDomination_all` |
+| `ZenoFront/DominationAll.lean` | Theorem 6.9 for every plan: Step 1, loops attached to one plane, Steps 3–6 | `exists_transfer_pw`, `withLoops`, `planesOK_withLoops`, `schedulableDomination_all` |
 | `ZenoFront/SchedMap.lean` | Scheduled configurations on representatives, rescaled | `Sched.map`, `Sched.tmpl_map_le`, `Sched.mul_tmpl_map_le` |
-| `ZenoFront/EventOrderCheck.lean` | A computable test that a plan is event-ordered, and its soundness | `eoRank`, `eoOK`, `EventOrdered.of_eoOK` |
 | `ZenoFront/Parse.lean` | Parser for both versions of the text format (untrusted) | `parseAnyCert`, `parseCert` |
 | `ZenoFront/Examples.lean` | Two certificates checked by the kernel alone | `Examples.lptCounterexample_front` |
 | `ZenoCheck.lean` | The `zeno-check` executable (untrusted wrapper) | `main` |
@@ -528,10 +526,8 @@ cites (`_ATri` for (AΔ)).
 * `Cert2.check_sound` (**soundness, format v2**): if `Cert2.check` accepts, the listed points
   are exactly the Pareto front of every feasible plan. This holds for every table of central
   flights satisfying (A1-NS) when the certificate lists it (`Cert2.check_sound_A1NS`), and for
-  every table otherwise (`Cert2.check_sound_of_not_A1NS`). When some city has `d = d̄ = 0` and
-  the certificate lists `EO`, the checker also tests that every listed plan is event-ordered
-  (`eoOK`, sound by `EventOrdered.of_eoOK`), so the points are also the front of the
-  event-ordered plans (`achievableEO`, `Cert2.check_sound_EO`).
+  every table otherwise (`Cert2.check_sound_of_not_A1NS`), with or without a city of
+  `d = d̄ = 0`.
 
   The kinds it verifies:
   * gaps: `relaxed`, `roles`, `lagrangian`, `balanced` and `search`;
@@ -539,26 +535,19 @@ cites (`_ATri` for (AΔ)).
     of makespan 0.
 
   It rejects `forest`.
-* `schedulableDomination` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible plan
-  that is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid
-  scheduled configuration with `2t − p` landings, cost at most the plan's and closed form at most
-  its makespan. Step 1 splits central flights (`Feasible.split`) and gives the legs keys
-  `(departure, ·, ·)` that increase along routes and along every passenger's two flights;
-  Step 2 exchanges futures (`exists_ordered_handoffs`); Steps 3–6 select links along the
-  hand-offs (`exists_links`), bound the closed form and shrink (`exists_sched`).
-  `not_schedulableDomination`: without `p ≤ t` the statement fails (`t = 0`, `p = 1`).
-* `schedulableDomination_all` (**Theorem 6.9 for every plan**): the same without event order
-  or hypothesis on zero durations. Step 2 works on visits by time (`exists_rewired`): it
-  exchanges futures, cuts a backward hand-off on one plane into a loop of zero-time visits and
-  splices such a loop back into a route; Steps 3–6 run with the remaining loops attached to one
-  plane (`withLoops`, `planesOK_withLoops`, `exists_sched_of`).
+* `schedulableDomination_all` (**Theorem 6.9**): under (A1-NS), with `p ≤ t`, every feasible
+  plan gives a valid scheduled configuration with `2t − p` landings, cost at most the plan's and
+  closed form at most its makespan, with no event order and no hypothesis on zero durations.
+  Step 1 splits central flights (`Feasible.split`) and finds every passenger's two flights
+  (`exists_transfer_pw`). Step 2 works on visits by time (`exists_rewired`): it exchanges
+  futures, cuts a backward hand-off on one plane into a loop of zero-time visits and splices such
+  a loop back into a route. Steps 3–6 select links along the hand-offs (`exists_links`), bound
+  the closed form and shrink, with the remaining loops attached to one plane (`withLoops`,
+  `planesOK_withLoops`, `exists_sched_of`).
 * `Cert2.searchWith_le` (**`search`**): Theorem 6.9, the configuration mapped to representatives
   (`Sched.map`, `Sched.mul_tmpl_map_le`), and the completeness of the search
   (`SearchData.closed_sound`): a closed search below `M` with cost bound `C'` rules out every
   feasible plan faster than `M` and cheaper than `C'` (`schedulableDomination_all`).
-* `eoOK`, `EventOrdered.of_eoOK`: a computable test that a plan is event-ordered, for the order
-  `(departure, phase, plane, position)` (phase: drop-off, crossing, pick-up), which the template
-  schedules of the C++ solver pass.
 * `BalData.value_le_totalCost` (**`balanced`**): the program of `BalancedRoles` (a DP over the
   planes, on states made of the imbalance vector and the landings so far) is at most the cost of
   every balanced configuration with `s` landings and role loads `≤ T`. A drop-off and a pick-up
@@ -757,13 +746,11 @@ needed for soundness: the plan of every listed point is checked by simulation.
       bound values.
 - [x] `search`, layer 1: the exhaustive search and the completeness of its enumeration
       (`SearchData.closed_sound`). It closes both `search` gaps of the Proposition 6.5 instance.
-- [x] Theorem 6.9 (`schedulableDomination`, for `p ≤ t`; `not_schedulableDomination`: the
-      statement fails for `t < p`). Lemma 6.3's optimality is not needed for soundness:
+- [x] Theorem 6.9 for every plan, for `p ≤ t` (`schedulableDomination_all`), including plans
+      that are not event-ordered on instances with a city of `d = d̄ = 0` (the case left open at
+      the end of §6.2 of the note). Lemma 6.3's optimality is not needed for soundness:
       Theorem 6.9 bounds the closed form directly.
 - [x] `search` gaps and `fastest search` in `Cert2.check_sound` (`Cert2.searchWith_le`), over
       every feasible plan.
-- [x] Plans that are not event-ordered on instances with a city of `d = d̄ = 0`
-      (`schedulableDomination_all`; the case left open at the end of §6.2 of the note). `EO`
-      is no longer needed; with it the checker also tests the plans (`Cert2.check_sound_EO`).
 - [ ] W1 (a single pick-up never waits harmfully); simulation with waiting; Conjecture 6.2 if it
       is proved.

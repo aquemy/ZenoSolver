@@ -371,7 +371,7 @@ created      = "2026-11-24"
 kind         = "corollary"
 statement    = "Corollary 6.10 (non-symmetric front): under (A1-NS), F = Min A_eo = Min K, with K the points (c(cfg), m(cfg)) of role configurations on the p planes with passenger count t and least makespan m(cfg), and A_eo the points of event-ordered feasible plans."
 status       = "math.proved-informal"
-lean_partial = "ZenoFront.Cert2.check_sound_EO"
+lean_partial = "ZenoFront.Cert2.check_sound"
 paper        = "Cor 6.10, doc/theory/exact-front.md §6.2"
 created      = "2026-11-24"
 

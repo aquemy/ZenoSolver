@@ -8,8 +8,6 @@ public import ZenoFront.Checker
 public import ZenoFront.BalancedBound
 public import ZenoFront.SearchGap
 public import ZenoFront.SchedMap
-public import ZenoFront.Domination
-public import ZenoFront.EventOrderCheck
 public import ZenoFront.DominationAll
 
 /-!
@@ -35,16 +33,11 @@ This file verifies:
 * `search` (gaps and fastest point), under (A1-NS): the exhaustive search over scheduled
   configurations of cost below the previous point's (`SearchData.closed_sound`), on the
   representatives, at the gap's level. Theorem 6.9 (`schedulableDomination_all`) turns every
-  feasible plan into such a configuration, whatever its event order and its durations;
+  feasible plan into such a configuration, also on instances with a city of `d = d̄ = 0`;
 * `fastest closed` for symmetric durations, as in v1.
 
 The other v2 kind (`forest`) is parsed but given no bound, so a certificate that uses it is
 rejected.
-
-**`EO`.** When some city has `d = d̄ = 0` and the certificate lists `EO` (`eoOnly`), the checker
-also tests that every listed plan is event-ordered (`eoOK`), so the listed points are also the
-front of the event-ordered plans (`check_sound_EO`, Corollary 6.10), the PDDL front in the limit.
-`EO` is no longer needed for soundness over every plan.
 
 ## Main results
 
@@ -52,9 +45,8 @@ front of the event-ordered plans (`check_sound_EO`, Corollary 6.10), the PDDL fr
 * `ZenoFront.Cert2.relaxedWith_le`: the relaxed bound is a lower bound on the cost of every
   feasible plan faster than the gap's upper point, for any durations and central flights.
 * `ZenoFront.Cert2.check_sound`: if `check` accepts, the listed points are exactly the Pareto
-  front of every feasible plan, for **every** table of central flight durations.
-* `ZenoFront.Cert2.check_sound_EO`: under `EO` with a city of `d = d̄ = 0`, they are also the front
-  of the event-ordered plans.
+  front of every feasible plan, for **every** table of central flight durations satisfying
+  (A1-NS) when the certificate lists it, with or without a city of `d = d̄ = 0`.
 -/
 
 @[expose] public section
@@ -100,11 +92,6 @@ structure Cert2 where
   plans : List (Plan n t p)
   gaps : List Kind2
 
-/-- The (cost, makespan) points of the feasible *event-ordered* plans (§1.2 of the note): their
-front is the PDDL front in the limit (Statement 1.2). -/
-def achievableEO {n : ℕ} (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ) :=
-  {x | ∃ P : Plan n t p, Feasible N P ∧ EventOrdered P ∧ (planCost c P, planMakespan P) = x}
-
 namespace Cert2
 
 variable (C : Cert2)
@@ -126,20 +113,11 @@ def headerOK : Bool :=
   decide (1 ≤ C.n) && decide (1 ≤ C.p) && decide (C.p ≤ C.t) &&
     (!C.assumptions.contains "S" || C.symmetric)
 
-/-- Whether no city has `d = d̄ = 0`. Then every feasible plan is covered by Theorem 6.9. -/
-def noZeroCity : Bool := decide (∀ i, ¬ (C.d i = 0 ∧ C.dbar i = 0))
-
-/-- Whether the certificate is about event-ordered plans only: some city has `d = d̄ = 0`, and
-the certificate lists `EO`. -/
-def eoOnly : Bool := C.assumptions.contains "EO" && !C.noZeroCity
-
-/-- Obligation 1: one plan per point, each feasible with the point's cost and makespan, and
-event-ordered when the certificate is about event-ordered plans only. -/
+/-- Obligation 1: one plan per point, each feasible with the point's cost and makespan. -/
 def plansOK : Bool :=
   decide (C.plans.length = C.front.length) &&
     (C.plans.zip C.front).all fun x => planOK C.d C.dbar x.1 &&
-      decide (planCost C.c x.1 = x.2.1) && decide (planMakespan x.1 = x.2.2) &&
-      (!C.eoOnly || eoOK x.1)
+      decide (planCost C.c x.1 = x.2.1) && decide (planMakespan x.1 = x.2.2)
 
 /-- Obligation 4: the last cost is `s · c_min`. -/
 def lastOK : Bool :=
@@ -439,9 +417,6 @@ theorem balWith_le {dc : Fin C.n → Fin C.n → ℕ} (hA : C.assumptions.contai
     · exact zero_le
   · exact zero_le
 
-theorem noZeroCity_spec (h : C.noZeroCity = true) : ∀ i, ¬ (C.d i = 0 ∧ C.dbar i = 0) := by
-  simpa [noZeroCity] using h
-
 /-- **The `search` bound is a lower bound** under (A1-NS): if the search below `M` finds no
 configuration cheaper than `C'` (the previous point's cost) with a schedule faster than `M`,
 every feasible plan with makespan below `M` costs at least `C'`. Theorem 6.9, for every plan,
@@ -512,7 +487,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
   refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
   · -- 1. Every point is achieved by its plan.
     obtain ⟨P, hPx⟩ := exists_mem_zip_of_mem hplans.1 hx
-    obtain ⟨⟨⟨hok, hcost⟩, hmk⟩, -⟩ := hplans.2 _ hPx
+    obtain ⟨⟨hok, hcost⟩, hmk⟩ := hplans.2 _ hPx
     exact ⟨P, planOK_feasible dc hok, Prod.ext hcost hmk⟩
   · -- 2–4. Every feasible plan is weakly dominated.
     obtain ⟨P, hP, rfl⟩ := hy
@@ -574,33 +549,6 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     refine (pairwise_of_strictlyMonotone hmono).imp fun {a b} hab => ⟨fun hle => ?_, fun hle => ?_⟩
     · exact absurd (Prod.le_def.mp hle).1 (not_le.mpr hab.2)
     · exact absurd (Prod.le_def.mp hle).2 (not_le.mpr hab.1)
-
-/-- **Soundness over every feasible plan.** Since Theorem 6.9 holds for every plan, this is
-`check_sound`, whatever `EO` says. -/
-theorem check_sound_of_not_EO (h : C.check = true) (_hEO : C.eoOnly = false)
-    (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) :
-    IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front :=
-  C.check_sound h dc hA
-
-/-- **Soundness over event-ordered plans**, when some city has `d = d̄ = 0` and the certificate
-lists `EO`: the listed plans are event-ordered (`eoOK`), so the listed points are also the front
-of the event-ordered feasible plans (Corollary 6.10), the PDDL front in the limit. -/
-theorem check_sound_EO (h : C.check = true) (hEO : C.eoOnly = true)
-    (dc : Fin C.n → Fin C.n → ℕ)
-    (hA : C.assumptions.contains "A1-NS" = true → (C.network dc).A1NS) :
-    IsParetoFront (achievableEO (C.network dc) C.c C.t C.p) C.front := by
-  have hs := C.check_sound h dc hA
-  simp only [check, Bool.and_eq_true] at h
-  obtain ⟨⟨⟨⟨-, -⟩, hplans⟩, -⟩, -⟩ := h
-  simp only [plansOK, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at hplans
-  refine ⟨fun x hx => ?_, fun y hy => ?_, hs.antichain⟩
-  · obtain ⟨P, hPx⟩ := exists_mem_zip_of_mem hplans.1 hx
-    obtain ⟨⟨⟨hok, hcost⟩, hmk⟩, heo⟩ := hplans.2 _ hPx
-    refine ⟨P, planOK_feasible dc hok, EventOrdered.of_eoOK ?_, Prod.ext hcost hmk⟩
-    simpa [hEO] using heo
-  · obtain ⟨P, hP, -, hPy⟩ := hy
-    exact hs.dominates y ⟨P, hP, hPy⟩
 
 /-- **Soundness under (A1-NS).** -/
 theorem check_sound_A1NS (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)

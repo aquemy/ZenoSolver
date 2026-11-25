@@ -775,6 +775,10 @@ void testFlightCertificates()
     ns.p = 4;
     const auto bracket = zeno::solveBracket(ns, options);
     check(bracket.exact() && !bracket.assumptions().empty(), "Proposition 6.5: an exact bracket that needs A1-NS");
+    zeno::Certificate nsCert = zeno::makeBracketCertificate(ns, bracket);
+    check(nsCert.assumptions == std::vector<std::string>{"A1-NS"} && zeno::checkCertificate(nsCert).ok, "Proposition 6.5: the v2 certificate lists A1-NS only and is accepted");
+    nsCert.assumptions.push_back("EO");
+    check(!zeno::checkCertificate(nsCert).ok, "an unknown assumption (EO) is rejected");
     ns.central = zeno::FlightTable{{0, 5}, {5, 0}};
     check(!zeno::checkFlights(ns).a1ns, "a short central flight violates (A1-NS)");
     threw = false;

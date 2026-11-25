@@ -5,7 +5,8 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.Rewire
-public import ZenoFront.Domination
+public import ZenoFront.NonSymmetric
+public import ZenoFront.Bridge
 
 /-!
 # Theorem 6.9 for every plan
@@ -13,11 +14,12 @@ public import ZenoFront.Domination
 **Theorem 6.9 (schedulable domination), for every plan.** Under (A1-NS), with `p ≤ t`, every
 feasible plan gives a valid scheduled configuration with `2t − p` landings, cost at most the
 plan's and closed form (Lemma 6.3) at most its makespan (`schedulableDomination_all`). No event
-order and no hypothesis on zero durations is needed: this settles the case left open at the end
-of §6.2 of the note, plans that are not event-ordered on instances with a city of `d = d̄ = 0`.
+order and no hypothesis on zero durations is needed, so it covers instances with a city of
+`d = d̄ = 0` too.
 
-* Step 1 (`Feasible.split`, `exists_transfer_pw`) gives routes of visits without keys (`TRoute`,
-  `tChain_pairs`) and every passenger's two flights.
+* Step 1 (`Feasible.split`, `exists_transfer_pw`) gives routes of visits (`TRoute`,
+  `tChain_pairs`) and every passenger's two flights: its last departure from `C_I`, a leg
+  `C_I → x`, and the next leg, `x → C_G`.
 * Step 2 (`exists_rewired`, Rewire.lean) exchanges, cuts and splices until every hand-off is
   ordered in time, keeping loops of zero-time visits on the side.
 * Steps 3–6 (`exists_sched_of`, SchedBuild.lean) run on the planes' visits, with every loop
@@ -32,6 +34,66 @@ namespace ZenoFront
 open Finset
 
 variable {n t p : ℕ} {K : Type}
+
+/-! ### Step 1: the passengers' two flights -/
+
+/-- **Step 1, the passengers.** In a route from `C_I` to `C_G` without central flights, some leg
+`C_I → x` is followed by a leg `x → C_G`: the last departure from `C_I` and the next leg. They
+are related by any pairwise relation of the route. -/
+theorem exists_transfer_pw {N : Network n} {α : Type*} (f : α → Leg n t) (r : α → α → Prop) :
+    ∀ (J : List α) (τ : ℕ), J.Pairwise r → IsRoute .ci τ (J.map f) →
+      (∀ a ∈ J, Flies N (f a) ∧ (f a).central = false) → finalLoc .ci (J.map f) = .cg →
+      ∃ a ∈ J, ∃ b ∈ J, (f a).src = .ci ∧ (∃ x, (f a).dst = .city x ∧ (f b).src = .city x) ∧
+        (f b).dst = .cg ∧ (f a).arr ≤ (f b).dep ∧ r a b
+  | [], _, _, _, _, h => by simp at h
+  | [a], _, _, hr, hf, h => by
+    obtain ⟨x, hx⟩ := (hf a List.mem_cons_self).1.dst_city_of_src_isHub (by simp [hr.1])
+    simp [hx] at h
+  | a :: b :: rest, τ, hpw, hr, hf, h => by
+    simp only [List.map_cons, isRoute_cons] at hr
+    obtain ⟨hsrc, -, hsrc', hab, hrest⟩ := hr
+    obtain ⟨x, hx⟩ := (hf a List.mem_cons_self).1.dst_city_of_src_isHub (by simp [hsrc])
+    have hbsrc : (f b).src = .city x := hsrc'.trans hx
+    have hbhub : (f b).dst.isHub = true := by
+      have := (hf b (List.mem_cons_of_mem _ List.mem_cons_self)).2
+      simpa [Leg.central, hbsrc] using this
+    by_cases hd : (f b).dst = .ci
+    · rw [hd] at hrest
+      have hfin : finalLoc .ci (rest.map f) = .cg := by
+        simpa [finalLoc_cons, hd] using h
+      obtain ⟨a', ha', b', hb', h'⟩ := exists_transfer_pw f r rest (f b).arr
+        (List.pairwise_cons.mp (List.pairwise_cons.mp hpw).2).2 hrest
+        (fun a ha => hf a (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ ha))) hfin
+      exact ⟨a', List.mem_cons_of_mem _ (List.mem_cons_of_mem _ ha'), b',
+        List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hb'), h'⟩
+    · have hcg : (f b).dst = .cg := by
+        rcases hdst : (f b).dst with _ | z | _
+        · exact absurd hdst hd
+        · rw [hdst] at hbhub; simp at hbhub
+        · rfl
+      exact ⟨a, List.mem_cons_self, b, List.mem_cons_of_mem _ List.mem_cons_self, hsrc,
+        ⟨x, hx, hbsrc⟩, hcg, hab, (List.pairwise_cons.mp hpw).1 b List.mem_cons_self⟩
+
+/-- Consecutive elements, two by two. -/
+def pairs {α : Type*} : List α → List (α × α)
+  | a :: b :: rest => (a, b) :: pairs rest
+  | _ => []
+
+theorem sum_map_sum_coe {α : Type*} (L : Fin p → List α) (f : α → ℕ) :
+    ((∑ k, (L k : Multiset α)).map f).sum = ∑ k, ((L k).map f).sum :=
+  map_sum (Multiset.sumAddMonoidHom.comp (Multiset.mapAddMonoidHom f))
+    (fun k => (L k : Multiset α)) univ
+
+/-- The empty configuration, on no plane. -/
+def Sched.empty : Sched n 0 := ⟨Fin.elim0, Fin.elim0, Fin.elim0, Fin.elim0⟩
+
+theorem Sched.empty_spec (c d db : Fin n → ℕ) :
+    (Sched.empty (n := n)).Valid ∧ (Sched.empty (n := n)).size = 0 ∧
+      (Sched.empty (n := n)).cost c = 0 ∧ (Sched.empty (n := n)).tmpl d db = 0 := by
+  refine ⟨⟨fun k => k.elim0, fun v => v.elim0, fun v => v.elim0, by simp⟩, by simp [Sched.size],
+    by simp [Sched.cost], ?_⟩
+  simp only [Sched.tmpl, Finset.univ_eq_empty, Finset.sup_empty]
+  rfl
 
 /-! ### Prefix and suffix bounds, through concatenation -/
 
@@ -471,10 +533,5 @@ theorem schedulableDomination_all {N : Network n} (c : Fin n → ℕ) (hpt : p �
   refine Finset.sum_congr rfl fun k _ => ?_
   simp only [KL, List.map_map]
   rfl
-
-/-- **Theorem 6.9**, in the form `SchedulableDomination`, for `p ≤ t`, for every plan. -/
-theorem schedulableDomination_of_le {N : Network n} (c : Fin n → ℕ) (hpt : p ≤ t) :
-    SchedulableDomination N c t p :=
-  fun hA _ hP _ => schedulableDomination_all c hpt hA hP
 
 end ZenoFront
