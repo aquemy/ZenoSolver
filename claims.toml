@@ -184,9 +184,10 @@ created   = "2026-11-23"
 
 [claims.thm-4-1]
 kind         = "theorem"
-statement    = "Theorem 4.1 (achievability): under (S), every admissible partition X_1..X_p of a multiset X with |X| = s is flown by a feasible plan whose central landings are exactly X (cost c(X)) and whose makespan is max_k ℓ(X_k), using no central flight."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Admissible.exists_plan"
+statement    = "Theorem 4.1 (achievability): Assume (S) and p ≤ t. Every admissible partition X_1, …, X_p with |X| = 2t − p is flown by a feasible plan whose planes land exactly at the groups (up to relabelling the planes), of cost c(X) and makespan 2·max_k δ(X_k)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Admissible.exists_plan"
+lean_partial = "ZenoFront.admissiblePoints_subset_achievable"
 paper        = "Thm 4.1, doc/theory/exact-front.md §4.1"
 created      = "2026-11-23"
 
