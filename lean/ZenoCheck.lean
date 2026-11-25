@@ -11,9 +11,8 @@ import ZenoFront.Parse
   Pareto front of the instance: for every table of central flight durations if all gaps are
   `relaxed`, and for every table satisfying the triangles through a hub otherwise, in particular
   (A1) (`Cert.check_sound`) and (AΔ) (`Cert.check_sound_ATri`). By `ZenoFront.Cert2.check_sound`,
-  those of a v2 certificate are the exact front of every feasible plan, for every table; when
-  some city has `d = d̄ = 0` and the certificate lists `EO`, also of every event-ordered one
-  (`Cert2.check_sound_EO`);
+  those of a v2 certificate are the exact front of every feasible plan, for every table
+  (satisfying (A1-NS) when the certificate lists it);
 * `rejected: <reason>` (exit code 1) when the certificate is malformed or an obligation fails.
 
 Only the `accepted` verdict is backed by the theorem; the reasons are diagnostics recomputed
@@ -100,9 +99,6 @@ def reasons2 (C : Cert2) : Array String := Id.run do
   for ((P, x), i) in (C.plans.zip C.front).zipIdx do
     if let some why := planReason C.d C.dbar C.c i P x then
       errs := errs.push why
-    else if C.eoOnly && !eoOK P then
-      errs := errs.push s!"plan {i + 1} is not event-ordered by (departure, phase, plane, \
-        position), and the certificate lists EO"
   if !C.lastOK then
     errs := errs.push s!"the cheapest point's cost is not s * c_min = {C.s * minOf C.c}"
   if errs.isEmpty then
@@ -167,11 +163,8 @@ def main (args : List String) : IO UInt32 := do
           s!"{roles} roles, {lag} lagrangian, {bal} balanced and {srch} search gap(s), the others \
             relaxed: for every central flight table satisfying A1-NS"
         else "all gaps relaxed: for every central flight table"
-      let eo := if C.eoOnly then
-          ", and of the event-ordered ones (EO; ZenoFront.Cert2.check_sound_EO)"
-        else ""
       IO.println s!"accepted: the {C.front.length} points are the Pareto front of all feasible \
-        plans (version 2, fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound){eo}"
+        plans (version 2, fastest {C.fastest.name}, {scope}; ZenoFront.Cert2.check_sound)"
       return 0
     IO.println s!"rejected: {(reasons2 C).getD 0 "an obligation fails"}"
     return 1

@@ -17,14 +17,12 @@ public import ZenoFront.RoleBound
 public import ZenoFront.LagrangianBound
 public import ZenoFront.BalancedBound
 public import ZenoFront.SearchGap
-public import ZenoFront.Exchange
+public import ZenoFront.Visits
 public import ZenoFront.LinkCount
 public import ZenoFront.SchedBuild
-public import ZenoFront.Domination
 public import ZenoFront.Rewire
 public import ZenoFront.DominationAll
 public import ZenoFront.SchedMap
-public import ZenoFront.EventOrderCheck
 public import ZenoFront.Parse
 public import ZenoFront.Examples
 public import ZenoFront.Shrink

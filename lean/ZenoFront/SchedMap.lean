@@ -5,6 +5,7 @@ Released under the license of the ZenoSolver repository.
 module
 
 public import ZenoFront.SearchGap
+public import Mathlib.Tactic.Ring
 
 /-!
 # Scheduled configurations on representatives

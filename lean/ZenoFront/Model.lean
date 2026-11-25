@@ -82,6 +82,11 @@ def cost (c : Fin n → ℕ) (Y : Multiset (Fin n)) : ℕ := (Y.map c).sum
 @[simp] theorem load_add (d : Fin n → ℕ) (Y Z : Multiset (Fin n)) :
     load d (Y + Z) = load d Y + load d Z := by simp [load]
 
+/-- The load for a sum of two duration functions is the sum of the loads. -/
+theorem load_add_fun (f g : Fin n → ℕ) (Y : Multiset (Fin n)) :
+    load (fun i => f i + g i) Y = load f Y + load g Y := by
+  simp [load, Multiset.sum_map_add]
+
 @[simp] theorem cost_zero (c : Fin n → ℕ) : cost c 0 = 0 := by simp [cost]
 
 @[simp] theorem cost_cons (c : Fin n → ℕ) (i : Fin n) (Y : Multiset (Fin n)) :

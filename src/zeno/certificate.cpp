@@ -275,9 +275,6 @@ Certificate makeBracketCertificate(const Instance& instance, const BracketResult
         cert.assumptions.push_back("S");
     if(needsA1)
         cert.assumptions.push_back("A1-NS");
-    for(const auto& a : result.assumptions())
-        if(a == "EO")
-            cert.assumptions.push_back("EO");
     return cert;
 }
 
@@ -442,6 +439,12 @@ CertificateCheck checkCertificate(const Certificate& cert)
         fail(std::string("invalid instance: ") + e.what());
         return report;
     }
+    for(const auto& a : cert.assumptions)
+        if(a != "S" && a != "A1" && a != kA1OrTriangle && a != "A1-NS")
+        {
+            fail("unknown assumption '" + a + "'");
+            return report;
+        }
     if(cert.version == 1 && (!in.symmetric() || !assumed("S")))
     {
         fail("version 1 certificates need symmetric durations, assumed as S");
@@ -490,8 +493,7 @@ CertificateCheck checkCertificate(const Certificate& cert)
     const LevelBounds bounds(in, f.back().makespan);
     bool usedA1 = false, usedA1NS = false;
     // The search proof (Corollary 6.10) needs A1-NS. Theorem 6.9 covers every
-    // plan, also with cities where d = dbar = 0; an `EO` assumption written by
-    // older versions is still read but no longer needed.
+    // plan, also with cities where d = dbar = 0.
     const auto searchAllowed = [&](std::string& why) {
         if(!assumed("A1-NS"))
         {

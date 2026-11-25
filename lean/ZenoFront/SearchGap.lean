@@ -4,7 +4,9 @@ Released under the license of the ZenoSolver repository.
 -/
 module
 
-public import ZenoFront.BalancedBound
+public import ZenoFront.Model
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Multiset.Sort
 
 /-!
@@ -13,7 +15,8 @@ public import Mathlib.Data.Multiset.Sort
 A `search` gap of a certificate claims that no role configuration of cost below `C_i` has a
 schedule finishing before `M_{i+1}` (`searchGap` and `exactSchedule` in
 `src/zeno/ns_search.cpp`). By Theorem 6.9 (schedulable domination) of the theory note this rules
-out every event-ordered plan. This file has the search and its statement:
+out every feasible plan (`schedulableDomination_all`, `DominationAll.lean`). This file has the
+search and its statement:
 
 * `Sched`: a *scheduled configuration*. Per plane it has an ordered list of drop-offs, an ordered
   list of pick-ups and a multiset of crossings, and a *matching* `mate` from pick-up slots
@@ -26,10 +29,6 @@ out every event-ordered plan. This file has the search and its statement:
 * `SearchData.closed_sound` (**completeness of the enumeration**): if the search reports the gap
   closed, every valid scheduled configuration with `s` landings and cost below the bound has
   `tmpl > T`.
-
-`EventOrdered` is the predicate on plans of the note (§1.2). Theorem 6.9 has the statement
-`SchedulableDomination`; it is proved for `p ≤ t` in `Domination.lean`
-(`schedulableDomination`), and the v2 checker uses it for `search` gaps (`Cert2.searchWith_le`).
 -/
 
 @[expose] public section
@@ -92,37 +91,6 @@ def tmpl (d db : Fin n → ℕ) : ℕ :=
   max (univ.sup fun k => S.load d db k) (univ.sup fun v => univ.sup fun l => S.term d db v l)
 
 end Sched
-
-/-! ### Event-ordered plans -/
-
-/-- The legs of a plan, by plane and position. -/
-abbrev LegId (P : Plan n t p) := (k : Fin p) × Fin (P k).length
-
-/-- The leg at a position. -/
-def legAt (P : Plan n t p) (x : LegId P) : Leg n t := (P x.1)[x.2]
-
-/-- **Event-ordered plans** (§1.2 of the note). The legs have a total order (`rank`, injective)
-that extends every route and some journey of every passenger, and along which departure times
-do not decrease. Every plan with positive durations is event-ordered, and so is every PDDL plan.
-This is the scope of Theorem 6.9 when a city has `d = d̄ = 0`. -/
-def EventOrdered (P : Plan n t p) : Prop :=
-  ∃ rank : LegId P → ℕ, Function.Injective rank ∧
-    (∀ k (i j : Fin (P k).length), i < j → rank ⟨k, i⟩ < rank ⟨k, j⟩) ∧
-    (∀ x y, rank x < rank y → (legAt P x).dep ≤ (legAt P y).dep) ∧
-    ∀ π : Fin t, ∃ js : List (LegId P), (js.map (legAt P)).Perm (paxLegs P π) ∧
-      IsRoute .ci 0 (js.map (legAt P)) ∧ finalLoc .ci (js.map (legAt P)) = .cg ∧
-      js.Pairwise fun x y => rank x < rank y
-
-/-- **Theorem 6.9 (schedulable domination), statement.** Under (A1-NS), every feasible plan that
-is event-ordered, or any feasible plan if no city has `d = d̄ = 0`, gives a valid scheduled
-configuration with the plan's number of landings `2t − p`, cost at most the plan's, and closed
-form at most its makespan. It holds for `p ≤ t`, the model's assumption
-(`schedulableDomination`), and fails for `t < p`, where no valid configuration has `2t − p`
-landings (`not_schedulableDomination`). -/
-def SchedulableDomination (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Prop :=
-  N.A1NS → ∀ P : Plan n t p, Feasible N P → (EventOrdered P ∨ ∀ x, ¬ (N.d x = 0 ∧ N.dbar x = 0)) →
-    ∃ S : Sched n p, S.Valid ∧ S.size = 2 * t - p ∧ S.cost c ≤ planCost c P ∧
-      S.tmpl N.d N.dbar ≤ planMakespan P
 
 /-! ### The search -/
 
