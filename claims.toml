@@ -273,7 +273,7 @@ created      = "2026-11-24"
 
 [claims.claim-4-13]
 kind      = "claim"
-statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 = L(19) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
+statement = "Example 4.13 (the hypothesis matters): for d = (2, 3, 9, 11), c = (50, 44, 17, 0), t = 6, p = 3 and central flights d_12 = 1, d_13 = 5, d_14 = 6, d_23 = 3, d_24 = 6, d_34 = 1, which satisfy (S) but neither (A1) nor (AΔ), a plan of cost 260 (the checker's relaxation L(19)) and makespan 39 is dominated by no point of the front of admissible partitions, whose consecutive points are (264, 34) and (228, 40). So Corollary 4.8 and the conclusion of Theorem 4.10 fail there."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Ex413.plan_feasible, ZenoFront.Ex413.plan_cost, ZenoFront.Ex413.plan_makespan, ZenoFront.Ex413.not_A1, ZenoFront.Ex413.not_ATri, ZenoFront.Ex413.not_ATriHub, ZenoFront.Ex413.admissible_cost_ge, ZenoFront.Ex413.relaxedBound_19, ZenoFront.Ex413.admissible_front_consecutive, ZenoFront.Ex413.no_admissible_partition, ZenoFront.Ex413.not_admissible_le, ZenoFront.Ex413.not_isParetoFront"
 paper     = "Ex 4.13, doc/theory/exact-front.md §4.6"
@@ -301,7 +301,7 @@ created   = "2026-11-25"
 
 [claims.claim-5]
 kind         = "claim"
-statement    = "Section 5 (greedy counterexamples): the per-PPP greedy of both papers, longest flights first to the least-loaded plane, misses front points: for d = (6, 10), c = (40, 20), t = 5, p = 2 it flies the landings of the front point (260, 60) in makespan 68, and for d = (1, 3), c = (9, 5), t = 4, p = 2 it misses (42, 12)."
+statement    = "Section 5 (greedy counterexamples), for the per-PPP greedies of EvoCOP 2015 (Algorithm 1 and its Step 2) and of arXiv:2304.14659 (§3.2, with its Steps 2 and 3 read as in Counterexamples.lean): (a) for d = (6, 10), c = (40, 20), t = 5, p = 2, the point (260, 60) is on the front for every central table, but for every PPP of cost at most 260, every set of P3 patterns and every tie-breaking of ArgMin, both greedies give a makespan above 60; on the landings of (260, 60), Algorithm 1 without P3 ends at (52, 68) whatever the ties. (b) For d = (1, 3), c = (9, 5), t = 4, p = 2, the point (42, 12) is on the front, and for every PPP of cost at most 42 and every tie-breaking the arXiv greedy gives a makespan above 12, while EvoCOP's greedy reaches (42, 12) with one P3 at city 2, whatever the ties."
 status       = "math.machine-checked"
 lean         = "ZenoFront.Greedy.evocop_misses_lpt, ZenoFront.Greedy.arxiv_misses_lpt, ZenoFront.Greedy.evocop_lpt_noP3, ZenoFront.Greedy.arxiv_misses_p3First, ZenoFront.Greedy.evocop_reaches_p3First"
 paper        = "§5, doc/theory/exact-front.md"
@@ -342,7 +342,7 @@ created   = "2026-11-23"
 
 [claims.prop-6-5]
 kind      = "proposition"
-statement = "Proposition 6.5 (harmful waiting): for n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4 and no central flights, (A1-NS) holds, the cheapest role configuration with every λ_k ≤ 73 costs 14, and no plan of makespan at most 73 costs less than 18. ((AΔ-path) fails: d_2 = 19 > d̄_2 + d̄_1 + d_1 = 17.)"
+statement = "Proposition 6.5 (harmful waiting): for n = 2, d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4 and no central flights, (A1-NS) holds, the cheapest role configuration with every λ_k ≤ 73 costs 14, and no plan of makespan at most 73 costs less than 18."
 status    = "math.machine-checked"
 lean      = "ZenoFront.Prop65.prop65, ZenoFront.Prop65.cost_ge_of_makespan_le_noCentral, ZenoFront.Prop65.harmful_waiting"
 paper     = "Prop 6.5, doc/theory/exact-front.md §6.2"
@@ -635,7 +635,7 @@ created   = "2026-11-23"
 
 [claims.paper-no-harmful-waiting]
 kind      = "conjecture"
-statement = "Assumption of arXiv:2304.14659, Conjecture 6.5 of the note: under (AΔ-path), every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations."
+statement = "Assumption of arXiv:2304.14659 (Conjecture 6.5 of the note, without its (AΔ-path) hypothesis): every role configuration has orders and a link matching whose template has makespan max_k λ_k, and in its front-level form the front is the Pareto set of (cost, max_k λ_k) over role configurations. Refuted on the instance of Proposition 6.5 (d = (3, 19), d̄ = (3, 11), c = (5, 1), t = 7, p = 4, no central flights)."
 status    = "math.disproved"
 lean      = "ZenoFront.Prop65.harmful_waiting"
 paper     = "arXiv:2304.14659; Conj 6.5, doc/theory/exact-front.md §6.2"
