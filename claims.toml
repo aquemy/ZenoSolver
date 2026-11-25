@@ -193,9 +193,9 @@ created      = "2026-11-23"
 
 [claims.def-4-2]
 kind      = "definition"
-statement = "Definition 4.2 (role configuration): drop-offs Dr_k, pick-ups Pk_k and crossings Cr_k per plane, multisets of central cities with |Cr_k| odd and Σ_k Dr_k = Σ_k Pk_k city by city, with its passenger count, cost and role loads λ_k. Lean form: RoleConfig holds the three families, the parity and the balance; the groups and the role loads are separate definitions (RoleConfig.groups, RoleConfig.roleLoad), and the passenger count t appears as 2t − p landings."
+statement = "Definition 4.2 (role configurations): A role configuration on p planes gives each plane multisets Dr_k (drop-offs), Pk_k (pick-ups) and Cr_k (crossings) of central cities, with |Cr_k| odd and Σ_k Dr_k = Σ_k Pk_k. Its groups are X_k = Dr_k + Pk_k + Cr_k, its cost is c(X), and the role load of plane k is λ_k = 2δ(Dr_k) + 2δ̄(Pk_k) + δ(Cr_k) + δ̄(Cr_k). The passenger count is read through the landings, |X| = 2t − p."
 status    = "math.machine-checked"
-lean      = "ZenoFront.RoleConfig"
+lean      = "ZenoFront.RoleConfig, ZenoFront.RoleConfig.groups, ZenoFront.RoleConfig.roleLoad"
 paper     = "Def 4.2, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
