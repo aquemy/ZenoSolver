@@ -526,9 +526,10 @@ created      = "2026-11-23"
 
 [claims.thm-7-6]
 kind         = "theorem"
-statement    = "Theorem 7.6 (σ-DP) [Claim C]: the shortest path from (0, 0, ∅) to (p, s, ∅) in the σ-graph has weight E(T)."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.sigmaBoundAt_eq_minCost"
+statement    = "Theorem 7.6 (the σ-DP): For 1 ≤ p ≤ t and T ≤ Tmax, the σ-DP, whose states are sets of at most min(p − 1, t − p) non-dominated cities, equals E(T)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.sigmaBoundAt_eq_minCost"
+lean_partial = "ZenoFront.sigmaBoundAt_le_totalCost"
 paper        = "Thm 7.6, doc/theory/exact-front.md §7.5"
 created      = "2026-11-23"
 
