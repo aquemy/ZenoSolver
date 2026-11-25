@@ -395,8 +395,9 @@ created   = "2026-11-24"
 
 [claims.prop-6-7]
 kind      = "proposition"
-statement = "Proposition 6.7 (shuttles are not enough): for n = 2, d = (1, 3), d̄ = (3, 1), d_12 = 2, t = 3, p = 2 and any costs, (AΔ) holds and (A1-NS) fails, some plan has makespan 8, and every plan whose central flights all lie in segments of type Ā (from C_G to C_I) has makespan at least 10; with c = (6, 1) the front is {(4, 10), (15, 8)}."
-status    = "math.proved-informal"
+statement = "Proposition 6.7 (the shuttle construction of arXiv:2304.14659 §3.3 misses the front): for n = 2, d = (1, 3), d̄ = (3, 1), a central flight of duration 2 between the two cities, c = (6, 1), t = 3 and p = 2, (AΔ) holds and (A1-NS) fails, and a feasible plan has cost 15 and makespan 8, so the front has a point of makespan at most 8. In the augmented instance of §3.3 as printed (the pick-up at the new city lasting 2d_j), whether or not the shuttle crossing is counted, every role configuration with per-pattern durations and t passengers has a plane whose patterns last at least 10, so every point of the construction has makespan at least 10 and its front is not the instance's front."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Shuttle.shuttle_misses, ZenoFront.Shuttle.load_ge, ZenoFront.Shuttle.plan_feasible, ZenoFront.Shuttle.not_net_A1NS"
 paper     = "Prop 6.7, doc/theory/exact-front.md §6.4"
 created   = "2026-11-24"
 

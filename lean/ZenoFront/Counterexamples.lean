@@ -11,6 +11,8 @@ public import ZenoFront.TriSegments
 public import ZenoFront.CheckerV2
 public import ZenoFront.DominationAll
 public import ZenoFront.RoleBound
+public import Mathlib.Order.WellFoundedSet
+public import Mathlib.Order.WellQuasiOrder
 
 /-!
 # The counterexamples of the theory note, checked by the kernel
@@ -93,6 +95,24 @@ reduction `f` of `Graph.lean` gives the clique instance with `d = (1, 3)`, `d̄ 
 is `{(8, 10)}` (`Ex611.reduced_front`). `U` has a plan of cost 8 and makespan 8 (`Ex611.plan`), so
 the two fronts differ (`Ex611.fronts_differ`).
 
+## Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front
+
+For each `B Ā B̄` situation through two central cities `i` and `j`, arXiv:2304.14659 §3.3 adds a
+virtual city whose patterns have their own durations and costs (`Shuttle.shuttleCity`,
+`Shuttle.augment`). The augmented instance is modelled by role configurations with per-pattern
+durations (`Shuttle.TConfig`). The construction is formalised as printed: the pick-up at the new
+city lasts `2 d_j` (equation (4)). The erratum's correction, `2 d̄_j`, is not formalised. The paper
+says the situation becomes a `B B̄` pair "and a `Ā` with a null multiplicity". Both readings are
+covered: the shuttle `Ā` is counted or not (the flag `shuttle`). One choice is left open by the
+paper and taken here: every ordered pair `i ≠ j` gets a virtual city (in the Lean model every pair
+of central cities is joined by a flight).
+
+The instance is `d = (1, 3)`, `d̄ = (3, 1)`, a central flight of duration 2, `c = (6, 1)`, `t = 3`,
+`p = 2`; (AΔ) holds. It has a feasible plan of cost 15 and makespan 8 (`Shuttle.plan_feasible`), so
+its front has a point of makespan at most 8 (`Shuttle.front_le`). Every configuration of the
+augmented instance has a plane that flies at least 10, in both readings (`Shuttle.load_ge`). So the
+construction's front is not the instance's front (`Shuttle.shuttle_misses`).
+
 ## Proposition I holds only in the front sense
 
 Both papers' Proposition I says that Pareto-optimal plans land exactly `2t − p` times. On `n = 1`,
@@ -110,6 +130,7 @@ with 9 central landings, more than `2t − p = 7`, attains it (`PropI.plan9_pare
 * `ZenoFront.Prop65.prop65`, `ZenoFront.Prop65.harmful_waiting`: Proposition 6.5.
 * `ZenoFront.Ex611.reduced_front`, `ZenoFront.Ex611.fronts_differ`: Example 6.11.
 * `ZenoFront.PropI.plan9_pareto`: a Pareto-optimal plan with more than `2t − p` landings.
+* `ZenoFront.Shuttle.shuttle_misses`: Proposition 6.7.
 -/
 
 @[expose] public section
@@ -1114,5 +1135,238 @@ theorem plan9_pareto (dc : Fin 1 → Fin 1 → ℕ) :
     by decide +kernel, ((front dc).mem_iff_minimal _).mp (by decide)⟩
 
 end PropI
+
+/-! ### Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front -/
+
+namespace Shuttle
+
+open Finset
+
+/-- A city of a pattern-typed instance (arXiv:2304.14659, §3.3): a duration and a landing cost for
+each pattern, `A` (`C_I → x → C_G`), `Ā` (`C_G → x → C_I`), `B` (`C_I → x → C_I`) and `B̄`
+(`C_G → x → C_G`), and whether the city is virtual. -/
+structure TCity where
+  dA : ℕ
+  dAb : ℕ
+  dB : ℕ
+  dBb : ℕ
+  cA : ℕ
+  cAb : ℕ
+  cB : ℕ
+  cBb : ℕ
+  virtual : Bool
+  deriving DecidableEq, Repr
+
+variable {n : ℕ}
+
+/-- A central city `i`: its patterns last `d_i + d̄_i`, `d̄_i + d_i`, `2 d_i` and `2 d̄_i`, and each
+lands once in `i`, for `c_i`. -/
+def plainCity (d dbar c : Fin n → ℕ) (i : Fin n) : TCity :=
+  ⟨d i + dbar i, dbar i + d i, 2 * d i, 2 * dbar i, c i, c i, c i, c i, false⟩
+
+/-- **The virtual city of arXiv §3.3** for a `B Ā B̄` situation through `C_i` and `C_j`, as printed:
+`d^A = min(d_i + d̄_i, d_j + d̄_j)`, `d^Ā = d̄_i + d_ij + d_j` (the shuttle), `d^B = 2 d_i` and
+`d^B̄ = 2 d_j` (equations (3)–(6)); it costs `c_i + c_j` for `A` and `Ā`, `c_i` for `B` and `c_j` for
+`B̄` (Figure 10). -/
+def shuttleCity (d dbar c : Fin n → ℕ) (dc : Fin n → Fin n → ℕ) (i j : Fin n) : TCity :=
+  ⟨min (d i + dbar i) (d j + dbar j), dbar i + dc i j + d j, 2 * d i, 2 * d j, c i + c j,
+    c i + c j, c i, c j, true⟩
+
+/-- **The augmented instance of arXiv §3.3**: the central cities, then one virtual city for each
+ordered pair `i ≠ j` (every pair of central cities is joined by a flight in the Lean model). -/
+def augment (d dbar c : Fin n → ℕ) (dc : Fin n → Fin n → ℕ) : List TCity :=
+  (List.finRange n).map (plainCity d dbar c) ++
+    (List.finRange n).flatMap fun i =>
+      ((List.finRange n).filter (· ≠ i)).map (shuttleCity d dbar c dc i)
+
+/-- A role configuration of a pattern-typed instance with `m` cities, by its counts: for each
+plane `k` and city `x`, how many patterns `A`, `Ā`, `B` and `B̄` plane `k` flies at `x`. -/
+structure TConfig (p m : ℕ) where
+  a : Fin p → Fin m → ℕ
+  ab : Fin p → Fin m → ℕ
+  b : Fin p → Fin m → ℕ
+  bb : Fin p → Fin m → ℕ
+
+namespace TConfig
+
+variable {p m : ℕ} (C : Fin m → TCity) (cfg : TConfig p m)
+
+/-- The load of plane `k`: the durations of its patterns. Each plane flies its patterns one after
+the other, so every schedule of the configuration has a makespan at least every load. -/
+def load (k : Fin p) : ℕ :=
+  ∑ x, (cfg.a k x * (C x).dA + cfg.ab k x * (C x).dAb + cfg.b k x * (C x).dB +
+    cfg.bb k x * (C x).dBb)
+
+/-- The cost: the landings of all patterns. -/
+def cost : ℕ :=
+  ∑ k, ∑ x, (cfg.a k x * (C x).cA + cfg.ab k x * (C x).cAb + cfg.b k x * (C x).cB +
+    cfg.bb k x * (C x).cBb)
+
+/-- The number of landings, one per pattern. -/
+def size : ℕ := ∑ k, ∑ x, (cfg.a k x + cfg.ab k x + cfg.b k x + cfg.bb k x)
+
+/-- A valid configuration for `t` passengers. Every plane flies one more `A` than `Ā` (it starts in
+`C_I` and ends in `C_G`); the `B` and `B̄` balance city by city (each `B B̄` pair carries one
+passenger); there are `t` passengers, one per `A` and one per pair. With `shuttle`, every pair at
+a virtual city also needs its shuttle, an `Ā` at that city. -/
+structure Valid (shuttle : Bool) (t : ℕ) : Prop where
+  alt : ∀ k, ∑ x, cfg.a k x = ∑ x, cfg.ab k x + 1
+  bal : ∀ x, ∑ k, cfg.b k x = ∑ k, cfg.bb k x
+  pax : ∑ k, ∑ x, (cfg.a k x + cfg.b k x) = t
+  shut : shuttle = true → ∀ x, (C x).virtual = true → ∑ k, cfg.b k x ≤ ∑ k, cfg.ab k x
+
+end TConfig
+
+/-- The points the construction can give: the cost of a valid configuration with `2t − p`
+landings, and any makespan at least its loads. Every schedule of a configuration has such a
+makespan, so this set contains every point of the construction (it over-approximates it). -/
+def points {m : ℕ} (C : Fin m → TCity) (shuttle : Bool) (t p : ℕ) : Set (ℕ × ℕ) :=
+  {x | ∃ cfg : TConfig p m, cfg.Valid C shuttle t ∧ cfg.size = 2 * t - p ∧
+    cfg.cost C = x.1 ∧ ∀ k, cfg.load C k ≤ x.2}
+
+/-! #### The instance of Proposition 6.7 -/
+
+/-- The durations to `C_I`, `d = (1, 3)`. -/
+def d : Fin 2 → ℕ := ![1, 3]
+
+/-- The durations to `C_G`, `d̄ = (3, 1)`. -/
+def db : Fin 2 → ℕ := ![3, 1]
+
+/-- The landing costs, `c = (6, 1)`. -/
+def c : Fin 2 → ℕ := ![6, 1]
+
+/-- The central flight between cities 1 and 2 lasts 2 (the diagonal is never flown). -/
+def dc : Fin 2 → Fin 2 → ℕ := ![![0, 2], ![2, 0]]
+
+/-- The instance, with its central flight. -/
+def net : Network 2 := ⟨d, db, dc⟩
+
+/-- (AΔ) holds: the only triangles are `C_I, 1, 2` and `C_G, 1, 2`, and `d_12 = 2` is between the
+difference and the sum of the two other sides. -/
+theorem net_ATri : net.ATri := by
+  intro a x b hab τab τax τxb h₁ h₂ h₃
+  have key : ∀ a ∈ allLocs 2, ∀ x ∈ allLocs 2, ∀ b ∈ allLocs 2, a ≠ b →
+      ∀ u ∈ (net.duration a b).toList, ∀ v ∈ (net.duration a x).toList,
+        ∀ w ∈ (net.duration x b).toList, u ≤ v + w := by
+    decide +kernel
+  exact key a (mem_allLocs a) x (mem_allLocs x) b (mem_allLocs b) hab τab (by simp [h₁]) τax
+    (by simp [h₂]) τxb (by simp [h₃])
+
+/-- (A1-NS) fails: `d_12 = 2 < 4 = min(d_1 + d_2, d̄_1 + d̄_2)`. -/
+theorem not_net_A1NS : ¬ net.A1NS := fun h => absurd (h 0 1) (by decide)
+
+/-- The plan of Proposition 6.7 (passengers numbered from `0`). Plane 1 leaves passenger 0 in
+city 1, carries passenger 1 across city 2, and picks passenger 2 up in city 2. Plane 2 flies the
+split crossing `C_I → 2 → 1 → C_G`: it leaves passenger 2 in city 2, flies the central flight
+empty, and carries passenger 0 from city 1. -/
+def plan : Plan 2 3 2 :=
+  ![[⟨.ci, .city 0, 0, 1, some 0⟩, ⟨.city 0, .ci, 1, 2, none⟩, ⟨.ci, .city 1, 2, 5, some 1⟩,
+      ⟨.city 1, .cg, 5, 6, some 1⟩, ⟨.cg, .city 1, 6, 7, none⟩, ⟨.city 1, .cg, 7, 8, some 2⟩],
+    [⟨.ci, .city 1, 0, 3, some 2⟩, ⟨.city 1, .city 0, 3, 5, none⟩, ⟨.city 0, .cg, 5, 8, some 0⟩]]
+
+/-- The flights the plan uses: the hub flights and the central flight from city 2 to city 1. -/
+def usedGraph : FlightGraph 2 :=
+  ⟨fun a b => match a, b with
+    | .city i, .city j => if i = 1 ∧ j = 0 then some 2 else none
+    | a, b => Network.duration ⟨d, db, fun _ _ => 0⟩ a b⟩
+
+/-- **The plan is feasible** in every network with these hub durations and a central flight of
+duration 2 from city 2 to city 1. -/
+theorem plan_feasible (dc' : Fin 2 → Fin 2 → ℕ) (h : dc' 1 0 = 2) : Feasible ⟨d, db, dc'⟩ plan := by
+  refine (feasible_iff_gFeasible _ _).mpr
+    ((gFeasible_of_planOKDur (U := usedGraph) (by decide +kernel)).mono fun a b τ hab => ?_)
+  cases a <;> cases b <;> simp only [usedGraph, Network.toGraph, Network.duration] at hab ⊢ <;>
+    try exact hab
+  rename_i i j
+  split_ifs at hab with hij
+  · obtain ⟨rfl, rfl⟩ := hij
+    rw [h]
+    exact hab
+
+/-- It costs 15. -/
+theorem plan_cost : planCost c plan = 15 := by decide +kernel
+
+/-- Its makespan is 8. -/
+theorem plan_makespan : planMakespan plan = 8 := by decide +kernel
+
+/-- **The front of the instance has a point of makespan at most 8**, weakly dominating `(15, 8)`,
+in every network with these hub durations and a central flight of duration 2 from city 2 to
+city 1. `ℕ × ℕ` is well quasi-ordered, so the points of the plans below `(15, 8)` have a minimal
+one. -/
+theorem front_le (dc' : Fin 2 → Fin 2 → ℕ) (h : dc' 1 0 = 2) :
+    ∃ y ≤ ((15, 8) : ℕ × ℕ), Minimal (· ∈ achievable ⟨d, db, dc'⟩ c 3 2) y :=
+  (Set.isPWO_of_wellQuasiOrderedLE _).exists_le_minimal
+    ⟨plan, plan_feasible dc' h, by rw [plan_cost, plan_makespan]⟩
+
+/-! #### The augmented instance -/
+
+/-- The cities of the augmented instance: cities 1 and 2, then the virtual cities of the
+situations through `(1, 2)` and through `(2, 1)`. -/
+def cities : Fin 4 → TCity := fun x =>
+  (augment d db c dc).getD x ⟨0, 0, 0, 0, 0, 0, 0, 0, false⟩
+
+theorem augment_length : (augment d db c dc).length = 4 := by decide +kernel
+
+theorem cities_0 : cities 0 = ⟨4, 4, 2, 6, 6, 6, 6, 6, false⟩ := by decide +kernel
+
+theorem cities_1 : cities 1 = ⟨4, 4, 6, 2, 1, 1, 1, 1, false⟩ := by decide +kernel
+
+theorem cities_2 : cities 2 = ⟨4, 8, 2, 6, 7, 7, 6, 1, true⟩ := by decide +kernel
+
+theorem cities_3 : cities 3 = ⟨4, 4, 6, 2, 7, 7, 1, 6, true⟩ := by decide +kernel
+
+/-- **Every configuration of the augmented instance has a plane that flies at least 10**, with or
+without the shuttle counted, and whatever its number of landings. With 3 passengers, each plane
+flies an `A` (4), so there is at most one `B B̄` pair; without a pair a plane flies `A Ā A` (12 or
+more), and a pair at one city lasts `(2, 6)` or `(6, 2)`, in every city. -/
+theorem load_ge (shuttle : Bool) (cfg : TConfig 2 4) (h : cfg.Valid cities shuttle 3) :
+    10 ≤ cfg.load cities 0 ∨ 10 ≤ cfg.load cities 1 := by
+  obtain ⟨halt, hbal, hpax, -⟩ := h
+  have h₀ := halt 0
+  have h₁ := halt 1
+  have hb₀ := hbal 0
+  have hb₁ := hbal 1
+  have hb₂ := hbal 2
+  have hb₃ := hbal 3
+  simp only [TConfig.load, Fin.sum_univ_two, Fin.sum_univ_four, cities_0, cities_1, cities_2,
+    cities_3] at *
+  omega
+
+/-- So every point of the construction has makespan at least 10. -/
+theorem points_ge (shuttle : Bool) : ∀ x ∈ points cities shuttle 3 2, 10 ≤ x.2 := by
+  rintro x ⟨cfg, hv, -, -, hload⟩
+  rcases load_ge shuttle cfg hv with h | h
+  · exact h.trans (hload 0)
+  · exact h.trans (hload 1)
+
+/-- A configuration of the construction, cost 4 and loads 10 and 6: both planes cross at city 2,
+and plane 1 drops a passenger there that plane 2 picks up. It is valid in both readings. -/
+def cfg4 : TConfig 2 4 where
+  a := fun _ x => if x = 1 then 1 else 0
+  ab := fun _ _ => 0
+  b := fun k x => if k = 0 ∧ x = 1 then 1 else 0
+  bb := fun k x => if k = 1 ∧ x = 1 then 1 else 0
+
+/-- `(4, 10)` is a point of the construction, in both readings. -/
+theorem mem_points (shuttle : Bool) : ((4, 10) : ℕ × ℕ) ∈ points cities shuttle 3 2 :=
+  ⟨cfg4, ⟨by decide +kernel, by decide +kernel, by decide +kernel, fun _ => by decide +kernel⟩,
+    by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+/-- **Proposition 6.7: the shuttle construction of arXiv §3.3 misses the front.** On
+`d = (1, 3)`, `d̄ = (3, 1)`, a central flight of duration 2, `c = (6, 1)`, `t = 3`, `p = 2`, (AΔ)
+holds, the front of the instance has a point of makespan at most 8, and every point of the
+augmented instance, as printed, has makespan at least 10, whether or not the shuttle is counted.
+So the construction's front is not the instance's front. -/
+theorem shuttle_misses (shuttle : Bool) :
+    net.ATri ∧ (∃ y ≤ ((15, 8) : ℕ × ℕ), Minimal (· ∈ achievable net c 3 2) y) ∧
+      (∀ x ∈ points cities shuttle 3 2, 10 ≤ x.2) ∧
+      ¬ ∀ x, Minimal (· ∈ achievable net c 3 2) x ↔ Minimal (· ∈ points cities shuttle 3 2) x := by
+  obtain ⟨y, hy, hmin⟩ := front_le dc rfl
+  refine ⟨net_ATri, ⟨y, hy, hmin⟩, points_ge shuttle, fun h => ?_⟩
+  have h₁ := points_ge shuttle y ((h y).mp hmin).prop
+  have h₂ := (Prod.le_def.mp hy).2
+  omega
+
+end Shuttle
 
 end ZenoFront
