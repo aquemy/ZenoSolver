@@ -154,9 +154,10 @@ created      = "2026-11-23"
 
 [claims.lem-3-2]
 kind         = "lemma"
-statement    = "Lemma 3.2 (counting): a feasible plan has at least s = 2t − p segments, hence at least s landings in central cities."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.le_sum_hubArrivals"
+statement    = "Lemma 3.2 (counting): In a feasible plan, 2t ≤ Σ_k h_k + p, where h_k is the number of hub arrivals (segments) of plane k."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Feasible.le_sum_hubArrivals"
+lean_partial = "ZenoFront.PlaneFeasible.ciDepartures_add_cgArrivals, ZenoFront.Feasible.le_ciDepartures, ZenoFront.Feasible.le_cgArrivals"
 paper        = "Lemma 3.2, doc/theory/exact-front.md §3"
 created      = "2026-11-23"
 
