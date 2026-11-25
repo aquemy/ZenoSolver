@@ -7,12 +7,13 @@ module
 public import ZenoFront.Solver
 
 /-!
-# Complexity (§8)
+# Complexity (§8): two reductions
 
 `M(X)` is `minMakespan d p X` (`Achievability.lean`): the least `2 max_k δ(X_k)` over the
 admissible partitions of the multiset `X` into `p` groups. Deciding `M(X) ≤ 2T` is strongly
-NP-hard, from 3-Partition. This file proves the reduction; the hardness of 3-Partition
-(Garey–Johnson) is cited by the note, not formalised.
+NP-hard (from 3-Partition) and stays NP-hard for two planes (from Partition). This file proves the
+reductions; the hardness of 3-Partition (Garey–Johnson) and of Partition is cited by the note, not
+formalised.
 
 ## Main results
 
@@ -21,6 +22,10 @@ NP-hard, from 3-Partition. This file proves the reduction; the hardness of 3-Par
 * `threePartition_iff` (**Theorem 8.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
   `B/4 < a_i < B/2`, the instance with durations `a_i` and `p = m` planes (`t = 2m`) has
   `M(X) ≤ 2B`, for `X` every city once, iff the `a_i` split into `m` triples of sum `B`.
+* `partition_iff` (**Proposition 8.2**, the NP-hard half): for `a_1, …, a_m` with sum `2B`,
+  `r ≥ m` odd and `K = B + 1`, the instance with `2r` cities of durations `a_i + K` and `K`
+  (`partitionDur`), `p = 2` (`t = r + 1`) has `M(X) ≤ 2(B + rK)` iff some sub-multiset of the
+  `a_i` sums to `B`.
 -/
 
 @[expose] public section
@@ -226,6 +231,168 @@ theorem threePartition_iff {m B : ℕ} (a : Fin (3 * m) → ℕ) (hsum : ∑ i, 
 /-- The multiset of Theorem 8.1 has `3m = 2t − p` landings, for `t = 2m` and `p = m`. -/
 theorem threePartition_card (m : ℕ) :
     (univ.val : Multiset (Fin (3 * m))).card = 2 * (2 * m) - m := by
+  rw [Finset.card_val, Finset.card_univ, Fintype.card_fin]
+  omega
+
+/-! ### Proposition 8.2: the Partition reduction for two planes -/
+
+/-- The items of the Partition reduction, padded with zeros: `a_i` for `i < m` and `0` for the
+other cities. -/
+def padItems {m : ℕ} (a : Fin m → ℕ) (N : ℕ) (i : Fin N) : ℕ :=
+  if h : i.val < m then a ⟨i, h⟩ else 0
+
+/-- The durations of the Partition reduction: city `i` has duration `a_i + K` if `i < m` and `K`
+otherwise. -/
+def partitionDur {m : ℕ} (a : Fin m → ℕ) (r K : ℕ) (i : Fin (2 * r)) : ℕ :=
+  padItems a (2 * r) i + K
+
+/-- All durations of the Partition reduction are positive. -/
+theorem partitionDur_pos {m : ℕ} (a : Fin m → ℕ) (r B : ℕ) (i : Fin (2 * r)) :
+    0 < partitionDur a r (B + 1) i := by
+  unfold partitionDur
+  omega
+
+/-- The padded items of a set of cities sum to the items of the indices it contains. -/
+theorem sum_padItems {m N : ℕ} (a : Fin m → ℕ) (hmN : m ≤ N) (Z : Finset (Fin N)) :
+    ∑ i ∈ Z, padItems a N i = ∑ j with Fin.castLEEmb hmN j ∈ Z, a j := by
+  classical
+  have hcast : ∀ j : Fin m, padItems a N (Fin.castLEEmb hmN j) = a j := fun j => by
+    simp [padItems, Fin.castLEEmb]
+  rw [← Finset.sum_congr rfl fun j _ => hcast j, ← Finset.sum_map _ (Fin.castLEEmb hmN)]
+  refine (Finset.sum_subset (fun i hi => ?_) fun i hi hni => ?_).symm
+  · obtain ⟨j, hj, rfl⟩ := Finset.mem_map.mp hi
+    exact (Finset.mem_filter.mp hj).2
+  · unfold padItems
+    split_ifs with h
+    · refine absurd (Finset.mem_map.mpr ⟨⟨i, h⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩,
+        ?_⟩) hni <;> simp [Fin.castLEEmb, hi]
+    · rfl
+
+/-- Two planes: the partition into a set `G` of cities and its complement. -/
+def halves {N : ℕ} (G : Finset (Fin N)) (i : Fin N) : Fin 2 := if i ∈ G then 0 else 1
+
+theorem filter_halves_zero {N : ℕ} (G : Finset (Fin N)) : ({i | halves G i = 0} : Finset _) = G := by
+  ext i
+  by_cases hi : i ∈ G <;> simp [halves, hi]
+
+theorem filter_halves_one {N : ℕ} (G : Finset (Fin N)) : ({i | halves G i = 1} : Finset _) = Gᶜ := by
+  ext i
+  by_cases hi : i ∈ G <;> simp [halves, hi]
+
+/-- Two odd halves are admissible. -/
+theorem admissible_halves {r : ℕ} (hr : Odd r) {G : Finset (Fin (2 * r))} (hG : #G = r) :
+    Admissible (groupsOf (halves G)) := by
+  refine admissible_groupsOf fun k => ?_
+  fin_cases k
+  · simpa [filter_halves_zero, hG] using hr
+  · simp only [Fin.mk_one, filter_halves_one, Finset.card_compl, Fintype.card_fin, hG]
+    rwa [show 2 * r - r = r by omega]
+
+/-- **Proposition 8.2 (the Partition reduction for two planes).** Let `a_1, …, a_m` be natural
+numbers with sum `2B`, `r ≥ m` odd and `K = B + 1`. In the symmetric instance with `2r` cities,
+of durations `a_i + K` for `i ≤ m` and `K` for the other `2r − m` (all positive,
+`partitionDur_pos`), `p = 2` planes (and `t = r + 1` passengers, so `s = 2r`), the multiset `X`
+that lands once at every city has `M(X) ≤ 2(B + rK)` iff some sub-multiset of the `a_i` sums to
+`B`, a set `S` of indices.
+
+The hardness of Partition is cited, not formalised. -/
+theorem partition_iff {m r B : ℕ} (a : Fin m → ℕ) (hsum : ∑ i, a i = 2 * B) (hr : Odd r)
+    (hmr : m ≤ r) :
+    minMakespan (partitionDur a r (B + 1)) 2 univ.val ≤ 2 * (B + r * (B + 1)) ↔
+      ∃ S : Finset (Fin m), ∑ i ∈ S, a i = B := by
+  classical
+  have hm2 : m ≤ 2 * r := by omega
+  set K := B + 1 with hK
+  set e := partitionDur a r K with he
+  have hsumF : ∀ F : Finset (Fin (2 * r)),
+      ∑ i ∈ F, e i = ∑ i ∈ F, padItems a (2 * r) i + #F * K := fun F => by
+    simp [he, partitionDur, Finset.sum_add_distrib]
+  have hall : ∑ i, e i = 2 * B + 2 * r * K := by
+    rw [hsumF, sum_padItems a hm2, Finset.card_univ, Fintype.card_fin]
+    simp [hsum]
+  obtain ⟨G, -, hG⟩ := Finset.exists_subset_card_eq (s := (univ : Finset (Fin (2 * r)))) (n := r)
+    (by simp; omega)
+  rw [minMakespan_le_iff ⟨_, admissible_halves hr hG, landings_groupsOf _⟩]
+  constructor
+  · rintro ⟨X, -, hXY, hload⟩
+    obtain ⟨g, rfl⟩ := exists_eq_groupsOf hXY
+    set F := ({i | g i = 0} : Finset (Fin (2 * r))) with hF
+    have hF1 : ({i | g i = 1} : Finset (Fin (2 * r))) = Fᶜ := by
+      ext i
+      have : g i = 0 ∨ g i = 1 := by omega
+      simp only [hF, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_compl]
+      omega
+    have h₀ := hload 0
+    have h₁ := hload 1
+    rw [load_groupsOf] at h₀ h₁
+    rw [hF1] at h₁
+    change ∑ i ∈ F, e i ≤ _ at h₀
+    have hsplit := Finset.sum_add_sum_compl F e
+    have hc := Finset.card_compl F
+    rw [Fintype.card_fin] at hc
+    have hcF : #F ≤ 2 * r := (Finset.card_le_univ F).trans (by simp)
+    rw [hsumF] at h₀ h₁
+    have hlo₀ : #F ≤ r := by
+      by_contra hlt
+      have := Nat.mul_le_mul_right K (show r + 1 ≤ #F by omega)
+      rw [add_mul, one_mul] at this
+      omega
+    have hlo₁ : #Fᶜ ≤ r := by
+      by_contra hlt
+      have := Nat.mul_le_mul_right K (show r + 1 ≤ #Fᶜ by omega)
+      rw [add_mul, one_mul] at this
+      omega
+    have hFr : #F = r := by omega
+    rw [hsumF, hsumF, hall] at hsplit
+    rw [hFr] at h₀ hsplit
+    rw [show #Fᶜ = r by omega] at hsplit h₁
+    refine ⟨({j | Fin.castLEEmb hm2 j ∈ F} : Finset (Fin m)), ?_⟩
+    rw [← sum_padItems a hm2 F]
+    have : 2 * r * K = r * K + r * K := by ring
+    omega
+  · rintro ⟨S, hS⟩
+    set ι := Fin.castLEEmb hm2 with hι
+    set W : Finset (Fin (2 * r)) := univ \ (univ.map ι \ S.map ι) with hW
+    have hSW : S.map ι ⊆ W := fun i hi => by
+      simp only [hW, Finset.mem_sdiff, Finset.mem_univ, true_and, not_and, not_not]
+      exact fun _ => hi
+    have hcardW : r ≤ #W := by
+      have h₁ : #(univ.map ι \ S.map ι) = m - #S := by
+        rw [Finset.card_sdiff, Finset.inter_eq_left.mpr (Finset.map_subset_map.mpr
+            (Finset.subset_univ S)), Finset.card_map, Finset.card_map, Finset.card_univ,
+          Fintype.card_fin]
+      have h₂ : #W = 2 * r - (m - #S) := by
+        rw [hW, Finset.card_sdiff, Finset.inter_eq_left.mpr (Finset.subset_univ _), h₁,
+          Finset.card_univ, Fintype.card_fin]
+      have : #S ≤ m := (Finset.card_le_univ S).trans (by simp)
+      omega
+    have hSr : #(S.map ι) ≤ r := by
+      rw [Finset.card_map]
+      exact ((Finset.card_le_univ S).trans (by simp)).trans hmr
+    obtain ⟨G₀, hSG, hGW, hG₀⟩ := Finset.exists_subsuperset_card_eq hSW hSr hcardW
+    refine ⟨_, admissible_halves hr hG₀, landings_groupsOf _, fun k => ?_⟩
+    have hpad : ∑ i ∈ G₀, padItems a (2 * r) i = B := by
+      rw [sum_padItems a hm2, ← hS]
+      congr 1
+      ext j
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      refine ⟨fun hj => ?_, fun hj => hSG (Finset.mem_map_of_mem ι hj)⟩
+      have := hGW hj
+      simp only [hW, Finset.mem_sdiff, Finset.mem_univ, true_and, not_and, not_not] at this
+      exact (Finset.mem_map' ι).mp (this (Finset.mem_map_of_mem ι (Finset.mem_univ j)))
+    have h₀ : ∑ i ∈ G₀, e i = B + r * K := by rw [hsumF, hpad, hG₀]
+    have hsplit := Finset.sum_add_sum_compl G₀ e
+    rw [hall, h₀] at hsplit
+    fin_cases k
+    · simp only [Fin.zero_eta, load_groupsOf, filter_halves_zero]
+      omega
+    · simp only [Fin.mk_one, load_groupsOf, filter_halves_one]
+      have : 2 * r * K = r * K + r * K := by ring
+      omega
+
+/-- The multiset of Proposition 8.2 has `2r = 2t − p` landings, for `t = r + 1` and `p = 2`. -/
+theorem partition_card (r : ℕ) :
+    (univ.val : Multiset (Fin (2 * r))).card = 2 * (r + 1) - 2 := by
   rw [Finset.card_val, Finset.card_univ, Fintype.card_fin]
   omega
 
