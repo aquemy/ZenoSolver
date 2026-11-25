@@ -1,15 +1,14 @@
----
-order: 4
-title: "Non-symmetric and general MultiZenoTravel"
-subtitle: "Waiting, BĀB̄ situations, and the reduction of general graphs to clique instances"
-css: ../styles/paper.css
----
+## Non-symmetric and general MultiZenoTravel {#sec-nonsymmetric}
+
+::: {.section-subtitle}
+Waiting, BĀB̄ situations, and the reduction of general graphs to clique instances
+:::
 
 This section relaxes the assumption (S), then the assumption that every central city is joined to
 $C_I$ and $C_G$. It corresponds to §6 of the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md).
 
-## Non-Symmetric Clique MultiZenoTravel {#sec-nonsym}
+### Non-Symmetric Clique MultiZenoTravel {#sec-nonsym}
 
 In this section, we relax the Assumption (S). As a result, the previous method does not work in
 the particular case a $(B\bar B)$-pairing is not possible. More precisely, it happens when there
@@ -26,7 +25,7 @@ the role of each landing, provided the makespan accounts for the waiting it may 
 flights are shorter, plans that move passengers between central cities, the $B\bar A\bar B$
 situations among them, can beat every plan of $2t - p$ simple patterns.
 
-### Role configurations {#sec-roles}
+#### Role configurations {#sec-roles}
 
 A pattern $A$ or $\bar A$ in $C_w$ lasts $d_w + \bar d_w$, a pattern $B$ lasts $2 d_w$ and a
 pattern $\bar B$ lasts $2\bar d_w$. Lists of cities are therefore replaced by role configurations
@@ -55,7 +54,7 @@ shortest path of a dynamic program over *imbalance vectors*, the per-city differ
 patterns $B$ and $\bar B$ so far ({{< node "Proposition 6.6" >}}); it is polynomial in $n$ and
 $2t - p$ for fixed $t - p$.
 
-### Waiting {#sec-waiting}
+#### Waiting {#sec-waiting}
 
 If a non-symmetric instance is highly imbalanced in durations, while performing a
 $(B\bar B)$-pairing, there is a chance that the plane performing $\bar B$ will have to wait. It
@@ -126,11 +125,11 @@ Harmful waiting needs a plane with several patterns $\bar B$ in a city $C_y$ who
 arrives before the earliest passenger left there, that is, a short phase of patterns $A$ and
 $\bar A$ with $d_x + \bar d_x + \bar d_y < d_y$ for its crossing city $x$. (AΔ-path) bounds
 $\bar d$ by $d$ but not $d$ by $\bar d$, so it does not prevent this. It is rare: in the experiment
-[E5](experiments.qmd#sec-e5), random configurations waited harmfully at most 29 times in a million
+[E5](#sec-e5), random configurations waited harmfully at most 29 times in a million
 draws, and waiting changed the front of 9 of 150 instances shaped like Proposition 6.5 and of none
 of 150 uniform ones.
 
-### The non-symmetric Pareto front {#sec-ns-front}
+#### The non-symmetric Pareto front {#sec-ns-front}
 
 Theorem 6.1 bounds the role loads of the configuration it selects, but not its waiting, since it
 pairs patterns $B$ and $\bar B$ by counts per city and not along the plan's own hand-offs. The
@@ -170,10 +169,10 @@ when each plane performs at most one $\bar B$ (Corollary 6.4). A gap between con
 points $(C_i, M_i)$ and $(C_{i+1}, M_{i+1})$ is closed by enumerating the configurations of cost
 below $C_i$ whose loads are at most $M_{i+1} - 1$, and computing the least makespan of each by a
 search over orders and matchings with the closed form of Lemma 6.3. Proposition 6.5 shows that the
-search can be needed. The experiment [E4](experiments.qmd#sec-e4) compares the resulting fronts
+search can be needed. The experiment [E4](#sec-e4) compares the resulting fronts
 with exhaustive searches over all plans.
 
-### BĀB̄ situations {#sec-short}
+#### BĀB̄ situations {#sec-short}
 
 Without (A1-NS), a flight between central cities can be shorter than any detour through $C_I$ or
 $C_G$, and plans of simple patterns can miss the Pareto front: a first search found 11 such
@@ -329,14 +328,14 @@ patterns above are upper bounds, and exact fronts come from exhaustive search or
 small instances. In the searches, shuttles never improved a front, split crossings completed it
 on all but 2 of 600 random instances, and on 150 instances whose durations $d$ and $\bar d$ order
 the cities alike, flights between central cities never changed it. A combinatorial description of
-the front is open ([perspectives](conclusion.qmd#sec-open)).
+the front is open ([perspectives](#sec-open)).
 
-## General MultiZenoTravel {#sec-graphs}
+### General MultiZenoTravel {#sec-graphs}
 
 We now consider a connected weighted graph $U = (V, E)$ such that $|V| = n + 2$ and two arbitrary
 vertices named $I$ and $G$ (with weight 0), respectively for the initial and the goal cities, not
 joined by an edge. A MultiZenoTravel instance $\Pi$ is defined by the triplet $(U, I, G)$; its
-plans are those of the [model](model.qmd#sec-plans), with the edges of $U$ as flights. We denote
+plans are those of the [model](#sec-plans), with the edges of $U$ as flights. We denote
 by $\Lambda$ the set of paths over $U$, and for any path $q$, $|q|$ is the number of cities in the
 path. We define the functions $\phi$ (resp. $\omega$) as follows:
 $$\phi(q) = \sum_{0 \le i < |q| - 1} \mathrm{dur}(q_i, q_{i+1}), \qquad \omega(q) = \sum_{1 \le i < |q|} c_{q_i}.$$
@@ -475,7 +474,7 @@ $n$, the number of cities in $U$, and thus, solving $U$ through $f(U)$ might be 
 the initial complexity of the problem and our algorithm. On top of that, the number of paths
 between two vertices can be up to super-exponential: a graph made of $\sqrt n$ layers of
 $\sqrt n$ vertices has $(\sqrt n)^{\sqrt n}$ paths between its ends, and computing the cardinal of
-the set of paths is already a $\sharp P$-complete problem [[Val79](index.qmd#ref-Val79)].
+the set of paths is already a $\sharp P$-complete problem [[Val79](#ref-Val79)].
 
 Not every path is needed. A path is *non-dominated* if no other path between the same vertices has
 a landing cost and a duration both at most its own, one of them strictly smaller. Removing a city
@@ -486,7 +485,7 @@ decision space, may be lost, but the Pareto front of $f(U)$ is entirely found.
 
 However, even in this case, the number of central cities in $f(U)$ is function of the cardinal of
 the Pareto Set of non-dominated paths for each couple of cities in $U$. In
-[[Han80](index.qmd#ref-Han80)], Hansen proposed some pathological instances of bicriterion graphs
+[[Han80](#ref-Han80)], Hansen proposed some pathological instances of bicriterion graphs
 such that the set of non-dominated paths between two extreme nodes is exponential in the number of
 nodes $n$. Conversely, when the number of non-dominated paths of $U$ is bounded by a polynomial of
 $n$, the number of cities of the reduced instance is polynomial of $n$.

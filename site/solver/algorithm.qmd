@@ -12,7 +12,7 @@ that states and proves the result; the badge after it says how much of it Lean c
 only). The proofs themselves are in the
 [theory note](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md). For
 context, see the [problem page](../problem.qmd), which introduces the same example, and the
-[paper section](../paper/index.qmd).
+[paper section](../paper/index.qmd#sec-algorithm).
 
 The page follows one instance from start to finish. Every number quoted for it, and every value
 in the figures, is recomputed from the definitions by `site/gen_algorithm.py` and checked against

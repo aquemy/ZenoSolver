@@ -1,9 +1,8 @@
----
-order: 5
-title: "Pareto Optimal Plans"
-subtitle: "Computing the Pareto front exactly, its complexity, and the ZenoSolver with its certificates and their verification"
-css: ../styles/paper.css
----
+## Pareto Optimal Plans {#sec-algorithm}
+
+::: {.section-subtitle}
+Computing the Pareto front exactly, its complexity, and the ZenoSolver with its certificates and their verification
+:::
 
 We now focus on finding the Pareto Optimal Plans from the lists of $2t - p$ cities, for the
 symmetric case: (S) holds throughout, and the statements about the front also need (A1) or, by
@@ -12,7 +11,7 @@ symmetric case: (S) holds throughout, and the statements about the front also ne
 [algorithm page](../solver/algorithm.qmd) of the Solver section describes how the implementation
 carries out each step.
 
-## Definitions {#sec-definitions}
+### Definitions {#sec-definitions}
 
 **Cost of a list**: Given a list $X$ of $2t - p$ cities, the cost of any plan using only the
 cities in $X$ is uniquely defined by $c(X) = \sum_{i \in X} c_i$.
@@ -51,13 +50,13 @@ smallest current duration, misses front points ({{< node "§5" >}}). With two ci
 in the slow city and five in the fast one. The greedy gives each plane a pattern $A$ in the slow
 city first and ends with durations 52 and 68, while the groups $\{10, 10, 10\}$ and
 $\{6, 6, 6, 6, 6\}$, both odd and hence admissible, both last 60; the front point $(260, 60)$ of
-that instance is missed. The experiment [E10](experiments.qmd#sec-e10) measures how often such a
+that instance is missed. The experiment [E10](#sec-e10) measures how often such a
 greedy is exact.
 
 The method below never computes $M(X)$ for a fixed list. It sweeps the makespans instead, and
 computes for each one the least cost over all lists at once.
 
-## Computing the Pareto front {#sec-breakpoints}
+### Computing the Pareto front {#sec-breakpoints}
 
 Scale the durations to integers and divide them by their gcd $g$. For an integer *level*
 $T \ge 0$ let
@@ -68,8 +67,8 @@ admissibility, so $L \le E$.
 
 ::: {.statement}
 {{< node "Proposition 7.1" >}} Under (S) and (A1),
-$\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$ with $E(-1) = \infty$, makespans in
-units of $g$.
+$$\mathcal F = \{(E(T), 2T) : T \in \mathbb N,\ E(T) < E(T-1)\}$$
+with $E(-1) = \infty$, makespans in units of $g$.
 :::
 
 The Pareto front is read off the levels where $E$ drops, and only a bounded range of levels
@@ -96,7 +95,7 @@ attained by spreading $2t - p$ copies of one city over the planes, which is admi
 {{< node "Lemma 2.9" >}} ({{< node "Proposition 7.10" text="full proof" badge=false >}}).
 :::
 
-On the [example instance](model.qmd#fig-plan) ($2t - p = 4$, $\kappa = 2$,
+On the [example instance](#fig-plan) ($2t - p = 4$, $\kappa = 2$,
 $d_{\min} = 2$, $d_{\rm cheap} = 5$), the levels run from $T_{\rm lo} = 4$ to $T_{\rm hi} = 10$:
 
 | $T$ | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
@@ -114,8 +113,8 @@ the front. The kept cities have increasing durations and decreasing costs.
 
 ::: {.statement}
 {{< node "Lemma 7.2" >}} Let $G[0][\tau] = 0$ for $\tau \ge 0$,
-$G[m][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m-1][\tau - d_i]\big)$, and $G[m][\tau] = \infty$
-for $\tau < 0$. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of total duration
+$$G[m][\tau] = \min_{i : d_i \le \tau}\big(c_i + G[m-1][\tau - d_i]\big),$$
+and $G[m][\tau] = \infty$ for $\tau < 0$. Then $G[m][\tau]$ is the least cost of a multiset of $m$ cities of total duration
 at most $\tau$.
 :::
 
@@ -208,7 +207,7 @@ $N_w = \sum_{u \le \lfloor 3w/2 \rfloor} \binom{n}{u} 3^u$, are as follows.
 
 : Complexity of the steps, with $s = 2t - p$. For all levels, multiply by $T_{\rm hi} - T_{\rm lo} + 1$. {#tbl-complexity}
 
-## ZenoSolver {#sec-zenosolver}
+### ZenoSolver {#sec-zenosolver}
 
 ZenoSolver is a C++ software dedicated to generate and exactly solve MultiZenoTravel instances.
 ZenoSolver computes the true Pareto Front using the algorithm described in this section. It
@@ -221,14 +220,14 @@ $E$ is non-increasing, $E(a) = E(b)$ for $a < b$ fixes $E$ on $[a, b]$, which al
 over runs of open levels. A plan is then built and simulated for every front point. For a
 non-symmetric instance, it brackets the front between lower bounds and achieved plans, and closes
 the gaps by a search over role configurations, as described in the
-[non-symmetric section](nonsymmetric.qmd#sec-ns-front).
+[non-symmetric section](#sec-ns-front).
 
 With each front, ZenoSolver can write a certificate that a checker verifies without trusting it,
 and the Lean development contains a solver of its own, proved correct
-([Verification](#sec-verification)). The experiment [E7](experiments.qmd#sec-e7) and the
-[benchmark suites](experiments.qmd#sec-bench) report the performances of the C++ solver.
+([Verification](#sec-verification)). The experiment [E7](#sec-e7) and the
+[benchmark suites](#sec-bench) report the performances of the C++ solver.
 
-## Certificates {#sec-certificates}
+### Certificates {#sec-certificates}
 
 A Pareto front is a strong claim: no plan, among infinitely many, beats any of its points. A
 certificate reduces the claim to finitely many checks that a program much simpler than the solver
@@ -265,11 +264,11 @@ or $U_3$ where Proposition 7.4 makes them exact, and `sigma-potential`, a sparse
 for the σ-DP built from {{< node "Lemma 9.2" >}} and {{< node "Lemma 9.3" >}}.
 
 For non-symmetric instances the format has a version 2, whose gap kinds rest on the results of
-the [non-symmetric section](nonsymmetric.qmd): `relaxed`, `roles`, `lagrangian`, `balanced`, and
+the [non-symmetric section](#sec-nonsymmetric): `relaxed`, `roles`, `lagrangian`, `balanced`, and
 `search` for the gaps that waiting leaves open. The
 [certificate format](../solver/certificates.qmd) page describes the files.
 
-### Verification {#sec-verification}
+#### Verification {#sec-verification}
 
 A certificate moves the trust from the solver to the checker, and the checker to a theorem.
 Two checkers implement the obligations: `zeno check`, in C++, and `zeno-check`, compiled from
@@ -304,5 +303,5 @@ site is built. The executables add the Lean compiler and the code that parses th
 not verified. The badges of this paper come from that audit. Among the results of the
 non-symmetric section, Theorems 6.1 and 6.9 are machine-checked as well; its examples and
 propositions, and those of the general section, are proved in the theory note or computed. The
-experiment [E8](experiments.qmd#sec-e8) tests
+experiment [E8](#sec-e8) tests
 both checkers against thousands of corrupted certificates.

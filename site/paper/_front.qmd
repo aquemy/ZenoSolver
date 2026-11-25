@@ -1,9 +1,8 @@
----
-order: 3
-title: "Symmetric MultiZenoTravel"
-subtitle: "Proposition I: the Pareto front is reached with exactly 2t − p central cities"
-css: ../styles/paper.css
----
+## Symmetric MultiZenoTravel {#sec-front}
+
+::: {.section-subtitle}
+Proposition I: the Pareto front is reached with exactly 2t − p central cities
+:::
 
 The method to find the Pareto Front of any general MultiZenoTravel instance consists of three
 steps. First, we provide an efficient algorithm to find the Pareto Front for any symmetric clique
@@ -37,11 +36,11 @@ plan, with 9 landings, still attains $(0, 6)$.
 The goal of this section is to establish the proof of Proposition I for the Symmetric case. For
 that purpose, we first describe which lists of $2t - p$ cities can be flown, and how fast. We then
 show that every plan is dominated by one of them, first under the assumption (A1) of
-[[QS15](index.qmd#ref-QS15)], then under the triangular inequality (AΔ). Precisely, with
+[[QS15](#ref-QS15)], then under the triangular inequality (AΔ). Precisely, with
 $$M(X) = \min\Big\{\max_k \ell(X_k) : X_1, \dots, X_p \text{ an admissible partition of } X\Big\},$$
 the front is the Pareto set of the pairs $(c(X), M(X))$ over the lists $X$ of $2t - p$ cities.
 
-## Admissible partitions {#sec-admissible}
+### Admissible partitions {#sec-admissible}
 
 A list of $2t - p$ cities does not hold any information about which plane will land in a
 particular city. Assign to each plane $k$ the cities $X_k$ in which it lands: when can the
@@ -81,14 +80,14 @@ each component has an even number of them; conversely, such a set is built botto
 spanning forest of $H$ ({{< node "Lemma 2.4" text="full proof" badge=false >}}).
 :::
 
-On the [example instance](model.qmd#fig-plan), the groups $\{2, 3\}$ and $\{2, 3\}$ are
+On the [example instance](#fig-plan), the groups $\{2, 3\}$ and $\{2, 3\}$ are
 admissible: both planes are even, and they share cities. The groups $\{1, 1\}$ and $\{3, 3\}$ are
 not: each plane is even, but they share no city, so each would have to hand a passenger to a plane
 that never comes to its city. Two odd groups, such as $\{1\}$ and $\{1, 1, 1\}$, are always
 admissible, and {{< node "Lemma 2.9" >}} shows that a partition with
 $\sum_k |X_k| \equiv p \pmod 2$ is admissible as soon as some city belongs to every even group.
 
-## (BB̄)-pairings and link forests {#sec-links}
+### (BB̄)-pairings and link forests {#sec-links}
 
 A *($B\bar B$)-pairing* in city $i$ is a pattern $B$ of one plane and a pattern $\bar B$ of
 another plane, both in $i$, carrying the same passenger: the first plane leaves it in $i$, the
@@ -121,7 +120,7 @@ that the pairs form no cycle ({{< node "Lemma 2.6" text="full proof" badge=false
 When $|X| = 2t - p$, {{< node "Corollary 2.7" >}} bounds the structure: a link forest has at most
 $t - p$ links, and each of its trees has at most $q_{\max} = \min(p, t - p + 1)$ planes.
 
-## Constructing the plan {#sec-achievability}
+### Constructing the plan {#sec-achievability}
 
 ::: {.statement}
 {{< node "Theorem 4.1" >}} Assume (S). For every list $X$ of $2t - p$ cities and every
@@ -191,14 +190,14 @@ $v$ is back in $C_G$ by $\max(\ell(X_v), \ell(X_u))$, and every plane flies exac
 </svg>
 ```
 
-The [example plan](model.qmd#fig-plan) as built by Theorem 4.1 and printed by
+The [example plan](#fig-plan) as built by Theorem 4.1 and printed by
 `zeno --plans` ($I = C_I$, $G = C_G$; dashed flights are empty). The partition is
 $X_1 = X_2 = \{2, 3\}$ with one link in $C_2$, $p_1$ being the parent: $p_1$ performs a $B$ in
 $C_2$ and then an $A$ in $C_3$, and $p_2$ an $A$ in $C_3$ and then a $\bar B$ in $C_2$. $t_1$ waits
 in $C_2$ from time 3 to 13; no plane waits. Both loads are $2(3 + 5) = 16$.
 :::
 
-## A lower bound for every plan {#sec-relaxation}
+### A lower bound for every plan {#sec-relaxation}
 
 A first lower bound on the cost of every plan comes from forgetting admissibility. It needs a
 bound on the duration of a pattern.
@@ -234,9 +233,9 @@ at least $2t - p$ patterns, at least one per plane, and their charged landings a
 
 $L$ is the minimisation that defines the front, without admissibility. Wherever it meets the
 least cost of an admissible partition, the front is known whatever the flights between central
-cities; this is the common case ([certificates](algorithm.qmd#sec-certificates)).
+cities; this is the common case ([certificates](#sec-certificates)).
 
-## Proof of Proposition I under the assumption of [QS15] {#sec-converse}
+### Proof of Proposition I under the assumption of [QS15] {#sec-converse}
 
 Under (A1), a flight between central cities can always be replaced by a detour through $C_G$:
 using the same plane, the passenger on board flies to $C_G$ instead, and the plane flies on to
@@ -320,7 +319,7 @@ $C_I \to x$ by $x \to C_G$. The planes left without flights are added back one a
 the cost or the largest load ({{< node "Theorem 4.9" text="full proof" badge=false >}}).
 :::
 
-## Proof of Proposition I under the triangular inequality {#sec-adelta}
+### Proof of Proposition I under the triangular inequality {#sec-adelta}
 
 Without (A1), the detour through $C_G$ can be longer than the flight it replaces, so a pattern
 may visit several central cities while its duration pays for only one of them. Each pattern can
@@ -368,11 +367,11 @@ This proves Proposition I under (AΔ). Theorem 4.10 is machine-checked in Lean, 
 Corollary 4.8 under (AΔ) (`minimal_achievable_iff_multisetPoints_ATri`), and the correctness of
 the verified solver and of the certificate checker under (AΔ) (`solveFront_isParetoFront_ATri`,
 `Cert.check_sound_ATri`). Independently of the proof, the experiment
-[E6](experiments.qmd#sec-e6) searched the gaps where $L$ lies below the admissible optimum, on
+[E6](#sec-e6) searched the gaps where $L$ lies below the admissible optimum, on
 small instances with the shortest flights between central cities the triangular inequality
 allows, and found no plan cheaper than that optimum.
 
-## The assumption is needed {#sec-ex413}
+### The assumption is needed {#sec-ex413}
 
 Without (A1) and (AΔ), a plan can beat every admissible partition, so Proposition I needs some
 assumption on the flights between central cities.
@@ -393,7 +392,7 @@ solver (computed). Under (S) alone, the exact front is open; $L$ and the admissi
 the durations $d'$ remain lower bounds.
 
 In conclusion, we proved that for the Symmetric MultiZenoTravel problem, under the triangular
-inequality as well as under the assumption of [[QS15](index.qmd#ref-QS15)], every point of the
+inequality as well as under the assumption of [[QS15](#ref-QS15)], every point of the
 Pareto front is attained by a plan using exactly $2t - p$ central cities, flown without waiting
 from an admissible partition. This will allow a constructive algorithm to drastically reduce the
-search space of feasible and Pareto-optimal plans ([Pareto Optimal Plans](algorithm.qmd)).
+search space of feasible and Pareto-optimal plans ([Pareto Optimal Plans](#sec-algorithm)).

@@ -29,7 +29,8 @@
   font-size: 0.95em;
 }
 
-/* The authors, as on arXiv:2304.14659v1, under the revision line of the opening page. */
+/* The authors and their affiliations (the co-authors' as on arXiv:2304.14659v1), under the
+   revision line of the opening page. */
 .paper-authors {
   margin: 0.4em 0 0.8em 0;
 }
@@ -172,6 +173,16 @@
 .zs-fronts .pt { fill: var(--zs-series-1); }
 .zs-fronts .pt.open { fill: var(--zs-series-2); }
 
+/* The line under the heading of each section (the subtitle of its former page). */
+.section-subtitle {
+  color: var(--zs-ink-2);
+  font-size: 1.05em;
+  margin: -0.5em 0 1em 0;
+}
+.section-subtitle > p {
+  margin-bottom: 0;
+}
+
 /* The line under the title of the opening page, and the reference list. */
 .revision-note {
   color: var(--zs-ink-2);
@@ -186,6 +197,14 @@
 }
 .plan-display {
   overflow-x: auto;
+}
+
+/* A display equation wider than the column scrolls inside its own box, not the page. */
+mjx-container[display="true"],
+.math.display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
 }
 
 /* Contents list of the chapters. */

@@ -1,4 +1,4 @@
-# The airports instance of the paper section (site/paper/application.qmd).
+# The airports instance: from Atlanta (ATL) to Beijing (PEK) through 11 large airports.
 #
 # Source: OpenFlights, airports.dat,
 # https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat
@@ -8,7 +8,7 @@
 #
 # Format of `zeno --metric sphere --hubs apart --coords FILE`: C_I (ATL) first, then C_G (PEK),
 # then the 11 central cities. atl-pek.dat and atl-pek-direct.dat are derived from this file
-# (see the application page for the commands).
+# (see README.md in this directory for the commands).
 # Hartsfield Jackson Atlanta International Airport, Atlanta, United States
 ATL,33.6367,-84.428101
 # Beijing Capital International Airport, Beijing, China

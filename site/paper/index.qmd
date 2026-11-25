@@ -1,9 +1,13 @@
 ---
-order: 1
 title: "MultiZenoTravel"
 subtitle: "a Tunable Benchmark for Multi-Objective Planning with Known Pareto Front"
 css: ../styles/paper.css
 toc: true
+# The whole paper is this page: each section after the introduction is a partial _<name>.qmd,
+# included below. The former pages paper/<name>.html redirect to the anchor #sec-<name>, except
+# paper/application.html, whose section is removed, which redirects to the open problems.
+toc-depth: 4
+reference-location: section
 ---
 
 ::: {.revision-note}
@@ -12,15 +16,14 @@ Revised and extended version of
 :::
 
 ::: {.paper-authors}
-**Alexandre Quemy**^1,2,\*^, **Marc Schoenauer**^3,4^, **Johann Dreo**^5,6^
+**Alexandre Quemy**^1,\*^, **Marc Schoenauer**^2,3^, **Johann Dreo**^4,5^
 
-^1^ YData Lab Inc., Seattle, United States (^\*^corresponding author) ·
-^2^ Poznan University of Technology, Poznan, Poland ·
-^3^ Inria Saclay, Orsay, France ·
-^4^ Universite Paris-Saclay, Orsay, France ·
-^5^ Computational Systems Biomedicine laboratory, Department of Computational Biology, Institut
+^1^ Centre for Credible AI, Warsaw University of Technology (^\*^corresponding author) ·
+^2^ Inria Saclay, Orsay, France ·
+^3^ Université Paris-Saclay, Orsay, France ·
+^4^ Computational Systems Biomedicine laboratory, Department of Computational Biology, Institut
 Pasteur, Paris, France ·
-^6^ Bioinformatics and Biostatistics hub, Université Paris Cité, Institut Pasteur, Paris, France
+^5^ Bioinformatics and Biostatistics hub, Université Paris Cité, Institut Pasteur, Paris, France
 :::
 
 ::: {.abstract}
@@ -36,35 +39,29 @@ front is computable in pseudo-polynomial time. We provide an implementation that
 solver to handle realistic instances in a reasonable time, and that returns each front with a
 certificate that an independent checker verifies; the central results, the checker and a solver
 are formally verified in Lean 4. We validate the solver and the theory in a seeded experiment
-campaign against exhaustive searches written independently. Finally, as a practical
-demonstration, we used this solver to find the Pareto-optimal plans between the two largest
-airports in the world, considering eleven large intermediate airports, spherical distances
-between airports and a made-up cost.
+campaign against exhaustive searches written independently.
 :::
 
 ::: {.chapters}
 [Introduction](#sec-intro)
 :   Motivation, previous works, contribution and outline.
 
-[MultiZenoTravel problems](model.qmd)
+[MultiZenoTravel problems](#sec-model)
 :   Instances, plans, Pareto fronts, assumptions and patterns.
 
-[Symmetric MultiZenoTravel](front.qmd)
+[Symmetric MultiZenoTravel](#sec-front)
 :   Proposition I: admissible partitions, link forests, and the converse under (A1) and (AΔ).
 
-[Non-symmetric and general MultiZenoTravel](nonsymmetric.qmd)
+[Non-symmetric and general MultiZenoTravel](#sec-nonsymmetric)
 :   Role configurations, waiting, $B\bar A\bar B$ situations, and general graphs.
 
-[Pareto Optimal Plans](algorithm.qmd)
+[Pareto Optimal Plans](#sec-algorithm)
 :   The exact method, its complexity, ZenoSolver, certificates and their verification.
 
-[Experiments](experiments.qmd)
+[Experiments](#sec-experiments)
 :   Validation of the solver and of the theory, performances, and examples of instances.
 
-[Application: OpenFlights data](application.qmd)
-:   The Pareto front of the transport from Atlanta to Beijing.
-
-[Conclusion and Perspectives](conclusion.qmd)
+[Conclusion and Perspectives](#sec-conclusion)
 :   What is established, and the open problems.
 
 [References](#sec-references)
@@ -230,33 +227,23 @@ performances of ZenoSolver. Each front is returned with a certificate that a che
 without trusting the solver, and the main theorems, the checker and a solver of their own are
 formally verified in Lean 4.
 
-Although we think that the primary utility of ZenoSolver is to generate benchmarks with known
-Pareto Front to study other solvers' properties and behaviors, we provide a demonstration of the
-ZenoSolver on a problem using real data. This has been made possible by the extension of the
-solver capabilities from the symmetric clique problem to non-symmetric instances. Real data also
-come as arbitrary graphs, and the extension to arbitrary graphs is studied in detail, together
-with the part of it that is exact.
-
 ### Outline {#sec-outline}
 
-The plan of this paper is as follows: in [MultiZenoTravel problems](model.qmd), we define three
+The plan of this paper is as follows: in [MultiZenoTravel problems](#sec-model), we define three
 versions of the MultiZenoTravel problem, together with the plans and the assumptions.
-[Symmetric MultiZenoTravel](front.qmd) is dedicated to solve the symmetric MultiZenoTravel
-problem, followed by [Non-symmetric and general MultiZenoTravel](nonsymmetric.qmd) that focuses
+[Symmetric MultiZenoTravel](#sec-front) is dedicated to solve the symmetric MultiZenoTravel
+problem, followed by [Non-symmetric and general MultiZenoTravel](#sec-nonsymmetric) that focuses
 on the non-symmetric version of the problem. In the same section, we study how an instance of the
 general MultiZenoTravel problem can be reduced to a non-symmetric clique version, and when the
 reduction preserves the Pareto front.
 
-In [Pareto Optimal Plans](algorithm.qmd), we detail how to compute the Pareto front and
+In [Pareto Optimal Plans](#sec-algorithm), we detail how to compute the Pareto front and
 construct Pareto optimal plans, and we introduce the ZenoSolver, a C++ implementation of the
-algorithm, with its certificates and their verification in Lean. [Experiments](experiments.qmd)
+algorithm, with its certificates and their verification in Lean. [Experiments](#sec-experiments)
 reports the validation of the solver and of the theory, its performances and examples of
 instances.
 
-Finally, in [Application](application.qmd), we study an (almost) realistic application for
-MultiZenoTravel and ZenoSolver using the OpenFlights database to find the optimal routes between
-the two largest airports in the world, and [Conclusion and Perspectives](conclusion.qmd) closes
-with the open problems.
+Finally, [Conclusion and Perspectives](#sec-conclusion) closes with the open problems.
 
 ::: {.callout-note appearance="simple"}
 **Statements, proofs and formal status.** Results keep the numbering of the
@@ -268,6 +255,18 @@ when the proof is written but not formalised. Here, proofs are sketched in a few
 gentler introduction to the problem, on a small example, is on the [Problem](../problem.qmd)
 page.
 :::
+
+{{< include _model.qmd >}}
+
+{{< include _front.qmd >}}
+
+{{< include _nonsymmetric.qmd >}}
+
+{{< include _algorithm.qmd >}}
+
+{{< include _experiments.qmd >}}
+
+{{< include _conclusion.qmd >}}
 
 ## References {#sec-references}
 

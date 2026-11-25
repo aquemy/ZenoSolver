@@ -10,8 +10,8 @@ project:
   render:
     - index.qmd
     - problem.qmd
-    # every page of the paper section (files starting with "_" are partials and never rendered)
-    - paper/*.qmd
+    # the paper, on one page; its sections are the partials paper/_*.qmd
+    - paper/index.qmd
     - instances/index.qmd
     - instances/model.qmd
     - instances/generator.qmd
@@ -42,6 +42,10 @@ project:
     - instances/fronts.json
     - paper/figures/
     - images/
+    # redirects from the former paper pages, and from /experiments.html, to their section of
+    # paper/index.html (Quarto aliases cannot point to an anchor)
+    - paper/*.html
+    - experiments.html
 
 website:
   title: "ZenoSolver"
@@ -79,13 +83,8 @@ website:
       - icon: github
         href: https://github.com/aquemy/ZenoSolver
         aria-label: "GitHub repository"
+  # The paper is a single page, navigated by its table of contents, so it has no sidebar.
   sidebar:
-    - id: paper
-      title: "Paper"
-      style: docked
-      # every page of site/paper/, ordered by each page's `order:` front-matter field
-      contents:
-        - auto: "paper/*.qmd"
     - id: instances
       title: "Instances"
       style: docked
