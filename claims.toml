@@ -224,12 +224,13 @@ paper     = "Lemma 4.5, doc/theory/exact-front.md §4.2"
 created   = "2026-11-23"
 
 [claims.lem-4-6]
-kind      = "lemma"
-statement = "Lemma 4.6 (adding a plane) [AP]: an admissible partition of q planes with 2t − q landings and t ≥ q + 1 gives an admissible partition of q + 1 planes with 2t − q − 1 landings, no larger cost and no larger max_k δ(Y_k)."
-status    = "math.machine-checked"
-lean      = "ZenoFront.Admissible.addPlane_of_size"
-paper     = "Lemma 4.6, doc/theory/exact-front.md §4.2"
-created   = "2026-11-23"
+kind         = "lemma"
+statement    = "Lemma 4.6 (adding a plane): An admissible partition of q planes with 2t − q landings, t ≥ q + 1, gives an admissible partition of q + 1 planes with 2t − q − 1 landings, no larger cost, and loads bounded by every bound on the old loads; repeating, one of p planes for any q ≤ p ≤ t."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Admissible.addPlane_of_size, ZenoFront.Admissible.addPlanes_le"
+lean_partial = "ZenoFront.Admissible.addPlane, ZenoFront.Admissible.addPlanes"
+paper        = "Lemma 4.6, doc/theory/exact-front.md §4.2"
+created      = "2026-11-23"
 
 [claims.thm-4-7]
 kind      = "theorem"
