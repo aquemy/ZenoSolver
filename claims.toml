@@ -724,6 +724,15 @@ lean_partial = "ZenoFront.Cert2.lagWith_le"
 paper        = "revision 3 (planned)"
 created      = "2026-11-25"
 
+[claims.prop-search-complete]
+kind         = "proposition"
+statement    = "Proposition (`search` bound), new in revision 3: If the exhaustive search over scheduled configurations of cost below C reports the gap closed at level T, every valid scheduled configuration with s landings and cost below C has M_tmpl > T."
+status       = "math.machine-checked"
+lean         = "ZenoFront.SearchData.closed_sound"
+lean_partial = "ZenoFront.Cert2.searchWith_le"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 10. The linear family
 # ===========================================================================
