@@ -568,9 +568,10 @@ created      = "2026-11-23"
 
 [claims.prop-7-3]
 kind         = "proposition"
-statement    = "Proposition 7.3: L(T) ≤ E(T) ≤ U_3(T) ≤ U(T), with L the relaxation and U_3, U the cheapest link forests of trees of at most three and two planes."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsBoundAt"
+statement    = "Proposition 7.3 (bracket): Let E(T) be the least cost of an admissible partition of 2t − p landings into p groups with every load ≤ T (minCost). Let L(T) be the relaxation L_d of Lemma 3.5 at level T, read from the one-plane table of Lemma 6.1 (relaxedBoundAt), and U₂(T) the pairs bound, the value at level T of the pairs DP (pairsBoundAt): the cheapest forest it builds from trees of one or two planes (a single plane with an odd number of landings, or two planes linked at a representative city b, each with one copy of b and an odd number of free landings), every load ≤ T. Then L(T) ≤ E(T) at every level, E(T) ≤ U₂(T) at every level T ≤ Tmax of the table, and where L(T) = U₂(T), E(T) = L(T)."
+status       = "math.machine-checked"
+lean         = "ZenoFront.relaxedBoundAt_le_minCost, ZenoFront.minCost_le_pairsBoundAt, ZenoFront.minCost_eq_of_bracket"
+lean_partial = "ZenoFront.pairsBoundAt, ZenoFront.relaxedBoundAt, ZenoFront.pairRows_attained"
 paper        = "Prop 7.3, doc/theory/exact-front.md §7.3"
 created      = "2026-11-23"
 
