@@ -454,7 +454,7 @@ window.Quarto = {
 <section id="correctness" class="level2">
 <h2 class="anchored" data-anchor-id="correctness">Correctness</h2>
 <ul>
-<li><strong>Golden fronts.</strong> <code>zeno</code> reproduces all 27 fronts of the brute-force oracle (<a href="./instances/suites.html#golden">golden suite</a>), including instances on which a greedy schedule of the landings is not optimal (<a href="./proofs.html#node-s5">§5</a>).</li>
+<li><strong>Golden fronts.</strong> <code>zeno</code> reproduces all 27 fronts of the brute-force oracle (<a href="./instances/suites.html#golden">golden suite</a>), including instances on which a greedy schedule of the landings is not optimal (<a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#5-why-the-per-ppp-greedy-of-both-papers-is-not-exact" title="In the theory note, §5">§5</a>).</li>
 <li><strong>Every level.</strong> <code>ut-zeno-core</code> compares the value of every level, the bracket order <span class="math inline">\(L \le E \le U_3 \le U\)</span> and the front with an independent enumeration oracle on random instances.</li>
 <li><strong>Non-symmetric.</strong> On 1,800 tiny random non-symmetric instances, every bracket closes and equals the oracle’s front.</li>
 <li><strong>Two solvers, one front.</strong> The Lean solver <code>zeno-front</code>, whose output is proved to be the front, gives the same front as <code>zeno front</code> on every suite instance (table below). CI compares the two on the golden, quick and three regime instances.</li>
@@ -1238,7 +1238,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>The <code>rejected/</code> certificates of the test set are corrupted on purpose, so their rejection is the expected verdict. The one rejected random version 2 certificate is the <a href="./proofs.html#node-proposition-6-5">Proposition 6.5</a> instance (<code>v2-random/prop65</code>); <code>bench/README.md</code> notes that it needs the <code>search</code> kind. The certificate <code>zeno</code> writes today for that instance closes two gaps with <code>search</code>, and <code>zeno-check</code> accepts it (<a href="./solver/lean.html#zeno-check">Lean tools</a>).</p>
+<p>The <code>rejected/</code> certificates of the test set are corrupted on purpose, so their rejection is the expected verdict. The one rejected random version 2 certificate is the <a href="https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations" title="In the theory note, §6.2">Proposition 6.5</a> instance (<code>v2-random/prop65</code>); <code>bench/README.md</code> notes that it needs the <code>search</code> kind. The certificate <code>zeno</code> writes today for that instance closes two gaps with <code>search</code>, and <code>zeno-check</code> accepts it (<a href="./solver/lean.html#zeno-check">Lean tools</a>).</p>
 </section>
 <section id="ci" class="level2">
 <h2 class="anchored" data-anchor-id="ci">Component benchmarks and CI</h2>
