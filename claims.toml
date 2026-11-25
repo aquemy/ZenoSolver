@@ -42,12 +42,12 @@
 # ===========================================================================
 
 [claims.lem-1-1]
-kind         = "lemma"
-statement    = "Lemma 1.1 (dominating subset): if S' ⊆ S ⊆ K² with S' finite and every point of S weakly dominated by a point of S', then Min S = Min S', and every point of S is weakly dominated by a point of Min S."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.minimal_iff_of_subset_of_dominated"
-paper        = "Lemma 1.1, doc/theory/exact-front.md §1.5"
-created      = "2026-11-23"
+kind      = "lemma"
+statement = "Lemma 1.1 (dominating sets): (a) If every point of A is weakly dominated by a point of B and every point of B by a point of A, then Min A = Min B; in particular when B ⊆ A and B dominates A. (b) A list that is the Pareto front of S lists exactly Min S."
+status    = "math.machine-checked"
+lean      = "ZenoFront.minimal_iff_of_dominated, ZenoFront.minimal_iff_of_subset_of_dominated, ZenoFront.IsParetoFront.mem_iff_minimal"
+paper     = "Lemma 1.1, doc/theory/exact-front.md §1.5"
+created   = "2026-11-23"
 
 [claims.claim-1-2]
 kind      = "claim"
