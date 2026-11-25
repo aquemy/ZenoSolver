@@ -18,27 +18,26 @@ Pareto-optimal plans comes next: for the [symmetric clique problem](#sec-front) 
 Let us introduce some notations related to the planning problem briefly presented in the
 introduction: a non-symmetric clique MultiZenoTravel instance
 ([schematic view](#fig-instance)) is defined by the following elements
-({{< node "§1.1" >}}):
+({{< node "Definition 1.1" >}}):
 
 * $n$ central cities, organized as a clique in which every node is connected to $C_I$ and $C_G$,
   respectively the initial city and the goal city.
-* $c \in (\mathbb R^+)^n$, where $c_i$ is the cost for landing in $C_i$.
-* $D \in (\mathbb R^+)^{n \times n}$, where $d_{ij}$ is the flying time between $C_i$ and $C_j$.
-* $d \in (\mathbb R^+)^n$, where $d_i$ is the flying time between $C_I$ and $C_i$.
-* $\bar d \in (\mathbb R^+)^n$, where $\bar d_i$ is the flying time between $C_i$ and $C_G$.
+* $c \in \mathbb N^n$, where $c_i$ is the cost for landing in $C_i$.
+* $D \in \mathbb N^{n \times n}$, where $d_{ij}$ is the flying time from $C_i$ to $C_j$.
+* $d \in \mathbb N^n$, where $d_i$ is the flying time between $C_I$ and $C_i$.
+* $\bar d \in \mathbb N^n$, where $\bar d_i$ is the flying time between $C_i$ and $C_G$.
 * $p$ planes, initially in $C_I$, that have a capacity of a unique person.
 * $t$ persons, initially in $C_I$.
 
 The goal of MultiZenoTravel is to carry all $t$ persons, initially in $C_I$, to $C_G$ using $p$
 planes, minimizing both the makespan and the cost of the plan.
 
-Flights are undirected: each one has a single duration, used in both directions, and there is no
-flight between $C_I$ and $C_G$. We write $\mathrm{dur}(a, b)$ for the duration of the flight
-between $a$ and $b$; a flight between central cities may also be missing. Landing in $C_I$ or
-$C_G$ is free. Without loss of generality, all triples $(d_i, \bar d_i, c_i)$ are assumed to be
-pairwise distinct. Otherwise, the 2 cities can be "merged" and the resulting $n-1$ cities problem
-is equivalent to the original $n$ cities problem, as there exist no city capacity constraints.
-Finally, we only consider cases where $t \ge p$, as the problem is otherwise trivial.
+A flight between a hub and a central city takes the same time in both directions, and there is no
+flight between $C_I$ and $C_G$. The table $D$ is complete and directed: for every ordered pair
+$(i, j)$ of central cities, $i = j$ included, the flight from $C_i$ to $C_j$ lasts $d_{ij}$; the
+results that need a condition on these flights state it ([assumptions](#sec-assumptions)). We
+write $\mathrm{dur}(a, b)$ for the duration of the flight from $a$ to $b$. Landing in $C_I$ or
+$C_G$ is free. Finally, we only consider cases where $t \ge p$.
 
 An instance of the symmetric clique MultiZenoTravel problem is an instance such that
 $d = \bar d$. A general MultiZenoTravel instance is an instance such that the $n$ central cities
@@ -46,11 +45,14 @@ are organized as an arbitrary graph; it is defined in the
 [general section](#sec-graphs).
 
 Throughout the paper, we illustrate the definitions on the symmetric instance with $n = 3$
-cities, $t = 3$ passengers and $p = 2$ planes, durations $d = (2, 3, 5)$, costs
-$c = (9, 6, 1)$ and no flight between central cities (the file
+cities, $t = 3$ passengers and $p = 2$ planes, durations $d = (2, 3, 5)$ and costs
+$c = (9, 6, 1)$ (the file
 [`site/problem/example.dat`](https://github.com/aquemy/ZenoSolver/blob/master/site/problem/example.dat),
-also used on the [Problem](../problem.qmd) page). Its Pareto front, as (cost, makespan), is
-$$(4, 20),\ (14, 16),\ (20, 14),\ (24, 12),\ (30, 10),\ (36, 8).$$
+also used on the [Problem](../problem.qmd) page). Its Pareto front, as (cost, makespan), computed
+by ZenoSolver and by the verified solver of the [Verification](#sec-verification) section, is
+$$(4, 20),\ (14, 16),\ (20, 14),\ (24, 12),\ (30, 10),\ (36, 8)$$
+for every table of flights between central cities: the certificate ZenoSolver writes for it closes
+every gap with the relaxation of the [next section](#sec-relaxation).
 
 ::: {#fig-plan .plan-display}
 
@@ -74,62 +76,63 @@ $C_2$ before $p_1$ dropped $t_1$ there.
 ### Plans {#sec-plans}
 
 To reason about all plans, including those that wait, hand passengers over or fly between
-central cities, we fix their semantics ({{< node "§1.2" >}}). A plan on a set $Q$ of planes (all
-$p$ planes unless stated otherwise) consists of
+central cities, we fix their semantics ({{< node "Definition 1.2" >}}). A *leg* is a flight of
+one plane, from its origin to its destination, with a departure time in $\mathbb N$, an arrival
+time equal to the departure plus the duration of the flight, and at most one passenger on board.
+A list of legs is a *route from $x$ at time $\tau$* if its first leg leaves $x$ no earlier than
+$\tau$ and each later leg leaves where the previous one arrived, no earlier than that arrival. A
+plan gives each plane a list of legs, and it is *feasible* if
 
-1. for every plane $k \in Q$, a *route*: a sequence of *legs* $(k, 1), \dots, (k, \nu_k)$. Leg
-   $(k, j)$ flies an existing flight from $v_{k,j-1}$ to $v_{k,j}$ and departs at time
-   $e_{k,j}$, with $v_{k,0} = C_I$, $e_{k,1} \ge 0$, and
-   $e_{k,j+1} \ge a_{k,j} := e_{k,j} + \mathrm{dur}(v_{k,j-1}, v_{k,j})$;
-2. for every passenger, a *journey*: a non-empty sequence of legs whose first leg departs from
-   $C_I$ and whose last leg arrives in $C_G$. Each leg departs from the city where the previous
-   one arrives, no earlier than that arrival, and, if both legs belong to the same plane, at a
-   later position of its route;
-3. *capacity*: the journeys are pairwise disjoint, and none repeats a leg.
+1. the legs of each plane form a route from $C_I$ at time 0 whose last leg arrives in $C_G$;
+2. for every passenger, the legs that carry it, its *journey*, form, in some order, a route from
+   $C_I$ at time 0 whose last leg arrives in $C_G$.
 
-The plan is *feasible* if every route ends in $C_G$. Its *cost* $C$ is the sum of the landing
-costs of all legs, with or without a passenger, and its *makespan* $M = \max_k a_{k,\nu_k}$ is
-the time at which the last plane reaches $C_G$ for the last time. $\mathcal A$ is the set of
-pairs $(C, M)$ of feasible plans. The *flight time* $F_k$ of plane $k$ is the sum of the
-durations of its legs; its flights are sequential, so $F_k \le M$.
+A leg names at most one passenger, which is the capacity constraint. The *cost* $C$ of a plan is
+the sum of the landing costs of all its legs that land in a central city, with or without a
+passenger, and its *makespan* $M$ is the time at which the last plane reaches $C_G$ for the last
+time, the arrival of the last leg of a route. $\mathcal A$ is the set of pairs $(C, M)$ of
+feasible plans. The *flight time* $F_k$ of plane $k$ is the sum of the durations of its legs; its
+flights are sequential, so $F_k \le M$.
 
 Waiting is implicit: a plane or a passenger may depart later than it arrived. Boarding and
 deplaning take no time, several planes may be in a city at once, and a passenger may change
 planes in any city, any number of times. In @fig-plan, $t_1$ changes planes once, in $C_2$.
+Times are natural numbers: a plan with rational or real times and the same integer durations,
+rounded down, becomes a feasible plan with the same cost and a makespan no larger
+({{< node "Lemma 1.3" >}}).
 
-Journeys may contain detours that serve nothing, and they can be removed:
+Requiring planes to finish in $C_G$ does not change the front: if planes may end anywhere, the
+legs of a plane forming a route from $C_I$ at time 0, possibly empty, and the makespan being the
+last arrival of any leg, the Pareto front is the same under the assumptions of the next section
+({{< node "Theorem 4.5" >}}). All the planes may thus be assumed to finish their respective
+sequence in $C_G$.
+
+Journeys may contain detours that serve nothing; what a passenger needs of its journey is a
+chain:
 
 ::: {.statement}
-{{< node "Lemma 3.1" >}} **Cleaning.** Every plan can be changed, keeping all routes (hence its
-cost, makespan and flight times), so that every journey is *clean*: its first flight is its only
-flight departing from $C_I$, and its last flight is its only flight arriving in $C_G$.
+{{< node "Lemma 3.2" >}} **Chains.** *(a)* In a feasible plan, and in a plan whose planes end
+anywhere, every passenger rides a *chain*: legs of the plan that carry it, the first leaving
+$C_I$, each later one leaving where the previous one arrived and no earlier, all landing in central
+cities except the last, which arrives in $C_G$. *(b)* If the plan has no flight between central
+cities, every passenger rides a leg $C_I \to C_x$ and then a leg $C_x \to C_G$ that leaves no
+earlier than the first one arrives.
 :::
 
 ::: {.sketch}
-*Sketch.* Cut each journey down to the part from its last departure from $C_I$ to the first later
-arrival in $C_G$; this is still a journey, and capacity only gets looser
-({{< node "Lemma 3.1" text="full proof" badge=false >}}).
+*Sketch.* Keep the part of the journey from its last departure from $C_I$ to the first later
+arrival in $C_G$; none of its legs arrives in $C_I$
+({{< node "Lemma 3.2" text="full proof" badge=false >}}).
 :::
-
-A plan is *event-ordered* if its legs admit a total order that extends every route and every
-journey and along which departure times do not decrease. With positive durations every plan is
-event-ordered. With zero durations, a passenger can ride a later leg of one plane and then an
-earlier leg of another at the same instant, in a cycle that no execution in time realises; such
-plans never improve the front ({{< node "Corollary 6.10" >}}).
-
-Requiring planes to finish in $C_G$ does not change the front: if planes may end anywhere, with
-the makespan taken as the last arrival of any leg, the Pareto front is the same under the
-assumptions of the next section ({{< node "Theorem 4.9" >}}). All the planes may thus be assumed
-to finish their respective sequence in $C_G$.
 
 ZenoSolver outputs each instance as a PDDL file[^pddl] for the domain
 [`pddl/multi-zeno-travel.pddl`](https://github.com/aquemy/ZenoSolver/blob/master/pddl/multi-zeno-travel.pddl):
 a durative `fly` action that adds the landing cost to `total-cost`, instantaneous `board` and
-`debark` actions, and a predicate `libre` that enforces capacity one. Under
-$\varepsilon$-separation, PDDL plans and event-ordered plans correspond, with the same cost and
-makespans equal in the limit $\varepsilon \to 0$ ({{< node "Statement 1.2" >}}); this
-correspondence is argued but not formalised. The [Instances](../instances/index.qmd) section
-describes the generator and the files.
+`debark` actions, and a predicate `libre` that enforces capacity one. The plans above abstract
+this domain: the `fly` actions of a plane are its legs, the flights a person takes between a
+`board` and a `debark` carry it, and `libre` is the capacity constraint. The makespan above ignores
+the $\varepsilon$-separation of PDDL 2.1 between dependent actions, and this paper proves nothing
+about PDDL plans themselves. The [Instances](../instances/index.qmd) section describes the files.
 
 [^pddl]: Planning Domain Definition Language [[FL03](#ref-FL03)], almost universally used
 in AI Planning to describe domains and instances.
@@ -139,27 +142,31 @@ in AI Planning to describe domains and instances.
 For points $y, z$ of the plane (cost, makespan), $y \preceq z$ if $y \le z$ in both coordinates.
 For a set $\mathcal S$ of points, $\mathrm{Min}\,\mathcal S$ is the set of $z \in \mathcal S$
 weakly dominated by no other point of $\mathcal S$, and the *Pareto front* of an instance is
-$\mathcal F = \mathrm{Min}\,\mathcal A$ ({{< node "§1.5" >}}). We look for the front and for one
-plan per front point.
+$\mathcal F = \mathrm{Min}\,\mathcal A$ ({{< node "Definition 1.6" >}}). A list of points is *the
+Pareto front of* $\mathcal S$ if its points lie in $\mathcal S$, every point of $\mathcal S$ is
+weakly dominated by a listed point, and the listed points are pairwise incomparable. We look for
+the front and for one plan per front point.
 
-Every characterization of the front in this paper has two halves: a finite set of points that
-plans attain, and a proof that every plan is weakly dominated by one of them. The following lemma
-turns them into an equality of fronts.
+Every characterization of the front in this paper has two halves: a set of points that plans
+attain, and a proof that every plan is weakly dominated by one of them. The following lemma turns
+them into an equality of fronts.
 
 ::: {.statement}
-{{< node "Lemma 1.1" >}} **Dominating subset.** Let $\mathcal S' \subseteq \mathcal S$ with
-$\mathcal S'$ finite and every point of $\mathcal S$ weakly dominated by a point of
-$\mathcal S'$. Then $\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$, and every point of
-$\mathcal S$ is weakly dominated by a point of $\mathrm{Min}\,\mathcal S$.
+{{< node "Lemma 1.7" >}} **Dominating sets.** *(a)* If every point of $\mathcal S$ is weakly
+dominated by a point of $\mathcal S'$ and every point of $\mathcal S'$ by a point of
+$\mathcal S$, then $\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$; in particular when
+$\mathcal S' \subseteq \mathcal S$ and every point of $\mathcal S$ is weakly dominated by a point
+of $\mathcal S'$. *(b)* A list that is the Pareto front of $\mathcal S$ lists exactly the points
+of $\mathrm{Min}\,\mathcal S$.
 :::
 
 ### Assumptions {#sec-assumptions}
 
-The results of this paper use the following assumptions ({{< node "§1.4" >}}), each one only
+The results of this paper use the following assumptions ({{< node "Definition 1.4" >}}), each one only
 where stated. The first two are the triangular inequality and the symmetry assumption:
 
 **Assumption**: $\forall (a, b, x),\ \mathrm{dur}(a, x) + \mathrm{dur}(x, b) \ge \mathrm{dur}(a, b)$
-whenever the three flights exist $\hfill$ (AΔ)
+whenever $a \ne b$ and the three flights exist $\hfill$ (AΔ)
 
 **Assumption** (Symmetry): $\forall i \in [1, n],\ d_i = \bar d_i$ $\hfill$ (S)
 
@@ -167,30 +174,32 @@ The assumption of [[QS15](#ref-QS15)], in a non-strict form, and its non-symmetr
 counterpart state that flights between central cities are useless, that is, never faster than a
 detour through $C_I$ or $C_G$:
 
-**Assumption**: under (S), $\forall (i, j),\ d_{ij} \ge d_i + d_j$ for every existing flight
-$\hfill$ (A1)
+**Assumption**: $\forall (i, j),\ d_{ij} \ge d_i + d_j$ $\hfill$ (A1)
 
-**Assumption**: $\forall (i, j),\ d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)$ for every
-existing flight $\hfill$ (A1-NS)
+**Assumption**: $\forall (i, j),\ d_{ij} \ge \min(d_i + d_j,\ \bar d_i + \bar d_j)$ $\hfill$ (A1-NS)
 
-Finally, a weak form of the triangular inequality through the hubs is used for waiting:
+Finally, the symmetric results use the triangular inequality only on the triangles through the
+hubs, the *hub triangles*:
 
-**Assumption**: $\forall (i, z),\ \bar d_i \le d_i + d_z + \bar d_z$ and
-$d_i \le \bar d_i + \bar d_z + d_z$ $\hfill$ (AΔ-path)
+**Assumption**: $\forall (i, j),\ d_j \le d_i + d_{ij}$ and $d_i \le d_{ij} + d_j$ $\hfill$ (H)
 
-(S) implies (AΔ-path), and so does (AΔ) whenever the flight between $i$ and $z$ exists. Under
-(S), (A1) and (AΔ) hold together only when $d_{ij} = d_i + d_j$: the first allows flights
-between central cities longer than the detour through a hub, and the second allows them as short
-as $|d_i - d_j|$. Every PDDL problem the generator writes is symmetric, and gives a flight between
-central cities the duration $d_i + d_j + 100$, so it satisfies (A1).
+(H) is (AΔ) on the triangles $C_I \to C_i \to C_j$ against $C_I \to C_j$, and
+$C_i \to C_j \to C_I$ against $C_i \to C_I$; under (S) these are also the triangles through
+$C_G$. In (AΔ), the condition $a \ne b$ leaves the flights $d_{ii}$ free.
+
+::: {.statement}
+{{< node "Lemma 1.5" >}} **Hub triangles.** (A1) implies (H), and (AΔ) implies (H).
+:::
 
 **Notation.** We write $s = 2t - p$, so that $s \ge p$ and $s \equiv p \pmod 2$, and
 $\kappa = \lceil s/p \rceil$ ({{< node "Notation" >}}). For a multiset $Y$ of central cities,
 $Y(i)$ is the multiplicity of $i$, $|Y|$ its size, $c(Y) = \sum_{w \in Y} c_w$ its cost, and
 $\delta(Y) = \sum_{w \in Y} d_w$ and $\bar\delta(Y) = \sum_{w \in Y} \bar d_w$ its durations;
-under (S), its *load* is $\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over the planes is a family
-of groups $X_1, \dots, X_p$ with $X_1 + \dots + X_p = X$, group $X_k$ being the cities in which
-plane $k$ lands.
+with $e_i = \min(d_i, \bar d_i)$, $e(Y) = \sum_{w \in Y} e_w$. Under (S), the *load* of $Y$ is
+$\ell(Y) = 2\delta(Y)$. A *partition* of $X$ over the planes is a family of groups
+$X_1, \dots, X_p$ with $X_1 + \dots + X_p = X$, group $X_k$ being the cities in which plane $k$
+lands. $d_{\min}$, $d_{\max}$ and $c_{\min}$ are the least and largest durations and the least
+cost.
 
 ### Patterns {#sec-patterns}
 
@@ -199,7 +208,7 @@ next, is a *pattern* (a *segment* in the [blueprint](../proofs.qmd)). As there i
 between $C_I$ and $C_G$, every pattern lands in at least one central city. Depending on the
 cities it starts and ends in, a pattern is of one of four types, denoted by $A$, $\bar A$, $B$ and
 $\bar B$ (@fig-patterns). A pattern that lands in exactly one central city, of *multiplicity*
-0, consists of two flights; we call it *simple*. We denote by $|X|$ the number of the patterns
+0, consists of two flights; we call it *simple* (a *visit* in the blueprint). We denote by $|X|$ the number of the patterns
 $X \in \{A, \bar A, B, \bar B\}$ in a given plan, and by $F(\gamma)$ the flight time of a
 pattern $\gamma$.
 
@@ -259,34 +268,32 @@ $x$ to $C_G$. Patterns of larger multiplicity have the same four types.
 
 In @fig-plan, $p_1$ performs a $B$ in $C_2$ and an $A$ in $C_3$, and $p_2$ an $A$ in $C_3$ and a
 $\bar B$ in $C_2$. Only the patterns $A$ and $\bar A$ change from $C_I$ to $C_G$ or back, and a
-plane goes from $C_I$ to $C_G$, so its patterns of these two types alternate $A, \bar A, \dots, A$
-({{< node "Lemma 2.1" >}}). We deduce the following property on the cardinal of each pattern in
+plane goes from $C_I$ to $C_G$, so on a route of simple patterns it performs one more $A$ than
+$\bar A$ ({{< node "Lemma 3.1" >}}). We deduce the following property on the number of patterns in
 any feasible plan.
 
 **Property II**: In every feasible plan,
 
-1. $|A| + |B| \ge t$;
-2. $|A| + |\bar B| \ge t$;
-3. $|A| = |\bar A| + p$.
+1. at least $t$ legs leave $C_I$;
+2. at least $t$ legs arrive in $C_G$;
+3. on the route of each plane, the legs that leave $C_I$ and the legs that arrive in $C_G$ number
+   one more than its patterns.
 
-**Proof**: The patterns $A$ and $B$ are the only ones that start with a flight from $C_I$, and
-the first flights of the journeys are distinct flights from $C_I$, so a feasible plan has at least
-$t$ of those patterns. Apply the same reasoning to $C_G$ with $A$ and $\bar B$, whose last flight
-arrives in $C_G$, to prove the second point. The third point is Lemma 2.1, summed over the $p$
-planes. $\square$
+**Proof**: The first legs of the journeys are distinct legs from $C_I$, which proves the first
+point. Apply the same reasoning to $C_G$ with the last legs of the journeys to prove the second
+point. For the third point, a pattern $A$ leaves $C_I$ and arrives in $C_G$, a pattern $B$ only
+leaves $C_I$, a pattern $\bar B$ only arrives in $C_G$ and a pattern $\bar A$ does neither; and a
+route from $C_I$ to $C_G$ performs one more $A$ than $\bar A$, since only these two patterns change
+hub. $\square$
 
-**Corollary II**: A feasible plan performs at least $2t - p$ patterns, hence lands at least
-$2t - p$ times in central cities ({{< node "Lemma 3.2" >}}).
+**Corollary II** ({{< node "Lemma 3.3" >}}): A feasible plan performs at least $2t - p$ patterns:
+$2t \le \sum_k h_k + p$, where $h_k$ is the number of patterns of plane $k$.
 
-**Proof**: By Property II, the number of patterns is
-$$\begin{aligned}
-&|A| + |\bar A| + |B| + |\bar B| \\
-&\quad = (|A| + |B|) + (|A| + |\bar B|) - p \\
-&\quad \ge 2t - p,
-\end{aligned}$$
-and each pattern lands in a central city. $\square$
+**Proof**: By Property II, $2t \le \sum_k (h_k + 1)$. $\square$
 
-With fewer planes than passengers, some planes have to come back to $C_I$, and every return costs
-a landing. In @fig-plan the bound is reached: the plan lands $2t - p = 4$ times. The
-[next section](#sec-front) shows that, in the symmetric case, the Pareto front is always reached
-by such plans, and which lists of $2t - p$ cities can be flown, and how fast.
+With every landing cost set to 1, {{< node "Proposition 3.6" >}} says that a feasible plan also
+lands at least $2t - p$ times in central cities. With fewer planes than passengers, some planes have to come back to $C_I$, and
+every return costs a landing. In @fig-plan the bound is reached: the plan lands $2t - p = 4$ times.
+The [next section](#sec-front) shows that, in the symmetric case and under the hub triangles (H),
+the Pareto front is always reached by such plans, and which lists of $2t - p$ cities can be flown,
+and how fast.
