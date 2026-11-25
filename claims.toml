@@ -201,9 +201,10 @@ created   = "2026-11-23"
 
 [claims.lem-4-3]
 kind         = "lemma"
-statement    = "Lemma 4.3 (direct selection) [DS]: (a) in a simple plan with clean journeys every journey is C_I → x → C_G; (b) such a plan on planes Q, routes ending in C_G, gives a role configuration on Q with passenger count at least t, cost at most the plan's, λ_k ≤ F_k and groups inside the planes' landings."
-status       = "math.proved-informal"
-lean_partial = "ZenoFront.Feasible.exists_roleConfig_records"
+statement    = "Lemma 4.3 (records give a configuration): Every feasible plan on p planes gives a role configuration with at least 2t − p landings whose drop-offs and pick-ups are cities of landing records (Lemma 3.1) of type B (from and back to C_I) and B̄ (neither) of their plane, and whose crossings are exactly the cities of its records of type A and Ā."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Feasible.exists_roleConfig_records"
+lean_partial = "ZenoFront.recCities, ZenoFront.landingRecs"
 paper        = "Lemma 4.3, doc/theory/exact-front.md §4.2"
 created      = "2026-11-23"
 
