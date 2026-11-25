@@ -241,12 +241,13 @@ paper     = "Thm 4.7, doc/theory/exact-front.md §4.3"
 created   = "2026-11-23"
 
 [claims.cor-4-8]
-kind      = "corollary"
-statement = "Corollary 4.8: under (S) and (A1), the front is Min {(c(X), M(X)) : |X| = s, M(X) < ∞}, with M(X) the least max_k ℓ(X_k) over admissible partitions of X, and every front point is attained by a plan with exactly s central landings. Lean form: the minimal points of the plans equal those of the multiset points (multisetPoints), with an explicit p ≤ t; the attainment by a plan with exactly s central landings is Admissible.exists_plan applied to an optimal partition."
-status    = "math.machine-checked"
-lean      = "ZenoFront.minimal_achievable_iff_multisetPoints"
-paper     = "Cor 4.8, doc/theory/exact-front.md §4.4"
-created   = "2026-11-23"
+kind         = "corollary"
+statement    = "Corollary 4.8 (the symmetric front): Assume (S), (H) and p ≤ t. The feasible plans, the plans whose planes end anywhere, the admissible partitions of 2t − p landings (points (c(X), 2·max_k δ(X_k))) and the multisets of 2t − p landings that have an admissible partition (points (c(X), M(X)), M(X) the least 2·max_k δ(X_k) over them) have the same minimal points: F = Min A′ = Min 𝒫 = Min 𝒳."
+status       = "math.machine-checked"
+lean         = "ZenoFront.minimal_achievable_iff_anywhere_hub, ZenoFront.minimal_achievable_iff_admissiblePoints_hub, ZenoFront.minimal_achievable_iff_multisetPoints_hub"
+lean_partial = "ZenoFront.minimal_admissiblePoints_iff_multisetPoints, ZenoFront.FeasibleAnywhere.exists_admissible_hub"
+paper        = "Cor 4.8, doc/theory/exact-front.md §4.4"
+created      = "2026-11-23"
 
 [claims.thm-4-9]
 kind      = "theorem"
