@@ -13,7 +13,7 @@ that the list is the front. The Lean checker is the executable form of Theorem 9
 **Theorem 9.1 (end to end) [X3].** If obligations 1–4 hold, then $\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
 
 ::: {.node-lean}
-Parts in Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L359-L404)
+Parts in Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L359-L404)
 :::
 
 ```{=html}
@@ -52,7 +52,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
@@ -75,7 +75,7 @@ that satisfies (A1-NS) if the certificate lists it, and for every table otherwis
 of Theorem 6.1) and `search` (under (A1-NS), through the Lean form of Theorem 6.9) are verified.
 
 ::: {.node-lean}
-Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L486-L576)
+Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/CheckerV2.lean#L486-L576)
 :::
 
 ```{=html}
@@ -97,7 +97,7 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
     IsParetoFront (achievable (C.network dc) C.c C.t C.p) C.front := …
 ```
 
-[`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/89fd9fa6e4d34830ec4ab328ef737187cca4f901/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
+[`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/7f80f3ea7f196833b7ec716d6c7beef3913c1b8d/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
 
 
 ```{=html}
