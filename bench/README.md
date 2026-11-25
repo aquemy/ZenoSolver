@@ -39,6 +39,7 @@ Both tools read and write the JSON schema of Google Benchmark, so `tools/compare
 | `instances/data/airports/` | A non-symmetric instance from real data, Atlanta to Beijing through 11 large airports (OpenFlights, ODbL); in no suite. Its README gives the source and the commands that regenerate it. |
 | `tools/run_suite.py` | Times an executable over suites: median wall and CPU time, peak RSS of the child, front size, status (`ok`, `timeout`, `error`). |
 | `tools/check_regression.py` | Regression gate between two result files. |
+| `tools/score_front.py` | Scores a planner's runs (`cost makespan` lines or IPC plans) against the exact front of a `zeno pddl` problem: points found, hypervolume ratio, additive epsilon, impossible points. Tests: `tests/score`. See the website's *Evaluate a planner* page. |
 | `tools/time_checker.py` | Times a certificate checker (`zeno check`, or the Lean `zeno-check`) over `*.cert` files: time, peak RSS, size, verdict. |
 | `baselines/<solver>/<machine>/*.json` | Committed reference results. |
 

@@ -105,3 +105,16 @@ add_test(NAME metric/certificate
             -P ${ZS_GOLDEN_DIR}/checkCertificate.cmake)
 set_tests_properties(metric/certificate PROPERTIES LABELS "certificate" TIMEOUT 300
     PASS_REGULAR_EXPRESSION "certificate accepted, assuming S A1\\|AD")
+
+######################################################################################
+### The planner scorer (bench/tools/score_front.py)
+######################################################################################
+
+# Python unit tests on the homepage example, and zeno's own front scored against
+# the problem `zeno pddl` writes. Skipped without a Python 3 interpreter.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME score-front
+             COMMAND Python3::Interpreter -m unittest discover -s ${CMAKE_CURRENT_SOURCE_DIR}/score -v)
+    set_tests_properties(score-front PROPERTIES ENVIRONMENT "ZENO=$<TARGET_FILE:zeno>")
+endif()

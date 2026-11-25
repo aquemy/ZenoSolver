@@ -1,0 +1,19 @@
+; cost 20, makespan 14 (zeno --plans), with PDDL 2.1 epsilon separations
+0.000: (board person1 plane1 city0) [0.000]
+0.000: (board person3 plane2 city0) [0.000]
+0.001: (fly plane1 city0 city1) [2.000]
+0.001: (fly plane2 city0 city3) [5.000]
+2.002: (debark person1 plane1 city1) [0.000]
+2.003: (fly plane1 city1 city0) [2.000]
+4.004: (board person2 plane1 city0) [0.000]
+4.005: (fly plane1 city0 city3) [5.000]
+5.002: (debark person3 plane2 city3)
+5.002: (board person3 plane2 city3)
+5.003: (fly plane2 city3 city4) [5.000]
+9.006: (fly plane1 city3 city4) [5.000]
+10.004: (debark person3 plane2 city4) [0.000]
+10.005: (fly plane2 city4 city1) [2.000]
+12.006: (board person1 plane2 city1) [0.000]
+12.007: (fly plane2 city1 city4) [2.000]
+14.007: (debark person2 plane1 city4) [0.000]
+14.008: (debark person1 plane2 city4) [0.000]
