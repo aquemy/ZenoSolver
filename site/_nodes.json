@@ -230,20 +230,6 @@
 "class": "informal",
 "note": "P"
 },
-"Example 4.13": {
-"anchor": "node-example-4-13",
-"title": "Example 4.13 (the hypothesis matters)",
-"lean": "informal",
-"class": "informal",
-"note": "P (computed)"
-},
-"§5": {
-"anchor": "node-s5",
-"title": "The greedy counterexample",
-"lean": "informal, parts in Lean",
-"class": "informal",
-"note": "P"
-},
 "Theorem 6.1": {
 "anchor": "node-theorem-6-1",
 "title": "Theorem 6.1 (converse to role configurations)",
@@ -272,54 +258,12 @@
 "class": "informal",
 "note": "P"
 },
-"Conjecture 6.5": {
-"anchor": "node-conjecture-6-5",
-"title": "Conjecture 6.5 (no harmful waiting), refuted",
-"lean": "informal",
-"class": "informal",
-"note": "refuted"
-},
-"Proposition 6.5": {
-"anchor": "node-proposition-6-5",
-"title": "Proposition 6.5 (harmful waiting)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
 "Proposition 6.6": {
 "anchor": "node-proposition-6-6",
 "title": "Proposition 6.6 (imbalance-vector DP)",
 "lean": "informal, parts in Lean",
 "class": "informal",
 "note": "P"
-},
-"Conjecture 6.7": {
-"anchor": "node-conjecture-6-7",
-"title": "Conjecture 6.7 (shuttle triples complete the front) — false",
-"lean": "informal",
-"class": "informal",
-"note": "refuted"
-},
-"Definition 6.17": {
-"anchor": "node-definition-6-17",
-"title": "Definition 6.17 (shuttle triple, split crossing)",
-"lean": "informal",
-"class": "informal",
-"note": "definition"
-},
-"Proposition 6.7": {
-"anchor": "node-proposition-6-7",
-"title": "Proposition 6.7 (shuttles are not enough)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
-"Proposition 6.18": {
-"anchor": "node-proposition-6-18",
-"title": "Proposition 6.18 (one central flight per segment is not enough)",
-"lean": "informal",
-"class": "informal",
-"note": "P (computed) for (a)–(c); S for the class claim of (d), which rests on the flow model only"
 },
 "Lemma 6.19": {
 "anchor": "node-lemma-6-19",
@@ -346,48 +290,6 @@
 "anchor": "node-corollary-6-10",
 "title": "Corollary 6.10 (non-symmetric front)",
 "lean": "informal, parts in Lean",
-"class": "informal",
-"note": "P"
-},
-"Example 6.11": {
-"anchor": "node-example-6-11",
-"title": "Example 6.11 (the reduction misses the front)",
-"lean": "informal",
-"class": "informal",
-"note": "refuted"
-},
-"Proposition 6.12": {
-"anchor": "node-proposition-6-12",
-"title": "Proposition 6.12 (the reduced front is attained)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
-"Proposition 6.13": {
-"anchor": "node-proposition-6-13",
-"title": "Proposition 6.13 (same least cost)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
-"Proposition 6.14": {
-"anchor": "node-proposition-6-14",
-"title": "Proposition 6.14 (dominated cities, Pareto paths)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
-"Proposition 6.15": {
-"anchor": "node-proposition-6-15",
-"title": "Proposition 6.15 (where the reduction is exact)",
-"lean": "informal",
-"class": "informal",
-"note": "P"
-},
-"Proposition 6.16": {
-"anchor": "node-proposition-6-16",
-"title": "Proposition 6.16 (time-expanded flows)",
-"lean": "informal",
 "class": "informal",
 "note": "P"
 },
@@ -524,11 +426,79 @@
 "class": "informal",
 "note": "P"
 },
+"Example 4.13": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#46-converse-under-a%CE%B4",
+"title": "Example 4.13 (the hypothesis matters)",
+"where": "§4.6"
+},
+"§5": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#5-why-the-per-ppp-greedy-of-both-papers-is-not-exact",
+"title": "Why the per-PPP greedy of both papers is not exact",
+"where": "§5"
+},
+"Conjecture 6.5": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations",
+"title": "Conjecture 6.5 (no harmful waiting) — false",
+"where": "§6.2"
+},
+"Proposition 6.5": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#62-scheduling-role-configurations",
+"title": "Proposition 6.5 (harmful waiting)",
+"where": "§6.2"
+},
+"Conjecture 6.7": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights",
+"title": "Conjecture 6.7 (shuttle triples complete the front) — false",
+"where": "§6.4"
+},
+"Definition 6.17": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights",
+"title": "Definition 6.17 (shuttle triple, split crossing)",
+"where": "§6.4"
+},
+"Proposition 6.7": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights",
+"title": "Proposition 6.7 (shuttles are not enough)",
+"where": "§6.4"
+},
+"Proposition 6.18": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#64-short-central-flights",
+"title": "Proposition 6.18 (one central flight per segment is not enough)",
+"where": "§6.4"
+},
+"Example 6.11": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Example 6.11 (the reduction misses the front)",
+"where": "§6.6"
+},
+"Proposition 6.12": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Proposition 6.12 (the reduced front is attained)",
+"where": "§6.6"
+},
+"Proposition 6.13": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Proposition 6.13 (same least cost)",
+"where": "§6.6"
+},
+"Proposition 6.14": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Proposition 6.14 (dominated cities, Pareto paths)",
+"where": "§6.6"
+},
+"Proposition 6.15": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Proposition 6.15 (where the reduction is exact)",
+"where": "§6.6"
+},
+"Proposition 6.16": {
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#66-general-graphs-arxiv-24",
+"title": "Proposition 6.16 (time-expanded flows)",
+"where": "§6.6"
+},
 "Conjecture 10.2": {
-"anchor": "node-conjecture-10-2",
+"href": "https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md#10-the-linear-family-default-generator",
 "title": "Conjecture 10.2",
-"lean": "informal",
-"class": "informal",
-"note": "O"
+"where": "§10"
 }
 }

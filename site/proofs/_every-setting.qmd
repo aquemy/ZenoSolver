@@ -5,33 +5,39 @@ the relaxation $L$ that the checker uses without any assumption on central fligh
 
 ### Lemma 3.1 (cleaning) {#node-lemma-3-1}
 
-**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §3).
-
 **Lemma 3.1 (cleaning).** Every plan can be changed, keeping all routes (hence cost, makespan and flight
 times), so that every journey is *clean*: its first flight is its only flight departing from $C_I$, and its
 last flight is its only flight arriving in $C_G$. A clean journey has no flight arriving in $C_I$ and none
 departing from $C_G$.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* Replace each journey by its part from its last flight departing from $C_I$ to the first later flight
-arriving in $C_G$, which exists since the journey ends in $C_G$. This is a journey, and capacity only gets
-looser. In a clean journey, a flight arriving in $C_I$ would be followed by a flight departing from $C_I$
-other than the first, since the journey ends in $C_G$. A flight departing from $C_G$ would follow a flight
-arriving in $C_G$ other than the last. $\square$
-:::
+::: {.node-lean}
+Parts in Lean: [`exists_transfer` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Converse.lean#L407-L431)
 :::
 
-::: {.content-visible unless-format="html"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §3
+
 *Proof.* Replace each journey by its part from its last flight departing from $C_I$ to the first later flight
 arriving in $C_G$, which exists since the journey ends in $C_G$. This is a journey, and capacity only gets
 looser. In a clean journey, a flight arriving in $C_I$ would be followed by a flight departing from $C_I$
 other than the first, since the journey ends in $C_G$. A flight departing from $C_G$ would follow a flight
 arriving in $C_G$ other than the last. $\square$
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** Lean does not rewrite journeys: `exists_transfer` extracts, from every passenger's route, the leg `C_I → x` followed by a leg leaving `x` not towards `C_I` that the cleaned journey would keep.
 
@@ -51,20 +57,33 @@ theorem exists_transfer {N : Network n} : ∀ (l : List (Leg n t)) (τ : ℕ), I
 
 [`lean/ZenoFront/Converse.lean`, lines 407–431](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Converse.lean#L407-L431){.lean-src} (statement only; the proof is elided)
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Lemma 3.2 (counting) {#node-lemma-3-2}
 
-**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal}
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §3).
-
 **Lemma 3.2 (counting).** A feasible plan has at least $s = 2t - p$ segments, hence at least $s$ landings in
 central cities.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+::: {.node-lean}
+Lean: [`Feasible.le_sum_hubArrivals` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165)
+:::
+
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §3
+
 *Proof.* For plane $k$, let $D^I_k$ and $A^I_k$ be its numbers of flights departing from and arriving in
 $C_I$, and $D^G_k$, $A^G_k$ the same for $C_G$. The route is in $C_I$ at its start and after each arrival
 there, and leaves after each of these visits since it ends in $C_G$: $D^I_k = A^I_k + 1$. It is in $C_G$ only
@@ -73,31 +92,28 @@ departs from $C_I$ and the last arrives in $C_G$; by capacity both maps are inje
 $\sum_k D^I_k \ge t$ and $\sum_k A^G_k \ge t$. Segments end exactly at arrivals in hubs, so plane $k$ has
 $A^I_k + A^G_k = D^I_k - 1 + A^G_k$ segments, and the plan at least $t - p + t = s$. Each segment contains a
 landing in a central city, and different segments contain different landings. $\square$
-:::
-:::
 
-::: {.content-visible unless-format="html"}
-*Proof.* For plane $k$, let $D^I_k$ and $A^I_k$ be its numbers of flights departing from and arriving in
-$C_I$, and $D^G_k$, $A^G_k$ the same for $C_G$. The route is in $C_I$ at its start and after each arrival
-there, and leaves after each of these visits since it ends in $C_G$: $D^I_k = A^I_k + 1$. It is in $C_G$ only
-after arrivals, and leaves after each but the last: $D^G_k = A^G_k - 1$. The first flight of each journey
-departs from $C_I$ and the last arrives in $C_G$; by capacity both maps are injective, so
-$\sum_k D^I_k \ge t$ and $\sum_k A^G_k \ge t$. Segments end exactly at arrivals in hubs, so plane $k$ has
-$A^I_k + A^G_k = D^I_k - 1 + A^G_k$ segments, and the plan at least $t - p + t = s$. Each segment contains a
-landing in a central city, and different segments contain different landings. $\square$
-:::
+```{=html}
+</details>
+```
 
-::: {.content-visible when-format="html"}
-::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
-No cleaning and no segment types are needed.
-:::
-:::
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
 
 ::: {.content-visible unless-format="html"}
 *Remarks in the note.*
+:::
 
 No cleaning and no segment types are needed.
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** Leg counting along each route: `#departures from C_I + #arrivals at C_G + [ends at C_I] = #hub arrivals + [starts at C_I]`, and every passenger leaves `C_I` and reaches `C_G` on its own leg.
 
@@ -111,15 +127,20 @@ theorem Feasible.le_sum_hubArrivals {N : Network n} {P : Plan n t p} (hP : Feasi
 
 [`lean/ZenoFront/PlanBounds.lean`, lines 153–165](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L153-L165){.lean-src} (statement only; the proof is elided)
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Lemma 3.3 (segment durations) {#node-lemma-3-3}
 
-**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) or (AΔ)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §3).
-
 **Lemma 3.3 (segment durations).** Let a segment $\gamma$ visit the central cities $x_1,\dots,x_m$ in this
 order.
 
@@ -131,23 +152,29 @@ $F(\gamma) \ge 2d_{x_j}$ for $B$ and $F(\gamma) \ge 2\bar d_{x_j}$ for $\bar B$.
 (c) A simple segment at $x$ lasts exactly $d_x + \bar d_x$ (types $A$, $\bar A$), $2d_x$ ($B$) or $2\bar d_x$
 ($\bar B$).
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* (c) It is two hub flights. (a) The first flight joins a hub to $x_1$ and lasts $d_{x_1}$ under (S);
-the last joins $x_m$ to a hub and lasts $d_{x_m}$; for $m = 1$ these are the two flights, and every flight
-lasts at least 0. (b) All hub flights exist, so by (AΔ) and induction along the route, the part of $\gamma$
-from its first hub to $x_j$ lasts at least the direct flight between them, and likewise from $x_j$ to its
-last hub. $\square$
-:::
+::: {.node-lean}
+Parts in Lean: [`PlaneFeasible.exists_segments` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L389-L394), [`segment_bound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/TriSegments.lean#L248-L276), [`roleW_landingRecs_le` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309)
 :::
 
-::: {.content-visible unless-format="html"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §3 · **Hypotheses** (S) or (AΔ)
+
 *Proof.* (c) It is two hub flights. (a) The first flight joins a hub to $x_1$ and lasts $d_{x_1}$ under (S);
 the last joins $x_m$ to a hub and lasts $d_{x_m}$; for $m = 1$ these are the two flights, and every flight
 lasts at least 0. (b) All hub flights exist, so by (AΔ) and induction along the route, the part of $\gamma$
 from its first hub to $x_j$ lasts at least the direct flight between them, and likewise from $x_j$ to its
 last hub. $\square$
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** Part (a) is used inside `PlaneFeasible.exists_segments` (one landing per segment, `2 δ(Z) ≤` the plane's end time); part (b) under (S) and (AΔ) is `segment_bound` (`F(γ) ≥ 2 d_x`); part (c) is `roleW_landingRecs_le` on routes without central flights.
 
@@ -191,15 +218,20 @@ theorem roleW_landingRecs_le (N : Network n) : ∀ (legs : List (Leg n t)) (x : 
 
 [`lean/ZenoFront/NonSymmetric.lean`, lines 264–309](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L264-L309){.lean-src} (statement only; the proof is elided)
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Lemma 3.4 (relaxation) {#node-lemma-3-4}
 
-**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Hypotheses** (S) · **Uses** [3.2](#node-lemma-3-2), [3.3](#node-lemma-3-3)
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §3).
-
 **Lemma 3.4 (relaxation) [R].** Assume (S). For every feasible plan with cost $C$ and makespan $M$ there are
 non-empty multisets $Y_1,\dots,Y_p$ with $\sum_k |Y_k| = s$, $c(Y_1 + \dots + Y_p) \le C$, and
 $\ell(Y_k) \le F_k \le M$ for every $k$. Hence, with integer durations, $C \ge L(\lfloor M/2\rfloor)$, where
@@ -207,19 +239,16 @@ $$L(T) = \min\Big\{c(Y) : Y = Y_1 + \dots + Y_p,\ |Y| = s,\ Y_k \ne \emptyset \t
 \quad(\min\emptyset = \infty).$$
 No assumption on central flights is needed.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* For a segment $\gamma$, let $x^\star(\gamma)$ be whichever of its first and last central cities has
-the smaller $d$. By Lemma 3.3(a), $F(\gamma) \ge 2d_{x^\star(\gamma)}$. Every route goes from $C_I$ to $C_G$,
-so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose one segment
-per plane and any $s - p$ others, and let $Y_k$ collect $x^\star(\gamma)$ over the chosen segments $\gamma$
-of plane $k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
-$c(Y) \le C$. Also $\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M$.
-With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
-:::
+::: {.node-lean}
+Lean: [`Feasible.exists_relaxation` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/PlanBounds.lean#L396-L403), [`relaxCost_oneplane_le_totalCost` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89)
 :::
 
-::: {.content-visible unless-format="html"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §3 · **Hypotheses** (S) · **Uses** [3.2](#node-lemma-3-2), [3.3](#node-lemma-3-3)
+
 *Proof.* For a segment $\gamma$, let $x^\star(\gamma)$ be whichever of its first and last central cities has
 the smaller $d$. By Lemma 3.3(a), $F(\gamma) \ge 2d_{x^\star(\gamma)}$. Every route goes from $C_I$ to $C_G$,
 so every plane has a segment, and by Lemma 3.2 the plan has at least $s \ge p$ segments. Choose one segment
@@ -227,7 +256,14 @@ per plane and any $s - p$ others, and let $Y_k$ collect $x^\star(\gamma)$ over t
 of plane $k$. Different segments have different landings, and $x^\star(\gamma)$ is a landing of $\gamma$, so
 $c(Y) \le C$. Also $\ell(Y_k) = \sum_\gamma 2d_{x^\star(\gamma)} \le \sum_\gamma F(\gamma) \le F_k \le M$.
 With integer durations, $\delta(Y_k)$ is an integer at most $M/2$. $\square$
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **Lean** `ZenoFront.Feasible.exists_relaxation` [machine-checked]{.badge .ok}
 
@@ -254,5 +290,10 @@ theorem relaxCost_oneplane_le_totalCost (d c : Fin n → ℕ) {T s : ℕ} (Y : G
 ```
 
 [`lean/ZenoFront/Relaxation.lean`, lines 79–89](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Relaxation.lean#L79-L89){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
 
 :::

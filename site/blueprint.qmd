@@ -37,6 +37,7 @@ format:
           \newunicodechar{≥}{\zs@sym{\geq}{"2265}}
           \newunicodechar{≤}{\zs@sym{\leq}{"2264}}
           \newunicodechar{≠}{\zs@sym{\neq}{"2260}}
+          \newunicodechar{↗}{\zs@sym{\nearrow}{"2197}}
           \makeatother
     code-overflow: wrap
 ---
@@ -49,6 +50,14 @@ every declaration formalising the statement uses no axiom beyond `propext`, `Cla
 `Quot.sound`; *Lean definition* marks definitions; *informal* means the statement is not in Lean.
 
 {{< include _blueprint-stats.md >}}
+
+{{< include proofs/_progress.md >}}
+
+## Main results {#main-results}
+
+{{< include proofs/_main.md >}}
+
+## Status of every node {#summary}
 
 {{< include proofs/_summary.md >}}
 

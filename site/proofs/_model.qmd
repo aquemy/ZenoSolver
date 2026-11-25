@@ -1,17 +1,15 @@
 ## The model {#sec-model}
 
-The instance, the plans and the Pareto front, as fixed in §1 of the note. Plans are precise
-objects (routes, journeys, capacity, waiting), and the Lean development transcribes that
-definition. Definitions are the trusted interface of the whole formalization: every theorem below
-is about these objects.
+The instance, the plans and the Pareto front, as fixed in §1 of the note. These definitions are the
+trusted interface of the formalization: every theorem below is about them.
 
 ### Instances {#node-s1-1}
 
-**Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.1).
-
 * Cities: $C_I$ (initial) and $C_G$ (goal), the *hubs*, and central cities $1,\dots,n$.
 * Flights are undirected: an existing flight joins two distinct cities and has one duration, used in both
   directions. $C_I$–$i$ lasts $d_i \ge 0$, $i$–$C_G$ lasts $\bar d_i \ge 0$, and a central flight $i$–$j$
@@ -21,6 +19,25 @@ is about these objects.
 * $p \ge 1$ planes and $t \ge p$ passengers start in $C_I$ at time 0. A plane carries at most one passenger.
 * Durations and times lie in an archimedean ordered field $\mathbb K$ ($\mathbb Q$ or $\mathbb R$), so that
   $\lfloor\cdot\rfloor$ is defined. From §7 on, durations are integers.
+
+::: {.node-lean}
+Lean: [`Network` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Plan.lean#L87-L92)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [definition]{.badge .informal} · theory note, §1.1
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** `Network` holds the durations `d`, `dbar` and an arbitrary table `dc` of central flights; costs are a separate argument `c : Fin n → ℕ`. Durations, costs and times are natural numbers (format v1); `Cert.check_sound_rat` extends the checker's soundness to rational times.
 
@@ -37,15 +54,20 @@ structure Network (n : ℕ) where
 
 [`lean/ZenoFront/Plan.lean`, lines 87–92](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Plan.lean#L87-L92){.lean-src}
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Plans, cost and makespan {#node-s1-2}
 
-**Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.2).
-
 **Definition (plan).** A plan on a finite set $Q$ of planes (all $p$ planes unless stated otherwise)
 consists of
 
@@ -90,6 +112,25 @@ $F_k \le a_{k,\nu_k} \le M$.
 may be empty), journeys still end in $C_G$, and the makespan $M'$ is the largest arrival time over all legs;
 there is at least one leg since $t \ge 1$. $\mathcal A'$ is the set of pairs $(C, M')$ of all plans.
 
+::: {.node-lean}
+Lean: [`Plan` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Plan.lean#L84-L85), [`Feasible` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Plan.lean#L155-L160), [`achievable` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L48-L50)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [definition]{.badge .informal} · theory note, §1.2
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
+
 **In Lean.** A plan gives every plane a list of legs (`Leg`: from, to, departure, arrival, passenger). `Feasible` requires routes chained from `C_I` at time ≥ 0 and ending in `C_G`, legs of exact duration, and every passenger's legs ordered into a route from `C_I` to `C_G`; capacity one holds by construction, since a leg names at most one passenger.
 
 **Lean** `ZenoFront.Plan` [Lean definition]{.badge .ok}
@@ -124,15 +165,20 @@ def achievable (N : Network n) (c : Fin n → ℕ) (t p : ℕ) : Set (ℕ × ℕ
 
 [`lean/ZenoFront/Checker.lean`, lines 48–50](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L48-L50){.lean-src}
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Statement 1.2 (PDDL correspondence) {#node-statement-1-2}
 
-**Lean** [informal]{.badge .informal} · **Note** [sketch]{.badge .informal}
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.3).
-
 **Statement 1.2 (PDDL correspondence, S).** A plan of the domain under ε-separation yields a plan of §1.2
 with the same cost and a makespan at most its `total-time`: each plane's `fly` actions in time order form
 its route, each person's flights between `board` and `debark` form its journey, and `libre` gives capacity
@@ -147,15 +193,26 @@ $\mathcal F$ under (S) and (A1), and under (S) and (AΔ) (the plans of Theorem 4
 what ZenoSolver reports. Whether PDDL planners and VAL accept zero-duration actions is not checked here. This
 is argued, not formalised.
 
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [sketch]{.badge .informal} · theory note, §1.3
+
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Assumptions {#node-s1-4}
 
-**Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.4).
-
 Used only where stated.
 
 * (S) symmetry: $d_i = \bar d_i$ for all $i$.
@@ -165,6 +222,25 @@ Used only where stated.
 * (AΔ-path) for all central $i$ and $z$: $\bar d_i \le d_i + d_z + \bar d_z$ and
   $d_i \le \bar d_i + \bar d_z + d_z$. A hub leg of $i$ is no longer than the detour through $z$ and the
   other hub. (S) implies it, and (AΔ) implies it when the central flight $i$–$z$ exists.
+
+::: {.node-lean}
+Lean: [`Network.A1` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Converse.lean#L51-L52), [`Network.A1NS` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L44-L46)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [definition]{.badge .informal} · theory note, §1.4
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** (S) is the hypothesis `N.dbar = N.d`. `Network.A1` is `d_i + d_j ≤ dc i j`, `Network.A1NS` is `min(d_i + d_j, d̄_i + d̄_j) ≤ dc i j`.
 
@@ -187,19 +263,43 @@ def Network.A1NS (N : Network n) : Prop :=
 
 [`lean/ZenoFront/NonSymmetric.lean`, lines 44–46](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/NonSymmetric.lean#L44-L46){.lean-src}
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Fronts {#node-s1-5}
 
-**Lean** [Lean definition]{.badge .ok} · **Note** [definition]{.badge .informal}
+::: {.node-badge}
+[Lean definition]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.5).
-
 For points $y, z \in \mathbb K^2$ (cost, makespan), $y \preceq z$, *$y$ weakly dominates $z$*, if
 $y \le z$ componentwise. For $\mathcal S \subseteq \mathbb K^2$, $\mathrm{Min}\,\mathcal S$ is the set of
 $z \in \mathcal S$ such that no $y \in \mathcal S$ other than $z$ has $y \preceq z$. The *front* is
 $\mathcal F = \mathrm{Min}\,\mathcal A$.
+
+::: {.node-lean}
+Lean: [`IsParetoFront` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L52-L57)
+:::
+
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [definition]{.badge .informal} · theory note, §1.5
+
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** `IsParetoFront S F`: the listed points are in `S`, every point of `S` is weakly dominated by a listed point, and the list is an antichain. `IsParetoFront.mem_iff_minimal` shows that it lists exactly the minimal elements of `S`.
 
@@ -216,15 +316,20 @@ structure IsParetoFront {α : Type*} [PartialOrder α] (S : Set α) (F : List α
 
 [`lean/ZenoFront/Checker.lean`, lines 52–57](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L52-L57){.lean-src}
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Notation {#node-notation}
 
-**Lean** [informal]{.badge .informal} · **Note** [definition]{.badge .informal}
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.5).
-
 **Notation.** $s = 2t - p$, so $s \ge p$ and $s \equiv p \pmod 2$; $\kappa = \lceil s/p\rceil$;
 $d_{\max} = \max_i d_i$. For multisets of central cities: $Y(i)$ is the multiplicity of $i$, $|Y|$ the size,
 $\mathrm{supp}\,Y$ the support, $Y + Z$ the sum, $Z \le Y$ inclusion and $Y - Z$ the difference for
@@ -234,37 +339,54 @@ family $(X_k)_{k \in Q}$ (one group per plane, possibly empty) with $\sum_{k\in 
 otherwise $Q$ is the set of all $p$ planes, written $X_1,\dots,X_p$; definitions and results of §2 hold for
 any $Q$, with $p$ replaced by $|Q|$.
 
+```{=html}
+<details class="node-more"><summary>In the note</summary>
+```
+
+**Note** [definition]{.badge .informal} · theory note, §1.5
+
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Lemma 1.1 (dominating subset) {#node-lemma-1-1}
 
-**Lean** [informal]{.badge .informal} (parts in Lean) · **Note** [proof in the note]{.badge .informal}
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §1.5).
-
 **Lemma 1.1 (dominating subset).** Let $\mathcal S' \subseteq \mathcal S \subseteq \mathbb K^2$ with
 $\mathcal S'$ finite and every point of $\mathcal S$ weakly dominated by a point of $\mathcal S'$. Then
 $\mathrm{Min}\,\mathcal S = \mathrm{Min}\,\mathcal S'$, and every point of $\mathcal S$ is weakly dominated
 by a point of $\mathrm{Min}\,\mathcal S$.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* Let $z \in \mathrm{Min}\,\mathcal S$. Some $y \in \mathcal S'$ has $y \preceq z$, so $y = z$, and
-$z$ is minimal in $\mathcal S' \subseteq \mathcal S$. Let $z \in \mathrm{Min}\,\mathcal S'$ and $y \in \mathcal S$
-with $y \preceq z$. Some $y' \in \mathcal S'$ has $y' \preceq y \preceq z$, so $y' = z$ and then $y = z$.
-Finally, for $z \in \mathcal S$, take $y \in \mathcal S'$ with $y \preceq z$ and a $\preceq$-minimal element
-of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{Min}\,\mathcal S' = \mathrm{Min}\,\mathcal S$. $\square$
-:::
+::: {.node-lean}
+Parts in Lean: [`minimal_iff_of_subset_of_dominated` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Bridge.lean#L508-L522)
 :::
 
-::: {.content-visible unless-format="html"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §1.5
+
 *Proof.* Let $z \in \mathrm{Min}\,\mathcal S$. Some $y \in \mathcal S'$ has $y \preceq z$, so $y = z$, and
 $z$ is minimal in $\mathcal S' \subseteq \mathcal S$. Let $z \in \mathrm{Min}\,\mathcal S'$ and $y \in \mathcal S$
 with $y \preceq z$. Some $y' \in \mathcal S'$ has $y' \preceq y \preceq z$, so $y' = z$ and then $y = z$.
 Finally, for $z \in \mathcal S$, take $y \in \mathcal S'$ with $y \preceq z$ and a $\preceq$-minimal element
 of the finite set $\{y' \in \mathcal S' : y' \preceq y\}$; it lies in $\mathrm{Min}\,\mathcal S' = \mathrm{Min}\,\mathcal S$. $\square$
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** The first claim, `Min S = Min S'`, is machine-checked without the finiteness hypothesis. The last claim (every point is dominated by a minimal one) uses finiteness and is not stated in Lean.
 
@@ -281,5 +403,10 @@ theorem minimal_iff_of_subset_of_dominated {α : Type*} [PartialOrder α] {A A' 
 ```
 
 [`lean/ZenoFront/Bridge.lean`, lines 508–522](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Bridge.lean#L508-L522){.lean-src} (statement only; the proof is elided)
+
+
+```{=html}
+</details>
+```
 
 :::

@@ -1,35 +1,40 @@
 ## Certificates {#sec-certificates}
 
-§9: a certificate lists one plan per point and one lower bound per gap; four obligations imply that
-the list is the front. The Lean checker is the executable form of Theorem 9.1, and its soundness
-theorems are the strongest machine-checked results of the project.
+§9: a certificate lists one plan per point and one lower bound per gap, and four obligations imply
+that the list is the front. The Lean checker is the executable form of Theorem 9.1.
 
 ### Theorem 9.1 (end to end) {#node-theorem-9-1}
 
-**Lean** [machine-checked]{.badge .ok} · **Note** [proof in the note]{.badge .informal} · **Uses** [1.1](#node-lemma-1-1)
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §9).
-
 **Theorem 9.1 (end to end) [X3].** If obligations 1–4 hold, then $\mathcal F = \{(C_i, M_i) : 1 \le i \le r\}$.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* Let $(C, M) \in \mathcal A$. By 2, $M \ge M_1$. Let $i$ be the largest index with $M_i \le M$. If
-$i < r$, then $M < M_{i+1}$ and $C \ge C_i$ by 3; if $i = r$, then $C \ge C_r$ by 4. Either way
-$(C_i, M_i) \preceq (C, M)$. So the list, contained in $\mathcal A$ by 1, is a finite dominating subset, and by
-Lemma 1.1, $\mathcal F$ is its $\mathrm{Min}$. That is the whole list, which is strictly monotone in both
-coordinates. $\square$
-:::
+::: {.node-lean}
+Lean: [`Cert.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404)
 :::
 
-::: {.content-visible unless-format="html"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [1.1](#node-lemma-1-1)
+
 *Proof.* Let $(C, M) \in \mathcal A$. By 2, $M \ge M_1$. Let $i$ be the largest index with $M_i \le M$. If
 $i < r$, then $M < M_{i+1}$ and $C \ge C_i$ by 3; if $i = r$, then $C \ge C_r$ by 4. Either way
 $(C_i, M_i) \preceq (C, M)$. So the list, contained in $\mathcal A$ by 1, is a finite dominating subset, and by
 Lemma 1.1, $\mathcal F$ is its $\mathrm{Min}$. That is the whole list, which is strictly monotone in both
 coordinates. $\square$
-:::
+
+```{=html}
+</details>
+```
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** `Cert.check_sound`: if `check` accepts, the listed points are exactly the Pareto front of every feasible plan, for every table of central flights satisfying (A1), or every table if all gaps are `relaxed`. `Cert.check_sound_rat` extends it to plans with rational times and `Cert.check_sound_anywhere` to planes ending anywhere.
 
@@ -47,19 +52,32 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 
 [`lean/ZenoFront/Checker.lean`, lines 359–404](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/Checker.lean#L359-L404){.lean-src} (statement only; the proof is elided)
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Soundness of the version 2 checker {#node-version-2-checker}
 
-**Lean** [machine-checked]{.badge .ok}
+::: {.node-badge}
+[machine-checked]{.badge .ok}
+:::
 
 ::: {.node-body}
-**Statement** (the Lean development).
-
 For non-symmetric instances (certificate format version 2): if `Cert2.check` accepts, the listed
 points are exactly the Pareto front of every feasible plan. Gap kinds `relaxed` (no assumption),
 `roles`, `lagrangian`, `balanced` (under (A1-NS), through Theorem 6.1) and `search` (under (A1-NS),
 through Theorem 6.9 for every plan) are verified.
+
+::: {.node-lean}
+Lean: [`Cert2.check_sound` ↗](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/CheckerV2.lean#L486-L576)
+:::
+
+```{=html}
+<details class="node-more"><summary>Lean statement and source</summary>
+```
 
 **In Lean.** The `search` kind rests on `schedulableDomination_all` and on the completeness of the search's enumeration (`SearchData.closed_sound`).
 
@@ -78,40 +96,46 @@ theorem check_sound (h : C.check = true) (dc : Fin C.n → Fin C.n → ℕ)
 
 [`lean/ZenoFront/CheckerV2.lean`, lines 486–576](https://github.com/aquemy/ZenoSolver/blob/b86eb69fb21e6eadf26d4f2783fc04808d4d7ec5/lean/ZenoFront/CheckerV2.lean#L486-L576){.lean-src} (statement only; the proof is elided)
 
+
+```{=html}
+</details>
+```
+
 :::
 
 ### Lemma 9.2 (potentials) {#node-lemma-9-2}
 
-**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [7.6](#node-theorem-7-6)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §9).
-
 **Lemma 9.2 (potentials) [X2].** In a finite graph with arc weights in $\mathbb K$, let $V$ map nodes to
 $\mathbb K \cup \{\infty\}$ with $V(\text{target}) \le 0$ and $V(u) \le \mathrm{wt}(u,v) + V(v)$ on every arc.
 Then $V(\text{source})$ is at most the weight of every path from the source to the target.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
-*Proof.* Along a path $u_0, \dots, u_m$ ending at the target, $V(u_m) \le 0$, and by backward induction
-$V(u_j) \le \sum_{j' \ge j} \mathrm{wt}(u_{j'}, u_{j'+1})$. $\square$
-:::
-:::
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
 
-::: {.content-visible unless-format="html"}
+**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [7.6](#node-theorem-7-6)
+
 *Proof.* Along a path $u_0, \dots, u_m$ ending at the target, $V(u_m) \le 0$, and by backward induction
 $V(u_j) \le \sum_{j' \ge j} \mathrm{wt}(u_{j'}, u_{j'+1})$. $\square$
-:::
+
+```{=html}
+</details>
+```
 
 :::
 
 ### Lemma 9.3 (default potentials) {#node-lemma-9-3}
 
-**Lean** [informal]{.badge .informal} · **Note** [proof in the note]{.badge .informal} · **Uses** [7.6](#node-theorem-7-6)
+::: {.node-badge}
+[informal]{.badge .informal}
+:::
 
 ::: {.node-body}
-**Statement** (theory note, §9).
-
 **Lemma 9.3 (default potentials).** At level $T$, let $G^a[m] = c_a + G[m-1][T - d_a]$, the cheapest
 $m$-group containing $a$. Let $L_{\rm rest}(p, s) = 0$, $L_{\rm rest}(p, j) = \infty$ for $j \ne s$, and
 $L_{\rm rest}(k, j) = \min_m \big(G[m][T] + L_{\rm rest}(k+1, j+m)\big)$. Let $L^a(p, j) = \infty$ and
@@ -120,8 +144,12 @@ $V_0(k, j, \emptyset) = L_{\rm rest}(k, j)$ and $V_0(k, j, \sigma) = \max_{a\in\
 $\sigma \ne \emptyset$. Then $V_0(\text{target}) = 0$ and $V_0(u) \le \mathrm{wt}(u, v) + V_0(v)$ on every arc of the
 σ-graph.
 
-::: {.content-visible when-format="html"}
-::: {.callout-tip collapse="true" appearance="simple" title="Proof (theory note)"}
+```{=html}
+<details class="node-more"><summary>Proof</summary>
+```
+
+**Note** [proof in the note]{.badge .informal} · theory note, §9 · **Uses** [7.6](#node-theorem-7-6)
+
 *Proof.* By induction from $k = p$, $L^a \ge L_{\rm rest}$, since $G^a[m] \ge G[m][T]$; so
 $V_0(v) \ge L_{\rm rest}(v)$ at every node $v$. An arc leaving $(k, j, \sigma)$ with option $(m, \eta)$ has weight
 at least $G[m][T]$, and at least $G^a[m]$ when $a \in \eta$, because $\eta$ with its filler is an $m$-group of
@@ -130,38 +158,27 @@ $V_0(u) = L_{\rm rest}(k, j) \le G[m][T] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt
 and $a \in \sigma$: when $a \in \eta$, $L^a(k, j) \le G^a[m] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt} + V_0(v)$;
 when $a \notin \eta$, $a \in \sigma \triangle \eta$, so $V_0(v) \ge L^a(k+1, j+m)$ and
 $L^a(k, j) \le G[m][T] + L^a(k+1, j+m) \le \mathrm{wt} + V_0(v)$. Take the maximum over $a$. $\square$
-:::
-:::
 
-::: {.content-visible unless-format="html"}
-*Proof.* By induction from $k = p$, $L^a \ge L_{\rm rest}$, since $G^a[m] \ge G[m][T]$; so
-$V_0(v) \ge L_{\rm rest}(v)$ at every node $v$. An arc leaving $(k, j, \sigma)$ with option $(m, \eta)$ has weight
-at least $G[m][T]$, and at least $G^a[m]$ when $a \in \eta$, because $\eta$ with its filler is an $m$-group of
-duration at most $T$. If $\sigma = \emptyset$:
-$V_0(u) = L_{\rm rest}(k, j) \le G[m][T] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt} + V_0(v)$. If $\sigma \ne \emptyset$
-and $a \in \sigma$: when $a \in \eta$, $L^a(k, j) \le G^a[m] + L_{\rm rest}(k+1, j+m) \le \mathrm{wt} + V_0(v)$;
-when $a \notin \eta$, $a \in \sigma \triangle \eta$, so $V_0(v) \ge L^a(k+1, j+m)$ and
-$L^a(k, j) \le G[m][T] + L^a(k+1, j+m) \le \mathrm{wt} + V_0(v)$. Take the maximum over $a$. $\square$
-:::
+```{=html}
+</details>
+```
 
-::: {.content-visible when-format="html"}
-::: {.callout-note collapse="true" appearance="simple" title="Remarks in the note"}
-*Sparse potential.* The certificate lists some nodes $u$ with values $V(u)$. The checker sets
-$V'(u) = \max(V(u), V_0(u))$ on listed nodes and $V' = V_0$ elsewhere. It checks $V'(\text{target}) \le 0$,
-$V'(u) \le \mathrm{wt}(u, v) + V'(v)$ on every arc leaving a listed node, and $V'(\text{source}) \ge C_i$. Arcs
-leaving other nodes satisfy the inequality by Lemma 9.3, as $V' \ge V_0$. By Lemma 9.2 and Theorem 7.6,
-$E(T^\star_i) \ge C_i$. The listed nodes are those that survive the solver's pruning.
-:::
-:::
+```{=html}
+<details class="node-more"><summary>Remarks</summary>
+```
 
 ::: {.content-visible unless-format="html"}
 *Remarks in the note.*
+:::
 
 *Sparse potential.* The certificate lists some nodes $u$ with values $V(u)$. The checker sets
 $V'(u) = \max(V(u), V_0(u))$ on listed nodes and $V' = V_0$ elsewhere. It checks $V'(\text{target}) \le 0$,
 $V'(u) \le \mathrm{wt}(u, v) + V'(v)$ on every arc leaving a listed node, and $V'(\text{source}) \ge C_i$. Arcs
 leaving other nodes satisfy the inequality by Lemma 9.3, as $V' \ge V_0$. By Lemma 9.2 and Theorem 7.6,
 $E(T^\star_i) \ge C_i$. The listed nodes are those that survive the solver's pruning.
-:::
+
+```{=html}
+</details>
+```
 
 :::

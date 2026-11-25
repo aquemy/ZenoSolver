@@ -1,36 +1,41 @@
 ---
 title: "Blueprint"
-subtitle: "Every statement of the theory note, with its proof and its Lean declarations"
+subtitle: "The results of the theory note, with their proofs and their Lean declarations"
 toc: true
 toc-depth: 3
 ---
 
-The blueprint is the detailed reference behind the [paper](paper/index.qmd). It follows the theory
-note
+The blueprint follows the theory note
 [`doc/theory/exact-front.md`](https://github.com/aquemy/ZenoSolver/blob/master/doc/theory/exact-front.md)
-statement by statement. For each node it gives the statement, the note's proof (collapsed), the
-remarks around it, and the Lean declarations of `lean/ZenoFront` that formalise it, with a link to
-their exact source lines. Statements and proofs are cut out of the note, and listings out of the
-Lean sources, when the site is built, so neither can drift from the repository.
+and links each result to the Lean declarations of `lean/ZenoFront` that formalise it. A result is
+[machine-checked]{.badge .ok} when they cover its whole statement and use no axiom beyond
+`propext`, `Classical.choice` and `Quot.sound`, and [informal]{.badge .informal} otherwise. Each
+node opens on its statement; its proof, its remarks and its Lean source are folded under it. The
+blueprint is also a [PDF](blueprint.pdf).
 
-Every node has two badges:
+{{< include proofs/_progress.md >}}
 
-- **Lean.** [machine-checked]{.badge .ok} when every declaration that formalises the whole
-  statement is a theorem whose axioms are among `propext`, `Classical.choice` and `Quot.sound`
-  (read from `collectAxioms`, the check behind `#print axioms`); [Lean definition]{.badge .ok} for
-  definitions; [informal]{.badge .informal} when the statement is not in Lean, possibly with
-  formalised parts listed under it. A node is never badged above what its own declarations cover.
-- **Note.** [proof in the note]{.badge .informal} for a complete written proof,
-  [sketch]{.badge .informal}, [computed]{.badge .informal}, [open problem]{.badge .open},
-  [refuted]{.badge .refuted} or [definition]{.badge .informal}, from the status table of §0 of the
-  note.
+## Main results {#main-results}
 
-{{< include _blueprint-stats.md >}}
+{{< include proofs/_main.md >}}
 
-The blueprint is also a [PDF](blueprint.pdf).
+{{< include proofs/_sections.qmd >}}
 
 ## Status of every node {#summary}
 
+{{< include _blueprint-stats.md >}}
+
+The *Note* column gives the status of the proof written in the note:
+[proof in the note]{.badge .informal}, [sketch]{.badge .informal} or [definition]{.badge .informal}.
+Refuted conjectures, counterexamples and the reduction of general flight graphs are left to the
+note.
+
+```{=html}
+<details class="node-more"><summary>The status table</summary>
+```
+
 {{< include proofs/_summary.md >}}
 
-{{< include proofs/_sections.qmd >}}
+```{=html}
+</details>
+```

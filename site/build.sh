@@ -50,6 +50,21 @@ if grep -rlE '(href|src)="(\.\./)+(doc|lean|src|include|bench|tests|site)/' "$ro
     echo "build: the pages above link outside docs/" >&2
     exit 1
 fi
+# Every link into the blueprint must reach a node. The `node` shortcode fails on an unknown label;
+# this also catches hand-written links to proofs.html#anchor.
+python3 - "$root/docs" <<'EOF'
+import re, sys
+from pathlib import Path
+docs = Path(sys.argv[1])
+ids = set(re.findall(r'\bid="([^"]+)"', (docs / "proofs.html").read_text(encoding="utf-8")))
+bad = sorted({(str(page.relative_to(docs)), anchor) for page in docs.rglob("*.html")
+              for anchor in re.findall(r'href="(?:\.{1,2}/)*proofs\.html#([^"]+)"',
+                                       page.read_text(encoding="utf-8", errors="replace"))
+              if anchor not in ids})
+for page, anchor in bad:
+    print(f"build: {page} links to proofs.html#{anchor}, which is not on the blueprint", file=sys.stderr)
+sys.exit(1 if bad else 0)
+EOF
 for f in blueprint.pdf graph/claimgraph-viewer.html graph/history-timeline.html instances/fronts.json; do
     test -f "$root/docs/$f" || { echo "build: docs/$f is missing" >&2; exit 1; }
 done

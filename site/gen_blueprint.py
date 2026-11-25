@@ -15,9 +15,12 @@ The node registry `site/blueprint.toml` is the only hand-authored map. Everythin
   `lean` list uses no axiom beyond propext, Classical.choice and Quot.sound.
 
 Outputs: `site/proofs/_<section>.qmd` (one partial per section), `site/proofs/_sections.qmd`
-(includes them in order), `site/proofs/_summary.md` (the status table) and
-`site/_blueprint-stats.md` (the counts quoted on the home page). The script fails if a label is not
-found in the note or a declaration is missing in Lean, so the pages cannot silently drift.
+(includes them in order), `site/proofs/_progress.md` (the one-line count at the top),
+`site/proofs/_main.md` (the main results), `site/proofs/_summary.md` (the status table),
+`site/_blueprint-stats.md` (the counts quoted on the About page) and `site/_nodes.json` (read by the
+`node` shortcode; the registry's `note_only` labels point there to their section of the note on
+GitHub). The script fails if a label is not found in the note or a declaration is missing in Lean,
+so the pages cannot silently drift.
 """
 
 from __future__ import annotations
@@ -31,6 +34,7 @@ import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import quote
 
 SITE = Path(__file__).resolve().parent
 ROOT = SITE.parent
@@ -156,6 +160,28 @@ class Note:
             if opener and (level is None or STATEMENT_KIND.match(opener.group(1))):
                 return i
         return len(self.lines)
+
+    def line_of(self, label: str) -> int:
+        """The line where a label is stated: its heading, its opener or its list item."""
+        if label.startswith("§"):
+            found = next((i for i, _, num, _ in self.headings if num == label[1:]), None)
+        else:
+            pattern = re.compile(re.escape(label) + r"(?![\d.]\d)(?:[\s.(:,]|$)")
+            item = re.compile(r"^[*-] \*\*" + re.escape(label) + r"(?![\d.]\d)")
+            found = next((i for i, text in self.openers if pattern.match(text)), None)
+            if found is None:
+                found = next((i for i, line in enumerate(self.lines) if item.match(line)), None)
+        if found is None:
+            raise SystemExit(f"blueprint: no statement '{label}' in {NOTE.name}")
+        return found
+
+    def github_anchor(self, label: str) -> str:
+        """The GitHub anchor of the innermost heading at or above a label, as GitHub slugs it:
+        lower case, punctuation dropped, spaces as hyphens."""
+        index = self.line_of(label)
+        line = self.lines[max(i for i, *_ in self.headings if i <= index)]
+        text = line.lstrip("#").strip().lower()
+        return re.sub(r"[^\w\- ]", "", text).replace(" ", "-")
 
     def extract(self, label: str, paras: int | None = None) -> Extract:
         """The node's text, without the note's remarks about the 2015/2023 papers: the site
@@ -463,29 +489,35 @@ def number_of(label: str) -> str | None:
     return m.group(1) if m else None
 
 
-def html_and_pdf(title: str, body: list[str], icon: str = "note") -> list[str]:
-    """A collapsed callout on the web, plain paragraphs in the PDF (titled unless the text
-    already opens with *Proof.*)."""
-    text = "\n\n".join(body)
-    pdf_title = [] if text.startswith("*Proof") else [f"*{title}.*", ""]
-    return [
-        "::: {.content-visible when-format=\"html\"}",
-        f"::: {{.callout-{icon} collapse=\"true\" appearance=\"simple\" title=\"{title}\"}}",
-        text,
-        ":::",
-        ":::",
-        "",
-        "::: {.content-visible unless-format=\"html\"}",
-        *pdf_title,
-        text,
-        ":::",
-    ]
+def details(summary: str, body: list[str], pdf_title: str | None = None) -> list[str]:
+    """A closed <details> block on the web. The markup is raw HTML, so the PDF shows the body as
+    plain paragraphs, under `pdf_title` if one is given."""
+    out = ["```{=html}", f'<details class="node-more"><summary>{summary}</summary>', "```", ""]
+    if pdf_title:
+        out += ["::: {.content-visible unless-format=\"html\"}", f"*{pdf_title}.*", ":::", ""]
+    out += body
+    out += ["", "```{=html}", "</details>", "```", ""]
+    return out
+
+
+BADGES = {"checked": "[machine-checked]{.badge .ok}", "definition": "[Lean definition]{.badge .ok}",
+          "partial": "[informal]{.badge .informal}", "informal": "[informal]{.badge .informal}",
+          "sorry": "[open]{.badge .open}", "axiom": "[axiomatised]{.badge .axiom}"}
+
+
+def short_name(name: str) -> str:
+    return name.removeprefix("ZenoFront.")
 
 
 class Blueprint:
     def __init__(self, registry: dict, note: Note, lean: dict, ref: str):
         self.sections = registry["section"]
         self.nodes = registry["node"]
+        self.main = registry.get("main", [])
+        self.note_only = registry.get("note_only", [])
+        both = {n["label"] for n in self.nodes} & set(self.note_only)
+        if both:
+            raise SystemExit(f"blueprint: {sorted(both)} are both nodes and note_only")
         self.note = note
         self.lean = lean
         self.ref = ref
@@ -529,10 +561,18 @@ class Blueprint:
 
         return re.sub(r"(?<![\d.])(\d+\.\d+)(?![\d.]*\d)", repl, uses)
 
+    def source_url(self, name: str) -> str:
+        lst = listing(self.decl(name))
+        return f"{REPO}/blob/{self.ref}/{lst.path}#L{lst.first}-L{lst.last}"
+
+    def lean_line(self, head: str, names: list[str]) -> list[str]:
+        links = ", ".join(f"[`{short_name(n)}` ↗]({self.source_url(n)})" for n in names)
+        return ["::: {.node-lean}", f"{head}: {links}", ":::", ""]
+
     def render_decl(self, name: str, heading: str) -> list[str]:
         d = self.decl(name)
         lst = listing(d)
-        url = f"{REPO}/blob/{self.ref}/{lst.path}#L{lst.first}-L{lst.last}"
+        url = self.source_url(name)
         note = " (statement only; the proof is elided)" if lst.elided and d["kind"] == "theorem" else (
             " (shortened)" if lst.elided else "")
         prov = d.get("provenance")
@@ -577,34 +617,44 @@ class Blueprint:
                           "lean_key": lean_key, "note": note_badge(status) if status else "",
                           "note_key": status})
 
-        out = [f"### {title} {{#{slug(label)}}}", ""]
-        facts = [f"**Lean** {lean}"]
+        # Shown: the title, one badge, the statement and one line naming the Lean declarations.
+        # Closed: the proof (with the note's status), the remarks, and the Lean listings.
+        out = [f"### {title} {{#{slug(label)}}}", "", "::: {.node-badge}", BADGES[lean_key], ":::", ""]
+        out.append("::: {.node-body}")
+        out += ["\n\n".join(extract.statement), ""]
+        if lean_names:
+            out += self.lean_line("Lean", lean_names)
+        elif leaf_names:
+            out += self.lean_line("Parts in Lean", leaf_names)
+
+        facts = []
         if status:
             facts.append(f"**Note** {note_badge(status)}")
+        if extract.where:
+            facts.append(f"theory note, {extract.where}")
         if row.get("hypotheses") and row["hypotheses"] not in ("—", "definition"):
             facts.append(f"**Hypotheses** {row['hypotheses']}")
         if row.get("uses") and self.link_uses(row["uses"]):
             facts.append(f"**Uses** {self.link_uses(row['uses'])}")
-        out += [" · ".join(facts), ""]
-
-        out.append("::: {.node-body}")
-        where = f", {extract.where}" if extract.where else ""
-        source = "theory note" if ex is None else "the Lean development"
-        out += [f"**Statement** ({source}{where}).", ""]
-        out += ["\n\n".join(extract.statement), ""]
+        facts_line = [" · ".join(facts), ""] if facts else []
         if extract.proof:
-            out += html_and_pdf("Proof (theory note)", extract.proof, "tip") + [""]
+            proof = "\n\n".join(extract.proof)
+            out += details("Proof", facts_line + [proof],
+                           pdf_title=None if proof.startswith("*Proof") else "Proof")
+        elif facts_line:
+            out += details("In the note", facts_line)
         if extract.remarks:
-            out += html_and_pdf("Remarks in the note", extract.remarks, "note") + [""]
-        if node.get("covers"):
-            out += [f"**In Lean.** {node['covers']}", ""]
+            out += details("Remarks", ["\n\n".join(extract.remarks)], pdf_title="Remarks in the note")
+        lean_body = [f"**In Lean.** {node['covers']}", ""] if node.get("covers") else []
         for n in lean_names:
-            out += self.render_decl(n, "**Lean**")
+            lean_body += self.render_decl(n, "**Lean**")
         if leaf_names:
-            out += ["**Formalised parts.** These declarations cover part of the statement; the "
-                    "node keeps the status of the note.", ""]
+            lean_body += ["**Formalised parts.** These declarations cover part of the statement; "
+                          "the node keeps the status of the note.", ""]
             for n in leaf_names:
-                out += self.render_decl(n, "*Part*")
+                lean_body += self.render_decl(n, "*Part*")
+        if lean_body:
+            out += details("Lean statement and source", lean_body)
         out += [":::", ""]
         return out
 
@@ -621,12 +671,50 @@ class Blueprint:
             (proofs / f"_{sec['id']}.qmd").write_text("\n".join(body).rstrip() + "\n", encoding="utf-8")
             includes.append(f"{{{{< include proofs/_{sec['id']}.qmd >}}}}")
         (proofs / "_sections.qmd").write_text("\n\n".join(includes) + "\n", encoding="utf-8")
+        self.write_progress(proofs / "_progress.md")
+        self.write_main(proofs / "_main.md")
         self.write_summary(proofs / "_summary.md")
         self.write_stats(SITE / "_blueprint-stats.md")
         self.write_index(SITE / "_nodes.json")
 
+    def is_result(self, row: dict) -> bool:
+        return row["lean_key"] != "definition" and row["note_key"] != "definition"
+
+    def write_progress(self, path: Path) -> None:
+        results = [r for r in self.rows if self.is_result(r)]
+        checked = sum(1 for r in results if r["lean_key"] == "checked")
+        partial = sum(1 for r in results if r["lean_key"] == "partial")
+        path.write_text(f"**{checked} of {len(results)} results are machine-checked; {partial} more "
+                        "have parts in Lean.**\n", encoding="utf-8")
+
+    def write_main(self, path: Path) -> None:
+        """The main results: a definition list of name, label, badge and one sentence."""
+        rows = {r["label"]: r for r in self.rows}
+
+        def ref(label: str) -> tuple[str, dict]:
+            if label not in rows:
+                raise SystemExit(f"blueprint: main result '{label}' is not a node")
+            r = rows[label]
+            text = label if number_of(label) else r["title"]
+            return f"[{text}](#{r['anchor']}) {BADGES[r['lean_key']]}", r
+
+        out = ["::: {.main-results}", ""]
+        for entry in self.main:
+            link, r = ref(entry["label"])
+            head = f"**{entry['name']}** · {link}" if number_of(entry["label"]) else \
+                f"[**{entry['name']}**](#{r['anchor']}) {BADGES[r['lean_key']]}"
+            text = " ".join(entry["text"].split())
+            with_ = [f"{ref(w['label'])[0]} ({w['name']})" for w in entry.get("with", [])]
+            if with_:
+                text += " With " + (", ".join(with_[:-1]) + " and " + with_[-1]
+                                    if len(with_) > 1 else with_[0]) + "."
+            out += [head, f":   {text}", ""]
+        out += [":::"]
+        path.write_text("\n".join(out) + "\n", encoding="utf-8")
+
     def write_index(self, path: Path) -> None:
-        """label -> anchor and badges, read by the `node` shortcode (shortcodes/node.lua)."""
+        """label -> anchor and badges, read by the `node` shortcode (shortcodes/node.lua). The
+        `note_only` labels get an `href` to their section of the theory note on GitHub instead."""
         badge = {"checked": ("machine-checked", "ok"), "definition": ("Lean definition", "ok"),
                  "partial": ("informal, parts in Lean", "informal"), "informal": ("informal", "informal"),
                  "sorry": ("open", "open"), "axiom": ("axiomatised", "axiom")}
@@ -635,6 +723,11 @@ class Blueprint:
             text, cls = badge.get(r["lean_key"], ("informal", "informal"))
             index[r["label"]] = {"anchor": r["anchor"], "title": r["title"],
                                  "lean": text, "class": cls, "note": r["note_key"] or ""}
+        note_url = f"{REPO}/blob/master/{NOTE.relative_to(ROOT).as_posix()}"
+        for label in self.note_only:
+            ex = self.note.extract(label)
+            index[label] = {"href": f"{note_url}#{quote(self.note.github_anchor(label), safe='-')}",
+                            "title": ex.title, "where": ex.where}
         path.write_text(json.dumps(index, ensure_ascii=False, indent=0) + "\n", encoding="utf-8")
 
     def write_summary(self, path: Path) -> None:

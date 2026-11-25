@@ -65,7 +65,7 @@ every PDDL file `zeno` writes ([Corollary 4.8](../proofs.qmd#node-corollary-4-8)
 [Proposition 7.1](../proofs.qmd#node-proposition-7-1)). The note proves that the same front holds
 for central flights that are faster but obey the triangle inequality (AΔ)
 ([Corollary 4.12](../proofs.qmd#node-corollary-4-12), not yet in Lean); with central flights that
-violate both, it can differ ([Example 4.13](../proofs.qmd#node-example-4-13)). When every gap of the
+violate both, it can differ ({{< node "Example 4.13" >}}). When every gap of the
 front is closed by the relaxation $L$, the same front holds for central flights of any duration;
 the certificate then lists only `relaxed` gaps.
 
