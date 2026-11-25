@@ -179,6 +179,14 @@ status    = "math.proved-informal"
 paper     = "Lemma 2.9, doc/theory/exact-front.md §2"
 created   = "2026-11-23"
 
+[claims.def-link-forest]
+kind      = "definition"
+statement = "Definition (link forest), new in revision 3: A rooted link tree is a plane with a multiset of free landings and a list of children, each hung from it by a link labelled with a city; the group of a plane is its free landings, one copy of each child's label and one copy of its parent's label, so (F1) holds by construction. (F2): every plane has an odd number of free landings. A link forest of a partition is a list of such trees satisfying (F2) whose groups are the partition's groups, up to relabelling the planes."
+status    = "math.machine-checked"
+lean      = "ZenoFront.LTree, ZenoFront.LKids, ZenoFront.LTree.groups, ZenoFront.LTree.WF, ZenoFront.forestGroups"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 3. Lemmas valid in every setting
 # ===========================================================================
