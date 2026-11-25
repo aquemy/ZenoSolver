@@ -158,6 +158,7 @@ plan). The C++ checker agrees with every verdict.
 | `ZenoFront/AdmissibleBound.lean` | The σ-DP lower bound on admissible partitions, memoised, with dominance merging and states of size `≤ min(p − 1, t − p)` | `groupOption`, `sigmaDP`, `domRep`, `smallSubsetList`, `sigmaLayer`, `sigmaBoundAt` |
 | `ZenoFront/LinkForest.lean` | Rooted link trees, Lemma 2.6 ("only if") by leaf removal | `LTree`, `LKids`, `LTree.groups`, `LTree.WF`, `Admissible.exists_linkForest` |
 | `ZenoFront/TreeBound.lean` | The link-forest DP (Theorem 7.5, lower-bound direction), memoised by layers; the checker's `forest` gap bound, choosing it or the σ-DP | `buildLayers`, `TreeData`, `TreeData.value`, `treeBoundAt`, `useTreeDP`, `forestBoundAt` |
+| `ZenoFront/Complexity.lean` | §8: Lemma 2.4 for disjoint groups, the 3-Partition and Partition reductions for `M(X)`, the link-forest DP and the scan of every level with a step counter (Corollary 8.3) | `admissible_iff_odd_of_disjoint`, `threePartition_iff`, `partition_iff`, `treeBoundSteps`, `treeBoundSteps_le`, `scanSteps_le` |
 | `ZenoFront/Simulate.lean` | Computable plan check (mirrors `src/zeno/plan.cpp`) | `legOK`, `planeOK`, `pickLeg`, `follow`, `paxOK`, `planOK` |
 | `ZenoFront/Checker.lean` | Pareto fronts, certificates, `check`, soundness | `achievable`, `IsParetoFront`, `Cert`, `Cert.check` |
 | `ZenoFront/RationalPlans.lean` | Plans with rational times, rounding down, soundness against them | `QPlan`, `QFeasible`, `floorPlan`, `Cert.check_sound_rat` |
@@ -506,6 +507,30 @@ Theorem 4.1 needs no assumption on central flights, so every front statement of 
   with loads `≤ T`. The converse (`For ≥ E`) is in `TreeExact.lean` (`treeBoundAt_eq_minCost`).
 * `forestBoundAt_le_totalCost`: the bound the checker computes (tree DP or σ-DP, chosen by
   `useTreeDP`) is such a lower bound.
+
+**Complexity (`Complexity.lean`)**
+
+The hardness of 3-Partition (Garey–Johnson) and of Partition is cited, not formalised.
+
+* `admissible_iff_odd_of_disjoint` (**Lemma 2.4, disjoint groups**): if no city lies in two
+  groups, a partition is admissible iff every group has an odd number of landings.
+* `minMakespan_le_iff`: `M(Y) ≤ 2T` iff some admissible partition of `Y` has all loads `≤ T`,
+  when `Y` has an admissible partition.
+* `threePartition_iff` (**Theorem 8.1**): for `a_1, …, a_{3m}`, `B` with `Σ a_i = mB` and
+  `B/4 < a_i < B/2`, the instance with durations `a_i` and `p = m` planes has `M(X) ≤ 2B`, for
+  `X` every city once, iff the `a_i` split into `m` triples of sum `B`.
+* `partition_iff` (**Proposition 8.2**, NP-hard half): for `a_1, …, a_m` with sum `2B`, `r ≥ m`
+  odd and `K = B + 1`, the instance with `2r` cities of durations `a_i + K` (`i ≤ m`) and `K`
+  (`partitionDur`, all positive) and `p = 2` has `M(X) ≤ 2(B + rK)` iff some sub-multiset of
+  the `a_i` sums to `B`.
+* `treeBoundSteps_value`, `treeBoundSteps_eq_minCost`, `treeBoundSteps_le` (**Corollary 8.3 (a)**):
+  the link-forest DP with a step counter (`treeBoundSteps`: the functions of `TreeBound.lean` with
+  counted loops) returns `treeBoundAt`, so `E(T)` for `T ≤ Tmax`, in at most
+  `P(n, t, p, T) = 30 (n + 1)² (p + 1)² (t + 1)² (T + 1)` steps (`stepBound`). A step is an
+  iteration of a minimum loop or a table cell; the cost model is in the module docstring.
+* `scanSteps_fst`, `scanSteps_le`, `scanSteps_isParetoFront` (**Corollary 8.3 (b)**): the one-plane
+  table and the DP at every level `0, …, Tmax = (2t − p) · d_max` give `solveFront` (the Pareto
+  front under (S) and (A1)) in at most `(Tmax + 1) · P(n, t, p, Tmax)` steps.
 
 **Checker (`Simulate.lean`, `Checker.lean`, `Examples.lean`)**
 
