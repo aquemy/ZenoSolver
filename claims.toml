@@ -697,6 +697,15 @@ status    = "math.proved-informal"
 paper     = "Lemma 9.3, doc/theory/exact-front.md §9"
 created   = "2026-11-23"
 
+[claims.thm-checker-v1]
+kind         = "theorem"
+statement    = "Theorem (v1 checker), new in revision 3: If `Cert.check` accepts a format v1 certificate, its points are the Pareto front of the feasible plans of its instance for every central table satisfying (H), and for every central table if all its gaps are `relaxed`; the same holds for plans with rational times (Lemma 1.3) and, under (H), for planes ending anywhere."
+status       = "math.machine-checked"
+lean         = "ZenoFront.Cert.check_sound_hub, ZenoFront.Cert.check_sound_rat_hub, ZenoFront.Cert.check_sound_anywhere_hub"
+lean_partial = "ZenoFront.Cert.check, ZenoFront.planOK_feasible"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 10. The linear family
 # ===========================================================================
