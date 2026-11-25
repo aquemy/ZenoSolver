@@ -273,9 +273,9 @@ created   = "2026-11-24"
 
 [claims.lem-4-11]
 kind      = "lemma"
-statement = "Lemma 4.11 (shrinking): an admissible partition X_1..X_p with |X| ≥ p + 2 stays admissible after removing two landings, each new group a sub-multiset of the old one."
+statement = "Lemma 4.11 (shrinking): If X is admissible with at least s landings, p ≤ s and s ≡ p (mod 2), some admissible Y with Y_k ≤ X_k for every k has exactly s landings; in particular two landings can be removed when |X| ≥ p + 2."
 status    = "math.machine-checked"
-lean      = "ZenoFront.Admissible.exists_remove_two"
+lean      = "ZenoFront.Admissible.exists_shrink, ZenoFront.Admissible.exists_remove_two"
 paper     = "Lemma 4.11, doc/theory/exact-front.md §4.6"
 created   = "2026-11-24"
 
