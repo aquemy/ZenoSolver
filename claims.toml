@@ -536,6 +536,15 @@ lean      = "ZenoFront.Sched, ZenoFront.Sched.Valid, ZenoFront.Sched.size, ZenoF
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.prop-dominance-ns]
+kind         = "proposition"
+statement    = "Proposition (dominance, non-symmetric), new in revision 3: Let rep satisfy d(rep i) ≤ d_i, d̄(rep i) ≤ d̄_i and c(rep i) ≤ c_i (domRep3 is one). Replacing every city by its representative maps a role configuration to one with the same number of landings, no larger cost and no larger role loads, and a valid scheduled configuration to a valid one with the same number of landings, no larger cost and no larger M_tmpl."
+status       = "math.machine-checked"
+lean         = "ZenoFront.RoleConfig.size_map, ZenoFront.RoleConfig.totalCost_map_le, ZenoFront.RoleConfig.roleLoad_map_le, ZenoFront.Sched.Valid.map, ZenoFront.Sched.size_map, ZenoFront.Sched.cost_map_le, ZenoFront.Sched.tmpl_map_le, ZenoFront.domRep3_le"
+lean_partial = "ZenoFront.domRep3, ZenoFront.RoleConfig.map, ZenoFront.Sched.map"
+paper        = "revision 3 (planned)"
+created      = "2026-11-25"
+
 # ===========================================================================
 # 7. Exact algorithm (symmetric case)
 # ===========================================================================
