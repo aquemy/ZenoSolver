@@ -88,6 +88,14 @@ lean      = "ZenoFront.Network.A1, ZenoFront.Network.A1NS, ZenoFront.Network.ATr
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.lem-hub-triangles]
+kind      = "lemma"
+statement = "Lemma (hub triangles), new in revision 3: (A1) implies (H), and (AΔ) implies (H)."
+status    = "math.machine-checked"
+lean      = "ZenoFront.Network.A1.hub, ZenoFront.Network.ATri.hub"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
