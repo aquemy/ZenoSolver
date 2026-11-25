@@ -96,6 +96,14 @@ lean      = "ZenoFront.Network.A1.hub, ZenoFront.Network.ATri.hub"
 paper     = "revision 3 (planned)"
 created   = "2026-11-25"
 
+[claims.def-front]
+kind      = "definition"
+statement = "Definition (fronts), new in revision 3: Points (cost, makespan) are ordered componentwise, and y weakly dominates z when y ≤ z. Min S is the set of minimal points of S; the front is F = Min A, A (A′) the points of the feasible plans (of the plans whose planes end anywhere). A list is the Pareto front of S if its points lie in S, weakly dominate every point of S and are pairwise incomparable."
+status    = "math.machine-checked"
+lean      = "ZenoFront.achievable, ZenoFront.achievableAnywhere, ZenoFront.IsParetoFront"
+paper     = "revision 3 (planned)"
+created   = "2026-11-25"
+
 # ===========================================================================
 # 2. Segments, admissible partitions, link forests
 # ===========================================================================
