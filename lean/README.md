@@ -439,6 +439,9 @@ cites (`_ATri` for (AΔ)).
 * `domRep_le`: cities are merged into non-dominated representatives (no slower, no more
   expensive). This keeps the bound valid and makes the city set small: at most 4 cities on the
   samples.
+* `Admissible.map_dominated` (**Proposition 7.9**): relabelling an admissible grouping by any map
+  to no slower and no more expensive cities keeps it admissible, with the same group sizes, no
+  larger cost and no larger load on any plane.
 * `mem_smallSubsetList`: the σ-DP's states are the subsets of the non-dominated cities of size
   `≤ min(p − 1, t − p)`. Claim B′ (`Admissible.exists_card_touched_le`) gives every admissible
   grouping a witness whose odd-degree sets all stay in that family.
